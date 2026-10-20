@@ -1,0 +1,140 @@
+[
+  {
+    "facing": -1,
+    "room": "A6",
+    "kind": "flier",
+    "actor": {
+      "x": 259,
+      "y": 234,
+      "w": 26,
+      "h": 22,
+      "anim": 1.8551479372239126,
+      "vx": 0,
+      "vy": 0,
+      "dir": -1,
+      "faceVis": -1,
+      "perched": false,
+      "holdT": 0,
+      "riseT": 0,
+      "spd": 158.688
+    },
+    "eyeWorld": [
+      257.0240003347397,
+      257.6079999640584
+    ],
+    "eyeOffset": [
+      -14.975999665260304,
+      12.607999964058422
+    ],
+    "strip": {
+      "key": "talonMiniCruise8",
+      "cell": 5,
+      "cells": 8,
+      "cx": 272,
+      "base": 293.75,
+      "h": 97.5,
+      "flip": false,
+      "result": true,
+      "image": {
+        "width": 1536,
+        "height": 192,
+        "tier": 3
+      },
+      "normalizedEyes": [
+        0.34,
+        0.63
+      ],
+      "contextTransform": [
+        0.671999973535538,
+        0,
+        0,
+        0.671999973535538,
+        122.41600200080865,
+        71.568002626419
+      ],
+      "worldTransform": [
+        0.9599999785423279,
+        0,
+        0,
+        0.9599999785423279,
+        10.880005836486816,
+        10.240005493164062
+      ]
+    },
+    "originalDownBound": 16.5,
+    "shot": "facing--1-shot.png",
+    "rawCell": "facing--1-rawCell.png",
+    "rawOverlay": "facing--1-rawOverlay.png",
+    "bodyMask": "facing--1-bodyMask.png",
+    "bodyOverlay": "facing--1-bodyOverlay.png"
+  },
+  {
+    "facing": 1,
+    "room": "A6",
+    "kind": "flier",
+    "actor": {
+      "x": 259,
+      "y": 234,
+      "w": 26,
+      "h": 22,
+      "anim": 1.8884812705572458,
+      "vx": 0,
+      "vy": 0,
+      "dir": 1,
+      "faceVis": 1,
+      "perched": false,
+      "holdT": 0,
+      "riseT": 0,
+      "spd": 158.688
+    },
+    "eyeWorld": [
+      257.0240003347397,
+      257.6079999640584
+    ],
+    "eyeOffset": [
+      -14.975999665260304,
+      12.607999964058422
+    ],
+    "strip": {
+      "key": "talonMiniCruise8",
+      "cell": 5,
+      "cells": 8,
+      "cx": 272,
+      "base": 293.75,
+      "h": 97.5,
+      "flip": false,
+      "result": true,
+      "image": {
+        "width": 1536,
+        "height": 192,
+        "tier": 3
+      },
+      "normalizedEyes": [
+        0.34,
+        0.63
+      ],
+      "contextTransform": [
+        0.671999973535538,
+        0,
+        0,
+        0.671999973535538,
+        122.41600200080865,
+        71.568002626419
+      ],
+      "worldTransform": [
+        0.9599999785423279,
+        0,
+        0,
+        0.9599999785423279,
+        10.880005836486816,
+        10.240005493164062
+      ]
+    },
+    "originalDownBound": 16.5,
+    "shot": "facing-1-shot.png",
+    "rawCell": "facing-1-rawCell.png",
+    "rawOverlay": "facing-1-rawOverlay.png",
+    "bodyMask": "facing-1-bodyMask.png",
+    "bodyOverlay": "facing-1-bodyOverlay.png"
+  }
+]

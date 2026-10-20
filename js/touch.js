@@ -83,6 +83,11 @@ function tcResize() {
   const vv = window.visualViewport;
   const rawW = Math.round(vv ? vv.width : innerWidth);
   const rawH = Math.round(vv ? vv.height : innerHeight);
+  // An intersection ratio can stay 1 across a rotation, so the observer need
+  // not send another entry. Its old landscape rect must not override the new
+  // portrait viewport (and crop the story while hiding the rotate guidance).
+  // A same-viewport host obstruction still uses the measured sub-rectangle.
+  if (rawW !== TOUCH.rawW || rawH !== TOUCH.rawH) TOUCH.vis = null;
   TOUCH.rawW = rawW; TOUCH.rawH = rawH;
   // if a host viewer's chrome covers part of the page, fit into the sub-rect
   // that is really visible (measured by the IntersectionObserver above)

@@ -1,0 +1,17 @@
+
+── brand  — every release surface carries the studio name
+ok   index.html: author meta names the studio
+  ok   index.html: structured data publishes as the studio
+  ok   index.html: the game constant is the same name
+  ok   odyssey.html: author meta names the studio
+  ok   odyssey.html: structured data publishes as the studio
+  ok   odyssey.html: the game constant is the same name
+  ok   title screen draws the studio footer  11 strings drawn
+  ok   pause card draws the studio footer  26 strings drawn
+  ok   the build stamp still travels with it
+  ok   no page errors while drawing them
+
+OK — every release surface carries the studio name
+   (brand: 1.0 s)
+
+all 1 harnesses ran

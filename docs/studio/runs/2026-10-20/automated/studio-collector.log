@@ -1,0 +1,11 @@
+
+── studio-collector  — collector snapshots original log bytes and rejects later loss/corruption
+......
+----------------------------------------------------------------------
+Ran 6 tests in 1.052s
+
+OK
+
+   (studio-collector: 1.2 s)
+
+all 1 harnesses ran

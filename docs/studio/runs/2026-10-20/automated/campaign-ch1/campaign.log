@@ -1,0 +1,1572 @@
+[00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:01] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:01] MENU choose "newgame"
+[00:01] STATE MENU -> CUT
+[00:51] STATE CUT -> DIFF
+[00:51] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:52] FRAME 000-difficulty.png
+[00:52] ROOM - -> W1  at x=96
+[00:52] STATE DIFF -> PANELS
+[00:52] MANHWA wake panel 1/5
+[00:52] OBJECTIVE "Reach the city gates"
+[00:52] CHIP move |  | 
+[00:52] SAVEPOINT null -> W1
+[00:52] WEAPON null -> claws
+[00:52]   . W1 x=96 y=413 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:53] MANHWA wake panel 2/5
+[00:54] MANHWA wake panel 3/5
+[00:55] MANHWA wake panel 4/5
+[00:56] MANHWA wake panel 5/5
+[00:57] STATE PANELS -> PLAY
+[00:57] CHIP move | Move | Walk right toward the light
+[01:00] TOAST POWER FAULT → SYSTEM RESTART
+[01:00]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:01] FRAMES median 50 ms -> planner step 1/30, game time 1.01x wall
+[01:01] PACE sim 60.1 s per 60 s wall (pace dial / slow frames)
+[01:02] FLAG +woke
+[01:02] MISSION opening (objective: "Reach the city gates")
+[01:06] ROOM W1 -> W2  at x=21
+[01:06] CHIP out | The city gates | Follow the gold marker
+[01:06] STATE PLAY -> PANELS
+[01:06] MANHWA bay panel 1/3
+[01:06] CHIP out |  | 
+[01:07] MANHWA bay panel 2/3
+[01:08] MANHWA bay panel 3/3
+[01:08]   . W2 x=21 y=436 vx=0 on cores=7/7 volts=33 tut=out/null@-1 mission=opening held=
+[01:10] STATE PANELS -> PLAY
+[01:10] CHIP out | The city gates | Follow the gold marker
+[01:10] CHIP jump | Jump | Follow the gold marker
+[01:11] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:12] CHIP gate | The city gates | Follow the gold marker
+[01:13] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:14] FLAG +gateOpened
+[01:16]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[01:18] ROOM W2 -> A0  at x=40
+[01:18] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[01:18] STATE PLAY -> PANELS
+[01:18] MANHWA gate panel 1/2
+[01:18] CHIP gate |  | 
+[01:20] MANHWA gate panel 2/2
+[01:21] STATE PANELS -> PLAY
+[01:21] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:22] CHIP booth | Ratchet's booth | Follow the gold marker
+[01:23] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[01:24]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[01:27] ROOM A0 -> A0B  at x=103
+[01:27] OBJECTIVE "Wake Ratchet"
+[01:28] CHIP note | Read the letter | Follow the gold marker
+[01:30] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:30] STATE PLAY -> PANELS
+[01:30] MANHWA letter panel 1/5
+[01:30] CHIP note |  | 
+[01:31] MANHWA letter panel 2/5
+[01:32]   . A0B x=561 y=433 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[01:33] MANHWA letter panel 3/5
+[01:34] MANHWA letter panel 4/5
+[01:35] MANHWA letter panel 5/5
+[01:37] STATE PANELS -> PLAY
+[01:37] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:37] FLAG +opNote
+[01:38] CHIP drawer | Open the drawer | Follow the gold marker
+[01:39] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[01:39] STATE PLAY -> DIALOG
+[01:39] CHIP drawer |  | 
+[01:39] FLAG +ch_A0B_1
+[01:39] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[01:39] ITEMS {"ratchetCell":1}
+[01:40] STATE DIALOG -> PANELS
+[01:40] MANHWA drawer panel 1/1
+[01:41]   . A0B x=424 y=430 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[01:42] STATE PANELS -> PLAY
+[01:42] CHIP drawer | Open the drawer | Follow the gold marker
+[01:42] CHIP repair | Restore his battery | Follow the gold marker
+[01:43] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[01:44] STATE PLAY -> DIALOG
+[01:44] CHIP repair |  | 
+[01:44] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[01:45] STATE DIALOG -> REPAIR
+[01:45] FRAME 001-repair-board.png
+[01:45] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[01:45] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[01:46] REPAIR place on target:socket (the hint names "battery socket")
+[01:46] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[01:47] REPAIR place on target:plus (the hint names "+ terminal")
+[01:47] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[01:49]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[01:49] REPAIR place on target:minus (the hint names "− terminal")
+[01:49] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[01:50] REPAIR place on target:relay (the hint names "relay")
+[01:51] REPAIR power
+[01:52] STATE REPAIR -> CUT
+[01:52] OBJECTIVE "Use Ratchet’s pod"
+[01:52] FLAG +on_A0B|ratchet
+[01:52] FLAG +ratchetRepaired
+[01:52] ITEMS {}
+[01:57]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[01:59] STATE CUT -> DIALOG
+[01:59] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[02:00] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[02:01] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[02:01] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[02:02] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[02:03] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[02:04] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[02:05]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:05] FLAG +opTold
+[02:05] FLAG +ratchetSpareGiven
+[02:05] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[02:05] ITEMS {"batt":1}
+[02:07] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[02:08] STATE DIALOG -> PANELS
+[02:08] MANHWA ratchet panel 1/2
+[02:09] MANHWA ratchet panel 2/2
+[02:11] STATE PANELS -> PLAY
+[02:11] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:12] CHIP pod | Use the pod | Follow the gold marker
+[02:13] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[02:13] SAVEPOINT W1 -> A0B
+[02:13]   . A0B x=880 y=426 vx=0 on cores=7/7 volts=99 tut=pod/INT@912 mission=opening held= near=bench:null
+[02:15] OBJECTIVE "Get the Volt Pack from Ratchet"
+[02:15] FLAG +opPod
+[02:16] CHIP pack | The Volt Pack | Follow the gold marker
+[02:17] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:17] STATE PLAY -> DIALOG
+[02:17] CHIP pack |  | 
+[02:17] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[02:18] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[02:19] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[02:21] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[02:21]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[02:22] FLAG +opScrap
+[02:22] FLAG +sawScrap
+[02:22] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[02:22] SCRAP 0 -> 12
+[02:23] STATE DIALOG -> SHOP
+[02:24] FRAME 002-counter.png
+[02:24] SHOP buy the marked row (cell) with 12 scrap
+[02:24] STATE SHOP -> DIALOG
+[02:24] OBJECTIVE "Try out the Volt Pack"
+[02:24] FLAG +tutBuy
+[02:24] FLAG +heal
+[02:24] FLAG +pack
+[02:24] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[02:24] SCRAP 12 -> 0
+[02:25] STATE DIALOG -> PLAY
+[02:25] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:26] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[02:26] HURT 7 -> 6 in A0B
+[02:26] HEAL: holding heal
+[02:28] CHIP atk | Back outside | Follow the gold marker
+[02:29] CHIP atk | Back outside | Stand at the den door and press ↑
+[02:29]   . A0B x=103 y=427 vx=0 on cores=7/7 volts=66 tut=atk/UP@115 mission=opening held=
+[02:33] ROOM A0B -> A0  at x=387
+[02:33] CHIP atk | Strike the winch | Follow the gold marker
+[02:34] CHIP atk | Strike the winch | Its infected arm blocks the road — each X knocks scrap loose
+[02:34] FLAG +winchKnock
+[02:35] CHIP burst | Volt Burst | Its motor still holds the arm — hold X, let go: the burst stops it
+[02:35] BURST: holding attack
+[02:36] TOAST The winch stops — its arm lifts clear of the road.
+[02:36] FLAG +burstDone
+[02:36] FLAG +opBurst
+[02:36] SCRAP 0 -> 12
+[02:37] OBJECTIVE "Solve the monument’s puzzle"
+[02:37] CHIP node | The monument | Follow the gold marker
+[02:37]   . A0 x=719 y=247 vx=340 air cores=7/7 volts=82 tut=node/MOVE@880 mission=opening held=ArrowRight
+[02:38] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:38] STATE PLAY -> TRIAL
+[02:38] CHIP node |  | 
+[02:41] FRAME 003-monument-puzzle.png
+[02:41] PUZZLE memory: the monument played 3 notes; answering
+[02:42] STATE TRIAL -> PLAY
+[02:42] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:42] TOAST The winch stops — its arm lifts clear of the road. / Knowledge gained  +10 IQ
+[02:42] FLAG +rd_n8
+[02:42] SCRAP 12 -> 15
+[02:42] OBJECTIVE "Head east into the Scrap Meadows"
+[02:42] CHIP go | Into the meadow | The road east leads to the Scrap Meadows
+[02:44] TOAST Knowledge gained  +10 IQ
+[02:45]   . A0 x=1907 y=381 vx=340 on cores=7/7 volts=82 tut=go/MOVE@2000 mission=opening held=ArrowRight
+[02:46] ROOM A0 -> A1  at x=21
+[02:46] OBJECTIVE "Find the raw marble beneath the meadow"
+[02:46] CHIP (none)
+[02:46] TOAST Map online — open it any time (M / Tab)
+[02:46] FLAG +tut
+[02:46] FLAG +mapSeen
+[02:46] MISSION DONE opening
+[02:47] FRAME 004-done-opening.png
+[02:47] MISSION servo (objective: "Find the raw marble beneath the meadow")
+[02:47] PLAN room A1: 92 standable tiles, 1411 moves (46 ms)
+[02:47] INTERACT servo (wake him with the spare Power Cell)
+[02:48] STATE PLAY -> DIALOG
+[02:48] SAY Old Servo: "Ratchet’s spare cell fits the port in his chest. You seat it."
+[02:49] STATE DIALOG -> PLAY
+[02:49] FLAG +on_A1|servo
+[02:49] FLAG +servoIntro
+[02:49] ITEMS {}
+[02:49] INTERACT servo (wake him with the spare Power Cell)
+[02:49] STATE PLAY -> DIALOG
+[02:49] SAY Old Servo: "Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you."
+[02:50] SAY Old Servo: "After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up."
+[02:51] SAY Old Servo: "And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ."
+[02:52] FLAG +servoMet
+[02:52] SAY "Errand taken"
+[02:53] STATE DIALOG -> PLAY
+[02:53] MISSION DONE servo
+[02:54] FRAME 005-done-servo.png
+[02:54] MISSION first-meeting (objective: "Find the raw marble beneath the meadow")
+[02:54] FLAG +sc_A1_3
+[02:54] SCRAP 15 -> 30
+[02:54]   . A1 x=129 y=426 vx=50 on cores=7/7 volts=82 mission=first-meeting held=ArrowRight near=npc:servo
+[02:54] FIGHT crawler (hp 26) in A1
+[02:55] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[02:58] FIGHT guard (hp 38) in A1
+[02:58] FLAG +sc_A1_4
+[02:58] SCRAP 30 -> 48
+[02:58] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind / Repair ready! Stand still and hold F to restore a core.
+[02:58] HURT 7 -> 6 in A1 (nearest guard at 88 px)
+[03:01] TOAST Repair ready! Stand still and hold F to restore a core.
+[03:02] FRAMES median 33 ms -> planner step 1/30, game time 0.98x wall
+[03:02] PACE sim 60.3 s per 60 s wall (pace dial / slow frames)
+[03:02]   . A1 x=1762 y=431 vx=0 on cores=6/7 volts=99 mission=first-meeting held=
+[03:09] STUCK trying to reach exit R toward A2 in A1 at x=1762,y=431
+[03:10] FRAME 006-stuck-A1.png
+[03:10]   . A1 x=1630 y=316 vx=-292 on cores=6/7 volts=99 mission=first-meeting held=
+[03:11] ROOM A1 -> A2  at x=33
+[03:12] PLAN room A2: 116 standable tiles, 1727 moves (96 ms)
+[03:13] FIGHT crawler (hp 26) in A2
+[03:14] HURT 6 -> 5 in A2 (nearest crawler at 26 px)
+[03:14] FLAG +sc_A2_4
+[03:14] SCRAP 48 -> 60
+[03:15] FIGHT flier (hp 21) in A2
+[03:16] HURT 5 -> 4 in A2 (nearest crawler at 16 px)
+[03:16] HEAL (cores 4/7, volts 99)
+[03:18]   . A2 x=779 y=291 vx=340 air cores=5/7 volts=66 mission=first-meeting held=ArrowRight+Space
+[03:19] FLAG +sc_A2_5
+[03:19] SCRAP 60 -> 78
+[03:21] FIGHT hopper (hp 31) in A2
+[03:23] FLAG +nfMeet
+[03:23] MISSION DONE first-meeting
+[03:24] FRAME 007-done-first-meeting.png
+[03:24] MISSION marble (objective: "Find the raw marble beneath the meadow")
+[03:24] FLAG +sc_A2_6
+[03:24] SCRAP 78 -> 101
+[03:24] MEET NULLFANG drops in (A2): stepping out of the swipe
+[03:25] FRAME 008-nullfang-meet.png
+[03:26]   . A2 x=2176 y=214 vx=-340 air cores=5/7 volts=77 mission=marble held=ArrowLeft+Space
+[03:28] FIGHT hopper (hp 17) in A2
+[03:28] HURT 5 -> 4 in A2 (nearest guard at 30 px)
+[03:29] FIGHT guard (hp 25) in A2
+[03:30] HURT 4 -> 3 in A2 (nearest hopper at 17 px)
+[03:30] STATE PLAY -> PANELS
+[03:30] MANHWA meet panel 1/3
+[03:31] MANHWA meet panel 2/3
+[03:32] MANHWA meet panel 3/3
+[03:34] STATE PANELS -> PLAY
+[03:34] HEAL (cores 3/7, volts 99)
+[03:35]   . A2 x=1785 y=434 vx=0 on cores=4/7 volts=66 mission=marble held= near=rescue:null
+[03:35] HEAL (cores 4/7, volts 66)
+[03:42] DOWN-STRIKE at the loose floor (tiles 12-14)
+[03:44] ROOM A2 -> A5  at x=399
+[03:44] FLAG +taughtBreak
+[03:44] FLAG +taughtFloor
+[03:44]   . A5 x=399 y=-3 vx=0 air cores=5/7 volts=33 mission=marble held=
+[03:44] PLAN room A5: 58 standable tiles, 764 moves (34 ms)
+[03:44] TOAST Chalk arrows — the old quarrymen marked their road to the marble.
+[03:44] FLAG +pgMarks
+[03:46] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it.
+[03:47] RUBBLE strike (hp 6)
+[03:47] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[03:47] RUBBLE strike (hp 5)
+[03:47] FLAG +sc_A5_5
+[03:47] SCRAP 101 -> 131
+[03:47] RUBBLE strike (hp 4)
+[03:48] RUBBLE strike (hp 3)
+[03:49] RUBBLE strike (hp 2)
+[03:49] RUBBLE strike (hp 1)
+[03:49] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:49] FLAG +rubbleA5
+[03:49] DOOR up at 1106 -> CV1
+[03:50] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:51] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:51] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[03:52]   . A5 x=1094 y=427 vx=0 on cores=5/7 volts=33 mission=marble held=
+[03:54] ROOM A5 -> CV1  at x=167
+[03:54] PLAN room CV1: 74 standable tiles, 806 moves (19 ms)
+[03:54] STATE PLAY -> PANELS
+[03:54] MANHWA cave panel 1/3
+[03:55] MANHWA cave panel 2/3
+[03:56] MANHWA cave panel 3/3
+[03:57] STATE PANELS -> PLAY
+[03:59] FIGHT crawler (hp 82) in CV1
+[03:59] HURT 5 -> 4 in CV1 (nearest crawler at 65 px)
+[04:00]   . CV1 x=726 y=463 vx=340 on cores=4/7 volts=55 mission=marble held=ArrowRight threat={"k":"crawler","x":762,"y":474,"w":28,"h":20,"hp":54,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:01] HURT 4 -> 3 in CV1 (nearest crawler at 88 px)
+[04:02] TOAST Something is calling from behind the fallen rock. STRIKE it.
+[04:03] FRAMES median 33 ms -> planner step 1/30, game time 1.03x wall
+[04:03] PACE sim 60.2 s per 60 s wall (pace dial / slow frames)
+[04:03] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[04:03] FIGHT crawler (hp 22) in CV1
+[04:04] HURT 3 -> 2 in CV1 (nearest crawler at 73 px)
+[04:06] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[04:07] TOAST The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[04:08] TOAST The pile shifts. The sound behind it comes closer.
+[04:08] FIGHT crawler (hp 8) in CV1
+[04:08] TOAST The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[04:08]   . CV1 x=1056 y=440 vx=0 on cores=2/7 volts=88 mission=marble held= threat={"k":"crawler","x":1015,"y":394,"w":28,"h":20,"hp":8,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:09] HEAL (cores 2/7, volts 88)
+[04:11] TOAST The pile shifts. The sound behind it comes closer.
+[04:12] FIGHT crawler (hp 8) in CV1
+[04:12] TOAST The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[04:12] HEAL (cores 3/7, volts 66)
+[04:14] TOAST The pile shifts. The sound behind it comes closer.
+[04:14] RUBBLE strike (hp 1)
+[04:14] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:14] FLAG +rubbleCV1B
+[04:14] DOOR up at 1111 -> CV1B
+[04:16]   . CV1 x=1099 y=459 vx=0 on cores=4/7 volts=33 mission=marble held= near=rescue:null
+[04:19] ROOM CV1 -> CV1B  at x=142
+[04:19] PLAN room CV1B: 50 standable tiles, 549 moves (12 ms)
+[04:23] REST at the pod in CV1B (cores 4/7, volts 33)
+[04:24] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map.
+[04:24] FLAG +sc_CV1B_4
+[04:24] FLAG +pgSurvey
+[04:24] SCRAP 131 -> 161
+[04:24] SAVEPOINT A0B -> CV1B
+[04:24]   . CV1B x=644 y=462 vx=0 on cores=4/7 volts=99 mission=marble held= near=bench:null
+[04:24] HEAL (cores 4/7, volts 99)
+[04:26] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map. / Systems recharged. Progress saved.
+[04:27] FIGHT bat (hp 54) in CV1B
+[04:28] FLAG +sc_CV1B_2
+[04:28] SCRAP 161 -> 214
+[04:29] TOAST Systems recharged. Progress saved.
+[04:31] FIGHT bat (hp 54) in CV1B
+[04:32]   . CV1B x=878 y=366 vx=0 air cores=7/7 volts=99 mission=marble held=
+[04:36] FIGHT bat (hp 54) in CV1B
+[04:39] HURT 7 -> 6 in CV1B (nearest bat at 77 px)
+[04:40] FIGHT bat (hp 26) in CV1B
+[04:40]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:44] FIGHT bat (hp 26) in CV1B
+[04:48] FIGHT bat (hp 26) in CV1B
+[04:48]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:52] FIGHT bat (hp 26) in CV1B
+[04:56] FIGHT bat (hp 26) in CV1B
+[04:56]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:00] FIGHT bat (hp 26) in CV1B
+[05:03] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[05:03] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[05:04] FIGHT bat (hp 26) in CV1B
+[05:04]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:08] FIGHT bat (hp 26) in CV1B
+[05:12] FIGHT bat (hp 26) in CV1B
+[05:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:16] FIGHT bat (hp 26) in CV1B
+[05:20] FIGHT bat (hp 26) in CV1B
+[05:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:24] FIGHT bat (hp 26) in CV1B
+[05:28] FIGHT bat (hp 26) in CV1B
+[05:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:32] FIGHT bat (hp 26) in CV1B
+[05:36] FIGHT bat (hp 26) in CV1B
+[05:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:40] FIGHT bat (hp 26) in CV1B
+[05:44] FIGHT bat (hp 26) in CV1B
+[05:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:48] FIGHT bat (hp 26) in CV1B
+[05:52] FIGHT bat (hp 26) in CV1B
+[05:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:57] FIGHT bat (hp 26) in CV1B
+[06:01] FIGHT bat (hp 26) in CV1B
+[06:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:04] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[06:04] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[06:05] FIGHT bat (hp 26) in CV1B
+[06:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:09] FIGHT bat (hp 26) in CV1B
+[06:13] FIGHT bat (hp 26) in CV1B
+[06:17]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:17] FIGHT bat (hp 26) in CV1B
+[06:21] FIGHT bat (hp 26) in CV1B
+[06:25]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:25] FIGHT bat (hp 26) in CV1B
+[06:29] FIGHT bat (hp 26) in CV1B
+[06:33]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:33] FIGHT bat (hp 26) in CV1B
+[06:37] FIGHT bat (hp 26) in CV1B
+[06:41]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:41] FIGHT bat (hp 26) in CV1B
+[06:45] FIGHT bat (hp 26) in CV1B
+[06:49]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:49] FIGHT bat (hp 26) in CV1B
+[06:53] FIGHT bat (hp 26) in CV1B
+[06:57]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:57] FIGHT bat (hp 26) in CV1B
+[07:01] FIGHT bat (hp 26) in CV1B
+[07:04] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[07:04] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[07:05]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:05] FIGHT bat (hp 26) in CV1B
+[07:09] FIGHT bat (hp 26) in CV1B
+[07:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:13] FIGHT bat (hp 26) in CV1B
+[07:18] FIGHT bat (hp 26) in CV1B
+[07:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:22] FIGHT bat (hp 26) in CV1B
+[07:26] FIGHT bat (hp 26) in CV1B
+[07:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:30] FIGHT bat (hp 26) in CV1B
+[07:34] FIGHT bat (hp 26) in CV1B
+[07:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:38] FIGHT bat (hp 26) in CV1B
+[07:42] FIGHT bat (hp 26) in CV1B
+[07:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:46] FIGHT bat (hp 26) in CV1B
+[07:50] FIGHT bat (hp 26) in CV1B
+[07:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[07:54] FIGHT bat (hp 26) in CV1B
+[07:58] FIGHT bat (hp 26) in CV1B
+[08:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:02] FIGHT bat (hp 26) in CV1B
+[08:05] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[08:05] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[08:06] FIGHT bat (hp 26) in CV1B
+[08:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:10] FIGHT bat (hp 26) in CV1B
+[08:14] FIGHT bat (hp 26) in CV1B
+[08:18]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:18] FIGHT bat (hp 26) in CV1B
+[08:22] FIGHT bat (hp 26) in CV1B
+[08:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:26] FIGHT bat (hp 26) in CV1B
+[08:30] FIGHT bat (hp 26) in CV1B
+[08:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:34] FIGHT bat (hp 26) in CV1B
+[08:38] FIGHT bat (hp 26) in CV1B
+[08:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:42] FIGHT bat (hp 26) in CV1B
+[08:46] FIGHT bat (hp 26) in CV1B
+[08:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:50] FIGHT bat (hp 26) in CV1B
+[08:54] FIGHT bat (hp 26) in CV1B
+[08:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:58] FIGHT bat (hp 26) in CV1B
+[09:03] FIGHT bat (hp 26) in CV1B
+[09:05] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[09:05] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[09:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:07] FIGHT bat (hp 26) in CV1B
+[09:11] FIGHT bat (hp 26) in CV1B
+[09:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:15] FIGHT bat (hp 26) in CV1B
+[09:19] FIGHT bat (hp 26) in CV1B
+[09:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:23] FIGHT bat (hp 26) in CV1B
+[09:27] FIGHT bat (hp 26) in CV1B
+[09:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:31] FIGHT bat (hp 26) in CV1B
+[09:35] FIGHT bat (hp 26) in CV1B
+[09:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:39] FIGHT bat (hp 26) in CV1B
+[09:43] FIGHT bat (hp 26) in CV1B
+[09:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:47] FIGHT bat (hp 26) in CV1B
+[09:51] FIGHT bat (hp 26) in CV1B
+[09:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:55] FIGHT bat (hp 26) in CV1B
+[09:59] FIGHT bat (hp 26) in CV1B
+[10:02]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:03] FIGHT bat (hp 26) in CV1B
+[10:06] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[10:06] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[10:07] FIGHT bat (hp 26) in CV1B
+[10:10]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:11] FIGHT bat (hp 26) in CV1B
+[10:15] FIGHT bat (hp 26) in CV1B
+[10:18]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:19] FIGHT bat (hp 26) in CV1B
+[10:23] FIGHT bat (hp 26) in CV1B
+[10:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:27] FIGHT bat (hp 26) in CV1B
+[10:31] FIGHT bat (hp 26) in CV1B
+[10:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:35] FIGHT bat (hp 26) in CV1B
+[10:40] FIGHT bat (hp 26) in CV1B
+[10:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:44] FIGHT bat (hp 26) in CV1B
+[10:48] FIGHT bat (hp 26) in CV1B
+[10:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[10:52] FIGHT bat (hp 26) in CV1B
+[10:56] FIGHT bat (hp 26) in CV1B
+[10:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:00] FIGHT bat (hp 26) in CV1B
+[11:04] FIGHT bat (hp 26) in CV1B
+[11:06] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[11:06] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[11:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:08] FIGHT bat (hp 26) in CV1B
+[11:12] FIGHT bat (hp 26) in CV1B
+[11:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:16] FIGHT bat (hp 26) in CV1B
+[11:20] FIGHT bat (hp 26) in CV1B
+[11:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:24] FIGHT bat (hp 26) in CV1B
+[11:28] FIGHT bat (hp 26) in CV1B
+[11:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:32] FIGHT bat (hp 26) in CV1B
+[11:36] FIGHT bat (hp 26) in CV1B
+[11:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:40] FIGHT bat (hp 26) in CV1B
+[11:44] FIGHT bat (hp 26) in CV1B
+[11:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:48] FIGHT bat (hp 26) in CV1B
+[11:52] FIGHT bat (hp 26) in CV1B
+[11:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[11:57] FIGHT bat (hp 26) in CV1B
+[12:01] FIGHT bat (hp 26) in CV1B
+[12:03]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:05] FIGHT bat (hp 26) in CV1B
+[12:07] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[12:07] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[12:09] FIGHT bat (hp 26) in CV1B
+[12:11]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:13] FIGHT bat (hp 26) in CV1B
+[12:17] FIGHT bat (hp 26) in CV1B
+[12:19]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:21] FIGHT bat (hp 26) in CV1B
+[12:25] FIGHT bat (hp 26) in CV1B
+[12:27]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:29] FIGHT bat (hp 26) in CV1B
+[12:33] FIGHT bat (hp 26) in CV1B
+[12:35]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:37] FIGHT bat (hp 26) in CV1B
+[12:41] FIGHT bat (hp 26) in CV1B
+[12:43]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:45] FIGHT bat (hp 26) in CV1B
+[12:49] FIGHT bat (hp 26) in CV1B
+[12:51]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[12:53] FIGHT bat (hp 26) in CV1B
+[12:57] FIGHT bat (hp 26) in CV1B
+[12:59]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:01] FIGHT bat (hp 26) in CV1B
+[13:05] FIGHT bat (hp 26) in CV1B
+[13:07] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[13:07] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[13:07]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:09] FIGHT bat (hp 26) in CV1B
+[13:13] FIGHT bat (hp 26) in CV1B
+[13:15]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:18] FIGHT bat (hp 26) in CV1B
+[13:22] FIGHT bat (hp 26) in CV1B
+[13:23]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:26] FIGHT bat (hp 26) in CV1B
+[13:30] FIGHT bat (hp 26) in CV1B
+[13:31]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:34] FIGHT bat (hp 26) in CV1B
+[13:38] FIGHT bat (hp 26) in CV1B
+[13:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:42] FIGHT bat (hp 26) in CV1B
+[13:46] FIGHT bat (hp 26) in CV1B
+[13:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:50] FIGHT bat (hp 26) in CV1B
+[13:54] FIGHT bat (hp 26) in CV1B
+[13:56]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:58] FIGHT bat (hp 26) in CV1B
+[14:02] FIGHT bat (hp 26) in CV1B
+[14:04]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:06] FIGHT bat (hp 26) in CV1B
+[14:08] FRAMES median 33 ms -> planner step 1/30, game time 0.97x wall
+[14:08] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[14:10] FIGHT bat (hp 26) in CV1B
+[14:12]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:14] FIGHT bat (hp 26) in CV1B
+[14:18] FIGHT bat (hp 26) in CV1B
+[14:20]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:22] FIGHT bat (hp 26) in CV1B
+[14:26] FIGHT bat (hp 26) in CV1B
+[14:28]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:30] FIGHT bat (hp 26) in CV1B
+[14:34] FIGHT bat (hp 26) in CV1B
+[14:36]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:38] FIGHT bat (hp 26) in CV1B
+[14:42] FIGHT bat (hp 26) in CV1B
+[14:44]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:46] FIGHT bat (hp 26) in CV1B
+[14:51] FIGHT bat (hp 26) in CV1B
+[14:52]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:55] FIGHT bat (hp 26) in CV1B
+[14:59] FIGHT bat (hp 26) in CV1B
+[15:00]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:03] FIGHT bat (hp 26) in CV1B
+[15:07] FIGHT bat (hp 26) in CV1B
+[15:08] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[15:08] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[15:08]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:11] FIGHT bat (hp 26) in CV1B
+[15:15] FIGHT bat (hp 26) in CV1B
+[15:16]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:19] FIGHT bat (hp 26) in CV1B
+[15:23] FIGHT bat (hp 26) in CV1B
+[15:24]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:27] FIGHT bat (hp 26) in CV1B
+[15:31] FIGHT bat (hp 26) in CV1B
+[15:32]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:35] FIGHT bat (hp 26) in CV1B
+[15:39] FIGHT bat (hp 26) in CV1B
+[15:41]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:43] FIGHT bat (hp 26) in CV1B
+[15:47] FIGHT bat (hp 26) in CV1B
+[15:49]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:51] FIGHT bat (hp 26) in CV1B
+[15:55] FIGHT bat (hp 26) in CV1B
+[15:57]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[15:59] FIGHT bat (hp 26) in CV1B
+[16:03] FIGHT bat (hp 26) in CV1B
+[16:05]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:07] FIGHT bat (hp 26) in CV1B
+[16:09] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[16:09] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[16:12] FIGHT bat (hp 26) in CV1B
+[16:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:16] FIGHT bat (hp 26) in CV1B
+[16:20] FIGHT bat (hp 26) in CV1B
+[16:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:24] FIGHT bat (hp 26) in CV1B
+[16:28] FIGHT bat (hp 26) in CV1B
+[16:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:32] FIGHT bat (hp 26) in CV1B
+[16:36] FIGHT bat (hp 26) in CV1B
+[16:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:40] FIGHT bat (hp 26) in CV1B
+[16:44] FIGHT bat (hp 26) in CV1B
+[16:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:48] FIGHT bat (hp 26) in CV1B
+[16:52] FIGHT bat (hp 26) in CV1B
+[16:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:56] FIGHT bat (hp 26) in CV1B
+[17:00] FIGHT bat (hp 26) in CV1B
+[17:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:04] FIGHT bat (hp 26) in CV1B
+[17:08] FIGHT bat (hp 26) in CV1B
+[17:09] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[17:09] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[17:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:12] FIGHT bat (hp 26) in CV1B
+[17:16] FIGHT bat (hp 26) in CV1B
+[17:17]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:20] FIGHT bat (hp 26) in CV1B
+[17:24] FIGHT bat (hp 26) in CV1B
+[17:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:28] FIGHT bat (hp 26) in CV1B
+[17:32] FIGHT bat (hp 26) in CV1B
+[17:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:36] FIGHT bat (hp 26) in CV1B
+[17:40] FIGHT bat (hp 26) in CV1B
+[17:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:44] FIGHT bat (hp 26) in CV1B
+[17:48] FIGHT bat (hp 26) in CV1B
+[17:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[17:52] FIGHT bat (hp 26) in CV1B
+[17:57] FIGHT bat (hp 26) in CV1B
+[17:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:01] FIGHT bat (hp 26) in CV1B
+[18:05] FIGHT bat (hp 26) in CV1B
+[18:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:09] FIGHT bat (hp 26) in CV1B
+[18:10] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[18:10] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[18:13] FIGHT bat (hp 26) in CV1B
+[18:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:17] FIGHT bat (hp 26) in CV1B
+[18:21] FIGHT bat (hp 26) in CV1B
+[18:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:25] FIGHT bat (hp 26) in CV1B
+[18:29] FIGHT bat (hp 26) in CV1B
+[18:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:33] FIGHT bat (hp 26) in CV1B
+[18:37] FIGHT bat (hp 26) in CV1B
+[18:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:41] FIGHT bat (hp 26) in CV1B
+[18:45] FIGHT bat (hp 26) in CV1B
+[18:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:49] FIGHT bat (hp 26) in CV1B
+[18:53] FIGHT bat (hp 26) in CV1B
+[18:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[18:57] FIGHT bat (hp 26) in CV1B
+[19:01] FIGHT bat (hp 26) in CV1B
+[19:02]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:05] FIGHT bat (hp 26) in CV1B
+[19:09] FIGHT bat (hp 26) in CV1B
+[19:10] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[19:10] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[19:11]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:13] FIGHT bat (hp 26) in CV1B
+[19:17] FIGHT bat (hp 26) in CV1B
+[19:19]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:21] FIGHT bat (hp 26) in CV1B
+[19:25] FIGHT bat (hp 26) in CV1B
+[19:27]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:30] FIGHT bat (hp 26) in CV1B
+[19:34] FIGHT bat (hp 26) in CV1B
+[19:35]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:38] FIGHT bat (hp 26) in CV1B
+[19:42] FIGHT bat (hp 26) in CV1B
+[19:43]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:46] FIGHT bat (hp 26) in CV1B
+[19:50] FIGHT bat (hp 26) in CV1B
+[19:51]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[19:54] FIGHT bat (hp 26) in CV1B
+[19:58] FIGHT bat (hp 26) in CV1B
+[19:59]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:02] FIGHT bat (hp 26) in CV1B
+[20:06] FIGHT bat (hp 26) in CV1B
+[20:07]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:10] FIGHT bat (hp 26) in CV1B
+[20:11] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[20:11] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[20:14] FIGHT bat (hp 26) in CV1B
+[20:15]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:18] FIGHT bat (hp 26) in CV1B
+[20:22] FIGHT bat (hp 26) in CV1B
+[20:23]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:26] FIGHT bat (hp 26) in CV1B
+[20:30] FIGHT bat (hp 26) in CV1B
+[20:31]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:34] FIGHT bat (hp 26) in CV1B
+[20:38] FIGHT bat (hp 26) in CV1B
+[20:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:42] FIGHT bat (hp 26) in CV1B
+[20:46] FIGHT bat (hp 26) in CV1B
+[20:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:51] FIGHT bat (hp 26) in CV1B
+[20:55] FIGHT bat (hp 26) in CV1B
+[20:55]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[20:59] FIGHT bat (hp 26) in CV1B
+[21:03] FIGHT bat (hp 26) in CV1B
+[21:03]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:07] FIGHT bat (hp 26) in CV1B
+[21:11] FIGHT bat (hp 26) in CV1B
+[21:11] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[21:11] PACE sim 60.3 s per 60 s wall (pace dial / slow frames)
+[21:12]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:15] FIGHT bat (hp 26) in CV1B
+[21:19] FIGHT bat (hp 26) in CV1B
+[21:20]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:23] FIGHT bat (hp 26) in CV1B
+[21:27] FIGHT bat (hp 26) in CV1B
+[21:28]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:31] FIGHT bat (hp 26) in CV1B
+[21:35] FIGHT bat (hp 26) in CV1B
+[21:36]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:39] FIGHT bat (hp 26) in CV1B
+[21:43] FIGHT bat (hp 26) in CV1B
+[21:44]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:47] FIGHT bat (hp 26) in CV1B
+[21:51] FIGHT bat (hp 26) in CV1B
+[21:52]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[21:55] FIGHT bat (hp 26) in CV1B
+[21:59] FIGHT bat (hp 26) in CV1B
+[22:00]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:03] FIGHT bat (hp 26) in CV1B
+[22:07] FIGHT bat (hp 26) in CV1B
+[22:08]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:12] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[22:12] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[22:12] FIGHT bat (hp 26) in CV1B
+[22:16] FIGHT bat (hp 26) in CV1B
+[22:16]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:20] FIGHT bat (hp 26) in CV1B
+[22:24]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:24] FIGHT bat (hp 26) in CV1B
+[22:28] FIGHT bat (hp 26) in CV1B
+[22:32]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:32] FIGHT bat (hp 26) in CV1B
+[22:36] FIGHT bat (hp 26) in CV1B
+[22:40]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:40] FIGHT bat (hp 26) in CV1B
+[22:44] FIGHT bat (hp 26) in CV1B
+[22:48]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:48] FIGHT bat (hp 26) in CV1B
+[22:52] FIGHT bat (hp 26) in CV1B
+[22:56]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[22:56] FIGHT bat (hp 26) in CV1B
+[23:00] FIGHT bat (hp 26) in CV1B
+[23:04]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:05] FIGHT bat (hp 26) in CV1B
+[23:09] FIGHT bat (hp 26) in CV1B
+[23:12] FRAMES median 33 ms -> planner step 1/30, game time 1.02x wall
+[23:12] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[23:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:13] FIGHT bat (hp 26) in CV1B
+[23:17] FIGHT bat (hp 26) in CV1B
+[23:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:21] FIGHT bat (hp 26) in CV1B
+[23:25] FIGHT bat (hp 26) in CV1B
+[23:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:29] FIGHT bat (hp 26) in CV1B
+[23:33] FIGHT bat (hp 26) in CV1B
+[23:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:37] FIGHT bat (hp 26) in CV1B
+[23:41] FIGHT bat (hp 26) in CV1B
+[23:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:45] FIGHT bat (hp 26) in CV1B
+[23:49] FIGHT bat (hp 26) in CV1B
+[23:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[23:53] FIGHT bat (hp 26) in CV1B
+[23:57] FIGHT bat (hp 26) in CV1B
+[24:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:01] FIGHT bat (hp 26) in CV1B
+[24:05] FIGHT bat (hp 26) in CV1B
+[24:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:09] FIGHT bat (hp 26) in CV1B
+[24:13] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[24:13] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[24:13] FIGHT bat (hp 26) in CV1B
+[24:17]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:17] FIGHT bat (hp 26) in CV1B
+[24:21] FIGHT bat (hp 26) in CV1B
+[24:25]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:25] FIGHT bat (hp 26) in CV1B
+[24:29] FIGHT bat (hp 26) in CV1B
+[24:33]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:33] FIGHT bat (hp 26) in CV1B
+[24:37] FIGHT bat (hp 26) in CV1B
+[24:41]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:41] FIGHT bat (hp 26) in CV1B
+[24:45] FIGHT bat (hp 26) in CV1B
+[24:49]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:50] FIGHT bat (hp 26) in CV1B
+[24:54] FIGHT bat (hp 26) in CV1B
+[24:57]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[24:58] FIGHT bat (hp 26) in CV1B
+[25:02] FIGHT bat (hp 26) in CV1B
+[25:05]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:06] FIGHT bat (hp 26) in CV1B
+[25:10] FIGHT bat (hp 26) in CV1B
+[25:14] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[25:14] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[25:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:14] FIGHT bat (hp 26) in CV1B
+[25:18] FIGHT bat (hp 26) in CV1B
+[25:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:22] FIGHT bat (hp 26) in CV1B
+[25:26] FIGHT bat (hp 26) in CV1B
+[25:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:30] FIGHT bat (hp 26) in CV1B
+[25:34] FIGHT bat (hp 26) in CV1B
+[25:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:38] FIGHT bat (hp 26) in CV1B
+[25:42] FIGHT bat (hp 26) in CV1B
+[25:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:46] FIGHT bat (hp 26) in CV1B
+[25:50] FIGHT bat (hp 26) in CV1B
+[25:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[25:54] FIGHT bat (hp 26) in CV1B
+[25:58] FIGHT bat (hp 26) in CV1B
+[26:02]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:02] FIGHT bat (hp 26) in CV1B
+[26:06] FIGHT bat (hp 26) in CV1B
+[26:10]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:10] FIGHT bat (hp 26) in CV1B
+[26:14] FRAMES median 33 ms -> planner step 1/30, game time 1.02x wall
+[26:14] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[26:14] FIGHT bat (hp 26) in CV1B
+[26:18]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:18] FIGHT bat (hp 26) in CV1B
+[26:22] FIGHT bat (hp 26) in CV1B
+[26:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:27] FIGHT bat (hp 26) in CV1B
+[26:31] FIGHT bat (hp 26) in CV1B
+[26:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:35] FIGHT bat (hp 26) in CV1B
+[26:39] FIGHT bat (hp 26) in CV1B
+[26:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:43] FIGHT bat (hp 26) in CV1B
+[26:47] FIGHT bat (hp 26) in CV1B
+[26:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:51] FIGHT bat (hp 26) in CV1B
+[26:55] FIGHT bat (hp 26) in CV1B
+[26:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[26:59] FIGHT bat (hp 26) in CV1B
+[27:03] FIGHT bat (hp 26) in CV1B
+[27:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:07] FIGHT bat (hp 26) in CV1B
+[27:11] FIGHT bat (hp 26) in CV1B
+[27:15] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[27:15] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[27:15]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:15] FIGHT bat (hp 26) in CV1B
+[27:19] FIGHT bat (hp 26) in CV1B
+[27:23]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:23] FIGHT bat (hp 26) in CV1B
+[27:27] FIGHT bat (hp 26) in CV1B
+[27:31]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:31] FIGHT bat (hp 26) in CV1B
+[27:35] FIGHT bat (hp 26) in CV1B
+[27:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:39] FIGHT bat (hp 26) in CV1B
+[27:43] FIGHT bat (hp 26) in CV1B
+[27:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:48] FIGHT bat (hp 26) in CV1B
+[27:52] FIGHT bat (hp 26) in CV1B
+[27:55]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[27:56] FIGHT bat (hp 26) in CV1B
+[28:00] FIGHT bat (hp 26) in CV1B
+[28:03]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:04] FIGHT bat (hp 26) in CV1B
+[28:08] FIGHT bat (hp 26) in CV1B
+[28:11]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:12] FIGHT bat (hp 26) in CV1B
+[28:15] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[28:15] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[28:16] FIGHT bat (hp 26) in CV1B
+[28:19]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:20] FIGHT bat (hp 26) in CV1B
+[28:24] FIGHT bat (hp 26) in CV1B
+[28:27]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:28] FIGHT bat (hp 26) in CV1B
+[28:32] FIGHT bat (hp 26) in CV1B
+[28:35]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:36] FIGHT bat (hp 26) in CV1B
+[28:40] FIGHT bat (hp 26) in CV1B
+[28:43]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:44] FIGHT bat (hp 26) in CV1B
+[28:48] FIGHT bat (hp 26) in CV1B
+[28:51]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[28:52] FIGHT bat (hp 26) in CV1B
+[28:56] FIGHT bat (hp 26) in CV1B
+[28:59]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:00] FIGHT bat (hp 26) in CV1B
+[29:04] FIGHT bat (hp 26) in CV1B
+[29:07]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:08] FIGHT bat (hp 26) in CV1B
+[29:12] FIGHT bat (hp 26) in CV1B
+[29:16] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[29:16] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[29:16]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:16] FIGHT bat (hp 26) in CV1B
+[29:20] FIGHT bat (hp 26) in CV1B
+[29:24]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:24] FIGHT bat (hp 26) in CV1B
+[29:28] FIGHT bat (hp 26) in CV1B
+[29:32]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:33] FIGHT bat (hp 26) in CV1B
+[29:37] FIGHT bat (hp 26) in CV1B
+[29:40]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:41] FIGHT bat (hp 26) in CV1B
+[29:45] FIGHT bat (hp 26) in CV1B
+[29:48]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:49] FIGHT bat (hp 26) in CV1B
+[29:53] FIGHT bat (hp 26) in CV1B
+[29:56]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[29:57] FIGHT bat (hp 26) in CV1B
+[30:01] FIGHT bat (hp 26) in CV1B
+[30:04]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:05] FIGHT bat (hp 26) in CV1B
+[30:09] FIGHT bat (hp 26) in CV1B
+[30:12]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:13] FIGHT bat (hp 26) in CV1B
+[30:16] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[30:16] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[30:17] FIGHT bat (hp 26) in CV1B
+[30:20]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:21] FIGHT bat (hp 26) in CV1B
+[30:25] FIGHT bat (hp 26) in CV1B
+[30:28]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:29] FIGHT bat (hp 26) in CV1B
+[30:33] FIGHT bat (hp 26) in CV1B
+[30:36]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:37] FIGHT bat (hp 26) in CV1B
+[30:41] FIGHT bat (hp 26) in CV1B
+[30:44]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:45] FIGHT bat (hp 26) in CV1B
+[30:49] FIGHT bat (hp 26) in CV1B
+[30:52]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[30:53] FIGHT bat (hp 26) in CV1B
+[30:57] FIGHT bat (hp 26) in CV1B
+[31:00]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:01] FIGHT bat (hp 26) in CV1B
+[31:05] FIGHT bat (hp 26) in CV1B
+[31:08]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:09] FIGHT bat (hp 26) in CV1B
+[31:13] FIGHT bat (hp 26) in CV1B
+[31:17] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[31:17] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[31:17]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:18] FIGHT bat (hp 26) in CV1B
+[31:22] FIGHT bat (hp 26) in CV1B
+[31:25]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:26] FIGHT bat (hp 26) in CV1B
+[31:30] FIGHT bat (hp 26) in CV1B
+[31:33]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:34] FIGHT bat (hp 26) in CV1B
+[31:38] FIGHT bat (hp 26) in CV1B
+[31:41]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:42] FIGHT bat (hp 26) in CV1B
+[31:46] FIGHT bat (hp 26) in CV1B
+[31:49]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:50] FIGHT bat (hp 26) in CV1B
+[31:54] FIGHT bat (hp 26) in CV1B
+[31:57]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[31:58] FIGHT bat (hp 26) in CV1B
+[32:02] FIGHT bat (hp 26) in CV1B
+[32:05]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:06] FIGHT bat (hp 26) in CV1B
+[32:10] FIGHT bat (hp 26) in CV1B
+[32:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:14] FIGHT bat (hp 26) in CV1B
+[32:17] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[32:17] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[32:18] FIGHT bat (hp 26) in CV1B
+[32:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:22] FIGHT bat (hp 26) in CV1B
+[32:26] FIGHT bat (hp 26) in CV1B
+[32:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:30] FIGHT bat (hp 26) in CV1B
+[32:34] FIGHT bat (hp 26) in CV1B
+[32:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:38] FIGHT bat (hp 26) in CV1B
+[32:42] FIGHT bat (hp 26) in CV1B
+[32:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:46] FIGHT bat (hp 26) in CV1B
+[32:51] FIGHT bat (hp 26) in CV1B
+[32:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[32:55] FIGHT bat (hp 26) in CV1B
+[32:59] FIGHT bat (hp 26) in CV1B
+[33:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:03] FIGHT bat (hp 26) in CV1B
+[33:07] FIGHT bat (hp 26) in CV1B
+[33:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:11] FIGHT bat (hp 26) in CV1B
+[33:15] FIGHT bat (hp 26) in CV1B
+[33:18] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[33:18] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[33:18]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:19] FIGHT bat (hp 26) in CV1B
+[33:23] FIGHT bat (hp 26) in CV1B
+[33:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:27] FIGHT bat (hp 26) in CV1B
+[33:31] FIGHT bat (hp 26) in CV1B
+[33:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:35] FIGHT bat (hp 26) in CV1B
+[33:39] FIGHT bat (hp 26) in CV1B
+[33:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:43] FIGHT bat (hp 26) in CV1B
+[33:47] FIGHT bat (hp 26) in CV1B
+[33:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:51] FIGHT bat (hp 26) in CV1B
+[33:55] FIGHT bat (hp 26) in CV1B
+[33:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[33:59] FIGHT bat (hp 26) in CV1B
+[34:03] FIGHT bat (hp 26) in CV1B
+[34:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:07] FIGHT bat (hp 26) in CV1B
+[34:11] FIGHT bat (hp 26) in CV1B
+[34:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:15] FIGHT bat (hp 26) in CV1B
+[34:18] FRAMES median 33 ms -> planner step 1/30, game time 0.98x wall
+[34:18] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[34:19] FIGHT bat (hp 26) in CV1B
+[34:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:24] FIGHT bat (hp 26) in CV1B
+[34:28] FIGHT bat (hp 26) in CV1B
+[34:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:32] FIGHT bat (hp 26) in CV1B
+[34:36] FIGHT bat (hp 26) in CV1B
+[34:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:40] FIGHT bat (hp 26) in CV1B
+[34:44] FIGHT bat (hp 26) in CV1B
+[34:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:48] FIGHT bat (hp 26) in CV1B
+[34:52] FIGHT bat (hp 26) in CV1B
+[34:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[34:56] FIGHT bat (hp 26) in CV1B
+[35:00] FIGHT bat (hp 26) in CV1B
+[35:02]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:04] FIGHT bat (hp 26) in CV1B
+[35:08] FIGHT bat (hp 26) in CV1B
+[35:10]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:12] FIGHT bat (hp 26) in CV1B
+[35:16] FIGHT bat (hp 26) in CV1B
+[35:19] FRAMES median 33 ms -> planner step 1/30, game time 1.02x wall
+[35:19] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[35:19]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:20] FIGHT bat (hp 26) in CV1B
+[35:24] FIGHT bat (hp 26) in CV1B
+[35:27]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:28] FIGHT bat (hp 26) in CV1B
+[35:32] FIGHT bat (hp 26) in CV1B
+[35:35]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:36] FIGHT bat (hp 26) in CV1B
+[35:40] FIGHT bat (hp 26) in CV1B
+[35:43]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:44] FIGHT bat (hp 26) in CV1B
+[35:48] FIGHT bat (hp 26) in CV1B
+[35:51]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[35:52] FIGHT bat (hp 26) in CV1B
+[35:56] FIGHT bat (hp 26) in CV1B
+[35:59]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:01] FIGHT bat (hp 26) in CV1B
+[36:05] FIGHT bat (hp 26) in CV1B
+[36:07]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:09] FIGHT bat (hp 26) in CV1B
+[36:13] FIGHT bat (hp 26) in CV1B
+[36:15]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:17] FIGHT bat (hp 26) in CV1B
+[36:19] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[36:19] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[36:21] FIGHT bat (hp 26) in CV1B
+[36:23]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:25] FIGHT bat (hp 26) in CV1B
+[36:29] FIGHT bat (hp 26) in CV1B
+[36:31]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:33] FIGHT bat (hp 26) in CV1B
+[36:37] FIGHT bat (hp 26) in CV1B
+[36:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:41] FIGHT bat (hp 26) in CV1B
+[36:45] FIGHT bat (hp 26) in CV1B
+[36:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:49] FIGHT bat (hp 26) in CV1B
+[36:53] FIGHT bat (hp 26) in CV1B
+[36:55]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[36:57] FIGHT bat (hp 26) in CV1B
+[37:01] FIGHT bat (hp 26) in CV1B
+[37:03]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:05] FIGHT bat (hp 26) in CV1B
+[37:09] FIGHT bat (hp 26) in CV1B
+[37:11]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:13] FIGHT bat (hp 26) in CV1B
+[37:18] FIGHT bat (hp 26) in CV1B
+[37:20] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[37:20] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[37:20]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:22] FIGHT bat (hp 26) in CV1B
+[37:26] FIGHT bat (hp 26) in CV1B
+[37:28]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:30] FIGHT bat (hp 26) in CV1B
+[37:34] FIGHT bat (hp 26) in CV1B
+[37:36]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:38] FIGHT bat (hp 26) in CV1B
+[37:42] FIGHT bat (hp 26) in CV1B
+[37:44]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:46] FIGHT bat (hp 26) in CV1B
+[37:50] FIGHT bat (hp 26) in CV1B
+[37:52]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[37:54] FIGHT bat (hp 26) in CV1B
+[37:58] FIGHT bat (hp 26) in CV1B
+[38:00]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:02] FIGHT bat (hp 26) in CV1B
+[38:06] FIGHT bat (hp 26) in CV1B
+[38:08]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:10] FIGHT bat (hp 26) in CV1B
+[38:14] FIGHT bat (hp 26) in CV1B
+[38:16]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:18] FIGHT bat (hp 26) in CV1B
+[38:20] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[38:20] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[38:22] FIGHT bat (hp 26) in CV1B
+[38:24]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:26] FIGHT bat (hp 26) in CV1B
+[38:30] FIGHT bat (hp 26) in CV1B
+[38:32]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:34] FIGHT bat (hp 26) in CV1B
+[38:38] FIGHT bat (hp 26) in CV1B
+[38:40]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:42] FIGHT bat (hp 26) in CV1B
+[38:46] FIGHT bat (hp 26) in CV1B
+[38:48]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:51] FIGHT bat (hp 26) in CV1B
+[38:55] FIGHT bat (hp 26) in CV1B
+[38:56]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[38:59] FIGHT bat (hp 26) in CV1B
+[39:03] FIGHT bat (hp 26) in CV1B
+[39:04]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:07] FIGHT bat (hp 26) in CV1B
+[39:11] FIGHT bat (hp 26) in CV1B
+[39:12]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:15] FIGHT bat (hp 26) in CV1B
+[39:19] FIGHT bat (hp 26) in CV1B
+[39:21] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[39:21] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[39:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:23] FIGHT bat (hp 26) in CV1B
+[39:27] FIGHT bat (hp 26) in CV1B
+[39:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:31] FIGHT bat (hp 26) in CV1B
+[39:35] FIGHT bat (hp 26) in CV1B
+[39:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:39] FIGHT bat (hp 26) in CV1B
+[39:43] FIGHT bat (hp 26) in CV1B
+[39:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:47] FIGHT bat (hp 26) in CV1B
+[39:51] FIGHT bat (hp 26) in CV1B
+[39:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[39:55] FIGHT bat (hp 26) in CV1B
+[39:59] FIGHT bat (hp 26) in CV1B
+[40:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:03] FIGHT bat (hp 26) in CV1B
+[40:07] FIGHT bat (hp 26) in CV1B
+[40:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:11] FIGHT bat (hp 26) in CV1B
+[40:15] FIGHT bat (hp 26) in CV1B
+[40:17]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:19] FIGHT bat (hp 26) in CV1B
+[40:21] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[40:21] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[40:23] FIGHT bat (hp 26) in CV1B
+[40:25]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:27] FIGHT bat (hp 26) in CV1B
+[40:31] FIGHT bat (hp 26) in CV1B
+[40:33]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:36] FIGHT bat (hp 26) in CV1B
+[40:40] FIGHT bat (hp 26) in CV1B
+[40:41]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:44] FIGHT bat (hp 26) in CV1B
+[40:48] FIGHT bat (hp 26) in CV1B
+[40:49]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[40:52] FIGHT bat (hp 26) in CV1B
+[40:56] FIGHT bat (hp 26) in CV1B
+[40:57]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:00] FIGHT bat (hp 26) in CV1B
+[41:04] FIGHT bat (hp 26) in CV1B
+[41:05]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:08] FIGHT bat (hp 26) in CV1B
+[41:12] FIGHT bat (hp 26) in CV1B
+[41:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:16] FIGHT bat (hp 26) in CV1B
+[41:20] FIGHT bat (hp 26) in CV1B
+[41:22] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[41:22] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[41:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:24] FIGHT bat (hp 26) in CV1B
+[41:28] FIGHT bat (hp 26) in CV1B
+[41:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:32] FIGHT bat (hp 26) in CV1B
+[41:36] FIGHT bat (hp 26) in CV1B
+[41:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:40] FIGHT bat (hp 26) in CV1B
+[41:44] FIGHT bat (hp 26) in CV1B
+[41:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:48] FIGHT bat (hp 26) in CV1B
+[41:52] FIGHT bat (hp 26) in CV1B
+[41:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[41:56] FIGHT bat (hp 26) in CV1B
+[42:00] FIGHT bat (hp 26) in CV1B
+[42:02]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:04] FIGHT bat (hp 26) in CV1B
+[42:08] FIGHT bat (hp 26) in CV1B
+[42:10]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:12] FIGHT bat (hp 26) in CV1B
+[42:16] FIGHT bat (hp 26) in CV1B
+[42:18]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:20] FIGHT bat (hp 26) in CV1B
+[42:22] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[42:22] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[42:24] FIGHT bat (hp 26) in CV1B
+[42:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:29] FIGHT bat (hp 26) in CV1B
+[42:33] FIGHT bat (hp 26) in CV1B
+[42:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:37] FIGHT bat (hp 26) in CV1B
+[42:41] FIGHT bat (hp 26) in CV1B
+[42:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:45] FIGHT bat (hp 26) in CV1B
+[42:49] FIGHT bat (hp 26) in CV1B
+[42:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[42:53] FIGHT bat (hp 26) in CV1B
+[42:57] FIGHT bat (hp 26) in CV1B
+[42:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:01] FIGHT bat (hp 26) in CV1B
+[43:05] FIGHT bat (hp 26) in CV1B
+[43:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:09] FIGHT bat (hp 26) in CV1B
+[43:13] FIGHT bat (hp 26) in CV1B
+[43:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:17] FIGHT bat (hp 26) in CV1B
+[43:21] FIGHT bat (hp 26) in CV1B
+[43:23] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[43:23] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[43:23]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:25] FIGHT bat (hp 26) in CV1B
+[43:29] FIGHT bat (hp 26) in CV1B
+[43:31]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:33] FIGHT bat (hp 26) in CV1B
+[43:37] FIGHT bat (hp 26) in CV1B
+[43:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:41] FIGHT bat (hp 26) in CV1B
+[43:45] FIGHT bat (hp 26) in CV1B
+[43:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:49] FIGHT bat (hp 26) in CV1B
+[43:53] FIGHT bat (hp 26) in CV1B
+[43:55]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[43:57] FIGHT bat (hp 26) in CV1B
+[44:01] FIGHT bat (hp 26) in CV1B
+[44:03]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:05] FIGHT bat (hp 26) in CV1B
+[44:10] FIGHT bat (hp 26) in CV1B
+[44:11]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:14] FIGHT bat (hp 26) in CV1B
+[44:18] FIGHT bat (hp 26) in CV1B
+[44:19]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:22] FIGHT bat (hp 26) in CV1B
+[44:23] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[44:23] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[44:26] FIGHT bat (hp 26) in CV1B
+[44:27]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:30] FIGHT bat (hp 26) in CV1B
+[44:34] FIGHT bat (hp 26) in CV1B
+[44:35]   . CV1B x=896 y=156 vx=-1 air cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:38] FIGHT bat (hp 26) in CV1B
+[44:42] FIGHT bat (hp 26) in CV1B
+[44:43]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:46] FIGHT bat (hp 26) in CV1B
+[44:50] FIGHT bat (hp 26) in CV1B
+[44:51]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[44:54] FIGHT bat (hp 26) in CV1B
+[44:58] FIGHT bat (hp 26) in CV1B
+[44:59]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:02] FIGHT bat (hp 26) in CV1B
+[45:06] FIGHT bat (hp 26) in CV1B
+[45:07]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:10] FIGHT bat (hp 26) in CV1B
+[45:14] FIGHT bat (hp 26) in CV1B
+[45:15]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:18] FIGHT bat (hp 26) in CV1B
+[45:22] FIGHT bat (hp 26) in CV1B
+[45:24] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[45:24] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[45:24]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:26] FIGHT bat (hp 26) in CV1B
+[45:30] FIGHT bat (hp 26) in CV1B
+[45:32]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:34] FIGHT bat (hp 26) in CV1B
+[45:39] FIGHT bat (hp 26) in CV1B
+[45:40]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:43] FIGHT bat (hp 26) in CV1B
+[45:47] FIGHT bat (hp 26) in CV1B
+[45:48]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:51] FIGHT bat (hp 26) in CV1B
+[45:55] FIGHT bat (hp 26) in CV1B
+[45:56]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[45:59] FIGHT bat (hp 26) in CV1B
+[46:03] FIGHT bat (hp 26) in CV1B
+[46:04]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:07] FIGHT bat (hp 26) in CV1B
+[46:11] FIGHT bat (hp 26) in CV1B
+[46:12]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:15] FIGHT bat (hp 26) in CV1B
+[46:19] FIGHT bat (hp 26) in CV1B
+[46:20]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:23] FIGHT bat (hp 26) in CV1B
+[46:24] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[46:24] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[46:27] FIGHT bat (hp 26) in CV1B
+[46:28]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:31] FIGHT bat (hp 26) in CV1B
+[46:35] FIGHT bat (hp 26) in CV1B
+[46:36]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:39] FIGHT bat (hp 26) in CV1B
+[46:43] FIGHT bat (hp 26) in CV1B
+[46:44]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:47] FIGHT bat (hp 26) in CV1B
+[46:51] FIGHT bat (hp 26) in CV1B
+[46:52]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[46:55] FIGHT bat (hp 26) in CV1B
+[46:59] FIGHT bat (hp 26) in CV1B
+[47:00]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:04] FIGHT bat (hp 26) in CV1B
+[47:08] FIGHT bat (hp 26) in CV1B
+[47:08]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:12] FIGHT bat (hp 26) in CV1B
+[47:16] FIGHT bat (hp 26) in CV1B
+[47:16]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:20] FIGHT bat (hp 26) in CV1B
+[47:24] FIGHT bat (hp 26) in CV1B
+[47:24] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[47:24] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[47:25]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:28] FIGHT bat (hp 26) in CV1B
+[47:32] FIGHT bat (hp 26) in CV1B
+[47:33]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:36] FIGHT bat (hp 26) in CV1B
+[47:40] FIGHT bat (hp 26) in CV1B
+[47:41]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:44] FIGHT bat (hp 26) in CV1B
+[47:48] FIGHT bat (hp 26) in CV1B
+[47:49]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[47:52] FIGHT bat (hp 26) in CV1B
+[47:56] FIGHT bat (hp 26) in CV1B
+[47:57]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:00] FIGHT bat (hp 26) in CV1B
+[48:04] FIGHT bat (hp 26) in CV1B
+[48:05]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:08] FIGHT bat (hp 26) in CV1B
+[48:12] FIGHT bat (hp 26) in CV1B
+[48:13]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:16] FIGHT bat (hp 26) in CV1B
+[48:20] FIGHT bat (hp 26) in CV1B
+[48:21]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:25] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[48:25] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[48:25] FIGHT bat (hp 26) in CV1B
+[48:29]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:29] FIGHT bat (hp 26) in CV1B
+[48:33] FIGHT bat (hp 26) in CV1B
+[48:37]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:37] FIGHT bat (hp 26) in CV1B
+[48:41] FIGHT bat (hp 26) in CV1B
+[48:45]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:45] FIGHT bat (hp 26) in CV1B
+[48:49] FIGHT bat (hp 26) in CV1B
+[48:53]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[48:53] FIGHT bat (hp 26) in CV1B
+[48:57] FIGHT bat (hp 26) in CV1B
+[49:01]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:01] FIGHT bat (hp 26) in CV1B
+[49:05] FIGHT bat (hp 26) in CV1B
+[49:09]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:10] FIGHT bat (hp 26) in CV1B
+[49:14] FIGHT bat (hp 26) in CV1B
+[49:17]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:18] FIGHT bat (hp 26) in CV1B
+[49:22] FIGHT bat (hp 26) in CV1B
+[49:25] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[49:25] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[49:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:26] FIGHT bat (hp 26) in CV1B
+[49:30] FIGHT bat (hp 26) in CV1B
+[49:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:34] FIGHT bat (hp 26) in CV1B
+[49:38] FIGHT bat (hp 26) in CV1B
+[49:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:42] FIGHT bat (hp 26) in CV1B
+[49:46] FIGHT bat (hp 26) in CV1B
+[49:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:50] FIGHT bat (hp 26) in CV1B
+[49:54] FIGHT bat (hp 26) in CV1B
+[49:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[49:58] FIGHT bat (hp 26) in CV1B
+[50:02] FIGHT bat (hp 26) in CV1B
+[50:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:06] FIGHT bat (hp 26) in CV1B
+[50:10] FIGHT bat (hp 26) in CV1B
+[50:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:14] FIGHT bat (hp 26) in CV1B
+[50:18] FIGHT bat (hp 26) in CV1B
+[50:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:22] FIGHT bat (hp 26) in CV1B
+[50:26] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[50:26] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[50:26] FIGHT bat (hp 26) in CV1B
+[50:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:30] FIGHT bat (hp 26) in CV1B
+[50:35] FIGHT bat (hp 26) in CV1B
+[50:38]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:39] FIGHT bat (hp 26) in CV1B
+[50:43] FIGHT bat (hp 26) in CV1B
+[50:46]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:47] FIGHT bat (hp 26) in CV1B
+[50:51] FIGHT bat (hp 26) in CV1B
+[50:54]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[50:55] FIGHT bat (hp 26) in CV1B
+[50:59] FIGHT bat (hp 26) in CV1B
+[51:02]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:03] FIGHT bat (hp 26) in CV1B
+[51:07] FIGHT bat (hp 26) in CV1B
+[51:10]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:11] FIGHT bat (hp 26) in CV1B
+[51:15] FIGHT bat (hp 26) in CV1B
+[51:18]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:19] FIGHT bat (hp 26) in CV1B
+[51:23] FIGHT bat (hp 26) in CV1B
+[51:26]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:27] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[51:27] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[51:27] FIGHT bat (hp 26) in CV1B
+[51:31] FIGHT bat (hp 26) in CV1B
+[51:34]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:35] FIGHT bat (hp 26) in CV1B
+[51:39] FIGHT bat (hp 26) in CV1B
+[51:42]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:43] FIGHT bat (hp 26) in CV1B
+[51:47] FIGHT bat (hp 26) in CV1B
+[51:50]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[51:52] FIGHT bat (hp 26) in CV1B
+[51:56] FIGHT bat (hp 26) in CV1B
+[51:58]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:00] FIGHT bat (hp 26) in CV1B
+[52:04] FIGHT bat (hp 26) in CV1B
+[52:06]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:08] FIGHT bat (hp 26) in CV1B
+[52:12] FIGHT bat (hp 26) in CV1B
+[52:14]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:16] FIGHT bat (hp 26) in CV1B
+[52:20] FIGHT bat (hp 26) in CV1B
+[52:22]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:24] FIGHT bat (hp 26) in CV1B
+[52:27] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[52:27] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[52:28] FIGHT bat (hp 26) in CV1B
+[52:30]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:32] FIGHT bat (hp 26) in CV1B
+[52:36] FIGHT bat (hp 26) in CV1B
+[52:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:40] FIGHT bat (hp 26) in CV1B
+[52:44] FIGHT bat (hp 26) in CV1B
+[52:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:48] FIGHT bat (hp 26) in CV1B
+[52:52] FIGHT bat (hp 26) in CV1B
+[52:55]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[52:56] FIGHT bat (hp 26) in CV1B
+[53:00] FIGHT bat (hp 26) in CV1B
+[53:03]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:04] FIGHT bat (hp 26) in CV1B
+[53:08] FIGHT bat (hp 26) in CV1B
+[53:11]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:12] FIGHT bat (hp 26) in CV1B
+[53:16] FIGHT bat (hp 26) in CV1B
+[53:19]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:21] FIGHT bat (hp 26) in CV1B
+[53:25] FIGHT bat (hp 26) in CV1B
+[53:27]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:28] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[53:28] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[53:29] FIGHT bat (hp 26) in CV1B
+[53:33] FIGHT bat (hp 26) in CV1B
+[53:35]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:37] FIGHT bat (hp 26) in CV1B
+[53:41] FIGHT bat (hp 26) in CV1B
+[53:43]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:45] FIGHT bat (hp 26) in CV1B
+[53:49] FIGHT bat (hp 26) in CV1B
+[53:51]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[53:53] FIGHT bat (hp 26) in CV1B
+[53:57] FIGHT bat (hp 26) in CV1B
+[53:59]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:01] FIGHT bat (hp 26) in CV1B
+[54:05] FIGHT bat (hp 26) in CV1B
+[54:07]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:09] FIGHT bat (hp 26) in CV1B
+[54:13] FIGHT bat (hp 26) in CV1B
+[54:15]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:17] FIGHT bat (hp 26) in CV1B
+[54:21] FIGHT bat (hp 26) in CV1B
+[54:23]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:25] FIGHT bat (hp 26) in CV1B
+[54:28] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[54:28] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[54:29] FIGHT bat (hp 26) in CV1B
+[54:31]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:33] FIGHT bat (hp 26) in CV1B
+[54:37] FIGHT bat (hp 26) in CV1B
+[54:39]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:41] FIGHT bat (hp 26) in CV1B
+[54:45] FIGHT bat (hp 26) in CV1B
+[54:47]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:50] FIGHT bat (hp 26) in CV1B
+[54:54] FIGHT bat (hp 26) in CV1B
+[54:55]   . CV1B x=896 y=156 vx=0 on cores=6/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":784,"y":201,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[54:58] FIGHT bat (hp 26) in CV1B
+[55:00] FRAME 009-end.png
+[55:00] MANHWA seen: wake, bay, gate, letter, drawer, ratchet, meet, cave
+[55:00] RESULT timeout  wall 55:00  deaths 0  missions opening,servo,first-meeting  stuck 1  page errors 0

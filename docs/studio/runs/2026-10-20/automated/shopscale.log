@@ -1,0 +1,17 @@
+
+── shopscale  — a shop door has no depth, a gate and a cave do
+── shopscale — a shop door has no depth, a gate and a cave do
+
+  ok   a real gate recedes to 16% of her size  0.16000000000000003
+  ok   a cave mouth keeps 84% — swallowed, not shrunk away  0.84
+  ok   the trader's booth stays close to full size  0.88
+  ok   ...and so does the Oracle's parlor — every style row, not just one  0.88
+  ok   a cave flag wins over a style tag, if they ever coincide  0.84
+  ok   halfway in, the shop has barely receded  0.94
+  ok   ...while the gate is already visibly smaller  0.5800000000000001
+  ok   no page errors
+
+all good
+   (shopscale: 0.8 s)
+
+all 1 harnesses ran

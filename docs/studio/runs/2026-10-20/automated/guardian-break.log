@@ -1,0 +1,22 @@
+
+── guardian-break  — comic page 29: NULLFANG lets go, and the bell writes the order back
+PASS guardian-break: opens only between the sage and the bell, runs clean and back, costs no core, holds no input, once only {
+  beforeSage: false,
+  afterBell: false,
+  afterGuardian: false,
+  bossIsStaged: true,
+  phases: [ 'come', 'still', 'bell', 'leave' ],
+  cleanSeen: true,
+  purpleBack: true,
+  ended: true,
+  flagged: true,
+  costCores: 0,
+  movedDuring: 924.2777777777804,
+  replayed: false,
+  veinPixels: 80921,
+  veinTeal: 49821,
+  veinPurple: 1497
+}
+   (guardian-break: 7.6 s)
+
+all 1 harnesses ran

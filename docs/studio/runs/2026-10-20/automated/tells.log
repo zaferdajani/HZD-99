@@ -1,0 +1,54 @@
+
+── tells  — every boss wind-up carries BOTH channels — no silently one-channel telegraphs
+engine TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|volley|broodcall|forgebell|hymn/i
+central cue hook present: true
+warning size per guardian: glitch=tell_glitch  brood=tell_brood  atlas=tell_atlas  zero=tell_zero  prism=tell_prism  mother=tell_mother  horn=tellbig
+
+glitch  — entered 16 states, 6 of them wind-ups
+   ♪ swipewarn    entered 11x
+   ♪ crouch       entered 28x
+   ♪ springwarn   entered 6x
+   ♪ perch        entered 5x   (cued by hand: the dive's tell is the LAST 450 ms of the perch, not all 1.4 s of it — a cue on entry would warn before there is anything to warn about)
+   ♪ roar         entered 4x
+   ♪ nullcharge   entered 1x
+
+brood  — entered 11 states, 3 of them wind-ups
+   ♪ swoopwarn    entered 14x
+   ♪ broodcall    entered 8x
+   ♪ volley       entered 2x
+
+atlas  — entered 11 states, 7 of them wind-ups
+   ♪ slamwarn     entered 3x
+   ♪ hymn         entered 13x
+   ♪ lobwarn      entered 58x
+   ♪ forgebell    entered 10x
+   ♪ meltwarn     entered 1x
+   ♪ dropcrouch   entered 4x
+   ♪ droplock     entered 4x
+
+zero  — entered 11 states, 5 of them wind-ups
+   ♪ novawarn     entered 6x
+   ♪ prisonwarn   entered 7x
+   ♪ shardwarn    entered 13x
+   ♪ dashwarn     entered 14x
+   ♪ lancewarn    entered 10x
+
+prism  — entered 8 states, 3 of them wind-ups
+   ♪ pouncewarn   entered 3x
+   ♪ dashwarn     entered 2x
+   ♪ spreadwarn   entered 2x
+
+mother  — entered 8 states, 4 of them wind-ups
+   ♪ nwcharge     entered 10x
+   ♪ ringcharge   entered 22x
+   ♪ beamwarn     entered 13x
+   ♪ grabwarn     entered 7x
+
+horn  — entered 14 states, 2 of them wind-ups
+   ♪ hornprep     entered 13x
+   ♪ chargewarn   entered 17x
+
+OK — every wind-up reached carries both channels
+   (tells: 2.1 s)
+
+all 1 harnesses ran

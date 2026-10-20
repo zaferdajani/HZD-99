@@ -101,10 +101,14 @@ const FLOOR = 0.5, CEIL = 1.0;
     out.flight = [];
     for (const mode of ['cruise', 'chase', 'banked-chase']) {
       const strip = mode === 'cruise' ? TALON_MINI.cruise : TALON_MINI.chase;
-      for (let i = 0; i < strip.cells * 4; i++) {
-        Object.assign(flier, {x:180,y:180,anim:(i+.5)/(strip.cells*4)*strip.beat,t:1,hurtT:0,lockT:0,holdT:0,packetT:0,riseT:0,perched:false,hypnoT:0,tr:[],vx:mode==='banked-chase'?flier.spd*1.6:0,vy:mode==='chase'?150:0});
-        cx2.clearRect(0, 0, 400, 300); G.lastStrip = null; flier.draw(cx2);
-        out.flight.push({mode,cell:i,height:height(),renderer:G.lastStrip,expected:strip.img});
+      for (const dir of [-1, 1]) for (let i = 0; i < strip.cells * 4; i++) {
+        Object.assign(flier, {x:180,y:180,dir,faceVis:dir,anim:(i+.5)/(strip.cells*4)*strip.beat,t:1,hurtT:0,lockT:0,holdT:0,packetT:0,riseT:0,perched:false,hypnoT:0,tr:[],vx:mode==='banked-chase'?dir*flier.spd*1.6:0,vy:mode==='chase'?150:0});
+        cx2.clearRect(0, 0, 400, 300); G.lastStrip = null;
+        // Measure the actual eye through the same scratch world's transform;
+        // a single random idle cell can miss the misregistered lower chest.
+        infEyeWorldBegin(cx2); flier.draw(cx2);
+        const eye = flier._eyeN ? [flier._eyeW[0]-(flier.x+flier.w/2),flier._eyeW[1]-(flier.y+flier.h/2)] : null;
+        out.flight.push({mode,dir,cell:i,height:height(),renderer:G.lastStrip,expected:strip.img,eye,body:[flier.w,flier.h]});
       }
     }
     player.x = px; player.y = py;
@@ -131,6 +135,10 @@ const FLOOR = 0.5, CEIL = 1.0;
   const flightBig = r.flight.filter(s => s.height / r.hero >= CEIL);
   check('the complete wingbeat stays in the same unchanged size band', !flightSmall.length && !flightBig.length,
     JSON.stringify({min:Math.min(...r.flight.map(s=>s.height))/r.hero,max:Math.max(...r.flight.map(s=>s.height))/r.hero,tooSmall:flightSmall.length,tooBig:flightBig.length}));
+  // Same body-bound contract as infection-roster; no collider/threshold change.
+  const badEye = r.flight.filter(s => {const M=Math.max(...s.body);return !s.eye || Math.abs(s.eye[0]) > M*2.6 || s.eye[1] > s.body[1]*.75 || s.eye[1] < -M*2.6;});
+  check('every loaded flight eye stays registered around its body in both facings', badEye.length===0,
+    JSON.stringify({samples:r.flight.length,bad:badEye.length,first:badEye.slice(0,4),vertical:[Math.min(...r.flight.map(s=>s.eye?s.eye[1]:Infinity)),Math.max(...r.flight.map(s=>s.eye?s.eye[1]:-Infinity))]}));
   console.log('\n  hero ' + r.hero + 'px  ·  ' +
     Object.entries(ratios).sort((a, b) => a[1] - b[1]).map(([k, v]) => k + ' ' + v).join('  '));
 

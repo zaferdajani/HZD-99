@@ -1,0 +1,8 @@
+// Verify that registration moved unchanged art instead of normalizing cells.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const root=__dirname,before=path.join(root,'art/registration-before'),after=path.join(root,'art/registration-after');
+const a=JSON.parse(fs.readFileSync(path.join(before,'result.json'))),b=JSON.parse(fs.readFileSync(path.join(after,'result.json')));
+const key=s=>[s.mode,s.facing,s.bank,s.cell].join('/'),bm=new Map(b.samples.map(s=>[key(s),s]));
+const samples=a.samples.map(s=>{const t=bm.get(key(s));assert(t,'same pose '+key(s));return {pose:key(s),rawCellIdentical:fs.readFileSync(path.join(before,s.rawCell)).equals(fs.readFileSync(path.join(after,t.rawCell))),eyeMapIdentical:JSON.stringify(s.trace.eyeMap)===JSON.stringify(t.trace.eyeMap),heightDelta:t.height-s.height,beforeEye:s.eyeOffset,afterEye:t.eyeOffset};});
+const result={scope:'Same authored pixels/eye map and sampled height delta, not temporal smoothness or all-bank size approval',count:samples.length,allRawCellsIdentical:samples.every(s=>s.rawCellIdentical),allEyeMapsIdentical:samples.every(s=>s.eyeMapIdentical),maxHeightDelta:Math.max(...samples.map(s=>Math.abs(s.heightDelta))),beforeMaxHeight:Math.max(...a.samples.map(s=>s.height)),afterMaxHeight:Math.max(...b.samples.map(s=>s.height)),samples};
+fs.writeFileSync(path.join(root,'graphics/comparison.json'),JSON.stringify(result,null,2)+'\n');assert.equal(result.count,84);assert(result.allRawCellsIdentical&&result.allEyeMapsIdentical);assert(result.maxHeightDelta<=1);console.log(JSON.stringify({...result,samples:undefined},null,2));

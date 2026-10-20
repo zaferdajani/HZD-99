@@ -1,0 +1,35 @@
+{
+  "build": "5b19cbfbf709",
+  "registeredHarnesses": 196,
+  "logs": 198,
+  "mismatches": [
+    {
+      "name": "desktop-protocol",
+      "raw": false,
+      "snapshot": true,
+      "same": false
+    }
+  ],
+  "frozenFiles": 281,
+  "failed": [
+    {
+      "name": "purification-controls",
+      "status": "fail"
+    },
+    {
+      "name": "winch-purpose",
+      "status": "fail"
+    },
+    {
+      "name": "opening-order",
+      "status": "fail"
+    },
+    {
+      "name": "campaign-ch1",
+      "status": "fail"
+    }
+  ],
+  "collectorPassed": false,
+  "campaignCertified": false,
+  "scope": "Integrity, not release quality or device approval"
+}

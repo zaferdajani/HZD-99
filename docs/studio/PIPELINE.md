@@ -69,6 +69,10 @@ deploy them automatically; Claude integrates using the generated handoff.
    Verify saved log hashes against the collector record before publishing. Retain
    and report a mismatch as a failed evidence gate; a later passing rerun is a
    separate execution, never a silent replacement or rewritten original hash.
+   The collector snapshots the same closed-file bytes it hashes in
+   `content_base64`, then revalidates every raw log at completion. Preserve both
+   the snapshot and raw file: this is retention/detection, not a cure for an
+   unexplained writer truncating a log. A damaged snapshot also fails closed.
 
 ## Mandatory report schema
 

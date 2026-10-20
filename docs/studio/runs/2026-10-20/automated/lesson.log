@@ -1,0 +1,11 @@
+
+── lesson  — every power teaches itself and completes on real use
+dash   card: {"lesson":"dash","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+djump  card: {"lesson":"djump","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+wall   card: {"lesson":"wall","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+emp    card: {"lesson":"emp","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+taught twice?      : no
+pageerrors         : none
+   (lesson: 21.8 s)
+
+all 1 harnesses ran

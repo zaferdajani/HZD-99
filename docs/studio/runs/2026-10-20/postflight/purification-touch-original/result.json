@@ -1,0 +1,794 @@
+{
+  "mode": "original",
+  "scope": "Original current staged fixture/assertions with observation hooks; instrumentation can perturb timing.",
+  "originalTestSha256": "fce0c25e93b2fa66b2b08b2cf08edaf6fa3189c5b95d45a82a6f103ff918fdab",
+  "diagnosticScriptSha256": "e1bcb60b03a494429c2ae3861153bddc8483009aa4b592731eaeef1d5b9dd163",
+  "fullFinishedUtc": "2026-10-20T09:51:32.014954+00:00",
+  "snapshots": [
+    {
+      "label": "staged-initial",
+      "build": "5b19cbfbf709",
+      "time": 402.6000000014901,
+      "state": "PURIFY",
+      "phase": "hold",
+      "armed": true,
+      "hold": 0,
+      "pointer": false,
+      "clock": 0.033266666666666694,
+      "inputSuspended": false,
+      "hidden": false,
+      "focus": true,
+      "portrait": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "touch": {
+        "enabled": true,
+        "pad": false,
+        "raw": [
+          844,
+          390
+        ],
+        "visible": [
+          844,
+          390
+        ],
+        "portrait": false,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "pointerEvents": "auto"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "pointerEvents": "auto"
+      },
+      "button": {
+        "x": 305.421875,
+        "y": 293.328125,
+        "width": 233.109375,
+        "height": 48,
+        "right": 538.53125,
+        "bottom": 341.328125,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "pointerEvents": "auto"
+      },
+      "point": {
+        "x": 421.9765625,
+        "y": 317.328125
+      },
+      "pointInside": true,
+      "pointTarget": {
+        "id": "purification-hold",
+        "tag": "BUTTON"
+      },
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "99",
+        "pointerEvents": "auto"
+      },
+      "heroReady": true,
+      "frame": 304.8,
+      "events": []
+    },
+    {
+      "label": "after-portrait",
+      "build": "5b19cbfbf709",
+      "time": 417.6000000014901,
+      "state": "PURIFY",
+      "phase": "hold",
+      "armed": false,
+      "hold": 0,
+      "pointer": false,
+      "clock": 0.033266666666666694,
+      "inputSuspended": false,
+      "hidden": false,
+      "focus": true,
+      "portrait": true,
+      "inner": [
+        390,
+        844
+      ],
+      "visual": {
+        "width": 390,
+        "height": 844,
+        "scale": 1
+      },
+      "touch": {
+        "enabled": true,
+        "pad": false,
+        "raw": [
+          844,
+          390
+        ],
+        "visible": [
+          844,
+          390
+        ],
+        "portrait": false,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "pointerEvents": "auto"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "pointerEvents": "auto"
+      },
+      "button": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "right": 0,
+        "bottom": 0,
+        "hidden": true,
+        "display": "none",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "pointerEvents": "auto"
+      },
+      "point": {
+        "x": 0,
+        "y": 0
+      },
+      "pointInside": true,
+      "pointTarget": {
+        "id": "cbload",
+        "tag": "DIV"
+      },
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "99",
+        "pointerEvents": "auto"
+      },
+      "heroReady": true,
+      "frame": 304.8,
+      "events": []
+    },
+    {
+      "label": "after-landscape",
+      "build": "5b19cbfbf709",
+      "time": 651.4000000003725,
+      "state": "PURIFY",
+      "phase": "hold",
+      "armed": true,
+      "hold": 0,
+      "pointer": false,
+      "clock": 0.04993333333333336,
+      "inputSuspended": false,
+      "hidden": false,
+      "focus": true,
+      "portrait": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "touch": {
+        "enabled": true,
+        "pad": false,
+        "raw": [
+          844,
+          390
+        ],
+        "visible": [
+          844,
+          390
+        ],
+        "portrait": false,
+        "vis": null
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "pointerEvents": "auto"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "pointerEvents": "auto"
+      },
+      "button": {
+        "x": 135,
+        "y": 472.625,
+        "width": 120,
+        "height": 48,
+        "right": 255,
+        "bottom": 520.625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "pointerEvents": "auto"
+      },
+      "point": {
+        "x": 195,
+        "y": 496.625
+      },
+      "pointInside": false,
+      "pointTarget": null,
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "99",
+        "pointerEvents": "auto"
+      },
+      "heroReady": true,
+      "frame": 304.8,
+      "events": []
+    },
+    {
+      "label": "before-touch",
+      "build": "5b19cbfbf709",
+      "time": 672.6000000014901,
+      "state": "PURIFY",
+      "phase": "hold",
+      "armed": true,
+      "hold": 0,
+      "pointer": false,
+      "clock": 0.04993333333333336,
+      "inputSuspended": false,
+      "hidden": false,
+      "focus": true,
+      "portrait": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "touch": {
+        "enabled": true,
+        "pad": false,
+        "raw": [
+          844,
+          390
+        ],
+        "visible": [
+          844,
+          390
+        ],
+        "portrait": false,
+        "vis": null
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "pointerEvents": "auto"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "pointerEvents": "auto"
+      },
+      "button": {
+        "x": 135,
+        "y": 472.625,
+        "width": 120,
+        "height": 48,
+        "right": 255,
+        "bottom": 520.625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "pointerEvents": "auto"
+      },
+      "point": {
+        "x": 195,
+        "y": 496.625
+      },
+      "pointInside": false,
+      "pointTarget": null,
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "99",
+        "pointerEvents": "auto"
+      },
+      "heroReady": true,
+      "frame": 304.8,
+      "events": [],
+      "screenshot": "before-touch.png",
+      "screenshotSha256": "f674493747f6555ae31ec3f31d327876cf71e1208dfda46efde4b3f521d5cc3f"
+    },
+    {
+      "label": "after-touch",
+      "build": "5b19cbfbf709",
+      "time": 701.9000000003725,
+      "state": "PURIFY",
+      "phase": "hold",
+      "armed": true,
+      "hold": 0,
+      "pointer": false,
+      "clock": 0.04993333333333336,
+      "inputSuspended": false,
+      "hidden": false,
+      "focus": true,
+      "portrait": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "touch": {
+        "enabled": true,
+        "pad": false,
+        "raw": [
+          844,
+          390
+        ],
+        "visible": [
+          844,
+          390
+        ],
+        "portrait": false,
+        "vis": null
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "pointerEvents": "auto"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "pointerEvents": "auto"
+      },
+      "button": {
+        "x": 135,
+        "y": 472.625,
+        "width": 120,
+        "height": 48,
+        "right": 255,
+        "bottom": 520.625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "pointerEvents": "auto"
+      },
+      "point": {
+        "x": 195,
+        "y": 496.625
+      },
+      "pointInside": false,
+      "pointTarget": null,
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "99",
+        "pointerEvents": "auto"
+      },
+      "heroReady": true,
+      "frame": 304.8,
+      "events": [
+        {
+          "type": "pointerdown",
+          "capture": true,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "pointerType": "touch",
+          "defaultPrevented": false,
+          "time": 698.5,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        },
+        {
+          "type": "pointerdown",
+          "capture": false,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "pointerType": "touch",
+          "defaultPrevented": false,
+          "time": 698.6000000014901,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        },
+        {
+          "type": "touchstart",
+          "capture": true,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "defaultPrevented": false,
+          "time": 701.2000000011176,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        },
+        {
+          "type": "touchstart",
+          "capture": false,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "defaultPrevented": false,
+          "time": 701.2000000011176,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        }
+      ]
+    },
+    {
+      "label": "after-30ticks",
+      "build": "5b19cbfbf709",
+      "time": 712.3000000007451,
+      "state": "PURIFY",
+      "phase": "hold",
+      "armed": true,
+      "hold": 0,
+      "pointer": false,
+      "clock": 0.5499333333333334,
+      "inputSuspended": false,
+      "hidden": false,
+      "focus": true,
+      "portrait": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "touch": {
+        "enabled": true,
+        "pad": false,
+        "raw": [
+          844,
+          390
+        ],
+        "visible": [
+          844,
+          390
+        ],
+        "portrait": false,
+        "vis": null
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "pointerEvents": "auto"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "pointerEvents": "auto"
+      },
+      "button": {
+        "x": 135,
+        "y": 472.625,
+        "width": 120,
+        "height": 48,
+        "right": 255,
+        "bottom": 520.625,
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "pointerEvents": "auto"
+      },
+      "point": {
+        "x": 195,
+        "y": 496.625
+      },
+      "pointInside": false,
+      "pointTarget": null,
+      "loader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "99",
+        "pointerEvents": "auto"
+      },
+      "heroReady": true,
+      "frame": 304.8,
+      "events": [
+        {
+          "type": "pointerdown",
+          "capture": true,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "pointerType": "touch",
+          "defaultPrevented": false,
+          "time": 698.5,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        },
+        {
+          "type": "pointerdown",
+          "capture": false,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "pointerType": "touch",
+          "defaultPrevented": false,
+          "time": 698.6000000014901,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        },
+        {
+          "type": "touchstart",
+          "capture": true,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "defaultPrevented": false,
+          "time": 701.2000000011176,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        },
+        {
+          "type": "touchstart",
+          "capture": false,
+          "target": "HTML",
+          "x": 195,
+          "y": 496.625,
+          "defaultPrevented": false,
+          "time": 701.2000000011176,
+          "state": {
+            "phase": "hold",
+            "armed": true,
+            "hold": 0,
+            "pointer": false,
+            "hidden": false,
+            "focus": true,
+            "suspended": false,
+            "portrait": false
+          }
+        }
+      ],
+      "screenshot": "after-30ticks.png",
+      "screenshotSha256": "f674493747f6555ae31ec3f31d327876cf71e1208dfda46efde4b3f521d5cc3f"
+    }
+  ],
+  "errors": [],
+  "servedIndexSha256": "ce15f05df20e48f75187d4a7645543a3ff0f7d0c4857e561100b0a47ed20d01d",
+  "diskIndexSha256": "ce15f05df20e48f75187d4a7645543a3ff0f7d0c4857e561100b0a47ed20d01d",
+  "instrumentedSourceSha256": "be84bee5f3f4c772b04a027c33095ced2f5df7a5861abf3b9ecb0b1c7d190a64",
+  "exitCode": 1
+}

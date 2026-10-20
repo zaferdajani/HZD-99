@@ -1,0 +1,701 @@
+{
+  "scope": "Exact opening capture followed by explicitly staged CUT/PANELS/REPAIR rotation snapshots; hasTouch emulation, not physical touch or uninterrupted play.",
+  "samples": [
+    {
+      "build": "1d3a7c72250c",
+      "state": "PANELS",
+      "panels": {
+        "id": "wake",
+        "phase": "show"
+      },
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 390,
+        "rawH": 844,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        390,
+        844
+      ],
+      "visual": {
+        "width": 390,
+        "height": 844,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 818,
+      "repair": null,
+      "name": "exact-opening-portrait-500ms",
+      "screenshot": "exact-opening-portrait-500ms.png",
+      "screenshotSha256": "9675de5b8acac44dcb55b4a18e27277d418e55cefba0dc3fe66d1c5496dbc312"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "PANELS",
+      "panels": {
+        "id": "wake",
+        "phase": "show"
+      },
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 844,
+        "rawH": 390,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "tc",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 1401.4,
+      "repair": null,
+      "name": "exact-opening-back-landscape",
+      "screenshot": "exact-opening-back-landscape.png",
+      "screenshotSha256": "709544ca3b7d4a259325eb2bd6009c0b556d21fd3e92f35306575d7f99af0b41"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "PANELS",
+      "cut": null,
+      "panels": {
+        "id": "chime",
+        "phase": "show"
+      },
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 844,
+        "rawH": 390,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "tc",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 2168,
+      "repair": null,
+      "name": "panels-landscape",
+      "screenshot": "panels-landscape.png",
+      "screenshotSha256": "f465b4a075e057fe2240eca4bed29848e98cf8c9aea5d5daf80ea9f9e46cd508"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "PANELS",
+      "cut": null,
+      "panels": {
+        "id": "chime",
+        "phase": "show"
+      },
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 390,
+        "rawH": 844,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        390,
+        844
+      ],
+      "visual": {
+        "width": 390,
+        "height": 844,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 2818,
+      "repair": null,
+      "name": "panels-portrait",
+      "screenshot": "panels-portrait.png",
+      "screenshotSha256": "c75d93839ad0852da8717c1d73e00b80538808da74cab67ed9df6b3f6cbf6509"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "PANELS",
+      "cut": null,
+      "panels": {
+        "id": "chime",
+        "phase": "show"
+      },
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 844,
+        "rawH": 390,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "tc",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 3434.7,
+      "repair": null,
+      "name": "panels-back-landscape",
+      "screenshot": "panels-back-landscape.png",
+      "screenshotSha256": "5132129417f5523c784013bd2e4d5b6953ceccd4f59afe5038894df0cd1eee12"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "REPAIR",
+      "cut": null,
+      "panels": null,
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 844,
+        "rawH": 390,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 4218,
+      "repair": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "backing": [
+          null,
+          null
+        ],
+        "inline": null
+      },
+      "name": "repair-landscape",
+      "screenshot": "repair-landscape.png",
+      "screenshotSha256": "6cc7497f5f21f4b83676432b05399b46cf0196278aa412129b6361ab54a0610d"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "REPAIR",
+      "cut": null,
+      "panels": null,
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 390,
+        "rawH": 844,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        390,
+        844
+      ],
+      "visual": {
+        "width": 390,
+        "height": 844,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          1026,
+          577
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 5517.9,
+      "repair": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "backing": [
+          null,
+          null
+        ],
+        "inline": null
+      },
+      "name": "repair-portrait",
+      "screenshot": "repair-portrait.png",
+      "screenshotSha256": "3954482c502ae9056983a90679668cfc5fb63b1d00392efcd6600c7b735058d5"
+    },
+    {
+      "build": "1d3a7c72250c",
+      "state": "REPAIR",
+      "cut": null,
+      "panels": null,
+      "touch": {
+        "enabled": true,
+        "portrait": false,
+        "rawW": 844,
+        "rawH": 390,
+        "vw": 844,
+        "vh": 390,
+        "ox": 0,
+        "oy": 0,
+        "vis": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390,
+          "top": 0,
+          "right": 844,
+          "bottom": 390,
+          "left": 0
+        }
+      },
+      "pad": false,
+      "inner": [
+        844,
+        390
+      ],
+      "visual": {
+        "width": 844,
+        "height": 390,
+        "scale": 1
+      },
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "auto",
+        "backing": [
+          816,
+          459
+        ],
+        "inline": "max-width: none; max-height: none; position: fixed; width: 582.8px; height: 327.825px; left: 130.6px; top: 31.0875px;"
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "block",
+        "visibility": "visible",
+        "zIndex": "5",
+        "backing": [
+          1688,
+          780
+        ],
+        "inline": "position: fixed; inset: 0px auto auto 0px; z-index: 5; display: block; pointer-events: auto; touch-action: none; width: 844px; height: 390px; user-select: none;"
+      },
+      "centerPixel": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "centerTop": "",
+      "rotateText": "Rotate your phone to landscape",
+      "frame": 6601.1,
+      "repair": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "display": "flex",
+        "visibility": "visible",
+        "zIndex": "10000",
+        "backing": [
+          null,
+          null
+        ],
+        "inline": null
+      },
+      "name": "repair-back-landscape",
+      "screenshot": "repair-back-landscape.png",
+      "screenshotSha256": "bc4059b4c4c93ccff838fdc47238590f9ad16e4b5906a48785941f115d3f8eb6"
+    }
+  ],
+  "errors": [],
+  "servedSha256": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+  "diskSha256": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+  "cjk": {
+    "font": "600 16px \"Segoe UI\", Tahoma, sans-serif",
+    "box": 548,
+    "fullWidth": 1424,
+    "lines": 3,
+    "widest": 544,
+    "textPreserved": true,
+    "build": "1d3a7c72250c",
+    "domPlatformFonts": [
+      {
+        "familyName": "Droid Sans Fallback",
+        "postScriptName": "",
+        "isCustomFont": false,
+        "glyphCount": 87
+      },
+      {
+        "familyName": "URW Bookman",
+        "postScriptName": "URWBookman-Demi",
+        "isCustomFont": false,
+        "glyphCount": 2
+      }
+    ],
+    "fixtureSha256": "7c96e32accca7ddd09eadc8d138979b8e3f717a40f3e1796881c98f5c58b987a",
+    "screenshotSha256": "b4b3a5239bd732449ff98a46a69228d78a764c9513d4aaecab8d7822a84f8745"
+  }
+}

@@ -1,0 +1,5641 @@
+{
+  "scope": "Deterministic staged all-flight-cell registration; not natural AI or input route",
+  "errors": [],
+  "samples": [
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 0,
+      "anim": 0.04375,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 0,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.32,
+          0.72
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        133.15200037658215,
+        171.03199977576733
+      ],
+      "eyeOffset": [
+        -16.84799962341785,
+        21.031999775767332
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        118,
+        128,
+        188,
+        194
+      ],
+      "height": 67,
+      "width": 71,
+      "opaquePixels": 1908,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell0-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell0-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell0-mask.png",
+      "overlay": "cruise-f-1-bank0-cell0-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 1,
+      "anim": 0.13124999999999998,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 1,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.32,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        133.15200037658215,
+        169.1599998176098
+      ],
+      "eyeOffset": [
+        -16.84799962341785,
+        19.159999817609787
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        106,
+        144,
+        195,
+        194
+      ],
+      "height": 51,
+      "width": 90,
+      "opaquePixels": 1832,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell1-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell1-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell1-mask.png",
+      "overlay": "cruise-f-1-bank0-cell1-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 2,
+      "anim": 0.21875,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 2,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.31,
+          0.68
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.21600039750336,
+        167.28799985945227
+      ],
+      "eyeOffset": [
+        -17.783999602496635,
+        17.28799985945227
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        103,
+        159,
+        195,
+        194
+      ],
+      "height": 36,
+      "width": 93,
+      "opaquePixels": 1824,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell2-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell2-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell2-mask.png",
+      "overlay": "cruise-f-1-bank0-cell2-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 3,
+      "anim": 0.30624999999999997,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 3,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        134.0880003556609,
+        164.47999992221594
+      ],
+      "eyeOffset": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        157,
+        188,
+        193
+      ],
+      "height": 37,
+      "width": 86,
+      "opaquePixels": 1822,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell3-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell3-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell3-mask.png",
+      "overlay": "cruise-f-1-bank0-cell3-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 4,
+      "anim": 0.39375,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 4,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        134.0880003556609,
+        164.47999992221594
+      ],
+      "eyeOffset": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        156,
+        190,
+        191
+      ],
+      "height": 36,
+      "width": 88,
+      "opaquePixels": 1857,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell4-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell4-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell4-mask.png",
+      "overlay": "cruise-f-1-bank0-cell4-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 5,
+      "anim": 0.48124999999999996,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 5,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.34,
+          0.63
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.0240003347397,
+        162.6079999640584
+      ],
+      "eyeOffset": [
+        -14.975999665260304,
+        12.607999964058394
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        105,
+        153,
+        195,
+        190
+      ],
+      "height": 38,
+      "width": 91,
+      "opaquePixels": 1944,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell5-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell5-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell5-mask.png",
+      "overlay": "cruise-f-1-bank0-cell5-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 6,
+      "anim": 0.56875,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 6,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.32,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        133.15200037658215,
+        165.41599990129473
+      ],
+      "eyeOffset": [
+        -16.84799962341785,
+        15.415999901294725
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        109,
+        140,
+        195,
+        189
+      ],
+      "height": 50,
+      "width": 87,
+      "opaquePixels": 1964,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell6-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell6-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell6-mask.png",
+      "overlay": "cruise-f-1-bank0-cell6-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 7,
+      "anim": 0.65625,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 7,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.34,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.0240003347397,
+        165.41599990129473
+      ],
+      "eyeOffset": [
+        -14.975999665260304,
+        15.415999901294725
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        115,
+        129,
+        191,
+        189
+      ],
+      "height": 61,
+      "width": 77,
+      "opaquePixels": 1975,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank0-cell7-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank0-cell7-rawOverlay.png",
+      "mask": "cruise-f-1-bank0-cell7-mask.png",
+      "overlay": "cruise-f-1-bank0-cell7-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 0,
+      "anim": 0.04375,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 0,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.32,
+          0.72
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        138.05186443922082,
+        174.2124126709619
+      ],
+      "eyeOffset": [
+        -11.948135560779178,
+        24.212412670961896
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        115,
+        121,
+        186,
+        193
+      ],
+      "height": 73,
+      "width": 72,
+      "opaquePixels": 1903,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell0-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell0-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell0-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell0-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 1,
+      "anim": 0.13124999999999998,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 1,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.32,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        137.64333859394472,
+        172.38553268664893
+      ],
+      "eyeOffset": [
+        -12.35666140605528,
+        22.38553268664893
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        107,
+        134,
+        194,
+        193
+      ],
+      "height": 60,
+      "width": 88,
+      "opaquePixels": 1831,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell1-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell1-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell1-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell1-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 2,
+      "anim": 0.21875,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 2,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.31,
+          0.68
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.32137275651212,
+        170.76291562497406
+      ],
+      "eyeOffset": [
+        -13.678627243487881,
+        20.762915624974056
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        109,
+        156,
+        198,
+        192
+      ],
+      "height": 37,
+      "width": 90,
+      "opaquePixels": 1825,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell2-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell2-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell2-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell2-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 3,
+      "anim": 0.30624999999999997,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 3,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        137.5354639729109,
+        167.61406980322852
+      ],
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        111,
+        158,
+        194,
+        198
+      ],
+      "height": 41,
+      "width": 84,
+      "opaquePixels": 1811,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell3-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell3-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell3-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell3-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 4,
+      "anim": 0.39375,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 4,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        137.5354639729109,
+        167.61406980322852
+      ],
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        110,
+        154,
+        194,
+        193
+      ],
+      "height": 40,
+      "width": 85,
+      "opaquePixels": 1864,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell4-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell4-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell4-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell4-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 5,
+      "anim": 0.48124999999999996,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 5,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.34,
+          0.63
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        138.04037811979123,
+        165.5829268962775
+      ],
+      "eyeOffset": [
+        -11.959621880208772,
+        15.582926896277513
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        109,
+        145,
+        196,
+        188
+      ],
+      "height": 44,
+      "width": 88,
+      "opaquePixels": 1956,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell5-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell5-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell5-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell5-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 6,
+      "anim": 0.56875,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 6,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.32,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.82628690339249,
+        168.73177271802305
+      ],
+      "eyeOffset": [
+        -13.173713096607514,
+        18.731772718023052
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        110,
+        131,
+        194,
+        188
+      ],
+      "height": 58,
+      "width": 85,
+      "opaquePixels": 1979,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell6-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell6-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell6-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell6-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 7,
+      "anim": 0.65625,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 7,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.34,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        138.65316688770542,
+        168.32324687274695
+      ],
+      "eyeOffset": [
+        -11.346833112294576,
+        18.32324687274695
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        114,
+        122,
+        189,
+        188
+      ],
+      "height": 67,
+      "width": 76,
+      "opaquePixels": 1976,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank-1-cell7-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank-1-cell7-rawOverlay.png",
+      "mask": "cruise-f-1-bank-1-cell7-mask.png",
+      "overlay": "cruise-f-1-bank-1-cell7-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 0,
+      "anim": 0.04375,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 0,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.32,
+          0.72
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        129.06429584314617,
+        166.85894745599165
+      ],
+      "eyeOffset": [
+        -20.93570415685383,
+        16.858947455991654
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        120,
+        128,
+        190,
+        193
+      ],
+      "height": 66,
+      "width": 71,
+      "opaquePixels": 1901,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell0-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell0-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell0-mask.png",
+      "overlay": "cruise-f-1-bank1-cell0-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 1,
+      "anim": 0.13124999999999998,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 1,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.32,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        129.47282168842227,
+        165.03206747167872
+      ],
+      "eyeOffset": [
+        -20.527178311577728,
+        15.032067471678715
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        107,
+        141,
+        194,
+        194
+      ],
+      "height": 54,
+      "width": 88,
+      "opaquePixels": 1833,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell1-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell1-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell1-mask.png",
+      "overlay": "cruise-f-1-bank1-cell1-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 2,
+      "anim": 0.21875,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 2,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.31,
+          0.68
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.96790754154193,
+        163.00092456472774
+      ],
+      "eyeOffset": [
+        -21.032092458458067,
+        13.00092456472774
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        99,
+        157,
+        189,
+        194
+      ],
+      "height": 38,
+      "width": 91,
+      "opaquePixels": 1827,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell2-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell2-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell2-mask.png",
+      "overlay": "cruise-f-1-bank1-cell2-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 3,
+      "anim": 0.30624999999999997,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 3,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.40757629376907,
+        160.66913043353443
+      ],
+      "eyeOffset": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        97,
+        155,
+        181,
+        196
+      ],
+      "height": 42,
+      "width": 85,
+      "opaquePixels": 1817,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell3-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell3-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell3-mask.png",
+      "overlay": "cruise-f-1-bank1-cell3-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 4,
+      "anim": 0.39375,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 4,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.40757629376907,
+        160.66913043353443
+      ],
+      "eyeOffset": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        99,
+        153,
+        184,
+        191
+      ],
+      "height": 39,
+      "width": 86,
+      "opaquePixels": 1861,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell4-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell4-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell4-mask.png",
+      "overlay": "cruise-f-1-bank1-cell4-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 5,
+      "anim": 0.48124999999999996,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 5,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.34,
+          0.63
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.72954213120167,
+        159.04651337185953
+      ],
+      "eyeOffset": [
+        -17.27045786879833,
+        9.046513371859533
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        151,
+        193,
+        190
+      ],
+      "height": 40,
+      "width": 91,
+      "opaquePixels": 1959,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell5-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell5-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell5-mask.png",
+      "overlay": "cruise-f-1-bank1-cell5-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 6,
+      "anim": 0.56875,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 6,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.32,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        130.28987337897453,
+        161.37830750305284
+      ],
+      "eyeOffset": [
+        -19.710126621025466,
+        11.378307503052838
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        109,
+        140,
+        195,
+        190
+      ],
+      "height": 51,
+      "width": 87,
+      "opaquePixels": 1981,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell6-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell6-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell6-mask.png",
+      "overlay": "cruise-f-1-bank1-cell6-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 7,
+      "anim": 0.65625,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 7,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.34,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.11675336328747,
+        161.78683334832897
+      ],
+      "eyeOffset": [
+        -17.883246636712528,
+        11.786833348328969
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        116,
+        130,
+        193,
+        189
+      ],
+      "height": 60,
+      "width": 78,
+      "opaquePixels": 1983,
+      "clipped": false,
+      "rawCell": "cruise-f-1-bank1-cell7-rawCell.png",
+      "rawOverlay": "cruise-f-1-bank1-cell7-rawOverlay.png",
+      "mask": "cruise-f-1-bank1-cell7-mask.png",
+      "overlay": "cruise-f-1-bank1-cell7-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 0,
+      "anim": 0.04375,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 0,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.32,
+          0.72
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        133.15200037658215,
+        171.03199977576733
+      ],
+      "eyeOffset": [
+        -16.84799962341785,
+        21.031999775767332
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        118,
+        128,
+        188,
+        194
+      ],
+      "height": 67,
+      "width": 71,
+      "opaquePixels": 1908,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell0-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell0-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell0-mask.png",
+      "overlay": "cruise-f1-bank0-cell0-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 1,
+      "anim": 0.13124999999999998,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 1,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.32,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        133.15200037658215,
+        169.1599998176098
+      ],
+      "eyeOffset": [
+        -16.84799962341785,
+        19.159999817609787
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        106,
+        144,
+        195,
+        194
+      ],
+      "height": 51,
+      "width": 90,
+      "opaquePixels": 1832,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell1-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell1-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell1-mask.png",
+      "overlay": "cruise-f1-bank0-cell1-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 2,
+      "anim": 0.21875,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 2,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.31,
+          0.68
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.21600039750336,
+        167.28799985945227
+      ],
+      "eyeOffset": [
+        -17.783999602496635,
+        17.28799985945227
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        103,
+        159,
+        195,
+        194
+      ],
+      "height": 36,
+      "width": 93,
+      "opaquePixels": 1824,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell2-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell2-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell2-mask.png",
+      "overlay": "cruise-f1-bank0-cell2-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 3,
+      "anim": 0.30624999999999997,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 3,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        134.0880003556609,
+        164.47999992221594
+      ],
+      "eyeOffset": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        157,
+        188,
+        193
+      ],
+      "height": 37,
+      "width": 86,
+      "opaquePixels": 1822,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell3-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell3-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell3-mask.png",
+      "overlay": "cruise-f1-bank0-cell3-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 4,
+      "anim": 0.39375,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 4,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        134.0880003556609,
+        164.47999992221594
+      ],
+      "eyeOffset": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        156,
+        190,
+        191
+      ],
+      "height": 36,
+      "width": 88,
+      "opaquePixels": 1857,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell4-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell4-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell4-mask.png",
+      "overlay": "cruise-f1-bank0-cell4-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 5,
+      "anim": 0.48124999999999996,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 5,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.34,
+          0.63
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.0240003347397,
+        162.6079999640584
+      ],
+      "eyeOffset": [
+        -14.975999665260304,
+        12.607999964058394
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        105,
+        153,
+        195,
+        190
+      ],
+      "height": 38,
+      "width": 91,
+      "opaquePixels": 1944,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell5-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell5-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell5-mask.png",
+      "overlay": "cruise-f1-bank0-cell5-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 6,
+      "anim": 0.56875,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 6,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.32,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        133.15200037658215,
+        165.41599990129473
+      ],
+      "eyeOffset": [
+        -16.84799962341785,
+        15.415999901294725
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        109,
+        140,
+        195,
+        189
+      ],
+      "height": 50,
+      "width": 87,
+      "opaquePixels": 1964,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell6-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell6-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell6-mask.png",
+      "overlay": "cruise-f1-bank0-cell6-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 7,
+      "anim": 0.65625,
+      "velocity": [
+        0,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 7,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.34,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.0240003347397,
+        165.41599990129473
+      ],
+      "eyeOffset": [
+        -14.975999665260304,
+        15.415999901294725
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        115,
+        129,
+        191,
+        189
+      ],
+      "height": 61,
+      "width": 77,
+      "opaquePixels": 1975,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank0-cell7-rawCell.png",
+      "rawOverlay": "cruise-f1-bank0-cell7-rawOverlay.png",
+      "mask": "cruise-f1-bank0-cell7-mask.png",
+      "overlay": "cruise-f1-bank0-cell7-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 0,
+      "anim": 0.04375,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 0,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.32,
+          0.72
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        138.05186443922082,
+        174.2124126709619
+      ],
+      "eyeOffset": [
+        -11.948135560779178,
+        24.212412670961896
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        115,
+        121,
+        186,
+        193
+      ],
+      "height": 73,
+      "width": 72,
+      "opaquePixels": 1903,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell0-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell0-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell0-mask.png",
+      "overlay": "cruise-f1-bank-1-cell0-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 1,
+      "anim": 0.13124999999999998,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 1,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.32,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        137.64333859394472,
+        172.38553268664893
+      ],
+      "eyeOffset": [
+        -12.35666140605528,
+        22.38553268664893
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        107,
+        134,
+        194,
+        193
+      ],
+      "height": 60,
+      "width": 88,
+      "opaquePixels": 1831,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell1-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell1-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell1-mask.png",
+      "overlay": "cruise-f1-bank-1-cell1-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 2,
+      "anim": 0.21875,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 2,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.31,
+          0.68
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.32137275651212,
+        170.76291562497406
+      ],
+      "eyeOffset": [
+        -13.678627243487881,
+        20.762915624974056
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        109,
+        156,
+        198,
+        192
+      ],
+      "height": 37,
+      "width": 90,
+      "opaquePixels": 1825,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell2-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell2-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell2-mask.png",
+      "overlay": "cruise-f1-bank-1-cell2-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 3,
+      "anim": 0.30624999999999997,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 3,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        137.5354639729109,
+        167.61406980322852
+      ],
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        111,
+        158,
+        194,
+        198
+      ],
+      "height": 41,
+      "width": 84,
+      "opaquePixels": 1811,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell3-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell3-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell3-mask.png",
+      "overlay": "cruise-f1-bank-1-cell3-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 4,
+      "anim": 0.39375,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 4,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        137.5354639729109,
+        167.61406980322852
+      ],
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        110,
+        154,
+        194,
+        193
+      ],
+      "height": 40,
+      "width": 85,
+      "opaquePixels": 1864,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell4-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell4-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell4-mask.png",
+      "overlay": "cruise-f1-bank-1-cell4-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 5,
+      "anim": 0.48124999999999996,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 5,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.34,
+          0.63
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        138.04037811979123,
+        165.5829268962775
+      ],
+      "eyeOffset": [
+        -11.959621880208772,
+        15.582926896277513
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        109,
+        145,
+        196,
+        188
+      ],
+      "height": 44,
+      "width": 88,
+      "opaquePixels": 1956,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell5-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell5-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell5-mask.png",
+      "overlay": "cruise-f1-bank-1-cell5-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 6,
+      "anim": 0.56875,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 6,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.32,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.82628690339249,
+        168.73177271802305
+      ],
+      "eyeOffset": [
+        -13.173713096607514,
+        18.731772718023052
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        110,
+        131,
+        194,
+        188
+      ],
+      "height": 58,
+      "width": 85,
+      "opaquePixels": 1979,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell6-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell6-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell6-mask.png",
+      "overlay": "cruise-f1-bank-1-cell6-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 7,
+      "anim": 0.65625,
+      "velocity": [
+        -120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 7,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.34,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        138.65316688770542,
+        168.32324687274695
+      ],
+      "eyeOffset": [
+        -11.346833112294576,
+        18.32324687274695
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        114,
+        122,
+        189,
+        188
+      ],
+      "height": 67,
+      "width": 76,
+      "opaquePixels": 1976,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank-1-cell7-rawCell.png",
+      "rawOverlay": "cruise-f1-bank-1-cell7-rawOverlay.png",
+      "mask": "cruise-f1-bank-1-cell7-mask.png",
+      "overlay": "cruise-f1-bank-1-cell7-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 0,
+      "anim": 0.04375,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 0,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.32,
+          0.72
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        129.06429584314617,
+        166.85894745599165
+      ],
+      "eyeOffset": [
+        -20.93570415685383,
+        16.858947455991654
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        120,
+        128,
+        190,
+        193
+      ],
+      "height": 66,
+      "width": 71,
+      "opaquePixels": 1901,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell0-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell0-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell0-mask.png",
+      "overlay": "cruise-f1-bank1-cell0-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 1,
+      "anim": 0.13124999999999998,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 1,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.32,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        129.47282168842227,
+        165.03206747167872
+      ],
+      "eyeOffset": [
+        -20.527178311577728,
+        15.032067471678715
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        107,
+        141,
+        194,
+        194
+      ],
+      "height": 54,
+      "width": 88,
+      "opaquePixels": 1833,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell1-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell1-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell1-mask.png",
+      "overlay": "cruise-f1-bank1-cell1-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 2,
+      "anim": 0.21875,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 2,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.31,
+          0.68
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.96790754154193,
+        163.00092456472774
+      ],
+      "eyeOffset": [
+        -21.032092458458067,
+        13.00092456472774
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        99,
+        157,
+        189,
+        194
+      ],
+      "height": 38,
+      "width": 91,
+      "opaquePixels": 1827,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell2-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell2-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell2-mask.png",
+      "overlay": "cruise-f1-bank1-cell2-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 3,
+      "anim": 0.30624999999999997,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 3,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.40757629376907,
+        160.66913043353443
+      ],
+      "eyeOffset": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        97,
+        155,
+        181,
+        196
+      ],
+      "height": 42,
+      "width": 85,
+      "opaquePixels": 1817,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell3-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell3-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell3-mask.png",
+      "overlay": "cruise-f1-bank1-cell3-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 4,
+      "anim": 0.39375,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 4,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.33,
+          0.65
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.40757629376907,
+        160.66913043353443
+      ],
+      "eyeOffset": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        99,
+        153,
+        184,
+        191
+      ],
+      "height": 39,
+      "width": 86,
+      "opaquePixels": 1861,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell4-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell4-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell4-mask.png",
+      "overlay": "cruise-f1-bank1-cell4-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 5,
+      "anim": 0.48124999999999996,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 5,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.34,
+          0.63
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.72954213120167,
+        159.04651337185953
+      ],
+      "eyeOffset": [
+        -17.27045786879833,
+        9.046513371859533
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        151,
+        193,
+        190
+      ],
+      "height": 40,
+      "width": 91,
+      "opaquePixels": 1959,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell5-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell5-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell5-mask.png",
+      "overlay": "cruise-f1-bank1-cell5-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 6,
+      "anim": 0.56875,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 6,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.32,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        130.28987337897453,
+        161.37830750305284
+      ],
+      "eyeOffset": [
+        -19.710126621025466,
+        11.378307503052838
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        109,
+        140,
+        195,
+        190
+      ],
+      "height": 51,
+      "width": 87,
+      "opaquePixels": 1981,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell6-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell6-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell6-mask.png",
+      "overlay": "cruise-f1-bank1-cell6-overlay.png"
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 7,
+      "anim": 0.65625,
+      "velocity": [
+        120,
+        0
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniCruise8",
+        "cell": 7,
+        "cells": 8,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.34,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.11675336328747,
+        161.78683334832897
+      ],
+      "eyeOffset": [
+        -17.883246636712528,
+        11.786833348328969
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        116,
+        130,
+        193,
+        189
+      ],
+      "height": 60,
+      "width": 78,
+      "opaquePixels": 1983,
+      "clipped": false,
+      "rawCell": "cruise-f1-bank1-cell7-rawCell.png",
+      "rawOverlay": "cruise-f1-bank1-cell7-rawOverlay.png",
+      "mask": "cruise-f1-bank1-cell7-mask.png",
+      "overlay": "cruise-f1-bank1-cell7-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 0,
+      "anim": 0.034999999999999996,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 0,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.71
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        170.09599979668855
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        20.095999796688545
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        122,
+        134,
+        182,
+        194
+      ],
+      "height": 61,
+      "width": 61,
+      "opaquePixels": 1797,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank0-cell0-rawCell.png",
+      "rawOverlay": "chase-f-1-bank0-cell0-rawOverlay.png",
+      "mask": "chase-f-1-bank0-cell0-mask.png",
+      "overlay": "chase-f-1-bank0-cell0-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 1,
+      "anim": 0.105,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 1,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        169.1599998176098
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        19.159999817609787
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        113,
+        134,
+        187,
+        194
+      ],
+      "height": 61,
+      "width": 75,
+      "opaquePixels": 1735,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank0-cell1-rawCell.png",
+      "rawOverlay": "chase-f-1-bank0-cell1-rawOverlay.png",
+      "mask": "chase-f-1-bank0-cell1-mask.png",
+      "overlay": "chase-f-1-bank0-cell1-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 2,
+      "anim": 0.175,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 2,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.31,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.21600039750336,
+        166.35199988037348
+      ],
+      "eyeOffset": [
+        -17.783999602496635,
+        16.351999880373484
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        159,
+        195,
+        194
+      ],
+      "height": 36,
+      "width": 93,
+      "opaquePixels": 1846,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank0-cell2-rawCell.png",
+      "rawOverlay": "chase-f-1-bank0-cell2-rawOverlay.png",
+      "mask": "chase-f-1-bank0-cell2-mask.png",
+      "overlay": "chase-f-1-bank0-cell2-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 3,
+      "anim": 0.245,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 3,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        165.41599990129473
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        15.415999901294725
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        104,
+        158,
+        189,
+        194
+      ],
+      "height": 37,
+      "width": 86,
+      "opaquePixels": 1919,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank0-cell3-rawCell.png",
+      "rawOverlay": "chase-f-1-bank0-cell3-rawOverlay.png",
+      "mask": "chase-f-1-bank0-cell3-mask.png",
+      "overlay": "chase-f-1-bank0-cell3-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 4,
+      "anim": 0.315,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 4,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        166.35199988037348
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        16.351999880373484
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        106,
+        149,
+        194,
+        192
+      ],
+      "height": 44,
+      "width": 89,
+      "opaquePixels": 2004,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank0-cell4-rawCell.png",
+      "rawOverlay": "chase-f-1-bank0-cell4-rawOverlay.png",
+      "mask": "chase-f-1-bank0-cell4-mask.png",
+      "overlay": "chase-f-1-bank0-cell4-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 5,
+      "anim": 0.38499999999999995,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 5,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.31,
+          0.69
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.21600039750336,
+        168.223999838531
+      ],
+      "eyeOffset": [
+        -17.783999602496635,
+        18.223999838531
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        117,
+        134,
+        185,
+        192
+      ],
+      "height": 59,
+      "width": 69,
+      "opaquePixels": 1973,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank0-cell5-rawCell.png",
+      "rawOverlay": "chase-f-1-bank0-cell5-rawOverlay.png",
+      "mask": "chase-f-1-bank0-cell5-mask.png",
+      "overlay": "chase-f-1-bank0-cell5-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 0,
+      "anim": 0.034999999999999996,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 0,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.71
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.02072153226982,
+        173.70749852408153
+      ],
+      "eyeOffset": [
+        -13.979278467730182,
+        23.70749852408153
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        119,
+        128,
+        179,
+        194
+      ],
+      "height": 67,
+      "width": 61,
+      "opaquePixels": 1783,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank-1-cell0-rawCell.png",
+      "rawOverlay": "chase-f-1-bank-1-cell0-rawOverlay.png",
+      "mask": "chase-f-1-bank-1-cell0-mask.png",
+      "overlay": "chase-f-1-bank-1-cell0-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 1,
+      "anim": 0.105,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 1,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.81645860963178,
+        172.79405853192506
+      ],
+      "eyeOffset": [
+        -14.18354139036822,
+        22.79405853192506
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        111,
+        127,
+        185,
+        194
+      ],
+      "height": 68,
+      "width": 75,
+      "opaquePixels": 1740,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank-1-cell1-rawCell.png",
+      "rawOverlay": "chase-f-1-bank-1-cell1-rawOverlay.png",
+      "mask": "chase-f-1-bank-1-cell1-mask.png",
+      "overlay": "chase-f-1-bank-1-cell1-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 2,
+      "anim": 0.175,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 2,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.31,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.11710983387405,
+        169.8494756328176
+      ],
+      "eyeOffset": [
+        -13.882890166125947,
+        19.849475632817587
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        109,
+        152,
+        198,
+        193
+      ],
+      "height": 42,
+      "width": 90,
+      "opaquePixels": 1854,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank-1-cell2-rawCell.png",
+      "rawOverlay": "chase-f-1-bank-1-cell2-rawOverlay.png",
+      "mask": "chase-f-1-bank-1-cell2-mask.png",
+      "overlay": "chase-f-1-bank-1-cell2-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 3,
+      "anim": 0.245,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 3,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        134.99940691907952,
+        169.14029856329918
+      ],
+      "eyeOffset": [
+        -15.000593080920481,
+        19.140298563299183
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        112,
+        157,
+        195,
+        201
+      ],
+      "height": 45,
+      "width": 84,
+      "opaquePixels": 1922,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank-1-cell3-rawCell.png",
+      "rawOverlay": "chase-f-1-bank-1-cell3-rawOverlay.png",
+      "mask": "chase-f-1-bank-1-cell3-mask.png",
+      "overlay": "chase-f-1-bank-1-cell3-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 4,
+      "anim": 0.315,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 4,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.20366984171758,
+        170.05373855545565
+      ],
+      "eyeOffset": [
+        -14.796330158282416,
+        20.053738555455652
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        110,
+        140,
+        195,
+        191
+      ],
+      "height": 52,
+      "width": 86,
+      "opaquePixels": 2011,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank-1-cell4-rawCell.png",
+      "rawOverlay": "chase-f-1-bank-1-cell4-rawOverlay.png",
+      "mask": "chase-f-1-bank-1-cell4-mask.png",
+      "overlay": "chase-f-1-bank-1-cell4-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 5,
+      "anim": 0.38499999999999995,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 5,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.31,
+          0.69
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.52563567915018,
+        171.67635561713053
+      ],
+      "eyeOffset": [
+        -13.474364320849816,
+        21.676355617130525
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        116,
+        127,
+        183,
+        193
+      ],
+      "height": 67,
+      "width": 68,
+      "opaquePixels": 1968,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank-1-cell5-rawCell.png",
+      "rawOverlay": "chase-f-1-bank-1-cell5-rawOverlay.png",
+      "mask": "chase-f-1-bank-1-cell5-mask.png",
+      "overlay": "chase-f-1-bank-1-cell5-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 1,
+      "cell": 0,
+      "anim": 0.034999999999999996,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 0,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.71
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        127.44167878147128,
+        165.53698161855905
+      ],
+      "eyeOffset": [
+        -22.558321218528718,
+        15.536981618559054
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        122,
+        129,
+        184,
+        193
+      ],
+      "height": 65,
+      "width": 63,
+      "opaquePixels": 1787,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank1-cell0-rawCell.png",
+      "rawOverlay": "chase-f-1-bank1-cell0-rawOverlay.png",
+      "mask": "chase-f-1-bank1-cell0-mask.png",
+      "overlay": "chase-f-1-bank1-cell0-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 1,
+      "cell": 1,
+      "anim": 0.105,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 1,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        127.64594170410935,
+        164.62354162640258
+      ],
+      "eyeOffset": [
+        -22.354058295890653,
+        14.623541626402584
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        115,
+        131,
+        189,
+        194
+      ],
+      "height": 64,
+      "width": 75,
+      "opaquePixels": 1735,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank1-cell1-rawCell.png",
+      "rawOverlay": "chase-f-1-bank1-cell1-rawOverlay.png",
+      "mask": "chase-f-1-bank1-cell1-mask.png",
+      "overlay": "chase-f-1-bank1-cell1-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 1,
+      "cell": 2,
+      "anim": 0.175,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 2,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.31,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        129.17217046418,
+        162.08748457257124
+      ],
+      "eyeOffset": [
+        -20.82782953582,
+        12.087484572571242
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        98,
+        156,
+        190,
+        193
+      ],
+      "height": 38,
+      "width": 93,
+      "opaquePixels": 1849,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank1-cell2-rawCell.png",
+      "rawOverlay": "chase-f-1-bank1-cell2-rawOverlay.png",
+      "mask": "chase-f-1-bank1-cell2-mask.png",
+      "overlay": "chase-f-1-bank1-cell2-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 1,
+      "cell": 3,
+      "anim": 0.245,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 3,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.4629933946616,
+        160.9697816577767
+      ],
+      "eyeOffset": [
+        -21.537006605338405,
+        10.969781657776707
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        97,
+        155,
+        182,
+        196
+      ],
+      "height": 42,
+      "width": 86,
+      "opaquePixels": 1916,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank1-cell3-rawCell.png",
+      "rawOverlay": "chase-f-1-bank1-cell3-rawOverlay.png",
+      "mask": "chase-f-1-bank1-cell3-mask.png",
+      "overlay": "chase-f-1-bank1-cell3-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 1,
+      "cell": 4,
+      "anim": 0.315,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 4,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.25873047202353,
+        161.8832216499332
+      ],
+      "eyeOffset": [
+        -21.74126952797647,
+        11.883221649933205
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        104,
+        149,
+        192,
+        192
+      ],
+      "height": 44,
+      "width": 89,
+      "opaquePixels": 2007,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank1-cell4-rawCell.png",
+      "rawOverlay": "chase-f-1-bank1-cell4-rawOverlay.png",
+      "mask": "chase-f-1-bank1-cell4-mask.png",
+      "overlay": "chase-f-1-bank1-cell4-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 1,
+      "cell": 5,
+      "anim": 0.38499999999999995,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 5,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.31,
+          0.69
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.76364461890387,
+        163.91436455688418
+      ],
+      "eyeOffset": [
+        -21.236355381096132,
+        13.91436455688418
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        118,
+        130,
+        188,
+        192
+      ],
+      "height": 63,
+      "width": 71,
+      "opaquePixels": 1972,
+      "clipped": false,
+      "rawCell": "chase-f-1-bank1-cell5-rawCell.png",
+      "rawOverlay": "chase-f-1-bank1-cell5-rawOverlay.png",
+      "mask": "chase-f-1-bank1-cell5-mask.png",
+      "overlay": "chase-f-1-bank1-cell5-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 0,
+      "anim": 0.034999999999999996,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 0,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.71
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        170.09599979668855
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        20.095999796688545
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        122,
+        134,
+        182,
+        194
+      ],
+      "height": 61,
+      "width": 61,
+      "opaquePixels": 1797,
+      "clipped": false,
+      "rawCell": "chase-f1-bank0-cell0-rawCell.png",
+      "rawOverlay": "chase-f1-bank0-cell0-rawOverlay.png",
+      "mask": "chase-f1-bank0-cell0-mask.png",
+      "overlay": "chase-f1-bank0-cell0-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 1,
+      "anim": 0.105,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 1,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        169.1599998176098
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        19.159999817609787
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        113,
+        134,
+        187,
+        194
+      ],
+      "height": 61,
+      "width": 75,
+      "opaquePixels": 1735,
+      "clipped": false,
+      "rawCell": "chase-f1-bank0-cell1-rawCell.png",
+      "rawOverlay": "chase-f1-bank0-cell1-rawOverlay.png",
+      "mask": "chase-f1-bank0-cell1-mask.png",
+      "overlay": "chase-f1-bank0-cell1-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 2,
+      "anim": 0.175,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 2,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.31,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.21600039750336,
+        166.35199988037348
+      ],
+      "eyeOffset": [
+        -17.783999602496635,
+        16.351999880373484
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        103,
+        159,
+        195,
+        194
+      ],
+      "height": 36,
+      "width": 93,
+      "opaquePixels": 1846,
+      "clipped": false,
+      "rawCell": "chase-f1-bank0-cell2-rawCell.png",
+      "rawOverlay": "chase-f1-bank0-cell2-rawOverlay.png",
+      "mask": "chase-f1-bank0-cell2-mask.png",
+      "overlay": "chase-f1-bank0-cell2-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 3,
+      "anim": 0.245,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 3,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        165.41599990129473
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        15.415999901294725
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        104,
+        158,
+        189,
+        194
+      ],
+      "height": 37,
+      "width": 86,
+      "opaquePixels": 1919,
+      "clipped": false,
+      "rawCell": "chase-f1-bank0-cell3-rawCell.png",
+      "rawOverlay": "chase-f1-bank0-cell3-rawOverlay.png",
+      "mask": "chase-f1-bank0-cell3-mask.png",
+      "overlay": "chase-f1-bank0-cell3-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 4,
+      "anim": 0.315,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 4,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.3,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        131.2800004184246,
+        166.35199988037348
+      ],
+      "eyeOffset": [
+        -18.719999581575394,
+        16.351999880373484
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        106,
+        149,
+        194,
+        192
+      ],
+      "height": 44,
+      "width": 89,
+      "opaquePixels": 2004,
+      "clipped": false,
+      "rawCell": "chase-f1-bank0-cell4-rawCell.png",
+      "rawOverlay": "chase-f1-bank0-cell4-rawOverlay.png",
+      "mask": "chase-f1-bank0-cell4-mask.png",
+      "overlay": "chase-f1-bank0-cell4-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 5,
+      "anim": 0.38499999999999995,
+      "velocity": [
+        0,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 5,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9599999785423279,
+          0,
+          0,
+          0.9599999785423279,
+          6.000003218650818,
+          6.440003454685211
+        ],
+        "eyeMap": [
+          0.31,
+          0.69
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        132.21600039750336,
+        168.223999838531
+      ],
+      "eyeOffset": [
+        -17.783999602496635,
+        18.223999838531
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        117,
+        134,
+        185,
+        192
+      ],
+      "height": 59,
+      "width": 69,
+      "opaquePixels": 1973,
+      "clipped": false,
+      "rawCell": "chase-f1-bank0-cell5-rawCell.png",
+      "rawOverlay": "chase-f1-bank0-cell5-rawOverlay.png",
+      "mask": "chase-f1-bank0-cell5-mask.png",
+      "overlay": "chase-f1-bank0-cell5-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 0,
+      "anim": 0.034999999999999996,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 0,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.71
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.02072153226982,
+        173.70749852408153
+      ],
+      "eyeOffset": [
+        -13.979278467730182,
+        23.70749852408153
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        119,
+        128,
+        179,
+        194
+      ],
+      "height": 67,
+      "width": 61,
+      "opaquePixels": 1783,
+      "clipped": false,
+      "rawCell": "chase-f1-bank-1-cell0-rawCell.png",
+      "rawOverlay": "chase-f1-bank-1-cell0-rawOverlay.png",
+      "mask": "chase-f1-bank-1-cell0-mask.png",
+      "overlay": "chase-f1-bank-1-cell0-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 1,
+      "anim": 0.105,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 1,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.81645860963178,
+        172.79405853192506
+      ],
+      "eyeOffset": [
+        -14.18354139036822,
+        22.79405853192506
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        111,
+        127,
+        185,
+        194
+      ],
+      "height": 68,
+      "width": 75,
+      "opaquePixels": 1740,
+      "clipped": false,
+      "rawCell": "chase-f1-bank-1-cell1-rawCell.png",
+      "rawOverlay": "chase-f1-bank-1-cell1-rawOverlay.png",
+      "mask": "chase-f1-bank-1-cell1-mask.png",
+      "overlay": "chase-f1-bank-1-cell1-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 2,
+      "anim": 0.175,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 2,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.31,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.11710983387405,
+        169.8494756328176
+      ],
+      "eyeOffset": [
+        -13.882890166125947,
+        19.849475632817587
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        109,
+        152,
+        198,
+        193
+      ],
+      "height": 42,
+      "width": 90,
+      "opaquePixels": 1854,
+      "clipped": false,
+      "rawCell": "chase-f1-bank-1-cell2-rawCell.png",
+      "rawOverlay": "chase-f1-bank-1-cell2-rawOverlay.png",
+      "mask": "chase-f1-bank-1-cell2-mask.png",
+      "overlay": "chase-f1-bank-1-cell2-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 3,
+      "anim": 0.245,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 3,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        134.99940691907952,
+        169.14029856329918
+      ],
+      "eyeOffset": [
+        -15.000593080920481,
+        19.140298563299183
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        112,
+        157,
+        195,
+        201
+      ],
+      "height": 45,
+      "width": 84,
+      "opaquePixels": 1922,
+      "clipped": false,
+      "rawCell": "chase-f1-bank-1-cell3-rawCell.png",
+      "rawOverlay": "chase-f1-bank-1-cell3-rawOverlay.png",
+      "mask": "chase-f1-bank-1-cell3-mask.png",
+      "overlay": "chase-f1-bank-1-cell3-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 4,
+      "anim": 0.315,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 4,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.3,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        135.20366984171758,
+        170.05373855545565
+      ],
+      "eyeOffset": [
+        -14.796330158282416,
+        20.053738555455652
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        110,
+        140,
+        195,
+        191
+      ],
+      "height": 52,
+      "width": 86,
+      "opaquePixels": 2011,
+      "clipped": false,
+      "rawCell": "chase-f1-bank-1-cell4-rawCell.png",
+      "rawOverlay": "chase-f1-bank-1-cell4-rawOverlay.png",
+      "mask": "chase-f1-bank-1-cell4-mask.png",
+      "overlay": "chase-f1-bank-1-cell4-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 5,
+      "anim": 0.38499999999999995,
+      "velocity": [
+        -120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 5,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          -0.20950043347493486,
+          0.20950043347493486,
+          0.9368615304168938,
+          -21.9542945837743,
+          41.33583569474057
+        ],
+        "eyeMap": [
+          0.31,
+          0.69
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        136.52563567915018,
+        171.67635561713053
+      ],
+      "eyeOffset": [
+        -13.474364320849816,
+        21.676355617130525
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": false,
+      "bbox": [
+        116,
+        127,
+        183,
+        193
+      ],
+      "height": 67,
+      "width": 68,
+      "opaquePixels": 1968,
+      "clipped": false,
+      "rawCell": "chase-f1-bank-1-cell5-rawCell.png",
+      "rawOverlay": "chase-f1-bank-1-cell5-rawOverlay.png",
+      "mask": "chase-f1-bank-1-cell5-mask.png",
+      "overlay": "chase-f1-bank-1-cell5-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 1,
+      "cell": 0,
+      "anim": 0.034999999999999996,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 0,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.71
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        127.44167878147128,
+        165.53698161855905
+      ],
+      "eyeOffset": [
+        -22.558321218528718,
+        15.536981618559054
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        122,
+        129,
+        184,
+        193
+      ],
+      "height": 65,
+      "width": 63,
+      "opaquePixels": 1787,
+      "clipped": false,
+      "rawCell": "chase-f1-bank1-cell0-rawCell.png",
+      "rawOverlay": "chase-f1-bank1-cell0-rawOverlay.png",
+      "mask": "chase-f1-bank1-cell0-mask.png",
+      "overlay": "chase-f1-bank1-cell0-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 1,
+      "cell": 1,
+      "anim": 0.105,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 1,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.7
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        127.64594170410935,
+        164.62354162640258
+      ],
+      "eyeOffset": [
+        -22.354058295890653,
+        14.623541626402584
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        115,
+        131,
+        189,
+        194
+      ],
+      "height": 64,
+      "width": 75,
+      "opaquePixels": 1735,
+      "clipped": false,
+      "rawCell": "chase-f1-bank1-cell1-rawCell.png",
+      "rawOverlay": "chase-f1-bank1-cell1-rawOverlay.png",
+      "mask": "chase-f1-bank1-cell1-mask.png",
+      "overlay": "chase-f1-bank1-cell1-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 1,
+      "cell": 2,
+      "anim": 0.175,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 2,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.31,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        129.17217046418,
+        162.08748457257124
+      ],
+      "eyeOffset": [
+        -20.82782953582,
+        12.087484572571242
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        98,
+        156,
+        190,
+        193
+      ],
+      "height": 38,
+      "width": 93,
+      "opaquePixels": 1849,
+      "clipped": false,
+      "rawCell": "chase-f1-bank1-cell2-rawCell.png",
+      "rawOverlay": "chase-f1-bank1-cell2-rawOverlay.png",
+      "mask": "chase-f1-bank1-cell2-mask.png",
+      "overlay": "chase-f1-bank1-cell2-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 1,
+      "cell": 3,
+      "anim": 0.245,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 3,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.66
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.4629933946616,
+        160.9697816577767
+      ],
+      "eyeOffset": [
+        -21.537006605338405,
+        10.969781657776707
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        97,
+        155,
+        182,
+        196
+      ],
+      "height": 42,
+      "width": 86,
+      "opaquePixels": 1916,
+      "clipped": false,
+      "rawCell": "chase-f1-bank1-cell3-rawCell.png",
+      "rawOverlay": "chase-f1-bank1-cell3-rawOverlay.png",
+      "mask": "chase-f1-bank1-cell3-mask.png",
+      "overlay": "chase-f1-bank1-cell3-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 1,
+      "cell": 4,
+      "anim": 0.315,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 4,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.3,
+          0.67
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.25873047202353,
+        161.8832216499332
+      ],
+      "eyeOffset": [
+        -21.74126952797647,
+        11.883221649933205
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        104,
+        149,
+        192,
+        192
+      ],
+      "height": 44,
+      "width": 89,
+      "opaquePixels": 2007,
+      "clipped": false,
+      "rawCell": "chase-f1-bank1-cell4-rawCell.png",
+      "rawOverlay": "chase-f1-bank1-cell4-rawOverlay.png",
+      "mask": "chase-f1-bank1-cell4-mask.png",
+      "overlay": "chase-f1-bank1-cell4-overlay.png"
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 1,
+      "cell": 5,
+      "anim": 0.38499999999999995,
+      "velocity": [
+        120,
+        150
+      ],
+      "size": [
+        26,
+        22
+      ],
+      "trace": {
+        "key": "talonMiniChase6",
+        "cell": 5,
+        "cells": 6,
+        "x": 150,
+        "base": 198.75,
+        "h": 97.5,
+        "flip": false,
+        "ok": true,
+        "transform": [
+          0.9368615304168938,
+          0.20950043347493486,
+          -0.20950043347493486,
+          0.9368615304168938,
+          40.89583545870617,
+          -21.514294347739906
+        ],
+        "eyeMap": [
+          0.31,
+          0.69
+        ],
+        "tier": 3
+      },
+      "eyeWorld": [
+        128.76364461890387,
+        163.91436455688418
+      ],
+      "eyeOffset": [
+        -21.236355381096132,
+        13.91436455688418
+      ],
+      "originalDownBound": 16.5,
+      "originalBoundPass": true,
+      "bbox": [
+        118,
+        130,
+        188,
+        192
+      ],
+      "height": 63,
+      "width": 71,
+      "opaquePixels": 1972,
+      "clipped": false,
+      "rawCell": "chase-f1-bank1-cell5-rawCell.png",
+      "rawOverlay": "chase-f1-bank1-cell5-rawOverlay.png",
+      "mask": "chase-f1-bank1-cell5-mask.png",
+      "overlay": "chase-f1-bank1-cell5-overlay.png"
+    }
+  ],
+  "served": {
+    "ownedEphemeralPort": true,
+    "indexSha256": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+    "sameCheckout": true
+  },
+  "build": "1d3a7c72250c",
+  "edraw": 0.96,
+  "flight": {
+    "cruise": {
+      "img": "talonMiniCruise8",
+      "cells": 8,
+      "beat": 0.7,
+      "w": 3.75
+    },
+    "chase": {
+      "img": "talonMiniChase6",
+      "cells": 6,
+      "beat": 0.42,
+      "w": 3.75
+    }
+  },
+  "boundFailures": [
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 0,
+      "eyeOffset": [
+        -16.84799962341785,
+        21.031999775767332
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 1,
+      "eyeOffset": [
+        -16.84799962341785,
+        19.159999817609787
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 0,
+      "cell": 2,
+      "eyeOffset": [
+        -17.783999602496635,
+        17.28799985945227
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 0,
+      "eyeOffset": [
+        -11.948135560779178,
+        24.212412670961896
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 1,
+      "eyeOffset": [
+        -12.35666140605528,
+        22.38553268664893
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 2,
+      "eyeOffset": [
+        -13.678627243487881,
+        20.762915624974056
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 3,
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 4,
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 6,
+      "eyeOffset": [
+        -13.173713096607514,
+        18.731772718023052
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": -1,
+      "cell": 7,
+      "eyeOffset": [
+        -11.346833112294576,
+        18.32324687274695
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": -1,
+      "bank": 1,
+      "cell": 0,
+      "eyeOffset": [
+        -20.93570415685383,
+        16.858947455991654
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 0,
+      "eyeOffset": [
+        -16.84799962341785,
+        21.031999775767332
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 1,
+      "eyeOffset": [
+        -16.84799962341785,
+        19.159999817609787
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 0,
+      "cell": 2,
+      "eyeOffset": [
+        -17.783999602496635,
+        17.28799985945227
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 0,
+      "eyeOffset": [
+        -11.948135560779178,
+        24.212412670961896
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 1,
+      "eyeOffset": [
+        -12.35666140605528,
+        22.38553268664893
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 2,
+      "eyeOffset": [
+        -13.678627243487881,
+        20.762915624974056
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 3,
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 4,
+      "eyeOffset": [
+        -12.46453602708911,
+        17.614069803228517
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 6,
+      "eyeOffset": [
+        -13.173713096607514,
+        18.731772718023052
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": -1,
+      "cell": 7,
+      "eyeOffset": [
+        -11.346833112294576,
+        18.32324687274695
+      ]
+    },
+    {
+      "mode": "cruise",
+      "facing": 1,
+      "bank": 1,
+      "cell": 0,
+      "eyeOffset": [
+        -20.93570415685383,
+        16.858947455991654
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 0,
+      "eyeOffset": [
+        -18.719999581575394,
+        20.095999796688545
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 1,
+      "eyeOffset": [
+        -18.719999581575394,
+        19.159999817609787
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": 0,
+      "cell": 5,
+      "eyeOffset": [
+        -17.783999602496635,
+        18.223999838531
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 0,
+      "eyeOffset": [
+        -13.979278467730182,
+        23.70749852408153
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 1,
+      "eyeOffset": [
+        -14.18354139036822,
+        22.79405853192506
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 2,
+      "eyeOffset": [
+        -13.882890166125947,
+        19.849475632817587
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 3,
+      "eyeOffset": [
+        -15.000593080920481,
+        19.140298563299183
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 4,
+      "eyeOffset": [
+        -14.796330158282416,
+        20.053738555455652
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": -1,
+      "bank": -1,
+      "cell": 5,
+      "eyeOffset": [
+        -13.474364320849816,
+        21.676355617130525
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 0,
+      "eyeOffset": [
+        -18.719999581575394,
+        20.095999796688545
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 1,
+      "eyeOffset": [
+        -18.719999581575394,
+        19.159999817609787
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": 0,
+      "cell": 5,
+      "eyeOffset": [
+        -17.783999602496635,
+        18.223999838531
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 0,
+      "eyeOffset": [
+        -13.979278467730182,
+        23.70749852408153
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 1,
+      "eyeOffset": [
+        -14.18354139036822,
+        22.79405853192506
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 2,
+      "eyeOffset": [
+        -13.882890166125947,
+        19.849475632817587
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 3,
+      "eyeOffset": [
+        -15.000593080920481,
+        19.140298563299183
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 4,
+      "eyeOffset": [
+        -14.796330158282416,
+        20.053738555455652
+      ]
+    },
+    {
+      "mode": "chase",
+      "facing": 1,
+      "bank": -1,
+      "cell": 5,
+      "eyeOffset": [
+        -13.474364320849816,
+        21.676355617130525
+      ]
+    }
+  ],
+  "rendererFailures": 0,
+  "clipped": 0,
+  "completed": true,
+  "passed": false
+}

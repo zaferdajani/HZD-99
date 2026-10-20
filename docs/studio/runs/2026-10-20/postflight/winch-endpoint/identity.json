@@ -1,0 +1,6 @@
+{
+  "scope": "Original staged winch-purpose assertions retained. Added endpoint observations at final walk sample; no geometry/timing/assertion changes.",
+  "servedIndexSha256": "ce15f05df20e48f75187d4a7645543a3ff0f7d0c4857e561100b0a47ed20d01d",
+  "originalTestSha256": "4026e972251d611cd070ff740134dc2f08a55f4299d49c41083675bd7e669ee3",
+  "diagnosticScriptSha256": "2363c0a5c993f0f7c2ebc42fe76b1be0c30a41c4b61959987f9921843cc173e8"
+}

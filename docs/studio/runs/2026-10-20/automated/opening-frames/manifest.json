@@ -1,0 +1,610 @@
+{
+  "scope": "Closed opening-order, not assumed complete: status below governs. Exact selected raw captures archived; other hashes only. Keyboard phone viewport is not physical touch.",
+  "openingHarnessStatus": "fail",
+  "complete": false,
+  "build": "5b19cbfbf709",
+  "openingLogSha256": "7b26da05ebe108e67c0ffdd582964fa9cda9d0cc621cdd1341a8fa0d5f028be2",
+  "missingSelected": [
+    "phone-39-monument-puzzle.png",
+    "phone-42-servo-dark-cue.png",
+    "phone-45-servo-awake.png",
+    "phone-46-servo-coil-home.png"
+  ],
+  "files": [
+    {
+      "file": "desktop-00-move-move.png",
+      "bytes": 739313,
+      "sha256": "4852e4367258cb86fb87f60261f960d18946b37314ee6e27a0cc000f7cfd86a5",
+      "mtimeUtc": "2026-10-20T08:47:05.549Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-01-out-move.png",
+      "bytes": 722589,
+      "sha256": "03addfa37a215964a98af86594e8ac6f6f6e283d83bafc30e45dbcbfd9e1de45",
+      "mtimeUtc": "2026-10-20T08:47:07.089Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-02-jump-move.png",
+      "bytes": 556206,
+      "sha256": "fff6f657ae9d071369adc62b39eb1e32b2016384c1e85b88ee340ae1d6fee599",
+      "mtimeUtc": "2026-10-20T08:47:22.069Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-03-jump-jump.png",
+      "bytes": 515237,
+      "sha256": "30e610a7b3d28915249186229512f9af6eb21e5578fc141d3cfaf0cacb8ce592",
+      "mtimeUtc": "2026-10-20T08:47:23.417Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-04-gate-move.png",
+      "bytes": 517110,
+      "sha256": "5f703591ab2ca22004fe51f9a5df855d939e8c2b7cc4024da143d9d460b551b7",
+      "mtimeUtc": "2026-10-20T08:47:24.893Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-05-gate-up.png",
+      "bytes": 643889,
+      "sha256": "f9dc3285b5ec7cc751b2ff81c09dc2389c6a8c96937ee316b91a667a7edc70d9",
+      "mtimeUtc": "2026-10-20T08:47:27.005Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-06-gate-move.png",
+      "bytes": 516254,
+      "sha256": "924c0e40ea156f7e70c055316e1bca91ea8c413af6babfc51aed557a8f713af0",
+      "mtimeUtc": "2026-10-20T08:47:32.665Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-07-booth-move.png",
+      "bytes": 761920,
+      "sha256": "6380f574bfb296e17e5794e9563ded4f9e95ffc5709fb5d25ab44af72ac95871",
+      "mtimeUtc": "2026-10-20T08:47:45.713Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-08-booth-up.png",
+      "bytes": 760192,
+      "sha256": "438f8824c1f3b5dca72524040487e88bf4a017e74f97517b71e6f26a8d830842",
+      "mtimeUtc": "2026-10-20T08:47:47.224Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-09-booth-x.png",
+      "bytes": 736725,
+      "sha256": "4c79b661864506284e4f28a358b5e1c9de8eb63d0cd1cc90001d870a49fbe2ec",
+      "mtimeUtc": "2026-10-20T08:47:52.956Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-10-note-move.png",
+      "bytes": 746927,
+      "sha256": "62300c981aded907c7afff1d11a1bfae9652f180ae426bf843b3a90024cd1fa9",
+      "mtimeUtc": "2026-10-20T08:47:53.712Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-11-note-int.png",
+      "bytes": 758081,
+      "sha256": "cba9fac4e773eb37ef7c42c858babe3772a835253f9a3fa269de4002dd33513b",
+      "mtimeUtc": "2026-10-20T08:47:55.308Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-12-drawer-move.png",
+      "bytes": 786479,
+      "sha256": "fed4797cb6f3ed2986e5d2d5217fd0da9b373b626e1335532caefc35059a4aa4",
+      "mtimeUtc": "2026-10-20T08:48:49.464Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-13-drawer-int.png",
+      "bytes": 741851,
+      "sha256": "0236aeb607e3004ff1f299cbedc77bbad4aefb665d06883d64a0872659da0f76",
+      "mtimeUtc": "2026-10-20T08:48:50.628Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-14-dialog-drawer.png",
+      "bytes": 678597,
+      "sha256": "ca2dddb9c1fee8454dd5b0655b4f42f003439cc55017935c86afaf463a18141c",
+      "mtimeUtc": "2026-10-20T08:48:51.300Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-15-repair-move.png",
+      "bytes": 769569,
+      "sha256": "03339725a3ae4373ed8b4ecf5fe381bb4a5089f743c9d06241983fd6ee885097",
+      "mtimeUtc": "2026-10-20T08:48:59.171Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-16-repair-int.png",
+      "bytes": 764641,
+      "sha256": "08a5a878612d1b95c577afece81b76db994738b3e17301f716ab4471f5900a40",
+      "mtimeUtc": "2026-10-20T08:48:59.803Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-17-dialog-repair.png",
+      "bytes": 698347,
+      "sha256": "ef777ce0020156a33d2648973742f36ddde9b5ca43833545d193ae8af7c4c9b3",
+      "mtimeUtc": "2026-10-20T08:49:01.067Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-18-repair-board.png",
+      "bytes": 637716,
+      "sha256": "8a87a3a5561299bcbce366070f98353617825bec61a7110ccb57973ad6c6503d",
+      "mtimeUtc": "2026-10-20T08:49:02.211Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-19-dialog-repair.png",
+      "bytes": 686827,
+      "sha256": "e803bcd9f33eccea9998cc38ba0778029311608fb6f19b82befe377f78f37d97",
+      "mtimeUtc": "2026-10-20T08:49:13.587Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-20-dialog-repair.png",
+      "bytes": 675015,
+      "sha256": "4601155fc5630bf3ba230fef69ac48472b8e331bd1fe9b3ad7f9becf82cc27b9",
+      "mtimeUtc": "2026-10-20T08:49:17.991Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-21-dialog-repair.png",
+      "bytes": 669778,
+      "sha256": "aea2a29a4c3070f28e14ce81871c9b85e3e7776d27c8c906b21a2b9b64ec5838",
+      "mtimeUtc": "2026-10-20T08:49:19.151Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-22-pod-move.png",
+      "bytes": 764706,
+      "sha256": "6821c3a3f71c0ef4b14cd901bf4d0e9ccf59436fa425308a491b0fa7bbcee3a3",
+      "mtimeUtc": "2026-10-20T08:49:37.775Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-23-pod-int.png",
+      "bytes": 744700,
+      "sha256": "27cfe6733bfa0bfe7810d2f18a580401aedb421b98a3617ff2a77a4f1de5606f",
+      "mtimeUtc": "2026-10-20T08:49:39.379Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-24-pack-move.png",
+      "bytes": 746856,
+      "sha256": "12599da607f4889a7509eb2eb3b9586dfc462b6e00edd10cfa7594b172bec4a7",
+      "mtimeUtc": "2026-10-20T08:49:42.807Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-25-pack-int.png",
+      "bytes": 719563,
+      "sha256": "a1fdd1cc9ed9ca5bed2814af4cc25fa21eead080e021bab9219aec17c88bd747",
+      "mtimeUtc": "2026-10-20T08:49:44.179Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-26-dialog-pack.png",
+      "bytes": 660821,
+      "sha256": "f661c76b23c936df366c860eef8c631fb95881a4698ac0a004b0e9e7fea7602f",
+      "mtimeUtc": "2026-10-20T08:49:45.631Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-27-dialog-pack.png",
+      "bytes": 662998,
+      "sha256": "b6a61e70c8f5818342ab1b180e31d483e9e22a8b14daff15bbf814fcb3d95525",
+      "mtimeUtc": "2026-10-20T08:49:49.171Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-28-counter.png",
+      "bytes": 384638,
+      "sha256": "c6b3793eb6171cbec1848071cfdd902c21a4892b6396cb4ad60c8553f7e87291",
+      "mtimeUtc": "2026-10-20T08:49:50.683Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-29-dialog-pack.png",
+      "bytes": 630984,
+      "sha256": "c3dc1dc8e4a5f07363f873754cfb7cb513baf2e5d02e3ad663789a5ab656c305",
+      "mtimeUtc": "2026-10-20T08:49:51.327Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-30-heal-heal.png",
+      "bytes": 715516,
+      "sha256": "13c79c4734ddb8e6c344526b6ae29f4a26c0176ee577060d456747d1ea267eb9",
+      "mtimeUtc": "2026-10-20T08:49:53.059Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-31-atk-move.png",
+      "bytes": 722136,
+      "sha256": "fb272165bf5349756042236054dcff15efa0da8a6fc108d44f82e98335ef394e",
+      "mtimeUtc": "2026-10-20T08:49:55.447Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-32-atk-up.png",
+      "bytes": 732417,
+      "sha256": "e55874a251bf413829a348b2aa469d78403d60de6b525c08c9465558809a3a7c",
+      "mtimeUtc": "2026-10-20T08:49:56.899Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-33-atk-move.png",
+      "bytes": 782131,
+      "sha256": "9c92c4116c95500246e419ce836048f4fa9fc7bf4f3e1a329f117116c3a5736d",
+      "mtimeUtc": "2026-10-20T08:50:01.974Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-34-atk-atk.png",
+      "bytes": 757993,
+      "sha256": "3f1f0c31fd3e8b4869ad34d3ff9c1dfd842f17b21014c6ea894cbc87296d8e24",
+      "mtimeUtc": "2026-10-20T08:50:03.190Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-35-burst-atk.png",
+      "bytes": 753748,
+      "sha256": "11b21e55937a7bf8b273a82db9798fabb8772fbcf07cb8ca5142e3dfa2de31b4",
+      "mtimeUtc": "2026-10-20T08:50:04.722Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-36-burst-charging.png",
+      "bytes": 758837,
+      "sha256": "27b561a86030ea824f8b835c039b4b34f49471eab69be969e270f1525e071b36",
+      "mtimeUtc": "2026-10-20T08:50:06.086Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-37-node-move.png",
+      "bytes": 767467,
+      "sha256": "a1c04bd031c64e12617f7d5d49d4c5f65596deb206bb30db36c630c727967943",
+      "mtimeUtc": "2026-10-20T08:50:07.630Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-38-node-int.png",
+      "bytes": 648061,
+      "sha256": "edd45393fe52db264a44f3ce818a1d95e2c1953ce2dc9c6be20fb2c7fe956de3",
+      "mtimeUtc": "2026-10-20T08:50:09.278Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-39-monument-puzzle.png",
+      "bytes": 181294,
+      "sha256": "809fdfe83d05ba770765c0aa4d46210c6c394f70a605ed408425b440e68adc3a",
+      "mtimeUtc": "2026-10-20T08:50:12.326Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-40-go-move.png",
+      "bytes": 665583,
+      "sha256": "eac0d1abfc6d02600c4a9430e867574019f3946a7002f05ae72a0745cf58615e",
+      "mtimeUtc": "2026-10-20T08:50:13.934Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-41-meadow-arrival.png",
+      "bytes": 634173,
+      "sha256": "08bc693ab187dcdffbd3008397cee95d505346d78868b6d8bf56b657503d8e96",
+      "mtimeUtc": "2026-10-20T08:50:18.914Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-42-servo-dark-cue.png",
+      "bytes": 630949,
+      "sha256": "bd650dc58e8f5491c17aa5a0c81a3d4f02fd3ef834eb27afec824ae23d0cc912",
+      "mtimeUtc": "2026-10-20T08:50:20.762Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-43-servo-waking.png",
+      "bytes": 708547,
+      "sha256": "b8182d4d4bdfd49a9799b92e4be57acbfe9a3522c05907e4fea2152678dcee3c",
+      "mtimeUtc": "2026-10-20T08:50:23.314Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-44-servo-intro.png",
+      "bytes": 540962,
+      "sha256": "edb6bd3e236b62775fc581fc0ab380a0df270f0980cd605f7600f85216d332e2",
+      "mtimeUtc": "2026-10-20T08:50:24.314Z",
+      "archived": false
+    },
+    {
+      "file": "desktop-45-servo-awake.png",
+      "bytes": 625573,
+      "sha256": "2199c900906c1c197f918698cea8d93aa4afdf354598b0a03104e663939c87cf",
+      "mtimeUtc": "2026-10-20T08:50:28.354Z",
+      "archived": true
+    },
+    {
+      "file": "desktop-46-servo-coil-home.png",
+      "bytes": 638805,
+      "sha256": "23f95ae1e8da7ad159bd57fa1f85156904fc928bd26e01517667267e2e21b150",
+      "mtimeUtc": "2026-10-20T08:50:36.210Z",
+      "archived": true
+    },
+    {
+      "file": "phone-00-move-move.png",
+      "bytes": 593957,
+      "sha256": "e0cb42bfd49c8a51e5b2d341fc4caf0f21a167bd2b1d1b39c2d7655f3215e9ec",
+      "mtimeUtc": "2026-10-20T08:51:22.981Z",
+      "archived": false
+    },
+    {
+      "file": "phone-01-out-move.png",
+      "bytes": 579986,
+      "sha256": "1cd7a89d65c160ad02c0d0b49afae0ccfff4677d115d38f70806e9860f68247f",
+      "mtimeUtc": "2026-10-20T08:51:24.325Z",
+      "archived": false
+    },
+    {
+      "file": "phone-02-jump-move.png",
+      "bytes": 462530,
+      "sha256": "bddbd7a16e0f183a74cc6cd89555b030c2aba98e29bb2617ff9571a1fc13ea5c",
+      "mtimeUtc": "2026-10-20T08:52:09.805Z",
+      "archived": false
+    },
+    {
+      "file": "phone-03-jump-jump.png",
+      "bytes": 475823,
+      "sha256": "4c523faf41fa16a3caffdf102c84aebabdd302d6e3c84ce170adbc70b13fe111",
+      "mtimeUtc": "2026-10-20T08:52:11.069Z",
+      "archived": false
+    },
+    {
+      "file": "phone-04-gate-move.png",
+      "bytes": 437695,
+      "sha256": "adf2a7ffbc4cbebf10d8e5b81c6c847e03ad34740a4a007e02d606f318f3deee",
+      "mtimeUtc": "2026-10-20T08:52:12.285Z",
+      "archived": false
+    },
+    {
+      "file": "phone-05-gate-up.png",
+      "bytes": 568981,
+      "sha256": "7b681ab825bec4f8551133f919259e7a2fd1e299d9679ab0a8ada45013dbeb43",
+      "mtimeUtc": "2026-10-20T08:52:14.297Z",
+      "archived": false
+    },
+    {
+      "file": "phone-06-gate-move.png",
+      "bytes": 378940,
+      "sha256": "1df8f3452dba20312573094187d7a5cba67ff59a356dc9ff6e83afc086a55876",
+      "mtimeUtc": "2026-10-20T08:52:19.440Z",
+      "archived": false
+    },
+    {
+      "file": "phone-07-booth-move.png",
+      "bytes": 700293,
+      "sha256": "e7b73c7186f91ca76c1f07691d616926b1b84f92db891c78da9e3011db8edb06",
+      "mtimeUtc": "2026-10-20T08:52:30.148Z",
+      "archived": false
+    },
+    {
+      "file": "phone-08-booth-up.png",
+      "bytes": 692941,
+      "sha256": "50785a5bb9e80f76052481b9b7ea6250d1b525ac57e9da276ebf09b08cbc029c",
+      "mtimeUtc": "2026-10-20T08:52:31.472Z",
+      "archived": false
+    },
+    {
+      "file": "phone-09-booth-x.png",
+      "bytes": 681789,
+      "sha256": "d6e4d9baba8554b1872da47815afb57eeac0b8c1e455ee9cbb2a44c3d34444bd",
+      "mtimeUtc": "2026-10-20T08:52:37.088Z",
+      "archived": false
+    },
+    {
+      "file": "phone-10-note-move.png",
+      "bytes": 675656,
+      "sha256": "d0325a3527811b90b2f6cc764f5210646ea926ee92e89272282d4117f2b04f7c",
+      "mtimeUtc": "2026-10-20T08:52:37.824Z",
+      "archived": false
+    },
+    {
+      "file": "phone-11-note-int.png",
+      "bytes": 679127,
+      "sha256": "e9a63f8b34c4e0fefc94554b503a149059528dd780cce91c26570c21ffaabf32",
+      "mtimeUtc": "2026-10-20T08:52:39.536Z",
+      "archived": true
+    },
+    {
+      "file": "phone-12-drawer-move.png",
+      "bytes": 709464,
+      "sha256": "38ef7dd5da784a9ce9832103d5b63c6d19bbc9df55b5f62b597fead4140faeb9",
+      "mtimeUtc": "2026-10-20T08:53:21.472Z",
+      "archived": false
+    },
+    {
+      "file": "phone-13-drawer-int.png",
+      "bytes": 671712,
+      "sha256": "9368ec631eadc7209fefb2615b0a3a257e1434d122ba95eb73b59a2e2d0db0d3",
+      "mtimeUtc": "2026-10-20T08:53:22.380Z",
+      "archived": false
+    },
+    {
+      "file": "phone-14-dialog-drawer.png",
+      "bytes": 606210,
+      "sha256": "8dfecf8e9bde15d570e89dedd3023e7a6f5f09600e89b1065d560a6e0ebb0050",
+      "mtimeUtc": "2026-10-20T08:53:23.096Z",
+      "archived": false
+    },
+    {
+      "file": "phone-15-repair-move.png",
+      "bytes": 699074,
+      "sha256": "d59dc1a7c18db775b49ca2dcbb67bc9b870836d5331b7bb9b4a35b0eb465230e",
+      "mtimeUtc": "2026-10-20T08:53:30.659Z",
+      "archived": false
+    },
+    {
+      "file": "phone-16-repair-int.png",
+      "bytes": 697568,
+      "sha256": "70cbd5fcc44e733971f6b677d5c143ad71799fd1226e96bf7be038c37bf680e4",
+      "mtimeUtc": "2026-10-20T08:53:31.263Z",
+      "archived": true
+    },
+    {
+      "file": "phone-17-dialog-repair.png",
+      "bytes": 627922,
+      "sha256": "ce86a44d3681acbb158a63d7820c7f952b22fdc167c7692c40ca0d8258bb992f",
+      "mtimeUtc": "2026-10-20T08:53:31.927Z",
+      "archived": false
+    },
+    {
+      "file": "phone-18-repair-board.png",
+      "bytes": 931222,
+      "sha256": "6cc7497f5f21f4b83676432b05399b46cf0196278aa412129b6361ab54a0610d",
+      "mtimeUtc": "2026-10-20T08:53:33.127Z",
+      "archived": true
+    },
+    {
+      "file": "phone-19-dialog-repair.png",
+      "bytes": 619315,
+      "sha256": "eb1b9874ebe227546211f6bc202c6fb7874ecef122eb2efff339c615ac0c1681",
+      "mtimeUtc": "2026-10-20T08:53:44.371Z",
+      "archived": false
+    },
+    {
+      "file": "phone-20-dialog-repair.png",
+      "bytes": 615536,
+      "sha256": "694993f210418a54608006478328140d74601a674fa378c4c50cab59cabade14",
+      "mtimeUtc": "2026-10-20T08:53:48.619Z",
+      "archived": false
+    },
+    {
+      "file": "phone-21-dialog-repair.png",
+      "bytes": 609000,
+      "sha256": "f759289623b5374d1e619912cbfb06a8ba3d4847d5b5e647ebaa9c49e9cfc15d",
+      "mtimeUtc": "2026-10-20T08:53:49.727Z",
+      "archived": false
+    },
+    {
+      "file": "phone-22-pod-move.png",
+      "bytes": 699086,
+      "sha256": "3b9d99767dedeb345e94d5d07daa753c9178988bf96027a783bf33dd6018b518",
+      "mtimeUtc": "2026-10-20T08:54:10.839Z",
+      "archived": true
+    },
+    {
+      "file": "phone-23-pod-int.png",
+      "bytes": 681353,
+      "sha256": "cd0bc472957e07d771e55840e2276a7d52eef7ae24f05ec37eee4b9d8b33455c",
+      "mtimeUtc": "2026-10-20T08:54:12.271Z",
+      "archived": false
+    },
+    {
+      "file": "phone-24-pack-move.png",
+      "bytes": 694178,
+      "sha256": "2b0f7fff26284fba08c0511c65f79824592d413bb13a1a0dcdc1742a506d8d62",
+      "mtimeUtc": "2026-10-20T08:54:15.539Z",
+      "archived": false
+    },
+    {
+      "file": "phone-25-pack-int.png",
+      "bytes": 690717,
+      "sha256": "24a228f317e732c90450f4c52b797a99213144aa521918eaf4ba2fff998d1d90",
+      "mtimeUtc": "2026-10-20T08:54:16.763Z",
+      "archived": false
+    },
+    {
+      "file": "phone-26-dialog-pack.png",
+      "bytes": 587273,
+      "sha256": "f256e8e909e6f18c48cf3ff97561b4f001547762309a2e478b1c568b5f0ffc86",
+      "mtimeUtc": "2026-10-20T08:54:17.915Z",
+      "archived": false
+    },
+    {
+      "file": "phone-27-dialog-pack.png",
+      "bytes": 595822,
+      "sha256": "c831f713341807f1782b2b35f2177bc9888fcf8ea3521fc8df62a1e4c5b4d494",
+      "mtimeUtc": "2026-10-20T08:54:21.379Z",
+      "archived": false
+    },
+    {
+      "file": "phone-28-counter.png",
+      "bytes": 364808,
+      "sha256": "9e0dd2c7cb0b089e4f69b271c0fc5067967707e809a1972f223364057a2349ee",
+      "mtimeUtc": "2026-10-20T08:54:22.815Z",
+      "archived": true
+    },
+    {
+      "file": "phone-29-dialog-pack.png",
+      "bytes": 567495,
+      "sha256": "a0ed948f500b678d2029a4d9f48c141de50fb3317073ce53e6ea3e1b299815d2",
+      "mtimeUtc": "2026-10-20T08:54:23.483Z",
+      "archived": false
+    },
+    {
+      "file": "phone-30-heal-heal.png",
+      "bytes": 668959,
+      "sha256": "420149af9f303f79143a19b3ae2f60886dff49a6b532151cc5dea82fb945e06e",
+      "mtimeUtc": "2026-10-20T08:54:25.131Z",
+      "archived": false
+    },
+    {
+      "file": "phone-31-atk-move.png",
+      "bytes": 662554,
+      "sha256": "8e840902b90b9d9f88ae08eb8447870ce4ff21994cdb8acdc9989c22e352fe65",
+      "mtimeUtc": "2026-10-20T08:54:27.487Z",
+      "archived": false
+    },
+    {
+      "file": "phone-32-atk-up.png",
+      "bytes": 658565,
+      "sha256": "a3049f76b9b20b59e9141d76f08b89e330465cead13751abd324c239c27752d8",
+      "mtimeUtc": "2026-10-20T08:54:28.935Z",
+      "archived": false
+    },
+    {
+      "file": "phone-33-atk-move.png",
+      "bytes": 714995,
+      "sha256": "4db12d6490b3d3a1ae544a5ac5ec3bdbab19fa818c5a7bf5fa4dd8cfe8c811b0",
+      "mtimeUtc": "2026-10-20T08:54:33.982Z",
+      "archived": false
+    },
+    {
+      "file": "phone-34-atk-atk.png",
+      "bytes": 719915,
+      "sha256": "068081f53d1700f17b2f32b7c5bd0e3cba5588f7d05712b6ca3d2d43b0948562",
+      "mtimeUtc": "2026-10-20T08:54:35.082Z",
+      "archived": false
+    },
+    {
+      "file": "phone-35-burst-atk.png",
+      "bytes": 714770,
+      "sha256": "d2f635759f554404c11df04dadf26f9ad6858e7c156e5ced45677e359c898aa7",
+      "mtimeUtc": "2026-10-20T08:54:36.434Z",
+      "archived": false
+    },
+    {
+      "file": "phone-36-burst-charging.png",
+      "bytes": 721385,
+      "sha256": "9ebcbb9af79911a75982cdcb6cfba730c98de5d6b05b61328617e3924cec463f",
+      "mtimeUtc": "2026-10-20T08:54:37.742Z",
+      "archived": true
+    },
+    {
+      "file": "phone-portrait-390x844.png",
+      "bytes": 36361,
+      "sha256": "b27ca2a78a98b94b9b813c83c2cc5f0fb42b80adfdd6a4b00536e2a70df89e7e",
+      "mtimeUtc": "2026-10-20T08:50:37.221Z",
+      "archived": true
+    }
+  ]
+}

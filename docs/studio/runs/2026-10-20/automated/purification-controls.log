@@ -1,0 +1,30 @@
+
+── purification-controls  — mobile hold/cancel, focus-loss safety and restored save
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(await page.evaluate(()=>G.purification.hold>.4))
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/purification-controls.cjs:27:123 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+FAILED: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(await page.evaluate(()=>G.purification.hold>.4))
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/purification-controls.cjs:27:123 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+   (purification-controls: 1.1 s)
+
+1 harness(es) failed

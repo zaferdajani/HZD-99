@@ -1,0 +1,11 @@
+{
+  "build": "5b19cbfbf709",
+  "frozenFiles": 281,
+  "inheritedLogMismatches": [
+    {
+      "file": "input-focus.log",
+      "expected": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44",
+      "actual": "5a64759c7cb51acadbd220e39a20a3e19719bec46e5f93b9dcfc7dff8271c1a8"
+    }
+  ]
+}

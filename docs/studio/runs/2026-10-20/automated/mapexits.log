@@ -1,0 +1,15 @@
+
+── mapexits  — the map shows rooms where they really are: every shaft stacked, every side exit edge to edge
+── mapexits — the map shows rooms where they really are
+
+  ok   every exit leads to a room on the board  all placed
+  ok   every shaft is drawn stacked, holes within 0.2 of a cell  24 vertical pairs, worst 0.10
+  ok   every side exit is drawn edge to edge, floors within 0.2 of a cell  35 side pairs, worst 0.10
+  --   overlaps in the world itself (drawn with a route line; the aligned square is taken): V2 (by A4)  D4 (by C2)
+  ok   no two rooms overlap anywhere on the board  every room on its own ground
+  ok   no page errors
+
+OK — every door on the chart opens where the room does
+   (mapexits: 0.9 s)
+
+all 1 harnesses ran

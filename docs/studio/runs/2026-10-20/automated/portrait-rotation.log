@@ -1,0 +1,30 @@
+
+── portrait-rotation  — rotation invalidates stale observer geometry; CUT/panels/repair stay contained with visible guidance
+ok touch detected without forcing enabled true
+ok cut-portrait expected live overlay "CUT"
+ok cut-portrait fresh viewport geometry {"raw":[390,844],"visible":[390,844],"portrait":true}
+ok cut-portrait both canvases contained {"cv":{"x":45,"y":337.625,"width":300,"height":168.75,"right":345,"bottom":506.375},"tc":{"x":0,"y":0,"width":390,"height":844,"right":390,"bottom":844}}
+ok cut-portrait rotation instruction actually painted and visible {"paint":{"text":"Rotate your phone to landscape","x":195,"y":422,"width":318.583984375,"time":1485.7999999998137},"alpha":242,"top":"tc"}
+ok cut-landscape expected live overlay "CUT"
+ok cut-landscape fresh viewport geometry {"raw":[844,390],"visible":[844,390],"portrait":false}
+ok cut-landscape both canvases contained {"cv":{"x":130.59375,"y":31.078125,"width":582.796875,"height":327.8125,"right":713.390625,"bottom":358.890625},"tc":{"x":0,"y":0,"width":844,"height":390,"right":844,"bottom":390}}
+ok panels-portrait expected live overlay "PANELS"
+ok panels-portrait fresh viewport geometry {"raw":[390,844],"visible":[390,844],"portrait":true}
+ok panels-portrait both canvases contained {"cv":{"x":45,"y":337.625,"width":300,"height":168.75,"right":345,"bottom":506.375},"tc":{"x":0,"y":0,"width":390,"height":844,"right":390,"bottom":844}}
+ok panels-portrait rotation instruction actually painted and visible {"paint":{"text":"Rotate your phone to landscape","x":195,"y":422,"width":318.583984375,"time":2430.1999999997206},"alpha":242,"top":"tc"}
+ok panels-landscape expected live overlay "PANELS"
+ok panels-landscape fresh viewport geometry {"raw":[844,390],"visible":[844,390],"portrait":false}
+ok panels-landscape both canvases contained {"cv":{"x":130.59375,"y":31.078125,"width":582.796875,"height":327.8125,"right":713.390625,"bottom":358.890625},"tc":{"x":0,"y":0,"width":844,"height":390,"right":844,"bottom":390}}
+ok repair-portrait expected live overlay "REPAIR"
+ok repair-portrait fresh viewport geometry {"raw":[390,844],"visible":[390,844],"portrait":true}
+ok repair-portrait both canvases contained {"cv":{"x":45,"y":337.625,"width":300,"height":168.75,"right":345,"bottom":506.375},"tc":{"x":0,"y":0,"width":390,"height":844,"right":390,"bottom":844}}
+ok repair-portrait repair owns readable contained card {"card":{"x":7.796875,"y":183.390625,"width":374.390625,"height":477.203125,"right":382.1875,"bottom":660.59375},"step":0}
+ok repair-landscape expected live overlay "REPAIR"
+ok repair-landscape fresh viewport geometry {"raw":[844,390],"visible":[844,390],"portrait":false}
+ok repair-landscape both canvases contained {"cv":{"x":130.59375,"y":31.078125,"width":582.796875,"height":327.8125,"right":713.390625,"bottom":358.890625},"tc":{"x":0,"y":0,"width":844,"height":390,"right":844,"bottom":390}}
+ok repair-landscape repair owns readable contained card {"card":{"x":25.3125,"y":4.078125,"width":793.359375,"height":381.84375,"right":818.671875,"bottom":385.921875},"step":0}
+ok purposeful same-viewport host clip retained {"visible":[824,320],"offset":[10,20],"retained":true}
+ok zero page errors []
+   (portrait-rotation: 5.6 s)
+
+all 1 harnesses ran

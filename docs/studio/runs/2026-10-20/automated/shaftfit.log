@@ -1,0 +1,14 @@
+
+── shaftfit  — a shaft is one hole through two rooms, and no sky hangs under another room's floor
+── shaftfit — a shaft is one hole cut through two rooms
+
+  ok   every shaft is the same columns at both ends  23 vertical pairs
+  ok   no drop from above lands inside the roof below  every drop lands in air
+  ok   no open sky under another room's floor  A1 under A6 (cols 0-43 roofed)  A2 under A8 (cols 0-43 roofed)  A3 under B1 (cols 0-31 roofed)
+  ok   every room is as wide as it is built  no void strip at any edge
+  ok   no page errors
+
+OK — every shaft is one hole, and nothing hangs over open sky
+   (shaftfit: 0.8 s)
+
+all 1 harnesses ran

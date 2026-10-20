@@ -1,0 +1,31 @@
+
+── npcstrip  — the five work strips are twelve frames of work, foot-aligned and steady
+── npcstrip — the five work strips are twelve frames of work
+
+  ok   every strip arrived  5 strips
+  ok   servo: every cell draws a body  26338..35205px
+  ok   servo: ...and no two cells are the same cell  quietest pair 9.92 (min 1.5), loudest 96.92
+  ok   servo: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   servo: ...and it does not pump in size  height 213..214px  spread 0.5%
+  ok   mono: every cell draws a body  13817..25963px
+  ok   mono: ...and no two cells are the same cell  quietest pair 5.34 (min 1.5), loudest 70.50
+  ok   mono: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   mono: ...and it does not pump in size  height 214..214px  spread 0.0%
+  ok   patch: every cell draws a body  21961..25406px
+  ok   patch: ...and no two cells are the same cell  quietest pair 50.40 (min 1.5), loudest 84.15
+  ok   patch: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   patch: ...and it does not pump in size  height 204..214px  spread 4.7%
+  ok   sage: every cell draws a body  6663..9475px
+  ok   sage: ...and no two cells are the same cell  quietest pair 100.50 (min 1.5), loudest 143.41
+  ok   sage: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1px
+  ok   sage: ...and it does not pump in size  height 212..213px  spread 0.5%
+  ok   lumen: every cell draws a body  6952..13385px
+  ok   lumen: ...and no two cells are the same cell  quietest pair 15.04 (min 1.5), loudest 165.19
+  ok   lumen: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   lumen: ...and it does not pump in size  height 171..194px  spread 11.9%
+  ok   no page errors
+
+all good
+   (npcstrip: 1.5 s)
+
+all 1 harnesses ran

@@ -1,5 +1,7 @@
 """Collector regressions: runner budgets and timeout descendant cleanup."""
 import importlib.util
+import base64
+import hashlib
 import os
 from pathlib import Path
 import sys
@@ -13,6 +15,36 @@ SPEC.loader.exec_module(audit)
 
 
 class AuditBudgets(unittest.TestCase):
+    def test_log_snapshot_survives_later_truncation_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            log = root / 'sample.log'
+            original = b'header\nPASS actual assertion\n'
+            log.write_bytes(original)
+            record = audit.capture_log(log)
+            self.assertEqual(base64.b64decode(record['content_base64']), original)
+            self.assertEqual(record['sha256'], hashlib.sha256(original).hexdigest())
+            self.assertTrue(audit.validate_logs(root, [record])['ok'])
+            log.write_bytes(b'header\n')
+            result = audit.validate_logs(root, [record])
+            self.assertFalse(result['ok'])
+            self.assertFalse(result['files'][0]['disk_matches'])
+            self.assertTrue(result['files'][0]['snapshot_matches'])
+            self.assertEqual(base64.b64decode(record['content_base64']), original)
+            log.unlink()
+            self.assertFalse(audit.validate_logs(root, [record])['ok'])
+
+    def test_malformed_or_tampered_snapshot_is_not_certified(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            log = root / 'sample.log'
+            log.write_bytes(b'ok\n')
+            record = audit.capture_log(log)
+            record['content_base64'] = base64.b64encode(b'false pass\n').decode()
+            self.assertFalse(audit.validate_logs(root, [record])['ok'])
+            record['content_base64'] = '***'
+            self.assertFalse(audit.validate_logs(root, [record])['ok'])
+
     def test_actual_runner_deadlines_are_preserved(self):
         budgets = audit.suite_budgets((audit.ROOT / 'tests/run.cjs').read_text())
         self.assertEqual(budgets['campaign-ch1'], 3600 + 180)

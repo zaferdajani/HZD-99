@@ -1,0 +1,88 @@
+{
+  "scope": "Archived original screenshot mtimeUtc markers from the closed full-run opening manifest. These are filesystem write times, NOT logged loop start/end, monotonic input timestamps, delivered charge duration, or proof of repeated failed releases.",
+  "manifestSha256": "3dfffb59d34fc803b2372b4d7560377d5440768d2f14cd021c2b26d3b2e09ea4",
+  "testSha256": "ba83e285430dc972d54f69def98b97dbd1b032d73b942d0161081c522b420c22",
+  "build": "5b19cbfbf709",
+  "harnessStatus": "fail",
+  "complete": false,
+  "sourceLoopBudgetSeconds": 240,
+  "runnerHarnessTimeoutSeconds": 900,
+  "modes": {
+    "desktop": {
+      "frameCount": 47,
+      "first": {
+        "file": "desktop-00-move-move.png",
+        "bytes": 739313,
+        "sha256": "4852e4367258cb86fb87f60261f960d18946b37314ee6e27a0cc000f7cfd86a5",
+        "mtimeUtc": "2026-10-20T08:47:05.549Z",
+        "archived": false
+      },
+      "last": {
+        "file": "desktop-46-servo-coil-home.png",
+        "bytes": 638805,
+        "sha256": "23f95ae1e8da7ad159bd57fa1f85156904fc928bd26e01517667267e2e21b150",
+        "mtimeUtc": "2026-10-20T08:50:36.210Z",
+        "archived": true
+      },
+      "charging": [
+        {
+          "file": "desktop-36-burst-charging.png",
+          "bytes": 758837,
+          "sha256": "27b561a86030ea824f8b835c039b4b34f49471eab69be969e270f1525e071b36",
+          "mtimeUtc": "2026-10-20T08:50:06.086Z",
+          "archived": true
+        }
+      ],
+      "frameMarkerSpanSeconds": 210.661
+    },
+    "phone": {
+      "frameCount": 37,
+      "first": {
+        "file": "phone-00-move-move.png",
+        "bytes": 593957,
+        "sha256": "e0cb42bfd49c8a51e5b2d341fc4caf0f21a167bd2b1d1b39c2d7655f3215e9ec",
+        "mtimeUtc": "2026-10-20T08:51:22.981Z",
+        "archived": false
+      },
+      "last": {
+        "file": "phone-36-burst-charging.png",
+        "bytes": 721385,
+        "sha256": "9ebcbb9af79911a75982cdcb6cfba730c98de5d6b05b61328617e3924cec463f",
+        "mtimeUtc": "2026-10-20T08:54:37.742Z",
+        "archived": true
+      },
+      "charging": [
+        {
+          "file": "phone-36-burst-charging.png",
+          "bytes": 721385,
+          "sha256": "9ebcbb9af79911a75982cdcb6cfba730c98de5d6b05b61328617e3924cec463f",
+          "mtimeUtc": "2026-10-20T08:54:37.742Z",
+          "archived": true
+        }
+      ],
+      "frameMarkerSpanSeconds": 194.761
+    }
+  },
+  "phonePortraitMarker": {
+    "file": "phone-portrait-390x844.png",
+    "bytes": 36361,
+    "sha256": "b27ca2a78a98b94b9b813c83c2cc5f0fb42b80adfdd6a4b00536e2a70df89e7e",
+    "mtimeUtc": "2026-10-20T08:50:37.221Z",
+    "archived": true
+  },
+  "phoneChargeMarker": {
+    "file": "phone-36-burst-charging.png",
+    "bytes": 721385,
+    "sha256": "9ebcbb9af79911a75982cdcb6cfba730c98de5d6b05b61328617e3924cec463f",
+    "mtimeUtc": "2026-10-20T08:54:37.742Z",
+    "archived": true
+  },
+  "phonePortraitToChargeSeconds": 240.521,
+  "warnings": [
+    "The portrait capture occurs before returning to landscape and before the case loop deadline is initialized.",
+    "The burst-charging screenshot is inside the held-key branch, before key release and the subsequent400ms wait.",
+    "There is one archived phone burst-charging filename. This does not prove repeated unsuccessful charge/release attempts.",
+    "No actual per-case loop-start, input-dispatch, charge simulation time, release result or explicit deadline-expiry record is retained in the original harness output.",
+    "Most phone traversal is ordinary keyboard input in touch/mobile viewport emulation; this is not physical touch play."
+  ]
+}

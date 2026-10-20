@@ -1,0 +1,1187 @@
+{
+  "scope": "Same authored pixels/eye map and sampled height delta, not temporal smoothness or all-bank size approval",
+  "count": 84,
+  "allRawCellsIdentical": true,
+  "allEyeMapsIdentical": true,
+  "maxHeightDelta": 1,
+  "beforeMaxHeight": 73,
+  "afterMaxHeight": 73,
+  "samples": [
+    {
+      "pose": "cruise/-1/0/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -16.84799962341785,
+        21.031999775767332
+      ],
+      "afterEye": [
+        -16.84799962341785,
+        2.3120001941919384
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -16.84799962341785,
+        19.159999817609787
+      ],
+      "afterEye": [
+        -16.84799962341785,
+        0.4400002360343933
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.783999602496635,
+        17.28799985945227
+      ],
+      "afterEye": [
+        -17.783999602496635,
+        -1.4319997221231233
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "afterEye": [
+        -15.91199964433909,
+        -4.239999659359455
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "afterEye": [
+        -15.91199964433909,
+        -4.239999659359455
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -14.975999665260304,
+        12.607999964058394
+      ],
+      "afterEye": [
+        -14.975999665260304,
+        -6.111999617517
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/6",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -16.84799962341785,
+        15.415999901294725
+      ],
+      "afterEye": [
+        -16.84799962341785,
+        -3.3039996802806684
+      ]
+    },
+    {
+      "pose": "cruise/-1/0/7",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -14.975999665260304,
+        15.415999901294725
+      ],
+      "afterEye": [
+        -14.975999665260304,
+        -3.3039996802806684
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -11.948135560779178,
+        24.212412670961896
+      ],
+      "afterEye": [
+        -16.033394013540374,
+        5.94361282783251
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -12.35666140605528,
+        22.38553268664893
+      ],
+      "afterEye": [
+        -16.441919858816505,
+        4.116732843519543
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -13.678627243487881,
+        20.762915624974056
+      ],
+      "afterEye": [
+        -17.763885696249105,
+        2.4941157818446698
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "afterEye": [
+        -16.549794479850334,
+        -0.6547300399008691
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "afterEye": [
+        -16.549794479850334,
+        -0.6547300399008691
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -11.959621880208772,
+        15.582926896277513
+      ],
+      "afterEye": [
+        -16.044880332969996,
+        -2.685872946851873
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/6",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -13.173713096607514,
+        18.731772718023052
+      ],
+      "afterEye": [
+        -17.258971549368766,
+        0.4629728748936657
+      ]
+    },
+    {
+      "pose": "cruise/-1/-1/7",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -11.346833112294576,
+        18.32324687274695
+      ],
+      "afterEye": [
+        -15.4320915650558,
+        0.0544470296175632
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -20.93570415685383,
+        16.858947455991654
+      ],
+      "afterEye": [
+        -16.850445704092607,
+        -1.4098523871377893
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -20.527178311577728,
+        15.032067471678715
+      ],
+      "afterEye": [
+        -16.441919858816505,
+        -3.236732371450728
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -21.032092458458067,
+        13.00092456472774
+      ],
+      "afterEye": [
+        -16.946834005696843,
+        -5.2678752784017036
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "afterEye": [
+        -14.507165253469708,
+        -7.599669409595009
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "afterEye": [
+        -14.507165253469708,
+        -7.599669409595009
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -17.27045786879833,
+        9.046513371859533
+      ],
+      "afterEye": [
+        -13.185199416037108,
+        -9.22228647126991
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/6",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -19.710126621025466,
+        11.378307503052838
+      ],
+      "afterEye": [
+        -15.624868168264243,
+        -6.890492340076605
+      ]
+    },
+    {
+      "pose": "cruise/-1/1/7",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.883246636712528,
+        11.786833348328969
+      ],
+      "afterEye": [
+        -13.797988183951304,
+        -6.481966494800474
+      ]
+    },
+    {
+      "pose": "cruise/1/0/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -16.84799962341785,
+        21.031999775767332
+      ],
+      "afterEye": [
+        -16.84799962341785,
+        2.3120001941919384
+      ]
+    },
+    {
+      "pose": "cruise/1/0/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -16.84799962341785,
+        19.159999817609787
+      ],
+      "afterEye": [
+        -16.84799962341785,
+        0.4400002360343933
+      ]
+    },
+    {
+      "pose": "cruise/1/0/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.783999602496635,
+        17.28799985945227
+      ],
+      "afterEye": [
+        -17.783999602496635,
+        -1.4319997221231233
+      ]
+    },
+    {
+      "pose": "cruise/1/0/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "afterEye": [
+        -15.91199964433909,
+        -4.239999659359455
+      ]
+    },
+    {
+      "pose": "cruise/1/0/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -15.91199964433909,
+        14.479999922215939
+      ],
+      "afterEye": [
+        -15.91199964433909,
+        -4.239999659359455
+      ]
+    },
+    {
+      "pose": "cruise/1/0/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -14.975999665260304,
+        12.607999964058394
+      ],
+      "afterEye": [
+        -14.975999665260304,
+        -6.111999617517
+      ]
+    },
+    {
+      "pose": "cruise/1/0/6",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -16.84799962341785,
+        15.415999901294725
+      ],
+      "afterEye": [
+        -16.84799962341785,
+        -3.3039996802806684
+      ]
+    },
+    {
+      "pose": "cruise/1/0/7",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -14.975999665260304,
+        15.415999901294725
+      ],
+      "afterEye": [
+        -14.975999665260304,
+        -3.3039996802806684
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -11.948135560779178,
+        24.212412670961896
+      ],
+      "afterEye": [
+        -16.033394013540374,
+        5.94361282783251
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -12.35666140605528,
+        22.38553268664893
+      ],
+      "afterEye": [
+        -16.441919858816505,
+        4.116732843519543
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -13.678627243487881,
+        20.762915624974056
+      ],
+      "afterEye": [
+        -17.763885696249105,
+        2.4941157818446698
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "afterEye": [
+        -16.549794479850334,
+        -0.6547300399008691
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -12.46453602708911,
+        17.614069803228517
+      ],
+      "afterEye": [
+        -16.549794479850334,
+        -0.6547300399008691
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -11.959621880208772,
+        15.582926896277513
+      ],
+      "afterEye": [
+        -16.044880332969996,
+        -2.685872946851873
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/6",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -13.173713096607514,
+        18.731772718023052
+      ],
+      "afterEye": [
+        -17.258971549368766,
+        0.4629728748936657
+      ]
+    },
+    {
+      "pose": "cruise/1/-1/7",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -11.346833112294576,
+        18.32324687274695
+      ],
+      "afterEye": [
+        -15.4320915650558,
+        0.0544470296175632
+      ]
+    },
+    {
+      "pose": "cruise/1/1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -20.93570415685383,
+        16.858947455991654
+      ],
+      "afterEye": [
+        -16.850445704092607,
+        -1.4098523871377893
+      ]
+    },
+    {
+      "pose": "cruise/1/1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -20.527178311577728,
+        15.032067471678715
+      ],
+      "afterEye": [
+        -16.441919858816505,
+        -3.236732371450728
+      ]
+    },
+    {
+      "pose": "cruise/1/1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -21.032092458458067,
+        13.00092456472774
+      ],
+      "afterEye": [
+        -16.946834005696843,
+        -5.2678752784017036
+      ]
+    },
+    {
+      "pose": "cruise/1/1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "afterEye": [
+        -14.507165253469708,
+        -7.599669409595009
+      ]
+    },
+    {
+      "pose": "cruise/1/1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.59242370623093,
+        10.669130433534434
+      ],
+      "afterEye": [
+        -14.507165253469708,
+        -7.599669409595009
+      ]
+    },
+    {
+      "pose": "cruise/1/1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -17.27045786879833,
+        9.046513371859533
+      ],
+      "afterEye": [
+        -13.185199416037108,
+        -9.22228647126991
+      ]
+    },
+    {
+      "pose": "cruise/1/1/6",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -19.710126621025466,
+        11.378307503052838
+      ],
+      "afterEye": [
+        -15.624868168264243,
+        -6.890492340076605
+      ]
+    },
+    {
+      "pose": "cruise/1/1/7",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.883246636712528,
+        11.786833348328969
+      ],
+      "afterEye": [
+        -13.797988183951304,
+        -6.481966494800474
+      ]
+    },
+    {
+      "pose": "chase/-1/0/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -18.719999581575394,
+        20.095999796688545
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        1.3760002151131516
+      ]
+    },
+    {
+      "pose": "chase/-1/0/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -18.719999581575394,
+        19.159999817609787
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        0.4400002360343933
+      ]
+    },
+    {
+      "pose": "chase/-1/0/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.783999602496635,
+        16.351999880373484
+      ],
+      "afterEye": [
+        -17.783999602496635,
+        -2.36799970120191
+      ]
+    },
+    {
+      "pose": "chase/-1/0/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.719999581575394,
+        15.415999901294725
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        -3.3039996802806684
+      ]
+    },
+    {
+      "pose": "chase/-1/0/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.719999581575394,
+        16.351999880373484
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        -2.36799970120191
+      ]
+    },
+    {
+      "pose": "chase/-1/0/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.783999602496635,
+        18.223999838531
+      ],
+      "afterEye": [
+        -17.783999602496635,
+        -0.4959997430443934
+      ]
+    },
+    {
+      "pose": "chase/-1/-1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -13.979278467730182,
+        23.70749852408153
+      ],
+      "afterEye": [
+        -18.064536920491378,
+        5.438698680952143
+      ]
+    },
+    {
+      "pose": "chase/-1/-1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -14.18354139036822,
+        22.79405853192506
+      ],
+      "afterEye": [
+        -18.268799843129443,
+        4.525258688795674
+      ]
+    },
+    {
+      "pose": "chase/-1/-1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -13.882890166125947,
+        19.849475632817587
+      ],
+      "afterEye": [
+        -17.96814861888717,
+        1.5806757896882004
+      ]
+    },
+    {
+      "pose": "chase/-1/-1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -15.000593080920481,
+        19.140298563299183
+      ],
+      "afterEye": [
+        -19.085851533681705,
+        0.8714987201697966
+      ]
+    },
+    {
+      "pose": "chase/-1/-1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -14.796330158282416,
+        20.053738555455652
+      ],
+      "afterEye": [
+        -18.88158861104364,
+        1.7849387123262659
+      ]
+    },
+    {
+      "pose": "chase/-1/-1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -13.474364320849816,
+        21.676355617130525
+      ],
+      "afterEye": [
+        -17.55962277361104,
+        3.407555774001139
+      ]
+    },
+    {
+      "pose": "chase/-1/1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -22.558321218528718,
+        15.536981618559054
+      ],
+      "afterEye": [
+        -18.47306276576751,
+        -2.7318182245703895
+      ]
+    },
+    {
+      "pose": "chase/-1/1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -22.354058295890653,
+        14.623541626402584
+      ],
+      "afterEye": [
+        -18.268799843129443,
+        -3.645258216726859
+      ]
+    },
+    {
+      "pose": "chase/-1/1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -20.82782953582,
+        12.087484572571242
+      ],
+      "afterEye": [
+        -16.742571083058778,
+        -6.181315270558201
+      ]
+    },
+    {
+      "pose": "chase/-1/1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -21.537006605338405,
+        10.969781657776707
+      ],
+      "afterEye": [
+        -17.45174815257718,
+        -7.299018185352736
+      ]
+    },
+    {
+      "pose": "chase/-1/1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -21.74126952797647,
+        11.883221649933205
+      ],
+      "afterEye": [
+        -17.656011075215247,
+        -6.385578193196238
+      ]
+    },
+    {
+      "pose": "chase/-1/1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -21.236355381096132,
+        13.91436455688418
+      ],
+      "afterEye": [
+        -17.15109692833491,
+        -4.354435286245263
+      ]
+    },
+    {
+      "pose": "chase/1/0/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -18.719999581575394,
+        20.095999796688545
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        1.3760002151131516
+      ]
+    },
+    {
+      "pose": "chase/1/0/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -18.719999581575394,
+        19.159999817609787
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        0.4400002360343933
+      ]
+    },
+    {
+      "pose": "chase/1/0/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.783999602496635,
+        16.351999880373484
+      ],
+      "afterEye": [
+        -17.783999602496635,
+        -2.36799970120191
+      ]
+    },
+    {
+      "pose": "chase/1/0/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.719999581575394,
+        15.415999901294725
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        -3.3039996802806684
+      ]
+    },
+    {
+      "pose": "chase/1/0/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -18.719999581575394,
+        16.351999880373484
+      ],
+      "afterEye": [
+        -18.719999581575394,
+        -2.36799970120191
+      ]
+    },
+    {
+      "pose": "chase/1/0/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -17.783999602496635,
+        18.223999838531
+      ],
+      "afterEye": [
+        -17.783999602496635,
+        -0.4959997430443934
+      ]
+    },
+    {
+      "pose": "chase/1/-1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -13.979278467730182,
+        23.70749852408153
+      ],
+      "afterEye": [
+        -18.064536920491378,
+        5.438698680952143
+      ]
+    },
+    {
+      "pose": "chase/1/-1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -14.18354139036822,
+        22.79405853192506
+      ],
+      "afterEye": [
+        -18.268799843129443,
+        4.525258688795674
+      ]
+    },
+    {
+      "pose": "chase/1/-1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -13.882890166125947,
+        19.849475632817587
+      ],
+      "afterEye": [
+        -17.96814861888717,
+        1.5806757896882004
+      ]
+    },
+    {
+      "pose": "chase/1/-1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 1,
+      "beforeEye": [
+        -15.000593080920481,
+        19.140298563299183
+      ],
+      "afterEye": [
+        -19.085851533681705,
+        0.8714987201697966
+      ]
+    },
+    {
+      "pose": "chase/1/-1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -14.796330158282416,
+        20.053738555455652
+      ],
+      "afterEye": [
+        -18.88158861104364,
+        1.7849387123262659
+      ]
+    },
+    {
+      "pose": "chase/1/-1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -13.474364320849816,
+        21.676355617130525
+      ],
+      "afterEye": [
+        -17.55962277361104,
+        3.407555774001139
+      ]
+    },
+    {
+      "pose": "chase/1/1/0",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -22.558321218528718,
+        15.536981618559054
+      ],
+      "afterEye": [
+        -18.47306276576751,
+        -2.7318182245703895
+      ]
+    },
+    {
+      "pose": "chase/1/1/1",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -22.354058295890653,
+        14.623541626402584
+      ],
+      "afterEye": [
+        -18.268799843129443,
+        -3.645258216726859
+      ]
+    },
+    {
+      "pose": "chase/1/1/2",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -20.82782953582,
+        12.087484572571242
+      ],
+      "afterEye": [
+        -16.742571083058778,
+        -6.181315270558201
+      ]
+    },
+    {
+      "pose": "chase/1/1/3",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -21.537006605338405,
+        10.969781657776707
+      ],
+      "afterEye": [
+        -17.45174815257718,
+        -7.299018185352736
+      ]
+    },
+    {
+      "pose": "chase/1/1/4",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": -1,
+      "beforeEye": [
+        -21.74126952797647,
+        11.883221649933205
+      ],
+      "afterEye": [
+        -17.656011075215247,
+        -6.385578193196238
+      ]
+    },
+    {
+      "pose": "chase/1/1/5",
+      "rawCellIdentical": true,
+      "eyeMapIdentical": true,
+      "heightDelta": 0,
+      "beforeEye": [
+        -21.236355381096132,
+        13.91436455688418
+      ],
+      "afterEye": [
+        -17.15109692833491,
+        -4.354435286245263
+      ]
+    }
+  ]
+}

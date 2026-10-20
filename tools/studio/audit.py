@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Evidence collector. Does not claim to replace the 15-role human/agent review."""
-import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
+import argparse, base64, binascii, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
@@ -11,6 +11,31 @@ FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
 # overhead covers its two served-build identity checks and server startup; it
 # does not change or retry a harness's own deadline.
 RUNNER_OVERHEAD_SECONDS = 180
+
+def capture_log(path):
+    """Hash and retain the SAME closed-file bytes; a rerun is not provenance."""
+    payload = path.read_bytes()
+    return {'log': path.name, 'sha256': hashlib.sha256(payload).hexdigest(),
+            'bytes': len(payload), 'content_base64': base64.b64encode(payload).decode('ascii')}
+
+def validate_logs(root, records):
+    """Fail closed on post-capture changes, missing files or damaged snapshots."""
+    files = []
+    for record in records:
+        if 'log' not in record:
+            continue
+        item = {'log': record['log'], 'disk_matches': False, 'snapshot_matches': False}
+        try:
+            payload = base64.b64decode(record['content_base64'], validate=True)
+            item['snapshot_matches'] = (len(payload) == record['bytes'] and
+                hashlib.sha256(payload).hexdigest() == record['sha256'])
+            disk = (root / record['log']).read_bytes()
+            item['disk_matches'] = disk == payload and item['snapshot_matches']
+        except (OSError, KeyError, ValueError, TypeError, binascii.Error) as error:
+            item['error'] = str(error)
+        files.append(item)
+    return {'ok': bool(files) and all(x['disk_matches'] and x['snapshot_matches'] for x in files),
+            'files': files}
 
 def suite_budgets(source):
     suite_match = re.search(r"const SUITE = \[(.*?)\n\];", source, re.S)
@@ -84,7 +109,7 @@ def main():
         entry = {'name': name, 'status': state, 'exit_code': code,
                  'seconds': (datetime.datetime.now(datetime.timezone.utc)-started).total_seconds(),
                  'timeout_seconds': timeout,
-                 'log': log.name, 'sha256': hashlib.sha256(log.read_bytes()).hexdigest()}
+                 **capture_log(log)}
         campaign_result = out/'campaign-ch1'/'result.json'
         if name == 'campaign-ch1' and campaign_result.exists():
             entry['campaign'] = json.loads(campaign_result.read_text())
@@ -144,7 +169,13 @@ def main():
         # and at the end: the served build must still be the one pinned at the start
         ready = identity('end', snapshot)
     report['complete_requested_scope'] = ready and len([x for x in report['results'] if x['name'] in names]) == len(names)
-    report['passed'] = report['complete_requested_scope'] and all(x['status']=='pass' for x in report['results'])
+    # Preserve the captured execution even if a raw log is later lost, and never
+    # certify a different/missing on-disk artifact from its stale recorded hash.
+    integrity = validate_logs(out, report['results'])
+    (out/'log-integrity.json').write_text(json.dumps(integrity, indent=2)+'\n')
+    report['log_integrity'] = integrity
+    report['passed'] = (report['complete_requested_scope'] and integrity['ok'] and
+                        all(x['status']=='pass' for x in report['results']))
     report['finished_utc'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
     lines = ['# Automated evidence', '', 'Base: `'+report['base_commit']+'`',

@@ -1,0 +1,328 @@
+{
+  "scope": "STAGED placement/state/animation/facing and manual eye-travel; not natural AI, input traversal or motion-video certification.",
+  "parent": "f19aee0bc93400944402aeee45db00068abd8ebd",
+  "samples": [
+    {
+      "state": "cruise",
+      "dir": 1,
+      "build": "1d3a7c72250c",
+      "actorStrip": "talonMiniCruise8:5",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        573.0240003347396,
+        368.6079999640584
+      ],
+      "file": "before-cruise-1.png"
+    },
+    {
+      "state": "chase",
+      "dir": 1,
+      "build": "1d3a7c72250c",
+      "actorStrip": "talonMiniChase6:5",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        566.763644618904,
+        369.91436455688415
+      ],
+      "file": "before-chase-1.png"
+    },
+    {
+      "state": "perch",
+      "dir": 1,
+      "build": "1d3a7c72250c",
+      "actorStrip": "talonMiniPerch:0",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        612.1056186611975,
+        335.2705991092074
+      ],
+      "file": "before-perch-1.png"
+    },
+    {
+      "state": "hold",
+      "dir": 1,
+      "build": "1d3a7c72250c",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.297769558143,
+        356.47318523384797
+      ],
+      "file": "before-hold-1.png"
+    },
+    {
+      "state": "packet",
+      "dir": 1,
+      "build": "1d3a7c72250c",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.297769558143,
+        356.47318523384797
+      ],
+      "file": "before-packet-1.png"
+    },
+    {
+      "state": "rise",
+      "dir": 1,
+      "build": "1d3a7c72250c",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        586.1973625271717,
+        353.8717887618551
+      ],
+      "file": "before-rise-1.png"
+    },
+    {
+      "state": "cruise",
+      "dir": -1,
+      "build": "5b19cbfbf709",
+      "actorStrip": "talonMiniCruise8:5",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        573.0240003347396,
+        349.888000382483
+      ],
+      "file": "after-cruise--1.png"
+    },
+    {
+      "state": "chase",
+      "dir": -1,
+      "build": "5b19cbfbf709",
+      "actorStrip": "talonMiniChase6:5",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        570.440377226389,
+        359.407555774001
+      ],
+      "file": "after-chase--1.png"
+    },
+    {
+      "state": "perch",
+      "dir": -1,
+      "build": "5b19cbfbf709",
+      "actorStrip": "talonMiniPerch:0",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        563.8943813388025,
+        335.2705991092074
+      ],
+      "file": "after-perch--1.png"
+    },
+    {
+      "state": "hold",
+      "dir": -1,
+      "build": "5b19cbfbf709",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.297769558143,
+        356.47318523384797
+      ],
+      "file": "after-hold--1.png"
+    },
+    {
+      "state": "packet",
+      "dir": -1,
+      "build": "5b19cbfbf709",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.297769558143,
+        356.47318523384797
+      ],
+      "file": "after-packet--1.png"
+    },
+    {
+      "state": "rise",
+      "dir": -1,
+      "build": "5b19cbfbf709",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.6385591551178,
+        354.3738905655006
+      ],
+      "file": "after-rise--1.png"
+    },
+    {
+      "state": "cruise",
+      "dir": 1,
+      "build": "5b19cbfbf709",
+      "actorStrip": "talonMiniCruise8:5",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        573.0240003347396,
+        349.888000382483
+      ],
+      "file": "after-cruise-1.png"
+    },
+    {
+      "state": "chase",
+      "dir": 1,
+      "build": "5b19cbfbf709",
+      "actorStrip": "talonMiniChase6:5",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        570.8489030716651,
+        351.6455647137547
+      ],
+      "file": "after-chase-1.png"
+    },
+    {
+      "state": "perch",
+      "dir": 1,
+      "build": "5b19cbfbf709",
+      "actorStrip": "talonMiniPerch:0",
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        612.1056186611975,
+        335.2705991092074
+      ],
+      "file": "after-perch-1.png"
+    },
+    {
+      "state": "hold",
+      "dir": 1,
+      "build": "5b19cbfbf709",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.297769558143,
+        356.47318523384797
+      ],
+      "file": "after-hold-1.png"
+    },
+    {
+      "state": "packet",
+      "dir": 1,
+      "build": "5b19cbfbf709",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        585.297769558143,
+        356.47318523384797
+      ],
+      "file": "after-packet-1.png"
+    },
+    {
+      "state": "rise",
+      "dir": 1,
+      "build": "5b19cbfbf709",
+      "actorStrip": null,
+      "lastGlobalStrip": "hzdIdle:0",
+      "hitbox": {
+        "w": 26,
+        "h": 22
+      },
+      "eye": "red",
+      "anchor": [
+        586.1973625271717,
+        353.8717887618551
+      ],
+      "file": "after-rise-1.png"
+    }
+  ],
+  "errors": [],
+  "served": {
+    "before": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+    "after": "ce15f05df20e48f75187d4a7645543a3ff0f7d0c4857e561100b0a47ed20d01d"
+  },
+  "trail": {
+    "classification": "red",
+    "moving": {
+      "red": 34,
+      "purple": 0,
+      "live": 34
+    },
+    "stillLive": 0,
+    "glow": true
+  },
+  "completed": true
+}

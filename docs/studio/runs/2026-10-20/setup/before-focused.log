@@ -1,0 +1,49 @@
+
+── portrait-rotation  — rotation invalidates stale observer geometry; CUT/panels/repair stay contained with visible guidance
+FAILED: ok touch detected without forcing enabled true
+ok cut-portrait expected live overlay "CUT"
+FAIL cut-portrait fresh viewport geometry {"raw":[390,844],"visible":[844,390],"portrait":false}
+FAIL cut-portrait both canvases contained {"cv":{"x":130.59375,"y":31.078125,"width":582.796875,"height":327.8125,"right":713.390625,"bottom":358.890625},"tc":{"x":0,"y":0,"width":844,"height":390,"right":844,"bottom":390}}
+FAIL cut-portrait rotation instruction actually painted and visible {"paint":null,"alpha":235,"top":""}
+ok cut-landscape expected live overlay "CUT"
+FAIL cut-landscape fresh viewport geometry {"raw":[844,390],"visible":[390,844],"portrait":true}
+FAIL cut-landscape both canvases contained {"cv":{"x":45,"y":337.625,"width":300,"height":168.75,"right":345,"bottom":506.375},"tc":{"x":0,"y":0,"width":390,"height":844,"right":390,"bottom":844}}
+ok panels-portrait expected live overlay "PANELS"
+FAIL panels-portrait fresh viewport geometry {"raw":[390,844],"visible":[844,390],"portrait":false}
+FAIL panels-portrait both canvases contained {"cv":{"x":130.59375,"y":31.078125,"width":582.796875,"height":327.8125,"right":713.390625,"bottom":358.890625},"tc":{"x":0,"y":0,"width":844,"height":390,"right":844,"bottom":390}}
+FAIL panels-portrait rotation instruction actually painted and visible {"paint":{"text":"Rotate your phone to landscape","x":195,"y":422,"width":318.583984375,"time":1290.8000000002794},"alpha":235,"top":""}
+ok panels-landscape expected live overlay "PANELS"
+FAIL panels-landscape fresh viewport geometry {"raw":[844,390],"visible":[390,844],"portrait":true}
+FAIL panels-landscape both canvases contained {"cv":{"x":45,"y":337.625,"width":300,"height":168.75,"right":345,"bottom":506.375},"tc":{"x":0,"y":0,"width":390,"height":844,"right":390,"bottom":844}}
+ok repair-portrait expected live overlay "REPAIR"
+FAIL repair-portrait fresh viewport geometry {"raw":[390,844],"visible":[844,390],"portrait":false}
+FAIL repair-portrait both canvases contained {"cv":{"x":130.59375,"y":31.078125,"width":582.796875,"height":327.8125,"right":713.390625,"bottom":358.890625},"tc":{"x":0,"y":0,"width":844,"height":390,"right":844,"bottom":390}}
+ok repair-portrait repair owns readable contained card {"card":{"x":7.796875,"y":183.390625,"width":374.390625,"height":477.203125,"right":382.1875,"bottom":660.59375},"step":0}
+ok repair-landscape expected live overlay "REPAIR"
+FAIL repair-landscape fresh viewport geometry {"raw":[844,390],"visible":[390,844],"portrait":true}
+FAIL repair-landscape both canvases contained {"cv":{"x":45,"y":337.625,"width":300,"height":168.75,"right":345,"bottom":506.375},"tc":{"x":0,"y":0,"width":390,"height":844,"right":390,"bottom":844}}
+ok repair-landscape repair owns readable contained card {"card":{"x":25.3125,"y":4.078125,"width":793.359375,"height":381.84375,"right":818.671875,"bottom":385.921875},"step":0}
+ok purposeful same-viewport host clip retained {"visible":[824,320],"offset":[10,20],"retained":true}
+ok zero page errors []
+Command failed: node /workspace/scratch/b4e9aa23d77e/HZD-99/tests/portrait-rotation.cjs
+   (portrait-rotation: 4.8 s)
+
+── foescale  — every machine reads in the hero's weight class
+FAILED: ── foescale — every machine reads in the hero's weight class
+
+  ok   the hero measures at all, from her real art  71px via hzdIdle:0
+  ok   no machine reads as scenery beside her (>= 0.5 of her height)  12 kinds
+  ok   ...and none of them reads as big as her — the SCALE LAW holds  max 0.9x
+  ok   no page errors
+  ok   the loaded flier is measured from its authored strip  {"assets":[{"key":"talonMiniCruise8","width":1536,"height":192,"tier":3},{"key":"talonMiniChase6","width":1152,"height":192,"tier":3}],"renderer":"talonMiniCruise8:5"}
+  ok   every full wingbeat sample uses the intended authored strip  160 samples
+  ok   the complete wingbeat stays in the same unchanged size band  {"min":0.5070422535211268,"max":0.9577464788732394,"tooSmall":0,"tooBig":0}
+  FAIL every loaded flight eye stays registered around its body in both facings  {"samples":160,"bad":72,"first":[{"mode":"cruise","dir":-1,"cell":0,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]},{"mode":"cruise","dir":-1,"cell":1,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]},{"mode":"cruise","dir":-1,"cell":2,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]},{"mode":"cruise","dir":-1,"cell":3,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]}],"vertical":[10.96978165777665,23.7074985240815]}
+
+  hero 71px  ·  flier 0.54  bat 0.61  surge 0.7  kiln 0.72  rime 0.75  snare 0.75  guard 0.77  blob 0.85  turret 0.87  sage 0.87  crawler 0.9  hopper 0.9
+
+FAILED: every loaded flight eye stays registered around its body in both facings — {"samples":160,"bad":72,"first":[{"mode":"cruise","dir":-1,"cell":0,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]},{"mode":"cruise","dir":-1,"cell":1,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]},{"mode":"cruise","dir":-1,"cell":2,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]},{"mode":"cruise","dir":-1,"cell":3,"height":67,"renderer":"talonMiniCruise8:0","expected":"talonMiniCruise8","eye":[-16.84799962341785,21.031999775767332],"body":[26,22]}],"vertical":[10.96978165777665,23.7074985240815]}
+Command failed: node /workspace/scratch/b4e9aa23d77e/HZD-99/tests/foescale.cjs
+   (foescale: 7.2 s)
+
+2 harness(es) failed

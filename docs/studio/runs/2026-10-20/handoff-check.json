@@ -1,0 +1,11 @@
+{
+  "scope": "Deliverable coherence, not game/device/art approval",
+  "stagedPaths": 1075,
+  "syntaxFiles": 24,
+  "localLinks": 146,
+  "singlePrompt": true,
+  "approvedAssetBytesUnchanged": true,
+  "dependencyFilesUnchanged": true,
+  "openingHarnessStatus": "fail",
+  "archivedOpeningFrameHashes": 17
+}

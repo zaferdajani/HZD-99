@@ -1,0 +1,16 @@
+
+── terrainrun  — irregularity is not elevation: she runs it, and so do they
+── terrainrun — irregularity is not elevation
+
+  ok   nothing under a step stops her  every halt was a rise of 24 px or more
+  ok   the clock ran in every room  A1 5.03s/121f@42ms  A2 5.02s/278f@18ms  CV1 5.02s/213f@24ms  CV2 5.02s/256f@20ms  C2 5.02s/291f@17ms
+       A1: stopped at a real 32px step 0px in — a jump, not a fault
+  ok   ...and she gets moving in every room she was put in  A1 0, A2 631, CV1 776, CV2 360, C2 1124
+  ok   no walker is told the ground has run out under its own feet  6 walkers, worst 1% of frames
+  ok   ...and none of them is vibrating in place  worst is 1 turns in 360 frames (it was 592 in 480)
+  ok   ...and the roster covers real ground  median patrol 585px across 6 walkers (range 110-728)
+
+all good
+   (terrainrun: 84.2 s)
+
+all 1 harnesses ran

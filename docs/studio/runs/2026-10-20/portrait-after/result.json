@@ -1,0 +1,325 @@
+{
+  "baseline": false,
+  "scope": "staged mobile-viewport keyboard/browser diagnostic",
+  "samples": [
+    {
+      "build": "5b19cbfbf709",
+      "state": "CUT",
+      "inner": [
+        390,
+        844
+      ],
+      "raw": [
+        390,
+        844
+      ],
+      "visible": [
+        390,
+        844
+      ],
+      "portrait": true,
+      "pad": false,
+      "vis": null,
+      "cv": {
+        "x": 45,
+        "y": 337.625,
+        "width": 300,
+        "height": 168.75,
+        "right": 345,
+        "bottom": 506.375
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "paint": {
+        "text": "Rotate your phone to landscape",
+        "x": 195,
+        "y": 422,
+        "width": 318.583984375,
+        "time": 697.7000000001863
+      },
+      "bgAlpha": 242,
+      "centerTop": "cbloadn",
+      "repairCard": null,
+      "name": "cut-portrait",
+      "screenshot": "cut-portrait.png",
+      "sha256": "c1ec84206084ecbe6978f2a30a8d3b86c2798df7a258eb28d2bf80a577016fc2"
+    },
+    {
+      "build": "5b19cbfbf709",
+      "state": "CUT",
+      "inner": [
+        844,
+        390
+      ],
+      "raw": [
+        844,
+        390
+      ],
+      "visible": [
+        844,
+        390
+      ],
+      "portrait": false,
+      "pad": false,
+      "vis": null,
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "paint": {
+        "text": "Rotate your phone to landscape",
+        "x": 195,
+        "y": 422,
+        "width": 318.583984375,
+        "time": 766.2000000001863
+      },
+      "bgAlpha": 235,
+      "centerTop": "tc",
+      "repairCard": null,
+      "name": "cut-landscape",
+      "screenshot": "cut-landscape.png",
+      "sha256": "790fa0d6ff34baa8a7c0c1d7e08c7d42bef0c561aa6d606786fc809a812a77a0"
+    },
+    {
+      "build": "5b19cbfbf709",
+      "state": "PANELS",
+      "inner": [
+        390,
+        844
+      ],
+      "raw": [
+        390,
+        844
+      ],
+      "visible": [
+        390,
+        844
+      ],
+      "portrait": true,
+      "pad": false,
+      "vis": null,
+      "cv": {
+        "x": 45,
+        "y": 337.625,
+        "width": 300,
+        "height": 168.75,
+        "right": 345,
+        "bottom": 506.375
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "paint": {
+        "text": "Rotate your phone to landscape",
+        "x": 195,
+        "y": 422,
+        "width": 318.583984375,
+        "time": 1642.1000000000931
+      },
+      "bgAlpha": 242,
+      "centerTop": "tc",
+      "repairCard": null,
+      "name": "panels-portrait",
+      "screenshot": "panels-portrait.png",
+      "sha256": "6c72c90592c7bd5487e32e69a5262f576fcac623dfeca36a1b40dba0d73f9b71"
+    },
+    {
+      "build": "5b19cbfbf709",
+      "state": "PANELS",
+      "inner": [
+        844,
+        390
+      ],
+      "raw": [
+        844,
+        390
+      ],
+      "visible": [
+        844,
+        390
+      ],
+      "portrait": false,
+      "pad": false,
+      "vis": null,
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "paint": {
+        "text": "Rotate your phone to landscape",
+        "x": 195,
+        "y": 422,
+        "width": 318.583984375,
+        "time": 1747.6000000000931
+      },
+      "bgAlpha": 235,
+      "centerTop": "tc",
+      "repairCard": null,
+      "name": "panels-landscape",
+      "screenshot": "panels-landscape.png",
+      "sha256": "5657685ae8580d80697fd84c83d620df4860ae1605eb302659a599b92402dff1"
+    },
+    {
+      "build": "5b19cbfbf709",
+      "state": "REPAIR",
+      "inner": [
+        390,
+        844
+      ],
+      "raw": [
+        390,
+        844
+      ],
+      "visible": [
+        390,
+        844
+      ],
+      "portrait": true,
+      "pad": false,
+      "vis": null,
+      "cv": {
+        "x": 45,
+        "y": 337.625,
+        "width": 300,
+        "height": 168.75,
+        "right": 345,
+        "bottom": 506.375
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "paint": {
+        "text": "Rotate your phone to landscape",
+        "x": 195,
+        "y": 422,
+        "width": 318.583984375,
+        "time": 2697.7000000001863
+      },
+      "bgAlpha": 242,
+      "centerTop": "",
+      "repairCard": {
+        "x": 7.796875,
+        "y": 183.390625,
+        "width": 374.390625,
+        "height": 477.203125,
+        "right": 382.1875,
+        "bottom": 660.59375
+      },
+      "repairStep": 0,
+      "name": "repair-portrait",
+      "screenshot": "repair-portrait.png",
+      "sha256": "df4e70f04e585c18343d36c0ee93d6999bbf9dfd43c5e6a104bfe59af9ce9c6a"
+    },
+    {
+      "build": "5b19cbfbf709",
+      "state": "REPAIR",
+      "inner": [
+        844,
+        390
+      ],
+      "raw": [
+        844,
+        390
+      ],
+      "visible": [
+        844,
+        390
+      ],
+      "portrait": false,
+      "pad": false,
+      "vis": null,
+      "cv": {
+        "x": 130.59375,
+        "y": 31.078125,
+        "width": 582.796875,
+        "height": 327.8125,
+        "right": 713.390625,
+        "bottom": 358.890625
+      },
+      "tc": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "paint": {
+        "text": "Rotate your phone to landscape",
+        "x": 195,
+        "y": 422,
+        "width": 318.583984375,
+        "time": 3045.399999999907
+      },
+      "bgAlpha": 235,
+      "centerTop": "",
+      "repairCard": {
+        "x": 25.3125,
+        "y": 4.078125,
+        "width": 793.359375,
+        "height": 381.84375,
+        "right": 818.671875,
+        "bottom": 385.921875
+      },
+      "repairStep": 0,
+      "name": "repair-landscape",
+      "screenshot": "repair-landscape.png",
+      "sha256": "bc4059b4c4c93ccff838fdc47238590f9ad16e4b5906a48785941f115d3f8eb6"
+    }
+  ],
+  "fails": [
+    "cut-portrait rotation instruction actually painted and visible"
+  ],
+  "errors": [],
+  "sameViewportClip": {
+    "visible": [
+      824,
+      320
+    ],
+    "offset": [
+      10,
+      20
+    ],
+    "retained": true
+  }
+}

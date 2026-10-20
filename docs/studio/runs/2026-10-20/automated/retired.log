@@ -1,0 +1,51 @@
+
+── retired  — the deleted art stays deleted, and no creature wears another body while its art loads
+── retired — the deleted art stays deleted, and nothing stands in for it
+  ok   no retired file is on disk
+  ok   the low tier holds only the copies its index names
+  ok   ...and none of them is a retired sheet
+  ok   the eye map measures no retired sheet
+  ok   no retired key is in the manifest
+  ok   the code that drew them is gone
+  ok   the roster declares no row for her, the crawler or the hopper
+  ok   CLAWBYTE A:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE A:crawler: ...and its own animal once the art is here  2136 px
+  ok   CLAWBYTE A:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE A:hopper: ...and its own animal once the art is here  2135 px
+  ok   CLAWBYTE B:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE B:crawler: ...and its own animal once the art is here  2160 px
+  ok   CLAWBYTE B:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE B:hopper: ...and its own animal once the art is here  2135 px
+  ok   CLAWBYTE C:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE C:crawler: ...and its own animal once the art is here  1618 px
+  ok   CLAWBYTE C:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE C:hopper: ...and its own animal once the art is here  1566 px
+  ok   CLAWBYTE D:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE D:crawler: ...and its own animal once the art is here  1618 px
+  ok   CLAWBYTE D:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE D:hopper: ...and its own animal once the art is here  1581 px
+  ok   CLAWBYTE E:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE E:crawler: ...and its own animal once the art is here  1618 px
+  ok   CLAWBYTE E:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE E:hopper: ...and its own animal once the art is here  1581 px
+  ok   CLAWBYTE X:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE X:crawler: ...and its own animal once the art is here  1633 px
+  ok   CLAWBYTE X:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   CLAWBYTE X:hopper: ...and its own animal once the art is here  1566 px
+  ok   the Alpha with its takes withheld is the dark hold, not a still plate  {"px":6287,"tall":1.17,"strip":null}
+  ok   ...and with them it is the filmed take  alRest:3
+  ok   index.html: no page errors
+  ok   NOSTOS A:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   NOSTOS A:crawler: ...and its own animal once the art is here  456 px
+  ok   NOSTOS A:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   NOSTOS A:hopper: ...and its own animal once the art is here  358 px
+  ok   NOSTOS C:crawler: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   NOSTOS C:crawler: ...and its own animal once the art is here  456 px
+  ok   NOSTOS C:hopper: with its art still in flight it draws NOTHING, not another creature  0 px
+  ok   NOSTOS C:hopper: ...and its own animal once the art is here  358 px
+  ok   odyssey.html: no page errors
+
+OK — the retired art is gone, and nothing wears another creature's body while it loads
+   (retired: 11.4 s)
+
+all 1 harnesses ran

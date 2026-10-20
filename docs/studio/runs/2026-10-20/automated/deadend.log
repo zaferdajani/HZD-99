@@ -1,0 +1,37 @@
+
+── deadend  — no broken exits, no one-way doors, no unreachable rooms, every leaf pays
+every room fills the window: yes (77 rooms)
+
+leaf rooms (one way in, one way out):
+  A0B  [A] chest
+  A7   [A] scrap,scrap,scrap
+  B6   [B] item,scrap
+  B3B  [B] scrap
+  V1B  [X] scrap
+  V2   [X] chest,scrap,scrap,scrap
+  C5B  [C] scrap
+  C4   [C] chest,scrap,riddle
+  D1B  [D] scrap
+  D4   [D] item,scrap
+  E1B  [E] scrap
+  E4   [E] item,scrap
+  A11  [A] scrap,scrap
+  A12  [A] scrap,scrap,scrap
+  A13  [A] scrap,scrap
+  CV3  [X] scrap,boss
+  B8   [B] boss
+  C7   [C] boss
+  D6   [D] boss
+  E6   [E] boss
+  GA1D [X] scrap,scrap,scrap
+  GA2D [X] scrap,scrap,scrap
+  GB1D [X] scrap,scrap,scrap
+  GC1D [X] scrap,scrap,scrap
+  GD1D [X] scrap,scrap,scrap
+  GX1D [X] scrap,scrap,scrap
+  GE1D [X] scrap,scrap,scrap
+
+OK — every door leads somewhere and every leaf pays
+   (deadend: 0.8 s)
+
+all 1 harnesses ran

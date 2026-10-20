@@ -33,7 +33,7 @@ function openR(g) { const w = g[0].length; rect(g, w - 1, 11, w - 1, 14, '.'); }
 // horizontal join in the game is a doorway with eleven tiles of rock over her
 // head. Measured across kingdom 1, every one of them reads the same:
 //
-//     ###########....##        A1|A2, A2|A10, A10|A3, A3|A4 — all of them
+//     ###########....##        A1|A2, A2|A3, A3|A4 — the main meadow road
 //
 // The camera carries through a crossing now (tests/cross.cjs) and the room
 // under it keeps running — but it carries her through a DOOR, and two rooms
@@ -759,13 +759,13 @@ const ROOMS = {
       hline(g, 25, 28, 11, '='); hline(g, 40, 44, 11, '=');
       hline(g, 33, 36, 12, '='); hline(g, 48, 51, 12, '=');
       // ---- THE EAST THIRD IS THE VISTA ------------------------------------
-      // This is what the room was widened FOR. A2 is the kingdom's hub and the
-      // last room before the Alpha, and it used to end four tiles after the
-      // hopper — so the pack's den arrived with no warning that anything was
-      // coming. The ground climbs here instead, over spoil and a walkway that
-      // came down on one end, and from the crest the road east is visible
-      // before she is on it. A rise she does not have to take: the scrap on
-      // top is what it pays, and the flat floor below it is still the way on.
+      // This is what the room was widened FOR. A2 is the kingdom's hub; its
+      // main road continues east to the camp, not through the Alpha's den.
+      // That optional forged-blade detour has its own depth door off this hub.
+      // The ground climbs over spoil and a walkway that came down on one end;
+      // from the crest the road east is visible before she is on it. A rise
+      // she does not have to take: the scrap on top is what it pays, and the
+      // flat floor below it is still the way on.
       mound(g, 58, 72, 4, 53);
       gantry(g, 63, 71, 8, 2);
       // and a hulk lying across the last of it, so the room ends on something
@@ -787,12 +787,11 @@ const ROOMS = {
       });
       rect(g, 80, 12, 81, 13, 'B'); rect(g, 80, 14, 81, 14, '.');
     } },
-  // ---- THE DEN. The first fight in the game you can lose, and it is on the
-  // way rather than off it: the pack has been in the meadow since the first
-  // room, and this is where the thing that leads it has been the whole time.
-  // It sits between the meadow and the save point on purpose — you meet the
-  // Alpha, you take the pack, and THEN you walk into the room with the bench
-  // and the trader in it, which is where the run's first breath is.
+  // ---- THE OPTIONAL DEN. The corrupted pack's leader waits in a depth
+  // detour off A2, available after Ratchet forges the white blade. His Lost
+  // Wardens lead explains why to come: freeing the Alpha befriends the pack
+  // and opens its supply cache. The main meadow road goes directly to A3;
+  // neither the camp save point nor NULLFANG requires this optional fight.
   A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: {},
     ents: [['boss', 27, 15, 'alpha']],
     build(g) {

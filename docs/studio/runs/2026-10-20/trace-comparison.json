@@ -1,0 +1,19 @@
+{
+  "scope": "Duplicate timestamped progress-line retention, not fresh gameplay or recovery of unknown lost bytes. Full original runner log remains authoritative and hash-checked.",
+  "base": "/workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-20/automated",
+  "wrapperSha256": "05cfde588561485204bc5083ddd903c1fe8dbe559d2d1b61b1a76d638aa10622",
+  "nestedSha256": "0dac7390bccb7bba9a7abbe1bee8ead1a83ccda7b363344609bf178d249395d6",
+  "wrapperLines": 1575,
+  "nestedLines": 1572,
+  "missingFromNested": [
+    "[01:02] CHIP out | Leave | The door has been open a long time — walk out",
+    "[01:02] FLAG +tutI",
+    "[01:02] FLAG +tutId",
+    "[04:17] TOAST The rock gives way — the tunnel is open, and it is breathing."
+  ],
+  "extraInNested": [
+    "[00:00] BOOT cleared browser storage; difficulty row 0; video off"
+  ],
+  "identicalProgressLines": false,
+  "campaignCertified": false
+}

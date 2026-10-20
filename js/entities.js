@@ -10405,6 +10405,11 @@ function drawEnemyTell(c, e, cx) {
 // fallback (24px versus 56px at the same pose, hero71). One constant size for
 // both flight strips restores body readability without flattening wingbeats,
 // changing hitboxes, or scaling each pose to a convenient measured height.
+// The torso/core is near 70% of these square cells, not their empty centre.
+// Register that body around the collider; infEyeArt follows the SAME transform.
+// One fixed origin for both cycles keeps the wingbeat, bank and authored optics
+// intact. Moving the eye map alone would detach the glow from its actual head.
+const TALON_MINI_ORIGIN_Y = 0.70;
 const TALON_MINI = {
   cruise: { img: 'talonMiniCruise8', cells: 8, beat: 0.7, w: 3.75 },
   chase:  { img: 'talonMiniChase6',  cells: 6, beat: 0.42, w: 3.75 },
@@ -10433,7 +10438,7 @@ function drawFlierMini(c, e) {
       const cell = Math.floor(((((e.anim || 0) / T.beat) % 1) + 1) % 1 * T.cells);
       if (e.hurtT > 0) c.globalAlpha = 0.72;
       if (e.hypnoT > 0) c.globalAlpha = 0.85;
-      ok = typeof drawStripCell === 'function' && drawStripCell(c, T.img, cell, T.cells, cx, cy + sh / 2, sh, false);
+      ok = typeof drawStripCell === 'function' && drawStripCell(c, T.img, cell, T.cells, cx, cy + sh * (1 - TALON_MINI_ORIGIN_Y), sh, false);
       c.globalAlpha = 1;
       if (!ok) ok = drawEagleMini(c, e);
     } finally { c.restore(); }

@@ -1,0 +1,21 @@
+// ARCHIVED FAILED ATTEMPT SOURCE. Evidence only; do not execute or register.
+// External no-progress stop, NOT a game result or a replacement certification.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'../../../../..'),run=path.dirname(__dirname),file=path.join(run,'automated/campaign-ch1/campaign.log');
+const raw=fs.readFileSync(file),lines=raw.toString().split('\n');
+const matches=lines.filter(x=>/CV1B x=896 y=156 vx=0 on cores=6\/7 volts=99 mission=marble held=ArrowLeft threat=/.test(x));
+const seconds=x=>{const m=x.match(/^\[(\d+):(\d+)\]/);assert(m);return +m[1]*60+ +m[2];};
+assert(matches.length>30,'substantial repeated observations required');
+assert(seconds(matches.at(-1))-seconds(matches[0])>=420,'at least seven minutes unchanged');
+const procs=[];
+for(const id of fs.readdirSync('/proc').filter(x=>/^\d+$/.test(x))){try{const cmd=fs.readFileSync('/proc/'+id+'/cmdline','utf8').split('\0').filter(Boolean);const stat=fs.readFileSync('/proc/'+id+'/stat','utf8').split(') ')[1].split(' ');procs.push({pid:+id,ppid:+stat[1],cmd});}catch{}}
+const targets=procs.filter(x=>x.cmd.length===2&&x.cmd[0].endsWith('node')&&x.cmd[1]===path.join(root,'tests/campaign-ch1.cjs'));
+assert.equal(targets.length,1,'one exact owned campaign process');const target=targets[0];
+assert.equal(fs.readlinkSync('/proc/'+target.pid+'/cwd'),root,'owned checkout');
+const parent=procs.find(x=>x.pid===target.ppid);assert(parent&&parent.cmd.some(x=>x.endsWith('/tests/run.cjs')),'campaign runner parent');
+const owned=new Set([target.pid]);let more=true;while(more){more=false;for(const p of procs)if(owned.has(p.ppid)&&!owned.has(p.pid)){owned.add(p.pid);more=true;}}
+const report={utc:new Date().toISOString(),kind:'External no-progress interruption; NOT natural timeout, game outcome or campaign certification',reason:'Unchanged CV1B actor/bat/health/controller state for at least seven minutes; static inspection identifies driver threat handling starving route watchdog. Game traversability unverified.',first:matches[0],last:matches.at(-1),plateauSeconds:seconds(matches.at(-1))-seconds(matches[0]),observations:matches.length,logBytesBeforeSignal:raw.length,logSha256BeforeSignal:crypto.createHash('sha256').update(raw).digest('hex'),target,parent,signal:'SIGTERM',ownedPids:[...owned],signalled:[],limitations:['No natural 55-minute deadline observed','No synthetic campaign result.json written','Controller failure does not establish impossible gameplay','Original closed wrapper log and nested trace remain unchanged by this script']};
+const out=path.join(__dirname,'campaign-interruption.json');fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');
+// Snapshot IDs only; do not signal the collector, runner, unrelated server or later tests.
+for(const pid of [...owned].reverse()){try{process.kill(pid,'SIGTERM');report.signalled.push(pid);}catch(e){report.signalled.push({pid,error:e.code});}}
+fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

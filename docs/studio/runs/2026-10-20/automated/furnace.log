@@ -1,0 +1,100 @@
+
+── furnace  — FURNACE CHOIR: every move told and opened, the third hit answered by the bellows (and the parry that turns it), the phase-two drop, the veto list
+── furnace — FURNACE CHOIR, every move told and opened, the bellows, the drop, phase two
+  ok   p1 lob: tell -> active -> recovery  lobwarn(467) > idle(867) > lobwarn
+  ok   p1 lob: the tell is a TELL_ST name, nothing after it in the move is  lobwarn / idle
+  ok   p1 slam: tell -> active -> recovery  slamwarn(567) > recover(517) > idle(667) > hymn
+  ok   p1 slam: the tell is a TELL_ST name, nothing after it in the move is  slamwarn / recover
+  ok   p1 forgebell: tell -> active -> recovery  forgebell(1517) > idle(1200) > hymn
+  ok   p1 forgebell: the tell is a TELL_ST name, nothing after it in the move is  forgebell / idle
+  ok   p1 hymn: tell -> active -> recovery  hymn(1000) > recover(567) > idle(750) > lobwarn
+  ok   p1 hymn: the tell is a TELL_ST name, nothing after it in the move is  hymn / recover
+  ok   p1 vent: tell -> active -> recovery  ventwarn(467) > vent(183) > recover(600) > idle(767) > hymn
+  ok   p1 vent: the tell is a TELL_ST name, nothing after it in the move is  ventwarn / vent,recover
+  ok   p1 melt: tell -> active -> recovery  meltwarn(1200) > recover(467) > idle(717) > lobwarn
+  ok   p1 melt: the tell is a TELL_ST name, nothing after it in the move is  meltwarn / recover
+  ok   p2 lob: tell -> active -> recovery  lobwarn(467) > idle(583) > dropcrouch
+  ok   p2 lob: the tell is a TELL_ST name, nothing after it in the move is  lobwarn / idle
+  ok   p2 slam: tell -> active -> recovery  slamwarn(567) > recover(433) > idle(383) > hymn
+  ok   p2 slam: the tell is a TELL_ST name, nothing after it in the move is  slamwarn / recover
+  ok   p2 forgebell: tell -> active -> recovery  forgebell(1517) > idle(633) > lobwarn
+  ok   p2 forgebell: the tell is a TELL_ST name, nothing after it in the move is  forgebell / idle
+  ok   p2 hymn: tell -> active -> recovery  hymn(1000) > recover(467) > idle(550) > lobwarn
+  ok   p2 hymn: the tell is a TELL_ST name, nothing after it in the move is  hymn / recover
+  ok   p2 vent: tell -> active -> recovery  ventwarn(417) > vent(183) > recover(517) > idle(500) > hymn
+  ok   p2 vent: the tell is a TELL_ST name, nothing after it in the move is  ventwarn / vent,recover
+  ok   p2 drop: tell -> active -> recovery  dropcrouch(600) > rise(467) > droplock(383) > dive(100) > recover(633) > idle(500) > hymn
+  ok   p2 drop: the tell is a TELL_ST name, nothing after it in the move is  dropcrouch / rise,droplock,dive,recover
+  ok   p2 melt: tell -> active -> recovery  meltwarn(1200) > recover(417) > idle(433) > lobwarn
+  ok   p2 melt: the tell is a TELL_ST name, nothing after it in the move is  meltwarn / recover
+  ok   1:lob tell >= 430 ms  467 ms
+  ok   1:slam tell >= 530 ms  567 ms
+  ok   1:forgebell tell >= 1480 ms  1517 ms
+  ok   1:hymn tell >= 980 ms  1000 ms
+  ok   1:vent tell >= 380 ms  467 ms
+  ok   1:melt tell >= 1180 ms  1200 ms
+  ok   2:lob tell >= 430 ms  467 ms
+  ok   2:slam tell >= 530 ms  567 ms
+  ok   2:forgebell tell >= 1480 ms  1517 ms
+  ok   2:hymn tell >= 980 ms  1000 ms
+  ok   2:vent tell >= 380 ms  417 ms
+  ok   2:drop tell >= 580 ms  600 ms
+  ok   2:melt tell >= 1180 ms  1200 ms
+  ok   p1 forgebell: the first clapper strike lands >= 430 ms in, three strikes 300 ms apart  450, 750, 1033 ms
+  ok   p1 lob: the fireball leaves as the tell ends  450 ms
+  ok   p2 forgebell: the first clapper strike lands >= 430 ms in, three strikes 300 ms apart  450, 750, 1033 ms
+  ok   p2 lob: the fireball leaves as the tell ends  450 ms
+  ok   p2 drop: lock -> impact gives the read >= 400 ms  483 ms (lock 383 + fall 100)
+  ok   p2 drop: he lands where the lock marked (no tracking after the lock)  lock 300 / landed 300
+  ok   hymn: two rings in phase one, three in phase two  2 / 3
+  ok   every recovery is an opening >= 250 ms (opening = recovery - 33 ms)  1:lob 834, 1:slam 484, 1:forgebell 1167, 1:hymn 534, 1:vent 567, 1:melt 434, 2:lob 550, 2:slam 400, 2:forgebell 600, 2:hymn 434, 2:vent 484, 2:drop 600, 2:melt 384
+  ok   1:slam: the opening takes two hits, and the THIRD wakes the bellows  {"hits":3,"during":["recover","recover","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   1:hymn: the opening takes two hits, and the THIRD wakes the bellows  {"hits":3,"during":["recover","recover","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   p1 lob: the walk-in is free — three hits do not wake the bellows in phase one  {"hits":3,"during":["idle","idle","idle"],"vent":null,"armed":false,"swings":3}
+  ok   2:lob: phase two guards every opening — the third hit wakes it  {"hits":3,"during":["idle","idle","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   2:forgebell: phase two guards every opening — the third hit wakes it  {"hits":3,"during":["idle","idle","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   2:drop: phase two guards every opening — the third hit wakes it  {"hits":3,"during":["recover","recover","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   ...but not inside a stagger she was given (the Song): a reward does not bite back  {"st":"recover","hits":0,"sawVent":false}
+  ok   the backdraft takes a body standing in front of him (the control)  {"st":"recover","lost":1,"parries":0,"parryKind":null,"counter":false,"raised":null,"jumped":null,"parryableEarly":false,"airborneAt":23,"stagger":null}
+  ok   ...a body that steps BEHIND him during the breath is not in the cone  {"st":"recover","lost":0,"parries":0,"parryKind":null,"counter":false,"raised":null,"jumped":null,"parryableEarly":false,"airborneAt":0,"stagger":null}
+  ok   ...a jump timed off the breath clears it (some take-off in the last 400 ms is safe)  0.4s:clear@216px 0.3s:clear@216px 0.22s:clear@212px 0.16s:clear@202px 0.1s:clear@182px 0.05s:hit@81px
+  ok   ...a brace held from the start of the breath only blocks: no core, no clash  {"st":"recover","lost":0,"parries":0,"parryKind":null,"counter":false,"raised":null,"jumped":null,"parryableEarly":false,"airborneAt":9,"stagger":null}
+  ok   a PERFECT GUARD turns it: he chokes (stagger), she takes nothing, the counter opens  {"st":"stagger","lost":0,"parries":1,"parryKind":"atlas","counter":true,"raised":0.05,"jumped":null,"parryableEarly":false,"airborneAt":9,"stagger":1}
+  ok   ...in phase two as well (the 400 ms breath)  {"st":"stagger","lost":0,"parries":1,"parryKind":"atlas","counter":true,"raised":0.05,"jumped":null,"parryableEarly":false,"airborneAt":9,"stagger":1}
+  ok   ...and the choke is an opening of >= 867 ms (the one gift-sized window, for the hardest read)  1 s left after the clash
+  ok   the lime glint is lit only in its window (the last 150 ms of the breath, and the blast)  {"first":["ventwarn",0.133,true],"warnLitMs":150,"anyEarly":false}
+  ok   the counter lands on him after the clash  {"kind":"atlas","dealt":11,"hpDrop":11,"st":"stagger"}
+  ok   the drop takes a body that stays on the marked floor (the control)  {"lost":1,"gap":9,"log":"dropcrouch>rise>droplock>dive>recover","jumped":false}
+  ok   ...a body that leaves the mark at the lock and jumps the wave takes nothing  {"lost":0,"gap":261,"log":"dropcrouch>rise>droplock>dive>recover","jumped":false}
+  ok   ...and so does one that DASHES off the mark  {"lost":0,"gap":364,"log":"dropcrouch>rise>droplock>dive>recover","jumped":false}
+       deck %  1:near {"hymn":70,"lob":30}  1:far {"lob":81,"hymn":19}  2:near {"hymn":69,"lob":31}  2:far {"lob":41,"drop":40,"hymn":19}
+  ok   phase one never draws the drop  {"lob":81,"hymn":19}
+  ok   phase two: the drop takes distance away (>= 30% of far draws)  {"lob":41,"drop":40,"hymn":19}
+  ok   ...and never at his feet (the near deck has no drop)  {"hymn":69,"lob":31}
+  ok   the near deck is not the far deck in either phase (the bells close, the lob far)  {"1:near":{"hymn":70,"lob":30},"1:far":{"lob":81,"hymn":19},"2:near":{"hymn":69,"lob":31},"2:far":{"lob":41,"drop":40,"hymn":19}}
+  ok   veto: no drop while forge weapons are live  {"lob":124,"hymn":76}
+  ok   veto: no drop and no hymn while the slag pours  {"lob":200} near {"lob":200}
+  ok   veto: no slam straight off a drop, no drop straight off a drop
+  ok   the cold-dice floor: after three moves that reached her, the next is the lob (a cold ledger slams)  {"got":[1,1,1],"streak":3,"next":"lobwarn"} / {"next":"slamwarn"}
+  ok   every state of the fight draws from his own sheet  15 states
+  ok   no page errors
+
+  measured sentences:
+    1:lob       lobwarn(467) > idle(867) > lobwarn
+    1:slam      slamwarn(567) > recover(517) > idle(667) > hymn
+    1:forgebell forgebell(1517) > idle(1200) > hymn
+    1:hymn      hymn(1000) > recover(567) > idle(750) > lobwarn
+    1:vent      ventwarn(467) > vent(183) > recover(600) > idle(767) > hymn
+    1:melt      meltwarn(1200) > recover(467) > idle(717) > lobwarn
+    2:lob       lobwarn(467) > idle(583) > dropcrouch
+    2:slam      slamwarn(567) > recover(433) > idle(383) > hymn
+    2:forgebell forgebell(1517) > idle(633) > lobwarn
+    2:hymn      hymn(1000) > recover(467) > idle(550) > lobwarn
+    2:vent      ventwarn(417) > vent(183) > recover(517) > idle(500) > hymn
+    2:drop      dropcrouch(600) > rise(467) > droplock(383) > dive(100) > recover(633) > idle(500) > hymn
+    2:melt      meltwarn(1200) > recover(417) > idle(433) > lobwarn
+
+OK — FURNACE CHOIR tells every move, opens after every move, answers the third hit, and changes the question in phase two
+   (furnace: 2.3 s)
+
+all 1 harnesses ran

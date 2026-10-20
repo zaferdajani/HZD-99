@@ -1,0 +1,17 @@
+{
+  "scope": "Duplicate timestamped progress-line retention, not fresh gameplay or recovery of unknown lost bytes. Full original runner log remains authoritative and hash-checked.",
+  "base": "/workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-19/automated",
+  "wrapperSha256": "55f5be6adbf3028ad56d541cef941f84a0cfa5cfccec0dcd802c4acb565b82e8",
+  "nestedSha256": "cef76c6a93b32f3fb63dc9d99cabe3cf81db4e3cb3b8dd4c7fda676a11b6ef65",
+  "wrapperLines": 991,
+  "nestedLines": 987,
+  "missingFromNested": [
+    "[00:01] STATE MENU -> CUT",
+    "[02:30] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F",
+    "[02:30] HURT 7 -> 6 in A0B",
+    "[02:30] HEAL: holding heal"
+  ],
+  "extraInNested": [],
+  "identicalProgressLines": false,
+  "campaignCertified": true
+}

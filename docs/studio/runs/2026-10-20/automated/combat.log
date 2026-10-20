@@ -1,0 +1,42 @@
+
+── combat  — every enemy telegraphs, does something different, and scales by zone
+REACTION BUDGET (seconds of warning)
+  100%   boss swipe 0.5  minion 0.35
+  90%    boss swipe 0.56  minion 0.39
+  80%    boss swipe 0.63  minion 0.44
+  70%    boss swipe 0.71  minion 0.5
+
+EVERY ENEMY, AND WHAT IT DOES
+  crawler   {"telegraphed":true,"tellSeconds":0.82,"does":"lunge+recovery"}
+  flier     {"telegraphed":true,"tellSeconds":0.73,"does":"dive+withdraw"}
+  turret    {"telegraphed":true,"tellSeconds":2.27,"does":"walks"}
+  hopper    {"telegraphed":true,"tellSeconds":1.47,"does":"leap"}
+  blob      {"telegraphed":false,"tellSeconds":0,"does":"pool"}
+  bat       {"telegraphed":true,"tellSeconds":0.37,"does":"dive+withdraw"}
+  surge     {"telegraphed":true,"tellSeconds":1.03,"does":"recovery+wave"}
+  kiln      {"telegraphed":true,"tellSeconds":1.03,"does":"plume+recovery"}
+  rime      {"telegraphed":true,"tellSeconds":1.4,"does":"ring+recovery"}
+  snare     {"telegraphed":true,"tellSeconds":1.4,"does":"reel+recovery"}
+
+THE SAME CRAWLER, ZONE BY ZONE
+  zone A {"hp":35,"spd":62}
+  zone B {"hp":43,"spd":64}
+  zone C {"hp":48,"spd":87}
+  zone D {"hp":98,"spd":65}
+  zone E {"hp":117,"spd":83}
+
+KNOCKBACK PER ATTACK (px a live crawler is carried; x every 4 frames while thrown)
+  jab         53 px   trace 5 23 36 47
+  finisher    87 px   trace 8 34 55 70 82
+  throw       73 px   trace 8 34 55 70
+  swirl     drifts 5 px   4 passes, 4 in the ring   trace 0 -3 -5 -5 -5 -5 -5
+  ok   every move connects
+  ok   a finisher throws farther than a jab  53 px -> 87 px
+  ok   the thrown blade carries farther than a jab (a spear)  73 px vs 53 px
+  ok   a multi-hit PINS: the swirl holds a walking crawler in its ring for every pass  4 passes, 4 in the ring, drift 5 px
+  ok   no page errors
+
+pageerrors: none
+   (combat: 4.8 s)
+
+all 1 harnesses ran
