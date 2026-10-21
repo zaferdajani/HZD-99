@@ -1,0 +1,19 @@
+
+── soar  — Volt Soar: UP + claw on the ground, six tiles straight up, to the first ceiling, cutting what she passes
+── soar — UP + claw on the ground launches her six tiles, to the first ceiling, cutting what she passes
+
+  ok   a room has an open column ten tiles tall  {"tx":2,"ty":15,"room":"A1"}
+  ok   locked with the claw alone: UP + claw is still the upward throw  {"soared":false,"clawUp":true,"rose":0,"last":null}
+  ok   the EMP module unlocks it, announced once  {"unlocked":true,"told":true,"toast":true}
+  ok   open air: she rises about six tiles (170-240 px) and the soar ends on height  {"soared":true,"clawUp":false,"rose":222,"last":{"risen":210,"end":"height","hit":0}}
+  ok   ...then the arc rounds off and she comes back down
+  ok   a roof can be laid three tiles over the column  {"room":"A1","tx":2,"ty":15,"gap":3,"built":true,"still":true,"at":[68,430]}
+  ok   under rock it stops at the first ceiling, well short of six tiles  {"soared":true,"clawUp":false,"rose":46,"last":{"risen":46,"end":"ceiling","hit":0}}
+  ok   it cuts what it passes: one hit, for the fixed blow (not her scaled slash)  {"hpLost":48,"fixed":48,"hits":1} {"soared":true,"clawUp":false,"rose":207,"last":{"risen":195,"end":"height","hit":1}}
+  ok   off the ground UP + claw stays the claw  {"soared":false,"clawUp":true,"rose":98,"last":null}
+  ok   no page errors
+
+all good
+   (soar: 17.2 s)
+
+all 1 harnesses ran

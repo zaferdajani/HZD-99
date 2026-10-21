@@ -467,7 +467,14 @@ function drawOpeningWorld() {
 // what pressing the interact control at this NPC will do, when it is not
 // simply "talk" — read by drawStatics' interact label
 function opNearLabel(s) {
-  if (!opOn() || !s || s.type !== 'npc' || s.extra !== 'servo' || npcLive(s)) return null;
+  if (!opOn() || !s || s.type !== 'npc' || npcLive(s)) return null;
+  // Ratchet cannot talk while his own battery is out. Name the action the
+  // opening actually performs: first read the letter, then restore him once
+  // the drawer has supplied his cell. These existing story keys are already
+  // localized and still pass through the player's current interact binding.
+  if (s.extra === 'ratchet' && G.roomId === 'A0B')
+    return t(invCount('ratchetCell') > 0 ? 'op_repair' : 'op_note');
+  if (s.extra !== 'servo') return null;
   return t(invCount('batt') > 0 ? 'op_sv_cue_wake' : 'op_sv_cue_dark');
 }
 // the drum's speed: barely turning while he is dark, turning when he is awake,

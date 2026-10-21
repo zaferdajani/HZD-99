@@ -1,0 +1,60 @@
+
+── hzdvox  — her voice: on the frame she moves, never clipping, never twice at once
+── hzdvox — her voice: no dead air in front of it, no clipping, and it holds its gate
+  ok   every take decodes  
+  ok   every voice the code can ask for has a take on disk  17 named, all present
+  ok   and no take ships that her voice can never reach  17 shipped, all reachable
+
+  take            len    peak   onset    rms   ch  sr
+  hzd_yalla      0.58s  0.781  5ms      0.1496 1   44100
+  hzd_atk1       0.29s  0.85   10ms     0.1304 1   44100
+  hzd_atk2       0.8s   0.784  5ms      0.0312 1   44100
+  hzd_atk3       0.8s   0.848  10ms     0.1487 1   44100
+  hzd_hurt       0.8s   0.854  5ms      0.1245 1   44100
+  hzd_hurtbad    0.39s  0.851  10ms     0.1657 1   44100
+  hzd_die        1.4s   0.851  10ms     0.1879 1   44100
+  hzd_dash       0.77s  0.861  10ms     0.0509 1   44100
+  hzd_djump      0.8s   0.848  10ms     0.0637 1   44100
+  hzd_land       0.8s   0.849  5ms      0.096  1   44100
+  hzd_heal       1.4s   0.854  10ms     0.0992 1   44100
+  hzd_evo        0.82s  0.853  10ms     0.1982 1   44100
+  hzd_win        2.13s  0.79   10ms     0.136  1   44100
+  hzd_purr       1.17s  0.854  10ms     0.087  1   44100
+  hzd_jump       0.6s   0.85   10ms     0.1297 1   44100
+  hzd_charge     1.6s   0.802  10ms     0.1212 1   44100
+  hzd_release    1s     0.848  5ms      0.1355 1   44100
+
+  ok   no take opens with dead air (onset <= 60 ms)  
+  ok   nothing is clipping (peak <= 0.95)  
+  ok   nothing is silence pretending to be a sound  
+  ok   combat barks are short enough to not overlap (<= 1.0 s)  
+  ok   the charge note outlasts the charge itself (>= 0.6 s)  1.6s vs 0.6 s of hold
+  ok   ...and there is a shout to spend it on  1s
+  ok   all mono — a positional bark in stereo fights the mix  
+  ok   a swing speaks  hzd_atk1,hzd_atk1
+  ok   two swings on one frame do not stutter  delta 1
+  ok   an ordinary tap never starts the held note  held 0.25s, note started 0 time(s)
+  ok   ...and a real charge does  held 0.52s, note started 1 time(s)
+  ok   ...and letting go ends it  1 release(s)
+  ok   ...and so does firing it  held 0.72s, 1 start / 5 release
+  ok   a charge she cannot pay for stays silent  0 note(s) on 0.53s with 5 volts
+      hzd_yalla       343 Hz
+      hzd_atk1        364 Hz
+      hzd_atk3        386 Hz
+      hzd_release     434 Hz
+      hzd_win         460 Hz
+      hzd_jump        460 Hz
+      hzd_atk2        517 Hz
+      hzd_hurtbad     517 Hz
+      hzd_evo         581 Hz
+      hzd_die         653 Hz
+      hzd_heal        875 Hz
+      hzd_hurt        928 Hz
+      hzd_djump       984 Hz
+      hzd_dash       1172 Hz
+  ok   every word she says is in her own register  
+
+OK — she sounds on the frame she moves, and never twice at once
+   (hzdvox: 12.0 s)
+
+all 1 harnesses ran

@@ -1,0 +1,23 @@
+
+── preload  — the art for the rooms she can reach is fetched before she reaches them
+── preload — the next room's art arrives before the next room does
+  ok   the room→art manifest is compiled into the page  77 rooms, 17.9 MB of room art
+  ok   ...and every room in ROOMS is in it
+  ok   ...and every key it names exists in the media map
+  ok   a fast connection reaches deep and fetches the far set  depth 3
+  ok   3g narrows the horizon and drops the far set  depth 2
+  ok   2g fetches only the next door
+  ok   Save-Data is obeyed, not negotiated with
+  ok   the neighbouring rooms' art is fetched while she stands still  2/2 from A0
+  ok   it runs while she is playing
+  ok   ...and stands down during a room transition
+  ok   ...and USES a menu rather than sitting it out
+  ok   ...and the title screen too
+  ok   ...and a film that is playing cleanly
+  ok   ...but backs off the moment that film hesitates
+  ok   ...and never competes with one still trying to start
+
+OK — she arrives to a room that is already painted
+   (preload: 12.8 s)
+
+all 1 harnesses ran

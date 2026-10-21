@@ -594,6 +594,7 @@ async function followChip(s) {
 // ---------------- moving with the planner ----------------
 let flight = null;       // the jump in the air: { prog, t0 }
 let stall = { k: -1, since: 0, best: Infinity };
+let combatWatch = null;
 async function ensureModel() {
   const sig = await page.evaluate(() => G.roomId + '|' + Object.keys(G.save.broken || {}).length + '|' + (G.grid && G.grid.length));
   if (sig === modelKey && model) return;
@@ -833,12 +834,32 @@ function threat(s) {
   let best = null, bd = 1e9;
   for (const e of s.en) {
     if (e.calm || e.mech === 'winch' || e.k === 'sage') continue;
+    // A flying enemy on another shelf may remain visually nearby while the
+    // route out is in the opposite direction. After the combat watchdog has
+    // observed no movement or damage, let the ordinary route planner drive
+    // for a bounded interval instead of selecting the same unreachable body
+    // forever. This changes only the evidence driver, never game state.
+    if (R.threatSkip && Date.now() < R.threatSkip.until && R.threatSkip.room === s.room && R.threatSkip.k === e.k) continue;
     const ex = e.x + e.w / 2, ey = e.y + e.h / 2;
     const dx = Math.abs(ex - px), dy = Math.abs(ey - py);
     const reach = /crawler|hopper|wolf/.test(e.k) ? 200 : 150;
     if (dx < reach && dy < (e.k === 'flier' || e.k === 'bat' ? 140 : 80) && dx < bd) { bd = dx; best = e; }
   }
   return best;
+}
+function combatMakingProgress(s, e) {
+  const now = Date.now(), key = s.room + '|' + e.k;
+  const cur = { key, since: now, px: s.p.x, py: s.p.y, ex: e.x, ey: e.y, hp: e.hp };
+  if (!combatWatch || combatWatch.key !== key) { combatWatch = cur; return true; }
+  const moved = Math.hypot(s.p.x - combatWatch.px, s.p.y - combatWatch.py) > 10
+    || Math.hypot(e.x - combatWatch.ex, e.y - combatWatch.ey) > 10;
+  const damaged = e.hp < combatWatch.hp - 0.05;
+  if (moved || damaged) { combatWatch = cur; stall.since = now; return true; }
+  if (now - combatWatch.since <= 5000) return true;
+  R.threatSkip = { room: s.room, k: e.k, until: now + 12000 };
+  log('COMBAT STALL ' + e.k + ': no position or damage progress for 5 s; resume route input for 12 s');
+  combatWatch = null;
+  return false;
 }
 async function fight(s, e) {
   const px = s.p.x + 12, ex = e.x + e.w / 2;
@@ -1305,7 +1326,7 @@ async function runMissions(s) {
     if (s.p && s.state === 'PLAY') {
       if (await maybeHeal(s)) return;
       const e = threat(s);
-      if (e && !s.tut) { stall.since = Date.now(); await fight(s, e); return; }
+      if (e && !s.tut && combatMakingProgress(s, e)) { await fight(s, e); return; }
     }
     await m.step(s);
     return;

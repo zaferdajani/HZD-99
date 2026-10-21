@@ -1,0 +1,23 @@
+{
+  "scope": "Frozen full collector integrity; corrected postflight is separate",
+  "result_entries": 200,
+  "registered_harnesses": 196,
+  "recorded_logs": 198,
+  "valid_snapshots": 198,
+  "matching_current_raw_logs": 195,
+  "collector_passed": false,
+  "collector_results": {
+    "passed": 195,
+    "failed": 5
+  },
+  "raw_mismatches": [
+    "servo-presence.log",
+    "mapexits.log",
+    "kingdom1.log"
+  ],
+  "limitations": [
+    "The writer or lifecycle cause of the raw-log divergence is unknown.",
+    "Valid captured snapshots do not convert the original red collector into a green release certificate.",
+    "Corrected-font targeted reruns are distinct executions and never replace the original logs."
+  ]
+}

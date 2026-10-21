@@ -1,0 +1,26 @@
+
+── guard  — she braces, and bracing costs the hit its push
+── guard — she braces, bracing costs the hit its push, and a brace in the instant turns it
+
+  ok   the guard is still wired into the transition table  hzdGuard
+  ok   holding GUARD raises the timer  guardT 1
+  ok   ...and the timer names the state  guard
+  ok   ...and the state draws the guard plate  hzdGuard:0
+  ok   letting go drops it  guardT 0
+  ok   a braced hit shoves her far less than an open one  guarded 88 vs open 250
+  ok   PARRY: a brace raised as the guard's lunge lands turns it — no core, the machine winded, the counter open  {"kind":"guard","brace":"perfect","pressedFirst":true,"mashed":false,"lost":0,"parries":1,"glint":true,"winded":0.9,"counterOpen":true,"heat":0,"how":"guard","hp0":51,"tries":1}
+  ok   ...and a turned blow is not a held one: no guard heat  heat 0
+  ok   the lunge wore the parry glint before it landed
+  ok   the counter: one ATTACK press answers, invulnerable for all of it  {"pre":{"counterT":0.6,"foe":true,"hitStop":0.14,"src":"keys"},"sawAct":true,"invulnAll":true,"dealt":32,"hpLost":32,"fixed":36}
+  ok   ...for fixed raw 36 through 12% armor, not her scaled slash  {"pre":{"counterT":0.6,"foe":true,"hitStop":0.14,"src":"keys"},"sawAct":true,"invulnAll":true,"dealt":32,"hpLost":32,"fixed":36}
+  ok   a brace held from early is just the brace: blocked, heated, not parried  {"kind":"guard","brace":"late","pressedFirst":true,"mashed":false,"lost":0,"parries":0,"glint":true,"winded":0.52,"counterOpen":false,"heat":0.53,"how":"guard","hp0":51,"tries":1}
+  ok   an attack without the glint cannot be parried, even at perfect timing  {"kind":"crawler","brace":"perfect","pressedFirst":true,"mashed":false,"lost":0,"parries":0,"glint":false,"winded":0.51,"counterOpen":false,"heat":0.5,"how":"guard","hp0":35,"tries":1}
+  ok   mashing GUARD buys no window: a re-raise inside the lock is a plain brace  {"kind":"guard","brace":"mash","pressedFirst":true,"mashed":true,"lost":0,"parries":0,"glint":true,"winded":0.54,"counterOpen":false,"heat":0.57,"how":"guard","hp0":51,"tries":1}
+  ok   the glint is drawn in its colour where the blow comes from, and not when nothing is parryable  {"lime":182,"offPixels":0}
+  ok   the parry colour is used by nothing else in the game (only js/parry.js names it)  parry.js
+  ok   no page errors
+
+all good
+   (guard: 17.8 s)
+
+all 1 harnesses ran

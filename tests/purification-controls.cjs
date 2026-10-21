@@ -3,7 +3,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  const page=await browser.newPage({viewport:{width:844,height:390},hasTouch:true});
  await page.goto('http://127.0.0.1:8220/index.html');await page.waitForFunction(()=>typeof purificationBegin==='function');
  await page.evaluate(async()=>{requestAnimationFrame=()=>0;const s=newSave(1);s.time=99;Object.assign(s.flags,{woke:1,tut:1,heal:1,crystal:1,nfBreak:1,bossChime:1});startGame(s);loadRoom('A4');G.state='PLAY';G.dialog=G.meet=G.cut=null;G.boss.meet=false;G.boss.hp=0;G.boss.die();window.tick=n=>{for(let i=0;i<n;i++){update(1/60);clearP();}};tick(1);draw(performance.now());});
- await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{tick(1);draw(performance.now());});assert.equal(await page.locator('#purification-hold').isVisible(),false);await page.setViewportSize({width:844,height:390});await page.evaluate(()=>{tick(1);draw(performance.now());});
+ // Chromium resolves setViewportSize before every resize/visualViewport
+ // listener has necessarily redrawn the fixed canvas. Wait for the production
+ // touch geometry to converge, then draw the button from that exact layout.
+ // This keeps the real touch event and hold threshold; it only prevents a
+ // stale portrait button from being sampled below the landscape viewport.
+ const settleLayout=async()=>{
+  await page.waitForFunction(()=>TOUCH.rawW===Math.round(visualViewport?visualViewport.width:innerWidth)&&TOUCH.rawH===Math.round(visualViewport?visualViewport.height:innerHeight));
+  await page.evaluate(()=>{drawTouchUI();tick(1);draw(performance.now());});
+ };
+ await page.setViewportSize({width:390,height:844});await settleLayout();assert.equal(await page.locator('#purification-hold').isVisible(),false);await page.setViewportSize({width:844,height:390});await settleLayout();
  const guidance=await page.evaluate(()=>{
   const saved={touch:TOUCH.enabled,on:PAD.on,kind:PAD.kind,bind:PAD.map.INT,keys:KEYB.INT,lang:LANG};
   const out={};
@@ -22,8 +31,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=requ
  assert.ok(guidance.pad.includes(guidance.padButton+' /'));
  assert.equal(guidance.unbound,guidance.touch);
  assert.ok(guidance.localized.every(x=>x&&!x.includes('{INT}')&&!/\bE\b/.test(x)));
- const btn=page.locator('#purification-hold'),box=await btn.boundingBox();assert.ok(box&&box.height>=48);
+ const btn=page.locator('#purification-hold'),box=await btn.boundingBox();assert.ok(box&&box.height>=48&&box.x>=0&&box.y>=0&&box.x+box.width<=844&&box.y+box.height<=390);
  const cdp=await page.context().newCDPSession(page),pt={x:box.x+box.width/2,y:box.y+box.height/2};
+ assert.equal(await page.evaluate(({x,y})=>document.elementFromPoint(x,y)?.id,{x:pt.x,y:pt.y}),'purification-hold');
  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[pt]});await page.evaluate(()=>tick(30));assert.ok(await page.evaluate(()=>G.purification.hold>.4));
  await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await page.evaluate(()=>tick(1));assert.equal(await page.evaluate(()=>G.purification.hold),0);
  await page.keyboard.down('KeyE');await page.evaluate(()=>{tick(30);window.dispatchEvent(new Event('blur'));tick(100);});assert.equal(await page.evaluate(()=>G.purification.phase),'hold');assert.equal(await page.evaluate(()=>G.purification.hold),0);await page.keyboard.up('KeyE');await page.evaluate(()=>{tick(1);draw(performance.now());});

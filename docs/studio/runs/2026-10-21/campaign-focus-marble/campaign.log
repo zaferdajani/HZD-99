@@ -1,0 +1,5 @@
+[00:00] FATAL page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8220/index.html
+Call log:
+[2m  - navigating to "http://127.0.0.1:8220/index.html", waiting until "load"[22m
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/campaign-ch1.cjs:1346:14

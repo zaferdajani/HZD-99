@@ -1,0 +1,15 @@
+
+── memnote  — the memory game is audible: phone-register bells, and the music steps aside
+── memnote — the memory game is audible: register, reply, and the duck
+  ok   the audio context is live in the harness  running
+  ok   the show phase actually reaches the synth  3 notes for a sequence of 3
+  ok   every note sits where a phone speaker speaks (midi >= 69 / A4 440Hz)  lowest 78
+  ok   the notes are not whispered under the mix (gain >= 0.1)  [0.115,0.115,0.115]
+  ok   the music ducks while the trial is open  MUS_DUCK 0.3
+  ok   the reply voice answers a fifth up, still in register  {"m":85,"v":0.08}
+  ok   ...and the duck lifts the moment the trial closes  MUS_DUCK 1
+
+OK — four bells a phone can speak, and a stream that steps aside for them
+   (memnote: 4.6 s)
+
+all 1 harnesses ran

@@ -1,0 +1,13 @@
+
+── voxmeas  — the NPC voice chain: no clipping, band limit, speech intact
+character   peak                  <150Hz    out-of-band tilt      speech   pitch
+servo       0.82 ok (was 0.88)    -19.8 dB       -14.1 -> -25 dB     -2.5 dB   x1.06
+ratchet     0.88 ok (was 0.95)    -20.4 dB     -27.4 -> -43.1 dB     -2.8 dB   x0.93
+mono        0.78 ok (was 0.89)    -28.4 dB     -24.3 -> -25.7 dB     -2.4 dB   x1.11
+sage        0.67 ok (was 0.85)    -16.6 dB     -20.6 -> -27.2 dB     -2.3 dB   x0.88
+patch       0.84 ok (was 0.91)     -6.8 dB      -8.4 -> -13.9 dB     -3.3 dB   x1.04
+lumen       0.68 ok (was 0.81)     -5.8 dB       -18 -> -17.6 dB     -0.9 dB      x1
+pageerrors: none
+   (voxmeas: 5.8 s)
+
+all 1 harnesses ran

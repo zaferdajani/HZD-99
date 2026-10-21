@@ -1,0 +1,40 @@
+
+── text-rules  — cards pause combat; one tap/press never reveals and dismisses; numbers stay immediate; five languages at phone width
+── text-rules — combat pauses under cards, one input never does two things, numbers stay immediate
+
+  ok   control: the wolf and the shot DO hurt her with nothing open  {"wolf":true,"before":5,"after":4}
+  ok   under a conversation nothing moves and nothing hurts her (three seconds, wolf on top of her, shot in the air)  {"cores":5,"iT":0,"wx":38200,"px":35600,"hx":38400}
+  ok   under an item card nothing moves and nothing hurts her (three seconds, wolf on top of her, shot in the air)  {"cores":5,"iT":0,"wx":38200,"px":35600,"hx":38400}
+  ok   under a story card nothing moves and nothing hurts her (three seconds, wolf on top of her, shot in the air)  {"cores":5,"iT":0,"wx":38200,"px":35600,"hx":38400}
+  ok   a guardian is frozen under a card: its update never runs  {"kind":"glitch","inPlay":30,"underCard":0,"state":"DIALOG"}
+  ok   a gamepad press reveals the page and does not turn it  {"done":true,"i":0,"pg":0}
+  ok   ...a second, separate pad press turns it  {"i":1,"pg":0}
+  ok   three confirm controls on one frame are one press: revealed, not turned  {"done":true,"i":0,"pg":0}
+  ok   the scrap count is the new number on the very next frame (not typed, not rolled)  ⬢ 37
+  ok   an urgent notice (the ward) is drawn whole on its first frame
+  ok   a notice raised during a conversation is not drawn over it  {"during":false,"after":true,"state":"PLAY","lifeDuring":6.055}
+  ok   ...and is shown, whole, once the conversation closes  {"during":false,"after":true,"state":"PLAY","lifeDuring":6.055}
+  ok   no page errors (stepped)  []
+  ok   touch: the E-button tap that opens a talk does not also reveal or turn it  {"st":"DIALOG","i":0,"pg":0,"done":false,"n":1,"lines":1}
+  ok   touch: a quick double tap while a page types completes it, and does not turn it  {"gapMs":117,"st":"DIALOG","i":0,"pg":0,"done":true,"n":1,"lines":2}
+  ok   touch: a double tap on a read page turns exactly one page  {"gapMs":117,"st":"DIALOG","i":1,"pg":0,"done":true,"n":1,"lines":2}
+  ok   touch: a finger held on a game button while a card opens turns nothing — not while held, not on release  [{"st":"DIALOG","i":0,"pg":0,"done":false,"n":1,"lines":2},{"st":"DIALOG","i":0,"pg":0,"done":false,"n":1,"lines":2}]
+  ok   touch: a double tap on a typing panel caption completes it and stays on that panel  {"gapMs":33,"p0":{"i":0,"done":false,"ph":"show","has":true},"p1":{"i":0,"done":true,"ph":"show","has":true}}
+  ok   ...and a later single tap turns it  {"i":1,"done":false,"ph":"show","has":true}
+  ok   no page errors (touch)  []
+  ok   ar at 844x390: every dialogue line (and a URL-long token) inside the box, four lines a page at most, nothing lost  1p/0px/1l 1p/0px/1l box 548
+  ok   ar is laid out right to left
+  ok   zh at 844x390: every dialogue line (and a URL-long token) inside the box, four lines a page at most, nothing lost  1p/0px/1l 1p/0px/1l box 548
+  ok   ru at 844x390: every dialogue line (and a URL-long token) inside the box, four lines a page at most, nothing lost  1p/0px/1l 1p/0px/1l box 548
+  ok   tr at 844x390: every dialogue line (and a URL-long token) inside the box, four lines a page at most, nothing lost  1p/0px/1l 1p/0px/1l box 548
+  ok   no page errors (languages)  []
+  ok   the audit reaches every language (CHIME and the Sages/guardians are each named in several lines of each)  {"enS":34,"en":7,"arS":41,"ar":7,"trS":17,"tr":9,"zhS":17,"zh":7,"ruS":16,"ru":8} over 935 keys
+  ok   no line, in any language, promises to rescue, free or cleanse CHIME — it is a hostile construct  
+  ok   no line, in any language, says a Sage or a guardian is killed or destroyed  
+  ok   no page errors (words)  []
+  shots in tests/out/text-rules/
+
+OK — cards stop the fight, one press is one thing on every input, and numbers never type
+   (text-rules: 15.5 s)
+
+all 1 harnesses ran

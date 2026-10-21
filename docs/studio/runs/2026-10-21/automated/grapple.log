@@ -1,0 +1,31 @@
+
+── grapple  — the grappling claw: walls, enemies, aim assist, and everything that outranks it
+── grapple — the claw bites walls and enemies, and gives way to everything that outranks it
+
+  ok   locked before the dash  {"unlocked":false,"fired":false}
+  ok   unlocked with the dash, announced once
+  ok   a room has a wall in reach on one side and open air on the other  {"room":"W1","x":132,"y":444,"wallDir":-1,"wallD":116}
+  ok   miss: flies to full reach, retracts, lets her go  {"maxLen":368,"sawBack":true,"gone":true,"heldAfterBack":false}
+  ok   wall: hooks and reels her most of the way  {"sawPull":true,"travelled":100,"wallD":116,"cd":0.38,"airJumps":0,"poseWasDash":"dash"}
+  ok   wall: cooldown set and air jumps refreshed  {"sawPull":true,"travelled":100,"wallD":116,"cd":0.38,"airJumps":0,"poseWasDash":"dash"}
+  ok   the reel draws her dash plate  dash
+  ok   dash cancels the reel into the dash  {"wasPull":true,"dashing":true,"clawLetGo":true}
+  ok   a hit knocks the claw loose
+  ok   enemy: latched, bitten and struck on arrival  {"latched":true,"hpLost":14,"bounced":true,"iFrames":0.25,"voltsGained":12}
+  ok   enemy: arrival grants i-frames and volts  {"latched":true,"hpLost":14,"bounced":true,"iFrames":0.25,"voltsGained":12}
+  ok   rescued machine is not a target, is not moved and grants no charge  {"latched":false,"hp":400,"x":280,"volts":45,"hp0":400,"x0":280,"volts0":45}
+  ok   a creature rescued during the reel is released without an arrival reward  {"latched":true,"released":true,"voltsBefore":49,"voltsAfter":49}
+  ok   aim assist: from the air, a level throw would pass over the crawler  {"chestY":394,"foeTop":434,"passesOver":true}
+  ok   aim assist takes it anyway  {"latched":true,"hpLost":14,"geometry":{"chestY":394,"foeTop":434,"passesOver":true}}
+  ok   stun, brace, boss entrance, gate walk and scripted meeting all outrank the claw  {"stun":true,"guard":true,"bossEntry":true,"gateWalk":true,"meet":true}
+  ok   leaving the room lets go
+  ok   two grapples in the air, the third waits for ground  [true,true,false]
+  ok   controller screen lists GRAPPLE, unbound, clear of the footer (row < 397)  {"listed":true,"unbound":true,"lastRowY":390,"label":"Grapple Claw"}
+  ok   keyboard: U and 3  ["KeyU","Digit3","VGRAPPLE","GP_GRAPPLE"]
+  ok   first-use prompt follows keyboard, touch, bound pad and unbound pad  {"keyboard":"GRAPPLE CLAW online — press U","touch":"GRAPPLE CLAW online — press ⟟","padUnbound":"GRAPPLE CLAW online — press Options ▸ Controls ▸ Grapple Claw","padBound":"GRAPPLE CLAW online — press Square"}
+  ok   no page errors
+
+all grapple checks passed
+   (grapple: 23.2 s)
+
+all 1 harnesses ran

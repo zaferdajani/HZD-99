@@ -1,0 +1,67 @@
+
+── purification-save  — interrupted guardian film preserves atomic choice and completion; legacy retry does not duplicate
+{
+  "fallback": {
+    "before": {
+      "forks": 0,
+      "flag": false,
+      "phase": "film"
+    },
+    "after": {
+      "forks": 1,
+      "flag": true,
+      "pending": false
+    }
+  },
+  "completed": {
+    "led": "L",
+    "forks": 1,
+    "boss": true,
+    "oath": true,
+    "afterRepeat": 1
+  },
+  "legacyDone": {
+    "forks": 1,
+    "boss": true
+  },
+  "scope": "STAGED regression; initial save and room injected; subsequent save is actual persisted disk save, not an uninterrupted campaign.",
+  "identity": {
+    "build": "80082e6b684f",
+    "url": "http://127.0.0.1:8220/index.html"
+  },
+  "before": {
+    "led": "",
+    "forks": 0,
+    "boss": false
+  },
+  "first": {
+    "state": "CUT",
+    "cutKind": "glitch",
+    "led": "",
+    "forks": 0,
+    "nodes": [],
+    "boss": false,
+    "runtimeBoss": false
+  },
+  "reloaded": {
+    "led": "",
+    "forks": 0,
+    "boss": false,
+    "spawned": true,
+    "dead": false
+  },
+  "second": {
+    "state": "CUT",
+    "cutKind": "glitch",
+    "led": "",
+    "forks": 0,
+    "nodes": [],
+    "boss": false,
+    "runtimeBoss": false
+  },
+  "errors": [],
+  "verdict": "PASS: interrupted/retried film records no early choice; completed rescue commits once; legacy guardian choice is preserved without duplication."
+}
+   (purification-save: 1.7 s)
+
+all 1 harnesses ran

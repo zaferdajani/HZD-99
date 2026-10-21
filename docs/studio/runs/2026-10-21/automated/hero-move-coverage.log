@@ -1,0 +1,7 @@
+
+── hero-move-coverage  — actual renderer coverage for movement, aerial attacks, reactions and departure
+PASS 19 actual-renderer move selections and supplied departure art
+     transition set: 0 of 8 fired (queued: transTurn, transWallAir, transFallRun, transAtkRec, transGrapThrow, transGrapReel, transGlideIn, transGlideOut)
+   (hero-move-coverage: 1.1 s)
+
+all 1 harnesses ran

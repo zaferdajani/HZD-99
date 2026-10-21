@@ -1,0 +1,17 @@
+
+── sage  — the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift
+── sage — the duelist that can only be cleansed
+  ok   a sage kneels in the deep chamber
+  ok   it duels: real tells, lunges, and the exhale opening  tells 2.77s
+  ok   claws break it to the floor and no further  locked true
+  ok   ...and glance off the song-lock for zero
+  ok   the crystal purifies it — tamed, never killed
+  ok   the gift pays, and pays once
+  ok   all seven sages have an identity, a story line and a gift, in both languages
+  ok   a purified sage cannot be harmed
+  ok   the purification is a save fact — it survives the room reload
+
+OK — broken by anything, cleansed by one thing, kept clean forever
+   (sage: 2.3 s)
+
+all 1 harnesses ran

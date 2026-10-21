@@ -1,0 +1,30 @@
+
+── comic-rewards  — saved milestone slideshows, updates, accessibility and failure recovery
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('heading', { name: 'New chapter from content', exact: true }) to be visible[22m
+[2m    63 × locator resolved to hidden <h3>New chapter from content</h3>[22m
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/comic-rewards.cjs:78:77 {
+  log: [
+    "  - waiting for getByRole('heading', { name: 'New chapter from content', exact: true }) to be visible",
+    '    63 × locator resolved to hidden <h3>New chapter from content</h3>'
+  ],
+  name: 'TimeoutError'
+}
+FAILED: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('heading', { name: 'New chapter from content', exact: true }) to be visible[22m
+[2m    63 × locator resolved to hidden <h3>New chapter from content</h3>[22m
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/comic-rewards.cjs:78:77 {
+  log: [
+    "  - waiting for getByRole('heading', { name: 'New chapter from content', exact: true }) to be visible",
+    '    63 × locator resolved to hidden <h3>New chapter from content</h3>'
+  ],
+  name: 'TimeoutError'
+}
+
+   (comic-rewards: 32.2 s)
+
+1 harness(es) failed

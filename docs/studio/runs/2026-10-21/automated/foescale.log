@@ -1,0 +1,20 @@
+
+── foescale  — every machine reads in the hero's weight class
+FAILED: ── foescale — every machine reads in the hero's weight class
+
+  ok   the hero measures at all, from her real art  68px via hzdHurt:1
+  ok   no machine reads as scenery beside her (>= 0.5 of her height)  12 kinds
+  ok   ...and none of them reads as big as her — the SCALE LAW holds  max 0.94x
+  ok   no page errors
+  ok   the loaded flier is measured from its authored strip  {"assets":[{"key":"talonMiniCruise8","width":1536,"height":192,"tier":3},{"key":"talonMiniChase6","width":1152,"height":192,"tier":3}],"renderer":"talonMiniCruise8:5"}
+  ok   every full wingbeat sample uses the intended authored strip  160 samples
+  FAIL the complete wingbeat stays in the same unchanged size band  {"min":0.5294117647058824,"max":1,"tooSmall":0,"tooBig":4}
+  ok   every loaded flight eye stays registered around its body in both facings  {"samples":160,"bad":0,"first":[],"vertical":[-7.299018185352736,5.438698680952086]}
+
+  hero 68px  ·  flier 0.56  bat 0.63  surge 0.74  kiln 0.75  rime 0.78  guard 0.81  snare 0.81  blob 0.88  turret 0.91  sage 0.91  crawler 0.94  hopper 0.94
+
+FAILED: the complete wingbeat stays in the same unchanged size band — {"min":0.5294117647058824,"max":1,"tooSmall":0,"tooBig":4}
+Command failed: node /workspace/scratch/b4e9aa23d77e/HZD-99/tests/foescale.cjs
+   (foescale: 8.6 s)
+
+1 harness(es) failed

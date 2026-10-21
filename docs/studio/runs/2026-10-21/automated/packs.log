@@ -1,0 +1,21 @@
+
+── packs  — a campaign pack is a folder of JSON: loads by query, saves apart, base game untouched
+ok  no query string: pack inert
+  ok  no query string: no pack room in ROOMS
+  ok  no query string: save key untouched
+  ok  base boot clean
+  ok  pack fetched and applied
+  ok  P1 and P2 registered in ROOMS
+  ok  pack save isolated under its own key
+  ok  new game starts at the pack bench (P1)
+  ok  grid rows stamped as authored
+  ok  P1|P2 seam agrees on every row
+  ok  the crawler wakes in P2 (1)
+  ok  the heap is material, one tile per column
+  ok  crossing back works
+  ok  malformed room refused with a reason
+  ok  pack session clean
+packs: a folder of JSON is a campaign, and the base game never knew
+   (packs: 4.0 s)
+
+all 1 harnesses ran

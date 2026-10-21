@@ -1,0 +1,18 @@
+
+── cavedark  — the cave is dark, and light is the only map of it
+── cavedark — the cave is dark and light is the map
+
+  ok   the cave is actually dark  the far rock lost 60% of its light (min 28%; 76.9 -> 30.63)
+  ok   ...and the unlit rock is still a silhouette, not a void  the darkest rock reads 30.63 (min 22)
+  ok   she carries a light  ground beside her 99.8 vs across the room 40.07  (x2.49, min x1.35)
+  ok   the beacon is visible from across the dark  its corner reads 149.28 with it and 79.54 without  (x1.88, min x1.35)
+  ok   ...and it is still a beacon with the glow given up  on the lean path it reads 71.69 with it and 52.99 without  (x1.35, min x1.20)
+  ok   ...and the pillar lights the rock it stands in  the rock beside it reads 112.37 with it and 25.32 without  (x4.44, min x1.60)
+  ok   ...and it REACHES further than the beacon, because it is the bigger errand  at 300 px the pillar still gains x1.71 where the beacon gains x1
+  ok   a buried mouth leaks nothing until it is broken open  buried 41.34 -> opened 104.22
+  ok   the dark stays in the cave  A1 reads 70.59 with the pass and 69.97 without it
+
+all good
+   (cavedark: 61.0 s)
+
+all 1 harnesses ran
