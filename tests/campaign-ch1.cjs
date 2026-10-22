@@ -1011,7 +1011,12 @@ async function travel(s, target) {
   // THE LANDMARK: the hub's loose floor down to the quarry is broken from above
   if (s.room === 'A2' && next === 'A5') {
     await ensureModel();
-    if (model.info.rows[15].slice(12, 15).includes('B') || model.info.rows[16].slice(12, 15).includes('B')) { await breakFloor(s, 12, 14); return; }
+    // A player-width shaft is enough to enter the quarry. The old driver kept
+    // attacking until all three decorative hatch columns were gone, so a real
+    // 64 px opening was mistaken for a lock and the certification pogoed on
+    // the last column instead of walking through the route it had opened.
+    const hatchOpen = [12, 13, 14].some(x => model.info.rows[15][x] !== 'B' && model.info.rows[16][x] !== 'B');
+    if (!hatchOpen) { await breakFloor(s, 12, 14); return; }
   }
   await leaveToward(s, next);
 }

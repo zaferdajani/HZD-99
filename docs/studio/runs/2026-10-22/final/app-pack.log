@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> clawbyte@1.0.0 app:pack
+> node build.cjs && node tools/pack-www.cjs
+
+index.html built (robo): 4.71MB
+odyssey.html built (hero): 3.48MB
+forge.html built (robo+forge): 4.73MB
+forge-odyssey.html built (hero+forge): 3.50MB
+www/  694 assets (244.3 MB) + 2 pages (8.2 MB)  =  252.5 MB

@@ -284,6 +284,7 @@ const SUITE = [
   ['twin',      'the swirl: four passes, a ring not a punch, and two blades afterwards'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
   ['sage',      'the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift'],
+  ['sage-walk', 'the rescued Sage walks in purified authored frames instead of sliding in its kneeling pose'],
   ['kingdom1',  'kingdom 1 holds its rules: the den rest catches deaths, the tunnel tells the sage, NPCs own their places'],
   ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],

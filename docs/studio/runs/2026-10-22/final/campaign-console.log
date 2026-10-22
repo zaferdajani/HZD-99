@@ -1,0 +1,353 @@
+[00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - ->
+[00:00] STATE null -> MENU
+[00:00] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:00] MENU choose "newgame"
+[00:01] STATE MENU -> CUT
+[00:52] STATE CUT -> DIFF
+[00:52] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:52] FRAME 000-difficulty.png
+[00:53] ROOM - -> W1  at x=96
+[00:53] STATE DIFF -> PANELS
+[00:53] MANHWA wake panel 1/5
+[00:53] OBJECTIVE "Reach the city gates"
+[00:53] CHIP move |  |
+[00:53] SAVEPOINT null -> W1
+[00:53] WEAPON null -> claws
+[00:53]   . W1 x=96 y=413 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:54] MANHWA wake panel 2/5
+[00:55] MANHWA wake panel 3/5
+[00:56] MANHWA wake panel 4/5
+[00:56] MANHWA wake panel 5/5
+[00:58] STATE PANELS -> PLAY
+[00:58] CHIP move | Move | Walk right toward the light
+[01:01] FRAMES median 83 ms -> planner step 1/30, game time 0.98x wall
+[01:01] PACE sim 59.8 s per 60 s wall (pace dial / slow frames)
+[01:01] TOAST POWER FAULT → SYSTEM RESTART
+[01:01]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:03] FLAG +woke
+[01:03] MISSION opening (objective: "Reach the city gates")
+[01:03] CHIP out | Leave | The door has been open a long time — walk out
+[01:03] FLAG +tutI
+[01:03] FLAG +tutId
+[01:07] ROOM W1 -> W2  at x=21
+[01:07] CHIP out | The city gates | Follow the gold marker
+[01:07] STATE PLAY -> PANELS
+[01:07] MANHWA bay panel 1/3
+[01:07] CHIP out |  |
+[01:07] MANHWA bay panel 2/3
+[01:09] MANHWA bay panel 3/3
+[01:09]   . W2 x=21 y=436 vx=0 on cores=7/7 volts=33 tut=out/null@-1 mission=opening held=
+[01:11] STATE PANELS -> PLAY
+[01:11] CHIP out | The city gates | Follow the gold marker
+[01:11] CHIP jump | Jump | Follow the gold marker
+[01:12] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:13] CHIP gate | The city gates | Follow the gold marker
+[01:14] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:15] FLAG +gateOpened
+[01:17]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[01:19] ROOM W2 -> A0  at x=40
+[01:19] STATE PLAY -> PANELS
+[01:19] MANHWA gate panel 1/2
+[01:19] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[01:19] CHIP gate |  |
+[01:20] MANHWA gate panel 2/2
+[01:22] STATE PANELS -> PLAY
+[01:22] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:23] CHIP booth | Ratchet's booth | Follow the gold marker
+[01:23] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[01:25]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[01:28] ROOM A0 -> A0B  at x=103
+[01:28] OBJECTIVE "Wake Ratchet"
+[01:29] CHIP note | Read the letter | Follow the gold marker
+[01:31] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:31] STATE PLAY -> PANELS
+[01:31] MANHWA letter panel 1/5
+[01:31] CHIP note |  |
+[01:32] MANHWA letter panel 2/5
+[01:33]   . A0B x=565 y=435 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[01:34] MANHWA letter panel 3/5
+[01:35] MANHWA letter panel 4/5
+[01:36] MANHWA letter panel 5/5
+[01:38] STATE PANELS -> PLAY
+[01:38] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:38] FLAG +opNote
+[01:39] CHIP drawer | Open the drawer | Follow the gold marker
+[01:40] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[01:40] STATE PLAY -> DIALOG
+[01:40] CHIP drawer |  |
+[01:40] FLAG +ch_A0B_1
+[01:40] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[01:40] ITEMS {"ratchetCell":1}
+[01:41] STATE DIALOG -> PANELS
+[01:41] MANHWA drawer panel 1/1
+[01:42]   . A0B x=433 y=433 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[01:43] STATE PANELS -> PLAY
+[01:43] CHIP drawer | Open the drawer | Follow the gold marker
+[01:43] CHIP repair | Restore his battery | Follow the gold marker
+[01:45] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[01:45] STATE PLAY -> DIALOG
+[01:45] CHIP repair |  |
+[01:45] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[01:46] STATE DIALOG -> REPAIR
+[01:46] FRAME 001-repair-board.png
+[01:46] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[01:46] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[01:47] REPAIR place on target:socket (the hint names "battery socket")
+[01:47] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[01:48] REPAIR place on target:plus (the hint names "+ terminal")
+[01:49] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[01:50]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[01:50] REPAIR place on target:minus (the hint names "− terminal")
+[01:50] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[01:52] REPAIR place on target:relay (the hint names "relay")
+[01:52] REPAIR power
+[01:54] STATE REPAIR -> CUT
+[01:54] OBJECTIVE "Use Ratchet’s pod"
+[01:54] FLAG +on_A0B|ratchet
+[01:54] FLAG +ratchetRepaired
+[01:54] ITEMS {}
+[01:58]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:01] STATE CUT -> DIALOG
+[02:01] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[02:02] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[02:02] PACE sim 60.9 s per 60 s wall (pace dial / slow frames)
+[02:02] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[02:03] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[02:05] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[02:06]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:06] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[02:07] FLAG +opTold
+[02:07] FLAG +ratchetSpareGiven
+[02:07] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[02:07] ITEMS {"batt":1}
+[02:08] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[02:10] STATE DIALOG -> PANELS
+[02:10] MANHWA ratchet panel 1/2
+[02:11] MANHWA ratchet panel 2/2
+[02:13] STATE PANELS -> PLAY
+[02:13] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:13] CHIP pod | Use the pod | Follow the gold marker
+[02:14]   . A0B x=728 y=260 vx=340 air cores=7/7 volts=33 tut=pod/MOVE@912 mission=opening held=ArrowRight
+[02:15] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[02:15] SAVEPOINT W1 -> A0B
+[02:17] TOAST Systems recharged. Progress saved.
+[02:17] OBJECTIVE "Get the Volt Pack from Ratchet"
+[02:17] FLAG +opPod
+[02:17] CHIP pack | The Volt Pack | Follow the gold marker
+[02:19] TOAST Systems recharged. Progress saved.
+[02:20] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:20] STATE PLAY -> DIALOG
+[02:20] CHIP pack |  |
+[02:20] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[02:21] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[02:22]   . A0B x=472 y=433 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[02:22] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[02:24] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[02:25] FLAG +opScrap
+[02:25] FLAG +sawScrap
+[02:25] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[02:25] SCRAP 0 -> 12
+[02:26] STATE DIALOG -> SHOP
+[02:27] FRAME 002-counter.png
+[02:27] SHOP buy the marked row (cell) with 12 scrap
+[02:27] STATE SHOP -> DIALOG
+[02:27] OBJECTIVE "Try out the Volt Pack"
+[02:27] FLAG +tutBuy
+[02:27] FLAG +heal
+[02:27] FLAG +pack
+[02:27] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[02:27] SCRAP 12 -> 0
+[02:28] STATE DIALOG -> PLAY
+[02:28] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:29] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[02:29] HURT 7 -> 6 in A0B
+[02:29] HEAL: holding heal
+[02:31] CHIP atk | Back outside | Follow the gold marker
+[02:31]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=66 tut=atk/MOVE@115 mission=opening held= near=npc:ratchet
+[02:32] CHIP atk | Back outside | Stand at the den door and press ↑
+[02:36] ROOM A0B -> A0  at x=387
+[02:36] CHIP atk | Strike the winch | Follow the gold marker
+[02:37] CHIP atk | Strike the winch | Its infected arm blocks the road — each X knocks scrap loose
+[02:37] FLAG +winchKnock
+[02:38] CHIP burst | Volt Burst | Its motor still holds the arm — hold X, let go: the burst stops it
+[02:38] BURST: holding attack
+[02:39] TOAST The winch stops — its arm lifts clear of the road.
+[02:39] FLAG +burstDone
+[02:39] FLAG +opBurst
+[02:39] SCRAP 0 -> 12
+[02:39]   . A0 x=552 y=434 vx=0 on cores=7/7 volts=82 tut=burst/ATK@-1 mission=opening held=
+[02:40] OBJECTIVE "Solve the monument’s puzzle"
+[02:40] CHIP node | The monument | Follow the gold marker
+[02:41] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:41] STATE PLAY -> TRIAL
+[02:41] CHIP node |  |
+[02:44] FRAME 003-monument-puzzle.png
+[02:44] PUZZLE memory: the monument played 3 notes; answering
+[02:45] STATE TRIAL -> PLAY
+[02:45] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:45] TOAST The winch stops — its arm lifts clear of the road. / Knowledge gained  +10 IQ
+[02:45] FLAG +rd_n8
+[02:45] SCRAP 12 -> 15
+[02:45] OBJECTIVE "Head east into the Scrap Meadows"
+[02:45] CHIP go | Into the meadow | The road east leads to the Scrap Meadows
+[02:47] TOAST Knowledge gained  +10 IQ
+[02:47]   . A0 x=1476 y=433 vx=340 on cores=7/7 volts=82 tut=go/MOVE@2000 mission=opening held=ArrowRight
+[02:49] ROOM A0 -> A1  at x=21
+[02:49] OBJECTIVE "Find the raw marble beneath the meadow"
+[02:49] CHIP (none)
+[02:49] TOAST Map online — open it any time (M / Tab)
+[02:49] FLAG +tut
+[02:49] FLAG +mapSeen
+[02:49] MISSION DONE opening
+[02:50] FRAME 004-done-opening.png
+[02:50] MISSION servo (objective: "Find the raw marble beneath the meadow")
+[02:50] PLAN room A1: 92 standable tiles, 1411 moves (50 ms)
+[02:51] INTERACT servo (wake him with the spare Power Cell)
+[02:51] STATE PLAY -> DIALOG
+[02:51] SAY Old Servo: "Ratchet’s spare cell fits the port in his chest. You seat it."
+[02:52] STATE DIALOG -> PLAY
+[02:52] FLAG +on_A1|servo
+[02:52] FLAG +servoIntro
+[02:52] ITEMS {}
+[02:52] INTERACT servo (wake him with the spare Power Cell)
+[02:53] STATE PLAY -> DIALOG
+[02:53] SAY Old Servo: "Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you."
+[02:53] SAY Old Servo: "After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up."
+[02:55] SAY Old Servo: "And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ."
+[02:55]   . A1 x=128 y=426 vx=0 on cores=7/7 volts=82 mission=servo held= near=npc:servo
+[02:56] FLAG +servoMet
+[02:56] SAY "Errand taken"
+[02:57] STATE DIALOG -> PLAY
+[02:57] MISSION DONE servo
+[02:57] FRAME 005-done-servo.png
+[02:57] MISSION first-meeting (objective: "Find the raw marble beneath the meadow")
+[02:57] FLAG +sc_A1_3
+[02:57] SCRAP 15 -> 30
+[02:59] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[02:59] FIGHT crawler (hp 26) in A1
+[03:00] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind / Repair ready! Stand still and hold F to restore a core.
+[03:00] HURT 7 -> 6 in A1 (nearest crawler at 95 px)
+[03:01] FLAG +sc_A1_4
+[03:01] SCRAP 30 -> 48
+[03:01] FIGHT guard (hp 38) in A1
+[03:02] HURT 6 -> 5 in A1 (nearest guard at 89 px)
+[03:02] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[03:02] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[03:03]   . A1 x=1564 y=436 vx=250 on cores=5/7 volts=99 mission=first-meeting held=ArrowRight threat={"k":"guard","x":1612,"y":444,"w":30,"h":22,"hp":10,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[03:05] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[03:12]   . A1 x=1764 y=432 vx=0 on cores=5/7 volts=99 mission=first-meeting held=
+[03:13] STUCK trying to reach exit R toward A2 in A1 at x=1764,y=432
+[03:14] FRAME 006-stuck-A1.png
+[03:15] ROOM A1 -> A2  at x=114
+[03:15] PLAN room A2: 116 standable tiles, 1727 moves (95 ms)
+[03:15] FLAG +sc_A2_4
+[03:15] SCRAP 48 -> 60
+[03:16] FIGHT crawler (hp 26) in A2
+[03:16] HURT 5 -> 4 in A2 (nearest crawler at 25 px)
+[03:17] HEAL (cores 4/7, volts 99)
+[03:20]   . A2 x=737 y=435 vx=201 on cores=5/7 volts=66 mission=first-meeting held=
+[03:20] FIGHT flier (hp 21) in A2
+[03:21] FLAG +sc_A2_5
+[03:21] SCRAP 60 -> 78
+[03:23] HURT 5 -> 4 in A2 (nearest flier at 135 px)
+[03:24] HEAL (cores 4/7, volts 66)
+[03:26] FIGHT flier (hp 21) in A2
+[03:28]   . A2 x=1225 y=430 vx=243 on cores=5/7 volts=33 mission=first-meeting held=
+[03:29] FIGHT hopper (hp 31) in A2
+[03:31] FLAG +nfMeet
+[03:31] MISSION DONE first-meeting
+[03:32] FRAME 007-done-first-meeting.png
+[03:32] MISSION marble (objective: "Find the raw marble beneath the meadow")
+[03:32] FLAG +sc_A2_6
+[03:32] SCRAP 78 -> 101
+[03:32] MEET NULLFANG drops in (A2): stepping out of the swipe
+[03:32] FRAME 008-nullfang-meet.png
+[03:36]   . A2 x=1861 y=426 vx=42 on cores=5/7 volts=33 mission=marble held=ArrowLeft
+[03:36] STATE PLAY -> PANELS
+[03:36] MANHWA meet panel 1/3
+[03:37] MANHWA meet panel 2/3
+[03:37] MANHWA meet panel 3/3
+[03:39] STATE PANELS -> PLAY
+[03:39] FIGHT hopper (hp 31) in A2
+[03:40] HURT 5 -> 4 in A2 (nearest hopper at 79 px)
+[03:41] HEAL (cores 4/7, volts 66)
+[03:44]   . A2 x=1269 y=224 vx=-340 air cores=5/7 volts=33 mission=marble held=ArrowLeft+Space
+[03:44] FIGHT flier (hp 21) in A2
+[03:48] FIGHT flier (hp 21) in A2
+[03:50] HURT 5 -> 4 in A2 (nearest flier at 82 px)
+[03:52]   . A2 x=528 y=433 vx=-340 on cores=4/7 volts=55 mission=marble held=ArrowLeft near=rescue:null
+[03:52] DOWN-STRIKE at the loose floor (tiles 12-14)
+[03:54] FLAG +taughtBreak
+[03:54] FLAG +taughtFloor
+[03:54] PLAN room A2: 114 standable tiles, 1684 moves (70 ms)
+[03:55] PLAN room A5: 58 standable tiles, 764 moves (25 ms)
+[03:56] ROOM A2 -> A5  at x=336
+[03:56] TOAST Chalk arrows — the old quarrymen marked their road to the marble.
+[03:56] FLAG +pgMarks
+[03:57] FLAG +sc_A5_5
+[03:57] SCRAP 101 -> 131
+[03:58] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it.
+[03:59] RUBBLE strike (hp 6)
+[03:59] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[03:59] RUBBLE strike (hp 5)
+[04:00] RUBBLE strike (hp 4)
+[04:00]   . A5 x=1073 y=433 vx=0 on cores=4/7 volts=55 mission=marble held=
+[04:00] RUBBLE strike (hp 3)
+[04:01] RUBBLE strike (hp 2)
+[04:01] RUBBLE strike (hp 1)
+[04:02] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:02] FLAG +rubbleA5
+[04:02] DOOR up at 1106 -> CV1
+[04:02] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:03] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[04:03] PACE sim 60.1 s per 60 s wall (pace dial / slow frames)
+[04:03] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:04] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[04:06] ROOM A5 -> CV1  at x=167
+[04:06] PLAN room CV1: 74 standable tiles, 806 moves (17 ms)
+[04:06] STATE PLAY -> PANELS
+[04:06] MANHWA cave panel 1/3
+[04:08] MANHWA cave panel 2/3
+[04:08] MANHWA cave panel 3/3
+[04:08]   . CV1 x=167 y=427 vx=0 on cores=4/7 volts=55 mission=marble held=
+[04:09] STATE PANELS -> PLAY
+[04:12] FIGHT crawler (hp 52) in CV1
+[04:13] HURT 4 -> 3 in CV1 (nearest crawler at 72 px)
+[04:14] HEAL (cores 3/7, volts 99)
+[04:16] HEAL (cores 4/7, volts 66)
+[04:18]   . CV1 x=488 y=469 vx=0 on cores=5/7 volts=33 mission=marble held= near=rescue:null
+[04:20] TOAST Something is calling from behind the fallen rock. STRIKE it.
+[04:21] RUBBLE strike (hp 6)
+[04:21] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[04:21] RUBBLE strike (hp 5)
+[04:22] RUBBLE strike (hp 4)
+[04:22] RUBBLE strike (hp 3)
+[04:23] RUBBLE strike (hp 2)
+[04:23] RUBBLE strike (hp 1)
+[04:24] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:24] FLAG +rubbleCV1B
+[04:24] DOOR up at 1111 -> CV1B
+[04:25] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:26] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[04:26]   . CV1 x=1099 y=459 vx=0 on cores=5/7 volts=33 mission=marble held=
+[04:28] ROOM CV1 -> CV1B  at x=142
+[04:28] PLAN room CV1B: 50 standable tiles, 549 moves (16 ms)
+[04:30] REST at the pod in CV1B (cores 5/7, volts 33)
+[04:31] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map.
+[04:31] FLAG +sc_CV1B_4
+[04:31] FLAG +pgSurvey
+[04:31] SCRAP 131 -> 161
+[04:31] SAVEPOINT A0B -> CV1B
+[04:31] READY: before CV3 (cores 5/7, save point CV1B) — resting at the pod in CV1B first
+[04:33] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map. / Systems recharged. Progress saved.
+[04:34] FIGHT bat (hp 31) in CV1B
+[04:34]   . CV1B x=889 y=298 vx=0 air cores=7/7 volts=99 mission=marble held= threat={"k":"bat","x":868,"y":174,"w":24,"h":18,"hp":31,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:36] TOAST Systems recharged. Progress saved.
+[04:36] FLAG +sc_CV1B_2
+[04:36] SCRAP 161 -> 214
+[04:38] FIGHT bat (hp 31) in CV1B
+[04:42]   . CV1B x=889 y=310 vx=0 air cores=7/7 volts=99 mission=marble held=
+[04:44] FIGHT bat (hp 31) in CV1B
+[04:48] FIGHT bat (hp 31) in CV1B
+[04:50] DOOR up at 1120 -> CV2

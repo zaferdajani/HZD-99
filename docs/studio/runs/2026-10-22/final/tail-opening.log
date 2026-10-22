@@ -1,0 +1,154 @@
+
+── cacheroster  — the Cache has machines to bend it: V1 and V2 spawn them with the moves, V1B and X1 spawn none
+── cacheroster — the Cache has machines to bend it
+
+  ok   V1 spawns what it declares on a finished run  bat+hopper (declared bat+hopper) at level 7
+  ok   ...and the spawned bat carries glint
+  ok   ...and the spawned hopper carries refract
+  ok   V2 spawns what it declares on a finished run  crawler+hopper (declared hopper+crawler) at level 7
+  ok   ...and the spawned crawler carries facet
+  ok   ...and the spawned hopper carries refract
+  ok   every spawned Cache machine holds only its own kingdom's moves  bat:glint hopper:refract hopper:refract crawler:facet
+  ok   a fresh save's Cache floor already buys every move (level 5, four points)  level 5, 4 pts
+  ok   V1B — the Kerf, the kingdom's NPC home — spawns nothing  0 spawned
+  ok   X1 spawns no roster machine — the arena is PRISM's  0 spawned, boss prism
+  ok   the bat hangs under rock at dive height, not from a roof nine rows up  bat top row 5, rock at row 4
+  ok   ...and the rock is a spar grown from the roof, one object  depths across the roof: 1,2,3,4
+  ok   ...and the ground under the spar is the floor, never the spar's underside  ground at 467 (spar bottom 160, ledge 352, floor 480)
+  ok   V1's spawned bat shivers, dives and leaves splinters in the air  shiver true, dive true, 1 splinters in 72 frames
+  ok   V1's spawned hopper crouches and paints its landing  painted at 401 in 88 frames
+  ok   V2's spawned hopper paints its landing  in 29 frames
+  ok   V2's spawned crawler coils, lunges and throws the lance behind it  spawn x 742 dir 1: coil true, lunge true, lance true in 110 frames
+  ok   every hit she took was attributable to a Cache machine
+  ok   no page errors
+
+all good
+   (cacheroster: 8.0 s)
+
+── npcstrip  — the five work strips are twelve frames of work, foot-aligned and steady
+── npcstrip — the five work strips are twelve frames of work
+
+  ok   every strip arrived  5 strips
+  ok   servo: every cell draws a body  26338..35205px
+  ok   servo: ...and no two cells are the same cell  quietest pair 9.92 (min 1.5), loudest 96.92
+  ok   servo: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   servo: ...and it does not pump in size  height 213..214px  spread 0.5%
+  ok   mono: every cell draws a body  13817..25963px
+  ok   mono: ...and no two cells are the same cell  quietest pair 5.34 (min 1.5), loudest 70.50
+  ok   mono: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   mono: ...and it does not pump in size  height 214..214px  spread 0.0%
+  ok   patch: every cell draws a body  21961..25406px
+  ok   patch: ...and no two cells are the same cell  quietest pair 50.40 (min 1.5), loudest 84.15
+  ok   patch: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   patch: ...and it does not pump in size  height 204..214px  spread 4.7%
+  ok   sage: every cell draws a body  6663..9475px
+  ok   sage: ...and no two cells are the same cell  quietest pair 100.50 (min 1.5), loudest 143.41
+  ok   sage: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1px
+  ok   sage: ...and it does not pump in size  height 212..213px  spread 0.5%
+  ok   lumen: every cell draws a body  6952..13385px
+  ok   lumen: ...and no two cells are the same cell  quietest pair 15.04 (min 1.5), loudest 165.19
+  ok   lumen: ...and the feet stay on the floor  offsets -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1px
+  ok   lumen: ...and it does not pump in size  height 171..194px  spread 11.9%
+  ok   no page errors
+
+all good
+   (npcstrip: 1.4 s)
+
+── opening  — she wakes, she walks, she arrives — and only then does anything move
+── opening — she wakes, she walks, she arrives, and only then does anything move
+  ok   both waking rooms exist  W1, W2
+  ok   the run STARTS in the cradle, not on the meadow  newSave starts at W1
+  ok   W1 walks to W2, and the GATES are the only way into the city  [true,true]
+  ok   ...she can walk back to the cradle, and there is NO side door past the gates  [true,true]
+  ok   both rooms are on the map
+  ok   nothing in either room can hurt her  W1 [] W2 []
+  ok   ...and neither floor has spikes in it
+  ok   the cradle takes hold of her when she arrives
+  ok   ...and its pages come before the waking
+  ok   ...and she cannot walk out of the release  0.00 px
+  ok   ...it ENDS, and gives her back  held false, then moved 170 px
+  ok   ...and it happens exactly once per save
+
+    lesson order: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+
+  ok   the verbs come in the right order, and Ratchet comes before any machine  move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+  ok   the lesson knows all three of its rooms  {"W1":0,"W2":1,"A0":2,"A0B":2}
+  ok   standing still in the cradle room cannot skip the lesson  stalled at move
+  ok   the cradle and the gates exist and decode
+  ok   ...the cradle stands in its room and the gates ARE their room's horizon  {"W1":true,"W2":true}
+  ok   the walk arrives: right to the gates, UP through them  W1 -> W2 -> A0
+  ok   the gates are the room's backdrop, not a rectangle pasted into it
+  ok   pressing up away from the gates does nothing
+  ok   pressing up AT the gates walks her in
+  ok   ...and she arrives inside the city, not past the far side of it  A0 at x=40
+  ok   her back plates decode
+  ok   she walks away with her BACK to us, never her side view  heroDeparture / 0 side frames
+  ok   ...and unarmed she wears the BARE back pair, not the sword she lacks  heroDeparture
+  ok   a moving wolf cycles real gait frames  runA,runB
+  ok   a standing wolf stands still  rest
+  ok   the gait answers to the FLOOR, not to a clock (half speed = half the steps)  10 steps fast vs 5 slow
+
+OK — she wakes, she is let go, she walks, she arrives, and nothing touched her on the way
+   (opening: 2.4 s)
+
+── opening-order  — the opening played with real input in the owner's order, desktop and phone, to Old Servo
+FAILED: ── opening-order — the opening, played in the owner's order with real input
+
+  [desktop] steps: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go   end: A1
+  ok   desktop: the opening reaches the meadow  A1
+  ok   desktop: every step, in the owner's order  move,out,jump,gate,booth,note,drawer,repair,pod,pack,heal,atk,burst,node,go
+  ok   desktop: every prompt names one control  []
+  ok   desktop: every hint names her real controls (nothing left unfilled)  []
+  ok   the letter is read before the battery is found  10 < 15
+  ok   ...his battery has its own card, with its art  Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him.
+  ok   ...and he wakes after the repair, and says who he is  18
+  ok   the explanation: the song infected, the marble slowed it, the battery pulled, she was asleep, raw marble below, a white sword
+  ok   the spare Power Cell is handed over with a card that names Servo  Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him.
+  ok   Ratchet sends her to the pod in the owner's words  24
+  ok   the pod saves first: the save point is in the den before the pack is introduced  {"step":"pack","room":"A0B","scrap":0,"bench":"A0B"}
+  ok   ...and the save is confirmed on screen
+  ok   the pack is explained — what, why, the cost — before the counter opens
+  ok   ...he pays her the 12 scrap with a card that says what scrap is  12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades.
+  ok   the counter opens on the Volt Pack, marked permanent, the rest locked until it is bought  {"type":"cell","name":"Volt Pack · permanent","desc":"Wires healing and the Volt Burst into you. Bought once, yours for good.","cost":12,"others":[true,true,true,true,true,true,true]}
+  ok   ...and the purchase card shows the two verbs with her controls  Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst.
+  ok   desktop: the Volt Pack is bought with zero scrap gathered from the floor  {"scrapAtShop":12,"pickups":0}
+  ok   desktop: the monument is east of the booth door, within one screen, before the way out  {"node":880,"door":399.36,"exit":2016,"screen":631.578947368421,"winch":596}
+  ok   desktop: ...and the winch stands between them, on the road  {"node":880,"door":399.36,"exit":2016,"screen":631.578947368421,"winch":596}
+  ok   desktop: no two overlays at once  []
+  ok   desktop: the goal line never sits on the lesson chip  []
+  ok   desktop: Servo is switched off on arrival, drawn bigger than her, and standing on the floor  {"live":false,"cells":1,"k":1.75,"drawnH":98,"heroH":36,"onFloor":true}
+  ok   desktop: the spare cell wakes him  {"live":true,"q":"active","cells":0}
+  ok   Servo introduces himself, explains the way to the marble, and names the coil task and its reward  ["Ratchet’s spare cell fits the port in his chest. You seat it.","Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you.","After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up.","And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ.","Errand taken"]
+  ok   ...a repeat visit is not the intro again  ["Mrrow. Little frame. Nothing your size has come back up that corridor.","My receiver was unplugged inside the shielded lift housing when the song changed.","I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.","Ratchet sent a spare? Tell him the last passenger got home.","Bring me: a shaken-loose coil","The coil is up in the gantries — the climb starts right behind me.","(not yet)"]
+  ok   ...and the coil coming home is answered and paid  {"q":"done","scrap":60,"joy":2.2336666666666947,"spin":true}
+  ok   desktop: the coil errand is taken
+  ok   desktop: no page errors  []
+  shots: 46 in tests/out/opening-order/
+
+  [phone] steps: move -> out -> jump -> gate -> booth -> note -> drawer -> repair   end: A0B
+  FAIL phone: the opening reaches the meadow  A0B
+  FAIL phone: every step, in the owner's order  move,out,jump,gate,booth,note,drawer,repair
+  ok   phone: every prompt names one control  []
+  ok   phone: every hint names her real controls (nothing left unfilled)  []
+  FAIL phone: the Volt Pack is bought with zero scrap gathered from the floor  {"scrapAtShop":null,"pickups":0}
+  FAIL phone: the monument was reached
+  ok   phone: no two overlays at once  []
+  ok   phone: the goal line never sits on the lesson chip  []
+  FAIL phone: Servo is switched off on arrival, drawn bigger than her, and standing on the floor
+  FAIL phone: the spare cell wakes him
+  FAIL phone: the coil errand is taken
+  ok   phone: no page errors  []
+  shots: 19 in tests/out/opening-order/
+
+FAILED:
+  phone: the opening reaches the meadow
+  phone: every step, in the owner's order
+  phone: the Volt Pack is bought with zero scrap gathered from the floor
+  phone: the monument was reached
+  phone: Servo is switched off on arrival, drawn bigger than her, and standing on the floor
+  phone: the spare cell wakes him
+  phone: the coil errand is taken
+Command failed: node /workspace/scratch/clawbyte-review-22/repo/tests/opening-order.cjs
+   (opening-order: 496.5 s)
+
+1 harness(es) failed

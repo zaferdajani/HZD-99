@@ -1,0 +1,217 @@
+
+── purification-controls  — mobile hold/cancel, focus-loss safety and restored save
+PASS mobile touch hold/cancel, focus loss, accessible target size, saved restored guardian
+   (purification-controls: 1.2 s)
+
+── purification  — deliberate guardian rescue hold, cancellation, choreography and protected rewards
+{
+  state: 'DIALOG',
+  pure: true,
+  dead: true,
+  paid: true,
+  ledger: {
+    led: 'L',
+    trail: '',
+    tally: { L: 1, R: 0, X: 0 },
+    nodes: [ [Object] ],
+    seen: { 'U-CSDDQY': 1 },
+    kills: 0,
+    forks: 1
+  },
+  hidden: true,
+  ritual: false
+}
+PASS deliberate hold, cancellation, all guardian gates, staged choreography, single reward and restored actor
+   (purification: 19.9 s)
+
+── story-order  — the story sheet walked through the real build: beat order, gates, named things, migration
+── story-order — the story sheet, walked through the real build
+  ok   the sheet: every beat has room, speaker, what they know and who points there  34 beats
+  ok   every ordered-story line exists, in the same shape, in all 5 languages  43 keys
+  ok   greedy: no beat is possible before its required flags  34 beats in order
+  ok   greedy: every beat on the sheet can be reached  all
+  ok   greedy: no line names something she has not met  clean
+  ok   sage route: no beat is possible before its required flags  34 beats in order
+  ok   sage route: every beat on the sheet can be reached  all
+  ok   sage route: no line names something she has not met  clean
+  ok   the sage route passes the break where the sage sends her (the hub, under the climb)  break fired in A2
+  ok   ...and in canon order: forge < sage < bell < NULLFANG < Conduits  wake > gates > ratchet_note > ratchet_wake > volt_pack > servo > meeting > dent_before_forge > way_down > beacon > gravehorn > quarry > forge > forged_line > alpha > first_sage > sage_line > break > chime > rematch_line > nullfang > conduits_line > conduits > mono > talonhost > sigil_foundry > furnace > archives_sage > glaciere > prowler > mind_nodes > vault > mother > kerf
+  ok   migration: an old save becomes the current story version  3
+  ok   migration: the camp waking is Ratchet's one waking (one flag, no second revival)  {"tut":1,"woke":1,"on_A3|ratchet":1,"crystal":1,"nfMeet":1,"sageTame_GA1D":1,"bossGlitch":1,"on_A0B|ratchet":1,"ratchetRepaired":1,"ratchetSpareGiven":1,"heal":1,"ratchetCamp":1,"chimeRevealed":1,"nfBreak":1}
+  ok   migration: nothing earned is stripped (blade, sage, lion, cell kept)
+  ok   migration: nothing is paid twice (no Draft 2 spare, forge errand closed, pack kept)
+  ok   migration: beats the old route passed are not replayed
+  ok   migration runs once (a migrated save is left as it is)
+  ok   migration: the drawer cell she already took is his cell again (no locked workshop)  {"ratchetCell":1}
+  ok   migration: ...or, every cell spent, the drawer holds it again
+  ok   migration leaves NOSTOS saves alone
+  ok   the climb to the Conduits refuses before NULLFANG is free
+  ok   ...and says why, in the player's language  The conduit hatch above the camp is jammed by NULLFANG's binding. Free the lion before you climb.
+  ok   ...and still refuses a save that never forged the blade
+  ok   ...and opens once the lion is free and the blade forged  B1
+  ok   without the forged blade a guardian cannot be freed (the song holds it)  hp 13 dead false tamed false
+  ok   ...and nothing is written to the braid for a fork never reached
+  ok   with the blade the blow prompts deliberate purification, without paying early  state PURIFY forks 0
+  ok   a new run: Ratchet stands in his workshop, and nowhere else  {"den":1,"camp":0,"campLive":null,"campKey":null}
+  ok   after the forge he has moved to the camp — one body, still awake on the one waking  {"den":0,"camp":1,"campLive":true,"campKey":"A0B|ratchet"}
+  ok   handing over the marble, he says he is moving to the camp  2 lines
+  ok   ...and the forge moves him
+  ok   Ratchet does not send claws at NULLFANG before the forge  sl_ratchet_dent,sl_ratchet_forged
+  ok   ...he does once the sage is free and the bell silent
+  ok   ...and after the lion, he points up to the Conduits
+  ok   the first sage says "silence that bell" only while the bell still rings
+  ok   NULLFANG's break happens on the sage's route, under the climb in the hub
+  ok   ...never before he has been met, and never after the bell
+  ok   B5's east side does not walk around the three-sigil vault  {"to":null,"inside":true}
+  ok   ...and opens with the vault  V1
+  ok   Vault Sigil III is placed once, in the Foundry tower (C1)  C1
+  ok   the locked vault points a player missing Sigil III to the Foundry tower  without: The vault door needs three sigils  2/3  The third seal was carried down into the Foundry tower. / with: The vault door needs three sigils  2/3
+  ok   a cull counts from the moment it was accepted, not from the start of the run  0 then 6
+  ok   the survey errand counts once she READS the survey after being asked — standing in the shaft is not enough  before false standing false read true
+  ok   an errand's object lies in the world from the start until it is handed in  before true during true after false
+  ok   ...a coil found before Servo asks is handed over on the ask, in his own words  Mrrow. Little frame. Nothing your size has come back up that corridor. My receiver was unp
+  ok   ...and an errand accepted on an older save keeps its progress
+  ok   Ratchet names the keyboard's own heal and attack keys and no placeholder survives  That ring of charge on you fills when your hits land. Right now you have no way to spend it. My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst. You will ne
+  ok   ...and, on a remapped controller, the button she bound  That ring of charge on you fills when your hits land. Right now you have no way to spend it. My Volt Pack fixes that. With it, hold Triangle to mend a core, or hold Square and let go for a Volt Burst.
+  ok   GLACIERE's title is not the sword's name  GLACIERE, THE FROZEN SENTINEL
+  ok   the Archives sage names GLACIERE, not a different "Archivist"
+  ok   the free chapter counts the guardians that are actually left  4: Four kingdoms, four more guardians and Mother's hijacked song are waiting in the full game.
+  ok   Mono does not blame MOTHER for the order
+  ok   the Prowler was never infected, and nothing says it was
+  ok   Kerf never split a purifier in two
+  ok   the finale cleanses and frees MOTHER — no "Null Core" is killed  MOTHER-V, THE HIJACKED SONG MOTHER-V is free. Her song is silent, and it is her own again. What remains is the Eye that
+  ok   ...and is truthful about the Eye: exposed, not defeated
+  ok   marble, not crystal, in the quarry's own words
+
+OK — every beat in its order, every gate says why, every line names only what she has met
+   (story-order: 1.0 s)
+
+── story-rescue  — recoverable machines and persistent cleansing
+PASS [
+  'opening target is a construct',
+  'person has stable identity',
+  'defeat preserves person and does not create a wreck',
+  'claws cannot cleanse',
+  'disabled person cannot take more damage',
+  'disabled state survives reload',
+  'forged sword starts short interaction',
+  'moving away interrupts without harming person',
+  'damage interrupts',
+  'cleanse changes body behaviour and save state',
+  'cure pays once',
+  'repeated actions cannot duplicate reward or destroy friend',
+  'rescued person persists in room after reload',
+  'rescued contact is safe',
+  'legacy encounters preserved'
+]
+   (story-rescue: 0.9 s)
+
+── sage-quiet  — comic page 26: the sage's promise closes its end of the network
+PASS sage-quiet: the chamber stands down in the moment (1 machines), all three rooms of the network wake calm on a fresh load, and no other cave or surface is touched {
+  before: { chamber: 1, n: 1 },
+  beforeTunnel: 1,
+  company: 1,
+  afterMoment: 0,
+  net: {
+    GA1: { hostile: 0, total: 0 },
+    GA1T: { hostile: 0, total: 1 },
+    GA1D: { hostile: 0, total: 1 }
+  },
+  otherNet: 1,
+  meadow: 2,
+  flagged: true
+}
+   (sage-quiet: 0.8 s)
+
+── enemygait  — machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground
+── enemygait — grounded, no moonwalk, the same flight at any frame rate, a gait clocked by the floor
+  ok   every kind is born with a grounded flag  12 kinds
+  ok   the walkers ran in real rooms  A1:2 A2:3 A6:1 B2:3 C2:3 CV2:3 D2:3 E1:2
+  ok   every walker carries `on`, every frame
+  ok   ...and it is true while they walk the floor  12909 grounded frames
+  ok   no walker skips down a curve (one/two-frame losses of ground that is there)  6 in 23756 walker-frames · A1 0, A2 0, A6 0, B2 2, C2 0, CV2 2, D2 2, E1 0
+  ok   they turned round, plenty  55 picture turns, 0 braking frames against the facing
+  ok   NO MOONWALK: outside a brake, vx never runs against the facing  0 frames
+  ok   the TAMED pack mills about without moonwalking  1 wolves, 7 turns, 0 frames against the facing
+  ok   the airborne hopper is a wolf in zone A (the case that ran walk frames mid-air)
+  ok   ...it left the ground  112 airborne frames
+  ok   ...and wears the airborne plate, never a walk frame, in the air  112 lunge / 0 walk of 112
+  ok   ...and lands into its own recovery pose  80 of 80 landing frames
+  ok   rounds: the flier at 30 fps flies the 60 fps path (within 4 px)  worst 2.3 px at 8.00 s
+  ok   rounds: the flier at 120 fps flies the 60 fps path (within 4 px)  worst 1.3 px at 8.00 s
+  ok   rounds: ...and it actually went somewhere  122 px from where it started
+       states rounds: 30→perch  60→perch  120→perch
+  ok   hunt: the flier at 30 fps flies the 60 fps path (within 4 px)  worst 0.2 px at 3.00 s
+  ok   hunt: the flier at 120 fps flies the 60 fps path (within 4 px)  worst 0.3 px at 2.75 s
+  ok   hunt: ...and it actually went somewhere  152 px from where it started
+       states hunt: 30→hold+dive+rise  60→hold+dive+rise  120→hold+dive+rise
+  ok   its rounds include a PERCH, not a sine drift  perch
+  ok   the hunt runs the whole cycle at every rate: tell, dive, climb out
+  ok   it faces where it is going  11 of 11 travelling samples
+  ok   guard: the drawing is there to measure  1163 px
+  ok   guard: the same floor covered at a different clock time is the SAME picture  0 px differ
+  ok   guard: ...and more floor covered at the same clock time is a different picture  251 px differ
+  ok   a walker standing still does not bob on the clock  0 px differ over 2.4 s
+  ok   one authored angle at a time: two facings inside the same angle draw identically (no blend)  between 0 px, vs profile 883 px
+  ok   the gait banks the floor it covered, nothing else  moved 100.3 px, banked 100.3
+
+OK — they stand on the floor, turn on their feet, fly the same at any rate, and step with the ground
+   (enemygait: 2.2 s)
+
+── infection-eyes  — red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending
+── infection-eyes — red for the rank and file, purple for guardians, smoke that leaves the eye and ends
+  ok   a trotting wolf smokes, and only red  {"live":56,"red":56,"purple":0}
+  ok   ...its eye is found in the art, off the body centre  eye 455,373 centre 494,406 (51 px)
+  ok   ...and the eye is at the front of the head, not the hips  facing left: eye must be left of and above the centre
+  ok   the youngest smoke is born AT the eye  0.0, 3.1, 4.6, 6.0 px
+  ok   ...and older smoke has risen from where it was born  age 0.63s: born y 370, now 361
+  ok   a camera pan makes no smoke and moves none  {"nBefore":57,"nAfter":57,"moved":false}
+  ok   standing still, the plume dissipates and the glow stays  {"live":0,"glow":true}
+  ok   paused, nothing advances  29 particles held
+  ok   purified: not one new wisp from the moment it is cured  0 born after the cure
+  ok   ...the wisps already out fade rather than vanish  57 → 57
+  ok   ...and are gone within their lifetime  0 left
+  ok   ...and a cured machine shows no infected glow
+  ok   a teleport clears the trail  {"preTp":33,"after":0}
+  ok   removal clears the trail  {"preRm":38,"after":0}
+  ok   a room change clears everything  {"preRoom":34,"after":0}
+  ok   the Alpha burns purple  {"red":0,"purple":63,"eye":1}
+  ok   NULLFANG burns purple  {"red":0,"purple":51,"eye":1}
+  ok   ...and once freed, the lion smokes no more  0 left
+  ok   on a phone the smoke is bounded  {"live":90,"red":90,"purple":0,"cap":90,"owners":25,"frame":821}
+  ok   MOTHER-V reports her eight lenses, purple, and her smoke stays inside the phone budget  {"eyes":8,"max":8,"purple":90,"red":0,"most":90,"cap":90,"bodyMax":8}
+  ok   no page errors
+  ok   reduced motion: the eye still glows, no smoke is drawn  {"live":0,"glow":true}
+
+OK — the eyes burn the right colour, the smoke leaves the eye, lives in the world and ends
+   (infection-eyes: 67.3 s)
+
+── sage  — the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift
+── sage — the duelist that can only be cleansed
+  ok   a sage kneels in the deep chamber
+  ok   it duels: real tells, lunges, and the exhale opening  tells 2.58s
+  ok   claws break it to the floor and no further  locked true
+  ok   ...and glance off the song-lock for zero
+  ok   the crystal purifies it — tamed, never killed
+  ok   the gift pays, and pays once
+  ok   all seven sages have an identity, a story line and a gift, in both languages
+  ok   a purified sage cannot be harmed
+  ok   the purification is a save fact — it survives the room reload
+
+OK — broken by anything, cleansed by one thing, kept clean forever
+   (sage: 2.2 s)
+
+── sage-walk  — the rescued Sage walks in purified authored frames instead of sliding in its kneeling pose
+── sage-walk — the rescued Sage has feet, a gait and a clean body
+  ok   the saved Sage returns tame and calm
+  ok   its real update moves the body and the distance gait  moved 87.59 px body / 82.48 gait
+  ok   it accelerates into the walk instead of snapping  firstV 23.6 -> 58.92 px/s
+  ok   moving draw selects the authored eight-cell Sage walk  [{"key":"sageWalk8","cell":3,"cells":8,"pure":true}]
+  ok   the moving authored gait is rendered with purified material
+  ok   standing still returns to the authored rescued kneel  [{"plate":"sagePure"}]
+  ok   the rescue remains a save fact after leaving and returning
+
+OK — rescued Sage walks in authored purified motion and rests in its rescued pose
+   (sage-walk: 1.6 s)
+
+all 9 harnesses ran
