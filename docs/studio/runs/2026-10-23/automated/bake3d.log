@@ -1,0 +1,80 @@
+
+── bake3d  — any authored GLB bakes to a turnaround the atlas can wear: grounded, rotating, silhouettes apart
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.evaluate: Error: Error creating WebGL context.
+    at new Ks (<anonymous>:6:383563)
+    at eval (eval at evaluate (:311:30), <anonymous>:83:15)
+    at async <anonymous>:337:30
+    at /workspace/scratch/b4e9aa23d77e/repo/tools/bake3d.cjs:89:27 {
+  log: []
+}
+
+Node.js v24.19.0
+node:internal/errors:985
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/scratch/b4e9aa23d77e/repo/tools/bake3d.cjs /tmp/bake3d-C3XQzg/fixture.glb fixture --cell=256 --out=/tmp/bake3d-C3XQzg
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at execFileSync (node:child_process:978:15)
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/bake3d.cjs:94:3
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/bake3d.cjs:169:3)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 23696,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.19.0
+FAILED: node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.evaluate: Error: Error creating WebGL context.
+    at new Ks (<anonymous>:6:383563)
+    at eval (eval at evaluate (:311:30), <anonymous>:83:15)
+    at async <anonymous>:337:30
+    at /workspace/scratch/b4e9aa23d77e/repo/tools/bake3d.cjs:89:27 {
+  log: []
+}
+
+Node.js v24.19.0
+node:internal/errors:985
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/scratch/b4e9aa23d77e/repo/tools/bake3d.cjs /tmp/bake3d-C3XQzg/fixture.glb fixture --cell=256 --out=/tmp/bake3d-C3XQzg
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at execFileSync (node:child_process:978:15)
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/bake3d.cjs:94:3
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/bake3d.cjs:169:3)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 23696,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.19.0
+
+   (bake3d: 0.9 s)
+
+1 harness(es) failed

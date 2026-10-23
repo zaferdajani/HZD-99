@@ -1,0 +1,15 @@
+
+── sage-walk  — the rescued Sage walks in purified authored frames instead of sliding in its kneeling pose
+── sage-walk — the rescued Sage has feet, a gait and a clean body
+  ok   the saved Sage returns tame and calm
+  ok   its real update moves the body and the distance gait  moved 128.47 px body / 123.86 gait
+  ok   it accelerates into the walk instead of snapping  firstV 34.62 -> 86.41 px/s
+  ok   moving draw selects the authored eight-cell Sage walk  [{"key":"sageWalk8","cell":1,"cells":8,"pure":true}]
+  ok   the moving authored gait is rendered with purified material
+  ok   standing still returns to the authored rescued kneel  [{"plate":"sagePure"}]
+  ok   the rescue remains a save fact after leaving and returning
+
+OK — rescued Sage walks in authored purified motion and rests in its rescued pose
+   (sage-walk: 1.6 s)
+
+all 1 harnesses ran

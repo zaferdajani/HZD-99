@@ -27,8 +27,10 @@
 //     spare cell, says who he is, where the marble is, and what he wants for
 //     what reward — and answers when the coil comes home.
 //
-// Every step is photographed at 1280x720 (keyboard) and on a 390x844 phone
-// with touch controls, turned to landscape as the game asks (844x390):
+// Every step is photographed at 1280x720 (keyboard) and in a touch-capable
+// 390x844 phone viewport driven by the same keyboard/mouse harness, turned to
+// landscape as the game asks (844x390). This is responsive-layout evidence,
+// not a physical touch-control playthrough:
 // tests/out/opening-order/.
 //
 //   node tests/opening-order.cjs
@@ -66,7 +68,7 @@ async function play(browser, mode) {
   }
   const R = { mode, steps: [], shots: [], dialogs: [], overlap: [], goalOnChip: [], scrapAtShop: null,
     shopRow: null, packTalk: null, podSaved: null, podBanner: false, stepLog: [], monument: null, pickups: 0,
-    multiAction: [], unfilled: [], servo: {} };
+    multiAction: [], unfilled: [], servo: {}, timeline: [], terminal: null };
   let held = null;
   const steer = async k => { if (held === k) return; if (held) await page.keyboard.up(held); held = k; if (k) await page.keyboard.down(k); };
   const shot = async (name) => {
@@ -74,8 +76,10 @@ async function play(browser, mode) {
     await page.screenshot({ path: f });
     R.shots.push(path.basename(f));
   };
-  const deadline = Date.now() + 240000;
+  const started = Date.now();
+  const deadline = started + 240000;
   let lastStep = null, lastDialog = '';
+  let lastTrace = '';
   const shotSeen = new Set();
   while (Date.now() < deadline) {
     const s = await page.evaluate(() => {
@@ -102,12 +106,27 @@ async function play(browser, mode) {
         dialog: G.dialog ? { name: G.dialog.name, line: G.dialog.lines[G.dialog.i], i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art, demo: G.dialog.demo } : null,
         pan: G.state === 'PANELS' && G.panels ? { id: G.panels.seq.id, i: G.panels.i, cap: (G.panels.list[G.panels.i] || {}).cap || null } : null,
         shopIdx: G.shopIdx, rech: !!G.recharge, wake: !!G.wake, cut: !!G.cut, gate: !!G.gateWalk, trans: !!G.trans,
+        cutInfo: G.cut ? { kind: G.cut.kind || null, ph: G.cut.ph || null, t: G.cut.t || 0,
+          held: G.cut.held || 0, failed: !!G.cut.failed, ran: !!G.cut.ran,
+          readyState: G.cut.v ? G.cut.v.readyState : null,
+          currentTime: G.cut.v ? G.cut.v.currentTime : null,
+          duration: G.cut.v && Number.isFinite(G.cut.v.duration) ? G.cut.v.duration : null,
+          error: G.cut.v && G.cut.v.error ? String(G.cut.v.error.message || G.cut.v.error.code || G.cut.v.error) : null } : null,
         overlays, goal, goalRect: gr, chip,
         bench: G.save.bench && G.save.bench.room, podBanner: typeof OP !== 'undefined' && OP.podBanner > 0,
         flagsTut: !!G.save.flags.tut, mem: typeof TRI !== 'undefined' && G.state === 'TRIAL' ? { phase: TRI.memPhase, seq: TRI.memSeq && TRI.memSeq.slice(), st: TRI.st, game: TRI.game } : null,
         pickups: Object.keys(G.save.flags).filter(k => /^sc_/.test(k)).length,
       };
     });
+    const trace = JSON.stringify([s.room, s.state, s.step, s.hold, s.rech,
+      s.dialog && [s.dialog.name, s.dialog.i], s.pan && [s.pan.id, s.pan.i],
+      s.cutInfo && [s.cutInfo.kind, s.cutInfo.ph, s.cutInfo.readyState, s.cutInfo.failed, s.cutInfo.ran]]);
+    if (trace !== lastTrace) {
+      lastTrace = trace;
+      R.timeline.push({ ms: Date.now() - started, room: s.room, state: s.state, step: s.step,
+        hold: s.hold, recharge: s.rech, dialog: s.dialog && { name: s.dialog.name, i: s.dialog.i },
+        panels: s.pan && { id: s.pan.id, i: s.pan.i }, cut: s.cutInfo });
+    }
     if (s.overlays.length > 1) R.overlap.push(s.overlays.join('+') + '@' + s.step);
     if (s.goalRect && s.chip) {
       const a = s.goalRect, b = s.chip;
@@ -226,6 +245,20 @@ async function play(browser, mode) {
     } else { await steer(null); await page.waitForTimeout(90); }
   }
   await steer(null);
+  R.terminal = await page.evaluate(() => ({
+    room: G.roomId, state: G.state,
+    step: G.tut && !G.save.flags.tut && TUT_STEPS[G.tut.i] ? TUT_STEPS[G.tut.i].id : null,
+    hold: G.tut ? G.tut.hold : 0, recharge: !!G.recharge,
+    dialog: G.dialog ? { name: G.dialog.name, i: G.dialog.i, n: G.dialog.lines.length } : null,
+    overlayQ: Array.isArray(G.overlayQ) ? G.overlayQ.length : null,
+    cut: G.cut ? { kind: G.cut.kind || null, ph: G.cut.ph || null, t: G.cut.t || 0,
+      held: G.cut.held || 0, failed: !!G.cut.failed, ran: !!G.cut.ran,
+      readyState: G.cut.v ? G.cut.v.readyState : null,
+      currentTime: G.cut.v ? G.cut.v.currentTime : null,
+      duration: G.cut.v && Number.isFinite(G.cut.v.duration) ? G.cut.v.duration : null,
+      error: G.cut.v && G.cut.v.error ? String(G.cut.v.error.message || G.cut.v.error.code || G.cut.v.error) : null } : null
+  }));
+  await shot('terminal-' + R.terminal.room + '-' + R.terminal.state);
   // ---- the meadow: Old Servo ----
   const inMeadow = await page.evaluate(() => G.roomId);
   R.end = inMeadow;
@@ -293,6 +326,7 @@ async function play(browser, mode) {
     await shot('servo-coil-home');
   }
   R.errors = errors;
+  fs.writeFileSync(path.join(OUT, mode + '-result.json'), JSON.stringify(R, null, 2) + '\n');
   await ctx.close();
   return R;
 }

@@ -1,0 +1,1998 @@
+{
+  "mode": "phone",
+  "steps": [
+    "move",
+    "out",
+    "jump",
+    "gate",
+    "booth",
+    "note",
+    "drawer",
+    "repair",
+    "pod",
+    "pack",
+    "heal",
+    "atk",
+    "burst",
+    "node",
+    "go"
+  ],
+  "shots": [
+    "phone-00-move-move.png",
+    "phone-01-out-move.png",
+    "phone-02-jump-move.png",
+    "phone-03-jump-jump.png",
+    "phone-04-gate-move.png",
+    "phone-05-gate-up.png",
+    "phone-06-gate-move.png",
+    "phone-07-booth-move.png",
+    "phone-08-booth-up.png",
+    "phone-09-booth-x.png",
+    "phone-10-note-move.png",
+    "phone-11-note-int.png",
+    "phone-12-drawer-move.png",
+    "phone-13-drawer-int.png",
+    "phone-14-dialog-drawer.png",
+    "phone-15-repair-move.png",
+    "phone-16-repair-int.png",
+    "phone-17-dialog-repair.png",
+    "phone-18-repair-board.png",
+    "phone-19-dialog-repair.png",
+    "phone-20-dialog-repair.png",
+    "phone-21-dialog-repair.png",
+    "phone-22-pod-move.png",
+    "phone-23-pod-int.png",
+    "phone-24-pack-move.png",
+    "phone-25-pack-int.png",
+    "phone-26-dialog-pack.png",
+    "phone-27-dialog-pack.png",
+    "phone-28-counter.png",
+    "phone-29-dialog-pack.png",
+    "phone-30-heal-heal.png",
+    "phone-31-atk-move.png",
+    "phone-32-atk-up.png",
+    "phone-33-atk-move.png",
+    "phone-34-atk-atk.png",
+    "phone-35-burst-atk.png",
+    "phone-36-burst-charging.png",
+    "phone-37-node-move.png",
+    "phone-38-node-int.png",
+    "phone-39-monument-puzzle.png",
+    "phone-40-go-move.png",
+    "phone-41-terminal-A1-PLAY.png",
+    "phone-42-meadow-arrival.png",
+    "phone-43-servo-dark-cue.png",
+    "phone-44-servo-waking.png",
+    "phone-45-servo-intro.png",
+    "phone-46-servo-awake.png",
+    "phone-47-servo-coil-home.png"
+  ],
+  "dialogs": [
+    {
+      "step": "move",
+      "room": "W1",
+      "panels": "wake",
+      "cap": "pc_w_cradle",
+      "line": ""
+    },
+    {
+      "step": "move",
+      "room": "W1",
+      "panels": "wake",
+      "cap": "pc_w_wake",
+      "line": ""
+    },
+    {
+      "step": "move",
+      "room": "W1",
+      "panels": "wake",
+      "cap": null,
+      "line": ""
+    },
+    {
+      "step": "move",
+      "room": "W1",
+      "panels": "wake",
+      "cap": null,
+      "line": ""
+    },
+    {
+      "step": "move",
+      "room": "W1",
+      "panels": "wake",
+      "cap": "pc_quiet",
+      "line": ""
+    },
+    {
+      "step": "out",
+      "room": "W2",
+      "panels": "bay",
+      "cap": null,
+      "line": ""
+    },
+    {
+      "step": "out",
+      "room": "W2",
+      "panels": "bay",
+      "cap": "pc_door",
+      "line": ""
+    },
+    {
+      "step": "out",
+      "room": "W2",
+      "panels": "bay",
+      "cap": "pc_city",
+      "line": ""
+    },
+    {
+      "step": "gate",
+      "room": "A0",
+      "panels": "gate",
+      "cap": "pc_gates",
+      "line": ""
+    },
+    {
+      "step": "gate",
+      "room": "A0",
+      "panels": "gate",
+      "cap": "pc_closed",
+      "line": ""
+    },
+    {
+      "step": "note",
+      "room": "A0B",
+      "panels": "letter",
+      "cap": "pc_l_tag",
+      "line": ""
+    },
+    {
+      "step": "note",
+      "room": "A0B",
+      "panels": "letter",
+      "cap": "pc_l_song",
+      "line": ""
+    },
+    {
+      "step": "note",
+      "room": "A0B",
+      "panels": "letter",
+      "cap": "pc_l_marble",
+      "line": ""
+    },
+    {
+      "step": "note",
+      "room": "A0B",
+      "panels": "letter",
+      "cap": "pc_l_cell",
+      "line": ""
+    },
+    {
+      "step": "note",
+      "room": "A0B",
+      "panels": "letter",
+      "cap": "pc_l_hope",
+      "line": ""
+    },
+    {
+      "step": "drawer",
+      "room": "A0B",
+      "name": "ACQUIRED",
+      "line": "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him.",
+      "art": "repairBattery",
+      "demo": null
+    },
+    {
+      "step": "drawer",
+      "room": "A0B",
+      "panels": "drawer",
+      "cap": "pc_drawer",
+      "line": ""
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "His chest socket is empty. Wire his battery back in."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "ACQUIRED",
+      "line": "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him.",
+      "art": "spareCell",
+      "demo": null
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "This pod saves your progress and recharges you. Use it before you leave."
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "panels": "ratchet",
+      "cap": "pc_r_cell",
+      "line": ""
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "panels": "ratchet",
+      "cap": "pc_r_marble",
+      "line": ""
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "My Volt Pack fixes that. With it, hold ✚ to mend a core, or hold Attack and let go for a Volt Burst."
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "name": "Ratchet",
+      "line": "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "name": "ACQUIRED",
+      "line": "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades.",
+      "art": "scrapPile",
+      "demo": null
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "name": "ACQUIRED",
+      "line": "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold ✚ to spend volts mending a core. Hold Attack and let go to spend them on a Volt Burst.",
+      "art": null,
+      "demo": "pack"
+    }
+  ],
+  "overlap": [],
+  "goalOnChip": [],
+  "scrapAtShop": 12,
+  "shopRow": {
+    "type": "cell",
+    "name": "Volt Pack · permanent",
+    "desc": "Wires healing and the Volt Burst into you. Bought once, yours for good.",
+    "cost": 12,
+    "others": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "packTalk": null,
+  "podSaved": null,
+  "podBanner": true,
+  "stepLog": [
+    {
+      "step": "move",
+      "room": "W1",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "out",
+      "room": "W1",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "jump",
+      "room": "W2",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "gate",
+      "room": "W2",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "booth",
+      "room": "A0",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "note",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "drawer",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "repair",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "pod",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "W1"
+    },
+    {
+      "step": "pack",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "A0B"
+    },
+    {
+      "step": "heal",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "A0B"
+    },
+    {
+      "step": "atk",
+      "room": "A0B",
+      "scrap": 0,
+      "bench": "A0B"
+    },
+    {
+      "step": "burst",
+      "room": "A0",
+      "scrap": 0,
+      "bench": "A0B"
+    },
+    {
+      "step": "node",
+      "room": "A0",
+      "scrap": 15,
+      "bench": "A0B"
+    },
+    {
+      "step": "go",
+      "room": "A0",
+      "scrap": 18,
+      "bench": "A0B"
+    }
+  ],
+  "monument": {
+    "node": 880,
+    "door": 399.36,
+    "exit": 2016,
+    "screen": 631.578947368421,
+    "winch": 596
+  },
+  "pickups": 0,
+  "multiAction": [],
+  "unfilled": [],
+  "servo": {
+    "before": {
+      "live": false,
+      "cells": 1,
+      "k": 1.75,
+      "drawnH": 98,
+      "heroH": 36,
+      "onFloor": true
+    },
+    "wakeShot": 1,
+    "lines": [
+      "Ratchet’s spare cell fits the port in his chest. You seat it.",
+      "Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you.",
+      "After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up.",
+      "And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ.",
+      "Errand taken"
+    ],
+    "after": {
+      "live": true,
+      "q": "active",
+      "cells": 0
+    },
+    "repeat": [
+      "Mrrow. Little frame. Nothing your size has come back up that corridor.",
+      "My receiver was unplugged inside the shielded lift housing when the song changed.",
+      "I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.",
+      "Ratchet sent a spare? Tell him the last passenger got home.",
+      "Bring me: a shaken-loose coil",
+      "The coil is up in the gantries — the climb starts right behind me.",
+      "(not yet)"
+    ],
+    "thanks": [
+      "That’s my coil! Listen — the drum turns true again. Here: 60 scrap and 10 IQ, as promised."
+    ],
+    "paid": {
+      "q": "done",
+      "scrap": 60,
+      "joy": 2.2502333333332967,
+      "spin": true
+    }
+  },
+  "timeline": [
+    {
+      "ms": 2,
+      "room": "W1",
+      "state": "PANELS",
+      "step": "move",
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "wake",
+        "i": 0
+      },
+      "cut": null
+    },
+    {
+      "ms": 3570,
+      "room": "W1",
+      "state": "PANELS",
+      "step": "move",
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "wake",
+        "i": 1
+      },
+      "cut": null
+    },
+    {
+      "ms": 5703,
+      "room": "W1",
+      "state": "PANELS",
+      "step": "move",
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "wake",
+        "i": 2
+      },
+      "cut": null
+    },
+    {
+      "ms": 6769,
+      "room": "W1",
+      "state": "PANELS",
+      "step": "move",
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "wake",
+        "i": 3
+      },
+      "cut": null
+    },
+    {
+      "ms": 7832,
+      "room": "W1",
+      "state": "PANELS",
+      "step": "move",
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "wake",
+        "i": 4
+      },
+      "cut": null
+    },
+    {
+      "ms": 28790,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 33484,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0.6166666666666666,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 33605,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0.5001333333333362,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 33711,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0.40003333333333757,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 33813,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0.30003333333333754,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 33913,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0.20013333333333605,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 34021,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "move",
+      "hold": 0.08349999999999981,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 34133,
+      "room": "W1",
+      "state": "PLAY",
+      "step": "out",
+      "hold": -0.016433333333332068,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 37954,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "out",
+      "hold": 0.7,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 38052,
+      "room": "W2",
+      "state": "PANELS",
+      "step": "out",
+      "hold": 0.7,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "bay",
+        "i": 0
+      },
+      "cut": null
+    },
+    {
+      "ms": 40530,
+      "room": "W2",
+      "state": "PANELS",
+      "step": "out",
+      "hold": 0.7,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "bay",
+        "i": 1
+      },
+      "cut": null
+    },
+    {
+      "ms": 43024,
+      "room": "W2",
+      "state": "PANELS",
+      "step": "out",
+      "hold": 0.7,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "bay",
+        "i": 2
+      },
+      "cut": null
+    },
+    {
+      "ms": 49077,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "out",
+      "hold": 0.5168333333333335,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 49188,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "out",
+      "hold": 0.4001999999999972,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 49292,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "out",
+      "hold": 0.3002666666666653,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 49392,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "out",
+      "hold": 0.20036666666666383,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 49495,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "out",
+      "hold": 0.10026666666666531,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 49600,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "jump",
+      "hold": -0.01633333333333324,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 51603,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "jump",
+      "hold": 0.4001333333333363,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 51725,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "jump",
+      "hold": 0.2836000000000058,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 51832,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "jump",
+      "hold": 0.16696666666666954,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 51949,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "jump",
+      "hold": 0.06706666666667536,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 52049,
+      "room": "W2",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": -0.016199999999989848,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 59475,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": -0.016199999999989848,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 59981,
+      "room": "A0",
+      "state": "PANELS",
+      "step": "gate",
+      "hold": -0.016199999999989848,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "gate",
+        "i": 0
+      },
+      "cut": null
+    },
+    {
+      "ms": 66733,
+      "room": "A0",
+      "state": "PANELS",
+      "step": "gate",
+      "hold": -0.016199999999989848,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "gate",
+        "i": 1
+      },
+      "cut": null
+    },
+    {
+      "ms": 89129,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": 0.5333666666666492,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 89294,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": 0.41673333333332757,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 89397,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": 0.2669000000000088,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 89509,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": 0.15033333333336252,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 89626,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "gate",
+      "hold": 0.033766666666701695,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 89742,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "booth",
+      "hold": -0.016233333333298308,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 96759,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "booth",
+      "hold": -0.016233333333298308,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 97391,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "booth",
+      "hold": 0.033633333333336325,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 97526,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": -0.016266666666657853,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 100028,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "note",
+      "hold": -0.016266666666657853,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "letter",
+        "i": 0
+      },
+      "cut": null
+    },
+    {
+      "ms": 107828,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "note",
+      "hold": -0.016266666666657853,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "letter",
+        "i": 1
+      },
+      "cut": null
+    },
+    {
+      "ms": 113146,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "note",
+      "hold": -0.016266666666657853,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "letter",
+        "i": 2
+      },
+      "cut": null
+    },
+    {
+      "ms": 129796,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "note",
+      "hold": -0.016266666666657853,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "letter",
+        "i": 3
+      },
+      "cut": null
+    },
+    {
+      "ms": 134080,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "note",
+      "hold": -0.016266666666657853,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "letter",
+        "i": 4
+      },
+      "cut": null
+    },
+    {
+      "ms": 139408,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": 0.5835,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 139517,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": 0.4668666666666493,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 139618,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": 0.366966666666655,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 139724,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": 0.2668666666666491,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 139825,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": 0.16693333333330992,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 139925,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "note",
+      "hold": 0.06703333333331572,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 140038,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": -0.016300000000017613,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 141830,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "drawer",
+      "hold": -0.016300000000017613,
+      "recharge": false,
+      "dialog": {
+        "name": "ACQUIRED",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 142899,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "drawer",
+      "hold": -0.016300000000017613,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "drawer",
+        "i": 0
+      },
+      "cut": null
+    },
+    {
+      "ms": 150403,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": 0.5501333333333217,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 150503,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": 0.45019999999998256,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 150611,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": 0.3501999999999826,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 150711,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": 0.2501999999999826,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 150810,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": 0.15026666666664343,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 150916,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "drawer",
+      "hold": 0.0502666666666434,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 151019,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 152907,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 153994,
+      "room": "A0B",
+      "state": "REPAIR",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 158139,
+      "room": "A0B",
+      "state": "CUT",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": {
+        "kind": "revive",
+        "ph": "in",
+        "t": 0.016600000000005822,
+        "held": 0,
+        "failed": false,
+        "ran": false,
+        "readyState": 0,
+        "currentTime": 0,
+        "duration": null,
+        "error": null
+      }
+    },
+    {
+      "ms": 158232,
+      "room": "A0B",
+      "state": "CUT",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": {
+        "kind": "revive",
+        "ph": "in",
+        "t": 0.11660000000000584,
+        "held": 0,
+        "failed": false,
+        "ran": false,
+        "readyState": 4,
+        "currentTime": 0.0434,
+        "duration": 6.041667,
+        "error": null
+      }
+    },
+    {
+      "ms": 158513,
+      "room": "A0B",
+      "state": "CUT",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": {
+        "kind": "revive",
+        "ph": "hold",
+        "t": 0.05,
+        "held": 0.05,
+        "failed": false,
+        "ran": false,
+        "readyState": 4,
+        "currentTime": 0,
+        "duration": 6.041667,
+        "error": null
+      }
+    },
+    {
+      "ms": 158612,
+      "room": "A0B",
+      "state": "CUT",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": {
+        "kind": "revive",
+        "ph": "play",
+        "t": 0.08329999999998836,
+        "held": 0.06670000000001164,
+        "failed": false,
+        "ran": true,
+        "readyState": 4,
+        "currentTime": 0.090458,
+        "duration": 6.041667,
+        "error": null
+      }
+    },
+    {
+      "ms": 164559,
+      "room": "A0B",
+      "state": "CUT",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": {
+        "kind": "revive",
+        "ph": "out",
+        "t": 0.033200000000011644,
+        "held": 0.06670000000001164,
+        "failed": false,
+        "ran": true,
+        "readyState": 4,
+        "currentTime": 6.037554,
+        "duration": 6.041667,
+        "error": null
+      }
+    },
+    {
+      "ms": 165265,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 166467,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 1
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 167226,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 2
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 168015,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 3
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 168874,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 4
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 169666,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "ACQUIRED",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 170882,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 172093,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "ratchet",
+        "i": 0
+      },
+      "cut": null
+    },
+    {
+      "ms": 182742,
+      "room": "A0B",
+      "state": "PANELS",
+      "step": "repair",
+      "hold": -0.01633333333336242,
+      "recharge": false,
+      "dialog": null,
+      "panels": {
+        "id": "ratchet",
+        "i": 1
+      },
+      "cut": null
+    },
+    {
+      "ms": 193397,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "repair",
+      "hold": 0.5500666666666609,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 193512,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "repair",
+      "hold": 0.43353333333331595,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 193632,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "repair",
+      "hold": 0.3002666666666435,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 193746,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "repair",
+      "hold": 0.20039999999996516,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 193857,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "repair",
+      "hold": 0.08383333333330431,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 193982,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": -0.03263333333337982,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 196220,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": -0.03263333333337982,
+      "recharge": true,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 197936,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.7,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198032,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.6000000000000001,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198150,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.5000000000000002,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198270,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.3835333333333161,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198365,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.2834999999999711,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198473,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.16689999999996533,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198589,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pod",
+      "hold": 0.05033333333330448,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 198705,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 201252,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 202378,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 1
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 203131,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 2
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 203894,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": {
+        "name": "Ratchet",
+        "i": 3
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 204647,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": {
+        "name": "ACQUIRED",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 205736,
+      "room": "A0B",
+      "state": "SHOP",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 206755,
+      "room": "A0B",
+      "state": "DIALOG",
+      "step": "pack",
+      "hold": -0.032833333333362184,
+      "recharge": false,
+      "dialog": {
+        "name": "ACQUIRED",
+        "i": 0
+      },
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 207867,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pack",
+      "hold": 0.3834333333333391,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 207961,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pack",
+      "hold": 0.2835,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 208075,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pack",
+      "hold": 0.18349999999999994,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 208173,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "pack",
+      "hold": 0.08349999999999996,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 208288,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "heal",
+      "hold": -0.03310000000000586,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 210654,
+      "room": "A0B",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": -0.032900000000023126,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 217060,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": -0.032900000000023126,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 218991,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": 0.4835333333333159,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 219104,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": 0.3668999999999942,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 219217,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": 0.2503666666666492,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 219327,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": 0.1503666666666492,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 219436,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "atk",
+      "hold": 0.03383333333330423,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 219539,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "burst",
+      "hold": -0.01626666666670159,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 221785,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "burst",
+      "hold": 0.46679999999998845,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 221888,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "burst",
+      "hold": 0.3667666666666435,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 221989,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "burst",
+      "hold": 0.26693333333331015,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 222095,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "burst",
+      "hold": 0.16689999999996516,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 222196,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "burst",
+      "hold": 0.05036666666662017,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 222310,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "node",
+      "hold": -0.01623333333338565,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 224622,
+      "room": "A0",
+      "state": "TRIAL",
+      "step": "node",
+      "hold": -0.01623333333338565,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 228162,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "node",
+      "hold": 0.31683333333333336,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 228285,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "node",
+      "hold": 0.20019999999998253,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 228397,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "node",
+      "hold": 0.06689999999999416,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 228510,
+      "room": "A0",
+      "state": "PLAY",
+      "step": "go",
+      "hold": -0.033033333333344995,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    },
+    {
+      "ms": 232561,
+      "room": "A1",
+      "state": "PLAY",
+      "step": null,
+      "hold": 0,
+      "recharge": false,
+      "dialog": null,
+      "panels": null,
+      "cut": null
+    }
+  ],
+  "terminal": {
+    "room": "A1",
+    "state": "PLAY",
+    "step": null,
+    "hold": 0,
+    "recharge": false,
+    "dialog": null,
+    "overlayQ": null,
+    "cut": null
+  },
+  "panels": [
+    "W1",
+    "W2",
+    "A0",
+    "A0B"
+  ],
+  "end": "A1",
+  "errors": []
+}

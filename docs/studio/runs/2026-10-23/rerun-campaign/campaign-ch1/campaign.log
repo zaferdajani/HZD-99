@@ -1,0 +1,1296 @@
+[00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:00] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:00] MENU choose "newgame"
+[00:01] STATE MENU -> CUT
+[00:47] STATE CUT -> DIFF
+[00:47] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:47] FRAME 000-difficulty.png
+[00:48] ROOM - -> W1  at x=96
+[00:48] STATE DIFF -> PANELS
+[00:48] MANHWA wake panel 1/5
+[00:48] OBJECTIVE "Reach the city gates"
+[00:48] CHIP move |  | 
+[00:48] SAVEPOINT null -> W1
+[00:48] WEAPON null -> claws
+[00:48]   . W1 x=96 y=413 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:48] MANHWA wake panel 2/5
+[00:50] MANHWA wake panel 3/5
+[00:50] MANHWA wake panel 4/5
+[00:51] MANHWA wake panel 5/5
+[00:53] STATE PANELS -> PLAY
+[00:53] CHIP move | Move | Walk right toward the light
+[00:55] TOAST POWER FAULT → SYSTEM RESTART
+[00:56]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[00:57] FLAG +woke
+[00:57] MISSION opening (objective: "Reach the city gates")
+[00:58] CHIP out | Leave | The door has been open a long time — walk out
+[00:58] FLAG +tutI
+[00:58] FLAG +tutId
+[01:01] FRAMES median 50 ms -> planner step 1/30, game time 1.01x wall
+[01:01] PACE sim 59.8 s per 60 s wall (pace dial / slow frames)
+[01:01] ROOM W1 -> W2  at x=21
+[01:01] STATE PLAY -> PANELS
+[01:01] MANHWA bay panel 1/3
+[01:01] CHIP out |  | 
+[01:02] MANHWA bay panel 2/3
+[01:04] MANHWA bay panel 3/3
+[01:04]   . W2 x=21 y=436 vx=0 on cores=7/7 volts=33 tut=out/null@-1 mission=opening held=
+[01:05] STATE PANELS -> PLAY
+[01:05] CHIP out | The city gates | Follow the gold marker
+[01:06] CHIP jump | Jump | Follow the gold marker
+[01:07] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:08] CHIP gate | The city gates | Follow the gold marker
+[01:09] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:10] FLAG +gateOpened
+[01:12]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[01:14] ROOM W2 -> A0  at x=40
+[01:14] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[01:14] STATE PLAY -> PANELS
+[01:14] MANHWA gate panel 1/2
+[01:14] CHIP gate |  | 
+[01:16] MANHWA gate panel 2/2
+[01:17] STATE PANELS -> PLAY
+[01:17] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:18] CHIP booth | Ratchet's booth | Follow the gold marker
+[01:19] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[01:24] ROOM A0 -> A0B  at x=103
+[01:24] OBJECTIVE "Wake Ratchet"
+[01:24] CHIP note | Read the letter | Follow the gold marker
+[01:26] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:26] STATE PLAY -> PANELS
+[01:26] MANHWA letter panel 1/5
+[01:26] CHIP note |  | 
+[01:27] MANHWA letter panel 2/5
+[01:28]   . A0B x=548 y=436 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[01:29] MANHWA letter panel 3/5
+[01:30] MANHWA letter panel 4/5
+[01:31] MANHWA letter panel 5/5
+[01:33] STATE PANELS -> PLAY
+[01:33] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:33] FLAG +opNote
+[01:34] CHIP drawer | Open the drawer | Follow the gold marker
+[01:35] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[01:35] STATE PLAY -> DIALOG
+[01:35] CHIP drawer |  | 
+[01:35] FLAG +ch_A0B_1
+[01:35] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[01:35] ITEMS {"ratchetCell":1}
+[01:36] STATE DIALOG -> PANELS
+[01:36] MANHWA drawer panel 1/1
+[01:36]   . A0B x=463 y=436 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[01:38] STATE PANELS -> PLAY
+[01:38] CHIP drawer | Open the drawer | Follow the gold marker
+[01:38] CHIP repair | Restore his battery | Follow the gold marker
+[01:39] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[01:40] STATE PLAY -> DIALOG
+[01:40] CHIP repair |  | 
+[01:40] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[01:41] STATE DIALOG -> REPAIR
+[01:41] FRAME 001-repair-board.png
+[01:41] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[01:41] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[01:41] REPAIR place on target:socket (the hint names "battery socket")
+[01:42] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[01:43] REPAIR place on target:plus (the hint names "+ terminal")
+[01:43] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[01:44]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[01:44] REPAIR place on target:minus (the hint names "− terminal")
+[01:45] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[01:46] REPAIR place on target:relay (the hint names "relay")
+[01:46] REPAIR power
+[01:48] STATE REPAIR -> CUT
+[01:48] OBJECTIVE "Use Ratchet’s pod"
+[01:48] FLAG +on_A0B|ratchet
+[01:48] FLAG +ratchetRepaired
+[01:48] ITEMS {}
+[01:52]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[01:55] STATE CUT -> DIALOG
+[01:55] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[01:56] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[01:57] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[01:59] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[02:00] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[02:00]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:01] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[02:01] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[02:02] FLAG +opTold
+[02:02] FLAG +ratchetSpareGiven
+[02:02] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[02:02] ITEMS {"batt":1}
+[02:03] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[02:04] STATE DIALOG -> PANELS
+[02:04] MANHWA ratchet panel 1/2
+[02:05] MANHWA ratchet panel 2/2
+[02:07] STATE PANELS -> PLAY
+[02:07] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:08] CHIP pod | Use the pod | Follow the gold marker
+[02:08]   . A0B x=588 y=257 vx=340 air cores=7/7 volts=33 tut=pod/MOVE@912 mission=opening held=ArrowRight
+[02:09] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[02:10] SAVEPOINT W1 -> A0B
+[02:11] TOAST Systems recharged. Progress saved.
+[02:12] OBJECTIVE "Get the Volt Pack from Ratchet"
+[02:12] FLAG +opPod
+[02:12] CHIP pack | The Volt Pack | Follow the gold marker
+[02:14] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:15] STATE PLAY -> DIALOG
+[02:15] CHIP pack |  | 
+[02:15] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[02:16] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[02:16]   . A0B x=624 y=437 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[02:17] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[02:18] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[02:19] FLAG +opScrap
+[02:19] FLAG +sawScrap
+[02:19] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[02:19] SCRAP 0 -> 12
+[02:21] STATE DIALOG -> SHOP
+[02:21] FRAME 002-counter.png
+[02:21] SHOP buy the marked row (cell) with 12 scrap
+[02:22] STATE SHOP -> DIALOG
+[02:22] OBJECTIVE "Try out the Volt Pack"
+[02:22] FLAG +tutBuy
+[02:22] FLAG +heal
+[02:22] FLAG +pack
+[02:22] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[02:22] SCRAP 12 -> 0
+[02:23] STATE DIALOG -> PLAY
+[02:23] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:23] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[02:23] HURT 7 -> 6 in A0B
+[02:23] HEAL: holding heal
+[02:25] CHIP atk | Back outside | Follow the gold marker
+[02:25]   . A0B x=624 y=436 vx=0 on cores=7/7 volts=66 tut=atk/MOVE@115 mission=opening held= near=npc:ratchet
+[02:27] CHIP atk | Back outside | Stand at the den door and press ↑
+[02:31] ROOM A0B -> A0  at x=387
+[02:31] CHIP atk | Strike the winch | Follow the gold marker
+[02:32] CHIP atk | Strike the winch | Its infected arm blocks the road — each X knocks scrap loose
+[02:32] FLAG +winchKnock
+[02:33] CHIP burst | Volt Burst | Its motor still holds the arm — hold X, let go: the burst stops it
+[02:33] BURST: holding attack
+[02:34] TOAST The winch stops — its arm lifts clear of the road.
+[02:34] FLAG +burstDone
+[02:34] FLAG +opBurst
+[02:34] SCRAP 0 -> 12
+[02:34]   . A0 x=552 y=434 vx=0 on cores=7/7 volts=82 tut=burst/ATK@-1 mission=opening held=
+[02:35] OBJECTIVE "Solve the monument’s puzzle"
+[02:35] CHIP node | The monument | Follow the gold marker
+[02:36] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:36] STATE PLAY -> TRIAL
+[02:36] CHIP node |  | 
+[02:39] FRAME 003-monument-puzzle.png
+[02:39] PUZZLE memory: the monument played 3 notes; answering
+[02:40] STATE TRIAL -> PLAY
+[02:40] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:40] TOAST The winch stops — its arm lifts clear of the road. / Knowledge gained  +10 IQ
+[02:40] FLAG +rd_n8
+[02:40] SCRAP 12 -> 15
+[02:40] OBJECTIVE "Head east into the Scrap Meadows"
+[02:40] CHIP go | Into the meadow | The road east leads to the Scrap Meadows
+[02:42] TOAST Knowledge gained  +10 IQ
+[02:42]   . A0 x=1546 y=436 vx=340 on cores=7/7 volts=82 tut=go/MOVE@2000 mission=opening held=ArrowRight
+[02:44] ROOM A0 -> A1  at x=21
+[02:44] OBJECTIVE "Find the raw marble beneath the meadow"
+[02:44] CHIP (none)
+[02:44] TOAST Map online — open it any time (M / Tab)
+[02:44] FLAG +tut
+[02:44] FLAG +mapSeen
+[02:44] MISSION DONE opening
+[02:44] FRAME 004-done-opening.png
+[02:45] MISSION servo (objective: "Find the raw marble beneath the meadow")
+[02:45] PLAN room A1: 92 standable tiles, 1411 moves (45 ms)
+[02:45] INTERACT servo (wake him with the spare Power Cell)
+[02:46] STATE PLAY -> DIALOG
+[02:46] SAY Old Servo: "Ratchet’s spare cell fits the port in his chest. You seat it."
+[02:46] STATE DIALOG -> PLAY
+[02:46] FLAG +on_A1|servo
+[02:46] FLAG +servoIntro
+[02:46] ITEMS {}
+[02:46] INTERACT servo (wake him with the spare Power Cell)
+[02:47] STATE PLAY -> DIALOG
+[02:47] SAY Old Servo: "Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you."
+[02:48] SAY Old Servo: "After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up."
+[02:49] SAY Old Servo: "And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ."
+[02:50] FLAG +servoMet
+[02:50] SAY "Errand taken"
+[02:50]   . A1 x=128 y=426 vx=0 on cores=7/7 volts=82 mission=servo held= near=npc:servo
+[02:51] STATE DIALOG -> PLAY
+[02:51] MISSION DONE servo
+[02:51] FRAME 005-done-servo.png
+[02:51] MISSION first-meeting (objective: "Find the raw marble beneath the meadow")
+[02:51] FLAG +sc_A1_3
+[02:51] SCRAP 15 -> 30
+[02:53] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[02:53] FIGHT crawler (hp 26) in A1
+[02:54] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind / Repair ready! Stand still and hold F to restore a core.
+[02:54] HURT 7 -> 6 in A1 (nearest crawler at 97 px)
+[02:56] FLAG +sc_A1_4
+[02:56] SCRAP 30 -> 48
+[02:56] FIGHT guard (hp 38) in A1
+[02:58]   . A1 x=1761 y=431 vx=292 on cores=6/7 volts=99 mission=first-meeting held=
+[02:59] PLAN room A2: 116 standable tiles, 1727 moves (96 ms)
+[02:59] ROOM A1 -> A2  at x=80
+[02:59] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[03:00] FLAG +sc_A2_4
+[03:00] SCRAP 48 -> 60
+[03:01] FIGHT crawler (hp 26) in A2
+[03:01] HURT 6 -> 5 in A2 (nearest crawler at 23 px)
+[03:02] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[03:02] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[03:02] FIGHT flier (hp 21) in A2
+[03:03] HURT 5 -> 4 in A2 (nearest crawler at 114 px)
+[03:03] HEAL (cores 4/7, volts 99)
+[03:06] FLAG +sc_A2_5
+[03:06] SCRAP 60 -> 78
+[03:06]   . A2 x=1022 y=394 vx=340 air cores=5/7 volts=66 mission=first-meeting held=ArrowRight+Space
+[03:08] FIGHT hopper (hp 31) in A2
+[03:09] HURT 5 -> 4 in A2 (nearest hopper at 207 px)
+[03:11] HURT 4 -> 3 in A2 (nearest hopper at 36 px)
+[03:11] HEAL (cores 3/7, volts 99)
+[03:12] HEAL (cores 4/7, volts 66)
+[03:14]   . A2 x=1615 y=430 vx=243 on cores=5/7 volts=33 mission=first-meeting held=
+[03:16] FLAG +nfMeet
+[03:16] MISSION DONE first-meeting
+[03:16] FRAME 006-done-first-meeting.png
+[03:16] MISSION marble (objective: "Find the raw marble beneath the meadow")
+[03:16] FLAG +sc_A2_6
+[03:16] SCRAP 78 -> 101
+[03:16] MEET NULLFANG drops in (A2): stepping out of the swipe
+[03:17] FRAME 007-nullfang-meet.png
+[03:18] HURT 5 -> 4 in A2 (nearest glitch/stalk at 273 px)
+[03:19] HURT 4 -> 3 in A2 (nearest glitch/stalk at 268 px)
+[03:21] HURT 3 -> 2 in A2 (nearest glitch/stalk at 275 px)
+[03:21] HEAL (cores 2/7, volts 33)
+[03:22]   . A2 x=1883 y=408 vx=150 on cores=3/7 volts=0 mission=marble held=ArrowRight
+[03:23] STATE PLAY -> PANELS
+[03:23] MANHWA meet panel 1/4
+[03:24] MANHWA meet panel 2/4
+[03:25] MANHWA meet panel 3/4
+[03:26] MANHWA meet panel 4/4
+[03:28] STATE PANELS -> PLAY
+[03:30]   . A2 x=1128 y=348 vx=-340 on cores=3/7 volts=0 mission=marble held=ArrowLeft
+[03:34] DOWN-STRIKE at the loose floor (tiles 12-14)
+[03:36] ROOM A2 -> A5  at x=451
+[03:36] FLAG +taughtBreak
+[03:36] FLAG +taughtFloor
+[03:36] PLAN room A5: 58 standable tiles, 764 moves (24 ms)
+[03:36] TOAST Chalk arrows — the old quarrymen marked their road to the marble.
+[03:36] FLAG +pgMarks
+[03:38] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it.
+[03:39]   . A5 x=1085 y=342 vx=340 air cores=3/7 volts=0 mission=marble held=ArrowRight+Space
+[03:39] RUBBLE strike (hp 6)
+[03:39] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[03:39] FLAG +sc_A5_5
+[03:39] SCRAP 101 -> 131
+[03:39] RUBBLE strike (hp 5)
+[03:40] RUBBLE strike (hp 4)
+[03:40] RUBBLE strike (hp 3)
+[03:41] RUBBLE strike (hp 2)
+[03:41] RUBBLE strike (hp 1)
+[03:42] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:42] FLAG +rubbleA5
+[03:42] DOOR up at 1106 -> CV1
+[03:44] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:44] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[03:46] ROOM A5 -> CV1  at x=167
+[03:46] PLAN room CV1: 74 standable tiles, 806 moves (22 ms)
+[03:46] STATE PLAY -> PANELS
+[03:46] MANHWA cave panel 1/3
+[03:47]   . CV1 x=167 y=427 vx=0 on cores=3/7 volts=0 mission=marble held=
+[03:47] MANHWA cave panel 2/3
+[03:48] MANHWA cave panel 3/3
+[03:49] STATE PANELS -> PLAY
+[03:52] FIGHT crawler (hp 82) in CV1
+[03:53] HURT 3 -> 2 in CV1 (nearest crawler at 25 px)
+[03:55]   . CV1 x=523 y=465 vx=0 on cores=2/7 volts=66 mission=marble held= near=rescue:null
+[03:55] HEAL (cores 2/7, volts 66)
+[03:58] TOAST Something is calling from behind the fallen rock. STRIKE it.
+[03:59] RUBBLE strike (hp 6)
+[03:59] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[04:00] RUBBLE strike (hp 5)
+[04:00] RUBBLE strike (hp 4)
+[04:01] RUBBLE strike (hp 3)
+[04:01] RUBBLE strike (hp 2)
+[04:02] RUBBLE strike (hp 1)
+[04:02] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:02] FLAG +rubbleCV1B
+[04:03] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[04:03] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[04:03] DOOR up at 1111 -> CV1B
+[04:03]   . CV1 x=1099 y=459 vx=0 on cores=3/7 volts=33 mission=marble held=
+[04:04] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:04] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[04:07] ROOM CV1 -> CV1B  at x=142
+[04:07] PLAN room CV1B: 50 standable tiles, 549 moves (14 ms)
+[04:09] REST at the pod in CV1B (cores 3/7, volts 33)
+[04:10] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map.
+[04:10] FLAG +pgSurvey
+[04:10] FLAG +sc_CV1B_4
+[04:10] SCRAP 131 -> 161
+[04:10] SAVEPOINT A0B -> CV1B
+[04:10] HEAL (cores 3/7, volts 99)
+[04:12]   . CV1B x=644 y=462 vx=0 on cores=7/7 volts=99 mission=marble held= near=bench:null
+[04:12] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map. / Systems recharged. Progress saved.
+[04:13] FIGHT bat (hp 50) in CV1B
+[04:14] FLAG +sc_CV1B_2
+[04:14] SCRAP 161 -> 214
+[04:14] TOAST Systems recharged. Progress saved.
+[04:17] FIGHT bat (hp 50) in CV1B
+[04:20]   . CV1B x=827 y=287 vx=0 air cores=7/7 volts=99 mission=marble held=
+[04:22] FIGHT bat (hp 36) in CV1B
+[04:26] FIGHT bat (hp 36) in CV1B
+[04:28]   . CV1B x=848 y=298 vx=0 air cores=7/7 volts=99 mission=marble held= threat={"k":"bat","x":849,"y":172,"w":24,"h":18,"hp":36,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:29] DOOR up at 1120 -> CV2
+[04:34] ROOM CV1B -> CV2  at x=372
+[04:34] FIGHT hopper (hp 109) in CV2
+[04:34] HURT 7 -> 6 in CV2 (nearest hopper at 66 px)
+[04:35] TOAST This wall sounds hollow…
+[04:35] FLAG +heardHollow
+[04:36] PLAN room CV2: 87 standable tiles, 976 moves (28 ms)
+[04:36]   . CV2 x=668 y=348 vx=0 on cores=6/7 volts=99 mission=marble held=
+[04:38] HURT 6 -> 5 in CV2 (nearest hopper at 256 px)
+[04:40] FIGHT crawler (hp 47) in CV2
+[04:40] HURT 5 -> 4 in CV2 (nearest crawler at 20 px)
+[04:42] HEAL (cores 4/7, volts 99)
+[04:44]   . CV2 x=1831 y=241 vx=340 air cores=5/7 volts=66 mission=marble held=ArrowRight+Space
+[04:52]   . CV2 x=2019 y=444 vx=0 on cores=5/7 volts=66 mission=marble held=
+[04:54] STUCK trying to reach exit R toward CV3 in CV2 at x=2019,y=444
+[04:54] FRAME 008-stuck-CV2.png
+[04:56] ROOM CV2 -> CV3  at x=10
+[04:58] GRAVEHORN p1 st=dorm hp=247 front=true dSnout=884 | cores 5/7 volts 66
+[05:00]   . CV3 x=396 y=467 vx=0 on cores=5/7 volts=66 mission=marble held=
+[05:01] GRAVEHORN p1 st=ghwake hp=247 front=true dSnout=350 | cores 5/7 volts 66
+[05:02] STATE PLAY -> DIALOG
+[05:02] OBJECTIVE "GRAVEHORN stands on the raw marble at the end of the cave. Drive him off."
+[05:02] FLAG +ghMet
+[05:02] SAY GRAVEHORN: "So the little cleaner woke up."
+[05:03] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[05:03] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[05:04] SAY GRAVEHORN: "I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone."
+[05:05] SAY GRAVEHORN: "The Eye is the one who stole your Mother's Song. I guard what it took."
+[05:06] SAY GRAVEHORN: "The marble stays buried. So will you."
+[05:07] STATE DIALOG -> PLAY
+[05:07] GRAVEHORN p1 st=ghbellow hp=247 front=true dSnout=344 | cores 5/7 volts 66
+[05:08]   . CV3 x=396 y=467 vx=0 on cores=5/7 volts=66 mission=marble held=
+[05:09] GRAVEHORN tells hornprep
+[05:10] GRAVEHORN p1 st=hornless hp=247 front=true dSnout=89 | cores 5/7 volts 66
+[05:11] HURT 5 -> 4 in CV3 (nearest horn/hornless at 260 px)
+[05:11] HEAL (cores 4/7, volts 66)
+[05:13] GRAVEHORN tells chargewarn
+[05:13] GRAVEHORN p1 st=chargewarn hp=247 front=true dSnout=189 | cores 5/7 volts 33
+[05:14] GRAVEHORN charge: jump at 0.34 s to contact
+[05:16]   . CV3 x=476 y=284 vx=0 on cores=5/7 volts=33 mission=marble held=
+[05:16] GRAVEHORN p1 st=turn hp=247 front=true dSnout=187 | cores 5/7 volts 33
+[05:17] GRAVEHORN tells hornprep
+[05:19] TOAST His horn is gone — the head is open. Hit it!
+[05:19] FLAG +ghHeadTold
+[05:20] GRAVEHORN p1 st=hornless hp=191 front=true dSnout=4 | cores 5/7 volts 66
+[05:23] GRAVEHORN p1 st=hornless hp=55 front=true dSnout=23 | cores 5/7 volts 99
+[05:24]   . CV3 x=323 y=463 vx=0 on cores=5/7 volts=99 mission=marble held=
+[05:25] GRAVEHORN tells chargewarn
+[05:26] GRAVEHORN p1 st=chargewarn hp=9 front=true dSnout=106 | cores 5/7 volts 99
+[05:26] GRAVEHORN charge: jump at 0.21 s to contact
+[05:29] GRAVEHORN p1 st=idle hp=9 front=true dSnout=173 | cores 5/7 volts 99
+[05:29] GRAVEHORN tells hornprep
+[05:32] GRAVEHORN p1 st=kneel hp=1 front=true dSnout=6 | cores 5/7 volts 99
+[05:32] STATE PLAY -> DIALOG
+[05:32] SAY GRAVEHORN: "Enough. The Eye built me for war. Now you see all of it."
+[05:32]   . CV3 x=709 y=470 vx=0 on cores=5/7 volts=99 mission=marble held=
+[05:33] STATE DIALOG -> PLAY
+[05:35] GRAVEHORN p2 st=idle hp=247 front=true dSnout=65 | cores 5/7 volts 99
+[05:35] GRAVEHORN tells chargewarn
+[05:36] GRAVEHORN charge: jump at 0.17 s to contact
+[05:38] GRAVEHORN tells chargewarn
+[05:38] GRAVEHORN p2 st=chargewarn hp=247 front=true dSnout=189 | cores 5/7 volts 99
+[05:39] GRAVEHORN charge: jump at 0.34 s to contact
+[05:40]   . CV3 x=454 y=284 vx=0 on cores=5/7 volts=99 mission=marble held=
+[05:41] GRAVEHORN p2 st=turn hp=247 front=true dSnout=264 | cores 5/7 volts 99
+[05:42] GRAVEHORN tells hornprep
+[05:43] HURT 5 -> 4 in CV3 (nearest horn/hornless at 292 px)
+[05:44] HEAL (cores 4/7, volts 99)
+[05:45] GRAVEHORN p2 st=hornless hp=247 front=true dSnout=133 | cores 5/7 volts 66
+[05:48] TOAST Strike his horn as it comes up — a clean hit turns the toss.
+[05:48] FLAG +ghParryTold
+[05:48] GRAVEHORN tells tossprep
+[05:48] GRAVEHORN toss: strike the horn (parry) at t=0.10
+[05:48] TOAST Strike his horn as it comes up — a clean hit turns the toss. / PARRY! A lime glint can be turned: raise the guard as it lands, then strike back.
+[05:48] FLAG +parryTold
+[05:48]   . CV3 x=765 y=458 vx=340 on cores=5/7 volts=99 mission=marble held=ArrowRight
+[05:48] GRAVEHORN p2 st=stagger hp=183 front=true dSnout=81 | cores 5/7 volts 99
+[05:50] GRAVEHORN tells hornprep
+[05:51] HURT 5 -> 4 in CV3 (nearest horn/hornless at 257 px)
+[05:51] HEAL (cores 4/7, volts 99)
+[05:53] TOAST PARRY! A lime glint can be turned: raise the guard as it lands, then strike back.
+[05:53] GRAVEHORN p2 st=hornless hp=155 front=true dSnout=107 | cores 5/7 volts 66
+[05:55] GRAVEHORN tells tossprep
+[05:55] GRAVEHORN toss: strike the horn (parry) at t=0.13
+[05:56] GRAVEHORN p2 st=stagger hp=40 front=true dSnout=102 | cores 5/7 volts 99
+[05:57]   . CV3 x=845 y=454 vx=340 on cores=5/7 volts=99 mission=marble held=ArrowRight
+[05:57] GRAVEHORN tells hornprep
+[05:59] HURT 5 -> 4 in CV3 (nearest horn/hornless at 230 px)
+[05:59] GRAVEHORN p2 st=beaten hp=1 front=true dSnout=11 | cores 4/7 volts 99
+[06:00] STATE PLAY -> DIALOG
+[06:00] SAY GRAVEHORN: "This isn't over."
+[06:01] SAY GRAVEHORN: "The Eye sees you, cleaner. Next time it comes itself."
+[06:02] STATE DIALOG -> PLAY
+[06:03] GRAVEHORN p2 st=retreat hp=1 front=true dSnout=1 | cores 4/7 volts 99
+[06:04] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[06:04] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[06:05]   . CV3 x=906 y=462 vx=0 on cores=4/7 volts=99 mission=marble held=
+[06:05] OBJECTIVE "Find the raw marble beneath the meadow"
+[06:05] TOAST GRAVEHORN backs into the rock and is gone. The raw marble is unguarded.
+[06:05] FLAG +bossHorn
+[06:05] HEAL (cores 4/7, volts 99)
+[06:07] PLAN room CV3: 62 standable tiles, 777 moves (32 ms)
+[06:07] SCRAP 214 -> 244
+[06:10] PILLAR: a plain strike first
+[06:11] FRAME 009-pillar-claws.png
+[06:11] TOAST Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.
+[06:11] PILLAR: Volt Burst (hold attack, release)
+[06:13] STATE PLAY -> PANELS
+[06:13] MANHWA marble panel 1/2
+[06:13] OBJECTIVE "Bring the raw marble to Ratchet"
+[06:13] TOAST ACQUIRED — raw cave marble / Errand ready — go back
+[06:13] FLAG +pl_cshard
+[06:13] BAG cshard
+[06:13]   . CV3 x=1642 y=462 vx=0 on cores=5/7 volts=41 mission=marble held=
+[06:14] MANHWA marble panel 2/2
+[06:16] STATE PANELS -> PLAY
+[06:16] MISSION DONE marble
+[06:16] FRAME 010-done-marble.png
+[06:16] MISSION forge (objective: "Bring the raw marble to Ratchet")
+[06:21]   . CV3 x=187 y=457 vx=-243 on cores=5/7 volts=41 mission=forge held=
+[06:22] PLAN room CV2: 87 standable tiles, 976 moves (23 ms)
+[06:23] ROOM CV3 -> CV2  at x=1963
+[06:26] FIGHT hopper (hp 56) in CV2
+[06:27] HURT 5 -> 4 in CV2 (nearest hopper at 242 px)
+[06:27] HEAL (cores 4/7, volts 41)
+[06:29]   . CV2 x=1178 y=462 vx=200 on cores=5/7 volts=19 mission=forge held=ArrowRight threat={"k":"hopper","x":1246,"y":478,"w":26,"h":24,"hp":43,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:30] HURT 5 -> 4 in CV2 (nearest hopper at 76 px)
+[06:30] FIGHT hopper (hp 30) in CV2
+[06:32] HEAL (cores 4/7, volts 52)
+[06:36] FIGHT bat (hp 28) in CV2
+[06:37]   . CV2 x=879 y=362 vx=0 air cores=5/7 volts=19 mission=forge held=
+[06:39] FIGHT hopper (hp 57) in CV2
+[06:40] HURT 5 -> 4 in CV2 (nearest hopper at 22 px)
+[06:40] FLAG +sc_CV2_7
+[06:40] SCRAP 244 -> 274
+[06:41] HEAL (cores 4/7, volts 63)
+[06:44] PLAN room CV1: 74 standable tiles, 806 moves (26 ms)
+[06:44] ROOM CV2 -> CV1  at x=1713
+[06:45]   . CV1 x=1527 y=246 vx=-340 air cores=5/7 volts=30 mission=forge held=ArrowLeft+Space
+[06:46] FLAG +sc_CV1_2
+[06:46] SCRAP 274 -> 289
+[06:53] DOOR up at 179 -> A5
+[06:53]   . CV1 x=166 y=458 vx=0 on cores=5/7 volts=30 mission=forge held=
+[06:57] ROOM CV1 -> A5  at x=1094
+[06:57] PLAN room A5: 58 standable tiles, 764 moves (25 ms)
+[07:01] FLAG +sc_A5_3
+[07:01] FLAG +sc_A5_4
+[07:01] SCRAP 289 -> 372
+[07:01]   . A5 x=438 y=60 vx=-107 on cores=5/7 volts=30 mission=forge held=
+[07:02] PLAN room A2: 114 standable tiles, 1686 moves (87 ms)
+[07:02] ROOM A5 -> A2  at x=406
+[07:04] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[07:04] PACE sim 60.7 s per 60 s wall (pace dial / slow frames)
+[07:05] PLAN room A5: 58 standable tiles, 764 moves (13 ms)
+[07:05] ROOM A2 -> A5  at x=461
+[07:06] PLAN room A2: 114 standable tiles, 1686 moves (29 ms)
+[07:06] ROOM A5 -> A2  at x=413
+[07:10]   . A2 x=334 y=235 vx=-340 air cores=5/7 volts=30 mission=forge held=ArrowLeft+Space
+[07:11] ROOM A2 -> A1  at x=1731
+[07:12] PLAN room A1: 92 standable tiles, 1411 moves (32 ms)
+[07:18]   . A1 x=7 y=436 vx=0 on cores=5/7 volts=30 mission=forge held=
+[07:26]   . A1 x=7 y=436 vx=0 on cores=5/7 volts=30 mission=forge held=
+[07:26] STUCK trying to reach exit L toward A0 in A1 at x=7,y=436
+[07:26] FRAME 011-stuck-A1.png
+[07:28] ROOM A1 -> A0  at x=1991
+[07:28] PLAN room A0: 80 standable tiles, 1125 moves (23 ms)
+[07:33] DOOR up at 399 -> A0B
+[07:34]   . A0 x=387 y=434 vx=0 on cores=5/7 volts=30 mission=forge held=
+[07:37] ROOM A0 -> A0B  at x=103
+[07:38] PLAN room A0B: 33 standable tiles, 432 moves (10 ms)
+[07:39] INTERACT ratchet (hand over the raw marble)
+[07:39] STATE PLAY -> DIALOG
+[07:39] FLAG +said
+[07:39] SAY Ratchet: "It threw you once — I saw the dent in the corridor. Not with claws. Bring me the marble first."
+[07:40] SAY Ratchet: "You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them—not what is left of them."
+[07:41] SAY Ratchet: "When the blade is done I'm taking my tools to the camp by the lion's enclosure. That is where this ends. Find me there."
+[07:42]   . A0B x=472 y=434 vx=0 on cores=5/7 volts=30 mission=forge held= near=npc:ratchet
+[07:50]   . A0B x=472 y=434 vx=0 on cores=5/7 volts=30 mission=forge held= near=npc:ratchet
+[07:52] STATE CUT -> DIALOG
+[07:52] FLAG +alphaLead
+[07:52] SAY Ratchet: "Before the song broke, the wolves escorted lost workers home. Their Alpha kept watch over the Meadow den."
+[07:53] SAY Ratchet: "Now its corrupted howl drives the pack to attack the people it protected. They are still following their guardian."
+[07:54] SAY Ratchet: "If you choose, find the marked den entrance in the Meadow. Your white blade can release the Alpha, and its pack will become our allies. The old supply cache beyond the den will be yours."
+[07:55] SAY Ratchet: "This is a detour. The marble came from the cave; your path to the sages remains open."
+[07:57] STATE DIALOG -> SHOP
+[07:57] SHOP leave
+[07:57] STATE SHOP -> PANELS
+[07:57] MANHWA forge panel 1/3
+[07:58] MANHWA forge panel 2/3
+[07:58]   . A0B x=472 y=434 vx=0 on cores=5/7 volts=30 mission=forge held= near=npc:ratchet
+[07:59] MANHWA forge panel 3/3
+[08:00] STATE PANELS -> PLAY
+[08:00] MISSION DONE forge
+[08:01] FRAME 012-done-forge.png
+[08:01] MISSION sage (objective: "Free the first sage — the door beside the marble quarry")
+[08:01] READY: before GA1D (cores 5/7, save point CV1B) — resting at the pod in CV1B first
+[08:02] DOOR up at 115 -> A0
+[08:05] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[08:05] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[08:06] ROOM A0B -> A0  at x=387
+[08:06] TOAST The ones you stopped are still bound — stand over one and cleanse it.
+[08:06] FLAG +pgBound
+[08:06] FLAG +pgBoundN
+[08:06] PLAN room A0: 80 standable tiles, 1125 moves (27 ms)
+[08:06]   . A0 x=390 y=436 vx=100 on cores=5/7 volts=30 mission=sage held=ArrowRight
+[08:12] ROOM A0 -> A1  at x=21
+[08:13] TOAST The ones you stopped are still bound — stand over one and cleanse it.
+[08:13] PLAN room A1: 92 standable tiles, 1411 moves (27 ms)
+[08:14]   . A1 x=537 y=434 vx=340 on cores=5/7 volts=30 mission=sage held=ArrowRight near=rescue:null
+[08:18] ROOM A1 -> A2  at x=23
+[08:19] PLAN room A2: 114 standable tiles, 1686 moves (29 ms)
+[08:21] PLAN room A5: 58 standable tiles, 764 moves (19 ms)
+[08:21] ROOM A2 -> A5  at x=459
+[08:22]   . A5 x=624 y=327 vx=340 air cores=5/7 volts=30 mission=sage held=ArrowRight
+[08:24] DOOR up at 1106 -> CV1
+[08:28] ROOM A5 -> CV1  at x=167
+[08:29] PLAN room CV1: 74 standable tiles, 806 moves (21 ms)
+[08:30]   . CV1 x=573 y=316 vx=340 air cores=5/7 volts=30 mission=sage held=ArrowRight+Space
+[08:33] DOOR up at 1111 -> CV1B
+[08:37] ROOM CV1 -> CV1B  at x=142
+[08:37] PLAN room CV1B: 50 standable tiles, 549 moves (11 ms)
+[08:38]   . CV1B x=553 y=226 vx=340 air cores=5/7 volts=30 mission=sage held=ArrowRight+Space
+[08:39] REST at the pod in CV1B (cores 5/7, volts 30)
+[08:41] TOAST Systems recharged. Progress saved.
+[08:42] FIGHT bat (hp 28) in CV1B
+[08:45] DOOR up at 1120 -> CV2
+[08:45] DOOR up at 1120 -> CV2
+[08:46]   . CV1B x=1108 y=460 vx=0 on cores=7/7 volts=99 mission=sage held=
+[08:50] ROOM CV1B -> CV2  at x=372
+[08:50] PLAN room CV2: 87 standable tiles, 976 moves (20 ms)
+[08:52] FIGHT bat (hp 31) in CV2
+[08:54] FLAG +taughtWall
+[08:54] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[08:55]   . CV2 x=865 y=458 vx=243 on cores=7/7 volts=99 mission=sage held= near=term:5
+[08:57] FLAG +sc_CV2_5
+[08:57] SCRAP 372 -> 410
+[09:03]   . CV2 x=2023 y=444 vx=0 on cores=7/7 volts=99 mission=sage held=
+[09:06] FRAMES median 50 ms -> planner step 1/30, game time 0.99x wall
+[09:06] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[09:11] STUCK trying to reach exit R toward CV3 in CV2 at x=2023,y=444
+[09:11] FRAME 013-stuck-CV2.png
+[09:12]   . CV2 x=1888 y=338 vx=-243 air cores=7/7 volts=99 mission=sage held=
+[09:13] ROOM CV2 -> CV3  at x=16
+[09:13] TOAST The cut face still glows. Beside it, the maintenance passage breathes cold blue light.
+[09:13] FLAG +pgCv3Back
+[09:13] PLAN room CV3: 62 standable tiles, 777 moves (14 ms)
+[09:15] FIGHT crawler (hp 52) in CV3
+[09:16] HURT 7 -> 6 in CV3 (nearest crawler at 100 px)
+[09:17] HURT 6 -> 5 in CV3 (nearest crawler at 53 px)
+[09:17] FIGHT bat (hp 29) in CV3
+[09:18] FIGHT crawler (hp 29) in CV3
+[09:19] HURT 5 -> 4 in CV3 (nearest crawler at 64 px)
+[09:20] HEAL (cores 4/7, volts 99)
+[09:22]   . CV3 x=901 y=460 vx=0 on cores=5/7 volts=66 mission=sage held= near=rescue:null
+[09:22] DOOR up at 1152 -> GA1T
+[09:27] ROOM CV3 -> GA1T  at x=628
+[09:27] PLAN room GA1T: 50 standable tiles, 495 moves (11 ms)
+[09:27] STATE PLAY -> PANELS
+[09:27] MANHWA passage panel 1/2
+[09:28] MANHWA passage panel 2/2
+[09:30]   . GA1T x=628 y=459 vx=0 on cores=5/7 volts=66 mission=sage held= near=term:6
+[09:30] STATE PANELS -> PLAY
+[09:33] ROOM GA1T -> GA1D  at x=27
+[09:34] SAGE hp=233 dist=927 | cores 5/7 volts 66
+[09:34] PLAN room GA1D: 52 standable tiles, 576 moves (11 ms)
+[09:35] FIGHT bat (hp 31) in GA1D
+[09:36] FLAG +sc_GA1D_2
+[09:36] SCRAP 410 -> 455
+[09:37] HURT 5 -> 4 in GA1D (nearest bat at 129 px)
+[09:38]   . GA1D x=463 y=444 vx=-250 on cores=4/7 volts=77 mission=sage held=ArrowLeft threat={"k":"bat","x":385,"y":315,"w":24,"h":18,"hp":8,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[09:38] HURT 4 -> 3 in GA1D (nearest sage at 31 px)
+[09:38] SAGE hp=233 dist=18 | cores 3/7 volts 88
+[09:39] SAGE ring: jump
+[09:42] SAGE hp=233 coil dist=118 | cores 3/7 volts 88
+[09:45] SAGE hp=212 coil dist=58 | cores 3/7 volts 99
+[09:45] HURT 3 -> 2 in GA1D (nearest sage at 209 px)
+[09:46]   . GA1D x=159 y=406 vx=250 on cores=2/7 volts=99 mission=sage held=ArrowRight
+[09:48] SAGE hp=212 lunge dist=121 | cores 2/7 volts 99
+[09:48] HEAL (cores 2/7, volts 99)
+[09:51] HEAL (cores 3/7, volts 66)
+[09:52] SAGE hp=212 gather dist=127 | cores 4/7 volts 33
+[09:53] SAGE ring: jump
+[09:54]   . GA1D x=71 y=273 vx=-250 air cores=4/7 volts=33 mission=sage held=ArrowLeft
+[09:55] HEAL (cores 4/7, volts 33)
+[09:56] SAGE hp=212 exhale dist=115 | cores 5/7 volts 0
+[09:59] STUCK trying to reach the fight in GA1D at x=22,y=444
+[09:59] FRAME 014-stuck-GA1D.png
+[10:00] ROOM GA1D -> GA1T  at x=1163
+[10:01] PLAN room GA1T: 50 standable tiles, 495 moves (10 ms)
+[10:02]   . GA1T x=858 y=421 vx=-200 air cores=5/7 volts=0 mission=sage held=ArrowLeft+Space
+[10:03] DOOR up at 640 -> CV3
+[10:06] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[10:06] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[10:07] ROOM GA1T -> CV3  at x=1140
+[10:07] PLAN room CV3: 62 standable tiles, 777 moves (14 ms)
+[10:10]   . CV3 x=231 y=460 vx=-340 on cores=5/7 volts=0 mission=sage held=ArrowLeft
+[10:18]   . CV3 x=3 y=444 vx=0 on cores=5/7 volts=0 mission=sage held=
+[10:20] STUCK trying to reach exit L toward CV2 in CV3 at x=3,y=444
+[10:21] FRAME 015-stuck-CV3.png
+[10:21] ROOM CV3 -> CV2  at x=1904
+[10:22] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[10:25] FIGHT bat (hp 29) in CV2
+[10:27]   . CV2 x=723 y=457 vx=0 on cores=5/7 volts=0 mission=sage held=
+[10:29] DOOR up at 384 -> CV1B
+[10:33] ROOM CV2 -> CV1B  at x=1108
+[10:33] PLAN room CV1B: 50 standable tiles, 549 moves (11 ms)
+[10:35]   . CV1B x=896 y=156 vx=0 on cores=5/7 volts=0 mission=sage held=ArrowLeft near=rescue:null
+[10:43]   . CV1B x=896 y=156 vx=0 on cores=5/7 volts=0 mission=sage held=ArrowLeft near=rescue:null
+[10:43] STUCK trying to reach the pod in CV1B in CV1B at x=896,y=156
+[10:43] FRAME 016-stuck-CV1B.png
+[10:45] REST at the pod in CV1B (cores 5/7, volts 0)
+[10:48] TOAST Systems recharged. Progress saved.
+[10:49] DOOR up at 1120 -> CV2
+[10:51]   . CV1B x=1108 y=284 vx=0 on cores=7/7 volts=99 mission=sage held=
+[10:54] ROOM CV1B -> CV2  at x=372
+[10:54] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[10:59]   . CV2 x=1449 y=311 vx=50 air cores=7/7 volts=99 mission=sage held=ArrowRight+Space
+[11:02] ROOM CV2 -> CV3  at x=27
+[11:02] PLAN room CV3: 62 standable tiles, 777 moves (21 ms)
+[11:05] DOOR up at 1152 -> GA1T
+[11:07] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[11:07] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[11:07]   . CV3 x=1140 y=459 vx=0 on cores=7/7 volts=99 mission=sage held= near=rescue:null
+[11:10] ROOM CV3 -> GA1T  at x=628
+[11:10] PLAN room GA1T: 50 standable tiles, 495 moves (12 ms)
+[11:13] ROOM GA1T -> GA1D  at x=38
+[11:13] SAGE hp=233 dist=924 | cores 7/7 volts 99
+[11:13] PLAN room GA1D: 52 standable tiles, 576 moves (11 ms)
+[11:15]   . GA1D x=442 y=303 vx=340 air cores=7/7 volts=99 mission=sage held=ArrowRight+Space
+[11:17] HURT 7 -> 6 in GA1D (nearest bat at 69 px)
+[11:17] SAGE hp=233 exhale dist=81 | cores 6/7 volts 99
+[11:19] HURT 6 -> 5 in GA1D (nearest sage at 23 px)
+[11:20] SAGE hp=212 exhale dist=102 | cores 5/7 volts 99
+[11:22] HURT 5 -> 4 in GA1D (nearest sage at 37 px)
+[11:22] HEAL (cores 4/7, volts 99)
+[11:24]   . GA1D x=776 y=457 vx=0 on cores=5/7 volts=66 mission=sage held=
+[11:24] SAGE hp=212 dist=90 | cores 5/7 volts 66
+[11:26] HURT 5 -> 4 in GA1D (nearest sage at 100 px)
+[11:26] HEAL (cores 4/7, volts 66)
+[11:28] SAGE hp=212 exhale dist=59 | cores 5/7 volts 33
+[11:28] HURT 5 -> 4 in GA1D (nearest sage at 81 px)
+[11:28] HEAL (cores 4/7, volts 44)
+[11:31] SAGE hp=191 lunge dist=96 | cores 5/7 volts 11
+[11:32] HURT 5 -> 4 in GA1D (nearest sage at 29 px)
+[11:32]   . GA1D x=778 y=444 vx=0 on cores=4/7 volts=22 mission=sage held=
+[11:34] HURT 4 -> 3 in GA1D (nearest sage at 108 px)
+[11:34] SAGE hp=170 exhale dist=94 | cores 3/7 volts 22
+[11:35] HURT 3 -> 2 in GA1D (nearest sage at 31 px)
+[11:37] SAGE hp=149 exhale dist=119 | cores 2/7 volts 33
+[11:37] HEAL (cores 2/7, volts 33)
+[11:40] SAGE hp=128 exhale dist=35 | cores 3/7 volts 11
+[11:40]   . GA1D x=571 y=460 vx=-300 on cores=3/7 volts=11 mission=sage held=ArrowLeft
+[11:41] HURT 3 -> 2 in GA1D (nearest sage at 72 px)
+[11:43] SAGE hp=78 exhale dist=98 | cores 2/7 volts 33
+[11:44] HURT 2 -> 1 in GA1D (nearest sage at 86 px)
+[11:46] STATE PLAY -> DEAD
+[11:46] DEATH #1 in GA1D (save deaths 1)
+[11:46] HURT 1 -> 0 in GA1D (nearest sage at 17 px)
+[11:46] SCRAP 455 -> 0
+[11:48] ROOM GA1D -> CV1B  at x=634
+[11:48] STATE DEAD -> PLAY
+[11:48] TOAST Your husk still stands where you fell — it kept what you were carrying.  (Scrap Meadows)
+[11:48] PLAN room CV1B: 50 standable tiles, 549 moves (10 ms)
+[11:49]   . CV1B x=773 y=428 vx=250 air cores=7/7 volts=33 mission=sage held=ArrowRight+Space
+[11:50] DOOR up at 1120 -> CV2
+[11:54] ROOM CV1B -> CV2  at x=372
+[11:54] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[11:57]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[12:04] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[12:05] FRAME 017-stuck-CV2.png
+[12:06]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[12:07] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[12:07] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[12:14]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[12:15] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[12:15] FRAME 018-stuck-CV2.png
+[12:22]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[12:25] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[12:26] FRAME 019-stuck-CV2.png
+[12:30]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[12:36] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[12:36] FRAME 020-stuck-CV2.png
+[12:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[12:46]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[12:46] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[12:47] FRAME 021-stuck-CV2.png
+[12:54]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[12:57] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[12:57] FRAME 022-stuck-CV2.png
+[13:02]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[13:08] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[13:08] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[13:08] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[13:08] FRAME 023-stuck-CV2.png
+[13:10]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[13:18]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[13:18] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[13:19] FRAME 024-stuck-CV2.png
+[13:26]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[13:29] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[13:29] FRAME 025-stuck-CV2.png
+[13:34]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[13:39] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[13:40] FRAME 026-stuck-CV2.png
+[13:42]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[13:50] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[13:50] FRAME 027-stuck-CV2.png
+[13:51]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[13:59]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[14:00] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[14:01] FRAME 028-stuck-CV2.png
+[14:07]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[14:08] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[14:08] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[14:11] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:11] FRAME 029-stuck-CV2.png
+[14:15]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[14:21] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:22] FRAME 030-stuck-CV2.png
+[14:23]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[14:31]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[14:32] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:32] FRAME 031-stuck-CV2.png
+[14:39]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[14:42] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:43] FRAME 032-stuck-CV2.png
+[14:47]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[14:53] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[14:53] FRAME 033-stuck-CV2.png
+[14:55]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[15:03] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[15:04] FRAME 034-stuck-CV2.png
+[15:05]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[15:09] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[15:09] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[15:13]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[15:14] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:14] FRAME 035-stuck-CV2.png
+[15:21]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[15:24] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:25] FRAME 036-stuck-CV2.png
+[15:29]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[15:35] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:35] FRAME 037-stuck-CV2.png
+[15:37]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[15:45]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[15:45] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[15:46] FRAME 038-stuck-CV2.png
+[15:53]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[15:56] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:56] FRAME 039-stuck-CV2.png
+[16:01]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[16:06] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:06] FRAME 040-stuck-CV2.png
+[16:10] FRAMES median 50 ms -> planner step 1/30, game time 0.99x wall
+[16:10] PACE sim 60.3 s per 60 s wall (pace dial / slow frames)
+[16:10]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[16:16] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:17] FRAME 041-stuck-CV2.png
+[16:18]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[16:26]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[16:27] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[16:27] FRAME 042-stuck-CV2.png
+[16:34]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[16:37] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:38] FRAME 043-stuck-CV2.png
+[16:42]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[16:48] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[16:48] FRAME 044-stuck-CV2.png
+[16:50]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[16:58] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:59] FRAME 045-stuck-CV2.png
+[16:59]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[17:08]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[17:09] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:09] FRAME 046-stuck-CV2.png
+[17:10] FRAMES median 50 ms -> planner step 1/30, game time 1.01x wall
+[17:10] PACE sim 60.8 s per 60 s wall (pace dial / slow frames)
+[17:16]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[17:19] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:20] FRAME 047-stuck-CV2.png
+[17:24]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[17:30] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[17:30] FRAME 048-stuck-CV2.png
+[17:32]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[17:40]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[17:41] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:41] FRAME 049-stuck-CV2.png
+[17:48]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[17:51] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:51] FRAME 050-stuck-CV2.png
+[17:56]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[18:02] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:02] FRAME 051-stuck-CV2.png
+[18:04]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[18:11] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[18:11] PACE sim 60.7 s per 60 s wall (pace dial / slow frames)
+[18:12] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[18:12] FRAME 052-stuck-CV2.png
+[18:13]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[18:22]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[18:23] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:23] FRAME 053-stuck-CV2.png
+[18:30]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[18:33] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:34] FRAME 054-stuck-CV2.png
+[18:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[18:44] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:44] FRAME 055-stuck-CV2.png
+[18:46]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[18:54]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[18:54] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:54] FRAME 056-stuck-CV2.png
+[19:02]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[19:04] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[19:05] FRAME 057-stuck-CV2.png
+[19:10]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[19:12] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[19:12] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[19:15] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[19:15] FRAME 058-stuck-CV2.png
+[19:18]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[19:26] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[19:26] FRAME 059-stuck-CV2.png
+[19:27]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[19:35]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[19:36] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[19:37] FRAME 060-stuck-CV2.png
+[19:43]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[19:47] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[19:47] FRAME 061-stuck-CV2.png
+[19:51]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[19:57] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[19:58] FRAME 062-stuck-CV2.png
+[19:59]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[20:07]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[20:08] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[20:08] FRAME 063-stuck-CV2.png
+[20:12] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[20:12] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[20:15]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[20:18] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[20:18] FRAME 064-stuck-CV2.png
+[20:23]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[20:28] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[20:29] FRAME 065-stuck-CV2.png
+[20:31]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[20:39] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[20:39] FRAME 066-stuck-CV2.png
+[20:40]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[20:48]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[20:49] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[20:50] FRAME 067-stuck-CV2.png
+[20:56]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[21:00] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[21:00] FRAME 068-stuck-CV2.png
+[21:04]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[21:10] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:10] FRAME 069-stuck-CV2.png
+[21:13] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[21:13] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[21:13]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[21:20] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:21] FRAME 070-stuck-CV2.png
+[21:22]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[21:30]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[21:31] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:31] FRAME 071-stuck-CV2.png
+[21:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[21:41] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[21:42] FRAME 072-stuck-CV2.png
+[21:46]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[21:52] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:52] FRAME 073-stuck-CV2.png
+[21:54]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[22:02]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[22:02] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:03] FRAME 074-stuck-CV2.png
+[22:10]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[22:13] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[22:13] FRAME 075-stuck-CV2.png
+[22:14] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[22:14] PACE sim 61.8 s per 60 s wall (pace dial / slow frames)
+[22:18]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[22:23] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:24] FRAME 076-stuck-CV2.png
+[22:26]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[22:34] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:34] FRAME 077-stuck-CV2.png
+[22:35]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[22:43]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[22:44] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:45] FRAME 078-stuck-CV2.png
+[22:51]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[22:55] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:55] FRAME 079-stuck-CV2.png
+[22:59]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[23:05] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:06] FRAME 080-stuck-CV2.png
+[23:07]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[23:15] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[23:15] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[23:16]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[23:16] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[23:16] FRAME 081-stuck-CV2.png
+[23:24]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[23:26] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:26] FRAME 082-stuck-CV2.png
+[23:32]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[23:36] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:37] FRAME 083-stuck-CV2.png
+[23:40]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[23:47] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:47] FRAME 084-stuck-CV2.png
+[23:48]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[23:56]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[23:57] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:58] FRAME 085-stuck-CV2.png
+[24:04]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[24:08] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[24:08] FRAME 086-stuck-CV2.png
+[24:12]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[24:15] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[24:15] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[24:18] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[24:19] FRAME 087-stuck-CV2.png
+[24:21]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[24:29]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[24:29] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[24:29] FRAME 088-stuck-CV2.png
+[24:37]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[24:39] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[24:39] FRAME 089-stuck-CV2.png
+[24:45]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[24:50] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[24:50] FRAME 090-stuck-CV2.png
+[24:53]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[25:00] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[25:01] FRAME 091-stuck-CV2.png
+[25:01]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[25:10]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[25:11] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[25:11] FRAME 092-stuck-CV2.png
+[25:16] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[25:16] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[25:18]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[25:21] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[25:21] FRAME 093-stuck-CV2.png
+[25:26]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[25:31] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[25:32] FRAME 094-stuck-CV2.png
+[25:34]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[25:42]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[25:42] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[25:42] FRAME 095-stuck-CV2.png
+[25:50]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[25:52] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[25:53] FRAME 096-stuck-CV2.png
+[25:58]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[26:03] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[26:04] FRAME 097-stuck-CV2.png
+[26:06]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[26:14] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:14] FRAME 098-stuck-CV2.png
+[26:15]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[26:16] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[26:16] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[26:23]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[26:24] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:24] FRAME 099-stuck-CV2.png
+[26:31]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[26:35] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:35] FRAME 100-stuck-CV2.png
+[26:39]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[26:45] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[26:45] FRAME 101-stuck-CV2.png
+[26:47]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[26:55]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[26:55] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:56] FRAME 102-stuck-CV2.png
+[27:03]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[27:06] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[27:06] FRAME 103-stuck-CV2.png
+[27:11]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[27:16] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[27:17] FRAME 104-stuck-CV2.png
+[27:18] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[27:18] PACE sim 61.7 s per 60 s wall (pace dial / slow frames)
+[27:19]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[27:27] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[27:28] FRAME 105-stuck-CV2.png
+[27:28]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[27:37]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[27:38] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[27:38] FRAME 106-stuck-CV2.png
+[27:45]   . CV2 x=744 y=220 vx=1 air cores=7/7 volts=33 mission=sage held=ArrowRight
+[27:48] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[27:48] FRAME 107-stuck-CV2.png
+[27:53]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[27:58] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[27:59] FRAME 108-stuck-CV2.png
+[28:01]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[28:09]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[28:09] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:09] FRAME 109-stuck-CV2.png
+[28:17]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[28:19] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[28:19] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[28:19] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:20] FRAME 110-stuck-CV2.png
+[28:25]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[28:30] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:30] FRAME 111-stuck-CV2.png
+[28:33]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[28:40] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[28:41] FRAME 112-stuck-CV2.png
+[28:42]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[28:50]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[28:51] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:51] FRAME 113-stuck-CV2.png
+[28:58]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[29:01] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[29:02] FRAME 114-stuck-CV2.png
+[29:06]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[29:12] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[29:12] FRAME 115-stuck-CV2.png
+[29:14]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[29:19] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[29:19] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[29:22]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[29:23] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[29:23] FRAME 116-stuck-CV2.png
+[29:30]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[29:33] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[29:33] FRAME 117-stuck-CV2.png
+[29:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[29:43] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[29:44] FRAME 118-stuck-CV2.png
+[29:46]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[29:54] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[29:54] FRAME 119-stuck-CV2.png
+[29:55]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[30:03]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[30:04] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:05] FRAME 120-stuck-CV2.png
+[30:11]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[30:15] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[30:15] FRAME 121-stuck-CV2.png
+[30:19]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[30:20] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[30:20] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[30:25] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:26] FRAME 122-stuck-CV2.png
+[30:27]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[30:35]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[30:36] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:36] FRAME 123-stuck-CV2.png
+[30:43]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[30:46] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[30:46] FRAME 124-stuck-CV2.png
+[30:51]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[30:56] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:57] FRAME 125-stuck-CV2.png
+[30:59]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[31:07] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[31:07] FRAME 126-stuck-CV2.png
+[31:08]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[31:16]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[31:17] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:18] FRAME 127-stuck-CV2.png
+[31:21] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[31:21] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[31:24]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[31:28] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:28] FRAME 128-stuck-CV2.png
+[31:32]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[31:38] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[31:38] FRAME 129-stuck-CV2.png
+[31:40]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[31:48]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[31:48] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:49] FRAME 130-stuck-CV2.png
+[31:56]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[31:59] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:59] FRAME 131-stuck-CV2.png
+[32:04]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[32:09] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[32:10] FRAME 132-stuck-CV2.png
+[32:12]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[32:20] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[32:20] FRAME 133-stuck-CV2.png
+[32:21]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[32:22] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[32:22] PACE sim 61.4 s per 60 s wall (pace dial / slow frames)
+[32:29]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[32:31] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[32:32] FRAME 134-stuck-CV2.png
+[32:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[32:42] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[32:42] FRAME 135-stuck-CV2.png
+[32:46]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[32:52] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[32:53] FRAME 136-stuck-CV2.png
+[32:54]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[33:02]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[33:03] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:03] FRAME 137-stuck-CV2.png
+[33:10]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[33:13] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:14] FRAME 138-stuck-CV2.png
+[33:18]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[33:23] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[33:23] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[33:24] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[33:24] FRAME 139-stuck-CV2.png
+[33:26]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[33:34]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[33:34] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:34] FRAME 140-stuck-CV2.png
+[33:42]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[33:44] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:45] FRAME 141-stuck-CV2.png
+[33:50]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[33:55] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[33:55] FRAME 142-stuck-CV2.png
+[33:58]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[34:05] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:06] FRAME 143-stuck-CV2.png
+[34:06]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[34:15]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[34:16] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:16] FRAME 144-stuck-CV2.png
+[34:23]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[34:23] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[34:23] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[34:26] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[34:27] FRAME 145-stuck-CV2.png
+[34:31]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[34:36] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:37] FRAME 146-stuck-CV2.png
+[34:39]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[34:47]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[34:47] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:47] FRAME 147-stuck-CV2.png
+[34:55]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[34:57] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[34:58] FRAME 148-stuck-CV2.png
+[35:03]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[35:08] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:08] FRAME 149-stuck-CV2.png
+[35:11]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[35:18] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[35:19] FRAME 150-stuck-CV2.png
+[35:20]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[35:24] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[35:24] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[35:28]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[35:29] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:29] FRAME 151-stuck-CV2.png
+[35:36]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[35:40] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:40] FRAME 152-stuck-CV2.png
+[35:44]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[35:50] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:50] FRAME 153-stuck-CV2.png
+[35:52]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[36:00]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[36:01] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:01] FRAME 154-stuck-CV2.png
+[36:08]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[36:11] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:12] FRAME 155-stuck-CV2.png
+[36:16]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[36:22] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[36:22] FRAME 156-stuck-CV2.png
+[36:24] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[36:24] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[36:24]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[36:32] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[36:33] FRAME 157-stuck-CV2.png
+[36:33]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[36:41]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[36:42] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:43] FRAME 158-stuck-CV2.png
+[36:49]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[36:53] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:53] FRAME 159-stuck-CV2.png
+[36:58]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[37:03] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[37:04] FRAME 160-stuck-CV2.png
+[37:06]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[37:14]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[37:14] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[37:14] FRAME 161-stuck-CV2.png
+[37:22]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[37:25] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[37:25] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[37:25] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[37:25] FRAME 162-stuck-CV2.png
+[37:30]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[37:35] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[37:36] FRAME 163-stuck-CV2.png
+[37:38]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[37:46] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[37:46] FRAME 164-stuck-CV2.png
+[37:47]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[37:55]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[37:56] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[37:57] FRAME 165-stuck-CV2.png
+[38:03]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[38:07] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:07] FRAME 166-stuck-CV2.png
+[38:11]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[38:17] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:18] FRAME 167-stuck-CV2.png
+[38:19]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[38:25] FRAMES median 50 ms -> planner step 1/30, game time 1.00x wall
+[38:25] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[38:27]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[38:28] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:28] FRAME 168-stuck-CV2.png
+[38:35]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[38:38] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:39] FRAME 169-stuck-CV2.png
+[38:44]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[38:49] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[38:49] FRAME 170-stuck-CV2.png
+[38:52]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[38:59] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[39:00] FRAME 171-stuck-CV2.png
+[39:01]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=
+[39:09]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[39:10] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[39:10] FRAME 172-stuck-CV2.png
+[39:17]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[39:20] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[39:21] FRAME 173-stuck-CV2.png
+[39:25]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[39:26] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[39:26] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[39:31] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[39:31] FRAME 174-stuck-CV2.png
+[39:33]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[39:41]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[39:41] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[39:42] FRAME 175-stuck-CV2.png
+[39:49]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowLeft
+[39:52] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[39:52] FRAME 176-stuck-CV2.png
+[39:57]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[40:00] FRAME 177-end.png
+[40:00] MANHWA seen: wake, bay, gate, letter, drawer, ratchet, meet, cave, marble, forge, passage
+[40:00] RESULT timeout  wall 40:00  deaths 1  missions opening,servo,first-meeting,marble,forge  stuck 166  page errors 0
