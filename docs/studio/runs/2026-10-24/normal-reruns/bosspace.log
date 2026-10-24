@@ -1,0 +1,17 @@
+
+── bosspace  — no guardian spends the fight standing still, measured against a moving player
+── bosspace  — how a guardian spends 20 seconds against a player who MOVES
+
+  boss             idle   move   wind    hit   states   busiest state
+  NULLFANG         26%    26%    29%    19%     13   idle 23.8%
+  TALONHOST        11%    78%    10%     0%      6   recover 8.8%
+  FURNACE CHOIR    14%    37%    23%    26%      7   recover 10.9%
+  GLACIERE         27%    35%    18%    21%      9   recover 25.3%
+  PRISM PROWLER    22%    55%     5%    19%      9   rest 20.3%
+  MOTHER-V         16%    44%    30%    10%      6   recover 14.5%
+  GRAVEHORN        22%     0%    17%    61%     13   idle 9.9%
+
+OK — every guardian keeps the pressure on
+   (bosspace: 149.3 s)
+
+all 1 harnesses ran

@@ -1,0 +1,217 @@
+[00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:01] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:01] MENU choose "newgame"
+[00:03] STATE MENU -> CUT
+[00:52] STATE CUT -> DIFF
+[00:52] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:53] FRAME 000-difficulty.png
+[00:53] PLAN reset (room  -> W1)
+[00:53] ROOM - -> W1  at x=96
+[00:53] STATE DIFF -> PANELS
+[00:53] MANHWA wake panel 1/5
+[00:53] OBJECTIVE "Reach the city gates"
+[00:53] CHIP move |  | 
+[00:53] SAVEPOINT null -> W1
+[00:53] WEAPON null -> claws
+[00:53]   . W1 x=96 y=413 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:54] MANHWA wake panel 2/5
+[00:55] MANHWA wake panel 3/5
+[00:56] MANHWA wake panel 4/5
+[00:57] MANHWA wake panel 5/5
+[00:59] STATE PANELS -> PLAY
+[00:59] CHIP move | Move | Walk right toward the light
+[01:01]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:03] FRAMES median 117 ms -> planner step 1/30, game time 0.90x wall
+[01:03] PACE sim 56.8 s per 60 s wall (pace dial / slow frames)
+[01:07] TOAST POWER FAULT → SYSTEM RESTART
+[01:09]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:16] FLAG +woke
+[01:16] MISSION opening (objective: "Reach the city gates")
+[01:17]   . W1 x=207 y=283 vx=50 air cores=7/7 volts=33 tut=move/MOVE@-1 mission=opening held=
+[01:19] CHIP out | Leave | The door has been open a long time — walk out
+[01:19] FLAG +tutI
+[01:19] FLAG +tutId
+[01:26]   . W1 x=961 y=428 vx=340 on cores=7/7 volts=33 tut=out/MOVE@1232 mission=opening held=ArrowRight
+[01:28] PLAN reset (room W1 -> W2)
+[01:28] ROOM W1 -> W2  at x=16
+[01:28] STATE PLAY -> PANELS
+[01:28] MANHWA bay panel 1/3
+[01:28] CHIP out |  | 
+[01:28] MANHWA bay panel 2/3
+[01:30] MANHWA bay panel 3/3
+[01:32] STATE PANELS -> PLAY
+[01:32] CHIP out | The city gates | Follow the gold marker
+[01:33] CHIP jump | Jump | Follow the gold marker
+[01:34]   . W2 x=130 y=270 vx=340 air cores=7/7 volts=33 tut=jump/MOVE@416 mission=opening held=ArrowRight
+[01:35] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:41] CHIP gate | The city gates | Follow the gold marker
+[01:44]   . W2 x=564 y=148 vx=340 air cores=7/7 volts=33 tut=gate/MOVE@960 mission=opening held=ArrowRight
+[01:47] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:50] FLAG +gateOpened
+[01:53]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[02:02]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[02:05] FRAMES median 17 ms -> planner step 1/60, game time 0.97x wall
+[02:05] PACE sim 19.1 s per 60 s wall (pace dial / slow frames)
+[02:11] PLAN reset (room W2 -> A0)
+[02:11] ROOM W2 -> A0  at x=40
+[02:11] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[02:11]   . A0 x=40 y=400 vx=0 on cores=7/7 volts=33 tut=gate/MOVE@-1 mission=opening held=
+[02:11] STATE PLAY -> PANELS
+[02:11] MANHWA gate panel 1/2
+[02:11] CHIP gate |  | 
+[02:13] MANHWA gate panel 2/2
+[02:14] STATE PANELS -> PLAY
+[02:14] CHIP gate | The city gates | Stand beneath them and press ↑
+[02:18] CHIP booth | Ratchet's booth | Follow the gold marker
+[02:21]   . A0 x=267 y=261 vx=340 air cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[02:21] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[02:31]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[02:39]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[02:43] PLAN reset (room A0 -> A0B)
+[02:43] ROOM A0 -> A0B  at x=103
+[02:43] OBJECTIVE "Wake Ratchet"
+[02:46] CHIP note | Read the letter | Follow the gold marker
+[02:49]   . A0B x=189 y=276 vx=340 air cores=7/7 volts=33 tut=note/MOVE@560 mission=opening held=ArrowRight
+[02:52] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[02:52] STATE PLAY -> PANELS
+[02:52] MANHWA letter panel 1/5
+[02:52] CHIP note |  | 
+[02:54] MANHWA letter panel 2/5
+[02:56] MANHWA letter panel 3/5
+[02:57]   . A0B x=523 y=433 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[02:57] MANHWA letter panel 4/5
+[02:58] MANHWA letter panel 5/5
+[03:00] STATE PANELS -> PLAY
+[03:00] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[03:00] FLAG +opNote
+[03:01] STATE PLAY -> DIALOG
+[03:01] CHIP note |  | 
+[03:01] SAY Ratchet's letter: "“My battery is in the drawer beside this chair. Seat it, connect the positive wire, then the ground, and bridge the relay. If you are reading this, there may still be hope. — R.”"
+[03:07]   . A0B x=472 y=433 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[03:07] FRAMES median 17 ms -> planner step 1/60, game time 1.02x wall
+[03:07] PACE sim 21.2 s per 60 s wall (pace dial / slow frames)
+[03:07] STATE DIALOG -> PLAY
+[03:07] CHIP note | Read the letter | Follow the gold marker
+[03:10] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[03:13] STATE PLAY -> DIALOG
+[03:13] CHIP drawer |  | 
+[03:13] FLAG +ch_A0B_1
+[03:13] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[03:13] ITEMS {"ratchetCell":1}
+[03:16]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[03:16] STATE DIALOG -> PANELS
+[03:16] MANHWA drawer panel 1/1
+[03:18] STATE PANELS -> PLAY
+[03:18] CHIP drawer | Open the drawer | Follow the gold marker
+[03:21] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[03:24] STATE PLAY -> DIALOG
+[03:24] CHIP repair |  | 
+[03:24] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[03:24]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:28] STATE DIALOG -> REPAIR
+[03:31] FRAME 001-repair-board.png
+[03:31] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[03:31] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[03:34]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:34] REPAIR place on target:socket (the hint names "battery socket")
+[03:37] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[03:41] REPAIR place on target:plus (the hint names "+ terminal")
+[03:44]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:44] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[03:47] REPAIR place on target:minus (the hint names "− terminal")
+[03:50] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[03:53]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:56] REPAIR place on target:relay (the hint names "relay")
+[03:59] REPAIR power
+[04:03]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:06] STATE REPAIR -> CUT
+[04:06] OBJECTIVE "Use Ratchet’s pod"
+[04:06] FLAG +on_A0B|ratchet
+[04:06] FLAG +ratchetRepaired
+[04:06] ITEMS {}
+[04:07] FRAMES median 17 ms -> planner step 1/60, game time 1.04x wall
+[04:07] PACE sim 14.2 s per 60 s wall (pace dial / slow frames)
+[04:11]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:13] STATE CUT -> DIALOG
+[04:13] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[04:20]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:20] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[04:26] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[04:29]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:33] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[04:39]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:40] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[04:46] FLAG +opTold
+[04:46] FLAG +ratchetSpareGiven
+[04:46] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[04:46] ITEMS {"batt":1}
+[04:49]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:52] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[04:58]   . A0B x=575 y=424 vx=0 air cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:58] STATE DIALOG -> PANELS
+[04:58] MANHWA ratchet panel 1/2
+[05:00] MANHWA ratchet panel 2/2
+[05:01] STATE PANELS -> PLAY
+[05:01] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[05:02] STATE PLAY -> DIALOG
+[05:02] CHIP repair |  | 
+[05:08]   . A0B x=624 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[05:09] FRAMES median 17 ms -> planner step 1/60, game time 1.04x wall
+[05:09] PACE sim 18.3 s per 60 s wall (pace dial / slow frames)
+[05:09] STATE DIALOG -> PLAY
+[05:09] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[05:15] CHIP pod | Use the pod | Follow the gold marker
+[05:18]   . A0B x=744 y=253 vx=340 air cores=7/7 volts=33 tut=pod/MOVE@912 mission=opening held=ArrowRight
+[05:18] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[05:21] SAVEPOINT W1 -> A0B
+[05:27]   . A0B x=900 y=426 vx=0 on cores=7/7 volts=99 tut=pod/INT@912 mission=opening held= near=bench:null
+[05:31] OBJECTIVE "Get the Volt Pack from Ratchet"
+[05:31] FLAG +opPod
+[05:34] CHIP pack | The Volt Pack | Follow the gold marker
+[05:37]   . A0B x=780 y=297 vx=-340 air cores=7/7 volts=99 tut=pack/MOVE@560 mission=opening held=ArrowLeft
+[05:41] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[05:43] STATE PLAY -> DIALOG
+[05:43] CHIP pack |  | 
+[05:43] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[05:47]   . A0B x=472 y=434 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[05:47] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[05:53] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[05:57]   . A0B x=472 y=434 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[06:00] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[06:07]   . A0B x=472 y=434 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[06:07] FLAG +opScrap
+[06:07] FLAG +sawScrap
+[06:07] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[06:07] SCRAP 0 -> 12
+[06:10] FRAMES median 17 ms -> planner step 1/60, game time 0.95x wall
+[06:10] PACE sim 11.2 s per 60 s wall (pace dial / slow frames)
+[06:14] STATE DIALOG -> SHOP
+[06:20] FRAME 002-counter.png
+[06:20] SHOP buy the marked row (cell) with 12 scrap
+[06:23] STATE SHOP -> DIALOG
+[06:23] OBJECTIVE "Try out the Volt Pack"
+[06:23] FLAG +tutBuy
+[06:23] FLAG +heal
+[06:23] FLAG +pack
+[06:23] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[06:23] SCRAP 12 -> 0
+[06:23]   . A0B x=472 y=434 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[06:27] STATE DIALOG -> PLAY
+[06:27] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[06:30] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[06:30] HURT 7 -> 6 in A0B
+[06:30] HEAL: holding heal
+[06:33]   . A0B x=472 y=435 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@484 mission=opening held= near=npc:ratchet
+[06:33] HEAL: holding heal
+[06:36] HEAL: holding heal
+[06:39] HEAL: holding heal
+[06:43]   . A0B x=472 y=435 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@484 mission=opening held= near=npc:ratchet
+[06:43] HEAL: holding heal
+[06:46] HEAL: holding heal
+[06:49] HEAL: holding heal
+[06:52]   . A0B x=472 y=435 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@484 mission=opening held= near=npc:ratchet
+[06:52] HEAL: holding heal
+[06:55] HEAL: holding heal
+[06:58] HEAL: holding heal

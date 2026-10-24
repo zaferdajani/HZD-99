@@ -1,0 +1,94 @@
+
+── gravehorn  — GRAVEHORN: the entrance, every move told and opened, the charge jumped, the toss thrown and parried, twin horns, the kick from behind, the exit
+page.evaluate: TypeError: Cannot read properties of null (reading 'missiles')
+    at Object.arena (eval at evaluate (:311:30), <anonymous>:19:16)
+    at eval (eval at evaluate (:311:30), <anonymous>:1:11)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/gravehorn.cjs:575:16 {
+  log: []
+}
+FAILED: ── gravehorn — the Eye's rhino, measured in the real build
+  ok   he is posted in CV3 while the marble is still in the rock
+  ok   ...asleep in the dark until she comes in  dorm
+  ok   he steps out of the dark when she walks in
+  ok   ...and she is held while he does (the staging is not walk-out-able)
+  ok   ...a held direction does not move her through it  0 px
+  FAIL he speaks: a dialogue box under his own name  null
+  FAIL ...four lines the first time (who he is, whom he serves, that the Eye stole the Song, the threat)
+  ok   the room locks while he stands: the way out does not cross  {"ok":true,"bossActive":true}
+  ok   the conversation closes on ordinary presses  PLAY
+  FAIL ...then he bellows, and his name card goes up
+  FAIL ...and the fight begins, her controls hers again  ghwake hold=true
+  FAIL the meeting is remembered (a retry gets the short version)
+  ok   every line of his exists in all five languages, translated  en ar tr zh ru
+  ok   ...Arabic is set right to left
+  FAIL missile: tell -> active -> recovery  dorm(100) > hornprep(700) > hornfire
+  ok   missile: the tell is a TELL_ST name (its sound fires), the active and recovery are not  hornprep / hornfire / hornless,hornseat
+  FAIL charge: tell -> active -> recovery  chargewarn(800) > rush
+  ok   charge: the tell is a TELL_ST name (its sound fires), the active and recovery are not  chargewarn / rush / wallslam,stunned,recover
+  FAIL chargeSkid: tell -> active -> recovery  chargewarn
+  ok   chargeSkid: the tell is a TELL_ST name (its sound fires), the active and recovery are not  chargewarn / rush / skid,recover
+  FAIL toss: tell -> active -> recovery  tossprep
+  ok   toss: the tell is a TELL_ST name (its sound fires), the active and recovery are not  tossprep / toss / tossrecover
+  FAIL kick: tell -> active -> recovery  kickprep(367) > kick
+  ok   kick: the tell is a TELL_ST name (its sound fires), the active and recovery are not  kickprep / kick / kickrecover
+  FAIL every tell is at least 350 ms (the zone-A floor is 400 for all but the close kick)  hornprep 700, chargewarn 800, tossprep 0, kickprep 367 ms
+  FAIL every recovery is an opening of >= 250 ms (opening = recovery - 33 ms)  missile (hornless) -33, charge->wall (stunned) -33, charge->skid (skid+recover) -33, toss (tossrecover) -33, kick (kickrecover) -33
+  FAIL standing in the charge costs a core (the control)  lost 0
+  FAIL a keyboard jump at the right moment clears him: no core lost  jumped at time-to-contact null s, charge null px/s
+  FAIL ...and she lands behind him
+       jump take-off (time to contact, s) -> 0.1:clear 0.16:clear 0.2:clear 0.3:clear 0.36:clear 0.44:clear 0.52:clear
+  ok   the toss lands: a core  1 lost
+  FAIL ...she is thrown FAR: up and away  rose 107 px, carried 130 px
+  ok   ...and DIZZY (stars, 1.4 s)  1.40 s
+  ok   ...with i-frames on the knockback (longer than she is dizzy, almost)  1.30 s
+  ok   ...and he does not start a move on a dizzy body (no blow lands until it passes)  {"lost":0,"st":"idle"}
+  ok   dizzy: the jump does nothing  0 px
+  ok   dizzy: the strike does nothing
+  ok   dizzy: she can walk, at under half speed  153 px/s
+  ok   dizzy never stacks  {"a":0.36679999999998836,"r":false,"grew":false}
+  FAIL ...and when it passes she jumps again
+  FAIL a strike in the last 150 ms of the wind-up CLASHES: he staggers, she takes nothing  pressed at t=null s; tossprep, lost 0
+  FAIL a strike well before the window does not: the toss lands  pressed at t=0.417 s; parries 0, lost 0
+  FAIL a brace raised as the toss lands turns it too: he staggers, she takes nothing, the counter opens  {"lost":0,"st":"tossprep","parries":0,"raised":null,"counter":false,"upAtToss":true,"tries":1}
+  ok   ...a brace held through the wind-up only blocks: no clash  {"lost":0,"st":"toss","parries":0,"raised":0.45,"counter":false,"upAtToss":true}
+  ok   the clash buys an opening of 867 ms
+  ok   the first toss teaches the parry, once (a hint line, in her language)  {"st":"tossprep","said":true,"told":true}
+  FAIL the big horn LEAVES the head (a missile in the air, the socket empty)
+  ok   it homes, then LOCKS ~0.35 s after launch (the cyan flash)  350 ms
+  ok   ...and after the lock it flies STRAIGHT (dodging works)  heading drift 0.0000 rad
+  ok   hornless, a strike on the HEAD deals more than one on his flank  head 14 vs flank 10
+  FAIL the horn flies home and SEATS (harmless on its way back)  returned false, hurt false
+  FAIL the hornless opening lasts ~2.5 s  0 ms
+  ok   at 0 HP in phase one he crashes to his knees (not dead, not a fork)  kneel hp 1
+  ok   ...and she is held for the beat
+  ok   ...the beat cannot be cheesed: a hit in it changes nothing  {"h0":1,"h1":1,"st":"kneel"}
+  FAIL he speaks into the change (the phase-two line)
+  FAIL ...the armour goes, the second horn lights: PHASE TWO, HP refilled, her controls back  not reached
+  FAIL phase two fires BOTH horns  []
+  FAIL ...staggered: the gap between them is the dodge (~0.45 s)
+  FAIL ...and the hornless opening is LONGER with both away  0 ms
+  ok   phase two: standing behind him draws the REAR KICK  {"kickprep":150}
+  ok   ...never from in front  {"tossprep":130,"hornprep":20}
+  ok   ...and never in phase one (he turns instead — that turn is the opening)  {"turn":150}
+  FAIL the kick connects behind: a core, and she is driven away  lost 0, at 950
+  ok   phase two charges ~1.3x faster  830 px/s (phase one 640)
+  FAIL ...chained: the wall turns him and he charges back once  chargewarn > rush
+  FAIL ...the second wind-up visibly differs (longer, a third scrape)  833 ms
+  FAIL ...and only the last leg ends in the opening
+  ok   a death mid-fight is a death (no special case)
+  ok   ...and walking back in, he is there again, full, phase one, asleep  {"from":"CV3","kind":"horn","st":"dorm","phase":1,"full":true,"flag":false}
+  FAIL ...and the second meeting is the short one (one line)
+page.evaluate: TypeError: Cannot read properties of null (reading 'missiles')
+    at Object.arena (eval at evaluate (:311:30), <anonymous>:19:16)
+    at eval (eval at evaluate (:311:30), <anonymous>:1:11)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/gravehorn.cjs:575:16 {
+  log: []
+}
+
+   (gravehorn: 273.9 s)
+
+1 harness(es) failed

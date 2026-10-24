@@ -1,0 +1,52 @@
+
+── roomcache  — a doorway costs a frame: rooms baked ahead, never rebaked on a revisit, the save off the crossing
+FAILED: ── roomcache — a doorway costs a frame, not a room
+
+  ok   the staged cache walk is not intercepted by story panels  post-guardian fixture includes its earlier lion meeting
+  ..   A1 R -> A2: first crossing 19 ms, 0 bake on the frame (warm-up, not judged)
+  ok   A2 L -> A1: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A2 L -> A1: ...and the crossing frame is a frame  16 ms (budget 90 ms, a median frame here is 17)
+  ok   A1 R -> A2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A1 R -> A2: ...and the crossing frame is a frame  6 ms (budget 90 ms, a median frame here is 17)
+  ok   A2 R -> A3: the room is already baked when she gets there  one door ahead (ready after 32 frames at the door), 0 bake on the crossing frame
+  ok   A2 R -> A3: ...and the crossing frame is a frame  15 ms (budget 90 ms, a median frame here is 17)
+  ok   A3 L -> A2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A3 L -> A2: ...and the crossing frame is a frame  6 ms (budget 90 ms, a median frame here is 17)
+  ok   A2 R -> A3: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A2 R -> A3: ...and the crossing frame is a frame  19 ms (budget 90 ms, a median frame here is 17)
+  ok   B2 T -> B7: the room is already baked when she gets there  one door ahead (ready after 31 frames at the door), 0 bake on the crossing frame
+  FAIL B2 T -> B7: ...and the crossing frame is a frame  159 ms (budget 90 ms, a median frame here is 17)
+  ok   B7 B -> B2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   B7 B -> B2: ...and the crossing frame is a frame  14 ms (budget 90 ms, a median frame here is 17)
+  ok   B2 T -> B7: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  FAIL B2 T -> B7: ...and the crossing frame is a frame  171 ms (budget 90 ms, a median frame here is 17)
+  ok   B7 B -> B2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   B7 B -> B2: ...and the crossing frame is a frame  5 ms (budget 90 ms, a median frame here is 17)
+  FAIL baking ahead never takes a frame hostage  longest frame while baking ahead 3008 ms (median 17)
+  ok   A3: baked ahead in slices = baked live  21 slices, identical
+  ok   B3: baked ahead in slices = baked live  15 slices, identical
+  ok   A12: baked ahead in slices = baked live  18 slices, identical
+  ok   D2: baked ahead in slices = baked live  21 slices, identical
+  ok   a cached room is not baked again on the way back  0 bakes
+  ok   ...a tile she breaks repaints the floor at once  1 bake when the hatch was cut
+  ok   ...and the floor she comes back to is the cut one, not rebaked again  0 bakes on the way back in, cut in the cached bake
+  ok   the cache stays inside the device budget  at most 4 rooms / 28.2 MB (cap 4 / 40 MB)
+  ok   ...and the phone tier holds fewer  low tier at most 3 rooms (cap 3)
+  ok   the save is not written on the crossing frame  0 writes inside loadRoom
+  ok   ...it is written in the next quiet moment  1 write(s) after 796 ms
+  ok   ...and at once when the page is hidden  1 write on pagehide, A2 recorded
+  ..   {"bakes":85,"live":46,"pre":39,"hits":23,"misses":43,"evicted":90,"sliceMax":2773.199999999255,"lastMs":431,"stepMax":2762.199999999255,"stepPass":"curve@A3","pass":"gamma"}
+  ok   a sheet readied in slices is the sheet drawn on demand  193 slices for the roster and the npcs sheet, identical
+  ok   the creatures one door away are readied before she gets there  ready after 78 frames at the door
+  ok   ...and meeting them costs the crossing frame no sheet processing  0.1 ms in the sheet passes on the crossing frame, 3 machines there, frame 39 ms
+  ..   {"units":16,"sliceMax":231.90000000037253,"stepMax":231.90000000037253,"stepKey":"sheet:roster"}
+  ok   no page errors
+
+FAILED
+  B2 T -> B7: ...and the crossing frame is a frame — 159 ms (budget 90 ms, a median frame here is 17)
+  B2 T -> B7: ...and the crossing frame is a frame — 171 ms (budget 90 ms, a median frame here is 17)
+  baking ahead never takes a frame hostage — longest frame while baking ahead 3008 ms (median 17)
+Command failed: node /workspace/scratch/b4e9aa23d77e/repo/tests/roomcache.cjs
+   (roomcache: 167.1 s)
+
+1 harness(es) failed

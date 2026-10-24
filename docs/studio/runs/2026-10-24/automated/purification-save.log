@@ -1,0 +1,20 @@
+
+── purification-save  — interrupted guardian film preserves atomic choice and completion; legacy retry does not duplicate
+page.evaluate: TypeError: Cannot read properties of undefined (reading 'led')
+    at eval (eval at evaluate (:311:30), <anonymous>:1:24)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/purification-save.cjs:9:26 {
+  log: []
+}
+FAILED: page.evaluate: TypeError: Cannot read properties of undefined (reading 'led')
+    at eval (eval at evaluate (:311:30), <anonymous>:1:24)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/purification-save.cjs:9:26 {
+  log: []
+}
+
+   (purification-save: 2.2 s)
+
+1 harness(es) failed

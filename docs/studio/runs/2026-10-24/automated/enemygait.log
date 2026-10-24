@@ -1,0 +1,39 @@
+
+── enemygait  — machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground
+FAILED: ── enemygait — grounded, no moonwalk, the same flight at any frame rate, a gait clocked by the floor
+  ok   every kind is born with a grounded flag  12 kinds
+  ok   the walkers ran in real rooms  A1:2 A2:3 A6:1 B2:3 C2:3 CV2:3 D2:3 E1:2
+  ok   every walker carries `on`, every frame
+  ok   ...and it is true while they walk the floor  12909 grounded frames
+  ok   no walker skips down a curve (one/two-frame losses of ground that is there)  6 in 23756 walker-frames · A1 0, A2 0, A6 0, B2 2, C2 0, CV2 2, D2 2, E1 0
+  ok   they turned round, plenty  55 picture turns, 0 braking frames against the facing
+  ok   NO MOONWALK: outside a brake, vx never runs against the facing  0 frames
+  ok   the TAMED pack mills about without moonwalking  1 wolves, 7 turns, 0 frames against the facing
+  ok   the airborne hopper is a wolf in zone A (the case that ran walk frames mid-air)
+  ok   ...it left the ground  112 airborne frames
+  ok   ...and wears the airborne plate, never a walk frame, in the air  112 lunge / 0 walk of 112
+  ok   ...and lands into its own recovery pose  80 of 80 landing frames
+  ok   rounds: the flier at 30 fps flies the 60 fps path (within 4 px)  worst 2.3 px at 8.00 s
+  ok   rounds: the flier at 120 fps flies the 60 fps path (within 4 px)  worst 1.3 px at 8.00 s
+  ok   rounds: ...and it actually went somewhere  122 px from where it started
+       states rounds: 30→perch  60→perch  120→perch
+  ok   hunt: the flier at 30 fps flies the 60 fps path (within 4 px)  worst 0.2 px at 3.00 s
+  ok   hunt: the flier at 120 fps flies the 60 fps path (within 4 px)  worst 0.3 px at 2.75 s
+  ok   hunt: ...and it actually went somewhere  152 px from where it started
+       states hunt: 30→hold+dive+rise  60→hold+dive+rise  120→hold+dive+rise
+  ok   its rounds include a PERCH, not a sine drift  perch
+  ok   the hunt runs the whole cycle at every rate: tell, dive, climb out
+  ok   it faces where it is going  11 of 11 travelling samples
+  ok   guard: the drawing is there to measure  1163 px
+  FAIL guard: the same floor covered at a different clock time is the SAME picture  39 px differ
+  ok   guard: ...and more floor covered at the same clock time is a different picture  284 px differ
+  ok   a walker standing still does not bob on the clock  0 px differ over 2.4 s
+  ok   one authored angle at a time: two facings inside the same angle draw identically (no blend)  between 0 px, vs profile 1066 px
+  ok   the gait banks the floor it covered, nothing else  moved 100.3 px, banked 100.3
+
+FAILED:
+  guard: the same floor covered at a different clock time is the SAME picture — 39 px differ
+Command failed: node /workspace/scratch/b4e9aa23d77e/repo/tests/enemygait.cjs
+   (enemygait: 6.7 s)
+
+1 harness(es) failed

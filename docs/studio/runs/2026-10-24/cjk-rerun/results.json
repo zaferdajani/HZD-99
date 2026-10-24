@@ -1,0 +1,78 @@
+{
+  "started_utc": "2026-10-24T10:12:57.293699+00:00",
+  "base_commit": "40bd9dc370c76d54b896c59b2b69e08bc9bbcf75",
+  "dirty_at_start": "M tests/campaign-ch1.cjs\n?? docs/studio/runs/2026-10-24/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.467843,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "94ec86705491aeddd54146b53d579108cbabeffc74e7e829cc9ad7a6ffe2d9bb",
+      "bytes": 150,
+      "content_base64": "aW5kZXguaHRtbCBidWlsdCAocm9ibyk6IDQuNzFNQgpvZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8pOiAzLjQ4TUIKZm9yZ2UuaHRtbCBidWlsdCAocm9ibytmb3JnZSk6IDQuNzNNQgpmb3JnZS1vZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8rZm9yZ2UpOiAzLjUwTUIK"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "textreveal",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.720231,
+      "timeout_seconds": 480,
+      "log": "textreveal.log",
+      "sha256": "2bf46a67c96f8ed4faee465b5f378e2531c70f42bd33bf0d9aa55067d9ad3fac",
+      "bytes": 3826,
+      "content_base64": "CuKUgOKUgCB0ZXh0cmV2ZWFsICDigJQgd29yZHMgdHlwZWQgYXQgYSByZWFkaW5nIHBhY2UsIHBhZ2VkLCByZWFkIGJlZm9yZSB0aGV5IHR1cm4sIG9uZSBvdmVybGF5IGF0IGEgdGltZQrilIDilIAgdGV4dHJldmVhbCDigJQgd29yZHMgYXQgYSByZWFkaW5nIHBhY2UsIHBhZ2VzLCBvbmUgb3ZlcmxheSBhdCBhIHRpbWUKCiAgb2sgICAxLiB0aGUgcGFnZSB0eXBlcyBvdXQgb3ZlciB0aW1lICAxMiAtPiAyNSBvZiAyNTMKICBvayAgIDIuIHRoZSBmaXJzdCBwcmVzcyByZXZlYWxzIHRoZSB3aG9sZSBwYWdlLi4uICB7ImRvbmUiOnRydWUsInBnIjowLCJpIjowLCJsZW4iOjI1MywicGcwIjoyNTN9CiAgb2sgICAuLi5hbmQgZG9lcyBub3QgdHVybiBpdAogIG9rICAgLi4uYSBzZWNvbmQsIHNlcGFyYXRlIHByZXNzIHR1cm5zIGl0ICB7InBnIjoxLCJpIjowLCJzdGF0ZSI6IkRJQUxPRyJ9CiAgb2sgICAzLiBhdHRhY2sgbWFzaGVkIGV2ZXJ5IGZyYW1lIGZvciAzIHMgdHVybnMgbm90aGluZyAgeyJwZyI6MCwiaSI6MCwiZG9uZSI6dHJ1ZX0KICBvayAgIC4uLm1hc2hlZCBldmVyeSAxMDAgbXMgZm9yIDMgcyB0dXJucyBub3RoaW5nICB7InBnIjowLCJpIjowfQogIG9rICAgLi4uaGVsZCBmb3IgMyBzIHR1cm5zIG5vdGhpbmcgIHsicGciOjAsImkiOjB9CiAgb2sgICAuLi5hIGRlbGliZXJhdGUgcHJlc3MgYWZ0ZXIgYSBwYXVzZSBkb2VzICB7InBnIjoxLCJpIjowfQogIG9rICAgLi4uYSBzd2luZyBsYW5kaW5nIGFzIHRoZSBib3ggb3BlbnMgaXMgZWF0ZW4gYnkgdGhlIGdyYWNlICB7ImkiOjB9CiAgb2sgICA0LiBhIGxvbmcgc3BlZWNoIGlzIGN1dCBpbnRvIHBhZ2VzICAyIHBhZ2VzCiAgb2sgICAuLi5vZiBhdCBtb3N0IGZvdXIgbGluZXMsIG5vbmUgYSBsb25lIHN0cmF5IGxpbmUgIDMuLjQKICBvayAgIC4uLmV2ZXJ5IGxpbmUgaW5zaWRlIHRoZSBib3ggIDU0MSA8PSA1NDgKICBvayAgIC4uLndpdGggbm90aGluZyBsb3N0IGJldHdlZW4gcGFnZXMKICBvayAgIC4uLmFuZCByZWFkIHRocm91Z2ggdG8gdGhlIGVuZCBpdCBjbG9zZXMgIDQgcHJlc3NlcwogIG9rICAgbG9uZyB0b2tlbnMgYWZ0ZXIgb3JkaW5hcnkgdGV4dCBmaXQgYW5kIHJldGFpbiBldmVyeSBjaGFyYWN0ZXIKICBvayAgIDUuIENoaW5lc2Ugd3JhcHMgaW5zaWRlIHRoZSBib3ggIDMgbGluZXMsIHdpZGVzdCA1NDQKICBvayAgIC4uLmFuZCBubyBsaW5lIHN0YXJ0cyB3aXRoIGNsb3NpbmcgcHVuY3R1YXRpb24KICBvayAgIDYuIEFyYWJpYyBpcyB0eXBlZCB3aG9sZSB3b3JkcyBhdCBhIHRpbWUKICBvayAgIC4uLmRyYXduIHJpZ2h0LWFsaWduZWQgYXQgdGhlIGNvbHVtbidzIHJpZ2h0IGVkZ2UsIHJpZ2h0IHRvIGxlZnQgIHsibiI6MywiYWxpZ25zIjpbInJpZ2h0Il0sInhzIjpbNzI0XX0KICBvayAgIDcuIGEgY2FyZCByYWlzZWQgbWlkLWNvbnZlcnNhdGlvbiB3YWl0czogdGhlIGNvbnZlcnNhdGlvbiBzdGF5cyAgeyJzdGlsbENvbnYiOnRydWUsInF1ZXVlZCI6MSwiY2FyZFJldHVybmVkIjp0cnVlLCJvcmRlciI6ImNvbnYsY2FyZCIsInRvZ2V0aGVyIjpmYWxzZSwiZW5kIjoiUExBWSIsImFzc2lnbktlcHQiOnRydWUsInNob3BDYXJkIjp7InN0YXRlIjoiRElBTE9HIiwicmV0IjoiU0hPUCJ9LCJzaG9wQmFjayI6IlNIT1AifQogIG9rICAgLi4uYm90aCBhcHBlYXIsIGluIG9yZGVyICBjb252LGNhcmQKICBvayAgIC4uLm5ldmVyIHRvZ2V0aGVyCiAgb2sgICAuLi5hIGRpYWxvZ3VlIGFzc2lnbmVkIG92ZXIgYW4gb3BlbiBvbmUgd2FpdHMgaXRzIHR1cm4KICBvayAgIC4uLmEgY2FyZCBib3VnaHQgaW4gdGhlIHNob3AgaGFuZHMgYmFjayB0byB0aGUgc2hvcCAgeyJzdGF0ZSI6IkRJQUxPRyIsInJldCI6IlNIT1AifSAtPiBTSE9QCiAgb2sgICA4LiBJbnN0YW50IHNob3dzIHRoZSBwYWdlIGF0IG9uY2UKICBvayAgIC4uLlJlZHVjZWQgbW90aW9uIGRvZXMgdG9vLCB3aGF0ZXZlciB0aGUgc3BlZWQKICBvayAgIC4uLmFuZCBTbG93IGRvZXMgbm90CiAgb2sgICA5LiBhIHN0b3J5IGxpbmUgaXMgYSBjYXJkLCBub3QgYSB0b2FzdCAgeyJzdGF0ZSI6IkRJQUxPRyIsIm5vdGUiOnRydWUsInRvYXN0cyI6MCwiYWZ0ZXI2MCI6dHJ1ZSwiY2xvc2VkIjoiUExBWSJ9CiAgb2sgICAuLi5zdGlsbCB0aGVyZSBhZnRlciBzaXh0eSBzZWNvbmRzIHVudG91Y2hlZAogIG9rICAgLi4uYW5kIGNsb3NlcyB3aGVuIHJlYWQKICBvayAgIC4uLmEgbG9ja2VkIGRvb3IncyBpbnN0cnVjdGlvbiBpcyBhIGNhcmQgdGhlIGZpcnN0IHRpbWUKICBvayAgIC4uLmFuZCBhIHJlbWluZGVyIGFmdGVyIGl0IHdhcyBhY2tub3dsZWRnZWQgIHsic3RhdGUiOiJQTEFZIiwidG9hc3QiOnRydWUsImFja2VkIjp0cnVlfQogIG9rICAgLi4uYSBsb25nIHRvYXN0IGxpdmVzIGxvbmcgZW5vdWdoIHRvIHJlYWQgIDI0LjkgcwogIG9rICAgLi4uYSBzY2VuZSdzIG5hcnJhdGlvbiBpcyBhIGNhcHRpb24gdGhhdCBsZWF2ZXMgaGVyIHRoZSBjb250cm9scyAgeyJzdGF0ZSI6IlBMQVkiLCJjYXAiOnRydWUsInRvYXN0cyI6MCwidHlwaW5nIjp0cnVlLCJhdDQiOnRydWUsInN0YWNrZWQiOnRydWUsImdvbmUiOnRydWV9CiAgb2sgICAuLi50eXBlZCBvdXQgZmlyc3QgKHRoZSBzY2VuZSB3YWl0cyBvbiB0aGF0KQogIG9rICAgLi4udGhlbiBoZWxkIG9uIHNjcmVlbiB1bnRpbCByZWFkCiAgb2sgICAuLi5hIHNlY29uZCBsaW5lIHN0YWNrcyB1bmRlciBpdCByYXRoZXIgdGhhbiByZXBsYWNpbmcgaXQKICBvayAgIC4uLnRoZW4gaXQgZ29lcwogIG9rICAgMTAuIGEgc2hvcCByZWZ1c2FsIGlzIHNhaWQgaW5zaWRlIHRoZSBzaG9wICB7Im1zZyI6Ik5vdCBlbm91Z2ggc2NyYXAiLCJkcmF3biI6dHJ1ZX0KICBvayAgIDExLiB0aGUgd29ybGQgaXMgZnJvemVuIHVuZGVyIGEgc3RvcnkgY2FyZCAgeyJzdGF0ZSI6IkRJQUxPRyIsInBsYXllciI6dHJ1ZSwiZm9lIjp0cnVlLCJ0aW1lIjp0cnVlfQogIG9rICAgMTIuIHBhdXNlIGNhcnJpZXMgVGV4dCBzcGVlZCBhbmQgUmVkdWNlZCBtb3Rpb24KICBvayAgIC4uLmFuZCB3aXRoIGEgcGhvbmUncyByb3dzIHRoZSBtZW51IGtlZXBzIGEgcmVhZGFibGUgcGl0Y2ggIDE3IHJvd3MgYXQgMjkgcHgKICBvayAgIC4uLlJJR0hUIGFuZCBPSyBjeWNsZSB0aGUgc3BlZWQgYW5kIHRoZSByb3cgc3RheXMgb3BlbiAgeyJ0c3BkIjp0cnVlLCJybW90Ijp0cnVlLCJwaXRjaCI6MjksInJvd3MiOjE3LCJhZnRlclJpZ2h0IjoiZmFzdCIsImFmdGVyT2siOiJpbnN0YW50Iiwic3RpbGxQYXVzZSI6dHJ1ZSwicm1Ub2dnbGVkIjp0cnVlLCJwZXJzaXN0ZWQiOnRydWV9CiAgb2sgICAuLi5SZWR1Y2VkIG1vdGlvbiB0b2dnbGVzCiAgb2sgICAuLi5hbmQgYm90aCBwZXJzaXN0IGluIHRoZSBzYXZlCiAgb2sgICAxMy4gdGhlIGhlbGQgc3RpbGwgd2FpdHMgdHdlbnR5IHNlY29uZHMgZm9yIGl0cyByZWFkZXIgIHsiaSI6MCwic3RhdGUiOiJDSU5FIiwiZG9uZSI6dHJ1ZSwiZmlyc3RQcmVzcyI6eyJpIjowLCJkb25lIjp0cnVlfSwic2Vjb25kUHJlc3MiOjF9CiAgb2sgICAuLi50aGUgZmlyc3QgcHJlc3MgZmluaXNoZXMgdGhlIGNhcHRpb24gd2l0aG91dCB0dXJuaW5nIHRoZSBzaG90ICB7ImkiOjAsImRvbmUiOnRydWV9CiAgb2sgICAuLi50aGUgbmV4dCBwcmVzcyB0dXJucyBpdCAgMQogIG9rICAgbm8gcGFnZSBlcnJvcnMgIAoKT0sg4oCUIGV2ZXJ5IHBhZ2UgaXMgdHlwZWQsIHJlYWQgYW5kIHR1cm5lZCBvbiBwdXJwb3NlLCBhbmQgbm90aGluZyB0YWtlcyB0aGUgc2NyZWVuIG92ZXIgYW55dGhpbmcgZWxzZQogICAodGV4dHJldmVhbDogMS40IHMpCgphbGwgMSBoYXJuZXNzZXMgcmFuCg=="
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+  "complete_requested_scope": true,
+  "log_integrity": {
+    "ok": true,
+    "files": [
+      {
+        "log": "build.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "textreveal.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      }
+    ]
+  },
+  "passed": true,
+  "finished_utc": "2026-10-24T10:13:00.005652+00:00"
+}

@@ -1,0 +1,78 @@
+{
+  "started_utc": "2026-10-24T10:12:57.296748+00:00",
+  "base_commit": "40bd9dc370c76d54b896c59b2b69e08bc9bbcf75",
+  "dirty_at_start": "M tests/campaign-ch1.cjs\n?? docs/studio/runs/2026-10-24/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.467523,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "3c4d8d01c7037bc8a453ea7313b36859d7f6f1d5a076b2df5bd63df7914d5c51",
+      "bytes": 150,
+      "content_base64": "aW5kZXguaHRtbCBidWlsdCAocm9ibyk6IDQuNzFNQgpvZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8pOiAwLjAwTUIKZm9yZ2UuaHRtbCBidWlsdCAocm9ibytmb3JnZSk6IDQuNzNNQgpmb3JnZS1vZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8rZm9yZ2UpOiAzLjUwTUIK"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "bake3d",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.527548,
+      "timeout_seconds": 480,
+      "log": "bake3d.log",
+      "sha256": "a6522765c48f624e68b04a5430f1b65970b2d01522bb7139989044c0afd5ea37",
+      "bytes": 1783,
+      "content_base64": "CuKUgOKUgCBiYWtlM2QgIOKAlCBhbnkgYXV0aG9yZWQgR0xCIGJha2VzIHRvIGEgdHVybmFyb3VuZCB0aGUgYXRsYXMgY2FuIHdlYXI6IGdyb3VuZGVkLCByb3RhdGluZywgc2lsaG91ZXR0ZXMgYXBhcnQKL3RtcC9iYWtlM2QtbHVmN1VXL2ZpeHR1cmVfOHlhdy5wbmcgIDggeCAxIEAgMjU2cHggIDEyIEtCCgp3aXJpbmcgKHRoZSBpbnRlZ3JhdG9yIGFkZHMsIHBlciBBUlRfQklCTEUgwqc0KToKICAxLiBhZGQgdGhlIHJvdyB0byB0aGUgcm9zdGVyIHNoZWV0LCBvciByZWdpc3RlciB0aGUgc2hlZXQgaW4ganMvbWVkaWEuanMgYW5kIGRlY2xhcmUgaXQgaW4gQVRMQVMgd2l0aCBzdWI6IHsgZml4dHVyZTogeyByb3c6IDAsIGs6IDxoaXRib3gtaGVpZ2h0cz4sIHlPZmY6IDAgfSB9CiAgMi4gbm9kZSB0b29scy9pbWctY3J1c2guY2pzIG9uIHRoZSBzb3VyY2UgY29weTsgbm9kZSB0b29scy9sb3dyZXMuY2pzICYmIG5vZGUgYnVpbGQuY2pzCiAgMy4gbm9kZSB0ZXN0cy9ydW4uY2pzIGFydGJpYmxlIGxvd3JlcyDigJQgZGVjbGFyZWQgYXJ0IG11c3QgYmUgZHJhd24sIGFuZCBzbGljZWQtYnktcGl4ZWwgc2hlZXRzIGdldCBubyBzbWFsbCBjb3B5Ci90bXAvYmFrZTNkLWx1ZjdVVy9maXh0dXJlX2JvYl9hbmRfdHJhdmVsXzYucG5nICA2IGNlbGxzIEAgMTkycHggICBjbGlwICJib2JfYW5kX3RyYXZlbCIgMS4wMHMsIDEgdHJhY2tzLCAxIG5vZGUocykgcGlubmVkIGFnYWluc3Qgcm9vdCBtb3Rpb24sIHlhdyAzMMKwCi90bXAvYmFrZTNkLWx1ZjdVVy9maXh0dXJlX2JvYl9hbmRfdHJhdmVsXzEyZnBzLndlYm0gIGRyaXZpbmcgdmlkZW8gZm9yIG1vdGlvbiBjb250cm9sCgpuZXh0OiB0aGUgYXJ0IHNlc3Npb24gZmlyZXMgbW90aW9uIGNvbnRyb2wgd2l0aCBoZXIgY2Fub24gcGxhdGUgb3ZlciB0aGUgZHJpdmluZyB2aWRlbywKICAgICAgdGhlbiB0b29scy92aWRzdHJpcC5janMgYXV0bzpOIGN1dHMgdGhlIHRha2UgYW5kIHRvb2xzL3N3aW5nay5janMgbWVhc3VyZXMgay4KICBvayAgYWxsIDggeWF3IGNlbGxzIHBvcHVsYXRlZCAgWzE5NDQ1IDIwMDkxIDg5ODcgMjAwODUgMTk0NDUgMjAwODUgODk4NyAyMDA5MV0KICBvayAgZmVldCBvbiBvbmUgcm93IGluIGV2ZXJ5IGNlbGwgIFsyNDggMjQ4IDI0OCAyNDggMjQ4IDI0OCAyNDggMjQ4XQogIG9rICBwcm9maWxlIHZzIGZyb250IGlzIGEgZGlmZmVyZW50IHNpbGhvdWV0dGUgIElvVSAwLjI3OCA8PSAwLjg2CiAgb2sgIGNvbCAwIHZzIGNvbCA0IGlzIGEgcm90YXRpb24sIG5vdCBhIG1pcnJvciAgSW9VIDAuNzI4CiAgb2sgIGNsaXA6IGFsbCA2IGNlbGxzIHBvcHVsYXRlZCAgWzEyMDE3IDEyMDE2IDEyMDE3IDExOTU5IDEyMDE3IDEyMDE2XQogIG9rICBjbGlwOiByb290IG1vdGlvbiBzdHJpcHBlZCDigJQgaG9yaXpvbnRhbCBjZW50cmUgaG9sZHMgIHNwcmVhZCAwLjIgcHggIFsxMDguNSAxMDguNSAxMDguNSAxMDguMyAxMDguNSAxMDguNV0KICBvayAgY2xpcDogdGhlIHZlcnRpY2FsIGJvYiBpcyBrZXB0IOKAlCB0aGUgZmVldCBtb3ZlICBzcHJlYWQgMjYgcHggIFsxODYgMTc3IDE2OSAxNjAgMTY5IDE3N10KICBvayAgY2xpcDogY2VsbCAwIHZzIGNlbGwgMyBpcyBhIGRpZmZlcmVudCBwaWN0dXJlICBJb1UgMC40NzMKICBvayAgY2xpcDogYSBkcml2aW5nIHZpZGVvIHdhcyB3cml0dGVuCmJha2UzZDogYSBtZXNoIGdvZXMgaW4sIGEgZ2FtZS1sZWdhbCB0dXJuYXJvdW5kIGNvbWVzIG91dCwgbWVhc3VyZWQKICAgKGJha2UzZDogMy4yIHMpCgphbGwgMSBoYXJuZXNzZXMgcmFuCg=="
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+  "complete_requested_scope": true,
+  "log_integrity": {
+    "ok": true,
+    "files": [
+      {
+        "log": "build.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "bake3d.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      }
+    ]
+  },
+  "passed": true,
+  "finished_utc": "2026-10-24T10:13:01.807905+00:00"
+}

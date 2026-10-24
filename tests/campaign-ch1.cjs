@@ -594,7 +594,14 @@ async function followChip(s) {
 // ---------------- moving with the planner ----------------
 let flight = null;       // the jump in the air: { prog, t0 }
 let stall = { k: -1, since: 0, best: Infinity };
+let lastPlan = null;
 let combatWatch = null;
+function resetNavigation(reason) {
+  model = null; modelKey = ''; info = null;
+  curGoalKey = ''; curD = null; flight = null; lastPlan = null;
+  stall = { k: -1, since: Date.now(), best: Infinity };
+  if (reason) log('PLAN reset (' + reason + ')');
+}
 async function ensureModel() {
   const sig = await page.evaluate(() => G.roomId + '|' + Object.keys(G.save.broken || {}).length + '|' + (G.grid && G.grid.length));
   if (sig === modelKey && model) return;
@@ -676,6 +683,9 @@ async function walkTo(s, goal) {
     if (c < bc) { bc = c; best = e; }
   }
   if (!best || !isFinite(bc)) return 'stuck';
+  lastPlan = { room: s.room, cur, to: best.to, exit: best.exit || null,
+    walk: best.walk || 0, dir: best.prog ? best.prog.dir : 0,
+    program: best.prog ? { hold: best.prog.hold, d0: best.prog.d0, d1: best.prog.d1, vx0: best.prog.vx0 || 0 } : null };
   if (DEBUG && Date.now() - (R.dbgT || 0) > 1500) { R.dbgT = Date.now(); log("  at " + JSON.stringify(model.nodes[cur]) + " D=" + curD[cur].toFixed(2) + " next " + (best.walk ? "walk " + best.walk : (best.exit || JSON.stringify(model.nodes[best.to])) + " " + JSON.stringify(best.prog)) + " x=" + Math.round(p.x) + " y=" + Math.round(p.y)); }
   if (best.walk) {
     // follow the walk chain to where the next jump (or the goal) is, and slow
@@ -803,9 +813,19 @@ async function unstick(s, what) {
   log('STUCK trying to reach ' + what + ' in ' + s.room + ' at x=' + Math.round(s.p.x) + ',y=' + Math.round(s.p.y));
   R.stuck = (R.stuck || 0) + 1;
   await frame('stuck-' + s.room);
+  // Recovery remains ordinary input.  The old fallback tapped jump, released
+  // it, and only then chose a random horizontal key.  On a suspended ledge
+  // that can never perform the moving jump a player would use.  Preserve the
+  // planned direction (or the named exit) and press direction+jump together.
+  const named = /exit R\b/.test(what) ? 1 : /exit L\b/.test(what) ? -1 : 0;
+  // A path to the right can still begin with a leftward setup jump.  The
+  // planned edge is therefore authoritative; the exit name is only fallback.
+  const dir = (lastPlan && (lastPlan.dir || lastPlan.walk)) || named || s.p.face || 1;
+  log('PLAN recovery ' + JSON.stringify({ what, dir, edge: lastPlan }));
   await hold([]);
-  await tap('Space', 300);
-  await hold([Math.random() < 0.5 ? 'ArrowLeft' : 'ArrowRight']); await sleep(400); await hold([]);
+  await hold([dir < 0 ? 'ArrowLeft' : 'ArrowRight', 'Space']); await sleep(320);
+  await hold([dir < 0 ? 'ArrowLeft' : 'ArrowRight']); await sleep(420); await hold([]);
+  resetNavigation('recovery input');
 }
 async function goRoom(s, target) {
   if (s.room === target) return true;
@@ -1370,7 +1390,8 @@ else (async () => {
     S = s;
     // Room transitions deliberately clear game input: release the driver's
     // physical held keys too so the next movement is a fresh keydown.
-    if(prevS && prevS.room !== s.room) await hold([]);
+    if(prevS && prevS.room !== s.room) { await hold([]); resetNavigation('room ' + prevS.room + ' -> ' + s.room); }
+    if(prevS && s.deaths > prevS.deaths) resetNavigation('death ' + prevS.deaths + ' -> ' + s.deaths);
     // the map changes as the story does (doors are built by flags): re-read it per room
     if (s.room && s.room !== lastRoom) { try { G_GRAPH = await worldGraph(); } catch (e) { } }
     diffLog(s);

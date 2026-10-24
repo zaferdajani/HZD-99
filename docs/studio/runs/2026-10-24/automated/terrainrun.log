@@ -1,0 +1,8 @@
+
+── terrainrun  — irregularity is not elevation: she runs it, and so do they
+FAILED: ── terrainrun — irregularity is not elevation
+
+spawnSync node ETIMEDOUT
+   (terrainrun: 300.1 s)
+
+1 harness(es) failed

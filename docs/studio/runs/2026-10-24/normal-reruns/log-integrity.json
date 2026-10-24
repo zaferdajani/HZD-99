@@ -1,0 +1,65 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "purification-save.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat-impact-input.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "wake.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "textreveal.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "bosspace.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gravehorn.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "terrainrun.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "enemygait.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-poses.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "roomcache.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "opening-order.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}

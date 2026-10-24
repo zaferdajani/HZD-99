@@ -1,0 +1,382 @@
+[00:00] BOOT continuing from the game's own pod save docs/studio/runs/2026-10-24/campaign/save-latest.json; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:00] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:00] MENU choose "continue"
+[00:01] PLAN reset (room  -> CV1B)
+[00:01] ROOM - -> CV1B  at x=634
+[00:01] STATE MENU -> PLAY
+[00:01] OBJECTIVE "Free the first sage — the door beside the marble quarry"
+[00:01] FLAG +tutI
+[00:01] FLAG +tutId
+[00:01] FLAG +gateOpened
+[00:01] FLAG +opNote
+[00:01] FLAG +ch_A0B_1
+[00:01] FLAG +on_A0B|ratchet
+[00:01] FLAG +ratchetRepaired
+[00:01] FLAG +opTold
+[00:01] FLAG +ratchetSpareGiven
+[00:01] FLAG +opPod
+[00:01] FLAG +opScrap
+[00:01] FLAG +sawScrap
+[00:01] FLAG +tutBuy
+[00:01] FLAG +heal
+[00:01] FLAG +pack
+[00:01] FLAG +winchKnock
+[00:01] FLAG +burstDone
+[00:01] FLAG +opBurst
+[00:01] FLAG +rd_n8
+[00:01] FLAG +tut
+[00:01] FLAG +mapSeen
+[00:01] FLAG +on_A1|servo
+[00:01] FLAG +sc_A1_3
+[00:01] FLAG +servoMet
+[00:01] FLAG +sc_A1_4
+[00:01] FLAG +sc_A2_4
+[00:01] FLAG +sc_A2_5
+[00:01] FLAG +nfMeet
+[00:01] FLAG +sc_A2_6
+[00:01] FLAG +taughtBreak
+[00:01] FLAG +taughtFloor
+[00:01] FLAG +pgMarks
+[00:01] FLAG +sc_A5_5
+[00:01] FLAG +rubbleA5
+[00:01] FLAG +rubbleCV1B
+[00:01] FLAG +pgSurvey
+[00:01] FLAG +sc_CV1B_4
+[00:01] FLAG +sc_CV1B_2
+[00:01] FLAG +heardHollow
+[00:01] FLAG +sc_CV2_7
+[00:01] FLAG +ghMet
+[00:01] FLAG +ghHeadTold
+[00:01] FLAG +ghParryTold
+[00:01] FLAG +parryTold
+[00:01] FLAG +bossHorn
+[00:01] FLAG +pl_cshard
+[00:01] FLAG +sc_A5_3
+[00:01] FLAG +said
+[00:01] FLAG +crystal
+[00:01] FLAG +ratchetCamp
+[00:01] FLAG +alphaLead
+[00:01] FLAG +pgBound
+[00:01] FLAG +pgBoundN
+[00:01] FLAG +taughtWall
+[00:01] FLAG +pgCv3Back
+[00:01] FLAG +sc_GA1D_2
+[00:01] SCRAP 0 -> 364
+[00:01] SAVEPOINT null -> CV1B
+[00:01] WEAPON null -> single
+[00:01]   . CV1B x=634 y=463 vx=0 on cores=7/7 volts=33 mission=undefined held= near=bench:null
+[00:02] MISSION DONE opening
+[00:03] FRAME 000-done-opening.png
+[00:03] MISSION DONE servo
+[00:04] FRAME 001-done-servo.png
+[00:04] MISSION DONE first-meeting
+[00:05] FRAME 002-done-first-meeting.png
+[00:05] MISSION DONE marble
+[00:06] FRAME 003-done-marble.png
+[00:06] MISSION DONE forge
+[00:07] FRAME 004-done-forge.png
+[00:07] MISSION sage (objective: "Free the first sage — the door beside the marble quarry")
+[00:07] PLAN room CV1B: 50 standable tiles, 588 moves (55 ms)
+[00:09] FIGHT bat (hp 54) in CV1B
+[00:10]   . CV1B x=839 y=331 vx=0 air cores=7/7 volts=33 mission=sage held=Space
+[00:14] DOOR up at 1120 -> CV2
+[00:18]   . CV1B x=1108 y=284 vx=0 on cores=7/7 volts=33 mission=sage held=
+[00:19] PLAN reset (room CV1B -> CV2)
+[00:19] ROOM CV1B -> CV2  at x=372
+[00:19] PLAN room CV2: 86 standable tiles, 1083 moves (59 ms)
+[00:24] FLAG +sc_CV2_5
+[00:24] SCRAP 364 -> 402
+[00:26]   . CV2 x=1488 y=464 vx=0 on cores=7/7 volts=33 mission=sage held=Space
+[00:34]   . CV2 x=2021 y=444 vx=0 on cores=7/7 volts=33 mission=sage held=
+[00:38] STUCK trying to reach exit R toward CV3 in CV2 at x=2021,y=444
+[00:38] FRAME 005-stuck-CV2.png
+[00:38] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":36,"exit":"R","walk":1,"dir":0,"program":null}}
+[00:39] PLAN reset (recovery input)
+[00:39] PLAN reset (room CV2 -> CV3)
+[00:39] ROOM CV2 -> CV3  at x=245
+[00:39] PLAN room CV3: 62 standable tiles, 930 moves (29 ms)
+[00:42] DOOR up at 1152 -> GA1T
+[00:42]   . CV3 x=1140 y=459 vx=0 on cores=7/7 volts=33 mission=sage held= near=rescue:null
+[00:46] PLAN reset (room CV3 -> GA1T)
+[00:46] ROOM CV3 -> GA1T  at x=628
+[00:46] PLAN room GA1T: 50 standable tiles, 539 moves (46 ms)
+[00:50]   . GA1T x=1250 y=444 vx=0 on cores=7/7 volts=33 mission=sage held=
+[00:58] STUCK trying to reach exit R toward GA1D in GA1T at x=1250,y=444
+[00:59] FRAME 006-stuck-GA1T.png
+[00:59] PLAN recovery {"what":"exit R toward GA1D","dir":1,"edge":{"room":"GA1T","cur":29,"exit":"R","walk":1,"dir":0,"program":null}}
+[01:00] PLAN reset (recovery input)
+[01:00] PLAN reset (room GA1T -> GA1D)
+[01:00] ROOM GA1T -> GA1D  at x=136
+[01:00]   . GA1D x=136 y=439 vx=0 on cores=7/7 volts=33 mission=sage held=
+[01:00] SAGE hp=233 dist=799 | cores 7/7 volts 33
+[01:00] PLAN room GA1D: 52 standable tiles, 623 moves (18 ms)
+[01:01] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[01:01] PACE sim 57.1 s per 60 s wall (pace dial / slow frames)
+[01:01] PLAN room GA1D: 52 standable tiles, 576 moves (10 ms)
+[01:03] SAGE hp=233 gather dist=121 | cores 7/7 volts 33
+[01:03] SAGE ring: jump
+[01:06] TOAST Repair ready! Stand still and hold F to restore a core.
+[01:06] HURT 7 -> 6 in GA1D (nearest bat at 27 px)
+[01:06] SAGE hp=212 exhale dist=54 | cores 6/7 volts 44
+[01:08]   . GA1D x=388 y=412 vx=0 on cores=6/7 volts=55 mission=sage held=
+[01:09] SAGE hp=191 gather dist=65 | cores 6/7 volts 55
+[01:09] SAGE ring: jump
+[01:11] SAGE ring: jump
+[01:12] SAGE hp=191 coil dist=165 | cores 6/7 volts 55
+[01:13] HURT 6 -> 5 in GA1D (nearest sage at 64 px)
+[01:15] SAGE hp=170 dist=58 | cores 5/7 volts 66
+[01:16]   . GA1D x=771 y=458 vx=340 on cores=5/7 volts=66 mission=sage held=ArrowRight
+[01:17] HURT 5 -> 4 in GA1D (nearest sage at 57 px)
+[01:18] SAGE hp=170 dist=65 | cores 4/7 volts 66
+[01:20] FLAG +sc_GA1D_4
+[01:20] HURT 4 -> 3 in GA1D (nearest sage at 224 px)
+[01:20] SCRAP 402 -> 492
+[01:21] SAGE hp=170 dist=44 | cores 3/7 volts 66
+[01:23] HURT 3 -> 2 in GA1D (nearest sage at 81 px)
+[01:23] HEAL (cores 2/7, volts 66)
+[01:25]   . GA1D x=991 y=462 vx=0 on cores=3/7 volts=33 mission=sage held=
+[01:25] HEAL (cores 3/7, volts 33)
+[01:26] SAGE hp=170 dist=59 | cores 4/7 volts 0
+[01:28] HURT 4 -> 3 in GA1D (nearest sage at 96 px)
+[01:29] HURT 3 -> 2 in GA1D (nearest sage at 25 px)
+[01:29] SAGE hp=78 exhale dist=40 | cores 2/7 volts 44
+[01:30] TOAST The sage kneels — the song holds its body together. Broken, but not CLEAN.
+[01:30] FLAG +sgLockSeen
+[01:30] HEAL (cores 2/7, volts 55)
+[01:33] SAGE hp=104.85000000000001 SONG-LOCKED purity=0.25 dist=-13 | cores 3/7 volts 22
+[01:33]   . GA1D x=1292 y=462 vx=-203 on cores=3/7 volts=22 mission=sage held=
+[01:33] cornered against the rock: over the top
+[01:36] SAGE hp=104.85000000000001 SONG-LOCKED purity=0.75 dist=73 | cores 3/7 volts 22
+[01:36] cornered against the rock: over the top
+[01:37] cornered against the rock: over the top
+[01:39] STATE PLAY -> DIALOG
+[01:39] OBJECTIVE "Silence the bell: the climb at the meadow hub's west end"
+[01:39] TOAST The Meadow Sage is rescued, not destroyed — and this cave lays down its orders. / Far above the meadow, the ward over the climb comes apart.
+[01:39] FLAG +sageTame_GA1D
+[01:39] FLAG +sageGift_GA1D
+[01:39] FLAG +chimeRevealed
+[01:39] SAY ACQUIRED: "THE MEADOW SAGE — It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light."
+[01:39] ITEMS {"batt":1}
+[01:39] SAY A SAGE, PURIFIED: "I called for the ones who had not answered. The order made me call louder."
+[01:41] SAY A SAGE, PURIFIED: "Every answer told it where another survivor was hiding."
+[01:41]   . GA1D x=1319 y=449 vx=243 on cores=3/7 volts=22 mission=sage held=
+[01:42] SAY A SAGE, PURIFIED: "NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it."
+[01:43] SAY A SAGE, PURIFIED: "Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet."
+[01:44] STATE DIALOG -> PANELS
+[01:44] MANHWA sage panel 1/6
+[01:46] MANHWA sage panel 2/6
+[01:47] MANHWA sage panel 3/6
+[01:48] MANHWA sage panel 4/6
+[01:49]   . GA1D x=1319 y=449 vx=0 on cores=3/7 volts=22 mission=sage held=
+[01:49] MANHWA sage panel 5/6
+[01:51] MANHWA sage panel 6/6
+[01:52] STATE PANELS -> PLAY
+[01:52] MISSION DONE sage
+[01:53] FRAME 007-done-sage.png
+[01:53] MISSION chime (objective: "Silence the bell: the climb at the meadow hub's west end")
+[01:53] READY: before A9 (cores 3/7, save point CV1B) — resting at the pod in A3 first
+[01:57]   . GA1D x=302 y=319 vx=-340 air cores=3/7 volts=22 mission=chime held=ArrowLeft+Space
+[02:01] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[02:01] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[02:05]   . GA1D x=3 y=444 vx=0 on cores=3/7 volts=22 mission=chime held=
+[02:07] STUCK trying to reach exit L toward GA1T in GA1D at x=3,y=444
+[02:07] FRAME 008-stuck-GA1D.png
+[02:07] PLAN recovery {"what":"exit L toward GA1T","dir":-1,"edge":{"room":"GA1D","cur":14,"exit":"L","walk":-1,"dir":0,"program":null}}
+[02:08] PLAN reset (recovery input)
+[02:08] PLAN reset (room GA1D -> GA1T)
+[02:08] ROOM GA1D -> GA1T  at x=1120
+[02:08] PLAN room GA1T: 50 standable tiles, 495 moves (29 ms)
+[02:10] DOOR up at 640 -> CV3
+[02:13]   . GA1T x=628 y=463 vx=0 on cores=3/7 volts=22 mission=chime held= near=term:6
+[02:14] PLAN reset (room GA1T -> CV3)
+[02:14] ROOM GA1T -> CV3  at x=1140
+[02:14] PLAN room CV3: 62 standable tiles, 777 moves (14 ms)
+[02:18] PLAN reset (room CV3 -> CV2)
+[02:18] ROOM CV3 -> CV2  at x=2003
+[02:19] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[02:21]   . CV2 x=1387 y=275 vx=-340 air cores=3/7 volts=22 mission=chime held=ArrowLeft+Space
+[02:23] FIGHT bat (hp 28) in CV2
+[02:27] PLAN room CV1: 74 standable tiles, 806 moves (22 ms)
+[02:28] PLAN reset (room CV2 -> CV1)
+[02:28] ROOM CV2 -> CV1  at x=1707
+[02:28] PLAN room CV1: 74 standable tiles, 806 moves (15 ms)
+[02:29]   . CV1 x=1386 y=349 vx=-340 air cores=3/7 volts=22 mission=chime held=ArrowLeft+Space
+[02:29] FLAG +sc_CV1_2
+[02:29] SCRAP 492 -> 507
+[02:35] DOOR up at 179 -> A5
+[02:37]   . CV1 x=167 y=458 vx=0 on cores=3/7 volts=22 mission=chime held=
+[02:39] PLAN reset (room CV1 -> A5)
+[02:39] ROOM CV1 -> A5  at x=1094
+[02:39] PLAN room A5: 58 standable tiles, 764 moves (15 ms)
+[02:44] FLAG +sc_A5_4
+[02:44] SCRAP 507 -> 545
+[02:44] PLAN reset (room A5 -> A2)
+[02:44] ROOM A5 -> A2  at x=438
+[02:44] PLAN room A2: 114 standable tiles, 1686 moves (57 ms)
+[02:44] FLAG +nfBreak
+[02:44] BEAT NULLFANG's break plays in A2 — watching
+[02:45] FRAME 009-nullfang-break.png
+[02:45]   . A2 x=563 y=435 vx=0 on cores=3/7 volts=22 mission=chime held=
+[02:50] STATE PLAY -> PANELS
+[02:50] MANHWA break panel 1/2
+[02:52] MANHWA break panel 2/2
+[02:53]   . A2 x=563 y=435 vx=0 on cores=3/7 volts=22 mission=chime held=
+[02:54] STATE PANELS -> PLAY
+[03:01]   . A2 x=2644 y=316 vx=200 air cores=3/7 volts=22 mission=chime held=ArrowRight+Space
+[03:02] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[03:02] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[03:02] PLAN reset (room A2 -> A3)
+[03:02] ROOM A2 -> A3  at x=21
+[03:02] PLAN room A3: 68 standable tiles, 950 moves (22 ms)
+[03:03] REST at the pod in A3 (cores 3/7, volts 22)
+[03:04] SAVEPOINT CV1B -> A3
+[03:04] HEAL (cores 3/7, volts 99)
+[03:06] TOAST Systems recharged. Progress saved.
+[03:08] PLAN reset (room A3 -> A2)
+[03:08] ROOM A3 -> A2  at x=2771
+[03:08] PLAN room A2: 114 standable tiles, 1686 moves (28 ms)
+[03:09]   . A2 x=2425 y=405 vx=0 on cores=7/7 volts=99 mission=chime held=
+[03:17] PLAN reset (room A2 -> A8)
+[03:17] ROOM A2 -> A8  at x=384
+[03:17] PLAN room A8: 92 standable tiles, 1350 moves (25 ms)
+[03:17]   . A8 x=353 y=558 vx=-100 air cores=7/7 volts=99 mission=chime held=ArrowLeft
+[03:18] FIGHT crawler (hp 26) in A8
+[03:19] FIGHT flier (hp 21) in A8
+[03:20] FLAG +sc_A8_2
+[03:20] SCRAP 545 -> 575
+[03:23] HURT 7 -> 6 in A8 (nearest flier at 42 px)
+[03:24] PLAN room A9: 51 standable tiles, 704 moves (19 ms)
+[03:24] PLAN reset (room A8 -> A9)
+[03:24] ROOM A8 -> A9  at x=376
+[03:25]   . A9 x=324 y=431 vx=0 on cores=6/7 volts=99 mission=chime held=
+[03:26] CHIME st=dorm hp=146 dx=496 dy=2 | cores 6/7 volts 99
+[03:26] PLAN room A9: 51 standable tiles, 704 moves (14 ms)
+[03:28] TOAST CHIME — it is singing at you
+[03:28] CHIME in burst range (176 px): Volt Burst
+[03:29] CHIME st=rest hp=146 dx=98 dy=-154 | cores 6/7 volts 74
+[03:30] CHIME in burst range (152 px): Volt Burst
+[03:32] HURT 6 -> 5 in A9 (nearest chime/notewarn at 25 px)
+[03:33] CHIME st=notewarn hp=62 dx=-210 dy=-47 | cores 5/7 volts 71
+[03:33]   . A9 x=883 y=424 vx=-340 on cores=5/7 volts=71 mission=chime held=ArrowLeft
+[03:34] HURT 5 -> 4 in A9 (nearest chime/notewarn at 62 px)
+[03:36] STATE PLAY -> DIALOG
+[03:36] SAY ACQUIRED: "EVOLUTION — MK-II Frame — Your chassis has grown: reinforced shoulder plating locks into place. You look tougher — because you are."
+[03:36] STATE DIALOG -> PLAY
+[03:36] CHIME st=rest hp=-18 dx=-42 dy=36 | cores 4/7 volts 99
+[03:36] SCRAP 575 -> 580
+[03:37] HEAL (cores 4/7, volts 99)
+[03:38] STATE PLAY -> DIALOG
+[03:38] OBJECTIVE "Free NULLFANG in his enclosure past the camp"
+[03:38] FLAG +bossChime
+[03:38] SAY ACQUIRED: "Power Cell — A charged cell. Seated in a switched-off machine, it wakes them."
+[03:38] SCRAP 580 -> 628
+[03:38] ITEMS {"batt":2}
+[03:39] STATE DIALOG -> PLAY
+[03:39] MISSION DONE chime
+[03:40] FRAME 010-done-chime.png
+[03:40] MISSION lion (objective: "Free NULLFANG in his enclosure past the camp")
+[03:40] READY: before A4 (cores 5/7, save point A3) — resting at the pod in A3 first
+[03:40] STATE PLAY -> PANELS
+[03:40] MANHWA chime panel 1/3
+[03:40] MANHWA chime panel 2/3
+[03:41]   . A9 x=568 y=435 vx=0 on cores=5/7 volts=66 mission=lion held=
+[03:42] MANHWA chime panel 3/3
+[03:43] STATE PANELS -> PLAY
+[03:44] SCRAP 628 -> 633
+[03:44] PLAN room A8: 92 standable tiles, 1350 moves (20 ms)
+[03:44] PLAN reset (room A9 -> A8)
+[03:44] ROOM A9 -> A8  at x=386
+[03:44] PLAN room A8: 92 standable tiles, 1350 moves (29 ms)
+[03:46] PLAN reset (room A8 -> A2)
+[03:46] ROOM A8 -> A2  at x=403
+[03:46] PLAN room A2: 114 standable tiles, 1686 moves (30 ms)
+[03:50]   . A2 x=1346 y=265 vx=340 air cores=5/7 volts=66 mission=lion held=ArrowRight+Space
+[03:55] PLAN reset (room A2 -> A3)
+[03:55] ROOM A2 -> A3  at x=16
+[03:56] PLAN room A3: 68 standable tiles, 950 moves (14 ms)
+[03:57] REST at the pod in A3 (cores 5/7, volts 66)
+[03:58]   . A3 x=260 y=433 vx=0 on cores=5/7 volts=99 mission=lion held= near=bench:null
+[03:59] TOAST Systems recharged. Progress saved.
+[04:02] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[04:02] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[04:04] PLAN room A4: 53 standable tiles, 773 moves (13 ms)
+[04:04] PLAN reset (room A3 -> A4)
+[04:04] ROOM A3 -> A4  at x=10
+[04:06]   . A4 x=10 y=436 vx=0 on cores=7/7 volts=99 mission=lion held=
+[04:06] NULLFANG st=dorm hp=247 dist=704 | cores 7/7 volts 99
+[04:06] PLAN room A4: 53 standable tiles, 773 moves (14 ms)
+[04:07] TOAST It remembers the corridor.
+[04:10] HURT 7 -> 6 in A4 (nearest glitch/idle at 97 px)
+[04:10] NULLFANG st=idle hp=224 dist=53 | cores 6/7 volts 99
+[04:12] HURT 6 -> 5 in A4 (nearest glitch/swipewarn at 114 px)
+[04:13] NULLFANG st=idle hp=124 dist=121 | cores 5/7 volts 99
+[04:14] HURT 5 -> 4 in A4 (nearest glitch/idle at 96 px)
+[04:14]   . A4 x=634 y=431 vx=-292 on cores=4/7 volts=99 mission=lion held=
+[04:16] TOAST ⚡ NULLFANG is reeling — hit it NOW
+[04:16] HURT 4 -> 3 in A4 (nearest glitch/daze at 97 px)
+[04:17] STATE PLAY -> PURIFY
+[04:22] STATE PURIFY -> CUT
+[04:22] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you.
+[04:22]   . A4 x=683 y=435 vx=0 on cores=3/7 volts=99 mission=lion held=
+[04:30]   . A4 x=683 y=435 vx=0 on cores=3/7 volts=99 mission=lion held=
+[04:34] STATE CUT -> DIALOG
+[04:34] OBJECTIVE "Climb to the Data Conduits above the camp"
+[04:34] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[04:34] FLAG +bossGlitch
+[04:34] FLAG +oath
+[04:34] SAY ACQUIRED: "Dash Jets — Press C or Shift — twin combustion jets ignite at your feet and hurl you forward." [card bootsIdle]
+[04:34] ITEMS {"batt":3}
+[04:34] SAY ACQUIRED: "Power Cell — A charged cell. Seated in a switched-off machine, it wakes them."
+[04:36] SAY ACQUIRED: "SCRAPPLATE — Shard Volley — A cone of magnetised shrapnel. Grounds anything arcing.  —  V or K fires it, G changes suit"
+[04:37] STATE DIALOG -> PLAY
+[04:37] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy. / GRAPPLE CLAW online — press U
+[04:37] FLAG +grapSeen
+[04:37] LESSON chip: dash — doing it
+[04:37] FRAME 011-lesson-dash.png
+[04:38] STATE PLAY -> DIALOG
+[04:38] SAY ACQUIRED: "NULLFANG'S OATH — Once each room, the blow that would break you is answered instead — it comes out of the dark and roars them off you."
+[04:38] SCRAP 633 -> 663
+[04:38]   . A4 x=840 y=422 vx=940 on cores=3/7 volts=99 mission=lion held=
+[04:39] STATE DIALOG -> PLAY
+[04:40] LINGER for the free panels in A4
+[04:41] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[04:43] HEAL (cores 3/7, volts 99)
+[04:44] STATE PLAY -> PANELS
+[04:44] MANHWA free panel 1/4
+[04:44] FLAG +les_dash
+[04:45] MANHWA free panel 2/4
+[04:46] MANHWA free panel 3/4
+[04:46]   . A4 x=1352 y=424 vx=0 on cores=3/7 volts=99 mission=lion held=
+[04:46] MANHWA free panel 4/4
+[04:48] STATE PANELS -> PLAY
+[04:48] MISSION DONE lion
+[04:49] FRAME 012-done-lion.png
+[04:49] MISSION teaser (objective: "Climb to the Data Conduits above the camp")
+[04:49] HEAL (cores 3/7, volts 99)
+[04:50] HEAL (cores 4/7, volts 66)
+[04:54]   . A4 x=817 y=426 vx=-52 on cores=5/7 volts=33 mission=teaser held=ArrowLeft
+[04:57] PLAN reset (room A4 -> A3)
+[04:57] ROOM A4 -> A3  at x=1604
+[04:58] PLAN room A3: 68 standable tiles, 938 moves (17 ms)
+[05:00] FLAG +ch2Climb
+[05:02] PLAN reset (room A3 -> B1)
+[05:02] ROOM A3 -> B1  at x=876
+[05:02] OBJECTIVE "null"
+[05:02] LINGER for the ch2 panels in B1
+[05:02] STATE PLAY -> PANELS
+[05:02] MANHWA ch2 panel 1/5
+[05:02] FRAMES median 17 ms -> planner step 1/60, game time 0.97x wall
+[05:02] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[05:02]   . B1 x=876 y=522 vx=0 air cores=5/7 volts=33 mission=teaser held=
+[05:03] MANHWA ch2 panel 2/5
+[05:04] MANHWA ch2 panel 3/5
+[05:06] MANHWA ch2 panel 4/5
+[05:07] MANHWA ch2 panel 5/5
+[05:09] STATE PANELS -> PLAY
+[05:09] MISSION DONE teaser
+[05:09] FRAME 013-done-teaser.png
+[05:10] FRAME 014-end.png
+[05:10] MANHWA seen: sage, break, chime, free, ch2
+[05:10] RESULT partial-diagnostic  wall 05:10  deaths 0  missions opening,servo,first-meeting,marble,forge,sage,chime,lion,teaser  stuck 3  page errors 0
