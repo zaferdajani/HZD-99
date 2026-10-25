@@ -1,0 +1,1201 @@
+[00:02] BOOT cleared browser storage; difficulty row 0; video off
+[00:02] ROOM - -> 
+[00:02] STATE null -> MENU
+[00:02] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:02] MENU choose "newgame"
+[00:03] STATE MENU -> CUT
+[00:54] STATE CUT -> DIFF
+[00:55] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:55] FRAME 000-difficulty.png
+[00:55] PLAN reset (room  -> W1)
+[00:55] ROOM - -> W1  at x=96
+[00:55] STATE DIFF -> PANELS
+[00:55] MANHWA wake panel 1/5
+[00:55] OBJECTIVE "Reach the city gates"
+[00:55] CHIP move |  | 
+[00:55] SAVEPOINT null -> W1
+[00:55] WEAPON null -> claws
+[00:55]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:56] MANHWA wake panel 2/5
+[00:58] MANHWA wake panel 3/5
+[00:58] MANHWA wake panel 4/5
+[00:59] MANHWA wake panel 5/5
+[01:01] STATE PANELS -> PLAY
+[01:01] CHIP move | Move | Walk right toward the light
+[01:03] FRAMES median 50 ms -> planner step 1/30, game time 0.84x wall
+[01:03] PACE sim 52.3 s per 60 s wall (pace dial / slow frames)
+[01:04]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:04] TOAST POWER FAULT → SYSTEM RESTART
+[01:06] FLAG +woke
+[01:06] MISSION opening (objective: "Reach the city gates")
+[01:07] CHIP out | Leave | The door has been open a long time — walk out
+[01:07] FLAG +tutI
+[01:07] FLAG +tutId
+[01:11] PLAN reset (room W1 -> W2)
+[01:11] ROOM W1 -> W2  at x=21
+[01:11] STATE PLAY -> PANELS
+[01:11] MANHWA bay panel 1/3
+[01:11] CHIP out |  | 
+[01:12]   . W2 x=21 y=436 vx=0 on cores=7/7 volts=33 tut=out/null@-1 mission=opening held=
+[01:12] MANHWA bay panel 2/3
+[01:13] MANHWA bay panel 3/3
+[01:16] STATE PANELS -> PLAY
+[01:16] CHIP out | The city gates | Follow the gold marker
+[01:17] CHIP jump | Jump | Follow the gold marker
+[01:18] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:20] CHIP gate | The city gates | Follow the gold marker
+[01:20]   . W2 x=461 y=316 vx=0 on cores=7/7 volts=33 tut=gate/MOVE@960 mission=opening held=
+[01:22] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:23] FLAG +gateOpened
+[01:27] PLAN reset (room W2 -> A0)
+[01:27] ROOM W2 -> A0  at x=40
+[01:27] STATE PLAY -> PANELS
+[01:27] MANHWA gate panel 1/2
+[01:27] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[01:27] CHIP gate |  | 
+[01:28]   . A0 x=40 y=400 vx=0 on cores=7/7 volts=33 tut=gate/null@-1 mission=opening held=
+[01:29] MANHWA gate panel 2/2
+[01:33] STATE PANELS -> PLAY
+[01:33] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:34] CHIP booth | Ratchet's booth | Follow the gold marker
+[01:35] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[01:36]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[01:40] PLAN reset (room A0 -> A0B)
+[01:40] ROOM A0 -> A0B  at x=103
+[01:40] OBJECTIVE "Wake Ratchet"
+[01:41] CHIP note | Read the letter | Follow the gold marker
+[01:42] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:42] STATE PLAY -> PANELS
+[01:42] MANHWA letter panel 1/5
+[01:42] CHIP note |  | 
+[01:44] MANHWA letter panel 2/5
+[01:44]   . A0B x=521 y=432 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[01:45] MANHWA letter panel 3/5
+[01:46] MANHWA letter panel 4/5
+[01:48] MANHWA letter panel 5/5
+[01:50] STATE PANELS -> PLAY
+[01:50] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:50] FLAG +opNote
+[01:51] CHIP drawer | Open the drawer | Follow the gold marker
+[01:51] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[01:52] STATE PLAY -> DIALOG
+[01:52] CHIP drawer |  | 
+[01:52] FLAG +ch_A0B_1
+[01:52] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[01:52] ITEMS {"ratchetCell":1}
+[01:52]   . A0B x=481 y=435 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[01:52] STATE DIALOG -> PANELS
+[01:52] MANHWA drawer panel 1/1
+[01:57] STATE PANELS -> PLAY
+[01:57] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[01:58] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[01:58] STATE PLAY -> DIALOG
+[01:58] CHIP repair |  | 
+[01:58] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[01:59] STATE DIALOG -> REPAIR
+[02:00] FRAME 001-repair-board.png
+[02:00] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[02:00] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[02:00]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:00] REPAIR place on target:socket (the hint names "battery socket")
+[02:01] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[02:01] REPAIR place on target:plus (the hint names "+ terminal")
+[02:02] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[02:03] FRAMES median 50 ms -> planner step 1/30, game time 0.99x wall
+[02:03] PACE sim 52.1 s per 60 s wall (pace dial / slow frames)
+[02:03] REPAIR place on target:minus (the hint names "− terminal")
+[02:04] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[02:05] REPAIR place on target:relay (the hint names "relay")
+[02:06] REPAIR power
+[02:07] STATE REPAIR -> CUT
+[02:07] OBJECTIVE "Use Ratchet’s pod"
+[02:07] FLAG +on_A0B|ratchet
+[02:07] FLAG +ratchetRepaired
+[02:07] ITEMS {}
+[02:08]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:15] STATE CUT -> DIALOG
+[02:15] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[02:16]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:17] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[02:18] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[02:19] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[02:21] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[02:22] FLAG +opTold
+[02:22] FLAG +ratchetSpareGiven
+[02:22] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[02:22] ITEMS {"batt":1}
+[02:23] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[02:24] STATE DIALOG -> PANELS
+[02:24] MANHWA ratchet panel 1/2
+[02:24]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:26] MANHWA ratchet panel 2/2
+[02:28] STATE PANELS -> PLAY
+[02:28] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:28] STATE PLAY -> DIALOG
+[02:28] CHIP repair |  | 
+[02:29] STATE DIALOG -> PLAY
+[02:29] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:29] STATE PLAY -> DIALOG
+[02:29] CHIP repair |  | 
+[02:31] STATE DIALOG -> PLAY
+[02:31] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:32] CHIP pod | Use the pod | Follow the gold marker
+[02:32]   . A0B x=713 y=348 vx=340 on cores=7/7 volts=33 tut=pod/MOVE@912 mission=opening held=ArrowRight
+[02:33] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[02:34] SAVEPOINT W1 -> A0B
+[02:35] OBJECTIVE "Get the Volt Pack from Ratchet"
+[02:35] FLAG +opPod
+[02:36] CHIP pack | The Volt Pack | Follow the gold marker
+[02:37] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:38] STATE PLAY -> DIALOG
+[02:38] CHIP pack |  | 
+[02:38] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[02:39] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[02:40] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[02:41]   . A0B x=472 y=436 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[02:41] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[02:42] FLAG +opScrap
+[02:42] FLAG +sawScrap
+[02:42] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[02:42] SCRAP 0 -> 12
+[02:44] STATE DIALOG -> SHOP
+[02:45] FRAME 002-counter.png
+[02:45] SHOP buy the marked row (cell) with 12 scrap
+[02:45] STATE SHOP -> DIALOG
+[02:45] OBJECTIVE "Try out the Volt Pack"
+[02:45] FLAG +tutBuy
+[02:45] FLAG +heal
+[02:45] FLAG +pack
+[02:45] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[02:45] SCRAP 12 -> 0
+[02:46] STATE DIALOG -> PLAY
+[02:46] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:47] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[02:47] HURT 7 -> 6 in A0B
+[02:47] HEAL: holding heal
+[02:49] CHIP atk | Back outside | Follow the gold marker
+[02:49]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=66 tut=atk/MOVE@115 mission=opening held= near=npc:ratchet
+[02:50] CHIP atk | Back outside | Stand at the den door and press ↑
+[02:55] PLAN reset (room A0B -> A0)
+[02:55] ROOM A0B -> A0  at x=387
+[02:55] CHIP atk | Strike the winch | Follow the gold marker
+[02:56] CHIP atk | Strike the winch | Its infected arm blocks the road — each X knocks scrap loose
+[02:57] FLAG +winchKnock
+[02:57]   . A0 x=556 y=434 vx=0 on cores=7/7 volts=77 tut=atk/ATK@656 mission=opening held=
+[02:58] CHIP burst | Volt Burst | Its motor still holds the arm — hold X, let go: the burst stops it
+[02:58] BURST: holding attack
+[03:00] BURST: holding attack
+[03:01] BURST: holding attack
+[03:02] TOAST The winch stops — its arm lifts clear of the road.
+[03:02] FLAG +burstDone
+[03:02] FLAG +opBurst
+[03:02] SCRAP 0 -> 15
+[03:03] SCRAP 15 -> 18
+[03:04] FRAMES median 67 ms -> planner step 1/30, game time 0.58x wall
+[03:04] PACE sim 51.2 s per 60 s wall (pace dial / slow frames)
+[03:04] OBJECTIVE "Solve the monument’s puzzle"
+[03:04] CHIP node | The monument | Follow the gold marker
+[03:04] SCRAP 18 -> 21
+[03:05]   . A0 x=668 y=255 vx=340 air cores=7/7 volts=93 tut=node/MOVE@880 mission=opening held=ArrowRight
+[03:06] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[03:06] STATE PLAY -> TRIAL
+[03:06] CHIP node |  | 
+[03:10] FRAME 003-monument-puzzle.png
+[03:10] PUZZLE memory: the monument played 3 notes; answering
+[03:12] STATE TRIAL -> PLAY
+[03:12] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[03:12] TOAST The winch stops — its arm lifts clear of the road. / Knowledge gained  +10 IQ
+[03:12] FLAG +rd_n8
+[03:12] SCRAP 21 -> 24
+[03:13] OBJECTIVE "Head east into the Scrap Meadows"
+[03:13] CHIP go | Into the meadow | The road east leads to the Scrap Meadows
+[03:13]   . A0 x=1036 y=257 vx=340 air cores=7/7 volts=93 tut=go/MOVE@2000 mission=opening held=ArrowRight
+[03:13] TOAST Knowledge gained  +10 IQ
+[03:16] PLAN reset (room A0 -> A1)
+[03:16] ROOM A0 -> A1  at x=23
+[03:16] OBJECTIVE "Find the raw marble beneath the meadow"
+[03:16] CHIP (none)
+[03:16] TOAST Map online — open it any time (M / Tab)
+[03:16] FLAG +tut
+[03:16] FLAG +mapSeen
+[03:17] MISSION DONE opening
+[03:18] FRAME 004-done-opening.png
+[03:18] MISSION servo (objective: "Find the raw marble beneath the meadow")
+[03:18] PLAN room A1: 92 standable tiles, 1411 moves (112 ms)
+[03:19] INTERACT servo (wake him with the spare Power Cell)
+[03:19] STATE PLAY -> DIALOG
+[03:19] SAY Old Servo: "Ratchet’s spare cell fits the port in his chest. You seat it."
+[03:20] STATE DIALOG -> PLAY
+[03:20] FLAG +on_A1|servo
+[03:20] FLAG +servoIntro
+[03:20] ITEMS {}
+[03:20] INTERACT servo (wake him with the spare Power Cell)
+[03:21] STATE PLAY -> DIALOG
+[03:21] SAY Old Servo: "Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you."
+[03:21]   . A1 x=264 y=438 vx=0 on cores=7/7 volts=93 mission=servo held= near=npc:servo
+[03:22] SAY Old Servo: "After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up."
+[03:23] SAY Old Servo: "And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ."
+[03:24] FLAG +servoMet
+[03:24] SAY "Errand taken"
+[03:25] STATE DIALOG -> PLAY
+[03:25] MISSION DONE servo
+[03:26] FRAME 005-done-servo.png
+[03:26] MISSION first-meeting (objective: "Find the raw marble beneath the meadow")
+[03:26] FLAG +sc_A1_3
+[03:26] SCRAP 24 -> 39
+[03:27] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[03:28] FIGHT crawler (hp 26) in A1
+[03:29] FLAG +sc_A1_4
+[03:29] SCRAP 39 -> 57
+[03:29]   . A1 x=1207 y=430 vx=340 on cores=7/7 volts=99 mission=first-meeting held=ArrowRight near=rescue:null
+[03:30] FIGHT guard (hp 38) in A1
+[03:37]   . A1 x=1758 y=431 vx=0 on cores=7/7 volts=99 mission=first-meeting held= near=rescue:null
+[03:42] STUCK trying to reach exit R toward A2 in A1 at x=1758,y=431
+[03:42] FRAME 006-stuck-A1.png
+[03:42] PLAN recovery {"what":"exit R toward A2","dir":1,"edge":{"room":"A1","cur":91,"exit":"R","walk":1,"dir":0,"program":null}}
+[03:43] PLAN reset (recovery input)
+[03:43] PLAN reset (room A1 -> A2)
+[03:43] ROOM A1 -> A2  at x=250
+[03:44] PLAN room A2: 116 standable tiles, 1727 moves (266 ms)
+[03:44] FLAG +sc_A2_4
+[03:44] SCRAP 57 -> 69
+[03:44] FIGHT crawler (hp 26) in A2
+[03:44] TOAST Repair ready! Stand still and hold F to restore a core.
+[03:44] HURT 7 -> 6 in A2 (nearest crawler at 27 px)
+[03:45]   . A2 x=477 y=436 vx=300 on cores=6/7 volts=99 mission=first-meeting held=ArrowRight threat={"k":"crawler","x":515,"y":449,"w":28,"h":20,"hp":11,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[03:47] FIGHT flier (hp 21) in A2
+[03:49] HURT 6 -> 5 in A2 (nearest flier at 55 px)
+[03:49] FLAG +sc_A2_5
+[03:49] SCRAP 69 -> 87
+[03:51] FIGHT flier (hp 6) in A2
+[03:53] HURT 5 -> 4 in A2 (nearest flier at 201 px)
+[03:53] HEAL (cores 4/7, volts 99)
+[03:54]   . A2 x=1091 y=348 vx=0 on cores=4/7 volts=99 mission=first-meeting held= threat={"k":"flier","x":1097,"y":238,"w":26,"h":22,"hp":6,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[03:55] HEAL (cores 4/7, volts 99)
+[03:57] FIGHT flier (hp 6) in A2
+[03:58] FIGHT guard (hp 38) in A2
+[03:58] HURT 5 -> 4 in A2 (nearest crawler at 226 px)
+[03:58] HEAL (cores 4/7, volts 66)
+[04:02]   . A2 x=1211 y=429 vx=150 on cores=5/7 volts=33 mission=first-meeting held=ArrowRight
+[04:03] FIGHT flier (hp 6) in A2
+[04:04] HURT 5 -> 4 in A2 (nearest flier at 23 px)
+[04:05] FRAMES median 33 ms -> planner step 1/30, game time 0.98x wall
+[04:05] PACE sim 56.2 s per 60 s wall (pace dial / slow frames)
+[04:09] FLAG +nfMeet
+[04:09] MISSION DONE first-meeting
+[04:09] FRAME 007-done-first-meeting.png
+[04:09] MISSION marble (objective: "Find the raw marble beneath the meadow")
+[04:10] FLAG +sc_A2_6
+[04:10] SCRAP 87 -> 110
+[04:10] MEET NULLFANG drops in (A2): stepping out of the swipe
+[04:10] FRAME 008-nullfang-meet.png
+[04:11]   . A2 x=2014 y=316 vx=125 on cores=4/7 volts=44 mission=marble held=ArrowRight
+[04:12] FIGHT guard (hp 38) in A2
+[04:12] HURT 4 -> 3 in A2 (nearest guard at 28 px)
+[04:14] HEAL (cores 3/7, volts 77)
+[04:16] STATE PLAY -> PANELS
+[04:16] MANHWA meet panel 1/4
+[04:16] MANHWA meet panel 2/4
+[04:17] MANHWA meet panel 3/4
+[04:18] MANHWA meet panel 4/4
+[04:19]   . A2 x=1457 y=437 vx=0 on cores=3/7 volts=77 mission=marble held= near=rescue:null
+[04:20] STATE PANELS -> PLAY
+[04:20] HEAL (cores 3/7, volts 77)
+[04:26] DOWN-STRIKE at the loose floor (tiles 12-14)
+[04:28] FLAG +taughtBreak
+[04:28] FLAG +taughtFloor
+[04:28]   . A2 x=320 y=430 vx=0 on cores=4/7 volts=44 mission=marble held=
+[04:28] PLAN room A2: 116 standable tiles, 1716 moves (109 ms)
+[04:30] DOWN-STRIKE at the loose floor (tiles 12-14)
+[04:33] PLAN reset (room A2 -> A5)
+[04:33] ROOM A2 -> A5  at x=410
+[04:33] PLAN room A5: 58 standable tiles, 764 moves (65 ms)
+[04:34] TOAST Chalk arrows — the old quarrymen marked their road to the marble.
+[04:34] FLAG +pgMarks
+[04:35] FLAG +sc_A5_5
+[04:35] SCRAP 110 -> 140
+[04:36]   . A5 x=818 y=425 vx=0 on cores=4/7 volts=44 mission=marble held= near=term:1
+[04:37] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it.
+[04:38] RUBBLE strike (hp 6)
+[04:38] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[04:38] FLAG +sc_A5_4
+[04:38] FLAG +sc_A5_3
+[04:38] SCRAP 140 -> 223
+[04:39] RUBBLE strike (hp 5)
+[04:39] RUBBLE strike (hp 4)
+[04:40] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[04:40] RUBBLE strike (hp 3)
+[04:40] RUBBLE strike (hp 2)
+[04:41] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[04:41] RUBBLE strike (hp 1)
+[04:41] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:41] FLAG +rubbleA5
+[04:41] DOOR up at 1106 -> CV1
+[04:42] TOAST The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:43] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:44]   . A5 x=1094 y=427 vx=0 on cores=4/7 volts=44 mission=marble held=
+[04:45] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[04:47] PLAN reset (room A5 -> CV1)
+[04:47] ROOM A5 -> CV1  at x=167
+[04:47] PLAN room CV1: 74 standable tiles, 806 moves (50 ms)
+[04:47] STATE PLAY -> PANELS
+[04:47] MANHWA cave panel 1/3
+[04:48] MANHWA cave panel 2/3
+[04:49] MANHWA cave panel 3/3
+[04:50] STATE PANELS -> PLAY
+[04:52]   . CV1 x=669 y=254 vx=340 air cores=4/7 volts=44 mission=marble held=ArrowRight+Space
+[04:54] TOAST Something is calling from behind the fallen rock. STRIKE it.
+[04:54] RUBBLE strike (hp 6)
+[04:55] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[04:55] RUBBLE strike (hp 5)
+[04:55] RUBBLE strike (hp 4)
+[04:56] RUBBLE strike (hp 3)
+[04:56] FIGHT crawler (hp 48) in CV1
+[04:57] RUBBLE strike (hp 2)
+[04:58] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[04:58] RUBBLE strike (hp 1)
+[04:58] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[04:58] FLAG +rubbleCV1B
+[04:58] DOOR up at 1111 -> CV1B
+[04:59] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[05:01]   . CV1 x=1099 y=459 vx=0 on cores=4/7 volts=44 mission=marble held=
+[05:02] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[05:04] PLAN reset (room CV1 -> CV1B)
+[05:04] ROOM CV1 -> CV1B  at x=142
+[05:04] PLAN room CV1B: 50 standable tiles, 549 moves (19 ms)
+[05:06] FRAMES median 67 ms -> planner step 1/30, game time 0.88x wall
+[05:06] PACE sim 55.3 s per 60 s wall (pace dial / slow frames)
+[05:06] FLAG +sc_CV1B_4
+[05:06] SCRAP 223 -> 253
+[05:07] REST at the pod in CV1B (cores 4/7, volts 44)
+[05:09]   . CV1B x=588 y=385 vx=340 air cores=4/7 volts=44 mission=marble held=ArrowRight+Space
+[05:11] REST at the pod in CV1B (cores 4/7, volts 44)
+[05:12] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map.
+[05:12] FLAG +pgSurvey
+[05:12] SAVEPOINT A0B -> CV1B
+[05:12] HEAL (cores 4/7, volts 99)
+[05:14] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map. / Systems recharged. Progress saved.
+[05:15] FIGHT bat (hp 29) in CV1B
+[05:16] FLAG +sc_CV1B_2
+[05:16] SCRAP 253 -> 306
+[05:17]   . CV1B x=987 y=246 vx=-340 air cores=7/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":866,"y":160,"w":24,"h":18,"hp":29,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:17] TOAST Systems recharged. Progress saved.
+[05:20] FIGHT bat (hp 29) in CV1B
+[05:25] FIGHT bat (hp 29) in CV1B
+[05:25]   . CV1B x=925 y=184 vx=-340 air cores=7/7 volts=99 mission=marble held=ArrowLeft threat={"k":"bat","x":864,"y":160,"w":24,"h":18,"hp":29,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:29] FIGHT bat (hp 29) in CV1B
+[05:33]   . CV1B x=873 y=242 vx=0 air cores=7/7 volts=99 mission=marble held=Space threat={"k":"bat","x":868,"y":160,"w":24,"h":18,"hp":29,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:33] FIGHT bat (hp 29) in CV1B
+[05:37] DOOR up at 1120 -> CV2
+[05:41]   . CV1B x=1108 y=284 vx=0 on cores=7/7 volts=99 mission=marble held=
+[05:42] PLAN reset (room CV1B -> CV2)
+[05:42] ROOM CV1B -> CV2  at x=372
+[05:42] PLAN room CV2: 87 standable tiles, 976 moves (45 ms)
+[05:42] FIGHT hopper (hp 62) in CV2
+[05:42] HURT 7 -> 6 in CV2 (nearest hopper at 23 px)
+[05:44] FLAG +sc_CV2_7
+[05:44] HURT 6 -> 5 in CV2 (nearest hopper at 69 px)
+[05:44] SCRAP 306 -> 336
+[05:46] FIGHT hopper (hp 18) in CV2
+[05:46] HURT 5 -> 4 in CV2 (nearest hopper at 21 px)
+[05:47] HEAL (cores 4/7, volts 99)
+[05:49]   . CV2 x=498 y=372 vx=105 air cores=4/7 volts=66 mission=marble held= threat={"k":"hopper","x":486,"y":410,"w":26,"h":24,"hp":5,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:49] HEAL (cores 4/7, volts 77)
+[05:54] FIGHT hopper (hp 62) in CV2
+[05:54] HURT 5 -> 4 in CV2 (nearest hopper at 12 px)
+[05:56] HURT 4 -> 3 in CV2 (nearest hopper at 29 px)
+[05:56] HEAL (cores 3/7, volts 99)
+[05:58]   . CV2 x=728 y=459 vx=0 on cores=4/7 volts=66 mission=marble held= near=rescue:null
+[05:58] HEAL (cores 4/7, volts 66)
+[06:02] FIGHT bat (hp 28) in CV2
+[06:07] FRAMES median 50 ms -> planner step 1/30, game time 0.97x wall
+[06:07] PACE sim 57.2 s per 60 s wall (pace dial / slow frames)
+[06:07]   . CV2 x=1518 y=465 vx=195 on cores=5/7 volts=33 mission=marble held=Space
+[06:09] FIGHT crawler (hp 47) in CV2
+[06:10] HURT 5 -> 4 in CV2 (nearest crawler at 40 px)
+[06:10] PLAN reset (room CV2 -> CV3)
+[06:11] ROOM CV2 -> CV3  at x=10
+[06:13] GRAVEHORN p1 st=dorm hp=247 front=true dSnout=884 | cores 4/7 volts 55
+[06:15]   . CV3 x=391 y=468 vx=0 on cores=4/7 volts=55 mission=marble held=
+[06:16] GRAVEHORN p1 st=ghwake hp=247 front=true dSnout=359 | cores 4/7 volts 55
+[06:16] STATE PLAY -> DIALOG
+[06:16] OBJECTIVE "GRAVEHORN stands on the raw marble at the end of the cave. Drive him off."
+[06:16] FLAG +ghMet
+[06:16] SAY GRAVEHORN: "So the little cleaner woke up."
+[06:17] SAY GRAVEHORN: "I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone."
+[06:18] SAY GRAVEHORN: "The Eye is the one who stole your Mother's Song. I guard what it took."
+[06:19] SAY GRAVEHORN: "The marble stays buried. So will you."
+[06:21] STATE DIALOG -> PLAY
+[06:21] GRAVEHORN p1 st=ghbellow hp=247 front=true dSnout=347 | cores 4/7 volts 55
+[06:22] GRAVEHORN tells hornprep
+[06:23]   . CV3 x=444 y=467 vx=0 on cores=4/7 volts=55 mission=marble held=
+[06:24] GRAVEHORN p1 st=hornless hp=247 front=true dSnout=195 | cores 4/7 volts 55
+[06:25] TOAST His horn is gone — the head is open. Hit it!
+[06:25] FLAG +ghHeadTold
+[06:27] GRAVEHORN p1 st=idle hp=167 front=true dSnout=88 | cores 4/7 volts 99
+[06:27] HEAL (cores 4/7, volts 99)
+[06:29] HEAL (cores 4/7, volts 66)
+[06:31] GRAVEHORN p1 st=idle hp=167 front=true dSnout=266 | cores 5/7 volts 33
+[06:31]   . CV3 x=488 y=469 vx=0 on cores=5/7 volts=33 mission=marble held=
+[06:32] GRAVEHORN tells hornprep
+[06:34] GRAVEHORN p1 st=hornless hp=167 front=true dSnout=102 | cores 5/7 volts 33
+[06:37] GRAVEHORN p1 st=walk hp=99 front=true dSnout=177 | cores 5/7 volts 77
+[06:39] GRAVEHORN tells chargewarn
+[06:39]   . CV3 x=698 y=467 vx=0 on cores=5/7 volts=77 mission=marble held=
+[06:40] GRAVEHORN p1 st=rush hp=99 front=true dSnout=116 | cores 5/7 volts 77
+[06:40] GRAVEHORN charge: jump at 0.25 s to contact
+[06:41] HURT 5 -> 4 in CV3 (nearest horn/rush at 64 px)
+[06:43] HURT 4 -> 3 in CV3 (nearest horn/stunned at 124 px)
+[06:43] GRAVEHORN p1 st=stunned hp=47 front=false dSnout=269 | cores 3/7 volts 99
+[06:44] TOAST ⚡ The guardian is down — hit it NOW
+[06:45] STATE PLAY -> DIALOG
+[06:45] SAY GRAVEHORN: "Enough. The Eye built me for war. Now you see all of it."
+[06:46] STATE DIALOG -> PLAY
+[06:46] GRAVEHORN p1 st=rage hp=1 front=false dSnout=259 | cores 3/7 volts 99
+[06:47]   . CV3 x=991 y=462 vx=0 on cores=3/7 volts=99 mission=marble held=
+[06:49] HEAL (cores 3/7, volts 99)
+[06:51] GRAVEHORN p2 st=hornless hp=247 front=true dSnout=197 | cores 3/7 volts 66
+[06:51] HEAL (cores 3/7, volts 66)
+[06:54] GRAVEHORN p2 st=hornseat hp=223 front=true dSnout=15 | cores 4/7 volts 55
+[06:55] TOAST Strike his horn as it comes up — a clean hit turns the toss. / PARRY! A lime glint can be turned: raise the guard as it lands, then strike back.
+[06:55] FLAG +ghParryTold
+[06:55] FLAG +parryTold
+[06:55] HEAL (cores 4/7, volts 77)
+[06:57]   . CV3 x=941 y=463 vx=0 on cores=5/7 volts=44 mission=marble held=
+[06:57] GRAVEHORN p2 st=hornprep hp=195 front=true dSnout=25 | cores 5/7 volts 44
+[06:57] GRAVEHORN tells hornprep
+[06:58] HURT 5 -> 4 in CV3 (nearest horn/hornless at 162 px)
+[07:01] TOAST PARRY! A lime glint can be turned: raise the guard as it lands, then strike back.
+[07:01] GRAVEHORN p2 st=hornless hp=122 front=true dSnout=21 | cores 4/7 volts 88
+[07:03] GRAVEHORN tells tossprep
+[07:04] HURT 4 -> 3 in CV3 (nearest horn/toss at 188 px)
+[07:04] GRAVEHORN p2 st=toss hp=43 front=true dSnout=33 DIZZY | cores 3/7 volts 99
+[07:05] HEAL (cores 3/7, volts 99)
+[07:06]   . CV3 x=599 y=469 vx=0 on cores=3/7 volts=99 mission=marble held=
+[07:06] HEAL (cores 3/7, volts 99)
+[07:08] HURT 3 -> 2 in CV3 (nearest horn/wallturn at 488 px)
+[07:10] FRAMES median 100 ms -> planner step 1/30, game time 0.96x wall
+[07:10] PACE sim 59.8 s per 60 s wall (pace dial / slow frames)
+[07:10] HEAL (cores 2/7, volts 99)
+[07:12] HURT 2 -> 1 in CV3 (nearest horn/rush at 19 px)
+[07:12] GRAVEHORN p2 st=rush hp=43 front=false dSnout=169 | cores 1/7 volts 99
+[07:13] HEAL (cores 1/7, volts 99)
+[07:14]   . CV3 x=599 y=469 vx=0 on cores=2/7 volts=66 mission=marble held=
+[07:14] HEAL (cores 2/7, volts 66)
+[07:16] GRAVEHORN p2 st=hornfire hp=43 front=true dSnout=360 | cores 3/7 volts 33
+[07:17] HURT 3 -> 2 in CV3 (nearest horn/hornless at 401 px)
+[07:17] HEAL (cores 2/7, volts 33)
+[07:19] GRAVEHORN p2 st=hornless hp=43 front=true dSnout=34 | cores 3/7 volts 0
+[07:21] GRAVEHORN tells tossprep
+[07:21] GRAVEHORN toss: strike the horn (parry) at t=0.05
+[07:21] HURT 3 -> 2 in CV3 (nearest horn/stagger at 157 px)
+[07:22] HEAL (cores 2/7, volts 33)
+[07:24]   . CV3 x=748 y=458 vx=0 on cores=3/7 volts=0 mission=marble held=
+[07:24] GRAVEHORN p2 st=chargewarn hp=7 front=true dSnout=218 | cores 3/7 volts 0
+[07:24] GRAVEHORN tells chargewarn
+[07:25] HURT 3 -> 2 in CV3 (nearest horn/rush at 157 px)
+[07:26] GRAVEHORN tells chargewarn
+[07:27] GRAVEHORN p2 st=chargewarn hp=7 front=true dSnout=182 | cores 2/7 volts 0
+[07:27] GRAVEHORN charge: jump at 0.36 s to contact
+[07:30] GRAVEHORN p2 st=kickprep hp=7 front=false dSnout=341 | cores 2/7 volts 0
+[07:30] GRAVEHORN tells kickprep
+[07:32]   . CV3 x=644 y=462 vx=0 on cores=2/7 volts=0 mission=marble held=
+[07:34] GRAVEHORN p2 st=hornprep hp=7 front=true dSnout=41 | cores 2/7 volts 0
+[07:34] GRAVEHORN tells hornprep
+[07:35] HURT 2 -> 1 in CV3 (nearest horn/hornless at 307 px)
+[07:37] GRAVEHORN p2 st=beaten hp=1 front=true dSnout=19 | cores 1/7 volts 11
+[07:37] STATE PLAY -> DIALOG
+[07:37] SAY GRAVEHORN: "This isn't over."
+[07:38] SAY GRAVEHORN: "The Eye sees you, cleaner. Next time it comes itself."
+[07:40] STATE DIALOG -> PLAY
+[07:40] GRAVEHORN p2 st=retreat hp=1 front=true dSnout=10 | cores 1/7 volts 11
+[07:40]   . CV3 x=669 y=463 vx=0 on cores=1/7 volts=11 mission=marble held=
+[07:43] OBJECTIVE "Find the raw marble beneath the meadow"
+[07:43] TOAST GRAVEHORN backs into the rock and is gone. The raw marble is unguarded.
+[07:43] FLAG +bossHorn
+[07:43] PLAN room CV3: 62 standable tiles, 777 moves (108 ms)
+[07:44] SCRAP 336 -> 341
+[07:44] SCRAP 341 -> 347
+[07:44] SCRAP 347 -> 350
+[07:45] SCRAP 350 -> 359
+[07:45] SCRAP 359 -> 366
+[07:48] PILLAR: a plain strike first
+[07:49] FRAME 009-pillar-claws.png
+[07:49] TOAST Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.
+[07:49]   . CV3 x=1578 y=464 vx=0 on cores=1/7 volts=11 mission=marble held= near=pillar:cshard
+[07:50] PILLAR: not enough charge for a burst (11/25)
+[07:57]   . CV3 x=172 y=459 vx=-195 on cores=1/7 volts=11 mission=marble held=
+[07:58] PLAN room CV2: 87 standable tiles, 976 moves (53 ms)
+[07:59] PLAN reset (room CV3 -> CV2)
+[07:59] ROOM CV3 -> CV2  at x=1918
+[07:59] FIGHT crawler (hp 43) in CV2
+[08:00] PLAN reset (death 0 -> 1)
+[08:00] STATE PLAY -> DEAD
+[08:00] DEATH #1 in CV2 (save deaths 1)
+[08:00] HURT 1 -> 0 in CV2 (nearest crawler at 27 px)
+[08:00] SCRAP 366 -> 0
+[08:02] PLAN reset (room CV2 -> CV1B)
+[08:02] ROOM CV2 -> CV1B  at x=634
+[08:02] STATE DEAD -> PLAY
+[08:02] TOAST Your husk still stands where you fell — it kept what you were carrying.  (Scrap Meadows)
+[08:03] PLAN room CV1B: 50 standable tiles, 549 moves (32 ms)
+[08:05] FIGHT bat (hp 54) in CV1B
+[08:05]   . CV1B x=923 y=293 vx=-340 air cores=7/7 volts=33 mission=marble held=ArrowLeft
+[08:07] HURT 7 -> 6 in CV1B (nearest bat at 89 px)
+[08:09] FIGHT bat (hp 40) in CV1B
+[08:12] FRAMES median 67 ms -> planner step 1/30, game time 0.57x wall
+[08:12] PACE sim 54.1 s per 60 s wall (pace dial / slow frames)
+[08:13] DOOR up at 1120 -> CV2
+[08:14]   . CV1B x=1108 y=460 vx=0 on cores=6/7 volts=44 mission=marble held=
+[08:18] PLAN reset (room CV1B -> CV2)
+[08:18] ROOM CV1B -> CV2  at x=372
+[08:18] PLAN room CV2: 87 standable tiles, 976 moves (34 ms)
+[08:23]   . CV2 x=761 y=458 vx=300 on cores=6/7 volts=44 mission=marble held=ArrowRight
+[08:31]   . CV2 x=1179 y=461 vx=340 on cores=6/7 volts=44 mission=marble held=ArrowRight
+[08:39]   . CV2 x=1516 y=463 vx=340 on cores=6/7 volts=44 mission=marble held=
+[08:41] HURT 6 -> 5 in CV2 (nearest crawler at 28 px)
+[08:41] FIGHT crawler (hp 48) in CV2
+[08:48]   . CV2 x=1608 y=462 vx=-300 on cores=5/7 volts=66 mission=marble held=ArrowLeft threat={"k":"crawler","x":1546,"y":484,"w":28,"h":20,"hp":20,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:48] FIGHT crawler (hp 20) in CV2
+[08:49] TOAST Husk reclaimed!  +366
+[08:49] SCRAP 0 -> 366
+[08:59] HURT 5 -> 4 in CV2 (nearest crawler at 86 px)
+[08:59]   . CV2 x=1556 y=463 vx=0 air cores=4/7 volts=77 mission=marble held= threat={"k":"crawler","x":1468,"y":481,"w":28,"h":20,"hp":2,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[08:59] FIGHT crawler (hp 2) in CV2
+[09:00] HEAL (cores 4/7, volts 88)
+[09:06] PLAN reset (room CV2 -> CV3)
+[09:06] ROOM CV2 -> CV3  at x=13
+[09:07] PLAN room CV3: 62 standable tiles, 777 moves (40 ms)
+[09:07]   . CV3 x=58 y=463 vx=150 on cores=5/7 volts=55 mission=marble held=ArrowRight
+[09:08] FIGHT crawler (hp 91) in CV3
+[09:08] HURT 5 -> 4 in CV3 (nearest crawler at 21 px)
+[09:11] HURT 4 -> 3 in CV3 (nearest crawler at 82 px)
+[09:12] HEAL (cores 3/7, volts 99)
+[09:14] FRAMES median 67 ms -> planner step 1/30, game time 0.97x wall
+[09:14] PACE sim 32.6 s per 60 s wall (pace dial / slow frames)
+[09:14] HEAL (cores 4/7, volts 66)
+[09:16]   . CV3 x=159 y=460 vx=0 on cores=5/7 volts=33 mission=marble held= near=rescue:null
+[09:17] FIGHT crawler (hp 91) in CV3
+[09:17] HURT 5 -> 4 in CV3 (nearest crawler at 16 px)
+[09:21] HURT 4 -> 3 in CV3 (nearest crawler at 90 px)
+[09:21] FIGHT crawler (hp 31) in CV3
+[09:22] HEAL (cores 3/7, volts 99)
+[09:24] HEAL (cores 4/7, volts 66)
+[09:26]   . CV3 x=-17 y=442 vx=0 on cores=5/7 volts=33 mission=marble held= near=rescue:null
+[09:31] FIGHT bat (hp 31) in CV3
+[09:34] PILLAR: Volt Burst (hold attack, release)
+[09:35] STATE PLAY -> PANELS
+[09:35] MANHWA marble panel 1/2
+[09:35] OBJECTIVE "Bring the raw marble to Ratchet"
+[09:35] TOAST ACQUIRED — raw cave marble / Errand ready — go back
+[09:35] FLAG +pl_cshard
+[09:35] BAG cshard
+[09:35]   . CV3 x=1634 y=462 vx=0 on cores=5/7 volts=19 mission=marble held= near=rescue:null
+[09:38] MANHWA marble panel 2/2
+[09:39] STATE PANELS -> PLAY
+[09:39] MISSION DONE marble
+[09:41] FRAME 010-done-marble.png
+[09:41] MISSION forge (objective: "Bring the raw marble to Ratchet")
+[09:44]   . CV3 x=1380 y=233 vx=-340 air cores=5/7 volts=19 mission=forge held=Space+ArrowLeft
+[09:52]   . CV3 x=145 y=460 vx=-50 on cores=5/7 volts=19 mission=forge held=ArrowLeft near=rescue:null
+[10:00]   . CV3 x=-2 y=444 vx=0 air cores=5/7 volts=19 mission=forge held= near=rescue:null
+[10:02] STUCK trying to reach exit L toward CV2 in CV3 at x=-2,y=444
+[10:03] FRAME 011-stuck-CV3.png
+[10:03] PLAN recovery {"what":"exit L toward CV2","dir":-1,"edge":{"room":"CV3","cur":19,"exit":"L","walk":-1,"dir":0,"program":null}}
+[10:04] PLAN reset (recovery input)
+[10:04] PLAN reset (room CV3 -> CV2)
+[10:04] ROOM CV3 -> CV2  at x=1742
+[10:04] PLAN room CV2: 87 standable tiles, 976 moves (43 ms)
+[10:08]   . CV2 x=1085 y=469 vx=0 on cores=5/7 volts=19 mission=forge held= near=rescue:null
+[10:09] FIGHT bat (hp 28) in CV2
+[10:15] FRAMES median 67 ms -> planner step 1/30, game time 1.00x wall
+[10:15] PACE sim 51.3 s per 60 s wall (pace dial / slow frames)
+[10:15] FIGHT bat (hp 28) in CV2
+[10:16]   . CV2 x=704 y=383 vx=0 air cores=5/7 volts=19 mission=forge held=ArrowLeft+Space
+[10:20] PLAN reset (room CV2 -> CV1)
+[10:20] ROOM CV2 -> CV1  at x=1735
+[10:20] PLAN room CV1: 74 standable tiles, 806 moves (35 ms)
+[10:23] FLAG +sc_CV1_2
+[10:23] SCRAP 366 -> 381
+[10:24]   . CV1 x=1179 y=308 vx=-340 air cores=5/7 volts=19 mission=forge held=ArrowLeft+Space
+[10:25] FIGHT crawler (hp 47) in CV1
+[10:27] HURT 5 -> 4 in CV1 (nearest crawler at 40 px)
+[10:29] FIGHT crawler (hp 1) in CV1
+[10:30] HURT 4 -> 3 in CV1 (nearest crawler at 39 px)
+[10:30] HEAL (cores 3/7, volts 63)
+[10:32]   . CV1 x=468 y=467 vx=-340 on cores=4/7 volts=30 mission=forge held=ArrowLeft
+[10:34] DOOR up at 179 -> A5
+[10:38] PLAN reset (room CV1 -> A5)
+[10:38] ROOM CV1 -> A5  at x=1094
+[10:39] PLAN room A5: 58 standable tiles, 764 moves (62 ms)
+[10:41]   . A5 x=699 y=435 vx=-50 on cores=4/7 volts=30 mission=forge held=Space
+[10:49]   . A5 x=455 y=436 vx=-10 on cores=4/7 volts=30 mission=forge held= near=riddle:null
+[10:55] STUCK trying to reach exit T toward A2 in A5 at x=318,y=430
+[10:56] FRAME 012-stuck-A5.png
+[10:56] PLAN recovery {"what":"exit T toward A2","dir":-1,"edge":{"room":"A5","cur":34,"to":7,"exit":null,"walk":0,"dir":-1,"program":{"hold":2,"d0":0,"d1":9,"vx0":0}}}
+[10:57] PLAN reset (recovery input)
+[10:57]   . A5 x=109 y=348 vx=-243 on cores=4/7 volts=30 mission=forge held=
+[10:57] PLAN room A5: 58 standable tiles, 764 moves (46 ms)
+[10:59] PLAN room A2: 113 standable tiles, 1656 moves (148 ms)
+[10:59] PLAN reset (room A5 -> A2)
+[10:59] ROOM A5 -> A2  at x=532
+[11:00] PLAN room A2: 113 standable tiles, 1656 moves (86 ms)
+[11:06]   . A2 x=159 y=428 vx=-200 on cores=4/7 volts=30 mission=forge held=ArrowLeft
+[11:06] PLAN reset (room A2 -> A1)
+[11:06] ROOM A2 -> A1  at x=1755
+[11:07] PLAN room A1: 92 standable tiles, 1411 moves (86 ms)
+[11:14]   . A1 x=6 y=437 vx=0 on cores=4/7 volts=30 mission=forge held=
+[11:16] FRAMES median 67 ms -> planner step 1/30, game time 0.74x wall
+[11:16] PACE sim 46.6 s per 60 s wall (pace dial / slow frames)
+[11:22]   . A1 x=6 y=437 vx=0 on cores=4/7 volts=30 mission=forge held=
+[11:22] STUCK trying to reach exit L toward A0 in A1 at x=6,y=437
+[11:24] FRAME 013-stuck-A1.png
+[11:24] PLAN recovery {"what":"exit L toward A0","dir":-1,"edge":{"room":"A1","cur":36,"exit":"L","walk":-1,"dir":0,"program":null}}
+[11:25] PLAN reset (recovery input)
+[11:25] PLAN reset (room A1 -> A0)
+[11:25] ROOM A1 -> A0  at x=1861
+[11:25] PLAN room A0: 80 standable tiles, 1125 moves (46 ms)
+[11:30]   . A0 x=1024 y=430 vx=-50 on cores=4/7 volts=30 mission=forge held=
+[11:32] DOOR up at 399 -> A0B
+[11:36] PLAN reset (room A0 -> A0B)
+[11:36] ROOM A0 -> A0B  at x=103
+[11:36] PLAN room A0B: 33 standable tiles, 432 moves (21 ms)
+[11:38]   . A0B x=429 y=431 vx=340 on cores=4/7 volts=30 mission=forge held=ArrowRight
+[11:38] INTERACT ratchet (hand over the raw marble)
+[11:39] STATE PLAY -> DIALOG
+[11:39] FLAG +deathsSeen
+[11:39] FLAG +said
+[11:39] SAY Ratchet: "You came back. Your husk was still warm when I passed it."
+[11:39] SAY Ratchet: "It threw you once — I saw the dent in the corridor. Not with claws. Bring me the marble first."
+[11:41] SAY Ratchet: "You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them—not what is left of them."
+[11:42] SAY Ratchet: "When the blade is done I'm taking my tools to the camp by the lion's enclosure. That is where this ends. Find me there."
+[11:43] STATE DIALOG -> CUT
+[11:43] OBJECTIVE "Free the first sage — the door beside the marble quarry"
+[11:43] FLAG +crystal
+[11:43] FLAG +ratchetCamp
+[11:43] BAG 
+[11:43] WEAPON claws -> single
+[11:46]   . A0B x=472 y=435 vx=0 on cores=4/7 volts=30 mission=forge held= near=npc:ratchet
+[11:54]   . A0B x=472 y=435 vx=0 on cores=4/7 volts=30 mission=forge held= near=npc:ratchet
+[11:54] STATE CUT -> DIALOG
+[11:54] FLAG +alphaLead
+[11:54] SAY Ratchet: "Before the song broke, the wolves escorted lost workers home. Their Alpha kept watch over the Meadow den."
+[11:55] SAY Ratchet: "Now its corrupted howl drives the pack to attack the people it protected. They are still following their guardian."
+[11:57] SAY Ratchet: "If you choose, find the marked den entrance in the Meadow. Your white blade can release the Alpha, and its pack will become our allies. The old supply cache beyond the den will be yours."
+[11:58] SAY Ratchet: "This is a detour. The marble came from the cave; your path to the sages remains open."
+[11:59] STATE DIALOG -> SHOP
+[11:59] SHOP leave
+[12:00] STATE SHOP -> PANELS
+[12:00] MANHWA forge panel 1/3
+[12:01] MANHWA forge panel 2/3
+[12:02] MANHWA forge panel 3/3
+[12:02]   . A0B x=472 y=435 vx=0 on cores=4/7 volts=30 mission=forge held= near=npc:ratchet
+[12:03] STATE PANELS -> PLAY
+[12:03] MISSION DONE forge
+[12:05] FRAME 014-done-forge.png
+[12:05] MISSION sage (objective: "Free the first sage — the door beside the marble quarry")
+[12:05] READY: before GA1D (cores 4/7, save point CV1B) — resting at the pod in CV1B first
+[12:06] DOOR up at 115 -> A0
+[12:10]   . A0B x=103 y=427 vx=0 on cores=4/7 volts=30 mission=sage held=
+[12:10] PLAN reset (room A0B -> A0)
+[12:11] ROOM A0B -> A0  at x=387
+[12:11] TOAST The ones you stopped are still bound — stand over one and cleanse it.
+[12:11] FLAG +pgBound
+[12:11] FLAG +pgBoundN
+[12:11] PLAN room A0: 80 standable tiles, 1125 moves (183 ms)
+[12:17] FRAMES median 83 ms -> planner step 1/30, game time 0.97x wall
+[12:17] PACE sim 51.7 s per 60 s wall (pace dial / slow frames)
+[12:20] PLAN reset (room A0 -> A1)
+[12:20] ROOM A0 -> A1  at x=59
+[12:20]   . A1 x=59 y=432 vx=50 on cores=4/7 volts=30 mission=sage held=
+[12:21] TOAST The ones you stopped are still bound — stand over one and cleanse it.
+[12:21] PLAN room A1: 92 standable tiles, 1411 moves (37 ms)
+[12:26] PLAN reset (room A1 -> A2)
+[12:26] ROOM A1 -> A2  at x=15
+[12:27] PLAN room A2: 113 standable tiles, 1656 moves (40 ms)
+[12:28] PLAN reset (room A2 -> A5)
+[12:28] ROOM A2 -> A5  at x=384
+[12:28] PLAN room A5: 58 standable tiles, 764 moves (23 ms)
+[12:28]   . A5 x=384 y=60 vx=0 on cores=4/7 volts=30 mission=sage held=
+[12:32] DOOR up at 1106 -> CV1
+[12:37]   . A5 x=1094 y=427 vx=0 on cores=4/7 volts=30 mission=sage held=
+[12:41] PLAN reset (room A5 -> CV1)
+[12:41] ROOM A5 -> CV1  at x=167
+[12:41] PLAN room CV1: 74 standable tiles, 806 moves (20 ms)
+[12:45]   . CV1 x=911 y=287 vx=340 air cores=4/7 volts=30 mission=sage held=ArrowRight
+[12:47] DOOR up at 1111 -> CV1B
+[12:53]   . CV1 x=1099 y=459 vx=0 on cores=4/7 volts=30 mission=sage held=
+[12:54] PLAN reset (room CV1 -> CV1B)
+[12:54] ROOM CV1 -> CV1B  at x=142
+[12:54] PLAN room CV1B: 50 standable tiles, 549 moves (61 ms)
+[12:57] REST at the pod in CV1B (cores 4/7, volts 30)
+[13:00] TOAST Systems recharged. Progress saved.
+[13:01]   . CV1B x=892 y=268 vx=340 air cores=7/7 volts=99 mission=sage held=ArrowRight+Space threat={"k":"bat","x":868,"y":174,"w":24,"h":18,"hp":31,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[13:01] FIGHT bat (hp 31) in CV1B
+[13:06] DOOR up at 1120 -> CV2
+[13:09]   . CV1B x=1108 y=284 vx=0 on cores=7/7 volts=99 mission=sage held=
+[13:17]   . CV1B x=1108 y=284 vx=0 on cores=7/7 volts=99 mission=sage held=
+[13:20] FRAMES median 283 ms -> planner step 1/30, game time 0.26x wall
+[13:20] PACE sim 41.5 s per 60 s wall (pace dial / slow frames)
+[13:20] PLAN reset (room CV1B -> CV2)
+[13:20] ROOM CV1B -> CV2  at x=372
+[13:21] PLAN room CV2: 87 standable tiles, 976 moves (72 ms)
+[13:25]   . CV2 x=900 y=452 vx=0 on cores=7/7 volts=99 mission=sage held=
+[13:26] FIGHT bat (hp 29) in CV2
+[13:30] FIGHT bat (hp 6) in CV2
+[13:33]   . CV2 x=1122 y=214 vx=340 air cores=7/7 volts=99 mission=sage held=ArrowRight+Space
+[13:39] PLAN reset (room CV2 -> CV3)
+[13:39] ROOM CV2 -> CV3  at x=21
+[13:39] TOAST The cut face still glows. Beside it, the maintenance passage breathes cold blue light.
+[13:39] FLAG +pgCv3Back
+[13:40] PLAN room CV3: 62 standable tiles, 777 moves (68 ms)
+[13:41]   . CV3 x=515 y=465 vx=340 on cores=7/7 volts=99 mission=sage held=ArrowRight near=rescue:null
+[13:43] DOOR up at 1152 -> GA1T
+[13:49]   . CV3 x=1140 y=459 vx=0 on cores=7/7 volts=99 mission=sage held= near=rescue:null
+[13:53] PLAN reset (room CV3 -> GA1T)
+[13:53] ROOM CV3 -> GA1T  at x=628
+[13:53] PLAN room GA1T: 50 standable tiles, 495 moves (34 ms)
+[13:53] STATE PLAY -> PANELS
+[13:53] MANHWA passage panel 1/2
+[13:54] MANHWA passage panel 2/2
+[13:57] STATE PANELS -> PLAY
+[13:57]   . GA1T x=801 y=279 vx=340 air cores=7/7 volts=99 mission=sage held=Space+ArrowRight
+[14:01] PLAN room GA1D: 52 standable tiles, 576 moves (105 ms)
+[14:01] PLAN reset (room GA1T -> GA1D)
+[14:01] ROOM GA1T -> GA1D  at x=118
+[14:01] SAGE hp=453 dist=858 | cores 7/7 volts 99
+[14:01] PLAN room GA1D: 52 standable tiles, 576 moves (23 ms)
+[14:04] FIGHT bat (hp 49) in GA1D
+[14:04] SAGE hp=453 dist=169 | cores 7/7 volts 99
+[14:06]   . GA1D x=504 y=418 vx=0 air cores=7/7 volts=99 mission=sage held=
+[14:06] HURT 7 -> 6 in GA1D (nearest sage at 23 px)
+[14:07] SAGE hp=432 dist=59 | cores 6/7 volts 99
+[14:08] SAGE ring: jump
+[14:09] FIGHT bat (hp 49) in GA1D
+[14:10] FLAG +sc_GA1D_2
+[14:10] SCRAP 381 -> 426
+[14:10] HURT 6 -> 5 in GA1D (nearest sage at 70 px)
+[14:12] SAGE hp=432 exhale dist=88 | cores 5/7 volts 99
+[14:14]   . GA1D x=450 y=441 vx=0 on cores=5/7 volts=99 mission=sage held=
+[14:15] SAGE hp=403 lunge dist=69 | cores 5/7 volts 99
+[14:16] HURT 5 -> 4 in GA1D (nearest sage at 27 px)
+[14:18] HURT 4 -> 3 in GA1D (nearest sage at 62 px)
+[14:19] FIGHT bat (hp 49) in GA1D
+[14:19] HURT 3 -> 2 in GA1D (nearest bat at 137 px)
+[14:19] SAGE hp=332 exhale dist=105 | cores 2/7 volts 99
+[14:21] FRAMES median 50 ms -> planner step 1/30, game time 0.98x wall
+[14:21] PACE sim 50.6 s per 60 s wall (pace dial / slow frames)
+[14:22] HURT 2 -> 1 in GA1D (nearest sage at 29 px)
+[14:22]   . GA1D x=269 y=453 vx=-57 air cores=1/7 volts=99 mission=sage held=
+[14:23] SAGE hp=219 dist=7 | cores 1/7 volts 99
+[14:24] PLAN reset (death 1 -> 2)
+[14:24] STATE PLAY -> DEAD
+[14:24] DEATH #2 in GA1D (save deaths 2)
+[14:24] HURT 1 -> 0 in GA1D (nearest sage at 22 px)
+[14:24] SCRAP 426 -> 0
+[14:26] PLAN reset (room GA1D -> CV1B)
+[14:26] ROOM GA1D -> CV1B  at x=634
+[14:26] STATE DEAD -> PLAY
+[14:26] TOAST Your husk still stands where you fell — it kept what you were carrying.  (Scrap Meadows)
+[14:26] PLAN room CV1B: 50 standable tiles, 549 moves (33 ms)
+[14:28] FIGHT bat (hp 29) in CV1B
+[14:30]   . CV1B x=931 y=188 vx=-340 on cores=7/7 volts=33 mission=sage held=ArrowLeft threat={"k":"bat","x":870,"y":160,"w":24,"h":18,"hp":29,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[14:32] FIGHT bat (hp 6) in CV1B
+[14:38]   . CV1B x=896 y=156 vx=0 on cores=7/7 volts=55 mission=sage held=ArrowLeft
+[14:43] STUCK trying to reach door to CV2 in CV1B at x=896,y=156
+[14:43] FRAME 015-stuck-CV1B.png
+[14:43] PLAN recovery {"what":"door to CV2","dir":1,"edge":{"room":"CV1B","cur":1,"to":2,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":340}}}
+[14:45] PLAN reset (recovery input)
+[14:45] PLAN room CV1B: 50 standable tiles, 549 moves (43 ms)
+[14:47]   . CV1B x=847 y=364 vx=340 air cores=7/7 volts=55 mission=sage held=ArrowRight+Space
+[14:48] DOOR up at 1120 -> CV2
+[14:52] PLAN reset (room CV1B -> CV2)
+[14:53] ROOM CV1B -> CV2  at x=372
+[14:53] PLAN room CV2: 87 standable tiles, 976 moves (43 ms)
+[14:55]   . CV2 x=785 y=466 vx=340 on cores=7/7 volts=55 mission=sage held=ArrowRight+Space
+[14:56] FIGHT bat (hp 29) in CV2
+[15:02] FIGHT bat (hp 29) in CV2
+[15:04]   . CV2 x=704 y=442 vx=0 on cores=7/7 volts=55 mission=sage held=
+[15:12]   . CV2 x=1736 y=358 vx=300 air cores=7/7 volts=55 mission=sage held=ArrowRight+Space
+[15:20]   . CV2 x=2023 y=444 vx=0 on cores=7/7 volts=55 mission=sage held=
+[15:22] FRAMES median 50 ms -> planner step 1/30, game time 0.30x wall
+[15:22] PACE sim 52.6 s per 60 s wall (pace dial / slow frames)
+[15:22] STUCK trying to reach exit R toward CV3 in CV2 at x=2023,y=444
+[15:23] FRAME 016-stuck-CV2.png
+[15:23] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":37,"exit":"R","walk":1,"dir":0,"program":null}}
+[15:24] PLAN reset (recovery input)
+[15:25] PLAN reset (room CV2 -> CV3)
+[15:25] ROOM CV2 -> CV3  at x=232
+[15:25] PLAN room CV3: 62 standable tiles, 777 moves (101 ms)
+[15:28] DOOR up at 1152 -> GA1T
+[15:28]   . CV3 x=1151 y=459 vx=0 on cores=7/7 volts=55 mission=sage held= near=rescue:null
+[15:33] PLAN reset (room CV3 -> GA1T)
+[15:33] ROOM CV3 -> GA1T  at x=628
+[15:33] PLAN room GA1T: 50 standable tiles, 495 moves (30 ms)
+[15:37]   . GA1T x=952 y=392 vx=0 on cores=7/7 volts=55 mission=sage held=
+[15:45]   . GA1T x=948 y=397 vx=-300 on cores=7/7 volts=55 mission=sage held=ArrowLeft
+[15:49] STUCK trying to reach exit R toward GA1D in GA1T at x=1029,y=359
+[15:51] FRAME 017-stuck-GA1T.png
+[15:51] PLAN recovery {"what":"exit R toward GA1D","dir":1,"edge":{"room":"GA1T","cur":45,"to":12,"exit":null,"walk":0,"dir":1,"program":{"hold":0.12,"d0":0,"d1":9,"vx0":0}}}
+[15:52] PLAN reset (recovery input)
+[15:52] PLAN room GA1T: 50 standable tiles, 495 moves (33 ms)
+[15:53] PLAN reset (room GA1T -> GA1D)
+[15:53] ROOM GA1T -> GA1D  at x=33
+[15:53]   . GA1D x=33 y=390 vx=340 air cores=7/7 volts=55 mission=sage held=
+[15:53] SAGE hp=238 dist=896 | cores 7/7 volts 55
+[15:53] PLAN room GA1D: 52 standable tiles, 576 moves (174 ms)
+[15:56] FIGHT bat (hp 31) in GA1D
+[15:56] SAGE hp=238 gather dist=389 | cores 7/7 volts 55
+[16:01] HURT 7 -> 6 in GA1D (nearest bat at 36 px)
+[16:01] FIGHT bat (hp 31) in GA1D
+[16:01]   . GA1D x=490 y=422 vx=0 air cores=6/7 volts=66 mission=sage held= threat={"k":"bat","x":428,"y":382,"w":24,"h":18,"hp":8,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[16:02] SAGE hp=238 exhale dist=72 | cores 6/7 volts 66
+[16:03] HURT 6 -> 5 in GA1D (nearest sage at 38 px)
+[16:05] TOAST Husk reclaimed!  +426
+[16:05] HURT 5 -> 4 in GA1D (nearest sage at 51 px)
+[16:05] SCRAP 0 -> 426
+[16:05] SAGE hp=96 dist=55 | cores 4/7 volts 99
+[16:09] HURT 4 -> 3 in GA1D (nearest bat at 140 px)
+[16:09] FIGHT bat (hp 8) in GA1D
+[16:10]   . GA1D x=296 y=397 vx=0 air cores=3/7 volts=99 mission=sage held=
+[16:10] SAGE hp=96 dist=-12 | cores 3/7 volts 99
+[16:13] SAGE hp=96 exhale dist=27 | cores 3/7 volts 99
+[16:16] SAGE hp=96 exhale dist=145 | cores 3/7 volts 99
+[16:18]   . GA1D x=324 y=412 vx=0 on cores=3/7 volts=99 mission=sage held= near=rescue:null
+[16:18] SAGE ring: jump
+[16:19] SAGE hp=96 ring=123 dist=58 | cores 3/7 volts 99
+[16:21] HURT 3 -> 2 in GA1D (nearest bat at 22 px)
+[16:22] SAGE hp=96 dist=21 | cores 2/7 volts 99
+[16:23] FRAMES median 50 ms -> planner step 1/30, game time 0.94x wall
+[16:23] PACE sim 43.2 s per 60 s wall (pace dial / slow frames)
+[16:23] HEAL (cores 2/7, volts 99)
+[16:25] SAGE hp=75 coil dist=40 | cores 3/7 volts 66
+[16:26] HURT 3 -> 2 in GA1D (nearest sage at 209 px)
+[16:26]   . GA1D x=224 y=222 vx=0 air cores=2/7 volts=66 mission=sage held=
+[16:27] TOAST The sage kneels — the song holds its body together. Broken, but not CLEAN.
+[16:27] FLAG +sgLockSeen
+[16:27] HEAL (cores 2/7, volts 77)
+[16:29] HEAL (cores 2/7, volts 44)
+[16:31] SAGE hp=107.10000000000001 SONG-LOCKED purity=0.00 dist=17 | cores 3/7 volts 11
+[16:33] STATE PLAY -> DIALOG
+[16:33] OBJECTIVE "Silence the bell: the climb at the meadow hub's west end"
+[16:33] TOAST The sage kneels — the song holds its body together. Broken, but not CLEAN. / The Meadow Sage is rescued, not destroyed — and this cave lays down its orders. / Far above the meadow, the ward over the climb comes apart.
+[16:33] FLAG +sageTame_GA1D
+[16:33] FLAG +sageGift_GA1D
+[16:33] FLAG +chimeRevealed
+[16:33] SAY ACQUIRED: "THE MEADOW SAGE — It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light."
+[16:33] ITEMS {"batt":1}
+[16:34]   . GA1D x=269 y=466 vx=299 on cores=3/7 volts=11 mission=sage held=
+[16:34] SAY A SAGE, PURIFIED: "I called for the ones who had not answered. The order made me call louder."
+[16:35] SAY A SAGE, PURIFIED: "Every answer told it where another survivor was hiding."
+[16:38] SAY A SAGE, PURIFIED: "NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it."
+[16:39] SAY A SAGE, PURIFIED: "Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet."
+[16:41] STATE DIALOG -> PANELS
+[16:41] MANHWA sage panel 1/6
+[16:42]   . GA1D x=269 y=466 vx=0 on cores=3/7 volts=11 mission=sage held=
+[16:45] MANHWA sage panel 2/6
+[16:47] MANHWA sage panel 3/6
+[16:49] MANHWA sage panel 4/6
+[16:50] MANHWA sage panel 5/6
+[16:50]   . GA1D x=269 y=466 vx=0 on cores=3/7 volts=11 mission=sage held=
+[16:53] MANHWA sage panel 6/6
+[16:55] STATE PANELS -> PLAY
+[16:55] MISSION DONE sage
+[16:56] FRAME 018-done-sage.png
+[16:56] MISSION chime (objective: "Silence the bell: the climb at the meadow hub's west end")
+[16:56] READY: before A9 (cores 3/7, save point CV1B) — resting at the pod in A3 first
+[16:56] TOAST The Meadow Sage is rescued, not destroyed — and this cave lays down its orders. / Far above the meadow, the ward over the climb comes apart.
+[16:58]   . GA1D x=296 y=451 vx=0 on cores=3/7 volts=11 mission=chime held=ArrowRight
+[16:59] PLAN reset (room GA1D -> GA1T)
+[16:59] ROOM GA1D -> GA1T  at x=1246
+[17:00] PLAN room GA1T: 50 standable tiles, 495 moves (13 ms)
+[17:01] TOAST The Meadow Sage is rescued, not destroyed — and this cave lays down its orders.
+[17:04] DOOR up at 640 -> CV3
+[17:06]   . GA1T x=628 y=463 vx=0 on cores=3/7 volts=11 mission=chime held= near=term:6
+[17:08] PLAN reset (room GA1T -> CV3)
+[17:09] ROOM GA1T -> CV3  at x=1140
+[17:10] PLAN room CV3: 62 standable tiles, 777 moves (449 ms)
+[17:14]   . CV3 x=508 y=466 vx=-340 on cores=3/7 volts=11 mission=chime held=ArrowLeft near=rescue:null
+[17:16] PLAN room CV2: 87 standable tiles, 976 moves (48 ms)
+[17:17] PLAN reset (room CV3 -> CV2)
+[17:17] ROOM CV3 -> CV2  at x=1946
+[17:17] PLAN room CV2: 87 standable tiles, 976 moves (51 ms)
+[17:23]   . CV2 x=982 y=397 vx=-340 air cores=3/7 volts=11 mission=chime held=ArrowLeft+Space
+[17:23] FIGHT bat (hp 54) in CV2
+[17:24] FRAMES median 50 ms -> planner step 1/30, game time 0.70x wall
+[17:24] PACE sim 44.3 s per 60 s wall (pace dial / slow frames)
+[17:30] PLAN room CV1: 74 standable tiles, 806 moves (41 ms)
+[17:30] PLAN reset (room CV2 -> CV1)
+[17:30] ROOM CV2 -> CV1  at x=1667
+[17:30] PLAN room CV1: 74 standable tiles, 806 moves (45 ms)
+[17:31]   . CV1 x=1561 y=267 vx=-340 air cores=3/7 volts=11 mission=chime held=ArrowLeft+Space
+[17:38] DOOR up at 179 -> A5
+[17:39]   . CV1 x=167 y=458 vx=0 on cores=3/7 volts=11 mission=chime held=
+[17:42] PLAN reset (room CV1 -> A5)
+[17:42] ROOM CV1 -> A5  at x=1094
+[17:42] PLAN room A5: 58 standable tiles, 764 moves (29 ms)
+[17:47] PLAN room A2: 113 standable tiles, 1656 moves (53 ms)
+[17:47] PLAN reset (room A5 -> A2)
+[17:47] ROOM A5 -> A2  at x=424
+[17:47] FLAG +nfBreak
+[17:47]   . A2 x=424 y=357 vx=-150 air cores=3/7 volts=11 mission=chime held=
+[17:47] BEAT NULLFANG's break plays in A2 — watching
+[17:48] FRAME 019-nullfang-break.png
+[17:48] PLAN reset (room A2 -> A5)
+[17:48] ROOM A2 -> A5  at x=389
+[17:48] PLAN room A5: 58 standable tiles, 764 moves (32 ms)
+[17:50] PLAN room A2: 113 standable tiles, 1656 moves (52 ms)
+[17:50] PLAN reset (room A5 -> A2)
+[17:50] ROOM A5 -> A2  at x=415
+[17:50] STATE PLAY -> PANELS
+[17:50] MANHWA break panel 1/2
+[17:51] MANHWA break panel 2/2
+[17:53] STATE PANELS -> PLAY
+[17:53] PLAN room A2: 113 standable tiles, 1656 moves (47 ms)
+[17:54] PLAN reset (room A2 -> A5)
+[17:54] ROOM A2 -> A5  at x=415
+[17:54] PLAN room A5: 58 standable tiles, 764 moves (23 ms)
+[17:55] PLAN room A2: 113 standable tiles, 1656 moves (76 ms)
+[17:55] PLAN reset (room A5 -> A2)
+[17:55] ROOM A5 -> A2  at x=406
+[17:55] PLAN room A2: 113 standable tiles, 1656 moves (41 ms)
+[17:55]   . A2 x=474 y=436 vx=340 on cores=3/7 volts=11 mission=chime held=ArrowRight
+[18:00] HURT 3 -> 2 in A2 (nearest crawler at 82 px)
+[18:03]   . A2 x=671 y=431 vx=0 on cores=2/7 volts=11 mission=chime held= near=rescue:null
+[18:05] HURT 2 -> 1 in A2 (nearest crawler at 70 px)
+[18:07] PLAN reset (death 2 -> 3)
+[18:07] STATE PLAY -> DEAD
+[18:07] DEATH #3 in A2 (save deaths 3)
+[18:07] HURT 1 -> 0 in A2 (nearest guard at 203 px)
+[18:07] SCRAP 426 -> 0
+[18:09] PLAN reset (room A2 -> CV1B)
+[18:09] ROOM A2 -> CV1B  at x=634
+[18:09] STATE DEAD -> PLAY
+[18:09] TOAST Your husk still stands where you fell — it kept what you were carrying.  (Scrap Meadows)
+[18:10] PLAN room CV1B: 50 standable tiles, 549 moves (17 ms)
+[18:11]   . CV1B x=269 y=288 vx=-340 air cores=7/7 volts=33 mission=chime held=ArrowLeft+Space
+[18:12] DOOR up at 154 -> CV1
+[18:17] PLAN reset (room CV1B -> CV1)
+[18:17] ROOM CV1B -> CV1  at x=1099
+[18:17] PLAN room CV1: 74 standable tiles, 806 moves (24 ms)
+[18:20]   . CV1 x=609 y=371 vx=-340 air cores=7/7 volts=33 mission=chime held=ArrowLeft+Space
+[18:22] DOOR up at 179 -> A5
+[18:26] FRAMES median 117 ms -> planner step 1/30, game time 0.87x wall
+[18:26] PACE sim 58.2 s per 60 s wall (pace dial / slow frames)
+[18:27] PLAN reset (room CV1 -> A5)
+[18:27] ROOM CV1 -> A5  at x=1094
+[18:27] PLAN room A5: 58 standable tiles, 764 moves (26 ms)
+[18:28]   . A5 x=1088 y=430 vx=-150 on cores=7/7 volts=33 mission=chime held=ArrowLeft
+[18:36]   . A5 x=275 y=207 vx=340 air cores=7/7 volts=33 mission=chime held=ArrowRight+Space
+[18:40] PLAN reset (room A5 -> A2)
+[18:40] ROOM A5 -> A2  at x=456
+[18:41] PLAN room A2: 113 standable tiles, 1656 moves (48 ms)
+[18:44] HURT 7 -> 6 in A2 (nearest crawler at 204 px)
+[18:44] PLAN room A5: 58 standable tiles, 764 moves (56 ms)
+[18:44] no way from A2 to A3
+[18:45] PLAN reset (room A2 -> A5)
+[18:45] ROOM A2 -> A5  at x=456
+[18:45]   . A5 x=456 y=60 vx=0 on cores=6/7 volts=33 mission=chime held=
+[18:45] PLAN room A5: 58 standable tiles, 764 moves (26 ms)
+[18:45] PLAN room A2: 113 standable tiles, 1656 moves (40 ms)
+[18:45] PLAN reset (room A5 -> A2)
+[18:45] ROOM A5 -> A2  at x=347
+[18:46] PLAN room A2: 113 standable tiles, 1656 moves (48 ms)
+[18:46] PLAN room A5: 58 standable tiles, 764 moves (22 ms)
+[18:46] PLAN reset (room A2 -> A5)
+[18:46] ROOM A2 -> A5  at x=487
+[18:47] PLAN room A5: 58 standable tiles, 764 moves (27 ms)
+[18:53]   . A5 x=274 y=247 vx=340 air cores=6/7 volts=33 mission=chime held=ArrowRight+Space
+[18:56] PLAN room A2: 113 standable tiles, 1656 moves (56 ms)
+[18:57] PLAN reset (room A5 -> A2)
+[18:57] ROOM A5 -> A2  at x=370
+[18:57] PLAN room A2: 113 standable tiles, 1656 moves (51 ms)
+[18:57] PLAN reset (room A2 -> A5)
+[18:57] ROOM A2 -> A5  at x=456
+[18:57] PLAN room A5: 58 standable tiles, 764 moves (28 ms)
+[19:01] PLAN room A2: 113 standable tiles, 1656 moves (88 ms)
+[19:01] PLAN reset (room A5 -> A2)
+[19:01] ROOM A5 -> A2  at x=504
+[19:01]   . A2 x=504 y=358 vx=340 air cores=6/7 volts=33 mission=chime held=
+[19:02] PLAN room A2: 113 standable tiles, 1656 moves (81 ms)
+[19:03] HURT 6 -> 5 in A2 (nearest crawler at 75 px)
+[19:05] HURT 5 -> 4 in A2 (nearest crawler at 70 px)
+[19:05] HEAL (cores 4/7, volts 33)
+[19:09] HURT 5 -> 4 in A2 (nearest crawler at 64 px)
+[19:09]   . A2 x=787 y=278 vx=200 air cores=4/7 volts=0 mission=chime held=Space+ArrowRight
+[19:10] TOAST Husk reclaimed!  +426
+[19:10] SCRAP 0 -> 426
+[19:12] FIGHT hopper (hp 31) in A2
+[19:13] HURT 4 -> 3 in A2 (nearest hopper at 144 px)
+[19:17]   . A2 x=2428 y=116 vx=340 air cores=3/7 volts=11 mission=chime held=Space+ArrowRight
+[19:19] PLAN reset (room A2 -> A3)
+[19:19] ROOM A2 -> A3  at x=27
+[19:19] PLAN room A3: 68 standable tiles, 950 moves (53 ms)
+[19:20] REST at the pod in A3 (cores 3/7, volts 11)
+[19:21] SAVEPOINT CV1B -> A3
+[19:23] TOAST Systems recharged. Progress saved.
+[19:25] PLAN room A2: 113 standable tiles, 1656 moves (66 ms)
+[19:25] PLAN reset (room A3 -> A2)
+[19:25] ROOM A3 -> A2  at x=2703
+[19:25]   . A2 x=2703 y=408 vx=-340 on cores=7/7 volts=99 mission=chime held=
+[19:26] PLAN room A2: 113 standable tiles, 1656 moves (55 ms)
+[19:27] FRAMES median 67 ms -> planner step 1/30, game time 0.97x wall
+[19:27] PACE sim 59.3 s per 60 s wall (pace dial / slow frames)
+[19:34]   . A2 x=787 y=257 vx=-340 air cores=7/7 volts=99 mission=chime held=ArrowLeft+Space
+[19:35] PLAN reset (room A2 -> A8)
+[19:35] ROOM A2 -> A8  at x=371
+[19:36] PLAN room A8: 92 standable tiles, 1350 moves (58 ms)
+[19:36] FIGHT crawler (hp 26) in A8
+[19:37] FLAG +sc_A8_2
+[19:37] SCRAP 426 -> 456
+[19:37] HURT 7 -> 6 in A8 (nearest crawler at 30 px)
+[19:39] PLAN room A2: 113 standable tiles, 1656 moves (57 ms)
+[19:39] PLAN reset (room A8 -> A2)
+[19:39] ROOM A8 -> A2  at x=434
+[19:39] PLAN room A2: 113 standable tiles, 1656 moves (52 ms)
+[19:39] PLAN reset (room A2 -> A8)
+[19:39] ROOM A2 -> A8  at x=394
+[19:39] PLAN room A8: 92 standable tiles, 1350 moves (78 ms)
+[19:41] FIGHT flier (hp 21) in A8
+[19:42]   . A8 x=382 y=481 vx=0 air cores=6/7 volts=99 mission=chime held=
+[19:50] PLAN reset (room A8 -> A9)
+[19:50] ROOM A8 -> A9  at x=446
+[19:50]   . A9 x=446 y=472 vx=0 air cores=6/7 volts=99 mission=chime held=
+[19:50] TOAST CHIME — it is singing at you
+[19:50] CHIME st=idle hp=146 dx=336 dy=-2 | cores 6/7 volts 99
+[19:51] PLAN room A9: 51 standable tiles, 704 moves (49 ms)
+[19:51] CHIME in burst range (181 px): Volt Burst
+[19:53] CHIME in burst range (125 px): Volt Burst
+[19:55] CHIME st=rest hp=2 dx=11 dy=-124 | cores 6/7 volts 71
+[19:55] CHIME in burst range (125 px): Volt Burst
+[19:57] STATE PLAY -> DIALOG
+[19:57] SAY ACQUIRED: "EVOLUTION — MK-II Frame — Your chassis has grown: reinforced shoulder plating locks into place. You look tougher — because you are."
+[19:57] STATE DIALOG -> PLAY
+[19:57] CHIME in burst range (130 px): Volt Burst
+[19:59] SCRAP 456 -> 467
+[19:59]   . A9 x=649 y=430 vx=0 on cores=6/7 volts=32 mission=chime held=
+[19:59] CHIME st=rest hp=-58 dx=33 dy=-125 | cores 6/7 volts 32
+[19:59] CHIME in burst range (129 px): Volt Burst
+[20:01] STATE PLAY -> DIALOG
+[20:01] OBJECTIVE "Free NULLFANG in his enclosure past the camp"
+[20:01] FLAG +bossChime
+[20:01] SAY ACQUIRED: "Power Cell — A charged cell. Seated in a switched-off machine, it wakes them."
+[20:01] SCRAP 467 -> 507
+[20:01] ITEMS {"batt":2}
+[20:02] STATE DIALOG -> PLAY
+[20:02] MISSION DONE chime
+[20:02] FRAME 020-done-chime.png
+[20:02] MISSION lion (objective: "Free NULLFANG in his enclosure past the camp")
+[20:02] STATE PLAY -> PANELS
+[20:02] MANHWA chime panel 1/3
+[20:03] MANHWA chime panel 2/3
+[20:05] MANHWA chime panel 3/3
+[20:07] STATE PANELS -> PLAY
+[20:07]   . A9 x=649 y=430 vx=0 on cores=6/7 volts=32 mission=lion held=
+[20:08] SCRAP 507 -> 509
+[20:09] SCRAP 509 -> 517
+[20:09] SCRAP 517 -> 520
+[20:09] SCRAP 520 -> 522
+[20:09] SCRAP 522 -> 526
+[20:13] PLAN reset (room A9 -> A8)
+[20:13] ROOM A9 -> A8  at x=370
+[20:13] PLAN room A8: 92 standable tiles, 1350 moves (37 ms)
+[20:14] PLAN reset (room A8 -> A2)
+[20:14] ROOM A8 -> A2  at x=352
+[20:14] PLAN room A2: 113 standable tiles, 1656 moves (55 ms)
+[20:15]   . A2 x=715 y=441 vx=146 on cores=6/7 volts=32 mission=lion held=Space
+[20:18] HURT 6 -> 5 in A2 (nearest crawler at 73 px)
+[20:23]   . A2 x=2113 y=310 vx=340 air cores=5/7 volts=32 mission=lion held=ArrowRight
+[20:26] PLAN reset (room A2 -> A3)
+[20:26] ROOM A2 -> A3  at x=16
+[20:27] PLAN room A3: 68 standable tiles, 950 moves (42 ms)
+[20:28] FRAMES median 50 ms -> planner step 1/30, game time 0.96x wall
+[20:28] PACE sim 54.1 s per 60 s wall (pace dial / slow frames)
+[20:31]   . A3 x=1347 y=147 vx=340 air cores=5/7 volts=32 mission=lion held=ArrowRight+Space
+[20:33] PLAN reset (room A3 -> A4)
+[20:33] ROOM A3 -> A4  at x=10
+[20:36] NULLFANG st=dorm hp=247 dist=704 | cores 5/7 volts 32
+[20:36] PLAN room A4: 53 standable tiles, 773 moves (27 ms)
+[20:37] TOAST It remembers the corridor.
+[20:39] NULLFANG st=intro hp=247 dist=47 | cores 5/7 volts 32
+[20:39]   . A4 x=675 y=436 vx=200 on cores=5/7 volts=32 mission=lion held=ArrowRight
+[20:41] HURT 5 -> 4 in A4 (nearest glitch/swipewarn at 107 px)
+[20:42] HURT 4 -> 3 in A4 (nearest glitch/idle at 57 px)
+[20:43] NULLFANG st=swipewarn hp=155 dist=78 | cores 3/7 volts 76
+[20:44] HURT 3 -> 2 in A4 (nearest glitch/idle at 90 px)
+[20:46] TOAST ⚡ NULLFANG is reeling — hit it NOW
+[20:46] HURT 2 -> 1 in A4 (nearest glitch/daze at 65 px)
+[20:46] NULLFANG st=daze hp=32 dist=22 | cores 1/7 volts 99
+[20:47] STATE PLAY -> PURIFY
+[20:49]   . A4 x=709 y=431 vx=0 air cores=1/7 volts=99 mission=lion held=
+[20:52] STATE PURIFY -> CUT
+[20:52] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you.
+[20:57]   . A4 x=709 y=431 vx=0 air cores=1/7 volts=99 mission=lion held=
+[21:05] STATE CUT -> DIALOG
+[21:05] OBJECTIVE "Climb to the Data Conduits above the camp"
+[21:05] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[21:05] FLAG +bossGlitch
+[21:05] FLAG +oath
+[21:05] SAY ACQUIRED: "Dash Jets — Press C or Shift — twin combustion jets ignite at your feet and hurl you forward." [card bootsIdle]
+[21:05] ITEMS {"batt":3}
+[21:06] SAY ACQUIRED: "Power Cell — A charged cell. Seated in a switched-off machine, it wakes them."
+[21:06]   . A4 x=709 y=431 vx=0 air cores=1/7 volts=99 mission=lion held=
+[21:07] SAY ACQUIRED: "SCRAPPLATE — Shard Volley — A cone of magnetised shrapnel. Grounds anything arcing.  —  V or K fires it, G changes suit"
+[21:08] STATE DIALOG -> PLAY
+[21:08] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy. / GRAPPLE CLAW online — press U
+[21:08] FLAG +grapSeen
+[21:08] SCRAP 526 -> 529
+[21:08] LESSON chip: dash — doing it
+[21:09] FRAME 021-lesson-dash.png
+[21:09] STATE PLAY -> DIALOG
+[21:09] SAY ACQUIRED: "NULLFANG'S OATH — Once each room, the blow that would break you is answered instead — it comes out of the dark and roars them off you."
+[21:09] SCRAP 529 -> 537
+[21:10] STATE DIALOG -> PLAY
+[21:11] SCRAP 537 -> 551
+[21:12] LINGER for the free panels in A4
+[21:13] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[21:14]   . A4 x=1352 y=424 vx=0 on cores=1/7 volts=99 mission=lion held=
+[21:15] HEAL (cores 1/7, volts 99)
+[21:16] STATE PLAY -> PANELS
+[21:16] MANHWA free panel 1/4
+[21:16] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[21:16] FLAG +les_dash
+[21:18] MANHWA free panel 2/4
+[21:19] MANHWA free panel 3/4
+[21:20] MANHWA free panel 4/4
+[21:22]   . A4 x=1352 y=424 vx=0 on cores=1/7 volts=99 mission=lion held=
+[21:22] STATE PANELS -> PLAY
+[21:22] MISSION DONE lion
+[21:23] FRAME 022-done-lion.png
+[21:23] MISSION teaser (objective: "Climb to the Data Conduits above the camp")
+[21:23] HEAL (cores 1/7, volts 99)
+[21:25] HEAL (cores 2/7, volts 66)
+[21:27] HEAL (cores 3/7, volts 33)
+[21:30] FRAMES median 83 ms -> planner step 1/30, game time 0.99x wall
+[21:30] PACE sim 58.3 s per 60 s wall (pace dial / slow frames)
+[21:30]   . A4 x=1352 y=424 vx=0 on cores=4/7 volts=0 mission=teaser held=ArrowLeft+Space
+[21:33] SCRAP 551 -> 554
+[21:36] SCRAP 554 -> 556
+[21:38]   . A4 x=13 y=436 vx=-195 on cores=4/7 volts=0 mission=teaser held=
+[21:39] PLAN reset (room A4 -> A3)
+[21:39] ROOM A4 -> A3  at x=1611
+[21:39] PLAN room A3: 68 standable tiles, 938 moves (28 ms)
+[21:43] FLAG +ch2Climb
+[21:46] PLAN reset (room A3 -> B1)
+[21:46] ROOM A3 -> B1  at x=884
+[21:46] OBJECTIVE "null"
+[21:46]   . B1 x=884 y=519 vx=-4 air cores=4/7 volts=0 mission=teaser held=
+[21:46] LINGER for the ch2 panels in B1
+[21:46] STATE PLAY -> PANELS
+[21:46] MANHWA ch2 panel 1/5
+[21:49] MANHWA ch2 panel 2/5
+[21:51] MANHWA ch2 panel 3/5
+[21:52] MANHWA ch2 panel 4/5
+[21:54] MANHWA ch2 panel 5/5
+[21:54]   . B1 x=884 y=519 vx=0 air cores=4/7 volts=0 mission=teaser held=
+[21:56] STATE PANELS -> PLAY
+[21:56] MISSION DONE teaser
+[21:56] FRAME 023-done-teaser.png
+[21:57] FRAME 024-end.png
+[21:57] MANHWA seen: wake, bay, gate, letter, drawer, ratchet, meet, cave, marble, forge, passage, sage, break, chime, free, ch2
+[21:57] RESULT complete  wall 21:57  deaths 3  missions opening,servo,first-meeting,marble,forge,sage,chime,lion,teaser  stuck 7  page errors 0

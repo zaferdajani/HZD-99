@@ -253,7 +253,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   {
     const still = await chargeAt(null);
     check('standing in the charge costs a core (the control)', still.lost >= 1, 'lost ' + still.lost);
-    const jump = await chargeAt(0.25);
+    // Polling can deliver a 0.25 s request at ~0.19 s on a loaded audit host,
+    // which is before the measured clear window below. Ask inside the stable
+    // 0.30-0.52 s take-off window so this assertion tests the player's real
+    // jumpable response instead of scheduler latency.
+    const jump = await chargeAt(0.36);
     check('a keyboard jump at the right moment clears him: no core lost', jump.lost === 0 && !!jump.jumped,
       'jumped at time-to-contact ' + (jump.jumped && jump.jumped.ttc) + ' s, charge ' + (jump.jumped && jump.jumped.vx) + ' px/s');
     check('...and she lands behind him', jump.behind);
@@ -373,22 +377,43 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // THE PERFECT GUARD turns the same toss (js/parry.js): the brace raised in
     // the instant it lands, not held through the wind-up
     const guardWith = async (raiseAt) => {
-      await page.evaluate(() => { T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40); G.boss.parries = 0; player.parryLockT = 0; T.go('tossprep', GH.tossTell); });
+      // Schedule the real key event from the simulation step. An external poll
+      // can miss the entire 450 ms wind-up when the audit host is loaded,
+      // producing no input at all rather than testing the perfect guard.
+      await page.evaluate((at) => {
+        const orig = window.__ghGuardStepOrig || (window.__ghGuardStepOrig = ghStep);
+        window.__ghGuardRaised = null;
+        window.__ghGuardUpAtToss = null;
+        window.ghStep = function (b, dt) {
+          const r = orig(b, dt);
+          if (window.__ghGuardRaised == null && b.st === 'tossprep' && b.t <= at) {
+            window.__ghGuardRaised = +b.t.toFixed(3);
+            setTimeout(() => dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyL' })), 0);
+          }
+          if (window.__ghGuardUpAtToss == null && b.st === 'toss') {
+            window.__ghGuardUpAtToss = player.guardT > 0;
+          }
+          return r;
+        };
+        T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40);
+        G.boss.parries = 0; player.parryLockT = 0; T.go('tossprep', GH.tossTell);
+      }, raiseAt);
       const c0 = (await S()).cores;
-      let raised = null, upAtToss = null;
       const t0 = Date.now();
       while (Date.now() - t0 < 2500) {
         const s = await S();
-        if (!raised && s.st === 'tossprep' && s.t <= raiseAt) { raised = +s.t.toFixed(3); await page.keyboard.down('KeyL'); }
-        if (upAtToss == null && s.st === 'toss') upAtToss = await page.evaluate(() => player.guardT > 0);
         if (['stagger', 'tossrecover'].includes(s.st)) break;
         await sleep(3);
       }
       await sleep(150);
-      await page.keyboard.up('KeyL');
+      await page.evaluate(() => dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyL' })));
+      const input = await page.evaluate(() => {
+        window.ghStep = window.__ghGuardStepOrig;
+        return { raised: window.__ghGuardRaised, upAtToss: window.__ghGuardUpAtToss };
+      });
       const s = await S();
       const glint = await page.evaluate(() => !!(player.counterT > 0 || player.counterAct));
-      return { lost: c0 - s.cores, st: s.st, parries: s.parries, raised, counter: glint, upAtToss: upAtToss !== false };
+      return { lost: c0 - s.cores, st: s.st, parries: s.parries, raised: input.raised, counter: glint, upAtToss: input.upAtToss !== false };
     };
     // A loaded machine can deliver the toss's first frames before the keydown
     // is seen; that run never raised the brace in time and did not test the
@@ -425,7 +450,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const lockAt = fly.find(r => r[2]);
     const after = fly.filter(r => r[2]);
     const turnAfter = after.length > 2 ? Math.max(...after.map(r => Math.abs(r[3] - after[0][3]))) : 0;
-    check('it homes, then LOCKS ~0.35 s after launch (the cyan flash)', !!lockAt && lockAt[0] - fly[0][0] >= 0.3 && lockAt[0] - fly[0][0] <= 0.45,
+    // The recorded 60 Hz samples can straddle 0.300 s by one floating-point
+    // tick while printing as 300 ms. Keep the same ~0.35 s contract with a
+    // 10 ms numerical tolerance at the lower bound.
+    check('it homes, then LOCKS ~0.35 s after launch (the cyan flash)', !!lockAt && lockAt[0] - fly[0][0] >= 0.29 && lockAt[0] - fly[0][0] <= 0.45,
       lockAt ? Math.round((lockAt[0] - fly[0][0]) * 1000) + ' ms' : 'never');
     check('...and after the lock it flies STRAIGHT (dodging works)', after.length > 2 && turnAfter < 0.02, 'heading drift ' + turnAfter.toFixed(4) + ' rad');
     // the head, hornless, bites deeper: a keyboard strike on it against one on his flank
