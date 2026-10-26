@@ -1,0 +1,21 @@
+
+── slashsnd  — the claw: onset, separate passes, heavy third hit
+player exists: true
+slash beat 1   {"peak":0.067,"onsetMs":0,"lenMs":77,"passes":6,"at":[2,21,28,34,40,46],"edgeKHz":2.3}
+slash beat 2   {"peak":0.062,"onsetMs":1,"lenMs":79,"passes":4,"at":[4,22,29,38],"edgeKHz":2.3}
+slash beat 3   {"peak":0.141,"onsetMs":2,"lenMs":160,"passes":8,"at":[4,22,29,39,45,51],"edgeKHz":1.8}
+(ref) hit      {"peak":0.132,"onsetMs":0,"lenMs":38,"passes":0,"at":[],"edgeKHz":0.4}
+(ref) jump     {"peak":0.081,"onsetMs":3,"lenMs":126,"passes":3,"at":[4,18,52],"edgeKHz":2}
+(ref) dash     {"peak":0.066,"onsetMs":0,"lenMs":162,"passes":8,"at":[4,10,18,34,40,65],"edgeKHz":1.2}
+wClaw          {"centroid":798,"ringHz":242,"ringAmp":0.001}
+wCrystal       {"centroid":1632,"ringHz":2020,"ringAmp":0.006}
+wDouble        {"centroid":1027,"ringHz":1012,"ringAmp":0.012}
+join           {"centroid":1382,"ringHz":1746,"ringAmp":0.071}
+ok   single crystal sustains a glass ring the claw lacks  claw 0.001 vs crystal 0.006 @2020Hz
+ok   the double's ring sits below the single's  1012 vs 2020 Hz
+ok   no two weapons share a spectral centre (>=12% apart)  claw 798Hz, crystal 1632Hz, double 1027Hz
+ok   the join sting exists and rings  ringAmp 0.071
+pageerrors: none
+   (slashsnd: 4.9 s)
+
+all 1 harnesses ran

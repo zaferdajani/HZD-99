@@ -1,0 +1,35 @@
+{
+  "source": "embedded closed-file snapshots in automated/results.json",
+  "reason": "four raw logs were overwritten after capture during the aggregate run; original aggregate log-integrity failure remains preserved",
+  "restored": [
+    {
+      "name": "marble-notices",
+      "log": "marble-notices.log",
+      "bytes": 5253,
+      "sha256": "fab3c033635185d6ce49f53ea75a5d08366c6075aedfeb2c146b42253d00c870",
+      "matches_record": true
+    },
+    {
+      "name": "winch-purpose",
+      "log": "winch-purpose.log",
+      "bytes": 5165,
+      "sha256": "72c43ca7e06da366a97a20916e3867904eadeaae27cac81ca99035f3c286e18a",
+      "matches_record": true
+    },
+    {
+      "name": "visual-depth",
+      "log": "visual-depth.log",
+      "bytes": 225,
+      "sha256": "b2351bfec4bf50a8b47687be5bb42174c8f6401569f0add9af296cf262821a6f",
+      "matches_record": true
+    },
+    {
+      "name": "deadend",
+      "log": "deadend.log",
+      "bytes": 899,
+      "sha256": "df867c2dbe5aefea023cb281f313ee1f0b8208da6399b5fb76608e6bbfb68d53",
+      "matches_record": true
+    }
+  ],
+  "all_match": true
+}

@@ -1,0 +1,16 @@
+
+── slashlayer  — her cuts on their own layer, drawn after her, with a glow copy on the dial
+── slashlayer — her cuts on their own layer, drawn after her, with a glow copy on the dial
+
+  ok   the authored scratch strip is loaded
+  ok   a swing draws its cut on the slash layer  {"frames":3,"base":true,"glow":true}
+  ok   ...never inside her body pass  rakes drawn inside Player.draw: 0
+  ok   the glow copy rides on top when the dial spends glow  {"frames":3,"base":true,"glow":true}
+  ok   ...and is skipped when it does not  {"frames":4,"glow":false}
+  ok   the copy adds light round the stroke (a wider lit area, more light in total)  {"base":{"n":1742,"sum":192662},"both":{"n":2502,"sum":304995}}
+  ok   no page errors
+
+all good
+   (slashlayer: 8.4 s)
+
+all 1 harnesses ran

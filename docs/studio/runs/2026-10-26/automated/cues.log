@@ -1,0 +1,15 @@
+
+── cues  — level, onset and length of each melodic cue
+jump   {"peak":0.081,"onsetMs":3,"lenMs":126,"notes":["C6(-0.35)","C6(0.06)"]}
+djump  {"peak":0.068,"onsetMs":2,"lenMs":176,"notes":["E6(-0.28)","G6(0.08)","G6(0.08)"]}
+land   {"peak":0.082,"onsetMs":0,"lenMs":141,"notes":["E5(-0.03)","C5(0.06)"]}
+dash   {"peak":0.065,"onsetMs":0,"lenMs":162,"notes":["E5(-0.03)","G5(0.08)","A5(0.04)","A5(0.04)"]}
+pick   {"peak":0.083,"onsetMs":3,"lenMs":173,"notes":["A5(0.04)","E6(0.23)"]}
+heal   {"peak":0.07,"onsetMs":3,"lenMs":400,"notes":["C5(0.06)","E5(-0.03)","G5(0.08)","C6(0.06)"]}
+chest  {"peak":0.099,"onsetMs":3,"lenMs":520,"notes":["C5(0.06)","E5(-0.03)","G5(0.08)","A5(0.04)","C5(0.06)"]}
+hurt   {"peak":0.076,"onsetMs":2,"lenMs":237,"notes":["C3(0.21)","C5(0.06)","C5(0.06)","A4(0.04)"]}
+edie   {"peak":0.094,"onsetMs":3,"lenMs":198,"notes":["G5(0.08)","E5(0.23)","C5(0.06)","C5(0.06)"]}
+pageerrors: none
+   (cues: 4.9 s)
+
+all 1 harnesses ran

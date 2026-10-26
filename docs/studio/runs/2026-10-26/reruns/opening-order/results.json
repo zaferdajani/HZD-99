@@ -1,0 +1,78 @@
+{
+  "started_utc": "2026-10-26T10:37:28.676205+00:00",
+  "base_commit": "daeff2977bc9ee614db2836bb1728a652a8f9907",
+  "dirty_at_start": "M docs/combat/impact-2026-10-16/input/result.json\n M docs/combat/impact-2026-10-16/visual/after.png\n M docs/combat/impact-2026-10-16/visual/before.png\n M docs/combat/impact-2026-10-16/visual/during.png\n M docs/combat/impact-2026-10-16/visual/gear.png\n M docs/combat/impact-2026-10-16/visual/result.json\n M docs/combat/purification-2026-10-16/contract.json\n M docs/combat/purification-2026-10-16/controls.json\n M docs/combat/purification-2026-10-16/screens/extract.png\n M docs/combat/purification-2026-10-16/screens/gather.png\n M docs/combat/purification-2026-10-16/screens/mobile-button.png\n M docs/combat/purification-2026-10-16/screens/movie.png\n M docs/combat/purification-2026-10-16/screens/prompt.png\n M docs/combat/purification-2026-10-16/screens/restored.png\n M docs/combat/purification-2026-10-16/screens/slash.png\n M docs/studio/runs/2026-10-11/images/winch-after-burst.png\n M docs/studio/runs/2026-10-11/images/winch-strike-scrap.png\n M tests/gravehorn.cjs\n M tests/purification-save.cjs\n?? docs/studio/runs/2026-10-26/\n?? tools/studio/__pycache__/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.515411,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "94ec86705491aeddd54146b53d579108cbabeffc74e7e829cc9ad7a6ffe2d9bb",
+      "bytes": 150,
+      "content_base64": "aW5kZXguaHRtbCBidWlsdCAocm9ibyk6IDQuNzFNQgpvZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8pOiAzLjQ4TUIKZm9yZ2UuaHRtbCBidWlsdCAocm9ibytmb3JnZSk6IDQuNzNNQgpmb3JnZS1vZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8rZm9yZ2UpOiAzLjUwTUIK"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "opening-order",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 499.462177,
+      "timeout_seconds": 1080,
+      "log": "opening-order.log",
+      "sha256": "92dbad390895ae3cd02ffa31dfdb846e7f75b832473d6a70abd5115da1245b1a",
+      "bytes": 2701,
+      "content_base64": "CuKUgOKUgCBvcGVuaW5nLW9yZGVyICDigJQgdGhlIG9wZW5pbmcgcGxheWVkIHdpdGggcmVhbCBpbnB1dCBpbiB0aGUgb3duZXIncyBvcmRlciwgZGVza3RvcCBhbmQgcGhvbmUsIHRvIE9sZCBTZXJ2bwpwYWdlLndhaXRGb3JGdW5jdGlvbjogVGltZW91dCA4MDAwbXMgZXhjZWVkZWQuCiAgICBhdCBwbGF5ICgvd29ya3NwYWNlL3NjcmF0Y2gvYjRlOWFhMjNkNzdlL3JlcG8vdGVzdHMvb3BlbmluZy1vcmRlci5janM6MTgwOjE4KQogICAgYXQgYXN5bmMgL3dvcmtzcGFjZS9zY3JhdGNoL2I0ZTlhYTIzZDc3ZS9yZXBvL3Rlc3RzL29wZW5pbmctb3JkZXIuY2pzOjMzODoxNSB7CiAgbG9nOiBbXSwKICBuYW1lOiAnVGltZW91dEVycm9yJwp9CkZBSUxFRDog4pSA4pSAIG9wZW5pbmctb3JkZXIg4oCUIHRoZSBvcGVuaW5nLCBwbGF5ZWQgaW4gdGhlIG93bmVyJ3Mgb3JkZXIgd2l0aCByZWFsIGlucHV0CgogIFtkZXNrdG9wXSBzdGVwczogbW92ZSAtPiBvdXQgLT4ganVtcCAtPiBnYXRlIC0+IGJvb3RoICAgZW5kOiBBMAogIEZBSUwgZGVza3RvcDogdGhlIG9wZW5pbmcgcmVhY2hlcyB0aGUgbWVhZG93ICBBMAogIEZBSUwgZGVza3RvcDogZXZlcnkgc3RlcCwgaW4gdGhlIG93bmVyJ3Mgb3JkZXIgIG1vdmUsb3V0LGp1bXAsZ2F0ZSxib290aAogIG9rICAgZGVza3RvcDogZXZlcnkgcHJvbXB0IG5hbWVzIG9uZSBjb250cm9sICBbXQogIG9rICAgZGVza3RvcDogZXZlcnkgaGludCBuYW1lcyBoZXIgcmVhbCBjb250cm9scyAobm90aGluZyBsZWZ0IHVuZmlsbGVkKSAgW10KICBGQUlMIHRoZSBsZXR0ZXIgaXMgcmVhZCBiZWZvcmUgdGhlIGJhdHRlcnkgaXMgZm91bmQgIC0xIDwgLTEKICBGQUlMIC4uLmhpcyBiYXR0ZXJ5IGhhcyBpdHMgb3duIGNhcmQsIHdpdGggaXRzIGFydAogIEZBSUwgLi4uYW5kIGhlIHdha2VzIGFmdGVyIHRoZSByZXBhaXIsIGFuZCBzYXlzIHdobyBoZSBpcyAgLTEKICBGQUlMIHRoZSBleHBsYW5hdGlvbjogdGhlIHNvbmcgaW5mZWN0ZWQsIHRoZSBtYXJibGUgc2xvd2VkIGl0LCB0aGUgYmF0dGVyeSBwdWxsZWQsIHNoZSB3YXMgYXNsZWVwLCByYXcgbWFyYmxlIGJlbG93LCBhIHdoaXRlIHN3b3JkCiAgRkFJTCB0aGUgc3BhcmUgUG93ZXIgQ2VsbCBpcyBoYW5kZWQgb3ZlciB3aXRoIGEgY2FyZCB0aGF0IG5hbWVzIFNlcnZvCiAgRkFJTCBSYXRjaGV0IHNlbmRzIGhlciB0byB0aGUgcG9kIGluIHRoZSBvd25lcidzIHdvcmRzICAtMQogIEZBSUwgdGhlIHBvZCBzYXZlcyBmaXJzdDogdGhlIHNhdmUgcG9pbnQgaXMgaW4gdGhlIGRlbiBiZWZvcmUgdGhlIHBhY2sgaXMgaW50cm9kdWNlZAogIEZBSUwgLi4uYW5kIHRoZSBzYXZlIGlzIGNvbmZpcm1lZCBvbiBzY3JlZW4KICBGQUlMIHRoZSBwYWNrIGlzIGV4cGxhaW5lZCDigJQgd2hhdCwgd2h5LCB0aGUgY29zdCDigJQgYmVmb3JlIHRoZSBjb3VudGVyIG9wZW5zCiAgRkFJTCAuLi5oZSBwYXlzIGhlciB0aGUgMTIgc2NyYXAgd2l0aCBhIGNhcmQgdGhhdCBzYXlzIHdoYXQgc2NyYXAgaXMKICBGQUlMIHRoZSBjb3VudGVyIG9wZW5zIG9uIHRoZSBWb2x0IFBhY2ssIG1hcmtlZCBwZXJtYW5lbnQsIHRoZSByZXN0IGxvY2tlZCB1bnRpbCBpdCBpcyBib3VnaHQKICBGQUlMIC4uLmFuZCB0aGUgcHVyY2hhc2UgY2FyZCBzaG93cyB0aGUgdHdvIHZlcmJzIHdpdGggaGVyIGNvbnRyb2xzCiAgRkFJTCBkZXNrdG9wOiB0aGUgVm9sdCBQYWNrIGlzIGJvdWdodCB3aXRoIHplcm8gc2NyYXAgZ2F0aGVyZWQgZnJvbSB0aGUgZmxvb3IgIHsic2NyYXBBdFNob3AiOm51bGwsInBpY2t1cHMiOjB9CiAgRkFJTCBkZXNrdG9wOiB0aGUgbW9udW1lbnQgd2FzIHJlYWNoZWQKICBvayAgIGRlc2t0b3A6IG5vIHR3byBvdmVybGF5cyBhdCBvbmNlICBbXQogIG9rICAgZGVza3RvcDogdGhlIGdvYWwgbGluZSBuZXZlciBzaXRzIG9uIHRoZSBsZXNzb24gY2hpcCAgW10KICBGQUlMIGRlc2t0b3A6IFNlcnZvIGlzIHN3aXRjaGVkIG9mZiBvbiBhcnJpdmFsLCBkcmF3biBiaWdnZXIgdGhhbiBoZXIsIGFuZCBzdGFuZGluZyBvbiB0aGUgZmxvb3IKICBGQUlMIGRlc2t0b3A6IHRoZSBzcGFyZSBjZWxsIHdha2VzIGhpbQogIEZBSUwgU2Vydm8gaW50cm9kdWNlcyBoaW1zZWxmLCBleHBsYWlucyB0aGUgd2F5IHRvIHRoZSBtYXJibGUsIGFuZCBuYW1lcyB0aGUgY29pbCB0YXNrIGFuZCBpdHMgcmV3YXJkCiAgRkFJTCAuLi5hIHJlcGVhdCB2aXNpdCBpcyBub3QgdGhlIGludHJvIGFnYWluCiAgRkFJTCAuLi5hbmQgdGhlIGNvaWwgY29taW5nIGhvbWUgaXMgYW5zd2VyZWQgYW5kIHBhaWQKICBGQUlMIGRlc2t0b3A6IHRoZSBjb2lsIGVycmFuZCBpcyB0YWtlbgogIG9rICAgZGVza3RvcDogbm8gcGFnZSBlcnJvcnMgIFtdCiAgc2hvdHM6IDEwIGluIHRlc3RzL291dC9vcGVuaW5nLW9yZGVyLwpwYWdlLndhaXRGb3JGdW5jdGlvbjogVGltZW91dCA4MDAwbXMgZXhjZWVkZWQuCiAgICBhdCBwbGF5ICgvd29ya3NwYWNlL3NjcmF0Y2gvYjRlOWFhMjNkNzdlL3JlcG8vdGVzdHMvb3BlbmluZy1vcmRlci5janM6MTgwOjE4KQogICAgYXQgYXN5bmMgL3dvcmtzcGFjZS9zY3JhdGNoL2I0ZTlhYTIzZDc3ZS9yZXBvL3Rlc3RzL29wZW5pbmctb3JkZXIuY2pzOjMzODoxNSB7CiAgbG9nOiBbXSwKICBuYW1lOiAnVGltZW91dEVycm9yJwp9CgogICAob3BlbmluZy1vcmRlcjogNDk5LjEgcykKCjEgaGFybmVzcyhlcykgZmFpbGVkCg=="
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+  "complete_requested_scope": true,
+  "log_integrity": {
+    "ok": true,
+    "files": [
+      {
+        "log": "build.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "opening-order.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      }
+    ]
+  },
+  "passed": false,
+  "finished_utc": "2026-10-26T10:45:49.234590+00:00"
+}

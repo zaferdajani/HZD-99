@@ -1,0 +1,6 @@
+
+── combat-impact-input  — real keyboard tap and held charge through the normal game loop in a staged arena
+PASS real keyboard tap and held/released charge: damage, knockback, release/contact audio, particle expiry
+   (combat-impact-input: 4.8 s)
+
+all 1 harnesses ran

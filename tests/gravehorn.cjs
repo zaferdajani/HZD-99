@@ -450,10 +450,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const lockAt = fly.find(r => r[2]);
     const after = fly.filter(r => r[2]);
     const turnAfter = after.length > 2 ? Math.max(...after.map(r => Math.abs(r[3] - after[0][3]))) : 0;
-    // The recorded 60 Hz samples can straddle 0.300 s by one floating-point
-    // tick while printing as 300 ms. Keep the same ~0.35 s contract with a
-    // 10 ms numerical tolerance at the lower bound.
-    check('it homes, then LOCKS ~0.35 s after launch (the cyan flash)', !!lockAt && lockAt[0] - fly[0][0] >= 0.29 && lockAt[0] - fly[0][0] <= 0.45,
+    check('it homes, then LOCKS ~0.35 s after launch (the cyan flash)', !!lockAt && lockAt[0] - fly[0][0] >= 0.3 && lockAt[0] - fly[0][0] <= 0.45,
       lockAt ? Math.round((lockAt[0] - fly[0][0]) * 1000) + ' ms' : 'never');
     check('...and after the lock it flies STRAIGHT (dodging works)', after.length > 2 && turnAfter < 0.02, 'heading drift ' + turnAfter.toFixed(4) + ' rad');
     // the head, hornless, bites deeper: a keyboard strike on it against one on his flank

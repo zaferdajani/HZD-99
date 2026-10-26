@@ -1,0 +1,14 @@
+
+── meadow  — the greenery keeps its colour all the way to the screen
+── meadow — the greenery keeps its colour all the way to the screen
+
+  ok   the frame comparison isolates the grass  0 unrelated changed pixels in the unchanged control
+  ok   the meadow actually grows something  13465 px of grass
+  ok   ...and the grass keeps its colour  saturation 42.6 (min 34; the paint is 63, the old blend gave 28)
+  ok   ...and it is GREEN, not blue-green  hue 106° (max 112; the paint is 98)
+  ok   ...and it stands out from the ground it grows in  grass 42.6/57 vs ground 19.4/28.4
+
+all good
+   (meadow: 9.3 s)
+
+all 1 harnesses ran

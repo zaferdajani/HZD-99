@@ -1,0 +1,32 @@
+{
+  "root": "/workspace/scratch/b4e9aa23d77e/repo",
+  "base": "http://127.0.0.1:8220/",
+  "takenAt": "2026-10-26T09:35:01.373Z",
+  "files": {
+    "index.html": {
+      "sha256": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+      "bytes": 4937121,
+      "buildId": "6d3db4ac3ebd"
+    },
+    "odyssey.html": {
+      "sha256": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+      "bytes": 3651886,
+      "buildId": "6d3db4ac3ebd"
+    },
+    "sw.js": {
+      "sha256": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+      "bytes": 2494,
+      "buildId": null
+    },
+    "assets/eyes.json": {
+      "sha256": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+      "bytes": 14438,
+      "buildId": null
+    },
+    "assets/lowres/alBite.webp": {
+      "sha256": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2",
+      "bytes": 26442,
+      "buildId": null
+    }
+  }
+}

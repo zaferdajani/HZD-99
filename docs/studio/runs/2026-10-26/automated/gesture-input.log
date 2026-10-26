@@ -1,0 +1,6 @@
+
+── gesture-input  — the picture answers taps and swipes, and nothing the controller owns changes
+PASS gesture-input: the picture hops, strikes, dashes and charges; the gutters, the stick's half, every control and every other state stay exactly as they were; a tap lands while the other thumb is moving; and one lifecycle owner suspends the audio nobody was suspending { j: 1, a: 0 }
+   (gesture-input: 0.6 s)
+
+all 1 harnesses ran

@@ -1,0 +1,6 @@
+
+── repair-browser  — Ratchet drag controls, page reload and interrupted boot in the assembled game
+PASS browser repair: actual drag/click controls, wrong target, Escape, page reload, interrupted boot, once-only rewards, forge continuation and room exit
+   (repair-browser: 2.7 s)
+
+all 1 harnesses ran

@@ -1,0 +1,15 @@
+
+── look  — hold up or down standing still and the frame pans that way; taps, walks and jumps never do
+── look — hold up or down and the frame shows what is there
+  spot C1 (16,18), zoom 1.52, pan 114 px
+  ok   holding DOWN pans the frame down  112 px of 114
+  ok   ...and letting go brings it back  0 px from rest
+  ok   holding UP pans the frame up  112 px of 114
+  ok   a quick tap does not move the frame  0 px
+  ok   walking with the stick tilted does not look  look offset 0 px
+  ok   in the air nothing looks  look offset 0 px
+
+OK — she can look before she leaps
+   (look: 0.8 s)
+
+all 1 harnesses ran

@@ -1,0 +1,177 @@
+
+── marble-notices  — retire the extraction hint only after raw marble acquisition; preserve rewards and missed-attempt guidance
+{
+  "scope": "STAGED save/placement and production update/releaseCharged; not a chapter playthrough.",
+  "results": [
+    {
+      "lang": "en",
+      "build": "6d3db4ac3ebd",
+      "hint": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+      "produced": [
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.120000000000001,
+          "scope": "marble-extraction"
+        }
+      ],
+      "survivesClaw": true,
+      "survivesMiss": true,
+      "afterMiss": [
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.120000000000001,
+          "scope": "marble-extraction"
+        },
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.220000000000001
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        }
+      ],
+      "after": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.220000000000001
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "ACQUIRED — raw cave marble",
+          "t": 3.0300000000000002
+        },
+        {
+          "text": "Somebody must be missing this. Keep it safe.",
+          "t": 4.02
+        }
+      ],
+      "retry": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.220000000000001
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "ACQUIRED — raw cave marble",
+          "t": 3.0300000000000002
+        },
+        {
+          "text": "Somebody must be missing this. Keep it safe.",
+          "t": 4.02
+        }
+      ],
+      "acquired": true,
+      "flag": true,
+      "removed": true
+    },
+    {
+      "lang": "ar",
+      "build": "6d3db4ac3ebd",
+      "hint": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+      "produced": [
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.460000000000001,
+          "scope": "marble-extraction"
+        }
+      ],
+      "survivesClaw": true,
+      "survivesMiss": true,
+      "afterMiss": [
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.460000000000001,
+          "scope": "marble-extraction"
+        },
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.5600000000000005
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        }
+      ],
+      "after": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.5600000000000005
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "تم الحصول على — رخام خام من الكهف",
+          "t": 3.415
+        },
+        {
+          "text": "لا بدّ أن أحدًا يفتقد هذا. احتفظي به.",
+          "t": 3.5250000000000004
+        }
+      ],
+      "retry": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.5600000000000005
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "تم الحصول على — رخام خام من الكهف",
+          "t": 3.415
+        },
+        {
+          "text": "لا بدّ أن أحدًا يفتقد هذا. احتفظي به.",
+          "t": 3.5250000000000004
+        }
+      ],
+      "acquired": true,
+      "flag": true,
+      "removed": true
+    }
+  ],
+  "errors": []
+}
+   (marble-notices: 0.7 s)
+
+all 1 harnesses ran

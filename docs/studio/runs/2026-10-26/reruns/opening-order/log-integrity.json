@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "opening-order.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}

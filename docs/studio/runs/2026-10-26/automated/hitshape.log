@@ -1,0 +1,19 @@
+
+── hitshape  — authored hit shapes: every swing inside its old square, the far corners trimmed, the Forge overlay
+── hitshape — every swing has an authored shape inside its old square, and the Forge can show it
+
+  ok   every swing (5 aims x 2 beats x 3 weapons) has its shape inside its old square  30 swings
+  ok   ...and each shape trims the square, keeping at least 80% of it  ["slash:0.88","finisher:0.91","down:0.84"]
+  ok   the square's far corner no longer lands  {"cornerBox":true,"cornerShape":false,"front":true,"paw":true}
+  ok   ...the front of the cut and her paw still do  {"cornerBox":true,"cornerShape":false,"front":true,"paw":true}
+  ok   a real jab at a machine sitting only in that corner misses it  {"hit":false,"geomBox":true}
+  ok   ...and a real jab at one in front of her lands  {"hit":true,"geomBox":true}
+  ok   the overlay draws her claws, what can be hit and her body  {"orange":5015,"green":85,"blue":198}
+  ok   ...and nothing when it is off  {"orange":0,"green":0,"blue":0}
+  ok   the Forge has the SHAPES toggle (button and F3); the game pages do not
+  ok   no page errors
+
+all good
+   (hitshape: 7.8 s)
+
+all 1 harnesses ran

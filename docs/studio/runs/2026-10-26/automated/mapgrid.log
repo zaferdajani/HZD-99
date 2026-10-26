@@ -1,0 +1,15 @@
+
+── mapgrid  — two rooms cannot stand on the same square of the map
+── mapgrid — two rooms cannot stand on the same square
+
+  ok   no kingdom 1 room overlaps anything on the map board  18 meadow rooms among 77 placed
+  --   pre-existing collisions elsewhere on the board, for the kingdoms that own them: none
+  ok   every room the graph can reach is on the board  none missing
+  ok   the meadow's cells match its rooms' widths  W1:1 W2:2 A0:2 A0B:1 A1:2 A2:3 A10:2 A3:2 A4:1 A5:2 A6:1 A7:1 A8:1 A9:1
+  ok   ...and its heights  rows agree
+  ok   no page errors
+
+OK — one square, one room, and the meadow draws the size it is
+   (mapgrid: 0.8 s)
+
+all 1 harnesses ran

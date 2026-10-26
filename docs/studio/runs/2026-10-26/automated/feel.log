@@ -1,0 +1,17 @@
+
+── feel  — input latency, hit-stop and camera lead, as frames
+run latency 1f   jump latency 1f   hit-stop 3f   camera answers a reversal in 2f
+  ok   a run starts within 2 frames of the key  1 frames
+  ok   a jump leaves the ground within 2 frames of the key  1 frames
+  ok   a claw hit freezes the world for at least 3 frames  3 frames
+  ok   the camera answers a reversal within 9 frames (150 ms)  2 frames
+  swirl, frame by frame (H pass, f frozen, . running): .........Hffffffff.........H........H.........H
+  ok   the swirl lands its four passes through the real frame  4 passes
+  ok   ...its FIRST pass freezes the world (the weight lands)  8 frozen frames
+  ok   ...and the later passes do not stutter it  frozen frames after each pass: 8 0 0 0
+  ok   no page errors
+
+OK — the body answers the hand, and the world answers the body
+   (feel: 2.3 s)
+
+all 1 harnesses ran

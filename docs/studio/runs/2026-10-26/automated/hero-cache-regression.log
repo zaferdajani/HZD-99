@@ -1,0 +1,6 @@
+
+── hero-cache-regression  — third-hit cached sheet geometry and supplied idle in every mood
+PASS third-hit gameplay renders six complete cells; incompatible cached sheet rejected; all 64 idle frame/mood/facing cases keep supplied art; voice and art URLs match build
+   (hero-cache-regression: 0.7 s)
+
+all 1 harnesses ran

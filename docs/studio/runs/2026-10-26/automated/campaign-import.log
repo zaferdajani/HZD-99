@@ -1,0 +1,15 @@
+
+── campaign-import  — helper imports preserve completed playthrough logs and create no output
+{
+  "scope": "Actual module import, isolated subprocess/filesystem, no gameplay.",
+  "existingLogPreserved": true,
+  "absentOutputRemainsAbsent": true,
+  "exitCodes": [
+    0,
+    0
+  ],
+  "errors": []
+}
+   (campaign-import: 0.6 s)
+
+all 1 harnesses ran

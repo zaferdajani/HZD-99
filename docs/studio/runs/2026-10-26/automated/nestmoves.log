@@ -1,0 +1,35 @@
+
+── nestmoves  — the Virus Nest's own three moves fire, warn first, and stay in kingdom E
+── nestmoves — the Virus Nest's own three, and the warning in front of each
+
+  ok   kingdom E wrote three rows, all of them kingdom-scoped  blob@E guard@E snare@E
+  ok   ...and not one unscoped row — the integrator's layer is untouched
+  ok   a Nest machine can afford all three at the kingdom floor  lv 5 → {"blob":["thornbed"],"guard":["shed"],"snare":["infest"]}
+  ok   ...and not one of them leaks into another kingdom, at any level, on any kind  no leaks
+  ok   the cost-3 lands where only the Nest can pay for it
+  ok   thornbed: the drip takes root and the stalk goes live  rise 0.5s, live 8.32s
+  ok   ...and it cannot touch her while it is still growing  0 hits during the rise
+  ok   ...but it owns the column once it is live  493 hits
+  ok   ...and the rise is the full told length at every level of cunning  fresh 0.5s vs finished-run 0.48s
+  ok   ...and a meadow blob never grows one
+  ok   shed: denied hits tear the plate loose  shed at frame 79
+  ok   ...after a wind-up, with the plate still up through all of it  tell 0.5s
+  ok   ...and the tell is the same length at full cunning  fresh 0.5s vs finished-run 0.5s
+  ok   ...the plate was real before, and is gone for good after
+  ok   ...and what tore loose is a hazard she has to answer  144 hits
+  ok   ...and a meadow guard never sheds — it is the guard it always was
+  ok   infest: the polyp spends its own punish window calling a host  sac 0.98s
+  ok   ...and the sac swells across the whole window — the longest minion tell in the game  0.98s
+  ok   ...at exactly the same length once the run is finished  fresh 0.98s vs finished-run 0.98s
+  ok   ...and one hit on the polyp pops it: the window still pays  {"infested":false,"popped":true,"sacS":0.22}
+  ok   a carrier bursts into a spore bed where it falls
+  ok   ...and the bed opens from nothing, so the burst is the warning
+  ok   ...and one polyp never converts the whole room  2 of a cap of 2
+  ok   ...and a meadow snare never calls
+  ok   every new read draws without throwing  6 drawn
+  ok   no page errors
+
+all good
+   (nestmoves: 4.5 s)
+
+all 1 harnesses ran

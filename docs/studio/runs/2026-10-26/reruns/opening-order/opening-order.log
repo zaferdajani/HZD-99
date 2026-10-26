@@ -1,0 +1,49 @@
+
+── opening-order  — the opening played with real input in the owner's order, desktop and phone, to Old Servo
+page.waitForFunction: Timeout 8000ms exceeded.
+    at play (/workspace/scratch/b4e9aa23d77e/repo/tests/opening-order.cjs:180:18)
+    at async /workspace/scratch/b4e9aa23d77e/repo/tests/opening-order.cjs:338:15 {
+  log: [],
+  name: 'TimeoutError'
+}
+FAILED: ── opening-order — the opening, played in the owner's order with real input
+
+  [desktop] steps: move -> out -> jump -> gate -> booth   end: A0
+  FAIL desktop: the opening reaches the meadow  A0
+  FAIL desktop: every step, in the owner's order  move,out,jump,gate,booth
+  ok   desktop: every prompt names one control  []
+  ok   desktop: every hint names her real controls (nothing left unfilled)  []
+  FAIL the letter is read before the battery is found  -1 < -1
+  FAIL ...his battery has its own card, with its art
+  FAIL ...and he wakes after the repair, and says who he is  -1
+  FAIL the explanation: the song infected, the marble slowed it, the battery pulled, she was asleep, raw marble below, a white sword
+  FAIL the spare Power Cell is handed over with a card that names Servo
+  FAIL Ratchet sends her to the pod in the owner's words  -1
+  FAIL the pod saves first: the save point is in the den before the pack is introduced
+  FAIL ...and the save is confirmed on screen
+  FAIL the pack is explained — what, why, the cost — before the counter opens
+  FAIL ...he pays her the 12 scrap with a card that says what scrap is
+  FAIL the counter opens on the Volt Pack, marked permanent, the rest locked until it is bought
+  FAIL ...and the purchase card shows the two verbs with her controls
+  FAIL desktop: the Volt Pack is bought with zero scrap gathered from the floor  {"scrapAtShop":null,"pickups":0}
+  FAIL desktop: the monument was reached
+  ok   desktop: no two overlays at once  []
+  ok   desktop: the goal line never sits on the lesson chip  []
+  FAIL desktop: Servo is switched off on arrival, drawn bigger than her, and standing on the floor
+  FAIL desktop: the spare cell wakes him
+  FAIL Servo introduces himself, explains the way to the marble, and names the coil task and its reward
+  FAIL ...a repeat visit is not the intro again
+  FAIL ...and the coil coming home is answered and paid
+  FAIL desktop: the coil errand is taken
+  ok   desktop: no page errors  []
+  shots: 10 in tests/out/opening-order/
+page.waitForFunction: Timeout 8000ms exceeded.
+    at play (/workspace/scratch/b4e9aa23d77e/repo/tests/opening-order.cjs:180:18)
+    at async /workspace/scratch/b4e9aa23d77e/repo/tests/opening-order.cjs:338:15 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+   (opening-order: 499.1 s)
+
+1 harness(es) failed

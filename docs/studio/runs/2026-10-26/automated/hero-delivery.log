@@ -1,0 +1,6 @@
+
+── hero-delivery  — source provenance, frame gutters, scale and floor registration
+PASS 291 frames: source hashes, one scale per source, dimensions, grounded floor, no clipped edges, minimum 19px gutter
+   (hero-delivery: 2.2 s)
+
+all 1 harnesses ran
