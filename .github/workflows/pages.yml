@@ -13,7 +13,7 @@ concurrency:
 jobs:
   deploy:
     if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, box]
     timeout-minutes: 25
     environment:
       name: github-pages

@@ -13,7 +13,7 @@ concurrency:
 jobs:
   integrate:
     if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, box]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
