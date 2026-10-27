@@ -6,6 +6,6 @@ permissions: {}
 jobs:
   retired:
     if: ${{ false }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, box]
     steps:
       - run: echo 'Retired; use the authoritative integration branch.'
