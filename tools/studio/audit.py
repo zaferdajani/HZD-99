@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Evidence collector. Does not claim to replace the 15-role human/agent review."""
-import argparse, base64, binascii, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
+import argparse, base64, binascii, ctypes, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
@@ -11,6 +11,7 @@ FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
 # overhead covers its two served-build identity checks and server startup; it
 # does not change or retry a harness's own deadline.
 RUNNER_OVERHEAD_SECONDS = 180
+SUBREAPER_ENABLED = None
 
 def capture_log(path):
     """Hash and retain the SAME closed-file bytes; a rerun is not provenance."""
@@ -61,12 +62,109 @@ def suite_budgets(source):
         raise ValueError('No test harnesses found; refusing empty coverage')
     return budgets
 
+def enable_subreaper():
+    """Adopt detached test descendants so a successful leader cannot orphan them."""
+    global SUBREAPER_ENABLED
+    if SUBREAPER_ENABLED is not None:
+        return SUBREAPER_ENABLED
+    SUBREAPER_ENABLED = False
+    if sys.platform.startswith('linux'):
+        try:
+            SUBREAPER_ENABLED = ctypes.CDLL(None).prctl(36, 1, 0, 0, 0) == 0
+        except (AttributeError, OSError):
+            pass
+    return SUBREAPER_ENABLED
+
+def direct_children():
+    try:
+        # This runner can sit inside a nested PID namespace while /proc is
+        # mounted from the host namespace, so os.getpid() is not a /proc key.
+        host_pid = int(pathlib.Path('/proc/self').resolve().name)
+        children = set()
+        for process in pathlib.Path('/proc').iterdir():
+            if not process.name.isdigit():
+                continue
+            try:
+                fields = {}
+                for line in (process/'status').read_text().splitlines():
+                    key, sep, value = line.partition(':')
+                    if sep: fields[key] = value.strip()
+                if int(fields.get('PPid', '-1')) != host_pid:
+                    continue
+                namespace_pids = fields.get('NSpid', fields.get('Pid', '')).split()
+                if namespace_pids: children.add(int(namespace_pids[-1]))
+            except (OSError, ValueError):
+                continue
+        return children
+    except (OSError, ValueError):
+        return set()
+
+def stop_adopted_children(baseline):
+    """Stop only children adopted during this owned run; preserve the audit server."""
+    killed = set()
+    for attempt in range(20):
+        children = direct_children() - baseline
+        if not children:
+            break
+        for pid in children:
+            try: os.kill(pid, signal.SIGKILL); killed.add(pid)
+            except ProcessLookupError: pass
+        for pid in children:
+            try: os.waitpid(pid, os.WNOHANG)
+            except (ChildProcessError, ProcessLookupError): pass
+        time.sleep(.01)
+    return len(killed)
+
+def stop_log_writers(log):
+    """Kill detached descendants that still hold this exact log inode open."""
+    proc_root = pathlib.Path('/proc')
+    if os.name != 'posix' or not proc_root.is_dir():
+        return 0
+    try:
+        target = os.fstat(log.fileno())
+    except (OSError, ValueError):
+        return 0
+    killed = set()
+    for attempt in range(20):
+        writers = set()
+        for process in proc_root.iterdir():
+            if not process.name.isdigit() or int(process.name) == os.getpid():
+                continue
+            try:
+                for fd in (process/'fd').iterdir():
+                    try:
+                        opened = fd.stat()
+                    except OSError:
+                        continue
+                    if opened.st_dev == target.st_dev and opened.st_ino == target.st_ino:
+                        writers.add(int(process.name)); break
+            except (OSError, PermissionError):
+                continue
+        if not writers:
+            break
+        for pid in writers:
+            try: os.kill(pid, signal.SIGKILL); killed.add(pid)
+            except ProcessLookupError: pass
+        time.sleep(.01)
+    return len(killed)
+
 def run_owned(cmd, *, cwd, log, timeout, env=None):
-    """Run one owned process group and kill every descendant on timeout."""
+    """Run one owned process group and leave no descendant writing its log."""
+    subreaper = enable_subreaper()
+    baseline = direct_children() if subreaper else set()
     proc = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT,
                             env=env, start_new_session=(os.name == 'posix'))
     try:
         code = proc.wait(timeout=timeout)
+        # A runner can exit after spawning a detached browser/server helper that
+        # inherited stdout.  Waiting for only the leader then hashing the log
+        # races that writer.  This process group belongs solely to this check,
+        # so close it before capture even when the leader returned normally.
+        if os.name == 'posix':
+            try: os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError: pass
+        if subreaper: stop_adopted_children(baseline)
+        stop_log_writers(log)
         return code, 'pass' if code == 0 else 'fail'
     except subprocess.TimeoutExpired:
         if os.name == 'posix':
@@ -75,6 +173,8 @@ def run_owned(cmd, *, cwd, log, timeout, env=None):
         else:
             proc.kill()
         proc.wait()
+        if subreaper: stop_adopted_children(baseline)
+        stop_log_writers(log)
         log.write('\nCollector timeout after '+str(timeout)+' seconds; owned process group terminated.\n')
         log.flush()
         return None, 'timeout'

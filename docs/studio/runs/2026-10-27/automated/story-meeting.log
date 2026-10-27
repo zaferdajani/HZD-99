@@ -1,0 +1,16 @@
+
+── story-meeting  — interactive guardian warning and real contact
+PASS readable and escapable first guardian {
+  phases: [
+    'fall',  'land',
+    'wind',  'swipe',
+    'watch', 'coil',
+    'leave'
+  ],
+  escapedWithoutDamage: true,
+  movement: 346.16666666667106,
+  contactDamage: 1
+}
+   (story-meeting: 1.0 s)
+
+all 1 harnesses ran

@@ -1,0 +1,21 @@
+
+── tinker  — Ratchet's plate set is seven poses, not one picture seven times
+── tinker — Ratchet's seven poses are seven poses
+
+  ok   every plate arrived
+  ok   every pose draws a body
+  ok   no two poses share a silhouette  worst work2/talk1 0.655 (max 0.86)
+  ok   the work loop actually moves between frames  closest pair of six sampled frames 0.559 (max 0.86), widest 0.147 apart
+  ok   ...and it keeps its feet on the floor in every frame  foot offsets -1,-1,-1,-1,-1,-1px
+  ok   ...and does not pump in size while it plays  20671px .. 24369px  spread 15.2%
+  ok   feet on the floor in every pose
+  ok   he is the same size in every pose  work1 22457px .. talk1 22974px  spread 2.3%
+  ok   he draws a long, varied sequence  1800 frames, 15 distinct
+  ok   no short period — he is working, not looping  strongest repeat at 0.48s matches 50% (max 55%)
+  ok   the vent actually smokes  16 particles
+  ok   ...once, not every frame it holds  16 -> 16
+
+all good
+   (tinker: 1.4 s)
+
+all 1 harnesses ran

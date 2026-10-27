@@ -1,0 +1,19 @@
+
+── seam  — a room boundary is a place she walks through, not a door
+── seam — a room boundary is a place she walks through
+
+  ok   every mirrored horizontal join agrees on both sides  35 joins
+  ok   ...including the joins between rooms of different heights  C5|C2
+  ok   the meadow is walked end to end, every step a real join  A0 -> A1 -> A2 -> A3 -> A4
+  ok   ...and the cradle's road is joined too  W1|W2
+  ok   ...and none of them is a doorway (>= 12 rows of standing space)  W1|W2=14 A0|A1=14 A1|A2=14 A2|A3=14 A3|A4=14
+  ok   the crystal cave mouths are tunnels, not slots (> 4 rows)  CV1|CV2=10 CV2|CV3=10
+  ok   a seam never opens the lid (sky rooms excepted)  60 lidded + 10 open-sky seam columns
+  ok   ...and never opens the ground under it  ground unbroken to every edge
+  ok   every T opening answers through the floor above it  23 vertical seams open both ways
+  ok   no page errors
+
+OK — the meadow is joined by ground, not by doors
+   (seam: 0.8 s)
+
+all 1 harnesses ran

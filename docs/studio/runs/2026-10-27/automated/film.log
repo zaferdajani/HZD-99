@@ -1,0 +1,38 @@
+
+── film  — the intro reel plays all eight shots without falling back
+reel progress {"st":"CUT","kind":"intro1","ph":"in","ran":false,"ct":0,"err":null}
+  playing intro1 at 0.1s
+reel progress {"st":"CUT","kind":"intro1","ph":"play","ran":true,"ct":3,"err":null}
+  playing intro2 at 0.1s
+reel progress {"st":"CUT","kind":"intro2","ph":"play","ran":true,"ct":1,"err":null}
+reel progress {"st":"CUT","kind":"intro2","ph":"play","ran":true,"ct":4.1,"err":null}
+  playing intro3 at 0.1s
+reel progress {"st":"CUT","kind":"intro3","ph":"play","ran":true,"ct":2.1,"err":null}
+reel progress {"st":"CUT","kind":"intro4","ph":"play","ran":true,"ct":0.1,"err":null}
+  playing intro4 at 0.1s
+reel progress {"st":"CUT","kind":"intro4","ph":"play","ran":true,"ct":3.2,"err":null}
+  playing intro5 at 0.2s
+reel progress {"st":"CUT","kind":"intro5","ph":"play","ran":true,"ct":1.3,"err":null}
+reel progress {"st":"CUT","kind":"intro5","ph":"play","ran":true,"ct":4.3,"err":null}
+  playing intro6 at 0.1s
+reel progress {"st":"CUT","kind":"intro6","ph":"play","ran":true,"ct":2.4,"err":null}
+  playing intro7 at 0.1s
+reel progress {"st":"CUT","kind":"intro7","ph":"play","ran":true,"ct":0.4,"err":null}
+reel progress {"st":"CUT","kind":"intro7","ph":"play","ran":true,"ct":3.5,"err":null}
+  playing intro8 at 0.1s
+reel progress {"st":"CUT","kind":"intro8","ph":"play","ran":true,"ct":0.6,"err":null}
+reel progress {"st":"CUT","kind":"intro8","ph":"play","ran":true,"ct":3.7,"err":null}
+reel progress {"st":"CUT","kind":"intro8","ph":"play","ran":true,"ct":6,"err":null}
+reel progress {"st":"CUT","kind":"intro8","ph":"play","ran":true,"ct":6,"err":null}
+reel progress {"st":"CUT","kind":"intro8","ph":"play","ran":true,"ct":6,"err":null}
+
+  New Game #1: reached play=true  ran to 1.22s
+  New Game #2: reached play=true  ran to 1.21s
+new game plays the film  : yes, both times
+shots that really played : 8 / 8
+fell back to stills      : no
+final state              : MENU
+pageerrors               : none
+   (film: 58.6 s)
+
+all 1 harnesses ran

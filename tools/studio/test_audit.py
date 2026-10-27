@@ -68,6 +68,57 @@ class AuditBudgets(unittest.TestCase):
                              cwd=audit.ROOT, log=log, timeout=5), (0, 'pass'))
 
     @unittest.skipUnless(os.name == 'posix', 'process-group regression requires POSIX')
+    def test_completed_parent_stops_descendant_output_before_capture(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            child = Path(tmp) / 'child.py'
+            heartbeat = Path(tmp) / 'heartbeat'
+            child.write_text('import time,pathlib\n'
+                f'p=pathlib.Path({str(heartbeat)!r})\n'
+                'while True:\n'
+                ' with p.open("a") as f: f.write("tick\\n")\n'
+                ' print("late child output", flush=True)\n'
+                ' time.sleep(.03)\n')
+            parent = ('import subprocess,sys,time; '
+                      f'subprocess.Popen([sys.executable, {str(child)!r}]); '
+                      'time.sleep(.2)')
+            with (Path(tmp) / 'owned.log').open('w+') as log:
+                self.assertEqual(audit.run_owned([sys.executable, '-c', parent],
+                    cwd=tmp, log=log, timeout=5), (0, 'pass'))
+                self.assertTrue(heartbeat.exists(), 'child must have actually started')
+                before_log = log.tell()
+                before_heartbeat = heartbeat.read_bytes()
+                time.sleep(.2)
+                self.assertEqual(log.tell(), before_log, 'completed child kept mutating the log')
+                self.assertEqual(heartbeat.read_bytes(), before_heartbeat,
+                                 'completed child survived owned-group cleanup')
+
+    @unittest.skipUnless(os.name == 'posix' and Path('/proc').is_dir(),
+                         'detached-writer regression requires procfs')
+    def test_completed_parent_stops_detached_log_writer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            child = Path(tmp) / 'child.py'
+            heartbeat = Path(tmp) / 'heartbeat'
+            child.write_text('import time,pathlib\n'
+                f'p=pathlib.Path({str(heartbeat)!r})\n'
+                'while True:\n'
+                ' with p.open("a") as f: f.write("tick\\n")\n'
+                ' print("detached output", flush=True)\n'
+                ' time.sleep(.03)\n')
+            parent = ('import subprocess,sys,time; '
+                      f'subprocess.Popen([sys.executable, {str(child)!r}], start_new_session=True); '
+                      'time.sleep(.2)')
+            with (Path(tmp) / 'detached.log').open('w+') as log:
+                self.assertEqual(audit.run_owned([sys.executable, '-c', parent],
+                    cwd=tmp, log=log, timeout=5), (0, 'pass'))
+                self.assertTrue(heartbeat.exists(), 'detached child must have started')
+                before_log = log.tell()
+                before_heartbeat = heartbeat.read_bytes()
+                time.sleep(.2)
+                self.assertEqual(log.tell(), before_log, 'detached child kept mutating the log')
+                self.assertEqual(heartbeat.read_bytes(), before_heartbeat,
+                                 'detached child survived exact-log cleanup')
+
+    @unittest.skipUnless(os.name == 'posix', 'process-group regression requires POSIX')
     def test_timeout_stops_descendant_output(self):
         with tempfile.TemporaryDirectory() as tmp:
             child = Path(tmp) / 'child.py'

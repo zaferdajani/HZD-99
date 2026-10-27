@@ -1,0 +1,37 @@
+
+── cachemoves  — the Crystal Cache bends the answer — behind, off the arc and in the air
+── cachemoves — the Crystal Cache bends the answer, and says so first
+
+  ok   kingdom X wrote three rows, all of them kingdom-scoped  crawler@X hopper@X bat@X
+  ok   ...and not one unscoped row — the integrator's layer is untouched
+  ok   the Cache's whole roster can afford its own move at the kingdom floor  lv 5 (4 pts) → {"crawler":["facet"],"hopper":["refract"],"bat":["glint"]}
+  ok   ...and not one of them leaks into another kingdom, at any level, on any kind  no leaks
+  ok   the cost-3 is unaffordable below level 4, and the Cache floor clears it  floor lv 5
+  ok   facet: the lunge throws a lance across the floor it left  live 0.23s
+  ok   ...and it owns that strip while it is real  13 hits
+  ok   ...but standing in the told strip costs nothing until it fires  0 hits across 0.52s of warning
+  ok   ...and it fires exactly where the amber drew it  0px drift
+  ok   ...the coil is longer than a bare crawler's, not shorter  cache 0.52s vs plain 0.37s
+  ok   ...at the same length once the run is finished  fresh 0.52s vs finished-run 0.52s
+  ok   ...and the punish window after it is the one a bare crawler hands back  cache 0.75s vs plain 0.75s
+  ok   ...and a meadow crawler never splits — it is the crawler it always was
+  ok   refract: the floor is painted before the machine leaves it  crouch 0.52s
+  ok   ...and the paint stays lit across the crouch AND the whole flight  1.08s of notice
+  ok   ...the spot sits off the honest arc by exactly its offset, both sides  62px off aim (want 62)
+  ok   ...and the machine comes down ON it, not on the arc  missed by 0px fresh, 13.1px finished-run
+  ok   ...at exactly the same warning once the run is finished  fresh 0.52s vs finished-run 0.52s
+  ok   ...and the paint goes out with the intention when the leap never comes  lit for 0 frames after the crouch ended
+  ok   ...and a meadow hopper never paints and never bends
+  ok   glint: the dive leaves splinters hanging in the air  3 at once, cap 6
+  ok   ...and they cannot touch her while they are arming  0 hits across 0.43s of arming
+  ok   ...and they own that air once they are real  40 hits
+  ok   ...never more than the cap, so a dive is a dotted line not a wall  3 / 3
+  ok   ...the shiver is the full told length at every level of cunning  fresh 0.52s vs finished-run 0.52s
+  ok   ...and a meadow bat sheds nothing, and shivers the shorter tell  meadow 0.37s vs cache 0.52s
+  ok   every new read draws without throwing  5 drawn
+  ok   no page errors
+
+all good
+   (cachemoves: 3.3 s)
+
+all 1 harnesses ran

@@ -1,0 +1,21 @@
+{
+  "recovered_from": "results.json closed-file snapshots",
+  "original_integrity_preserved_in": "log-integrity.json",
+  "ok": true,
+  "files": [
+    {
+      "log": "input-focus.log",
+      "bytes": 249,
+      "expected_sha256": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44",
+      "recovered_sha256": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44",
+      "matches": true
+    },
+    {
+      "log": "seam.log",
+      "bytes": 1002,
+      "expected_sha256": "f339adaef4372580a3083b19d8eb38d8a2cfbacc496a99d9d222d2a48f51cecf",
+      "recovered_sha256": "f339adaef4372580a3083b19d8eb38d8a2cfbacc496a99d9d222d2a48f51cecf",
+      "matches": true
+    }
+  ]
+}

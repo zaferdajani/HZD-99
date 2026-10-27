@@ -1,0 +1,94 @@
+{
+  "started_utc": "2026-10-27T10:32:14.289948+00:00",
+  "base_commit": "327da1dee3f05bf4ee8eb9d6d7ee9cfaca902076",
+  "dirty_at_start": "M docs/combat/impact-2026-10-16/input/result.json\n M docs/combat/impact-2026-10-16/visual/after.png\n M docs/combat/impact-2026-10-16/visual/before.png\n M docs/combat/impact-2026-10-16/visual/during.png\n M docs/combat/impact-2026-10-16/visual/gear.png\n M docs/combat/impact-2026-10-16/visual/result.json\n M docs/combat/purification-2026-10-16/contract.json\n M docs/combat/purification-2026-10-16/controls.json\n M docs/combat/purification-2026-10-16/screens/extract.png\n M docs/combat/purification-2026-10-16/screens/gather.png\n M docs/combat/purification-2026-10-16/screens/mobile-button.png\n M docs/combat/purification-2026-10-16/screens/movie.png\n M docs/combat/purification-2026-10-16/screens/prompt.png\n M docs/combat/purification-2026-10-16/screens/restored.png\n M docs/combat/purification-2026-10-16/screens/slash.png\n M docs/studio/runs/2026-10-11/images/winch-after-burst.png\n M docs/studio/runs/2026-10-11/images/winch-strike-scrap.png\n M tools/studio/audit.py\n M tools/studio/test_audit.py\n?? docs/studio/runs/2026-10-27/\n?? tools/studio/__pycache__/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.288493,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "94ec86705491aeddd54146b53d579108cbabeffc74e7e829cc9ad7a6ffe2d9bb",
+      "bytes": 150,
+      "content_base64": "aW5kZXguaHRtbCBidWlsdCAocm9ibyk6IDQuNzFNQgpvZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8pOiAzLjQ4TUIKZm9yZ2UuaHRtbCBidWlsdCAocm9ibytmb3JnZSk6IDQuNzNNQgpmb3JnZS1vZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8rZm9yZ2UpOiAzLjUwTUIK"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "input-focus",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.399663,
+      "timeout_seconds": 480,
+      "log": "input-focus.log",
+      "sha256": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44",
+      "bytes": 249,
+      "content_base64": "CuKUgOKUgCBpbnB1dC1mb2N1cyAg4oCUIGZvY3VzIGxvc3MgY2xlYXJzIGlucHV0IGFuZCBjYW5jZWxsZWQgdG91Y2hlcyBjYW5ub3QgZmlyZQpPSyDigJQgZm9jdXMgbG9zcyBjbGVhcnMgYWxsIGlucHV0LCBiYWNrZ3JvdW5kIGlucHV0IGlzIGJsb2NrZWQsIGZyZXNoIGlucHV0IHJlY292ZXJzIGFuZCB0b3VjaCBjYW5jZWxsYXRpb24gY2Fubm90IGZpcmUKICAgKGlucHV0LWZvY3VzOiAwLjEgcykKCmFsbCAxIGhhcm5lc3NlcyByYW4K"
+    },
+    {
+      "name": "seam",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.50625,
+      "timeout_seconds": 480,
+      "log": "seam.log",
+      "sha256": "f339adaef4372580a3083b19d8eb38d8a2cfbacc496a99d9d222d2a48f51cecf",
+      "bytes": 1002,
+      "content_base64": "CuKUgOKUgCBzZWFtICDigJQgYSByb29tIGJvdW5kYXJ5IGlzIGEgcGxhY2Ugc2hlIHdhbGtzIHRocm91Z2gsIG5vdCBhIGRvb3IK4pSA4pSAIHNlYW0g4oCUIGEgcm9vbSBib3VuZGFyeSBpcyBhIHBsYWNlIHNoZSB3YWxrcyB0aHJvdWdoCgogIG9rICAgZXZlcnkgbWlycm9yZWQgaG9yaXpvbnRhbCBqb2luIGFncmVlcyBvbiBib3RoIHNpZGVzICAzNSBqb2lucwogIG9rICAgLi4uaW5jbHVkaW5nIHRoZSBqb2lucyBiZXR3ZWVuIHJvb21zIG9mIGRpZmZlcmVudCBoZWlnaHRzICBDNXxDMgogIG9rICAgdGhlIG1lYWRvdyBpcyB3YWxrZWQgZW5kIHRvIGVuZCwgZXZlcnkgc3RlcCBhIHJlYWwgam9pbiAgQTAgLT4gQTEgLT4gQTIgLT4gQTMgLT4gQTQKICBvayAgIC4uLmFuZCB0aGUgY3JhZGxlJ3Mgcm9hZCBpcyBqb2luZWQgdG9vICBXMXxXMgogIG9rICAgLi4uYW5kIG5vbmUgb2YgdGhlbSBpcyBhIGRvb3J3YXkgKD49IDEyIHJvd3Mgb2Ygc3RhbmRpbmcgc3BhY2UpICBXMXxXMj0xNCBBMHxBMT0xNCBBMXxBMj0xNCBBMnxBMz0xNCBBM3xBND0xNAogIG9rICAgdGhlIGNyeXN0YWwgY2F2ZSBtb3V0aHMgYXJlIHR1bm5lbHMsIG5vdCBzbG90cyAoPiA0IHJvd3MpICBDVjF8Q1YyPTEwIENWMnxDVjM9MTAKICBvayAgIGEgc2VhbSBuZXZlciBvcGVucyB0aGUgbGlkIChza3kgcm9vbXMgZXhjZXB0ZWQpICA2MCBsaWRkZWQgKyAxMCBvcGVuLXNreSBzZWFtIGNvbHVtbnMKICBvayAgIC4uLmFuZCBuZXZlciBvcGVucyB0aGUgZ3JvdW5kIHVuZGVyIGl0ICBncm91bmQgdW5icm9rZW4gdG8gZXZlcnkgZWRnZQogIG9rICAgZXZlcnkgVCBvcGVuaW5nIGFuc3dlcnMgdGhyb3VnaCB0aGUgZmxvb3IgYWJvdmUgaXQgIDIzIHZlcnRpY2FsIHNlYW1zIG9wZW4gYm90aCB3YXlzCiAgb2sgICBubyBwYWdlIGVycm9ycwoKT0sg4oCUIHRoZSBtZWFkb3cgaXMgam9pbmVkIGJ5IGdyb3VuZCwgbm90IGJ5IGRvb3JzCiAgIChzZWFtOiAwLjggcykKCmFsbCAxIGhhcm5lc3NlcyByYW4K"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+        "odyssey.html": "27249fb1ee46972f6236d354250a4580d1f413356a073db593cf64176f6ad540",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "8992e9e43c585cf804af178c9dba4adee7b797e4aca077f0d67e5220fdb94d1d",
+  "complete_requested_scope": true,
+  "log_integrity": {
+    "ok": true,
+    "files": [
+      {
+        "log": "build.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "input-focus.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "seam.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      }
+    ]
+  },
+  "passed": true,
+  "finished_utc": "2026-10-27T10:32:18.036341+00:00"
+}

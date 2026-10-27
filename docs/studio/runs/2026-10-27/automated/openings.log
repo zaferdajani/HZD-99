@@ -1,0 +1,96 @@
+
+── openings  — every boss move opens for at least one hit, and only the bait pays out three
+── openings — every move opens for at least one hit, and only the bait pays out three
+  ── NULLFANG
+       @70px p1  idle 39%  swipewarn 34%  swipe 16%  perch 4%  spring 2%  stalk 1%  springwarn 1%  dive 1%  recover 1%
+         tells began at (px): swipewarn 14  springwarn 3  perch 234
+         swipe>idle: idle 517, stalk 17 -> swipewarn  (reach 32/32)
+         swipe>idle: idle 483, stalk 50 -> swipewarn  (reach 32/32)
+         dive>recover: recover 317, idle 350, stalk 17 -> swipewarn  (reach 41/41)
+         dive>recover: recover 317, idle 367, stalk 17 -> swipewarn  (reach 42/42)
+       @320px p1  crouch 26%  pounce 20%  idle 19%  recover 10%  stalk 8%  swipewarn 7%  swipe 4%  perch 3%  springwarn 1%  spring 1%  dive 1%  roar 1%
+         tells began at (px): crouch 281  swipewarn 39  springwarn 123  perch 200
+         pounce>recover: recover 367, idle 417, stalk 17 -> swipewarn  (reach 48/48)
+         pounce>recover: recover 367, idle 433, stalk 17 -> swipewarn  (reach 49/49)
+         swipe>idle: idle 483 -> crouch  (reach 29/29)
+         swipe>idle: idle 667 -> crouch  (reach 40/40)
+         dive>recover: recover 317, idle 433 -> crouch  (reach 45/45)
+         dive>recover: recover 317, idle 433, stalk 17 -> swipewarn  (reach 46/46)
+       @70px p2  swipewarn 44%  swipe 31%  idle 20%  stalk 1%  springwarn 1%  spring 1%  perch 1%  dive 1%  recover 0%
+         tells began at (px): swipewarn 19  springwarn 10  perch 234
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>idle: idle 567, stalk 17 -> swipewarn  (reach 35/35)
+         swipe>idle: idle 567, stalk 17 -> swipewarn  (reach 35/35)
+         dive>recover: recover 233, idle 317, stalk 17 -> swipewarn  (reach 34/34)
+       @320px p2  crouch 21%  idle 18%  swipewarn 16%  pounce 15%  swipe 11%  recover 6%  stalk 5%  perch 2%  springwarn 1%  spring 1%  dive 1%  roar 1%
+         tells began at (px): crouch 280  swipewarn 145  springwarn 209  perch 398
+         pounce>recover: recover 267, idle 333, stalk 17 -> swipewarn  (reach 37/37)
+         pounce>recover: recover 267, idle 333, stalk 17 -> swipewarn  (reach 37/37)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>idle: idle 567 -> crouch  (reach 34/34)
+         swipe>idle: idle 600 -> crouch  (reach 36/36)
+         dive>recover: recover 233, idle 417, stalk 17 -> swipewarn  (reach 40/40)
+         dive>recover: recover 233, idle 367, stalk 17 -> swipewarn  (reach 37/37)
+       dive>recover         n= 7  min   567  med   683  max   767
+  ok   NULLFANG: dive>recover opens for at least one hit (>= 250 ms)  worst 567 ms (med 683)
+  ok   NULLFANG: dive>recover is not a gift (3 in 4 openings <= 900 ms)  p75 750 ms
+       pounce>recover       n=26  min   617  med   750  max  2517
+  ok   NULLFANG: pounce>recover opens for at least one hit (>= 250 ms)  worst 617 ms (med 750)
+  ok   NULLFANG: pounce>recover is not a gift (3 in 4 openings <= 900 ms)  p75 783 ms
+       swipe>idle           n=101  min   383  med   533  max   717
+  ok   NULLFANG: swipe>idle opens for at least one hit (>= 250 ms)  worst 383 ms (med 533)
+  ok   NULLFANG: swipe>idle is not a gift (3 in 4 openings <= 900 ms)  p75 600 ms
+       swipe>swipewarn      n=44  min     0  med     0  max     0   (chain middle)
+  ok   NULLFANG: every damaging move was seen  all
+  ── THE ALPHA
+       @60px p1  rest 43%  roarwarn 10%  coil 9%  turn 9%  leap 7%  roar 6%  clawwarn 4%  bitewarn 4%  claw 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 244  coil 112  broodcall 215  howl 222  bitewarn 291  roarwarn 210
+         claw>rest: rest 600 -> coil  (reach 36/36)
+         claw>rest: rest 667 -> coil  (reach 40/40)
+         leap>turn: turn 517, rest 1200 -> broodcall  (reach 103/103)
+         leap>turn: turn 517, rest 1317 -> roarwarn  (reach 110/110)
+         bite>rest: rest 417 -> coil  (reach 25/25)
+         bite>rest: rest 417 -> coil  (reach 25/25)
+         roar>rest: rest 717 -> clawwarn  (reach 43/43)
+         roar>rest: rest 700 -> clawwarn  (reach 42/42)
+       @200px p1  rest 43%  roarwarn 10%  coil 9%  turn 9%  leap 7%  roar 6%  clawwarn 4%  bitewarn 4%  claw 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 283  coil 87  broodcall 132  howl 132  bitewarn 132  roarwarn 183
+         claw>rest: rest 600 -> coil  (reach 36/36)
+         claw>rest: rest 350 -> coil  (reach 21/21)
+         leap>turn: turn 517, rest 1233 -> broodcall  (reach 105/105)
+         leap>turn: turn 517, rest 1117 -> roarwarn  (reach 98/98)
+         bite>rest: rest 583 -> coil  (reach 35/35)
+         bite>rest: rest 583 -> coil  (reach 35/35)
+         roar>rest: rest 817 -> clawwarn  (reach 49/49)
+         roar>rest: rest 667 -> clawwarn  (reach 40/40)
+       @420px p1  rest 42%  coil 10%  turn 10%  roarwarn 10%  leap 7%  roar 6%  clawwarn 4%  bitewarn 4%  claw 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 314  coil 163  broodcall 196  howl 228  bitewarn 300  roarwarn 190
+         claw>rest: rest 383 -> coil  (reach 23/23)
+         claw>rest: rest 350 -> coil  (reach 21/21)
+         leap>turn: turn 517, rest 1350 -> broodcall  (reach 112/112)
+         leap>turn: turn 517, rest 1117 -> roarwarn  (reach 98/98)
+         bite>rest: rest 350 -> coil  (reach 21/21)
+         bite>rest: rest 350 -> coil  (reach 21/21)
+         roar>rest: rest 750 -> clawwarn  (reach 45/45)
+         roar>rest: rest 800 -> clawwarn  (reach 48/48)
+       bite>rest            n=18  min   350  med   417  max   667
+  ok   THE ALPHA: bite>rest opens for at least one hit (>= 250 ms)  worst 350 ms (med 417)
+  ok   THE ALPHA: bite>rest is not a gift (3 in 4 openings <= 900 ms)  p75 583 ms
+       claw>rest            n=19  min   350  med   417  max   667
+  ok   THE ALPHA: claw>rest opens for at least one hit (>= 250 ms)  worst 350 ms (med 417)
+  ok   THE ALPHA: claw>rest is not a gift (3 in 4 openings <= 900 ms)  p75 600 ms
+       leap>turn            n=36  min  1600  med  1733  max  1867   (the gift)
+  ok   THE ALPHA: leap>turn opens for at least one hit (>= 250 ms)  worst 1600 ms (med 1733)
+  ok   THE ALPHA: leap>turn is the one gift, and pays out (> 900 ms)  1733 ms
+       roar>rest            n=30  min   667  med   717  max   817
+  ok   THE ALPHA: roar>rest opens for at least one hit (>= 250 ms)  worst 667 ms (med 717)
+  ok   THE ALPHA: roar>rest is not a gift (3 in 4 openings <= 900 ms)  p75 767 ms
+  ok   THE ALPHA: every damaging move was seen  all
+  ok   no page errors  
+
+OK — every move opens, and the fight hands out its gift exactly where it means to
+   (openings: 2.7 s)
+
+all 1 harnesses ran

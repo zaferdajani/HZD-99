@@ -1,0 +1,1809 @@
+
+── campaign-ch1  — chapter one played end to end with keyboard input only, from a cleared browser to the chapter-two teaser (long, real time)
+FAILED: [00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:00] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:00] MENU choose "newgame"
+[00:01] STATE MENU -> CUT
+[00:51] STATE CUT -> DIFF
+[00:51] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:51] FRAME 000-difficulty.png
+[00:52] PLAN reset (room  -> W1)
+[00:52] ROOM - -> W1  at x=96
+[00:52] STATE DIFF -> PANELS
+[00:52] MANHWA wake panel 1/5
+[00:52] OBJECTIVE "Reach the city gates"
+[00:52] CHIP move |  | 
+[00:52] SAVEPOINT null -> W1
+[00:52] WEAPON null -> claws
+[00:52]   . W1 x=96 y=412 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:53] MANHWA wake panel 2/5
+[00:54] MANHWA wake panel 3/5
+[00:55] MANHWA wake panel 4/5
+[00:55] MANHWA wake panel 5/5
+[00:57] STATE PANELS -> PLAY
+[00:57] CHIP move | Move | Walk right toward the light
+[01:00] TOAST POWER FAULT → SYSTEM RESTART
+[01:00]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:01] FRAMES median 50 ms -> planner step 1/30, game time 0.95x wall
+[01:01] PACE sim 59.7 s per 60 s wall (pace dial / slow frames)
+[01:02] FLAG +woke
+[01:02] MISSION opening (objective: "Reach the city gates")
+[01:03] CHIP out | Leave | The door has been open a long time — walk out
+[01:03] FLAG +tutI
+[01:03] FLAG +tutId
+[01:06] PLAN reset (room W1 -> W2)
+[01:06] ROOM W1 -> W2  at x=16
+[01:06] STATE PLAY -> PANELS
+[01:06] MANHWA bay panel 1/3
+[01:06] CHIP out |  | 
+[01:07] MANHWA bay panel 2/3
+[01:08] MANHWA bay panel 3/3
+[01:08]   . W2 x=16 y=437 vx=0 on cores=7/7 volts=33 tut=out/null@-1 mission=opening held=
+[01:10] STATE PANELS -> PLAY
+[01:10] CHIP out | The city gates | Follow the gold marker
+[01:11] CHIP jump | Jump | Follow the gold marker
+[01:12] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:12] CHIP gate | The city gates | Follow the gold marker
+[01:14] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:14] FLAG +gateOpened
+[01:16]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[01:18] PLAN reset (room W2 -> A0)
+[01:18] ROOM W2 -> A0  at x=40
+[01:18] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[01:19] STATE PLAY -> PANELS
+[01:19] MANHWA gate panel 1/2
+[01:19] CHIP gate |  | 
+[01:20] MANHWA gate panel 2/2
+[01:22] STATE PANELS -> PLAY
+[01:22] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:23] CHIP booth | Ratchet's booth | Follow the gold marker
+[01:23] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[01:24]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[01:28] PLAN reset (room A0 -> A0B)
+[01:28] ROOM A0 -> A0B  at x=103
+[01:28] OBJECTIVE "Wake Ratchet"
+[01:29] CHIP note | Read the letter | Follow the gold marker
+[01:30] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:30] STATE PLAY -> PANELS
+[01:30] MANHWA letter panel 1/5
+[01:30] CHIP note |  | 
+[01:32] MANHWA letter panel 2/5
+[01:32]   . A0B x=524 y=433 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[01:33] MANHWA letter panel 3/5
+[01:34] MANHWA letter panel 4/5
+[01:36] MANHWA letter panel 5/5
+[01:37] STATE PANELS -> PLAY
+[01:37] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[01:37] FLAG +opNote
+[01:38] CHIP drawer | Open the drawer | Follow the gold marker
+[01:39] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[01:40] STATE PLAY -> DIALOG
+[01:40] CHIP drawer |  | 
+[01:40] FLAG +ch_A0B_1
+[01:40] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[01:40] ITEMS {"ratchetCell":1}
+[01:40] STATE DIALOG -> PANELS
+[01:40] MANHWA drawer panel 1/1
+[01:40]   . A0B x=451 y=435 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[01:42] STATE PANELS -> PLAY
+[01:42] CHIP drawer | Open the drawer | Follow the gold marker
+[01:43] CHIP repair | Restore his battery | Follow the gold marker
+[01:44] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[01:44] STATE PLAY -> DIALOG
+[01:44] CHIP repair |  | 
+[01:44] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[01:45] STATE DIALOG -> REPAIR
+[01:45] FRAME 001-repair-board.png
+[01:45] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[01:45] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[01:46] REPAIR place on target:socket (the hint names "battery socket")
+[01:46] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[01:47] REPAIR place on target:plus (the hint names "+ terminal")
+[01:48] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[01:48]   . A0B x=472 y=433 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[01:49] REPAIR place on target:minus (the hint names "− terminal")
+[01:49] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[01:51] REPAIR place on target:relay (the hint names "relay")
+[01:51] REPAIR power
+[01:52] STATE REPAIR -> CUT
+[01:52] OBJECTIVE "Use Ratchet’s pod"
+[01:52] FLAG +on_A0B|ratchet
+[01:52] FLAG +ratchetRepaired
+[01:52] ITEMS {}
+[01:57]   . A0B x=472 y=433 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:00] STATE CUT -> DIALOG
+[02:00] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[02:01] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[02:01] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[02:01] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[02:02] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[02:03] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[02:05] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[02:05]   . A0B x=472 y=433 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[02:06] FLAG +opTold
+[02:06] FLAG +ratchetSpareGiven
+[02:06] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[02:06] ITEMS {"batt":1}
+[02:07] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[02:08] STATE DIALOG -> PANELS
+[02:08] MANHWA ratchet panel 1/2
+[02:10] MANHWA ratchet panel 2/2
+[02:11] STATE PANELS -> PLAY
+[02:11] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[02:12] CHIP pod | Use the pod | Follow the gold marker
+[02:13]   . A0B x=583 y=264 vx=340 air cores=7/7 volts=33 tut=pod/MOVE@912 mission=opening held=ArrowRight
+[02:13] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[02:14] SAVEPOINT W1 -> A0B
+[02:16] OBJECTIVE "Get the Volt Pack from Ratchet"
+[02:16] FLAG +opPod
+[02:16] CHIP pack | The Volt Pack | Follow the gold marker
+[02:18] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:18] STATE PLAY -> DIALOG
+[02:18] CHIP pack |  | 
+[02:18] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[02:19] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[02:20] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[02:21]   . A0B x=472 y=434 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[02:21] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[02:23] FLAG +opScrap
+[02:23] FLAG +sawScrap
+[02:23] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[02:23] SCRAP 0 -> 12
+[02:24] STATE DIALOG -> SHOP
+[02:25] FRAME 002-counter.png
+[02:25] SHOP buy the marked row (cell) with 12 scrap
+[02:25] STATE SHOP -> DIALOG
+[02:25] OBJECTIVE "Try out the Volt Pack"
+[02:25] FLAG +tutBuy
+[02:25] FLAG +heal
+[02:25] FLAG +pack
+[02:25] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[02:25] SCRAP 12 -> 0
+[02:26] STATE DIALOG -> PLAY
+[02:26] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[02:26] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[02:26] HURT 7 -> 6 in A0B
+[02:26] HEAL: holding heal
+[02:28] CHIP atk | Back outside | Follow the gold marker
+[02:29]   . A0B x=367 y=269 vx=-340 air cores=7/7 volts=66 tut=atk/MOVE@115 mission=opening held=ArrowLeft
+[02:29] CHIP atk | Back outside | Stand at the den door and press ↑
+[02:34] PLAN reset (room A0B -> A0)
+[02:34] ROOM A0B -> A0  at x=387
+[02:34] CHIP atk | Strike the winch | Follow the gold marker
+[02:34] CHIP atk | Strike the winch | Its infected arm blocks the road — each X knocks scrap loose
+[02:35] FLAG +winchKnock
+[02:35] CHIP burst | Volt Burst | Its motor still holds the arm — hold X, let go: the burst stops it
+[02:35] BURST: holding attack
+[02:37] TOAST The winch stops — its arm lifts clear of the road.
+[02:37] FLAG +burstDone
+[02:37] FLAG +opBurst
+[02:37] SCRAP 0 -> 12
+[02:37]   . A0 x=552 y=434 vx=0 on cores=7/7 volts=82 tut=burst/ATK@-1 mission=opening held=
+[02:37] OBJECTIVE "Solve the monument’s puzzle"
+[02:37] CHIP node | The monument | Follow the gold marker
+[02:38] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:39] STATE PLAY -> TRIAL
+[02:39] CHIP node |  | 
+[02:41] FRAME 003-monument-puzzle.png
+[02:41] PUZZLE memory: the monument played 3 notes; answering
+[02:42] STATE TRIAL -> PLAY
+[02:42] CHIP node | The monument | Press E at the monument and solve its puzzle — puzzles earn IQ for skills
+[02:42] TOAST The winch stops — its arm lifts clear of the road. / Knowledge gained  +10 IQ
+[02:42] FLAG +rd_n8
+[02:42] SCRAP 12 -> 15
+[02:42] OBJECTIVE "Head east into the Scrap Meadows"
+[02:43] CHIP go | Into the meadow | The road east leads to the Scrap Meadows
+[02:44] TOAST Knowledge gained  +10 IQ
+[02:45]   . A0 x=1638 y=431 vx=340 on cores=7/7 volts=82 tut=go/MOVE@2000 mission=opening held=ArrowRight
+[02:46] PLAN reset (room A0 -> A1)
+[02:46] ROOM A0 -> A1  at x=16
+[02:46] OBJECTIVE "Find the raw marble beneath the meadow"
+[02:46] CHIP (none)
+[02:46] TOAST Map online — open it any time (M / Tab)
+[02:46] FLAG +tut
+[02:46] FLAG +mapSeen
+[02:46] MISSION DONE opening
+[02:47] FRAME 004-done-opening.png
+[02:47] MISSION servo (objective: "Find the raw marble beneath the meadow")
+[02:47] PLAN room A1: 92 standable tiles, 1411 moves (60 ms)
+[02:48] INTERACT servo (wake him with the spare Power Cell)
+[02:48] STATE PLAY -> DIALOG
+[02:48] SAY Old Servo: "Ratchet’s spare cell fits the port in his chest. You seat it."
+[02:49] STATE DIALOG -> PLAY
+[02:49] FLAG +on_A1|servo
+[02:49] FLAG +servoIntro
+[02:49] ITEMS {}
+[02:49] INTERACT servo (wake him with the spare Power Cell)
+[02:50] STATE PLAY -> DIALOG
+[02:50] SAY Old Servo: "Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you."
+[02:50] SAY Old Servo: "After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up."
+[02:52] SAY Old Servo: "And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ."
+[02:53] FLAG +servoMet
+[02:53] SAY "Errand taken"
+[02:53]   . A1 x=128 y=426 vx=0 on cores=7/7 volts=82 mission=servo held= near=npc:servo
+[02:54] STATE DIALOG -> PLAY
+[02:54] MISSION DONE servo
+[02:54] FRAME 005-done-servo.png
+[02:54] MISSION first-meeting (objective: "Find the raw marble beneath the meadow")
+[02:55] FLAG +sc_A1_3
+[02:55] SCRAP 15 -> 30
+[02:55] FIGHT crawler (hp 26) in A1
+[02:56] TOAST Map online — open it any time (M / Tab) / Repair ready! Stand still and hold F to restore a core.
+[02:56] HURT 7 -> 6 in A1 (nearest crawler at 89 px)
+[02:56] TOAST Repair ready! Stand still and hold F to restore a core.
+[02:56] TOAST Repair ready! Stand still and hold F to restore a core. / You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[02:57] FIGHT guard (hp 38) in A1
+[02:58] HURT 6 -> 5 in A1 (nearest guard at 54 px)
+[03:00] TOAST You have enough ◈ to learn something new — press T — Neural Tree: Sharp Mind
+[03:01] FLAG +sc_A1_4
+[03:01] SCRAP 30 -> 48
+[03:01]   . A1 x=1363 y=427 vx=340 on cores=5/7 volts=99 mission=first-meeting held=ArrowRight
+[03:02] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[03:02] PACE sim 60.3 s per 60 s wall (pace dial / slow frames)
+[03:03] PLAN room A2: 116 standable tiles, 1727 moves (89 ms)
+[03:03] PLAN reset (room A1 -> A2)
+[03:03] ROOM A1 -> A2  at x=13
+[03:03] PLAN room A2: 116 standable tiles, 1727 moves (37 ms)
+[03:04] FLAG +sc_A2_4
+[03:04] SCRAP 48 -> 60
+[03:05] FIGHT crawler (hp 26) in A2
+[03:05] HURT 5 -> 4 in A2 (nearest crawler at 64 px)
+[03:06] HEAL (cores 4/7, volts 99)
+[03:08] FIGHT flier (hp 21) in A2
+[03:08] HEAL (cores 4/7, volts 66)
+[03:10]   . A2 x=555 y=252 vx=0 on cores=5/7 volts=33 mission=first-meeting held= threat={"k":"flier","x":546,"y":134,"w":26,"h":22,"hp":21,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[03:11] HURT 5 -> 4 in A2 (nearest flier at 36 px)
+[03:13] FLAG +sc_A2_5
+[03:14] SCRAP 60 -> 78
+[03:15] FIGHT hopper (hp 31) in A2
+[03:18] FLAG +nfMeet
+[03:18] MISSION DONE first-meeting
+[03:18] FRAME 006-done-first-meeting.png
+[03:18] MISSION marble (objective: "Find the raw marble beneath the meadow")
+[03:18] FLAG +sc_A2_6
+[03:18] SCRAP 78 -> 101
+[03:18]   . A2 x=1910 y=395 vx=-100 on cores=4/7 volts=44 mission=marble held=ArrowLeft
+[03:18] MEET NULLFANG drops in (A2): stepping out of the swipe
+[03:19] FRAME 007-nullfang-meet.png
+[03:19] HURT 4 -> 3 in A2 (nearest hopper at 50 px)
+[03:22] PLAN reset (room A2 -> A1)
+[03:22] ROOM A2 -> A1  at x=1732
+[03:22] PLAN room A1: 92 standable tiles, 1411 moves (32 ms)
+[03:23] PLAN reset (room A1 -> A2)
+[03:23] ROOM A1 -> A2  at x=15
+[03:23] STATE PLAY -> PANELS
+[03:23] MANHWA meet panel 1/4
+[03:24] MANHWA meet panel 2/4
+[03:25] MANHWA meet panel 3/4
+[03:26] MANHWA meet panel 4/4
+[03:26]   . A2 x=15 y=437 vx=0 on cores=3/7 volts=44 mission=marble held=
+[03:27] STATE PANELS -> PLAY
+[03:27] PLAN room A2: 116 standable tiles, 1727 moves (40 ms)
+[03:29] DOWN-STRIKE at the loose floor (tiles 12-14)
+[03:31] PLAN reset (room A2 -> A5)
+[03:31] ROOM A2 -> A5  at x=447
+[03:31] FLAG +taughtBreak
+[03:31] FLAG +taughtFloor
+[03:31] PLAN room A5: 58 standable tiles, 764 moves (18 ms)
+[03:31] TOAST Chalk arrows — the old quarrymen marked their road to the marble.
+[03:31] FLAG +pgMarks
+[03:33] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it.
+[03:34] RUBBLE strike (hp 6)
+[03:34] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[03:34] FLAG +sc_A5_5
+[03:34] SCRAP 101 -> 131
+[03:34]   . A5 x=1099 y=427 vx=0 on cores=3/7 volts=44 mission=marble held=
+[03:34] RUBBLE strike (hp 5)
+[03:35] RUBBLE strike (hp 4)
+[03:35] RUBBLE strike (hp 3)
+[03:36] RUBBLE strike (hp 2)
+[03:36] RUBBLE strike (hp 1)
+[03:37] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:37] FLAG +rubbleA5
+[03:37] DOOR up at 1106 -> CV1
+[03:37] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:39] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:39] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[03:41] PLAN reset (room A5 -> CV1)
+[03:41] ROOM A5 -> CV1  at x=167
+[03:41] PLAN room CV1: 74 standable tiles, 806 moves (31 ms)
+[03:41] STATE PLAY -> PANELS
+[03:41] MANHWA cave panel 1/3
+[03:43]   . CV1 x=167 y=427 vx=0 on cores=3/7 volts=44 mission=marble held=
+[03:43] MANHWA cave panel 2/3
+[03:43] MANHWA cave panel 3/3
+[03:45] STATE PANELS -> PLAY
+[03:46] FIGHT crawler (hp 52) in CV1
+[03:47] HURT 3 -> 2 in CV1 (nearest crawler at 24 px)
+[03:49] HURT 2 -> 1 in CV1 (nearest crawler at 37 px)
+[03:49] HEAL (cores 1/7, volts 88)
+[03:50] HEAL (cores 2/7, volts 55)
+[03:52]   . CV1 x=827 y=453 vx=0 on cores=3/7 volts=22 mission=marble held= near=rescue:null
+[03:53] TOAST Something is calling from behind the fallen rock. STRIKE it.
+[03:53] RUBBLE strike (hp 6)
+[03:54] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[03:54] RUBBLE strike (hp 5)
+[03:55] RUBBLE strike (hp 4)
+[03:55] RUBBLE strike (hp 3)
+[03:56] RUBBLE strike (hp 2)
+[03:56] RUBBLE strike (hp 1)
+[03:57] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:57] FLAG +rubbleCV1B
+[03:57] DOOR up at 1111 -> CV1B
+[03:58] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[03:58] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[04:00]   . CV1 x=1099 y=459 vx=0 on cores=3/7 volts=22 mission=marble held=
+[04:01] PLAN reset (room CV1 -> CV1B)
+[04:01] ROOM CV1 -> CV1B  at x=142
+[04:01] PLAN room CV1B: 50 standable tiles, 549 moves (14 ms)
+[04:02] FRAMES median 33 ms -> planner step 1/30, game time 0.98x wall
+[04:02] PACE sim 60.2 s per 60 s wall (pace dial / slow frames)
+[04:03] REST at the pod in CV1B (cores 3/7, volts 22)
+[04:04] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map.
+[04:04] FLAG +pgSurvey
+[04:04] FLAG +sc_CV1B_4
+[04:04] SCRAP 131 -> 161
+[04:04] SAVEPOINT A0B -> CV1B
+[04:04] HEAL (cores 3/7, volts 99)
+[04:06] TOAST The quarrymen's survey pod wakes: the quarry is charted on your map. / Systems recharged. Progress saved.
+[04:07] FIGHT bat (hp 50) in CV1B
+[04:08] FLAG +sc_CV1B_2
+[04:08] SCRAP 161 -> 214
+[04:08]   . CV1B x=868 y=370 vx=200 air cores=7/7 volts=99 mission=marble held=ArrowRight+Space
+[04:09] TOAST Systems recharged. Progress saved.
+[04:11] FIGHT bat (hp 50) in CV1B
+[04:16] FIGHT bat (hp 50) in CV1B
+[04:17]   . CV1B x=895 y=245 vx=0 air cores=7/7 volts=99 mission=marble held= threat={"k":"bat","x":894,"y":160,"w":24,"h":18,"hp":50,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:21] FIGHT bat (hp 50) in CV1B
+[04:22] HURT 7 -> 6 in CV1B (nearest bat at 40 px)
+[04:25]   . CV1B x=956 y=267 vx=340 air cores=6/7 volts=99 mission=marble held=ArrowRight
+[04:25] DOOR up at 1120 -> CV2
+[04:29] PLAN reset (room CV1B -> CV2)
+[04:30] ROOM CV1B -> CV2  at x=372
+[04:30] PLAN room CV2: 87 standable tiles, 976 moves (30 ms)
+[04:30] FIGHT hopper (hp 56) in CV2
+[04:30] HURT 6 -> 5 in CV2 (nearest hopper at 61 px)
+[04:31] TOAST This wall sounds hollow…
+[04:31] FLAG +heardHollow
+[04:33]   . CV2 x=672 y=379 vx=0 on cores=5/7 volts=99 mission=marble held=ArrowLeft threat={"k":"hopper","x":521,"y":360,"w":26,"h":24,"hp":43,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[04:34] FIGHT hopper (hp 43) in CV2
+[04:35] HURT 5 -> 4 in CV2 (nearest hopper at 53 px)
+[04:37] HURT 4 -> 3 in CV2 (nearest hopper at 16 px)
+[04:38] FIGHT hopper (hp 12) in CV2
+[04:39] HURT 3 -> 2 in CV2 (nearest hopper at 73 px)
+[04:39] HEAL (cores 2/7, volts 99)
+[04:41]   . CV2 x=742 y=458 vx=0 on cores=3/7 volts=66 mission=marble held= near=rescue:null
+[04:41] HEAL (cores 3/7, volts 66)
+[04:44] FIGHT bat (hp 54) in CV2
+[04:45] FIGHT crawler (hp 91) in CV2
+[04:45] HURT 4 -> 3 in CV2 (nearest crawler at 20 px)
+[04:48] HURT 3 -> 2 in CV2 (nearest crawler at 28 px)
+[04:48] HEAL (cores 2/7, volts 99)
+[04:50]   . CV2 x=1323 y=468 vx=0 on cores=3/7 volts=66 mission=marble held= near=rescue:null
+[04:50] HEAL (cores 3/7, volts 66)
+[04:55] PLAN reset (room CV2 -> CV3)
+[04:55] ROOM CV2 -> CV3  at x=10
+[04:57] GRAVEHORN p1 st=dorm hp=247 front=true dSnout=884 | cores 4/7 volts 33
+[04:58]   . CV3 x=205 y=457 vx=340 on cores=4/7 volts=33 mission=marble held=ArrowRight
+[05:00] GRAVEHORN p1 st=ghwake hp=247 front=true dSnout=356 | cores 4/7 volts 33
+[05:00] STATE PLAY -> DIALOG
+[05:00] OBJECTIVE "GRAVEHORN stands on the raw marble at the end of the cave. Drive him off."
+[05:00] FLAG +ghMet
+[05:00] SAY GRAVEHORN: "So the little cleaner woke up."
+[05:02] SAY GRAVEHORN: "I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone."
+[05:03] FRAMES median 50 ms -> planner step 1/30, game time 0.99x wall
+[05:03] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[05:03] SAY GRAVEHORN: "The Eye is the one who stole your Mother's Song. I guard what it took."
+[05:05] SAY GRAVEHORN: "The marble stays buried. So will you."
+[05:06] STATE DIALOG -> PLAY
+[05:06]   . CV3 x=397 y=467 vx=0 on cores=4/7 volts=33 mission=marble held=
+[05:06] GRAVEHORN p1 st=ghbellow hp=247 front=true dSnout=341 | cores 4/7 volts 33
+[05:08] GRAVEHORN tells hornprep
+[05:09] GRAVEHORN p1 st=hornless hp=247 front=true dSnout=146 | cores 4/7 volts 33
+[05:10] TOAST His horn is gone — the head is open. Hit it!
+[05:10] FLAG +ghHeadTold
+[05:12] GRAVEHORN p1 st=idle hp=146 front=true dSnout=67 | cores 4/7 volts 99
+[05:12] HEAL (cores 4/7, volts 99)
+[05:14] TOAST Strike his horn as it comes up — a clean hit turns the toss.
+[05:14] FLAG +ghParryTold
+[05:14]   . CV3 x=389 y=429 vx=-144 air cores=4/7 volts=66 mission=marble held=
+[05:14] HEAL (cores 4/7, volts 66)
+[05:16] GRAVEHORN p1 st=rush hp=146 front=true dSnout=282 | cores 5/7 volts 33
+[05:16] GRAVEHORN charge: jump at 0.33 s to contact
+[05:17] HURT 5 -> 4 in CV3 (nearest horn/rush at 95 px)
+[05:19] HURT 4 -> 3 in CV3 (nearest horn/stunned at 120 px)
+[05:19] GRAVEHORN p1 st=recover hp=82 front=false dSnout=263 | cores 3/7 volts 88
+[05:20] TOAST ⚡ The guardian is down — hit it NOW
+[05:22]   . CV3 x=232 y=460 vx=0 on cores=3/7 volts=99 mission=marble held=
+[05:22] GRAVEHORN p1 st=kneel hp=1 front=false dSnout=259 | cores 3/7 volts 99
+[05:22] STATE PLAY -> DIALOG
+[05:22] SAY GRAVEHORN: "Enough. The Eye built me for war. Now you see all of it."
+[05:24] STATE DIALOG -> PLAY
+[05:25] GRAVEHORN p2 st=rage hp=209 front=false dSnout=259 | cores 3/7 volts 99
+[05:26] HEAL (cores 3/7, volts 99)
+[05:28] GRAVEHORN tells hornprep
+[05:28] HEAL (cores 4/7, volts 66)
+[05:30] HURT 4 -> 3 in CV3 (nearest horn/hornless at 300 px)
+[05:30] HEAL (cores 3/7, volts 66)
+[05:32]   . CV3 x=499 y=469 vx=0 on cores=4/7 volts=33 mission=marble held=
+[05:32] GRAVEHORN p2 st=hornless hp=247 front=true dSnout=145 | cores 4/7 volts 33
+[05:33] GRAVEHORN tells tossprep
+[05:33] GRAVEHORN toss: strike the horn (parry) at t=0.12
+[05:34] TOAST PARRY! A lime glint can be turned: raise the guard as it lands, then strike back.
+[05:34] FLAG +parryTold
+[05:34] HEAL (cores 4/7, volts 77)
+[05:36] GRAVEHORN p2 st=rush hp=177 front=true dSnout=14 | cores 4/7 volts 44
+[05:36] GRAVEHORN charge: jump at 0.00 s to contact
+[05:38] GRAVEHORN tells chargewarn
+[05:39] GRAVEHORN charge: jump at 0.38 s to contact
+[05:39] GRAVEHORN p2 st=rush hp=177 front=false dSnout=250 | cores 4/7 volts 44
+[05:40]   . CV3 x=700 y=467 vx=-340 on cores=4/7 volts=44 mission=marble held=ArrowLeft
+[05:41] GRAVEHORN tells kickprep
+[05:42] GRAVEHORN p2 st=idle hp=177 front=false dSnout=313 | cores 4/7 volts 44
+[05:43] GRAVEHORN tells chargewarn
+[05:44] GRAVEHORN charge: jump at 0.33 s to contact
+[05:45] GRAVEHORN p2 st=wallturn hp=177 front=true dSnout=302 | cores 4/7 volts 44
+[05:46] GRAVEHORN tells chargewarn
+[05:47] GRAVEHORN charge: jump at 0.26 s to contact
+[05:48]   . CV3 x=641 y=463 vx=-340 on cores=4/7 volts=44 mission=marble held=ArrowLeft
+[05:48] GRAVEHORN p2 st=recover hp=177 front=false dSnout=394 | cores 4/7 volts 44
+[05:50] GRAVEHORN tells hornprep
+[05:51] HURT 4 -> 3 in CV3 (nearest horn/hornless at 268 px)
+[05:51] GRAVEHORN p2 st=hornless hp=177 front=true dSnout=67 | cores 3/7 volts 44
+[05:55] GRAVEHORN p2 st=hornless hp=36 front=true dSnout=15 | cores 3/7 volts 99
+[05:56]   . CV3 x=379 y=463 vx=-34 on cores=3/7 volts=99 mission=marble held=
+[05:57] STATE PLAY -> DIALOG
+[05:57] SAY GRAVEHORN: "This isn't over."
+[05:58] SAY GRAVEHORN: "The Eye sees you, cleaner. Next time it comes itself."
+[05:59] STATE DIALOG -> PLAY
+[05:59] GRAVEHORN p2 st=retreat hp=1 front=true dSnout=10 | cores 3/7 volts 99
+[06:01] HEAL (cores 3/7, volts 99)
+[06:03] OBJECTIVE "Find the raw marble beneath the meadow"
+[06:03] TOAST GRAVEHORN backs into the rock and is gone. The raw marble is unguarded.
+[06:03] FLAG +bossHorn
+[06:03] HEAL (cores 4/7, volts 66)
+[06:05] SCRAP 214 -> 219
+[06:05]   . CV3 x=379 y=463 vx=0 on cores=5/7 volts=33 mission=marble held=
+[06:05] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[06:05] PACE sim 62.2 s per 60 s wall (pace dial / slow frames)
+[06:05] PLAN room CV3: 62 standable tiles, 777 moves (52 ms)
+[06:05] SCRAP 219 -> 225
+[06:09] PILLAR: a plain strike first
+[06:10] FRAME 008-pillar-claws.png
+[06:10] TOAST Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.
+[06:10] PILLAR: Volt Burst (hold attack, release)
+[06:12] STATE PLAY -> PANELS
+[06:12] MANHWA marble panel 1/2
+[06:12] OBJECTIVE "Bring the raw marble to Ratchet"
+[06:12] TOAST ACQUIRED — raw cave marble / Errand ready — go back
+[06:12] FLAG +pl_cshard
+[06:12] BAG cshard
+[06:13]   . CV3 x=1555 y=462 vx=0 on cores=5/7 volts=8 mission=marble held=
+[06:13] MANHWA marble panel 2/2
+[06:15] STATE PANELS -> PLAY
+[06:15] MISSION DONE marble
+[06:15] FRAME 009-done-marble.png
+[06:15] MISSION forge (objective: "Bring the raw marble to Ratchet")
+[06:20] SCRAP 225 -> 230
+[06:20] SCRAP 230 -> 244
+[06:21]   . CV3 x=154 y=429 vx=-200 air cores=5/7 volts=8 mission=forge held=ArrowLeft+Space
+[06:21] PLAN reset (room CV3 -> CV2)
+[06:21] ROOM CV3 -> CV2  at x=2003
+[06:22] PLAN room CV2: 87 standable tiles, 976 moves (33 ms)
+[06:27] FIGHT bat (hp 28) in CV2
+[06:28] FLAG +taughtWall
+[06:28] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[06:28] FLAG +sc_CV2_5
+[06:28] SCRAP 244 -> 282
+[06:29]   . CV2 x=577 y=339 vx=-195 on cores=5/7 volts=8 mission=forge held=Space
+[06:30] FLAG +sc_CV2_7
+[06:30] SCRAP 282 -> 312
+[06:31] PLAN room CV1: 74 standable tiles, 806 moves (16 ms)
+[06:31] PLAN reset (room CV2 -> CV1)
+[06:32] ROOM CV2 -> CV1  at x=1718
+[06:32] PLAN room CV1: 74 standable tiles, 806 moves (15 ms)
+[06:33] FLAG +sc_CV1_2
+[06:33] SCRAP 312 -> 327
+[06:37]   . CV1 x=405 y=347 vx=-340 air cores=5/7 volts=8 mission=forge held=ArrowLeft+Space
+[06:38] DOOR up at 179 -> A5
+[06:42] PLAN reset (room CV1 -> A5)
+[06:42] ROOM CV1 -> A5  at x=1094
+[06:42] PLAN room A5: 58 standable tiles, 764 moves (19 ms)
+[06:45]   . A5 x=458 y=350 vx=-340 air cores=5/7 volts=8 mission=forge held=ArrowLeft+Space
+[06:46] FLAG +sc_A5_4
+[06:46] FLAG +sc_A5_3
+[06:46] SCRAP 327 -> 410
+[06:47] PLAN reset (room A5 -> A2)
+[06:47] ROOM A5 -> A2  at x=419
+[06:47] PLAN room A2: 114 standable tiles, 1686 moves (47 ms)
+[06:49] PLAN reset (room A2 -> A1)
+[06:49] ROOM A2 -> A1  at x=1747
+[06:49] PLAN room A1: 92 standable tiles, 1411 moves (39 ms)
+[06:53]   . A1 x=398 y=435 vx=-340 on cores=5/7 volts=8 mission=forge held=ArrowLeft
+[06:55] PLAN reset (room A1 -> A0)
+[06:55] ROOM A1 -> A0  at x=2003
+[06:55] PLAN room A0: 80 standable tiles, 1125 moves (28 ms)
+[07:00] DOOR up at 399 -> A0B
+[07:01]   . A0 x=387 y=434 vx=0 on cores=5/7 volts=8 mission=forge held=
+[07:04] PLAN reset (room A0 -> A0B)
+[07:04] ROOM A0 -> A0B  at x=103
+[07:04] PLAN room A0B: 33 standable tiles, 432 moves (9 ms)
+[07:05] FRAMES median 17 ms -> planner step 1/60, game time 1.01x wall
+[07:05] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[07:05] PLAN room A0B: 33 standable tiles, 491 moves (13 ms)
+[07:05] INTERACT ratchet (hand over the raw marble)
+[07:06] STATE PLAY -> DIALOG
+[07:06] FLAG +said
+[07:06] SAY Ratchet: "It threw you once — I saw the dent in the corridor. Not with claws. Bring me the marble first."
+[07:07] SAY Ratchet: "You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them—not what is left of them."
+[07:08] SAY Ratchet: "When the blade is done I'm taking my tools to the camp by the lion's enclosure. That is where this ends. Find me there."
+[07:09]   . A0B x=472 y=437 vx=0 on cores=5/7 volts=8 mission=forge held= near=npc:ratchet
+[07:09] STATE DIALOG -> CUT
+[07:09] OBJECTIVE "Free the first sage — the door beside the marble quarry"
+[07:09] FLAG +crystal
+[07:09] FLAG +ratchetCamp
+[07:09] BAG 
+[07:09] WEAPON claws -> single
+[07:17]   . A0B x=472 y=437 vx=0 on cores=5/7 volts=8 mission=forge held= near=npc:ratchet
+[07:19] STATE CUT -> DIALOG
+[07:19] FLAG +alphaLead
+[07:19] SAY Ratchet: "Before the song broke, the wolves escorted lost workers home. Their Alpha kept watch over the Meadow den."
+[07:20] SAY Ratchet: "Now its corrupted howl drives the pack to attack the people it protected. They are still following their guardian."
+[07:21] SAY Ratchet: "If you choose, find the marked den entrance in the Meadow. Your white blade can release the Alpha, and its pack will become our allies. The old supply cache beyond the den will be yours."
+[07:22] SAY Ratchet: "This is a detour. The marble came from the cave; your path to the sages remains open."
+[07:23] STATE DIALOG -> SHOP
+[07:23] SHOP leave
+[07:24] STATE SHOP -> PANELS
+[07:24] MANHWA forge panel 1/3
+[07:25] MANHWA forge panel 2/3
+[07:25]   . A0B x=472 y=437 vx=0 on cores=5/7 volts=8 mission=forge held= near=npc:ratchet
+[07:26] MANHWA forge panel 3/3
+[07:27] STATE PANELS -> PLAY
+[07:27] MISSION DONE forge
+[07:28] FRAME 010-done-forge.png
+[07:28] MISSION sage (objective: "Free the first sage — the door beside the marble quarry")
+[07:28] READY: before GA1D (cores 5/7, save point CV1B) — resting at the pod in CV1B first
+[07:29] DOOR up at 115 -> A0
+[07:33] PLAN reset (room A0B -> A0)
+[07:33] ROOM A0B -> A0  at x=387
+[07:33] TOAST The ones you stopped are still bound — stand over one and cleanse it.
+[07:33] FLAG +pgBound
+[07:33] FLAG +pgBoundN
+[07:33] PLAN room A0: 80 standable tiles, 1270 moves (36 ms)
+[07:33]   . A0 x=390 y=436 vx=100 on cores=5/7 volts=8 mission=sage held=ArrowRight
+[07:39] PLAN room A1: 92 standable tiles, 1584 moves (39 ms)
+[07:39] PLAN reset (room A0 -> A1)
+[07:39] ROOM A0 -> A1  at x=55
+[07:40] TOAST The ones you stopped are still bound — stand over one and cleanse it.
+[07:40] PLAN room A1: 92 standable tiles, 1584 moves (39 ms)
+[07:41]   . A1 x=561 y=433 vx=340 on cores=5/7 volts=8 mission=sage held=ArrowRight near=rescue:null
+[07:45] PLAN reset (room A1 -> A2)
+[07:45] ROOM A1 -> A2  at x=21
+[07:46] PLAN room A2: 114 standable tiles, 1822 moves (52 ms)
+[07:47] PLAN room A5: 58 standable tiles, 880 moves (28 ms)
+[07:47] PLAN reset (room A2 -> A5)
+[07:47] ROOM A2 -> A5  at x=410
+[07:47] PLAN room A5: 58 standable tiles, 880 moves (24 ms)
+[07:49]   . A5 x=901 y=212 vx=340 air cores=5/7 volts=8 mission=sage held=ArrowRight+Space
+[07:51] DOOR up at 1106 -> CV1
+[07:55] PLAN reset (room A5 -> CV1)
+[07:55] ROOM A5 -> CV1  at x=167
+[07:55] PLAN room CV1: 74 standable tiles, 858 moves (23 ms)
+[07:57]   . CV1 x=423 y=457 vx=0 on cores=5/7 volts=8 mission=sage held=
+[08:00] DOOR up at 1111 -> CV1B
+[08:04] PLAN reset (room CV1 -> CV1B)
+[08:04] ROOM CV1 -> CV1B  at x=142
+[08:04] PLAN room CV1B: 50 standable tiles, 588 moves (18 ms)
+[08:05]   . CV1B x=395 y=434 vx=243 on cores=5/7 volts=8 mission=sage held=Space
+[08:06] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[08:06] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[08:06] PLAN room CV1B: 50 standable tiles, 549 moves (9 ms)
+[08:08] REST at the pod in CV1B (cores 5/7, volts 8)
+[08:10] TOAST Systems recharged. Progress saved.
+[08:12] FIGHT bat (hp 29) in CV1B
+[08:14]   . CV1B x=879 y=299 vx=0 air cores=7/7 volts=99 mission=sage held=
+[08:16] FIGHT bat (hp 29) in CV1B
+[08:20] FIGHT bat (hp 29) in CV1B
+[08:22]   . CV1B x=875 y=379 vx=0 air cores=7/7 volts=99 mission=sage held=
+[08:23] DOOR up at 1120 -> CV2
+[08:27] PLAN reset (room CV1B -> CV2)
+[08:27] ROOM CV1B -> CV2  at x=372
+[08:27] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[08:30]   . CV2 x=672 y=379 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[08:37] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=379
+[08:38] FRAME 011-stuck-CV2.png
+[08:38] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":27,"to":53,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[08:39] PLAN reset (recovery input)
+[08:39]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[08:39] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[08:47]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[08:48] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[08:48] FRAME 012-stuck-CV2.png
+[08:48] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[08:49] PLAN reset (recovery input)
+[08:49] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[08:55]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[08:59] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[08:59] FRAME 013-stuck-CV2.png
+[08:59] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[09:00] PLAN reset (recovery input)
+[09:00] PLAN room CV2: 86 standable tiles, 977 moves (47 ms)
+[09:03]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[09:06] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[09:06] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[09:09] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[09:09] FRAME 014-stuck-CV2.png
+[09:09] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[09:10] PLAN reset (recovery input)
+[09:10] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[09:11]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[09:19]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[09:20] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[09:20] FRAME 015-stuck-CV2.png
+[09:20] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[09:21] PLAN reset (recovery input)
+[09:21] PLAN room CV2: 86 standable tiles, 977 moves (31 ms)
+[09:27]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[09:30] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[09:30] FRAME 016-stuck-CV2.png
+[09:30] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[09:31] PLAN reset (recovery input)
+[09:31] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[09:35]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[09:41] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[09:41] FRAME 017-stuck-CV2.png
+[09:41] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[09:42] PLAN reset (recovery input)
+[09:42] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[09:43]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[09:51] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[09:52] FRAME 018-stuck-CV2.png
+[09:52] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[09:52] PLAN reset (recovery input)
+[09:52]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[09:53] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[10:01]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[10:02] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[10:02] FRAME 019-stuck-CV2.png
+[10:02] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[10:03] PLAN reset (recovery input)
+[10:03] PLAN room CV2: 86 standable tiles, 977 moves (34 ms)
+[10:07] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[10:07] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[10:09]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[10:12] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[10:13] FRAME 020-stuck-CV2.png
+[10:13] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[10:13] PLAN reset (recovery input)
+[10:14] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[10:17]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[10:23] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[10:23] FRAME 021-stuck-CV2.png
+[10:23] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[10:24] PLAN reset (recovery input)
+[10:24] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[10:25]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[10:33]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[10:33] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[10:34] FRAME 022-stuck-CV2.png
+[10:34] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[10:35] PLAN reset (recovery input)
+[10:35] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[10:41]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[10:44] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[10:44] FRAME 023-stuck-CV2.png
+[10:44] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[10:45] PLAN reset (recovery input)
+[10:45] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[10:49]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[10:54] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[10:55] FRAME 024-stuck-CV2.png
+[10:55] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[10:56] PLAN reset (recovery input)
+[10:56] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[10:57]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[11:05] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[11:05] FRAME 025-stuck-CV2.png
+[11:05] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[11:06] PLAN reset (recovery input)
+[11:06]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[11:06] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[11:07] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[11:07] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[11:14]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[11:15] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[11:16] FRAME 026-stuck-CV2.png
+[11:16] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[11:17] PLAN reset (recovery input)
+[11:17] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[11:22]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[11:26] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[11:26] FRAME 027-stuck-CV2.png
+[11:26] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[11:27] PLAN reset (recovery input)
+[11:27] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[11:30]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[11:36] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[11:37] FRAME 028-stuck-CV2.png
+[11:37] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[11:38] PLAN reset (recovery input)
+[11:38] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[11:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[11:46]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[11:47] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[11:47] FRAME 029-stuck-CV2.png
+[11:47] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[11:48] PLAN reset (recovery input)
+[11:48] PLAN room CV2: 86 standable tiles, 977 moves (30 ms)
+[11:54]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[11:57] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[11:58] FRAME 030-stuck-CV2.png
+[11:58] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[11:59] PLAN reset (recovery input)
+[11:59] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[12:02]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[12:08] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[12:08] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[12:08] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[12:08] FRAME 031-stuck-CV2.png
+[12:08] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[12:09] PLAN reset (recovery input)
+[12:09] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[12:11]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[12:19] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[12:19] FRAME 032-stuck-CV2.png
+[12:19] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[12:20] PLAN reset (recovery input)
+[12:20]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[12:20] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[12:28]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[12:29] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[12:29] FRAME 033-stuck-CV2.png
+[12:29] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[12:30] PLAN reset (recovery input)
+[12:30] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[12:36]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[12:39] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[12:40] FRAME 034-stuck-CV2.png
+[12:40] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[12:41] PLAN reset (recovery input)
+[12:41] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[12:44]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[12:50] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[12:50] FRAME 035-stuck-CV2.png
+[12:50] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[12:51] PLAN reset (recovery input)
+[12:51] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[12:52]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[13:00]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[13:00] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[13:01] FRAME 036-stuck-CV2.png
+[13:01] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[13:02] PLAN reset (recovery input)
+[13:02] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[13:08] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[13:08] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[13:08]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[13:11] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[13:11] FRAME 037-stuck-CV2.png
+[13:11] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[13:12] PLAN reset (recovery input)
+[13:12] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[13:17]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[13:22] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[13:22] FRAME 038-stuck-CV2.png
+[13:22] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[13:23] PLAN reset (recovery input)
+[13:23] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[13:25]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[13:32] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[13:33] FRAME 039-stuck-CV2.png
+[13:33] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[13:33] PLAN reset (recovery input)
+[13:34]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[13:34] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[13:42]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[13:43] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[13:43] FRAME 040-stuck-CV2.png
+[13:43] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[13:44] PLAN reset (recovery input)
+[13:44] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[13:50]   . CV2 x=672 y=220 vx=-1 air cores=7/7 volts=99 mission=sage held=ArrowLeft
+[13:53] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[13:54] FRAME 041-stuck-CV2.png
+[13:54] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[13:55] PLAN reset (recovery input)
+[13:55] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[13:58]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[14:04] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:04] FRAME 042-stuck-CV2.png
+[14:04] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[14:05] PLAN reset (recovery input)
+[14:06] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[14:06]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[14:09] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[14:09] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[14:14]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[14:15] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[14:15] FRAME 043-stuck-CV2.png
+[14:15] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[14:16] PLAN reset (recovery input)
+[14:16] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[14:22]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[14:25] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:26] FRAME 044-stuck-CV2.png
+[14:26] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[14:26] PLAN reset (recovery input)
+[14:27] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[14:30]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[14:36] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[14:36] FRAME 045-stuck-CV2.png
+[14:36] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[14:37] PLAN reset (recovery input)
+[14:37] PLAN room CV2: 86 standable tiles, 977 moves (29 ms)
+[14:38]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[14:46]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[14:46] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[14:47] FRAME 046-stuck-CV2.png
+[14:47] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[14:48] PLAN reset (recovery input)
+[14:48] PLAN room CV2: 86 standable tiles, 977 moves (27 ms)
+[14:54]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[14:57] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[14:57] FRAME 047-stuck-CV2.png
+[14:57] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[14:58] PLAN reset (recovery input)
+[14:58] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[15:02]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[15:07] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:08] FRAME 048-stuck-CV2.png
+[15:08] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[15:09] PLAN reset (recovery input)
+[15:09] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[15:09] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[15:09] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[15:10]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[15:18] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[15:19] FRAME 049-stuck-CV2.png
+[15:19] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[15:19] PLAN reset (recovery input)
+[15:19]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[15:20] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[15:27]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[15:29] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:29] FRAME 050-stuck-CV2.png
+[15:29] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[15:30] PLAN reset (recovery input)
+[15:30] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[15:36]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[15:39] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[15:40] FRAME 051-stuck-CV2.png
+[15:40] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[15:41] PLAN reset (recovery input)
+[15:41] PLAN room CV2: 86 standable tiles, 977 moves (31 ms)
+[15:44]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[15:50] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[15:50] FRAME 052-stuck-CV2.png
+[15:50] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[15:51] PLAN reset (recovery input)
+[15:51] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[15:52]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[16:00]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[16:00] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[16:01] FRAME 053-stuck-CV2.png
+[16:01] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[16:02] PLAN reset (recovery input)
+[16:02] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[16:08]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[16:10] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[16:10] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[16:11] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:11] FRAME 054-stuck-CV2.png
+[16:11] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[16:12] PLAN reset (recovery input)
+[16:12] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[16:16]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[16:21] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[16:22] FRAME 055-stuck-CV2.png
+[16:22] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[16:23] PLAN reset (recovery input)
+[16:23] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[16:24]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[16:32] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:32] FRAME 056-stuck-CV2.png
+[16:32] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[16:33] PLAN reset (recovery input)
+[16:33]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[16:33] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[16:41]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[16:42] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[16:43] FRAME 057-stuck-CV2.png
+[16:43] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[16:44] PLAN reset (recovery input)
+[16:44] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[16:49]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[16:53] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[16:53] FRAME 058-stuck-CV2.png
+[16:53] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[16:54] PLAN reset (recovery input)
+[16:54] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[16:57]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[17:03] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[17:04] FRAME 059-stuck-CV2.png
+[17:04] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[17:05] PLAN reset (recovery input)
+[17:05] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[17:05]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[17:10] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[17:10] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[17:14]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[17:14] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:14] FRAME 060-stuck-CV2.png
+[17:14] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[17:15] PLAN reset (recovery input)
+[17:16] PLAN room CV2: 86 standable tiles, 977 moves (37 ms)
+[17:22]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[17:25] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[17:25] FRAME 061-stuck-CV2.png
+[17:25] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[17:26] PLAN reset (recovery input)
+[17:26] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[17:30]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[17:35] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:36] FRAME 062-stuck-CV2.png
+[17:36] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[17:37] PLAN reset (recovery input)
+[17:37] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[17:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[17:46]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[17:46] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[17:46] FRAME 063-stuck-CV2.png
+[17:46] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[17:47] PLAN reset (recovery input)
+[17:47] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[17:54]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[17:56] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[17:57] FRAME 064-stuck-CV2.png
+[17:57] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[17:58] PLAN reset (recovery input)
+[17:58] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[18:02]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[18:07] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:07] FRAME 065-stuck-CV2.png
+[18:07] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[18:08] PLAN reset (recovery input)
+[18:08] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[18:10]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[18:11] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[18:11] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[18:17] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[18:18] FRAME 066-stuck-CV2.png
+[18:18] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[18:19] PLAN reset (recovery input)
+[18:19]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[18:19] PLAN room CV2: 86 standable tiles, 977 moves (27 ms)
+[18:27]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[18:28] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:28] FRAME 067-stuck-CV2.png
+[18:28] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[18:29] PLAN reset (recovery input)
+[18:29] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[18:35]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[18:39] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[18:39] FRAME 068-stuck-CV2.png
+[18:39] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[18:40] PLAN reset (recovery input)
+[18:40] PLAN room CV2: 86 standable tiles, 977 moves (29 ms)
+[18:43]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[18:49] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[18:49] FRAME 069-stuck-CV2.png
+[18:49] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[18:50] PLAN reset (recovery input)
+[18:50] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[18:51]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[18:59]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[19:00] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[19:00] FRAME 070-stuck-CV2.png
+[19:00] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[19:01] PLAN reset (recovery input)
+[19:01] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[19:07]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[19:10] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[19:11] FRAME 071-stuck-CV2.png
+[19:11] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[19:11] PLAN reset (recovery input)
+[19:12] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[19:12] PACE sim 60.9 s per 60 s wall (pace dial / slow frames)
+[19:12] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[19:15]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[19:21] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[19:21] FRAME 072-stuck-CV2.png
+[19:21] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[19:22] PLAN reset (recovery input)
+[19:22] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[19:23]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[19:31]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[19:31] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[19:32] FRAME 073-stuck-CV2.png
+[19:32] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[19:33] PLAN reset (recovery input)
+[19:33] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[19:39]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[19:42] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[19:42] FRAME 074-stuck-CV2.png
+[19:42] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[19:43] PLAN reset (recovery input)
+[19:43] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[19:47]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[19:53] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[19:53] FRAME 075-stuck-CV2.png
+[19:53] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[19:54] PLAN reset (recovery input)
+[19:54] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[19:55]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[20:03] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[20:04] FRAME 076-stuck-CV2.png
+[20:04] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[20:04] PLAN reset (recovery input)
+[20:04]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[20:05] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[20:13] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[20:13] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[20:13]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[20:14] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[20:14] FRAME 077-stuck-CV2.png
+[20:14] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[20:15] PLAN reset (recovery input)
+[20:15] PLAN room CV2: 86 standable tiles, 977 moves (27 ms)
+[20:21]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[20:24] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[20:25] FRAME 078-stuck-CV2.png
+[20:25] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[20:26] PLAN reset (recovery input)
+[20:26] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[20:29]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[20:35] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[20:35] FRAME 079-stuck-CV2.png
+[20:35] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[20:36] PLAN reset (recovery input)
+[20:36] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[20:37]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[20:45]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[20:45] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[20:46] FRAME 080-stuck-CV2.png
+[20:46] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[20:46] PLAN reset (recovery input)
+[20:47] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[20:53]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[20:56] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[20:56] FRAME 081-stuck-CV2.png
+[20:56] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[20:57] PLAN reset (recovery input)
+[20:57] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[21:01]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[21:06] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:07] FRAME 082-stuck-CV2.png
+[21:07] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[21:07] PLAN reset (recovery input)
+[21:08] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[21:09]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[21:13] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[21:13] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[21:17] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[21:17] FRAME 083-stuck-CV2.png
+[21:17] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[21:18] PLAN reset (recovery input)
+[21:18]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[21:18] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[21:26]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[21:27] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:27] FRAME 084-stuck-CV2.png
+[21:27] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[21:28] PLAN reset (recovery input)
+[21:28] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[21:34]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[21:38] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[21:38] FRAME 085-stuck-CV2.png
+[21:38] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[21:39] PLAN reset (recovery input)
+[21:39] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[21:42]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[21:48] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[21:48] FRAME 086-stuck-CV2.png
+[21:48] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[21:49] PLAN reset (recovery input)
+[21:49] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[21:50]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[21:58]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[21:59] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[21:59] FRAME 087-stuck-CV2.png
+[21:59] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[22:00] PLAN reset (recovery input)
+[22:00] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[22:06]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[22:09] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:09] FRAME 088-stuck-CV2.png
+[22:09] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[22:10] PLAN reset (recovery input)
+[22:10] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[22:14] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[22:14] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[22:14]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[22:20] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[22:20] FRAME 089-stuck-CV2.png
+[22:20] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[22:21] PLAN reset (recovery input)
+[22:21] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[22:22]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[22:30] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:30] FRAME 090-stuck-CV2.png
+[22:30] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[22:31] PLAN reset (recovery input)
+[22:31]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[22:31] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[22:39]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[22:41] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[22:41] FRAME 091-stuck-CV2.png
+[22:41] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[22:42] PLAN reset (recovery input)
+[22:42] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[22:48]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[22:51] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[22:52] FRAME 092-stuck-CV2.png
+[22:52] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[22:52] PLAN reset (recovery input)
+[22:53] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[22:56]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[23:02] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[23:02] FRAME 093-stuck-CV2.png
+[23:02] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[23:03] PLAN reset (recovery input)
+[23:03] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[23:04]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[23:12]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[23:12] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:13] FRAME 094-stuck-CV2.png
+[23:13] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[23:14] PLAN reset (recovery input)
+[23:14] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[23:14] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[23:14] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[23:20]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[23:23] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[23:23] FRAME 095-stuck-CV2.png
+[23:23] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[23:24] PLAN reset (recovery input)
+[23:24] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[23:28]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[23:33] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:34] FRAME 096-stuck-CV2.png
+[23:34] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[23:35] PLAN reset (recovery input)
+[23:35] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[23:36]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[23:44] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[23:44] FRAME 097-stuck-CV2.png
+[23:44] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[23:45] PLAN reset (recovery input)
+[23:45]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[23:45] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[23:53]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[23:54] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[23:55] FRAME 098-stuck-CV2.png
+[23:55] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[23:56] PLAN reset (recovery input)
+[23:56] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[24:01]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[24:05] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[24:05] FRAME 099-stuck-CV2.png
+[24:05] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[24:06] PLAN reset (recovery input)
+[24:06] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[24:09]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[24:15] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[24:15] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[24:16] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[24:16] FRAME 100-stuck-CV2.png
+[24:16] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[24:17] PLAN reset (recovery input)
+[24:17] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[24:17]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[24:25]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[24:26] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[24:26] FRAME 101-stuck-CV2.png
+[24:26] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[24:27] PLAN reset (recovery input)
+[24:27] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[24:33]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[24:36] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[24:37] FRAME 102-stuck-CV2.png
+[24:37] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[24:38] PLAN reset (recovery input)
+[24:38] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[24:42]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[24:47] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[24:47] FRAME 103-stuck-CV2.png
+[24:47] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[24:48] PLAN reset (recovery input)
+[24:48] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[24:50]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[24:57] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[24:58] FRAME 104-stuck-CV2.png
+[24:58] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[24:59] PLAN reset (recovery input)
+[24:59]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[24:59] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[25:07]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[25:08] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[25:08] FRAME 105-stuck-CV2.png
+[25:08] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[25:09] PLAN reset (recovery input)
+[25:09] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[25:15] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[25:15] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[25:15]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[25:19] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[25:19] FRAME 106-stuck-CV2.png
+[25:19] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[25:20] PLAN reset (recovery input)
+[25:20] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[25:23]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[25:29] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[25:29] FRAME 107-stuck-CV2.png
+[25:29] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[25:30] PLAN reset (recovery input)
+[25:31] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[25:31]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[25:39]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[25:40] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[25:40] FRAME 108-stuck-CV2.png
+[25:40] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[25:41] PLAN reset (recovery input)
+[25:41] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[25:48]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[25:50] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[25:51] FRAME 109-stuck-CV2.png
+[25:51] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[25:51] PLAN reset (recovery input)
+[25:52] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[25:56]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[26:01] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[26:01] FRAME 110-stuck-CV2.png
+[26:01] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[26:02] PLAN reset (recovery input)
+[26:02] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[26:04]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[26:11] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:11] FRAME 111-stuck-CV2.png
+[26:11] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[26:12] PLAN reset (recovery input)
+[26:12]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[26:13] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[26:16] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[26:16] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[26:20]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[26:22] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[26:22] FRAME 112-stuck-CV2.png
+[26:22] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[26:23] PLAN reset (recovery input)
+[26:23] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[26:29]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[26:32] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:33] FRAME 113-stuck-CV2.png
+[26:33] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[26:33] PLAN reset (recovery input)
+[26:34] PLAN room CV2: 86 standable tiles, 977 moves (37 ms)
+[26:37]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[26:43] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[26:43] FRAME 114-stuck-CV2.png
+[26:43] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[26:44] PLAN reset (recovery input)
+[26:44] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[26:45]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[26:53]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[26:53] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[26:54] FRAME 115-stuck-CV2.png
+[26:54] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[26:55] PLAN reset (recovery input)
+[26:55] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[27:01]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[27:04] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[27:04] FRAME 116-stuck-CV2.png
+[27:04] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[27:05] PLAN reset (recovery input)
+[27:05] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[27:09]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[27:14] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[27:15] FRAME 117-stuck-CV2.png
+[27:15] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[27:16] PLAN reset (recovery input)
+[27:16] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[27:16] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[27:16] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[27:17]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[27:25]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[27:25] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[27:25] FRAME 118-stuck-CV2.png
+[27:25] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[27:26] PLAN reset (recovery input)
+[27:26] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[27:33]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[27:35] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[27:36] FRAME 119-stuck-CV2.png
+[27:36] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[27:37] PLAN reset (recovery input)
+[27:37] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[27:41]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[27:46] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[27:46] FRAME 120-stuck-CV2.png
+[27:46] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[27:47] PLAN reset (recovery input)
+[27:47] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[27:49]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[27:57] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[27:57] FRAME 121-stuck-CV2.png
+[27:57] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[27:58] PLAN reset (recovery input)
+[27:58]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[27:58] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[28:06]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[28:07] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:07] FRAME 122-stuck-CV2.png
+[28:07] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[28:08] PLAN reset (recovery input)
+[28:08] PLAN room CV2: 86 standable tiles, 977 moves (25 ms)
+[28:14]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[28:17] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[28:17] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[28:17] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[28:18] FRAME 123-stuck-CV2.png
+[28:18] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[28:19] PLAN reset (recovery input)
+[28:19] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[28:22]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[28:28] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:28] FRAME 124-stuck-CV2.png
+[28:28] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[28:29] PLAN reset (recovery input)
+[28:29] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[28:30]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[28:38]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[28:38] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[28:39] FRAME 125-stuck-CV2.png
+[28:39] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[28:40] PLAN reset (recovery input)
+[28:40] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[28:46]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[28:49] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[28:49] FRAME 126-stuck-CV2.png
+[28:49] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[28:50] PLAN reset (recovery input)
+[28:50] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[28:54]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[28:59] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[29:00] FRAME 127-stuck-CV2.png
+[29:00] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[29:01] PLAN reset (recovery input)
+[29:01] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[29:02]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[29:10] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[29:10] FRAME 128-stuck-CV2.png
+[29:10] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[29:11] PLAN reset (recovery input)
+[29:11]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[29:11] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[29:17] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[29:17] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[29:19]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[29:20] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[29:21] FRAME 129-stuck-CV2.png
+[29:21] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[29:22] PLAN reset (recovery input)
+[29:22] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[29:27]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[29:31] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[29:31] FRAME 130-stuck-CV2.png
+[29:31] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[29:32] PLAN reset (recovery input)
+[29:32] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[29:35]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[29:41] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[29:42] FRAME 131-stuck-CV2.png
+[29:42] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[29:43] PLAN reset (recovery input)
+[29:43] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[29:43]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[29:51]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[29:52] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[29:52] FRAME 132-stuck-CV2.png
+[29:52] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[29:53] PLAN reset (recovery input)
+[29:53] PLAN room CV2: 86 standable tiles, 977 moves (31 ms)
+[29:59]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[30:02] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:03] FRAME 133-stuck-CV2.png
+[30:03] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[30:04] PLAN reset (recovery input)
+[30:04] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[30:07]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[30:13] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[30:13] FRAME 134-stuck-CV2.png
+[30:13] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[30:14] PLAN reset (recovery input)
+[30:14] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[30:16]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[30:18] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[30:18] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[30:24] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:24] FRAME 135-stuck-CV2.png
+[30:24] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[30:25] PLAN reset (recovery input)
+[30:25]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[30:25] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[30:33]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[30:34] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[30:35] FRAME 136-stuck-CV2.png
+[30:35] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[30:36] PLAN reset (recovery input)
+[30:36] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[30:41]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[30:45] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[30:45] FRAME 137-stuck-CV2.png
+[30:45] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[30:46] PLAN reset (recovery input)
+[30:46] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[30:49]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[30:55] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[30:56] FRAME 138-stuck-CV2.png
+[30:56] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[30:56] PLAN reset (recovery input)
+[30:57] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[30:57]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[31:05]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[31:06] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:06] FRAME 139-stuck-CV2.png
+[31:06] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[31:07] PLAN reset (recovery input)
+[31:07] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[31:13]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[31:16] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[31:17] FRAME 140-stuck-CV2.png
+[31:17] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[31:18] PLAN reset (recovery input)
+[31:18] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[31:19] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[31:19] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[31:21]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[31:27] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:27] FRAME 141-stuck-CV2.png
+[31:27] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[31:28] PLAN reset (recovery input)
+[31:28] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[31:29]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[31:37] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[31:38] FRAME 142-stuck-CV2.png
+[31:38] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[31:39] PLAN reset (recovery input)
+[31:39]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[31:39] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[31:47]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[31:48] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[31:49] FRAME 143-stuck-CV2.png
+[31:49] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[31:49] PLAN reset (recovery input)
+[31:50] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[31:55]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[31:59] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[31:59] FRAME 144-stuck-CV2.png
+[31:59] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[32:00] PLAN reset (recovery input)
+[32:00] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[32:03]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[32:09] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[32:10] FRAME 145-stuck-CV2.png
+[32:10] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[32:10] PLAN reset (recovery input)
+[32:11] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[32:11]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[32:19] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[32:19] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[32:19]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[32:20] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[32:20] FRAME 146-stuck-CV2.png
+[32:20] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[32:21] PLAN reset (recovery input)
+[32:21] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[32:27]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[32:30] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[32:30] FRAME 147-stuck-CV2.png
+[32:30] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[32:31] PLAN reset (recovery input)
+[32:31] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[32:35]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[32:41] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[32:41] FRAME 148-stuck-CV2.png
+[32:41] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[32:42] PLAN reset (recovery input)
+[32:42] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[32:43]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[32:51] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[32:51] FRAME 149-stuck-CV2.png
+[32:51] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[32:52] PLAN reset (recovery input)
+[32:52]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[32:52] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[33:00]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[33:01] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[33:02] FRAME 150-stuck-CV2.png
+[33:02] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[33:03] PLAN reset (recovery input)
+[33:03] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[33:08]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[33:12] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:12] FRAME 151-stuck-CV2.png
+[33:12] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[33:13] PLAN reset (recovery input)
+[33:13] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[33:17]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[33:20] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[33:20] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[33:23] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[33:23] FRAME 152-stuck-CV2.png
+[33:23] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[33:24] PLAN reset (recovery input)
+[33:24] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[33:25]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[33:33]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[33:33] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:34] FRAME 153-stuck-CV2.png
+[33:34] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[33:34] PLAN reset (recovery input)
+[33:35] PLAN room CV2: 86 standable tiles, 977 moves (27 ms)
+[33:41]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[33:44] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[33:44] FRAME 154-stuck-CV2.png
+[33:44] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[33:45] PLAN reset (recovery input)
+[33:45] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[33:49]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[33:54] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[33:55] FRAME 155-stuck-CV2.png
+[33:55] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[33:56] PLAN reset (recovery input)
+[33:56] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[33:57]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[34:05] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:05] FRAME 156-stuck-CV2.png
+[34:05] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[34:06] PLAN reset (recovery input)
+[34:06]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[34:06] PLAN room CV2: 86 standable tiles, 977 moves (21 ms)
+[34:14]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[34:15] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[34:16] FRAME 157-stuck-CV2.png
+[34:16] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[34:17] PLAN reset (recovery input)
+[34:17] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[34:20] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[34:20] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[34:22]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[34:26] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:26] FRAME 158-stuck-CV2.png
+[34:26] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[34:27] PLAN reset (recovery input)
+[34:27] PLAN room CV2: 86 standable tiles, 977 moves (34 ms)
+[34:30]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[34:37] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[34:37] FRAME 159-stuck-CV2.png
+[34:37] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[34:38] PLAN reset (recovery input)
+[34:38] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[34:38]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[34:46]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[34:47] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[34:48] FRAME 160-stuck-CV2.png
+[34:48] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[34:48] PLAN reset (recovery input)
+[34:49] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[34:54]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[34:58] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[34:58] FRAME 161-stuck-CV2.png
+[34:58] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[34:59] PLAN reset (recovery input)
+[34:59] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[35:02]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[35:08] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:09] FRAME 162-stuck-CV2.png
+[35:09] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[35:10] PLAN reset (recovery input)
+[35:10] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[35:10]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[35:19]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[35:19] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[35:19] FRAME 163-stuck-CV2.png
+[35:19] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[35:20] PLAN reset (recovery input)
+[35:21] FRAMES median 50 ms -> planner step 1/30, game time 0.99x wall
+[35:21] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[35:21] PLAN room CV2: 86 standable tiles, 977 moves (50 ms)
+[35:27]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[35:30] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:31] FRAME 164-stuck-CV2.png
+[35:31] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[35:31] PLAN reset (recovery input)
+[35:32] PLAN room CV2: 86 standable tiles, 977 moves (20 ms)
+[35:35]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[35:41] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[35:41] FRAME 165-stuck-CV2.png
+[35:41] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[35:42] PLAN reset (recovery input)
+[35:42] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[35:43]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[35:51]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[35:51] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[35:52] FRAME 166-stuck-CV2.png
+[35:52] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[35:53] PLAN reset (recovery input)
+[35:53] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[35:59]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[36:02] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:02] FRAME 167-stuck-CV2.png
+[36:02] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[36:03] PLAN reset (recovery input)
+[36:03] PLAN room CV2: 86 standable tiles, 977 moves (31 ms)
+[36:07]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[36:13] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[36:13] FRAME 168-stuck-CV2.png
+[36:13] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[36:14] PLAN reset (recovery input)
+[36:14] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[36:15]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[36:21] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[36:21] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[36:23] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:23] FRAME 169-stuck-CV2.png
+[36:23] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[36:24] PLAN reset (recovery input)
+[36:24]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[36:24] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[36:32]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[36:34] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[36:34] FRAME 170-stuck-CV2.png
+[36:34] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[36:35] PLAN reset (recovery input)
+[36:35] PLAN room CV2: 86 standable tiles, 977 moves (26 ms)
+[36:41]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[36:44] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[36:45] FRAME 171-stuck-CV2.png
+[36:45] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[36:46] PLAN reset (recovery input)
+[36:46] PLAN room CV2: 86 standable tiles, 977 moves (35 ms)
+[36:49]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[36:55] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[36:55] FRAME 172-stuck-CV2.png
+[36:55] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[36:56] PLAN reset (recovery input)
+[36:56] PLAN room CV2: 86 standable tiles, 977 moves (36 ms)
+[36:57]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[37:05]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[37:05] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[37:06] FRAME 173-stuck-CV2.png
+[37:06] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[37:07] PLAN reset (recovery input)
+[37:07] PLAN room CV2: 86 standable tiles, 977 moves (24 ms)
+[37:13]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[37:16] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[37:16] FRAME 174-stuck-CV2.png
+[37:16] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[37:17] PLAN reset (recovery input)
+[37:17] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[37:21]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[37:22] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[37:22] PACE sim 60.5 s per 60 s wall (pace dial / slow frames)
+[37:26] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[37:27] FRAME 175-stuck-CV2.png
+[37:27] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[37:28] PLAN reset (recovery input)
+[37:28] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[37:29]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[37:37]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[37:37] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[37:38] FRAME 176-stuck-CV2.png
+[37:38] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[37:38] PLAN reset (recovery input)
+[37:39] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[37:45]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[37:48] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[37:48] FRAME 177-stuck-CV2.png
+[37:48] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[37:49] PLAN reset (recovery input)
+[37:49] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[37:53]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[37:58] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[37:59] FRAME 178-stuck-CV2.png
+[37:59] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[37:59] PLAN reset (recovery input)
+[38:00] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[38:01]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[38:09] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:09] FRAME 179-stuck-CV2.png
+[38:09] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[38:10] PLAN reset (recovery input)
+[38:10]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[38:10] PLAN room CV2: 86 standable tiles, 977 moves (18 ms)
+[38:18]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[38:19] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[38:20] FRAME 180-stuck-CV2.png
+[38:20] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[38:21] PLAN reset (recovery input)
+[38:21] PLAN room CV2: 86 standable tiles, 977 moves (19 ms)
+[38:22] FRAMES median 33 ms -> planner step 1/30, game time 0.99x wall
+[38:22] PACE sim 60.6 s per 60 s wall (pace dial / slow frames)
+[38:26]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[38:30] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:30] FRAME 181-stuck-CV2.png
+[38:30] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[38:31] PLAN reset (recovery input)
+[38:31] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[38:34]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[38:40] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[38:41] FRAME 182-stuck-CV2.png
+[38:41] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[38:42] PLAN reset (recovery input)
+[38:42] PLAN room CV2: 86 standable tiles, 977 moves (22 ms)
+[38:42]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[38:50]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[38:51] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[38:51] FRAME 183-stuck-CV2.png
+[38:51] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[38:52] PLAN reset (recovery input)
+[38:52] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[38:58]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[39:01] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[39:02] FRAME 184-stuck-CV2.png
+[39:02] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[39:03] PLAN reset (recovery input)
+[39:03] PLAN room CV2: 86 standable tiles, 977 moves (23 ms)
+[39:07]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[39:12] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[39:12] FRAME 185-stuck-CV2.png
+[39:12] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[39:13] PLAN reset (recovery input)
+[39:13] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[39:15]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[39:22] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[39:23] FRAME 186-stuck-CV2.png
+[39:23] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[39:24] PLAN reset (recovery input)
+[39:24]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=
+[39:24] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[39:24] PACE sim 61.7 s per 60 s wall (pace dial / slow frames)
+[39:24] PLAN room CV2: 86 standable tiles, 977 moves (15 ms)
+[39:32]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[39:33] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[39:34] FRAME 187-stuck-CV2.png
+[39:34] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[39:34] PLAN reset (recovery input)
+[39:35] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[39:40]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[39:44] STUCK trying to reach exit R toward CV3 in CV2 at x=744,y=220
+[39:44] FRAME 188-stuck-CV2.png
+[39:44] PLAN recovery {"what":"exit R toward CV3","dir":-1,"edge":{"room":"CV2","cur":6,"to":50,"exit":null,"walk":0,"dir":-1,"program":{"hold":0,"d0":0,"d1":0.05,"vx0":-340}}}
+[39:45] PLAN reset (recovery input)
+[39:45] PLAN room CV2: 86 standable tiles, 977 moves (17 ms)
+[39:48]   . CV2 x=672 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowLeft
+[39:54] STUCK trying to reach exit R toward CV3 in CV2 at x=672,y=220
+[39:55] FRAME 189-stuck-CV2.png
+[39:55] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":5,"to":51,"exit":null,"walk":0,"dir":1,"program":{"hold":0,"d0":0,"d1":9,"vx0":340}}}
+[39:55] PLAN reset (recovery input)
+[39:56] PLAN room CV2: 86 standable tiles, 977 moves (16 ms)
+[39:56]   . CV2 x=744 y=220 vx=0 on cores=7/7 volts=99 mission=sage held=ArrowRight
+[40:00] FRAME 190-end.png
+[40:00] MANHWA seen: wake, bay, gate, letter, drawer, ratchet, meet, cave, marble, forge
+[40:00] RESULT timeout  wall 40:00  deaths 0  missions opening,servo,first-meeting,marble,forge  stuck 179  page errors 0
+Command failed: node /workspace/scratch/b4e9aa23d77e/repo/tests/campaign-ch1.cjs
+   (campaign-ch1: 2400.8 s)
+
+1 harness(es) failed

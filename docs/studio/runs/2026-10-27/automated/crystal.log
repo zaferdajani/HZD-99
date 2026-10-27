@@ -1,0 +1,44 @@
+
+── crystal  — the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns
+── crystal — the purifier: gift, tree, reach, grammar, launcher, throw
+  ok   the bare tree has no crystal nodes  7 nodes
+  ok   the waking gift is a KIT — the crystal is never handed over
+  ok   the forge quest exists and gates ratchet's second errand
+  ok   handing Ratchet the shard FORGES the crystal  flag true, bag cleared true, card true
+  ok   the crystal grows the branch (+3)  10 nodes
+  ok   the joined blade opens the throw node (+1)  11 nodes
+  ok   the pillar stands in the cave's last room
+  ok   claws glance off it
+  ok   the supercharged claw shatters it, into the bag  down true, bag true, flag true
+  ok   ...and it does not grow back
+  ok   A5 and CV1 are a two-way door pair
+  ok   the first mouth is buried and refuses the walk
+  ok   ...and the blade is what opens it
+  ok   UP at the mouth opens the walk, and only once
+  ok   the walk arrives inside the cave
+  ok   and walks back out to the mouth  back true, room true, at mouth true
+  ok   a lair holds NO cave door before its guardian falls
+  ok   ...and grows one the moment it does
+  ok   the revealed door walks into the grotto
+  ok   ...which pays something (scrap and a rest)
+  ok   every guardian has its grotto pair, cave-marked and on the map
+  ok   crystal light turns the aura sense ON (her + the machines)  3 halos
+  ok   no crystal light, no halos
+  ok   the crystal out-reaches the claw, the joined blade more  claw 74 < crystal 76.8 < joined 87.9
+  ok   the claw finisher stays flat  {"ay":0,"wield":0}
+  ok   the crystal finisher RISES (diagonal cut)  {"ay":-0.55,"combo":2,"wield":1}
+  ok   up-aim and the opener are untouched  up {"ay":-1,"combo":0}, open {"ay":0,"combo":0}
+  ok   risecut launches the target upward  vy -430
+  ok   ordinary joined finisher remains melee
+  ok   holding and releasing attack throws the joined blade
+  ok   ...and her paw sounds EMPTY while it flies  claw
+  ok   it flies out a real distance  211px
+  ok   and she catches it  caught true, audio crystal2
+  ok   the opener never throws
+  ok   room transition returns the thrown blade without losing equipment
+  ok   room transition cancels hurricane, partial charge and buffered melee
+
+OK — given, grown, longer, rising, launching, flying, and coming back
+   (crystal: 5.5 s)
+
+all 1 harnesses ran

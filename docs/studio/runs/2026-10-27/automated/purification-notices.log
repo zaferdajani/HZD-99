@@ -1,0 +1,47 @@
+
+── purification-notices  — retire stale combat openings at rescue without losing earned notices
+{
+  "build": "6d3db4ac3ebd",
+  "scope": "STAGED save/arena; not a campaign",
+  "entered": true,
+  "hint": "⚡ NULLFANG is reeling — hit it NOW",
+  "before": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47,
+      "scope": "boss-opening"
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "after": [
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "retry": [
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "errors": []
+}
+   (purification-notices: 0.8 s)
+
+all 1 harnesses ran

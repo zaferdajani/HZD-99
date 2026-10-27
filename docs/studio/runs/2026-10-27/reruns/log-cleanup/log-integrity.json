@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "input-focus.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "seam.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}

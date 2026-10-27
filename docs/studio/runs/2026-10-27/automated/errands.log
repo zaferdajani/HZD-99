@@ -1,0 +1,19 @@
+
+── errands  — every errand has a goal that exists and can be reached
+errands:
+  alpha_pack     [A]  
+  ratchet_forge  [A]  fetch cshard -> CV3
+  servo_coil     [A]  fetch coil -> A6
+  servo_swarm    [A]  cull 6 x crawler -> 13 authored in the world
+  ratchet_deep   [A]  read terminal 20 in A7 -> placed
+  mono_relay     [B]  fetch relay -> B6
+  patch_quiet    [C]  cull 4 x turret -> 14 authored in the world
+  sage_index     [D]  fetch index -> D4
+  lumen_light    [E]  fetch lens -> E4
+
+quest items in the world: coil, relay, index, lens, cshard
+
+OK — every errand has a reachable goal
+   (errands: 0.7 s)
+
+all 1 harnesses ran

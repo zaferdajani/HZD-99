@@ -1,0 +1,33 @@
+
+── foelevel  — a machine's level is its kingdom plus the run, and it spends it
+── foelevel — a machine's level is its kingdom plus the run, and it spends it
+
+  ok   a fresh save has taken nothing  iq 0
+  ok   the opening meadow is level 1 and spends nothing  lv 1, 0 pts
+  ok   every kingdom after it is deeper than the one before  1 < 2 < 3 < 4 < 5
+  ok   the Cache stands with the deepest kingdoms  X 5
+  ok   the Nest has points to spend where the meadow has none  4 pts
+  ok   a finished run raises the machines above it  A 1->3, E 5->7
+  ok   ...and never past the ceiling  E late 7
+  ok   a level-1 machine never rolls a trait  max 0
+  ok   a levelled one does
+  ok   ...but never more than two — a room stays varied, not uniform  max 2
+  ok   ...and never the same trait twice on one body
+  ok   ...and the same level still produces different machines  7 distinct loadouts
+  ok   every row in the registry keeps the contract it was written against
+  ok   ...and every scoped key names one real kingdom, so no two sessions collide
+  ok   ...and a kind with no row at all buys nothing
+  ok   a row is bought cheapest-first, within its points  [[],["burrow"],["burrow","spit"]]
+  ok   ...and a move nothing can afford is never handed out  burrow,spit
+  ok   a kingdom-scoped move reaches its own kingdom  burrow,spit,slag
+  ok   ...and NOT the kingdom next door — parallel sessions cannot collide  burrow,spit
+  ok   ...and a scoped row stands alone where there is no shared one  [[],["slag"]]
+  ok   a spawned machine carries its level and its moves  lv 3
+  ok   ...and hasMove refuses a move it never bought
+  ok   the registry is left as it was found
+  ok   no page errors
+
+all good
+   (foelevel: 3.5 s)
+
+all 1 harnesses ran
