@@ -1,0 +1,14 @@
+
+── gatecue  — the first built thing the player finds sounds like one
+── gatecue — the first built thing the player finds sounds like one
+
+  ok   the gate is not the UI blip  energy 269.8014 vs 0, tail 1.95s vs 0s
+  ok   ...and the floor answers under it  sub-60 Hz in the first 200 ms: 1322.49 vs the blip at 0
+  ok   ...and the toll is a pitch, not a peak in some noise  D3 223.85 vs neighbours 6.66 / 5.36
+  ok   the first time she opens it is a bigger event  energy 269.8014 vs 95.1517, tail 1.95s vs 1.43s
+  ok   ...and five layers stacked still do not clip  peak 0.289 / 0.255
+
+all good
+   (gatecue: 2.8 s)
+
+all 1 harnesses ran

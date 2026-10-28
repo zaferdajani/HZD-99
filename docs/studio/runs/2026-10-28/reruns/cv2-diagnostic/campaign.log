@@ -1,0 +1,252 @@
+[00:01] BOOT continuing from the game's own pod save docs/studio/runs/2026-10-27/automated/campaign-ch1/save-latest.json; difficulty row 0; video off
+[00:01] ROOM - -> 
+[00:01] STATE null -> MENU
+[00:03] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:03] MENU choose "continue"
+[00:10] PLAN reset (room  -> CV1B)
+[00:11] ROOM - -> CV1B  at x=634
+[00:11] STATE MENU -> PLAY
+[00:11] OBJECTIVE "Free the first sage — the door beside the marble quarry"
+[00:11] FLAG +tutI
+[00:11] FLAG +tutId
+[00:11] FLAG +gateOpened
+[00:11] FLAG +opNote
+[00:11] FLAG +ch_A0B_1
+[00:11] FLAG +on_A0B|ratchet
+[00:11] FLAG +ratchetRepaired
+[00:11] FLAG +opTold
+[00:11] FLAG +ratchetSpareGiven
+[00:11] FLAG +opPod
+[00:11] FLAG +opScrap
+[00:11] FLAG +sawScrap
+[00:11] FLAG +tutBuy
+[00:11] FLAG +heal
+[00:11] FLAG +pack
+[00:11] FLAG +winchKnock
+[00:11] FLAG +burstDone
+[00:11] FLAG +opBurst
+[00:11] FLAG +rd_n8
+[00:11] FLAG +tut
+[00:11] FLAG +mapSeen
+[00:11] FLAG +on_A1|servo
+[00:11] FLAG +servoMet
+[00:11] FLAG +sc_A1_3
+[00:11] FLAG +sc_A1_4
+[00:11] FLAG +sc_A2_4
+[00:11] FLAG +sc_A2_5
+[00:11] FLAG +nfMeet
+[00:11] FLAG +sc_A2_6
+[00:11] FLAG +taughtBreak
+[00:11] FLAG +taughtFloor
+[00:11] FLAG +pgMarks
+[00:11] FLAG +sc_A5_5
+[00:11] FLAG +rubbleA5
+[00:11] FLAG +rubbleCV1B
+[00:11] FLAG +pgSurvey
+[00:11] FLAG +sc_CV1B_4
+[00:11] FLAG +sc_CV1B_2
+[00:11] FLAG +heardHollow
+[00:11] FLAG +ghMet
+[00:11] FLAG +ghHeadTold
+[00:11] FLAG +ghParryTold
+[00:11] FLAG +parryTold
+[00:11] FLAG +bossHorn
+[00:11] FLAG +pl_cshard
+[00:11] FLAG +taughtWall
+[00:11] FLAG +sc_CV2_5
+[00:11] FLAG +sc_CV2_7
+[00:11] FLAG +sc_CV1_2
+[00:11] FLAG +sc_A5_4
+[00:11] FLAG +sc_A5_3
+[00:11] FLAG +said
+[00:11] FLAG +crystal
+[00:11] FLAG +ratchetCamp
+[00:11] FLAG +alphaLead
+[00:11] FLAG +pgBound
+[00:11] FLAG +pgBoundN
+[00:11] SCRAP 0 -> 410
+[00:11] SAVEPOINT null -> CV1B
+[00:11] WEAPON null -> single
+[00:11]   . CV1B x=634 y=453 vx=0 air cores=7/7 volts=33 mission=undefined held= near=bench:null
+[00:13] MISSION DONE opening
+[00:21] FRAME 000-done-opening.png
+[00:22] MISSION DONE servo
+[00:29] FRAME 001-done-servo.png
+[00:30] MISSION DONE first-meeting
+[00:37] FRAME 002-done-first-meeting.png
+[00:38] MISSION DONE marble
+[00:45] FRAME 003-done-marble.png
+[00:46] MISSION DONE forge
+[00:53] FRAME 004-done-forge.png
+[00:56] PLAN room CV1B: 50 standable tiles, 588 moves (107 ms)
+[00:56]   . CV1B x=634 y=463 vx=0 on cores=7/7 volts=33 mission=sage held= near=bench:null
+[01:12] FRAMES median 833 ms -> planner step 1/30, game time 0.76x wall
+[01:12] PACE sim 5.9 s per 60 s wall (pace dial / slow frames)
+[01:14] PLAN room CV1B: 50 standable tiles, 549 moves (66 ms)
+[01:15]   . CV1B x=1000 y=434 vx=0 on cores=7/7 volts=33 mission=sage held=
+[01:25]   . CV1B x=928 y=241 vx=0 air cores=7/7 volts=33 mission=sage held=Space
+[01:29] STUCK trying to reach door to CV2 in CV1B at x=928,y=436
+[01:32] FRAME 005-stuck-CV1B.png
+[01:32] PLAN recovery {"what":"door to CV2","dir":1,"edge":{"room":"CV1B","cur":42,"to":11,"exit":null,"walk":0,"dir":1,"program":{"hold":2,"d0":0.18,"d1":9,"vx0":0}}}
+[01:32] PLAN penalty {"room":"CV1B","edge":"42>11","value":1.6,"reason":"recovery: door to CV2"}
+[01:34] PLAN reset (recovery input)
+[01:35]   . CV1B x=1031 y=347 vx=50 air cores=7/7 volts=33 mission=sage held=
+[01:36] PLAN room CV1B: 50 standable tiles, 549 moves (28 ms)
+[01:45]   . CV1B x=948 y=459 vx=300 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[01:49] STUCK trying to reach door to CV2 in CV1B at x=980,y=454
+[01:55] FRAME 006-stuck-CV1B.png
+[01:55] PLAN recovery {"what":"door to CV2","dir":-1,"edge":{"room":"CV1B","cur":44,"to":43,"exit":null,"walk":-1,"dir":0,"program":null}}
+[01:55] PLAN penalty {"room":"CV1B","edge":"44>43","value":1,"reason":"recovery: door to CV2"}
+[01:58] PLAN reset (recovery input)
+[01:58]   . CV1B x=882 y=324 vx=-50 air cores=7/7 volts=33 mission=sage held=
+[02:00] PLAN room CV1B: 50 standable tiles, 549 moves (46 ms)
+[02:09]   . CV1B x=1020 y=284 vx=50 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[02:11] DOOR up at 1120 -> CV2
+[02:20] FRAMES median 17 ms -> planner step 1/60, game time 0.35x wall
+[02:20] PACE sim 9.2 s per 60 s wall (pace dial / slow frames)
+[02:20] PLAN room CV1B: 50 standable tiles, 588 moves (45 ms)
+[02:21]   . CV1B x=1127 y=460 vx=0 on cores=7/7 volts=33 mission=sage held=
+[02:21] DOOR up at 1120 -> CV2
+[02:29]   . CV1B x=1108 y=460 vx=0 on cores=7/7 volts=33 mission=sage held=
+[02:38]   . CV1B x=1108 y=460 vx=0 on cores=7/7 volts=33 mission=sage held=
+[02:46]   . CV1B x=1108 y=460 vx=0 on cores=7/7 volts=33 mission=sage held=
+[02:52] PLAN reset (room CV1B -> CV2)
+[02:53] ROOM CV1B -> CV2  at x=372
+[02:55] PLAN room CV2: 86 standable tiles, 1083 moves (87 ms)
+[02:57]   . CV2 x=392 y=468 vx=300 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[03:08]   . CV2 x=602 y=223 vx=50 air cores=7/7 volts=33 mission=sage held=Space
+[03:16]   . CV2 x=724 y=393 vx=340 air cores=7/7 volts=33 mission=sage held=ArrowRight
+[03:30] FRAMES median 600 ms -> planner step 1/30, game time 0.20x wall
+[03:30] PACE sim 9.0 s per 60 s wall (pace dial / slow frames)
+[03:31] PLAN room CV2: 86 standable tiles, 977 moves (101 ms)
+[03:32]   . CV2 x=968 y=432 vx=340 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[03:44]   . CV2 x=1314 y=309 vx=340 air cores=7/7 volts=33 mission=sage held=ArrowRight+Space
+[03:52]   . CV2 x=1436 y=462 vx=150 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[04:04]   . CV2 x=1529 y=294 vx=0 air cores=7/7 volts=33 mission=sage held=
+[04:12]   . CV2 x=1613 y=411 vx=0 air cores=7/7 volts=33 mission=sage held=
+[04:21]   . CV2 x=1621 y=293 vx=0 air cores=7/7 volts=33 mission=sage held=Space
+[04:30]   . CV2 x=1624 y=418 vx=52 air cores=7/7 volts=33 mission=sage held=Space
+[04:37] FRAMES median 17 ms -> planner step 1/60, game time 0.78x wall
+[04:37] PACE sim 8.1 s per 60 s wall (pace dial / slow frames)
+[04:37] PLAN room CV2: 86 standable tiles, 1083 moves (35 ms)
+[04:40]   . CV2 x=1632 y=463 vx=0 on cores=7/7 volts=33 mission=sage held=
+[04:40] STUCK trying to reach exit R toward CV3 in CV2 at x=1632,y=463
+[04:44] FRAME 007-stuck-CV2.png
+[04:44] PLAN recovery {"what":"exit R toward CV3","dir":1,"edge":{"room":"CV2","cur":75,"to":83,"exit":null,"walk":0,"dir":1,"program":{"hold":2,"d0":0,"d1":9,"vx0":0}}}
+[04:44] PLAN penalty {"room":"CV2","edge":"75>83","value":1,"reason":"recovery: exit R toward CV3"}
+[04:47] PLAN reset (recovery input)
+[04:47] PLAN room CV2: 86 standable tiles, 1083 moves (90 ms)
+[04:50]   . CV2 x=1698 y=378 vx=0 air cores=7/7 volts=33 mission=sage held=
+[05:00]   . CV2 x=1780 y=463 vx=0 on cores=7/7 volts=33 mission=sage held= near=rescue:null
+[05:08]   . CV2 x=1963 y=470 vx=98 on cores=7/7 volts=33 mission=sage held=
+[05:17]   . CV2 x=2004 y=382 vx=340 air cores=7/7 volts=33 mission=sage held=ArrowRight+Space
+[05:19] PLAN room CV3: 62 standable tiles, 930 moves (97 ms)
+[05:21] PLAN reset (room CV2 -> CV3)
+[05:21] ROOM CV2 -> CV3  at x=146
+[05:21] TOAST The cut face still glows. Beside it, the maintenance passage breathes cold blue light.
+[05:21] FLAG +pgCv3Back
+[05:23] PLAN room CV3: 62 standable tiles, 930 moves (44 ms)
+[05:25]   . CV3 x=200 y=458 vx=0 on cores=7/7 volts=33 mission=sage held=
+[05:36]   . CV3 x=504 y=467 vx=340 on cores=7/7 volts=33 mission=sage held=ArrowRight
+[05:37] FIGHT crawler (hp 48) in CV3
+[05:44] FRAMES median 17 ms -> planner step 1/60, game time 0.72x wall
+[05:44] PACE sim 7.0 s per 60 s wall (pace dial / slow frames)
+[05:44] FIGHT crawler (hp 48) in CV3
+[05:47] TOAST The cut face still glows. Beside it, the maintenance passage breathes cold blue light. / Repair ready! Stand still and hold F to restore a core.
+[05:47] HURT 7 -> 6 in CV3 (nearest crawler at 29 px)
+[05:47]   . CV3 x=806 y=458 vx=0 air cores=6/7 volts=55 mission=sage held= threat={"k":"crawler","x":833,"y":470,"w":28,"h":20,"hp":25,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[05:49] FIGHT crawler (hp 2) in CV3
+[05:53] FIGHT crawler (hp 25) in CV3
+[06:01]   . CV3 x=957 y=461 vx=340 on cores=6/7 volts=77 mission=sage held=ArrowRight threat={"k":"crawler","x":1029,"y":478,"w":28,"h":20,"hp":25,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:01] COMBAT STALL crawler: no position or damage progress for 5 s; resume route input for 12 s
+[06:02] HURT 6 -> 5 in CV3 (nearest crawler at 27 px)
+[06:02] FIGHT bat (hp 49) in CV3
+[06:06] FIGHT bat (hp 49) in CV3
+[06:12]   . CV3 x=723 y=365 vx=0 air cores=5/7 volts=77 mission=sage held=
+[06:18] FIGHT crawler (hp 25) in CV3
+[06:21]   . CV3 x=777 y=467 vx=340 on cores=5/7 volts=77 mission=sage held=ArrowRight threat={"k":"crawler","x":864,"y":474,"w":28,"h":20,"hp":25,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[06:25] HURT 5 -> 4 in CV3 (nearest crawler at 32 px)
+[06:26] FIGHT crawler (hp 2) in CV3
+[06:30]   . CV3 x=833 y=453 vx=0 on cores=4/7 volts=99 mission=sage held= near=rescue:null
+[06:30] HEAL (cores 4/7, volts 99)
+[06:34] TOAST Repair ready! Stand still and hold F to restore a core.
+[06:34] HEAL (cores 4/7, volts 99)
+[06:38]   . CV3 x=833 y=453 vx=0 on cores=4/7 volts=99 mission=sage held= near=rescue:null
+[06:38] HEAL (cores 4/7, volts 99)
+[06:42] HEAL (cores 4/7, volts 99)
+[06:50] FRAMES median 17 ms -> planner step 1/60, game time 0.32x wall
+[06:50] PACE sim 6.3 s per 60 s wall (pace dial / slow frames)
+[06:50] HEAL (cores 4/7, volts 99)
+[06:54]   . CV3 x=833 y=453 vx=0 on cores=4/7 volts=99 mission=sage held= near=rescue:null
+[06:54] HEAL (cores 4/7, volts 99)
+[06:59] HEAL (cores 4/7, volts 99)
+[07:03]   . CV3 x=833 y=453 vx=0 on cores=4/7 volts=99 mission=sage held= near=rescue:null
+[07:03] HEAL (cores 4/7, volts 99)
+[07:08] HEAL (cores 4/7, volts 99)
+[07:14]   . CV3 x=833 y=453 vx=0 on cores=4/7 volts=99 mission=sage held= threat={"k":"bat","x":849,"y":362,"w":24,"h":18,"hp":49,"mech":null,"calm":false,"st":null,"wt":0,"sg":null} near=rescue:null
+[07:14] FIGHT bat (hp 49) in CV3
+[07:22] HURT 4 -> 3 in CV3 (nearest crawler at 80 px)
+[07:22]   . CV3 x=982 y=441 vx=147 air cores=3/7 volts=99 mission=sage held=
+[07:22] HEAL (cores 3/7, volts 99)
+[07:25] HEAL (cores 3/7, volts 99)
+[07:30]   . CV3 x=983 y=462 vx=0 on cores=3/7 volts=99 mission=sage held=
+[07:30] HEAL (cores 3/7, volts 99)
+[07:34] HEAL (cores 3/7, volts 99)
+[07:38]   . CV3 x=983 y=462 vx=0 on cores=3/7 volts=99 mission=sage held=
+[07:38] HEAL (cores 3/7, volts 99)
+[07:41] HEAL (cores 3/7, volts 99)
+[07:46] HEAL (cores 3/7, volts 99)
+[07:50]   . CV3 x=983 y=462 vx=0 on cores=3/7 volts=99 mission=sage held=
+[07:50] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[07:50] PACE sim 6.1 s per 60 s wall (pace dial / slow frames)
+[07:50] HEAL (cores 3/7, volts 99)
+[07:55] HEAL (cores 3/7, volts 99)
+[07:59]   . CV3 x=983 y=462 vx=0 on cores=3/7 volts=99 mission=sage held=
+[07:59] HEAL (cores 3/7, volts 99)
+[08:04] FIGHT bat (hp 49) in CV3
+[08:09] HURT 3 -> 2 in CV3 (nearest crawler at 39 px)
+[08:09]   . CV3 x=838 y=454 vx=0 on cores=2/7 volts=99 mission=sage held= threat={"k":"bat","x":930,"y":412,"w":24,"h":18,"hp":26,"mech":null,"calm":false,"st":null,"wt":0,"sg":null} near=rescue:null
+[08:09] FIGHT bat (hp 26) in CV3
+[08:13] FIGHT bat (hp 26) in CV3
+[08:19]   . CV3 x=1137 y=428 vx=0 air cores=2/7 volts=99 mission=sage held=
+[08:19] HEAL (cores 2/7, volts 99)
+[08:24] HEAL (cores 2/7, volts 99)
+[08:29]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[08:29] HEAL (cores 2/7, volts 99)
+[08:33] HEAL (cores 2/7, volts 99)
+[08:37]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[08:37] HEAL (cores 2/7, volts 99)
+[08:41] HEAL (cores 2/7, volts 99)
+[08:45]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[08:45] HEAL (cores 2/7, volts 99)
+[08:50] HEAL (cores 2/7, volts 99)
+[08:54]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[08:54] FRAMES median 17 ms -> planner step 1/60, game time 0.21x wall
+[08:54] PACE sim 6.7 s per 60 s wall (pace dial / slow frames)
+[08:54] HEAL (cores 2/7, volts 99)
+[08:58] HEAL (cores 2/7, volts 99)
+[09:03]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[09:03] HEAL (cores 2/7, volts 99)
+[09:07] HEAL (cores 2/7, volts 99)
+[09:11]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[09:11] HEAL (cores 2/7, volts 99)
+[09:15] HEAL (cores 2/7, volts 99)
+[09:19]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[09:19] HEAL (cores 2/7, volts 99)
+[09:23] HEAL (cores 2/7, volts 99)
+[09:27] HEAL (cores 2/7, volts 99)
+[09:31]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[09:31] HEAL (cores 2/7, volts 99)
+[09:35] HEAL (cores 2/7, volts 99)
+[09:40]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[09:40] HEAL (cores 2/7, volts 99)
+[09:44] HEAL (cores 2/7, volts 99)
+[09:48] HEAL (cores 2/7, volts 99)
+[09:52]   . CV3 x=1137 y=460 vx=0 on cores=2/7 volts=99 mission=sage held=
+[09:52] HEAL (cores 2/7, volts 99)
+[09:56] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[09:56] PACE sim 6.4 s per 60 s wall (pace dial / slow frames)
+[09:56] HEAL (cores 2/7, volts 99)
+[10:05] FRAME 008-end.png
+[10:05] MANHWA seen: 
+[10:05] RESULT timeout  wall 10:05  deaths 0  missions opening,servo,first-meeting,marble,forge  stuck 3  page errors 0

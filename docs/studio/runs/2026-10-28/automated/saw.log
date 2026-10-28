@@ -1,0 +1,10 @@
+
+── saw  — the chainsaw rig: sparks, impacts, contact damage
+C2        {"inList":1,"isRig":true,"sparkFrames":"39%","peakParticles":44,"endImpacts":8,"speed":"3-201 px/s","travelPx":192}
+D2        {"inList":4,"isRig":true,"sparkFrames":"40%","peakParticles":76,"endImpacts":8,"speed":"3-207 px/s","travelPx":224}
+E2        {"inList":5,"isRig":true,"sparkFrames":"41%","peakParticles":108,"endImpacts":10,"speed":"1-232 px/s","travelPx":192}
+contact   {"coresBefore":5,"coresAfter":4,"hurt":true}
+pageerrors: none
+   (saw: 6.0 s)
+
+all 1 harnesses ran

@@ -1,0 +1,7 @@
+
+── infection-roster  — every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there
+FAILED: ── infection-roster — every hostile body, every guardian: an eye, the right colour, on the head, facing, and the smoke born there
+spawnSync node ETIMEDOUT
+   (infection-roster: 240.1 s)
+
+1 harness(es) failed

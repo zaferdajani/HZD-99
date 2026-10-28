@@ -1,0 +1,20 @@
+
+── kingdom1  — kingdom 1 holds its rules: the den rest catches deaths, the tunnel tells the sage, NPCs own their places
+── kingdom1 — the meadow kingdom holds its own rules
+  ok   the den keeps a bench
+  ok   resting there moves the save point to the den  A0B
+  ok   a death out in the meadow comes back under the roof  A0B
+  ok   the tunnel terminal reads the meadow page, not the generic log  page 6
+  ok   …and the page exists in both full languages
+  ok   Servo's winding house is declared in A1
+  ok   …and his dialogue claims it
+  ok   the trader stands in his camp
+  ok   forged: his standing line points the blade underground
+  ok   tamed: his standing line says the kingdom ended
+  ok   every new key resolves in ar and in the hero theme
+  ok   no page errors across den, tunnel, meadow and camp  
+
+OK — kingdom 1 holds: a roof with a rest, a keeper with a place, an ending that is told
+   (kingdom1: 10.4 s)
+
+all 1 harnesses ran

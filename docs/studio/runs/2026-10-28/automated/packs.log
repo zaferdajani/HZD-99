@@ -1,0 +1,13 @@
+
+── packs  — a campaign pack is a folder of JSON: loads by query, saves apart, base game untouched
+SERVED BUILD MISMATCH — before the first browser harness: http://127.0.0.1:8220/ is not serving the build this run expects.
+  index.html
+    served   8992e9e43c585cf8 4937121 B BUILD_ID 6d3db4ac3ebd
+    expected a55e4a3c0658ed32 4937121 B BUILD_ID 33624055a86a
+  odyssey.html
+    served   27249fb1ee46972f 3651886 B BUILD_ID 6d3db4ac3ebd
+    expected ef2fc7c57c3967d7 3651886 B BUILD_ID 33624055a86a
+  expected root /workspace/scratch/b4e9aa23d77e/repo, server says its root is /workspace/scratch/b4e9aa23d77e/repo
+  Another checkout or session may own the port, or the pages were rebuilt. Stop that server, serve this checkout (node tests/serve.cjs), or isolate the run (e.g. its own network namespace). No browser harness result from this server can be trusted.
+  this checkout's own files changed on disk since the build was pinned: index.html, odyssey.html (someone rebuilt it during the run)
+Refusing to run browser harnesses against a build that is not this checkout.

@@ -1,0 +1,39 @@
+
+── opening  — she wakes, she walks, she arrives — and only then does anything move
+── opening — she wakes, she walks, she arrives, and only then does anything move
+  ok   both waking rooms exist  W1, W2
+  ok   the run STARTS in the cradle, not on the meadow  newSave starts at W1
+  ok   W1 walks to W2, and the GATES are the only way into the city  [true,true]
+  ok   ...she can walk back to the cradle, and there is NO side door past the gates  [true,true]
+  ok   both rooms are on the map
+  ok   nothing in either room can hurt her  W1 [] W2 []
+  ok   ...and neither floor has spikes in it
+  ok   the cradle takes hold of her when she arrives
+  ok   ...and its pages come before the waking
+  ok   ...and she cannot walk out of the release  0.00 px
+  ok   ...it ENDS, and gives her back  held false, then moved 170 px
+  ok   ...and it happens exactly once per save
+
+    lesson order: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+
+  ok   the verbs come in the right order, and Ratchet comes before any machine  move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+  ok   the lesson knows all three of its rooms  {"W1":0,"W2":1,"A0":2,"A0B":2}
+  ok   standing still in the cradle room cannot skip the lesson  stalled at move
+  ok   the cradle and the gates exist and decode  
+  ok   ...the cradle stands in its room and the gates ARE their room's horizon  {"W1":true,"W2":true}
+  ok   the walk arrives: right to the gates, UP through them  W1 -> W2 -> A0
+  ok   the gates are the room's backdrop, not a rectangle pasted into it
+  ok   pressing up away from the gates does nothing
+  ok   pressing up AT the gates walks her in
+  ok   ...and she arrives inside the city, not past the far side of it  A0 at x=40
+  ok   her back plates decode
+  ok   she walks away with her BACK to us, never her side view  heroDeparture / 0 side frames
+  ok   ...and unarmed she wears the BARE back pair, not the sword she lacks  heroDeparture
+  ok   a moving wolf cycles real gait frames  runA,runB
+  ok   a standing wolf stands still  rest
+  ok   the gait answers to the FLOOR, not to a clock (half speed = half the steps)  10 steps fast vs 5 slow
+
+OK — she wakes, she is let go, she walks, she arrives, and nothing touched her on the way
+   (opening: 9.9 s)
+
+all 1 harnesses ran

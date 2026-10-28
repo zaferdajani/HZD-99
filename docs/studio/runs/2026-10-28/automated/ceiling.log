@@ -1,0 +1,17 @@
+
+── ceiling  — every kingdom has a roof that sheds its own weather, at every quality tier
+ceiling plates: A=512x152  B=512x152  C=512x152  D=512x152  E=512x152  X=512x152
+weather C: peak 11  sheds [melt]
+weather D: peak 21  sheds [snow, icicle]
+weather B: peak 2  sheds [arc]
+weather E: peak 30  sheds [spore]
+cleared on room change: 0
+device: laptop cores=9 dpr=1  ->  guessed tier ultra
+low : backbuffer 672x378  bloom=false ceil=1  particles capped at 220
+high: backbuffer 960x540  bloom=true ceil=2  particles capped at 600
+frame at low tier: 2619 sampled pixels drawn
+
+OK
+   (ceiling: 3.3 s)
+
+all 1 harnesses ran

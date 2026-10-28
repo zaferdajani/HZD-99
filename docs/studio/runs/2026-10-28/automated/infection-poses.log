@@ -1,0 +1,11 @@
+
+── infection-poses  — every guardian, every drawn state, both facings: an eye on the art, never twice, never under the loading silhouette, the smoke born there
+FAILED: ── infection-poses — every guardian, every drawn state, both facings: an eye, on the body, the smoke born there
+    alpha staged (88 s)
+    glitch staged (200 s)
+    brood staged (270 s)
+    zero staged (338 s)
+spawnSync node ETIMEDOUT
+   (infection-poses: 420.1 s)
+
+1 harness(es) failed

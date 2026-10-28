@@ -1,0 +1,15 @@
+
+── daze  — a group of hits breaks NULLFANG open, pays out, closes, and cannot be held
+── daze — a group of hits breaks NULLFANG open, once, for a while
+  ok   five grouped hits break it  st=daze
+  ok   five SPACED hits do not  st=stalk
+  ok   the window is worth having (>= 1 s)  1.7s
+  ok   it never attacked while dazed  daze
+  ok   and it recovers rather than sticking  st=recover
+  ok   the open window pays more damage  18 -> 29
+  ok   it cannot be stunlocked (<= 55% of a 12 s mash)  28% dazed
+
+OK — the break opens on a group, pays out, closes, and cannot be held
+   (daze: 7.4 s)
+
+all 1 harnesses ran

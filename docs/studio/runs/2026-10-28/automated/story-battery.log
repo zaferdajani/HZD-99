@@ -1,0 +1,29 @@
+
+── story-battery  — unique workshop battery and legacy save compatibility
+PASS [
+  'fresh cat carries no cell',
+  'offline Ratchet names the letter action',
+  'dialogue terminates',
+  'cannot wake before finding battery',
+  'dialogue terminates',
+  'drawer grants unique battery',
+  'battery in hand names the restoration action',
+  'repeated interaction cannot duplicate',
+  'found battery persists',
+  'drawer stays open after reload',
+  'dialogue terminates',
+  'Ratchet battery cannot be spent on Servo',
+  'dialogue terminates',
+  'dialogue terminates',
+  'Ratchet cell installed, distinct spare granted',
+  'restored Ratchet returns to ordinary talk',
+  'dialogue terminates',
+  'spare not duplicated',
+  'dialogue terminates',
+  'separate spare wakes Servo',
+  'dialogue terminates',
+  'old save retains its original rescue path'
+]
+   (story-battery: 2.5 s)
+
+all 1 harnesses ran

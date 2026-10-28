@@ -1,0 +1,965 @@
+
+── campaign-ch1  — chapter one played end to end with keyboard input only, from a cleared browser to the chapter-two teaser (long, real time)
+FAILED: [00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:01] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:01] MENU choose "newgame"
+[00:03] STATE MENU -> CUT
+[00:53] STATE CUT -> DIFF
+[00:53] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:53] FRAME 000-difficulty.png
+[00:54] PLAN reset (room  -> W1)
+[00:54] ROOM - -> W1  at x=96
+[00:54] STATE DIFF -> PANELS
+[00:54] MANHWA wake panel 1/5
+[00:54] OBJECTIVE "Reach the city gates"
+[00:54] CHIP move |  | 
+[00:54] SAVEPOINT null -> W1
+[00:54] WEAPON null -> claws
+[00:54]   . W1 x=96 y=415 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:55] MANHWA wake panel 2/5
+[00:56] MANHWA wake panel 3/5
+[00:57] MANHWA wake panel 4/5
+[00:57] MANHWA wake panel 5/5
+[01:00] STATE PANELS -> PLAY
+[01:00] CHIP move | Move | Walk right toward the light
+[01:03] FRAMES median 17 ms -> planner step 1/60, game time 0.86x wall
+[01:03] PACE sim 57.1 s per 60 s wall (pace dial / slow frames)
+[01:03]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:08] TOAST POWER FAULT → SYSTEM RESTART
+[01:11]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[01:17] FLAG +woke
+[01:17] MISSION opening (objective: "Reach the city gates")
+[01:19]   . W1 x=167 y=297 vx=340 air cores=7/7 volts=33 tut=move/MOVE@-1 mission=opening held=ArrowRight
+[01:21] CHIP out | Leave | The door has been open a long time — walk out
+[01:21] FLAG +tutI
+[01:21] FLAG +tutId
+[01:28]   . W1 x=990 y=430 vx=340 on cores=7/7 volts=33 tut=out/MOVE@1232 mission=opening held=ArrowRight
+[01:30] PLAN reset (room W1 -> W2)
+[01:30] ROOM W1 -> W2  at x=16
+[01:30] CHIP out | The city gates | Follow the gold marker
+[01:30] STATE PLAY -> PANELS
+[01:30] MANHWA bay panel 1/3
+[01:30] CHIP out |  | 
+[01:31] MANHWA bay panel 2/3
+[01:32] MANHWA bay panel 3/3
+[01:34] STATE PANELS -> PLAY
+[01:34] CHIP out | The city gates | Follow the gold marker
+[01:36] CHIP jump | Jump | Follow the gold marker
+[01:36]   . W2 x=101 y=286 vx=340 air cores=7/7 volts=33 tut=jump/MOVE@416 mission=opening held=ArrowRight
+[01:38] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:44]   . W2 x=402 y=316 vx=0 on cores=7/7 volts=33 tut=jump/JUMP@416 mission=opening held=
+[01:44] CHIP gate | The city gates | Follow the gold marker
+[01:54] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:54]   . W2 x=896 y=404 vx=340 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=ArrowRight
+[01:55] FLAG +gateOpened
+[02:05]   . W2 x=944 y=399 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[02:05] FRAMES median 17 ms -> planner step 1/60, game time 0.91x wall
+[02:05] PACE sim 17.8 s per 60 s wall (pace dial / slow frames)
+[02:15]   . W2 x=944 y=399 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[02:19] PLAN reset (room W2 -> A0)
+[02:19] ROOM W2 -> A0  at x=40
+[02:19] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[02:20] STATE PLAY -> PANELS
+[02:20] MANHWA gate panel 1/2
+[02:20] CHIP gate |  | 
+[02:21] MANHWA gate panel 2/2
+[02:23] STATE PANELS -> PLAY
+[02:23] CHIP gate | The city gates | Stand beneath them and press ↑
+[02:23]   . A0 x=143 y=428 vx=340 on cores=7/7 volts=33 tut=gate/MOVE@-1 mission=opening held=ArrowRight
+[02:26] CHIP booth | Ratchet's booth | Follow the gold marker
+[02:29] CHIP booth | Ratchet's booth | A light is on inside — stand at the door and press ↑
+[02:32]   . A0 x=334 y=418 vx=0 air cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[02:40]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[02:49]   . A0 x=387 y=434 vx=0 on cores=7/7 volts=33 tut=booth/UP@399 mission=opening held=
+[02:53] PLAN reset (room A0 -> A0B)
+[02:53] ROOM A0 -> A0B  at x=103
+[02:53] OBJECTIVE "Wake Ratchet"
+[02:56] CHIP note | Read the letter | Follow the gold marker
+[02:59]   . A0B x=217 y=260 vx=340 air cores=7/7 volts=33 tut=note/MOVE@560 mission=opening held=ArrowRight
+[03:03] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[03:03] STATE PLAY -> PANELS
+[03:03] MANHWA letter panel 1/5
+[03:03] CHIP note |  | 
+[03:05] FRAMES median 17 ms -> planner step 1/60, game time 0.97x wall
+[03:05] PACE sim 15.8 s per 60 s wall (pace dial / slow frames)
+[03:05] MANHWA letter panel 2/5
+[03:06] MANHWA letter panel 3/5
+[03:07]   . A0B x=523 y=433 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[03:08] MANHWA letter panel 4/5
+[03:09] MANHWA letter panel 5/5
+[03:11] STATE PANELS -> PLAY
+[03:11] CHIP note | Read the letter | A switched-off robot with a letter on him — press E
+[03:11] FLAG +opNote
+[03:11] STATE PLAY -> DIALOG
+[03:11] CHIP note |  | 
+[03:11] SAY Ratchet's letter: "“My battery is in the drawer beside this chair. Seat it, connect the positive wire, then the ground, and bridge the relay. If you are reading this, there may still be hope. — R.”"
+[03:17]   . A0B x=472 y=433 vx=0 on cores=7/7 volts=33 tut=note/null@-1 mission=opening held= near=npc:ratchet
+[03:17] STATE DIALOG -> PLAY
+[03:17] CHIP note | Read the letter | Follow the gold marker
+[03:21] CHIP drawer | Open the drawer | The letter says his battery is in the drawer — press E
+[03:24] STATE PLAY -> DIALOG
+[03:24] CHIP drawer |  | 
+[03:24] FLAG +ch_A0B_1
+[03:24] SAY ACQUIRED: "Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him." [card repairBattery]
+[03:24] ITEMS {"ratchetCell":1}
+[03:27]   . A0B x=472 y=435 vx=0 on cores=7/7 volts=33 tut=drawer/null@-1 mission=opening held= near=chest:it:batt
+[03:27] STATE DIALOG -> PANELS
+[03:27] MANHWA drawer panel 1/1
+[03:29] STATE PANELS -> PLAY
+[03:29] CHIP drawer | Open the drawer | Follow the gold marker
+[03:33] CHIP repair | Restore his battery | Follow the gold marker
+[03:33] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[03:36] STATE PLAY -> DIALOG
+[03:36] CHIP repair |  | 
+[03:36] SAY Ratchet: "His chest socket is empty. Wire his battery back in."
+[03:36]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:39] STATE DIALOG -> REPAIR
+[03:43] FRAME 001-repair-board.png
+[03:43] REPAIR board: "Place Ratchet’s own battery in the empty socket." 0 / 4 focus=piece:cell
+[03:43] REPAIR take piece:cell ("Place Ratchet’s own battery in the empty socket.")
+[03:46]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:47] REPAIR place on target:socket (the hint names "battery socket")
+[03:50] REPAIR take piece:positive ("Connect the amber positive wire to the + terminal.")
+[03:53] REPAIR place on target:plus (the hint names "+ terminal")
+[03:56]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[03:56] REPAIR take piece:negative ("Connect the blue ground wire to the − terminal.")
+[04:02] REPAIR place on target:minus (the hint names "− terminal")
+[04:05]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:05] REPAIR take piece:bridge ("Lay the copper bridge across the two posts of the relay.")
+[04:09] FRAMES median 17 ms -> planner step 1/60, game time 1.01x wall
+[04:09] PACE sim 17.3 s per 60 s wall (pace dial / slow frames)
+[04:12] REPAIR place on target:relay (the hint names "relay")
+[04:15]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:15] REPAIR power
+[04:25]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:25] STATE REPAIR -> CUT
+[04:25] OBJECTIVE "Use Ratchet’s pod"
+[04:25] FLAG +on_A0B|ratchet
+[04:25] FLAG +ratchetRepaired
+[04:25] ITEMS {}
+[04:33] STATE CUT -> DIALOG
+[04:33] SAY Ratchet: "…My own battery. You put it back. Thank you, little one — I’m Ratchet."
+[04:33]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:40] SAY Ratchet: "Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it."
+[04:43]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:46] SAY Ratchet: "So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast."
+[04:53]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[04:53] SAY Ratchet: "Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out."
+[05:00] SAY Ratchet: "One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him."
+[05:03]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[05:07] FLAG +opTold
+[05:07] FLAG +ratchetSpareGiven
+[05:07] SAY ACQUIRED: "Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him." [card spareCell]
+[05:07] ITEMS {"batt":1}
+[05:10] FRAMES median 17 ms -> planner step 1/60, game time 1.01x wall
+[05:10] PACE sim 16.4 s per 60 s wall (pace dial / slow frames)
+[05:14]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[05:14] SAY Ratchet: "This pod saves your progress and recharges you. Use it before you leave."
+[05:22] STATE DIALOG -> PANELS
+[05:22] MANHWA ratchet panel 1/2
+[05:22]   . A0B x=624 y=434 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[05:23] MANHWA ratchet panel 2/2
+[05:25] STATE PANELS -> PLAY
+[05:25] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[05:25] STATE PLAY -> DIALOG
+[05:25] CHIP repair |  | 
+[05:32]   . A0B x=624 y=436 vx=0 on cores=7/7 volts=33 tut=repair/null@-1 mission=opening held= near=npc:ratchet
+[05:33] STATE DIALOG -> PLAY
+[05:33] CHIP repair | Restore his battery | Press E at Ratchet and wire it back in
+[05:37] CHIP pod | Use the pod | Follow the gold marker
+[05:41]   . A0B x=721 y=284 vx=340 air cores=7/7 volts=33 tut=pod/MOVE@912 mission=opening held=ArrowRight
+[05:44] CHIP pod | Use the pod | Step into the pod and press E — it saves and recharges you
+[05:44] SAVEPOINT W1 -> A0B
+[05:51]   . A0B x=900 y=426 vx=0 on cores=7/7 volts=99 tut=pod/INT@912 mission=opening held= near=bench:null
+[05:56] TOAST Systems recharged. Progress saved.
+[05:59] OBJECTIVE "Get the Volt Pack from Ratchet"
+[05:59] FLAG +opPod
+[05:59]   . A0B x=873 y=426 vx=0 on cores=7/7 volts=99 tut=pod/INT@912 mission=opening held= near=bench:null
+[06:03] CHIP pack | The Volt Pack | Follow the gold marker
+[06:07]   . A0B x=900 y=426 vx=0 on cores=7/7 volts=99 tut=pack/MOVE@560 mission=opening held= near=bench:null
+[06:11] FRAMES median 17 ms -> planner step 1/60, game time 0.87x wall
+[06:11] PACE sim 11.5 s per 60 s wall (pace dial / slow frames)
+[06:18]   . A0B x=666 y=431 vx=-340 on cores=7/7 volts=99 tut=pack/MOVE@560 mission=opening held=ArrowLeft
+[06:18] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[06:18] STATE PLAY -> DIALOG
+[06:18] CHIP pack |  | 
+[06:18] SAY Ratchet: "That ring of charge on you fills when your hits land. Right now you have no way to spend it."
+[06:22] SAY Ratchet: "My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst."
+[06:29]   . A0B x=624 y=437 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[06:29] SAY Ratchet: "You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap."
+[06:36] SAY Ratchet: "You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind."
+[06:40]   . A0B x=624 y=437 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[06:44] FLAG +opScrap
+[06:44] FLAG +sawScrap
+[06:44] SAY ACQUIRED: "12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades." [card scrapPile]
+[06:44] SCRAP 0 -> 12
+[06:51]   . A0B x=624 y=437 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[06:51] STATE DIALOG -> SHOP
+[06:58] FRAME 002-counter.png
+[06:58] SHOP buy the marked row (cell) with 12 scrap
+[07:01] STATE SHOP -> DIALOG
+[07:01] OBJECTIVE "Try out the Volt Pack"
+[07:01] FLAG +tutBuy
+[07:01] FLAG +heal
+[07:01] FLAG +pack
+[07:01] SAY ACQUIRED: "Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst."
+[07:01] SCRAP 12 -> 0
+[07:01]   . A0B x=624 y=437 vx=0 on cores=7/7 volts=99 tut=pack/null@-1 mission=opening held= near=npc:ratchet
+[07:05] STATE DIALOG -> PLAY
+[07:05] CHIP pack | The Volt Pack | Press E at Ratchet — he will explain it
+[07:09] CHIP heal | Mend a core | The pack's first surge cost you a core — stand still and hold F
+[07:09] HURT 7 -> 6 in A0B
+[07:09] HEAL: holding heal
+[07:12]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[07:13] FRAMES median 17 ms -> planner step 1/60, game time 0.82x wall
+[07:13] PACE sim 10.0 s per 60 s wall (pace dial / slow frames)
+[07:13] HEAL: holding heal
+[07:16] HEAL: holding heal
+[07:20] HEAL: holding heal
+[07:24]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[07:24] HEAL: holding heal
+[07:27] HEAL: holding heal
+[07:31] HEAL: holding heal
+[07:34]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[07:34] HEAL: holding heal
+[07:39] HEAL: holding heal
+[07:43]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[07:43] HEAL: holding heal
+[07:47] HEAL: holding heal
+[07:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[07:52] HEAL: holding heal
+[07:56] HEAL: holding heal
+[08:00]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[08:00] HEAL: holding heal
+[08:03] HEAL: holding heal
+[08:07] HEAL: holding heal
+[08:12]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[08:12] HEAL: holding heal
+[08:15] FRAMES median 17 ms -> planner step 1/60, game time 0.27x wall
+[08:15] PACE sim 8.9 s per 60 s wall (pace dial / slow frames)
+[08:15] HEAL: holding heal
+[08:19] HEAL: holding heal
+[08:22]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[08:22] HEAL: holding heal
+[08:26] HEAL: holding heal
+[08:30] HEAL: holding heal
+[08:33]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[08:33] HEAL: holding heal
+[08:37] HEAL: holding heal
+[08:41] HEAL: holding heal
+[08:45]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[08:45] HEAL: holding heal
+[08:50] HEAL: holding heal
+[08:55]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[08:55] HEAL: holding heal
+[08:59] HEAL: holding heal
+[09:02] HEAL: holding heal
+[09:08]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[09:08] HEAL: holding heal
+[09:11] HEAL: holding heal
+[09:17]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[09:17] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[09:17] PACE sim 7.7 s per 60 s wall (pace dial / slow frames)
+[09:17] HEAL: holding heal
+[09:22] HEAL: holding heal
+[09:27]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[09:27] HEAL: holding heal
+[09:31] HEAL: holding heal
+[09:35] HEAL: holding heal
+[09:40]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[09:40] HEAL: holding heal
+[09:43] HEAL: holding heal
+[09:47] HEAL: holding heal
+[09:51]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[09:51] HEAL: holding heal
+[09:55] HEAL: holding heal
+[10:00]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:00] HEAL: holding heal
+[10:05] HEAL: holding heal
+[10:08]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:08] HEAL: holding heal
+[10:12] HEAL: holding heal
+[10:17]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:17] HEAL: holding heal
+[10:21] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[10:21] PACE sim 6.9 s per 60 s wall (pace dial / slow frames)
+[10:21] HEAL: holding heal
+[10:26]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:26] HEAL: holding heal
+[10:30] HEAL: holding heal
+[10:35]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:35] HEAL: holding heal
+[10:40] HEAL: holding heal
+[10:45]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:45] HEAL: holding heal
+[10:49] HEAL: holding heal
+[10:53]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[10:53] HEAL: holding heal
+[10:58] HEAL: holding heal
+[11:02]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:02] HEAL: holding heal
+[11:06] HEAL: holding heal
+[11:10]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:10] HEAL: holding heal
+[11:15] HEAL: holding heal
+[11:19]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:19] HEAL: holding heal
+[11:24] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[11:24] PACE sim 6.5 s per 60 s wall (pace dial / slow frames)
+[11:24] HEAL: holding heal
+[11:27]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:27] HEAL: holding heal
+[11:32] HEAL: holding heal
+[11:36]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:36] HEAL: holding heal
+[11:41] HEAL: holding heal
+[11:45]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:45] HEAL: holding heal
+[11:49] HEAL: holding heal
+[11:53]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[11:53] HEAL: holding heal
+[11:56] HEAL: holding heal
+[12:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:01] HEAL: holding heal
+[12:05] HEAL: holding heal
+[12:10]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:10] HEAL: holding heal
+[12:14] HEAL: holding heal
+[12:18]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:18] HEAL: holding heal
+[12:22] HEAL: holding heal
+[12:26]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:26] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[12:26] PACE sim 6.9 s per 60 s wall (pace dial / slow frames)
+[12:26] HEAL: holding heal
+[12:30] HEAL: holding heal
+[12:35]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:35] HEAL: holding heal
+[12:39] HEAL: holding heal
+[12:43]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:43] HEAL: holding heal
+[12:47] HEAL: holding heal
+[12:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[12:52] HEAL: holding heal
+[12:56] HEAL: holding heal
+[13:00] HEAL: holding heal
+[13:04]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:04] HEAL: holding heal
+[13:10] HEAL: holding heal
+[13:13]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:13] HEAL: holding heal
+[13:17] HEAL: holding heal
+[13:22]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:22] HEAL: holding heal
+[13:27] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[13:27] PACE sim 6.6 s per 60 s wall (pace dial / slow frames)
+[13:27] HEAL: holding heal
+[13:31]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:31] HEAL: holding heal
+[13:35] HEAL: holding heal
+[13:38] HEAL: holding heal
+[13:42]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:42] HEAL: holding heal
+[13:47] HEAL: holding heal
+[13:50]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:50] HEAL: holding heal
+[13:54] HEAL: holding heal
+[13:59]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[13:59] HEAL: holding heal
+[14:03] HEAL: holding heal
+[14:07]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[14:07] HEAL: holding heal
+[14:12] HEAL: holding heal
+[14:16]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[14:16] HEAL: holding heal
+[14:20] HEAL: holding heal
+[14:24] HEAL: holding heal
+[14:28]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[14:28] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[14:28] PACE sim 8.0 s per 60 s wall (pace dial / slow frames)
+[14:28] HEAL: holding heal
+[14:32] HEAL: holding heal
+[14:36]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[14:36] HEAL: holding heal
+[14:41] HEAL: holding heal
+[14:46]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[14:46] HEAL: holding heal
+[14:50] HEAL: holding heal
+[14:55]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[14:55] HEAL: holding heal
+[14:59] HEAL: holding heal
+[15:03]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:03] HEAL: holding heal
+[15:08] HEAL: holding heal
+[15:11]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:11] HEAL: holding heal
+[15:15] HEAL: holding heal
+[15:19]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:19] HEAL: holding heal
+[15:24] HEAL: holding heal
+[15:28]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:28] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[15:28] PACE sim 6.8 s per 60 s wall (pace dial / slow frames)
+[15:28] HEAL: holding heal
+[15:32] HEAL: holding heal
+[15:37]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:37] HEAL: holding heal
+[15:40] HEAL: holding heal
+[15:44] HEAL: holding heal
+[15:49]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:49] HEAL: holding heal
+[15:53] HEAL: holding heal
+[15:57]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[15:57] HEAL: holding heal
+[16:01] HEAL: holding heal
+[16:05] HEAL: holding heal
+[16:10]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[16:10] HEAL: holding heal
+[16:14] HEAL: holding heal
+[16:18]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[16:18] HEAL: holding heal
+[16:22] HEAL: holding heal
+[16:27]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[16:27] HEAL: holding heal
+[16:32] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[16:32] PACE sim 7.5 s per 60 s wall (pace dial / slow frames)
+[16:32] HEAL: holding heal
+[16:35]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[16:35] HEAL: holding heal
+[16:41] HEAL: holding heal
+[16:44]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[16:44] HEAL: holding heal
+[16:49] HEAL: holding heal
+[16:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[16:52] HEAL: holding heal
+[16:57] HEAL: holding heal
+[17:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[17:01] HEAL: holding heal
+[17:05] HEAL: holding heal
+[17:09]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[17:09] HEAL: holding heal
+[17:14] HEAL: holding heal
+[17:18]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[17:18] HEAL: holding heal
+[17:23] HEAL: holding heal
+[17:26] HEAL: holding heal
+[17:31]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[17:31] HEAL: holding heal
+[17:35] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[17:35] PACE sim 7.9 s per 60 s wall (pace dial / slow frames)
+[17:35] HEAL: holding heal
+[17:38] HEAL: holding heal
+[17:42]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[17:42] HEAL: holding heal
+[17:45] HEAL: holding heal
+[17:48] HEAL: holding heal
+[17:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[17:52] HEAL: holding heal
+[17:55] HEAL: holding heal
+[17:59] HEAL: holding heal
+[18:04]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:04] HEAL: holding heal
+[18:09] HEAL: holding heal
+[18:13]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:13] HEAL: holding heal
+[18:18] HEAL: holding heal
+[18:22]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:22] HEAL: holding heal
+[18:27] HEAL: holding heal
+[18:31]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:31] HEAL: holding heal
+[18:35] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[18:35] PACE sim 7.9 s per 60 s wall (pace dial / slow frames)
+[18:35] HEAL: holding heal
+[18:40]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:40] HEAL: holding heal
+[18:44] HEAL: holding heal
+[18:48]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:48] HEAL: holding heal
+[18:52] HEAL: holding heal
+[18:57]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[18:57] HEAL: holding heal
+[19:02] HEAL: holding heal
+[19:05]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[19:05] HEAL: holding heal
+[19:09] HEAL: holding heal
+[19:13] HEAL: holding heal
+[19:18]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[19:18] HEAL: holding heal
+[19:22] HEAL: holding heal
+[19:26] HEAL: holding heal
+[19:30]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[19:30] HEAL: holding heal
+[19:34] HEAL: holding heal
+[19:39]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[19:39] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[19:39] PACE sim 7.6 s per 60 s wall (pace dial / slow frames)
+[19:39] HEAL: holding heal
+[19:43] HEAL: holding heal
+[19:48]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[19:48] HEAL: holding heal
+[19:51] HEAL: holding heal
+[19:55] HEAL: holding heal
+[20:00]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:00] HEAL: holding heal
+[20:04] HEAL: holding heal
+[20:06] HEAL: holding heal
+[20:11]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:11] HEAL: holding heal
+[20:16] HEAL: holding heal
+[20:21]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:21] HEAL: holding heal
+[20:24] HEAL: holding heal
+[20:29]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:29] HEAL: holding heal
+[20:33] HEAL: holding heal
+[20:37]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:37] HEAL: holding heal
+[20:42] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[20:42] PACE sim 7.5 s per 60 s wall (pace dial / slow frames)
+[20:42] HEAL: holding heal
+[20:45]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:45] HEAL: holding heal
+[20:50] HEAL: holding heal
+[20:54]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[20:54] HEAL: holding heal
+[20:59] HEAL: holding heal
+[21:03]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:03] HEAL: holding heal
+[21:07] HEAL: holding heal
+[21:12]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:12] HEAL: holding heal
+[21:16] HEAL: holding heal
+[21:20]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:20] HEAL: holding heal
+[21:25] HEAL: holding heal
+[21:29]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:29] HEAL: holding heal
+[21:33] HEAL: holding heal
+[21:38]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:38] HEAL: holding heal
+[21:42] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[21:42] PACE sim 7.1 s per 60 s wall (pace dial / slow frames)
+[21:42] HEAL: holding heal
+[21:47]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:47] HEAL: holding heal
+[21:51] HEAL: holding heal
+[21:56]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[21:56] HEAL: holding heal
+[22:00] HEAL: holding heal
+[22:04]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[22:04] HEAL: holding heal
+[22:09] HEAL: holding heal
+[22:13]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[22:13] HEAL: holding heal
+[22:16] HEAL: holding heal
+[22:21]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[22:21] HEAL: holding heal
+[22:25] HEAL: holding heal
+[22:30]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[22:30] HEAL: holding heal
+[22:34] HEAL: holding heal
+[22:37] HEAL: holding heal
+[22:42]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[22:42] HEAL: holding heal
+[22:46] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[22:46] PACE sim 7.7 s per 60 s wall (pace dial / slow frames)
+[22:46] HEAL: holding heal
+[22:51]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[22:51] HEAL: holding heal
+[22:54] HEAL: holding heal
+[22:57] HEAL: holding heal
+[23:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[23:01] HEAL: holding heal
+[23:04] HEAL: holding heal
+[23:08] HEAL: holding heal
+[23:11]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[23:11] HEAL: holding heal
+[23:15] HEAL: holding heal
+[23:18] HEAL: holding heal
+[23:22]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[23:22] HEAL: holding heal
+[23:25] HEAL: holding heal
+[23:28] HEAL: holding heal
+[23:31]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[23:31] HEAL: holding heal
+[23:34] HEAL: holding heal
+[23:38] HEAL: holding heal
+[23:41]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[23:41] HEAL: holding heal
+[23:44] HEAL: holding heal
+[23:48] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[23:48] PACE sim 10.4 s per 60 s wall (pace dial / slow frames)
+[23:48] HEAL: holding heal
+[23:51]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[23:51] HEAL: holding heal
+[23:54] HEAL: holding heal
+[23:57] HEAL: holding heal
+[24:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[24:01] HEAL: holding heal
+[24:04] HEAL: holding heal
+[24:08] HEAL: holding heal
+[24:13]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[24:13] HEAL: holding heal
+[24:17] HEAL: holding heal
+[24:21] HEAL: holding heal
+[24:25]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[24:25] HEAL: holding heal
+[24:30] HEAL: holding heal
+[24:34]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[24:34] HEAL: holding heal
+[24:38] HEAL: holding heal
+[24:43]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[24:43] HEAL: holding heal
+[24:47] HEAL: holding heal
+[24:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[24:52] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[24:52] PACE sim 7.6 s per 60 s wall (pace dial / slow frames)
+[24:52] HEAL: holding heal
+[24:57] HEAL: holding heal
+[25:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:01] HEAL: holding heal
+[25:06] HEAL: holding heal
+[25:10]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:10] HEAL: holding heal
+[25:15] HEAL: holding heal
+[25:19]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:19] HEAL: holding heal
+[25:23] HEAL: holding heal
+[25:28]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:28] HEAL: holding heal
+[25:32] HEAL: holding heal
+[25:36]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:36] HEAL: holding heal
+[25:41] HEAL: holding heal
+[25:46]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:46] HEAL: holding heal
+[25:50] HEAL: holding heal
+[25:54]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[25:55] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[25:55] PACE sim 6.6 s per 60 s wall (pace dial / slow frames)
+[25:55] HEAL: holding heal
+[25:59] HEAL: holding heal
+[26:03]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:03] HEAL: holding heal
+[26:08] HEAL: holding heal
+[26:12]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:12] HEAL: holding heal
+[26:16] HEAL: holding heal
+[26:20]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:20] HEAL: holding heal
+[26:24] HEAL: holding heal
+[26:29]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:29] HEAL: holding heal
+[26:33] HEAL: holding heal
+[26:37]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:37] HEAL: holding heal
+[26:43] HEAL: holding heal
+[26:48]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:48] HEAL: holding heal
+[26:52] HEAL: holding heal
+[26:57]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[26:58] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[26:58] PACE sim 6.7 s per 60 s wall (pace dial / slow frames)
+[26:58] HEAL: holding heal
+[27:02] HEAL: holding heal
+[27:06]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[27:06] HEAL: holding heal
+[27:09] HEAL: holding heal
+[27:12] HEAL: holding heal
+[27:17]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[27:17] HEAL: holding heal
+[27:21] HEAL: holding heal
+[27:26]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[27:26] HEAL: holding heal
+[27:30] HEAL: holding heal
+[27:35]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[27:35] HEAL: holding heal
+[27:39] HEAL: holding heal
+[27:43] HEAL: holding heal
+[27:47]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[27:47] HEAL: holding heal
+[27:52] HEAL: holding heal
+[27:56]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[27:56] HEAL: holding heal
+[28:01] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[28:01] PACE sim 6.8 s per 60 s wall (pace dial / slow frames)
+[28:01] HEAL: holding heal
+[28:04] HEAL: holding heal
+[28:09]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[28:09] HEAL: holding heal
+[28:13] HEAL: holding heal
+[28:17]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[28:17] HEAL: holding heal
+[28:22] HEAL: holding heal
+[28:26]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[28:26] HEAL: holding heal
+[28:31] HEAL: holding heal
+[28:35]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[28:35] HEAL: holding heal
+[28:40] HEAL: holding heal
+[28:45]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[28:45] HEAL: holding heal
+[28:50] HEAL: holding heal
+[28:54]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[28:54] HEAL: holding heal
+[28:59] HEAL: holding heal
+[29:03]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:03] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[29:03] PACE sim 7.0 s per 60 s wall (pace dial / slow frames)
+[29:03] HEAL: holding heal
+[29:08] HEAL: holding heal
+[29:13]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:13] HEAL: holding heal
+[29:17] HEAL: holding heal
+[29:21]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:21] HEAL: holding heal
+[29:26] HEAL: holding heal
+[29:30]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:30] HEAL: holding heal
+[29:35] HEAL: holding heal
+[29:39]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:39] HEAL: holding heal
+[29:44] HEAL: holding heal
+[29:48]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:48] HEAL: holding heal
+[29:52] HEAL: holding heal
+[29:56]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[29:56] HEAL: holding heal
+[30:01] HEAL: holding heal
+[30:03] HEAL: holding heal
+[30:08]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[30:08] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[30:08] PACE sim 7.5 s per 60 s wall (pace dial / slow frames)
+[30:08] HEAL: holding heal
+[30:11] HEAL: holding heal
+[30:15] HEAL: holding heal
+[30:20]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[30:20] HEAL: holding heal
+[30:24] HEAL: holding heal
+[30:29]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[30:29] HEAL: holding heal
+[30:33] HEAL: holding heal
+[30:37]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[30:37] HEAL: holding heal
+[30:42] HEAL: holding heal
+[30:46]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[30:46] HEAL: holding heal
+[30:51] HEAL: holding heal
+[30:55]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[30:55] HEAL: holding heal
+[31:00] HEAL: holding heal
+[31:05]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[31:05] HEAL: holding heal
+[31:08] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[31:08] PACE sim 6.9 s per 60 s wall (pace dial / slow frames)
+[31:08] HEAL: holding heal
+[31:12] HEAL: holding heal
+[31:16]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[31:16] HEAL: holding heal
+[31:20] HEAL: holding heal
+[31:25]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[31:25] HEAL: holding heal
+[31:29] HEAL: holding heal
+[31:33]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[31:33] HEAL: holding heal
+[31:38] HEAL: holding heal
+[31:43]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[31:43] HEAL: holding heal
+[31:47] HEAL: holding heal
+[31:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[31:52] HEAL: holding heal
+[31:56] HEAL: holding heal
+[32:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:01] HEAL: holding heal
+[32:04] HEAL: holding heal
+[32:08] HEAL: holding heal
+[32:12]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:13] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[32:13] PACE sim 7.6 s per 60 s wall (pace dial / slow frames)
+[32:13] HEAL: holding heal
+[32:17] HEAL: holding heal
+[32:21]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:21] HEAL: holding heal
+[32:25] HEAL: holding heal
+[32:30]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:30] HEAL: holding heal
+[32:34] HEAL: holding heal
+[32:39]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:39] HEAL: holding heal
+[32:43] HEAL: holding heal
+[32:47]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:47] HEAL: holding heal
+[32:51] HEAL: holding heal
+[32:56]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[32:56] HEAL: holding heal
+[33:00] HEAL: holding heal
+[33:05]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[33:05] HEAL: holding heal
+[33:10] HEAL: holding heal
+[33:13] HEAL: holding heal
+[33:16]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[33:17] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[33:17] PACE sim 7.4 s per 60 s wall (pace dial / slow frames)
+[33:17] HEAL: holding heal
+[33:21] HEAL: holding heal
+[33:25]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[33:25] HEAL: holding heal
+[33:30] HEAL: holding heal
+[33:35]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[33:35] HEAL: holding heal
+[33:39] HEAL: holding heal
+[33:43]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[33:43] HEAL: holding heal
+[33:48] HEAL: holding heal
+[33:52]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[33:52] HEAL: holding heal
+[33:56] HEAL: holding heal
+[34:01]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[34:01] HEAL: holding heal
+[34:05] HEAL: holding heal
+[34:09] HEAL: holding heal
+[34:12]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[34:12] HEAL: holding heal
+[34:15] HEAL: holding heal
+[34:19] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[34:19] PACE sim 7.9 s per 60 s wall (pace dial / slow frames)
+[34:19] HEAL: holding heal
+[34:22]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[34:22] HEAL: holding heal
+[34:25] HEAL: holding heal
+[34:29] HEAL: holding heal
+[34:32]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[34:32] HEAL: holding heal
+[34:35] HEAL: holding heal
+[34:39] HEAL: holding heal
+[34:42]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[34:42] HEAL: holding heal
+[34:45] HEAL: holding heal
+[34:49] HEAL: holding heal
+[34:54]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[34:54] HEAL: holding heal
+[34:57] HEAL: holding heal
+[35:01] HEAL: holding heal
+[35:05]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[35:05] HEAL: holding heal
+[35:10] HEAL: holding heal
+[35:15]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[35:15] HEAL: holding heal
+[35:19] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[35:19] PACE sim 9.1 s per 60 s wall (pace dial / slow frames)
+[35:19] HEAL: holding heal
+[35:23] HEAL: holding heal
+[35:27]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[35:27] HEAL: holding heal
+[35:31] HEAL: holding heal
+[35:36]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[35:36] HEAL: holding heal
+[35:41] HEAL: holding heal
+[35:46]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[35:46] HEAL: holding heal
+[35:49] HEAL: holding heal
+[35:54]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[35:54] HEAL: holding heal
+[35:58] HEAL: holding heal
+[36:02]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:02] HEAL: holding heal
+[36:05] HEAL: holding heal
+[36:11]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:11] HEAL: holding heal
+[36:16] HEAL: holding heal
+[36:20]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:20] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[36:20] PACE sim 7.0 s per 60 s wall (pace dial / slow frames)
+[36:20] HEAL: holding heal
+[36:24] HEAL: holding heal
+[36:29]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:29] HEAL: holding heal
+[36:33] HEAL: holding heal
+[36:37]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:37] HEAL: holding heal
+[36:42] HEAL: holding heal
+[36:46]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:46] HEAL: holding heal
+[36:50] HEAL: holding heal
+[36:54]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[36:54] HEAL: holding heal
+[36:59] HEAL: holding heal
+[37:02]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[37:02] HEAL: holding heal
+[37:06] HEAL: holding heal
+[37:10]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[37:10] HEAL: holding heal
+[37:15] HEAL: holding heal
+[37:19]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[37:19] HEAL: holding heal
+[37:24] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[37:24] PACE sim 7.6 s per 60 s wall (pace dial / slow frames)
+[37:24] HEAL: holding heal
+[37:27] HEAL: holding heal
+[37:31]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[37:31] HEAL: holding heal
+[37:36] HEAL: holding heal
+[37:39]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[37:39] HEAL: holding heal
+[37:43] HEAL: holding heal
+[37:47] HEAL: holding heal
+[37:51]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[37:51] HEAL: holding heal
+[37:56] HEAL: holding heal
+[38:00]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[38:00] HEAL: holding heal
+[38:04] HEAL: holding heal
+[38:08] HEAL: holding heal
+[38:11]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[38:11] HEAL: holding heal
+[38:16] HEAL: holding heal
+[38:20]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[38:20] HEAL: holding heal
+[38:23] HEAL: holding heal
+[38:27] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[38:27] PACE sim 8.5 s per 60 s wall (pace dial / slow frames)
+[38:27] HEAL: holding heal
+[38:31]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[38:31] HEAL: holding heal
+[38:34] HEAL: holding heal
+[38:38] HEAL: holding heal
+[38:42]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[38:42] HEAL: holding heal
+[38:46] HEAL: holding heal
+[38:49] HEAL: holding heal
+[38:53]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[38:53] HEAL: holding heal
+[38:57] HEAL: holding heal
+[39:01] HEAL: holding heal
+[39:05]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[39:05] HEAL: holding heal
+[39:08] HEAL: holding heal
+[39:12] HEAL: holding heal
+[39:16]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[39:16] HEAL: holding heal
+[39:20] HEAL: holding heal
+[39:24] HEAL: holding heal
+[39:28]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[39:29] FRAMES median 17 ms -> planner step 1/60, game time 0.20x wall
+[39:29] PACE sim 8.3 s per 60 s wall (pace dial / slow frames)
+[39:29] HEAL: holding heal
+[39:32] HEAL: holding heal
+[39:37]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[39:37] HEAL: holding heal
+[39:42] HEAL: holding heal
+[39:46]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[39:46] HEAL: holding heal
+[39:50] HEAL: holding heal
+[39:53] HEAL: holding heal
+[39:57]   . A0B x=624 y=436 vx=0 on cores=6/7 volts=99 tut=heal/HEAL@636 mission=opening held= near=npc:ratchet
+[39:57] HEAL: holding heal
+[40:04] FRAME 003-end.png
+[40:04] MANHWA seen: wake, bay, gate, letter, drawer, ratchet
+[40:04] RESULT timeout  wall 40:04  deaths 0  missions   stuck 0  page errors 0
+Command failed: node /workspace/scratch/b4e9aa23d77e/repo/tests/campaign-ch1.cjs
+   (campaign-ch1: 2407.0 s)
+
+1 harness(es) failed

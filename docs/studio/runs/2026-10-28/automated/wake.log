@@ -1,0 +1,63 @@
+
+── wake  — the opening: film, waking floor, move -> jump -> gates -> straight into Ratchet's booth
+AssertionError [ERR_ASSERTION]: fresh tutorial did not reach the workshop; last state: {"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":92.87602000000122,"on":true,"hold":0.3832333333333275,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":443.99,"input":true,"suspended":false}
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/wake.cjs:68:5 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+FAILED: {"room":"W1","state":"PLAY","wake":true,"cut":false,"gate":false,"step":null,"action":null,"control":null,"target":null,"x":108,"on":false,"hold":null,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":412,"input":false,"suspended":false}
+{"room":"W1","state":"PANELS","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":false,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":414.784666775,"input":false,"suspended":false}
+{"room":"W1","state":"PLAY","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":false,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":414.784666775,"input":false,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":171.4900199999998,"on":true,"hold":0.5000000000000002,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.89933227539063,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":279.1340200000006,"on":true,"hold":0.18339999999999812,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":436.3886511230469,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":335.8120200000007,"on":true,"hold":0.016699999999997425,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.97095703125,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":364.1680200000011,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":429.8544714355469,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":415.13402000000025,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":433.3763220214844,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":500.1000200000006,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":436.57181762695313,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":573.7780200000007,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":433.32731079101563,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":681.4673533333333,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.51178955078126,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":749.4673533333336,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.68384765625,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":800.4333533333341,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":433.13028930664063,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":908.1113533333335,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.2056677246094,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":987.444686666667,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.74799560546876,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1055.4446866666672,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":435.7595007324219,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1163.134019999998,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":426.7977392578125,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1214.1000199999985,"on":true,"hold":-3.3029134982598407e-15,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":428.9879248046875,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":27.71200000000099,"on":true,"hold":0.7,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":436.66681884765626,"input":true,"suspended":false}
+{"room":"W2","state":"PANELS","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":27.71200000000099,"on":true,"hold":0.7,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":436.66681884765626,"input":false,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":27.71200000000099,"on":true,"hold":0.7,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":436.66681884765626,"input":false,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":92.09802000000325,"on":true,"hold":0.36649999999999266,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":428.5325720214844,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":177.06402000000372,"on":true,"hold":0.11659999999999111,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":426.98285888671876,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"MOVE","control":"→","target":416,"x":245.0640200000037,"on":true,"hold":-0.016733333333342225,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.69416259765626,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":284.74202000000275,"on":true,"hold":-0.016733333333342225,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":"JUMP","vx":0,"y":436.0197546386719,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":364.5640400000012,"on":false,"hold":0.4334000000000016,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":260.6049111386692,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":404.24204000000265,"on":false,"hold":0.31669999999999726,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":252.54760797200302,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":494.8860400000046,"on":true,"hold":0.05009999999999139,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":315.99,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":523.2080400000032,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":315.99,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":574.2080400000032,"on":false,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":346.349197258333,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":659.208040000003,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":371.78290771484376,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":727.1740400000035,"on":false,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":382.1483874000002,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":823.5300400000042,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":426.0435583496094,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"UP","control":null,"target":960,"x":902.8180400000056,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":404.39957641601563,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":true,"step":"gate","action":"UP","control":null,"target":960,"x":960,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":false,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":false,"suspended":false}
+{"room":"A0","state":"PANELS","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":-0.016500000000007158,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":0.5500333333333304,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":443.99,"input":false,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":92.87602000000122,"on":true,"hold":0.3832333333333275,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":443.99,"input":true,"suspended":false}
+AssertionError [ERR_ASSERTION]: fresh tutorial did not reach the workshop; last state: {"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":92.87602000000122,"on":true,"hold":0.3832333333333275,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":443.99,"input":true,"suspended":false}
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/wake.cjs:68:5 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+   (wake: 97.0 s)
+
+1 harness(es) failed

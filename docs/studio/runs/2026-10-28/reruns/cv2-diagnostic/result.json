@@ -1,0 +1,44 @@
+{
+ "result": "timeout",
+ "certified": false,
+ "missingPanels": [
+  "wake",
+  "bay",
+  "gate",
+  "letter",
+  "drawer",
+  "ratchet",
+  "meet",
+  "cave",
+  "marble",
+  "forge",
+  "passage",
+  "sage",
+  "break",
+  "chime",
+  "free",
+  "ch2"
+ ],
+ "panelOrderErrors": [],
+ "wall": "10:06",
+ "deaths": 0,
+ "missions": [
+  "opening",
+  "servo",
+  "first-meeting",
+  "marble",
+  "forge"
+ ],
+ "rooms": [
+  "",
+  "CV1B",
+  "CV2",
+  "CV3"
+ ],
+ "panelsSeen": [],
+ "panelsMissed": [],
+ "difficulty": 0,
+ "segment": "docs/studio/runs/2026-10-27/automated/campaign-ch1/save-latest.json",
+ "stopAt": null,
+ "errors": []
+}

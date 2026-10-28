@@ -1,0 +1,26 @@
+
+── forge  — the Forge: gated to the owner, every op changes the live world, main rooms edit like DLCs
+ok  index.html carries no editor
+  ok  forge.html is the editor page
+  ok  wrong passphrase does not open
+  ok  the word opens the Forge and the world starts
+  ok  the Forge plays on its own save
+  ok  new room created and entered
+  ok  heap and frame are material
+  ok  bench, crawler and keeper placed (3)
+  ok  the keeper has a name and a conversation
+  ok  the keeper wears the borrowed body
+  ok  a main-game room edits like a DLC room
+  ok  the export carries rooms, dialogue, bodies and start
+  ok  a click paints the pointed tile
+  ok  legacy key removed without transmission
+  ok  invalid JSON stays available for correction
+  ok  JSON console applies reviewed operations
+  ok  editor never calls the external AI API
+  ok  no API key input
+  ok  room brief exports for use in an assistant
+  ok  no page errors
+forge: the owner describes, the world changes, and only the owner
+   (forge: 39.4 s)
+
+all 1 harnesses ran

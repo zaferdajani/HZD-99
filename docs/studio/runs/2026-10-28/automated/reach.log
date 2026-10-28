@@ -1,0 +1,13 @@
+
+── reach  — she hits what she is standing next to, and she turns to it
+── reach — she hits what she is standing next to, and she turns to it
+
+  ok   a foe at any distance inside her reach takes the hit  hit at 0, 8, 16, 24, 36, 52, 68 px
+  ok   ...including one standing on top of her  hit at 0 px
+  ok   she turns to the foe when no direction is held  turned at all 10 distances, both sides
+  ok   ...and the swing lands on the side she turned to  hit on the left at -8, -24, -52 px
+
+all good
+   (reach: 100.8 s)
+
+all 1 harnesses ran

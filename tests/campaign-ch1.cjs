@@ -596,6 +596,32 @@ let flight = null;       // the jump in the air: { prog, t0 }
 let stall = { k: -1, since: 0, best: Infinity };
 let lastPlan = null;
 let combatWatch = null;
+// Recovery rebuilds the room model after ordinary input has settled the
+// player.  Keep the small amount learned about failed traversal edges across
+// that rebuild; otherwise the planner forgets the edge immediately and can
+// alternate between the same two failed jumps for the rest of the run.
+// Keys are room/layout signatures, so a changed room state gets a clean map.
+const navigationPenalties = new Map();
+function penaltiesFor(sig, registry = navigationPenalties) {
+  let penalties = registry.get(sig);
+  if (!penalties) {
+    penalties = new Map();
+    registry.set(sig, penalties);
+    // A chapter-one run touches far fewer than this.  The bound prevents a
+    // damaged route from turning the evidence driver into an unbounded log.
+    while (registry.size > 32) registry.delete(registry.keys().next().value);
+  }
+  return penalties;
+}
+function penalizePlan(plan, amount, reason) {
+  if (!plan || !modelKey || plan.room !== (info && info.id)) return;
+  const key = plan.cur + '>' + (plan.exit || plan.to);
+  const penalties = penaltiesFor(modelKey);
+  const value = Math.min(6, (penalties.get(key) || 0) + amount);
+  penalties.set(key, value);
+  while (penalties.size > 64) penalties.delete(penalties.keys().next().value);
+  log('PLAN penalty ' + JSON.stringify({ room: plan.room, edge: key, value, reason }));
+}
 function resetNavigation(reason) {
   model = null; modelKey = ''; info = null;
   curGoalKey = ''; curD = null; flight = null; lastPlan = null;
@@ -611,7 +637,7 @@ async function ensureModel() {
   for (const k of Object.keys(info.exits)) if (info.exits[k].open) exits[k] = info.exits[k].to;
   const t0 = Date.now();
   model = roomModel({ ...info, exits });
-  model.pen = new Map();
+  model.pen = penaltiesFor(sig);
   modelKey = sig;
   log('PLAN room ' + info.id + ': ' + model.nodes.length + ' standable tiles, ' + model.edges.reduce((a, e) => a + e.length, 0) + ' moves (' + (Date.now() - t0) + ' ms)');
 }
@@ -822,6 +848,10 @@ async function unstick(s, what) {
   // planned edge is therefore authoritative; the exit name is only fallback.
   const dir = (lastPlan && (lastPlan.dir || lastPlan.walk)) || named || s.p.face || 1;
   log('PLAN recovery ' + JSON.stringify({ what, dir, edge: lastPlan }));
+  // Record the failed edge before resetNavigation() discards the live model.
+  // This changes only route selection in the certification driver; game
+  // geometry, physics, saves and progression remain untouched.
+  penalizePlan(lastPlan, 1, 'recovery: ' + what);
   await hold([]);
   await hold([dir < 0 ? 'ArrowLeft' : 'ArrowRight', 'Space']); await sleep(320);
   await hold([dir < 0 ? 'ArrowLeft' : 'ArrowRight']); await sleep(420); await hold([]);
@@ -1360,7 +1390,7 @@ async function runMissions(s) {
 }
 
 if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, nodeStart, nodeFeet,
-  campaignCertification, REQUIRED_PANELS };
+  campaignCertification, REQUIRED_PANELS, penaltiesFor };
 else (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, ...(VIDEO ? { recordVideo: { dir: OUT, size: { width: 1280, height: 720 } } } : {}) });

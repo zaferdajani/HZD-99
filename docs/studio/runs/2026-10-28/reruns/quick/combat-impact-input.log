@@ -1,0 +1,28 @@
+
+── combat-impact-input  — real keyboard tap and held charge through the normal game loop in a staged arena
+AssertionError [ERR_ASSERTION]: held real input reaches charge threshold
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/combat-impact-input.cjs:28:9
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:541:9) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+FAILED: AssertionError [ERR_ASSERTION]: held real input reaches charge threshold
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/combat-impact-input.cjs:28:9
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:541:9) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+   (combat-impact-input: 16.5 s)
+
+1 harness(es) failed

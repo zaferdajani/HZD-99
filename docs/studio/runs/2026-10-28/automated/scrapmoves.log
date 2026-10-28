@@ -1,0 +1,32 @@
+
+── scrapmoves  — kingdom A picks the floor up — and never on a fresh save
+── scrapmoves — kingdom A picks the floor up, and never on a fresh save
+
+  ok   a fresh save leaves the meadow at level 1  lv 1
+  ok   ...and level 1 buys none of kingdom A's moves  {"crawler":[],"hopper":[],"blob":[]}
+  ok   ...so a spawned opening machine carries nothing  [[],[],[]]
+  ok   ...the opening crawler never drags a plate  0 frames
+  ok   ...the opening hopper never kicks scrap  0 frames
+  ok   ...the opening blob never blooms  0 frames
+  ok   ...and every drop it leaves is still under its own belly  [{"n":1,"dx":[0]},{"n":1,"dx":[0]},{"n":1,"dx":[0]}]
+  ok   ...the opening wind-ups are the ones the tutorial taught  crawler 0.36666666666666664s, hopper 0.36666666666666664s vs TELL_FAST 0.35
+  ok   a run that has been somewhere raises the meadow  lv 2
+  ok   ...and one point is enough to arm every one of them  1 pts: [["scrapdrag"],["scrapkick"],["rustbloom"]]
+  ok   SCRAPDRAG: the crawler hooks a plate and shoves it  45 frames with the plate out, over 45 lunge frames
+  ok   ...and it lets go of it — no plate outlives its lunge  plate 45 vs lunge 45
+  ok   SCRAPKICK: the hopper rakes a heap and the landing throws it  78 frames, reach 96px of 96
+  ok   RUSTBLOOM: the blob throws sideways instead of dripping  206 frames blooming
+  ok   ...and the bloom takes the two tiles BESIDE it, not the one under it  [{"n":2,"dx":[-30,30]},{"n":2,"dx":[-30,30]}]
+  ok   ...while a plain drip still lands underneath  [{"n":1,"dx":[0]},{"n":1,"dx":[0]}]
+  ok   the armed crawler warns LONGER, not shorter  0.36666666666666664s -> 0.5166666666666667s (TELL_SWIPE 0.5)
+  ok   the armed hopper warns LONGER, not shorter  0.36666666666666664s -> 0.5166666666666667s (TELL_SWIPE 0.5)
+  ok   the bloom sags for nearly twice the plain drip before it throws  0.6166666666666667s vs drip 0.34s
+  ok   kingdom A's moves never reach another kingdom
+  ok   ...and the guard keeps its own question — no plate on the shield  nothing
+  ok   ...and no unscoped row was written: that layer is the integrator's
+  ok   no page errors
+
+all good
+   (scrapmoves: 15.6 s)
+
+all 1 harnesses ran

@@ -1,0 +1,26 @@
+
+── warp  — ?room= drops the owner into any room: locked, loud when refused, and never his save
+── warp — one person's door into any room, and it stays one person's
+
+  ok   no query string: the game boots to its own menu  MENU
+  ok   no query string: the save slot is the ordinary one  clawbyte_save_robo
+  ok   no query string: nothing is said
+  ok   a browser with no Forge key does not warp  (menu)
+  ok   ...and it says why, out loud  warp refused — this browser has no Forge key | warp: warp refused — this browser has no Forge key
+  ok   ...and it leaves his real save slot alone  clawbyte_save_robo
+  ok   an id that is not a room does not warp  MENU
+  ok   ...and the id it could not find is in the message  warp — no room "V1Bx" | warp: warp — no room "V1Bx"
+  ok   an unlocked browser lands in the room  V1B
+  ok   ...playing, not at a menu or in a film  PLAY
+  ok   ...standing in open air over the floor, not inside the rock
+  ok   ...with every power, so the room can be walked  5 abilities
+  ok   ...and the Cutter is standing there  kerf
+  ok   ...and it says where it put him  WARP — V1B | GRAPPLE CLAW online — press U | VOLT SOAR online: hold UP and fire the claw on the ground to launch straight up.
+  ok   a warp session writes to its OWN slot, never his run  clawbyte_save_robo_warp
+  ok   any room in the game is reachable (the Cache proper)  X1
+  ok   no page errors in any of it
+
+OK — the door opens for the key, refuses everyone else out loud, and never touches his save
+   (warp: 37.6 s)
+
+all 1 harnesses ran

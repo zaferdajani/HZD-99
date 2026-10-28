@@ -1,0 +1,19 @@
+
+── face  — face acting: effort on the reel, relief after a repair, fear at a roar, drawn
+── face — effort on the reel, relief after a repair, fear at a roar, a sputter on the last core
+
+  ok   calm when nothing is happening  calm
+  ok   EFFORT on the claw's reel, the soar and the counter (not on the throw)  ["effort","effort","effort","calm"]
+  ok   FEAR at a guardian's entrance and at any state it names roar  ["afraid","afraid"]
+  ok   ...and a blow still outranks it (hurt over fear)  hurt
+  ok   a real repair: eyes shut happy while it runs, then RELIEF when the core lands  {"during":"happy","after":"relief","healed":true,"keyb":["KeyF","KeyH","VHEAL","GP_HEAL"]}
+  ok   ...and the relief passes  calm
+  ok   each new face is a visibly different pair of lights from calm (pixels off the renderer)  {"calm":{"lit":484,"tall":18},"effort":{"lit":302,"tall":12},"relief":{"lit":398,"tall":14},"afraid":{"lit":516,"tall":24},"hurt":{"lit":184,"tall":6}}
+  ok   ...fear opens the eyes wider than calm, effort squeezes them  {"calm":{"lit":484,"tall":18},"effort":{"lit":302,"tall":12},"relief":{"lit":398,"tall":14},"afraid":{"lit":516,"tall":24},"hurt":{"lit":184,"tall":6}}
+  ok   LOW-CORE IDLE: standing on her last core the pack sputters; on full cores it does not  {"low":3,"full":0}
+  ok   no page errors
+
+all good
+   (face: 97.7 s)
+
+all 1 harnesses ran

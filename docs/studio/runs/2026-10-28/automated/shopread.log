@@ -1,0 +1,40 @@
+
+── shopread  — a structure she can enter is never the wall behind it
+── shopread — a structure she can enter is never the wall behind it
+
+  ok   the trader's stall is drawn with the cast, not the painting  A0
+  ok   ...and restoring the probe restores the same frame  A0 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  A0 147207 px in 1 attempt(s)
+  ok   ...and it puts pixels on the screen  A0 147207 px (min 400)
+  ok   ...and it out-reads the ground it covers  A0 sat 21.2 vs 24.9 (-3.7)  val 49.8 vs 26.1 (x1.91)  ->  reads 1.82 (min 1.00)
+  ok   the Oracle's shrine is drawn with the cast, not the painting  B3
+  ok   ...and restoring the probe restores the same frame  B3 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  B3 0 px in 1 attempt(s)
+  --   the Oracle's shrine: 0 px survive contrast, reads 2.00   B3 sat 0 vs 0 (+0)  val 0 vs 0 (x0)  ->  reads 2.00
+  ok   the Tinker's quench hood is drawn with the cast, not the painting  C5
+  ok   ...and restoring the probe restores the same frame  C5 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  C5 53234 px in 1 attempt(s)
+  --   the Tinker's quench hood: 53234 px survive contrast, reads 4.30   C5 sat 31 vs 18.1 (+12.9)  val 40.6 vs 27.3 (x1.49)  ->  reads 4.30
+  ok   the Sage's carrel is drawn with the cast, not the painting  D1
+  ok   ...and restoring the probe restores the same frame  D1 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  D1 90799 px in 1 attempt(s)
+  --   the Sage's carrel: 90799 px survive contrast, reads 1.66   D1 sat 9.4 vs 23.1 (-13.7)  val 56.8 vs 31 (x1.83)  ->  reads 1.66
+  ok   the Nymph's hollow is drawn with the cast, not the painting  E1
+  ok   ...and restoring the probe restores the same frame  E1 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  E1 58712 px in 1 attempt(s)
+  --   the Nymph's hollow: 58712 px survive contrast, reads 1.20   E1 sat 26.3 vs 22.7 (+3.6)  val 41.5 vs 29.6 (x1.4)  ->  reads 1.20
+  ok   the Cutter's split stone is drawn with the cast, not the painting  V1
+  ok   ...and restoring the probe restores the same frame  V1 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  V1 45080 px in 1 attempt(s)
+  --   the Cutter's split stone: 45080 px survive contrast, reads 1.22   V1 sat 22.5 vs 21.9 (+0.6)  val 51.5 vs 32 (x1.61)  ->  reads 1.22
+  ok   the first cave mouth is drawn with the cast, not the painting  A5
+  ok   ...and restoring the probe restores the same frame  A5 0 unrelated changed pixels
+  ok   ...and the measurement is of the structure and nothing else  A5 0 px in 1 attempt(s)
+  --   the first cave mouth: 0 px survive contrast, reads 2.00   A5 sat 0 vs 0 (+0)  val 0 vs 0 (x0)  ->  reads 2.00
+
+  (rooms without a fired plate are reported, not enforced — see ART_QUEUE §2h/§2k)
+
+all good
+   (shopread: 168.5 s)
+
+all 1 harnesses ran

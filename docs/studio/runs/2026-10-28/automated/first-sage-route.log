@@ -1,0 +1,9 @@
+
+── first-sage-route  — pre-guardian route through quarry maintenance passage
+PASS first-sage maintenance route before guardian [
+  { from: 'CV3', to: 'GA1T', x: 628 },
+  { from: 'GA1T', to: 'CV3', x: 1140 }
+]
+   (first-sage-route: 2.2 s)
+
+all 1 harnesses ran

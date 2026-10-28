@@ -1,0 +1,7 @@
+
+── infection-eyes  — red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending
+FAILED: ── infection-eyes — red for the rank and file, purple for guardians, smoke that leaves the eye and ends
+spawnSync node ETIMEDOUT
+   (infection-eyes: 300.1 s)
+
+1 harness(es) failed

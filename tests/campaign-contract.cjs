@@ -1,6 +1,6 @@
 // The long campaign's certificate must fail closed independently for every
 // evidence class. campaign-ch1 remains the uninterrupted real-input run.
-const { campaignCertification, REQUIRED_PANELS } = require('./campaign-ch1.cjs');
+const { campaignCertification, REQUIRED_PANELS, penaltiesFor } = require('./campaign-ch1.cjs');
 
 const fails = [];
 const check = (name, ok, detail) => {
@@ -30,6 +30,14 @@ check('restored segment is diagnostic, never a full certificate', !r.certified &
 
 r = campaignCertification('complete', good(), [], [], null, 'forge');
 check('developer stop is diagnostic, never a full certificate', !r.certified && r.result === 'partial-diagnostic', JSON.stringify(r));
+
+const learned = new Map();
+const cv2 = penaltiesFor('CV2|layout-a', learned);
+cv2.set('5>51', 1);
+check('a failed traversal edge survives a model rebuild', penaltiesFor('CV2|layout-a', learned).get('5>51') === 1);
+check('a changed room signature gets a clean traversal ledger', !penaltiesFor('CV2|layout-b', learned).has('5>51'));
+for (let i = 0; i < 40; i++) penaltiesFor('room-' + i, learned);
+check('the recovery ledger is bounded', learned.size === 32, learned.size + ' model signatures');
 
 console.log('\n' + (fails.length ? fails.length + ' FAILED' : 'all campaign certificate checks passed'));
 process.exit(fails.length ? 1 : 0);

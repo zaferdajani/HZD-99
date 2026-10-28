@@ -1,0 +1,76 @@
+
+── seam-look  — a floor wears one face across a vertical seam: seen from below, stood on from above, nothing black in front of it
+── seam-look — a floor looks the same from below and from on top of it
+
+  ok   chapter one has vertical seams to walk  A1/A6 A7/A5 A2/A8 A5/A2 A8/A9 A12/A3
+  ok   up A1 -> A6: the floor under her feet is the floor she saw  luminance 66.9 seen across the seam, 71.8 standing on it (x1.07); near-black 1% -> 0%; floor pixels 67% / 67% of the strip
+  ok   up A1 -> A6: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   up A1 -> A6: the grass on its edge is there from both sides  blades own 19% of the verge seen across the seam, 22% standing on it
+  ok   up A1 -> A6: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   down A6 -> A1: the floor under her feet is the floor she saw  luminance 97.8 seen across the seam, 103.6 standing on it (x1.06); near-black 0% -> 0%; floor pixels 44% / 44% of the strip
+  ok   down A6 -> A1: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   down A6 -> A1: the grass on its edge is there from both sides  blades own 22% of the verge seen across the seam, 26% standing on it
+  ok   down A6 -> A1: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   up A7 -> A5: the floor under her feet is the floor she saw  luminance 70.7 seen across the seam, 72.7 standing on it (x1.03); near-black 0% -> 0%; floor pixels 82% / 82% of the strip
+  ok   up A7 -> A5: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   up A7 -> A5: the grass on its edge is there from both sides  blades own 28% of the verge seen across the seam, 32% standing on it
+  ok   up A7 -> A5: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   down A5 -> A7: the floor under her feet is the floor she saw  luminance 96.7 seen across the seam, 103.0 standing on it (x1.07); near-black 0% -> 0%; floor pixels 35% / 35% of the strip
+  ok   down A5 -> A7: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   down A5 -> A7: the grass on its edge is there from both sides  blades own 29% of the verge seen across the seam, 32% standing on it
+  ok   down A5 -> A7: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   up A2 -> A8: the floor under her feet is the floor she saw  luminance 71.8 seen across the seam, 73.3 standing on it (x1.02); near-black 3% -> 3%; floor pixels 85% / 85% of the strip
+  ok   up A2 -> A8: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   up A2 -> A8: the grass on its edge is there from both sides  blades own 28% of the verge seen across the seam, 34% standing on it
+  ok   up A2 -> A8: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   down A8 -> A2: the floor under her feet is the floor she saw  luminance 94.2 seen across the seam, 105.8 standing on it (x1.12); near-black 0% -> 0%; floor pixels 34% / 34% of the strip
+  ok   down A8 -> A2: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   down A8 -> A2: the grass on its edge is there from both sides  blades own 11% of the verge seen across the seam, 12% standing on it
+  ok   down A8 -> A2: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   up A5 -> A2: the floor under her feet is the floor she saw  luminance 69.8 seen across the seam, 78.3 standing on it (x1.12); near-black 0% -> 0%; floor pixels 82% / 82% of the strip
+  ok   up A5 -> A2: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   up A5 -> A2: the grass on its edge is there from both sides  blades own 21% of the verge seen across the seam, 29% standing on it
+  ok   up A5 -> A2: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   down A2 -> A5: the floor under her feet is the floor she saw  luminance 91.2 seen across the seam, 100.2 standing on it (x1.10); near-black 0% -> 0%; floor pixels 34% / 34% of the strip
+  ok   down A2 -> A5: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   down A2 -> A5: the grass on its edge is there from both sides  blades own 10% of the verge seen across the seam, 13% standing on it
+  ok   down A2 -> A5: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   up A8 -> A9: the floor under her feet is the floor she saw  luminance 69.8 seen across the seam, 68.4 standing on it (x0.98); near-black 0% -> 0%; floor pixels 88% / 88% of the strip
+  ok   up A8 -> A9: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   up A8 -> A9: the grass on its edge is there from both sides  blades own 24% of the verge seen across the seam, 30% standing on it
+  ok   up A8 -> A9: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   down A9 -> A8: the floor under her feet is the floor she saw  luminance 98.0 seen across the seam, 109.0 standing on it (x1.11); near-black 0% -> 0%; floor pixels 43% / 43% of the strip
+  ok   down A9 -> A8: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   down A9 -> A8: the grass on its edge is there from both sides  blades own 16% of the verge seen across the seam, 20% standing on it
+  ok   down A9 -> A8: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   up A12 -> A3: the floor under her feet is the floor she saw  luminance 69.5 seen across the seam, 71.7 standing on it (x1.03); near-black 0% -> 0%; floor pixels 84% / 84% of the strip
+  ok   up A12 -> A3: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   up A12 -> A3: the grass on its edge is there from both sides  blades own 29% of the verge seen across the seam, 32% standing on it
+  ok   up A12 -> A3: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   down A3 -> A12: the floor under her feet is the floor she saw  luminance 92.7 seen across the seam, 97.8 standing on it (x1.06); near-black 0% -> 0%; floor pixels 32% / 32% of the strip
+  ok   down A3 -> A12: nothing in front paints over the floor she stands on  0.0% of the floor strip changes when the depth planes are taken away
+  ok   down A3 -> A12: the grass on its edge is there from both sides  blades own 17% of the verge seen across the seam, 19% standing on it
+  ok   down A3 -> A12: nothing grows inside the slab between the two rooms  blades on the seam line: 0% from the room left, 0% from the room arrived in
+  ok   the near plate is measurable in the kingdom  16 of 16 outdoor rooms draw one
+  ok   W1: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   W2: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A0: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A1: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A6: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A7: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A2: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A10: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A3: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A4: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A5: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A8: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A9: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A11: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A12: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   A13: the near plate crosses her ankles and stops at the walk line  crest 24 px above the floor, ends 2.0 px below it
+  ok   no page errors
+
+OK — every chapter-one floor wears one face, from below and from on top
+   (seam-look: 26.7 s)
+
+all 1 harnesses ran

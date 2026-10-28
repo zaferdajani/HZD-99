@@ -1,0 +1,18 @@
+
+── platform  — RULE ONE: web, phone, app and desktop shell are the same game
+── platform — one build, four platforms, no divergence
+  ok   index.html: the packaged page is the web page  
+  ok   index.html: and the app does not register a worker
+  ok   odyssey.html: the packaged page is the web page  
+  ok   odyssey.html: and the app does not register a worker
+  ok   every asset the manifest names is in the package (502)  
+  ok   ...and every one of them exists on disk at all  
+  ok   the generation archive stays out of the package  
+  ok   every pause row is reachable by touch  15 / 15
+  ok   every pad action is reachable (17 actions, 5 via the menu)  
+  ok   ...and an unbound action names its route rather than a missing button  
+
+OK — the web page, the phone, the app and the desktop shell are the same game
+   (platform: 3.2 s)
+
+all 1 harnesses ran

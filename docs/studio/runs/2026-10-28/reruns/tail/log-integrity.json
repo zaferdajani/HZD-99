@@ -1,0 +1,105 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "pack.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "studio-collector.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "preload.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "boot.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "lowres.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "demo.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "twin.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "crystal.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage-walk.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "kingdom1.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "memnote.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "platform.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "packs.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "warp.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "denlight.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "bake3d.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "forge.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}

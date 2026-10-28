@@ -1,0 +1,12 @@
+
+── drawclock  — a frozen clock freezes the frame: draw never reads the wall clock
+── drawclock — a frozen clock freezes the frame
+
+  ok   the save toast dates itself on the frozen clock  planted=42191 frozen=40491
+  ok   two seconds of wall clock change nothing in a frozen frame  0px
+  ok   no page errors
+
+all good
+   (drawclock: 45.8 s)
+
+all 1 harnesses ran
