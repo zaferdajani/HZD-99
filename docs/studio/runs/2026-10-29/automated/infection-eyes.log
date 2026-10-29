@@ -1,0 +1,30 @@
+
+── infection-eyes  — red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/infection-eyes.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/infection-eyes.cjs:225:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.22.1
+FAILED: node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/infection-eyes.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/infection-eyes.cjs:225:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.22.1
+
+   (infection-eyes: 0.3 s)
+
+1 harness(es) failed

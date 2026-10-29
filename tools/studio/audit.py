@@ -62,6 +62,27 @@ def suite_budgets(source):
         raise ValueError('No test harnesses found; refusing empty coverage')
     return budgets
 
+def browser_test(name, root=ROOT):
+    """Return whether a harness directly requires Playwright's browser API."""
+    path = pathlib.Path(root) / 'tests' / (name + '.cjs')
+    try:
+        source = path.read_text()
+    except OSError:
+        return False
+    return bool(re.search(r"require\(\s*(['\"])playwright\1\s*\)", source))
+
+def browser_block_reason(name, env=None, root=ROOT):
+    """Fail closed before launch when the browser executable is unavailable."""
+    env = os.environ if env is None else env
+    if not browser_test(name, root):
+        return None
+    executable = pathlib.Path(env.get('CHROMIUM_PATH', '/opt/pw-browsers/chromium'))
+    if not executable.is_file():
+        return 'Chromium executable is missing: ' + str(executable)
+    if not os.access(executable, os.X_OK):
+        return 'Chromium executable is not executable: ' + str(executable)
+    return None
+
 def enable_subreaper():
     """Adopt detached test descendants so a successful leader cannot orphan them."""
     global SUBREAPER_ENABLED
@@ -218,6 +239,16 @@ def main():
         (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
         print(name+': '+state, flush=True)
         return state == 'pass'
+    def block(name, reason, timeout):
+        log = out/(name+'.log')
+        log.write_text('BLOCKED: '+reason+'\n')
+        entry = {'name': name, 'status': 'blocked', 'exit_code': None,
+                 'seconds': 0, 'timeout_seconds': timeout, 'reason': reason,
+                 **capture_log(log)}
+        report['results'].append(entry)
+        (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
+        print(name+': blocked', flush=True)
+        return False
     ready = run('build', ['node', 'build.cjs'], 180)
     if ready and 'platform' in names: ready = run('pack', ['node', 'tools/pack-www.cjs'], 180)
     snapshot = out/'served-identity.json'
@@ -265,7 +296,11 @@ def main():
         for name in names:
             if not (ROOT/'tests'/f'{name}.cjs').exists():
                 report['results'].append({'name':name,'status':'missing'}); continue
-            run(name, ['node','tests/run.cjs', name], suite[name])
+            reason = browser_block_reason(name, run_env.get('env'))
+            if reason:
+                block(name, reason, suite[name])
+            else:
+                run(name, ['node','tests/run.cjs', name], suite[name])
         # and at the end: the served build must still be the one pinned at the start
         ready = identity('end', snapshot)
     report['complete_requested_scope'] = ready and len([x for x in report['results'] if x['name'] in names]) == len(names)

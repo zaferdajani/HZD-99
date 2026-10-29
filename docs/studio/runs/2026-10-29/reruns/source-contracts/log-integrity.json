@@ -1,0 +1,50 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "campaign-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-opening.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-progression.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cave-ground.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat-impact-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "repair-lifecycle.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tutorial-clarity.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "weapons.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}

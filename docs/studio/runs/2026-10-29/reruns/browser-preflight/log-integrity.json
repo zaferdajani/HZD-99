@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat-impact-input.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "opening-order.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gravehorn.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-eyes.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-roster.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-poses.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "textreveal.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "roomcache.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage-walk.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "campaign-ch1.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}

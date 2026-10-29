@@ -1,0 +1,32 @@
+
+── textreveal  — words typed at a reading pace, paged, read before they turn, one overlay at a time
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/textreveal.cjs:47:34
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/textreveal.cjs:366:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.22.1
+FAILED: ── textreveal — words at a reading pace, pages, one overlay at a time
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/textreveal.cjs:47:34
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/textreveal.cjs:366:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.22.1
+
+   (textreveal: 0.3 s)
+
+1 harness(es) failed

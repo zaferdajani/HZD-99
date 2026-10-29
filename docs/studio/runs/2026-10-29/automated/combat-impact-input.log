@@ -1,0 +1,18 @@
+
+── combat-impact-input  — real keyboard tap and held charge through the normal game loop in a staged arena
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/combat-impact-input.cjs:6:25
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/combat-impact-input.cjs:34:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/combat-impact-input.cjs:6:25
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/combat-impact-input.cjs:34:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (combat-impact-input: 0.3 s)
+
+1 harness(es) failed

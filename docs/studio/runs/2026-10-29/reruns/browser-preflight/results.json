@@ -1,0 +1,232 @@
+{
+  "started_utc": "2026-10-29T08:11:27.068800+00:00",
+  "base_commit": "67d7338d9eb68aeb4b62b57a850c6b5a9be52934",
+  "dirty_at_start": "M forge-odyssey.html\n M forge.html\n M index.html\n M odyssey.html\n M tools/studio/audit.py\n M tools/studio/test_audit.py\n?? assets/manhua/revised-2026-09/.page-30.webp.YD8DTc\n?? assets/source/hero/rig/.clip_idle_0.glb.Dc5eZf\n?? assets/source/music/asfired/.mus_furnace.m4a.iU9mQT\n?? assets/video/.intro2.webm.wb1SkC\n?? docs/studio/runs/2026-10-29/\n?? tools/studio/__pycache__/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.634322,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "94ec86705491aeddd54146b53d579108cbabeffc74e7e829cc9ad7a6ffe2d9bb",
+      "bytes": 150,
+      "content_base64": "aW5kZXguaHRtbCBidWlsdCAocm9ibyk6IDQuNzFNQgpvZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8pOiAzLjQ4TUIKZm9yZ2UuaHRtbCBidWlsdCAocm9ibytmb3JnZSk6IDQuNzNNQgpmb3JnZS1vZHlzc2V5Lmh0bWwgYnVpbHQgKGhlcm8rZm9yZ2UpOiAzLjUwTUIK"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "a8f30467c8e8f8d08d9d0e7dc45e425ed3f34039e6409f495c0e7440d7edc523",
+        "odyssey.html": "1d8904d0af9a93e29adb397c6183a519912374b05085bd5a10e05022346a3812",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "combat-impact-input",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "combat-impact-input.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "opening-order",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "opening-order.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "gravehorn",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gravehorn.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "infection-eyes",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "infection-eyes.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "infection-roster",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 420,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "infection-roster.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "infection-poses",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "infection-poses.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "textreveal",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "textreveal.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "roomcache",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "roomcache.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "sage-walk",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sage-walk.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "campaign-ch1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 3780,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "campaign-ch1.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49",
+      "bytes": 67,
+      "content_base64": "QkxPQ0tFRDogQ2hyb21pdW0gZXhlY3V0YWJsZSBpcyBtaXNzaW5nOiAvb3B0L3B3LWJyb3dzZXJzL2Nocm9taXVtCg=="
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "a8f30467c8e8f8d08d9d0e7dc45e425ed3f34039e6409f495c0e7440d7edc523",
+        "odyssey.html": "1d8904d0af9a93e29adb397c6183a519912374b05085bd5a10e05022346a3812",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "a8f30467c8e8f8d08d9d0e7dc45e425ed3f34039e6409f495c0e7440d7edc523",
+  "complete_requested_scope": true,
+  "log_integrity": {
+    "ok": true,
+    "files": [
+      {
+        "log": "build.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "combat-impact-input.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "opening-order.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "gravehorn.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "infection-eyes.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "infection-roster.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "infection-poses.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "textreveal.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "roomcache.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "sage-walk.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      },
+      {
+        "log": "campaign-ch1.log",
+        "disk_matches": true,
+        "snapshot_matches": true
+      }
+    ]
+  },
+  "passed": false,
+  "finished_utc": "2026-10-29T08:11:28.257189+00:00"
+}

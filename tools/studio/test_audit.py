@@ -15,6 +15,33 @@ SPEC.loader.exec_module(audit)
 
 
 class AuditBudgets(unittest.TestCase):
+    def test_browser_preflight_blocks_only_browser_harnesses(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'tests').mkdir()
+            (root / 'tests' / 'visual.cjs').write_text(
+                "const { chromium } = require('playwright');\n")
+            (root / 'tests' / 'contract.cjs').write_text("console.log('source only');\n")
+            missing = root / 'no-browser'
+            env = {'CHROMIUM_PATH': str(missing)}
+            self.assertTrue(audit.browser_test('visual', root))
+            self.assertFalse(audit.browser_test('contract', root))
+            self.assertIn('missing', audit.browser_block_reason('visual', env, root))
+            self.assertIsNone(audit.browser_block_reason('contract', env, root))
+
+    @unittest.skipUnless(os.name == 'posix', 'executable-bit regression requires POSIX')
+    def test_browser_preflight_accepts_an_executable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'tests').mkdir()
+            (root / 'tests' / 'visual.cjs').write_text(
+                'const { chromium } = require("playwright");\n')
+            browser = root / 'chromium'
+            browser.write_text('#!/bin/sh\nexit 0\n')
+            browser.chmod(0o755)
+            self.assertIsNone(audit.browser_block_reason(
+                'visual', {'CHROMIUM_PATH': str(browser)}, root))
+
     def test_log_snapshot_survives_later_truncation_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

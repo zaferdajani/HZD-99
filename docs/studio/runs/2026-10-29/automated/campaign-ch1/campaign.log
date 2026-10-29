@@ -1,0 +1,3 @@
+[00:00] FATAL browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/b4e9aa23d77e/repo/tests/campaign-ch1.cjs:1395:34
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/repo/tests/campaign-ch1.cjs:1491:3)
