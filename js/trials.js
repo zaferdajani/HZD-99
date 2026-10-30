@@ -64,18 +64,30 @@ function triStartNode(i, st) {
   TRI.mode = 'node'; TRI.results = []; TRI.gi = 0;
   TRI.node = { i, st, iq: n.iq };
   TRI.t = 999; TRI.level = n.level; TRI.streak = 0; TRI.score = 0;
-  TRI.game = n.game; TRI.fb = 0;
+  TRI.game = n.game; TRI.fb = 0; TRI.retry = false;
   triGen();
   TRI.st = 'pre'; TRI.preT = 1.1;
   G.state = 'TRIAL'; sfx('ui');
 }
-// one answer, then straight back to the room — right or wrong
+// A RIGHT ANSWER PAYS AND HANDS THE ROOM BACK; A WRONG ONE ASKS AGAIN.
+// A wrong answer used to end the attempt and drop her back in the room, which
+// a player reads as the puzzle crashing — and on the waking floor the way out
+// is gated on this very node, so one slip by a friend holding the phone left a
+// wall at the end of the screen telling them to go and do it again. A miss now
+// says so, waits a beat, and hands over a fresh question at the same level,
+// right there. BACK still leaves whenever she wants to.
 function triNodeAnswer(ok) {
   const nd = TRI.node;
+  if (!nd) { TRI.mode = 'full'; G.state = 'PLAY'; return; }
+  if (!ok) {
+    sfx('no'); cam.shake = 4;
+    TRI.fb = 0.8; TRI.fbGood = false;
+    triGen();
+    TRI.st = 'pre'; TRI.preT = 1.3; TRI.retry = true;
+    return;
+  }
   TRI.node = null; TRI.mode = 'full';
   G.state = 'PLAY';
-  if (!nd) return;
-  if (!ok) { sfx('no'); cam.shake = 6; G.toast(t('rd_wrong')); return; }
   G.save.flags[nodeKey(nd.i)] = 1;
   G.save.iq += nd.iq;
   if (typeof iqNudge === 'function') iqNudge();
@@ -371,7 +383,7 @@ function updateTrial(dt) {
     }
   } else if (TRI.st === 'pre') {
     TRI.preT -= dt;
-    if (TRI.preT <= 0) TRI.st = 'play';
+    if (TRI.preT <= 0) { TRI.st = 'play'; TRI.retry = false; }
   } else if (TRI.st === 'between') {
     TRI.betweenT -= dt;
     if (TRI.betweenT <= 0) triStartGame(TRI.order[TRI.gi]);
@@ -385,14 +397,23 @@ function updateTrial(dt) {
     if (inP('BACK')) { TRI.node = null; TRI.mode = 'full'; G.state = 'PLAY'; sfx('ui'); return; }
     if (TRI.game === 'mem') {
       if (TRI.memPhase === 'show') {
-        // an answer pressed while the lights are still playing is REMEMBERED,
-        // not thrown away — it fires the moment input opens
-        const early = triDir(4);
-        if (early >= 0) { TRI_BUF = early; TRI_BUF_T = 0.2; }
+        // A PRESS WHILE THE LIGHTS PLAY ECHOES; IT NEVER ANSWERS. It used to be
+        // buffered as an early answer, and the most natural thing a player does
+        // with a demonstration — copy it as it plays — left the press on the
+        // LAST light sitting in that buffer, so the moment input opened it was
+        // taken as the FIRST answer, was nearly always wrong, and the node threw
+        // her out. Owner, 2026-10-30: "if I press on any of the sequence that I
+        // see, it automatically crashes and stops the game and go out of it."
+        // The press lights its own node so the player sees it was heard.
+        const echo = triDir(4);
+        if (echo >= 0) TRI.memHit = { i: echo, t: 0.3 };
         TRI.memShowT -= dt;
         if (TRI.memShowT <= 0) {
           TRI.memShow++;
-          if (TRI.memShow >= TRI.memSeq.length) { TRI.memPhase = 'input'; TRI.memShow = -1; }
+          if (TRI.memShow >= TRI.memSeq.length) {
+            TRI.memPhase = 'input'; TRI.memShow = -1; TRI_BUF = -1;
+            TRI.memGo = 0.9; TRI.memHit = null;     // the "your turn" cue
+          }
           else {
             TRI.memShowT = Math.max(0.24, 0.42 - TRI.level * 0.02);
             sfxMemNote(TRI.memSeq[TRI.memShow], false);
@@ -414,6 +435,7 @@ function updateTrial(dt) {
         }
       }
       if (TRI.memHit && TRI.memHit.t > 0) TRI.memHit.t -= dt;
+      if (TRI.memGo > 0) TRI.memGo -= dt;
     } else if (TRI.game === 'log') {
       // one key per item on the bench, so the answer is the OBJECT itself
       const pick = triDir(TRI.q.k);
@@ -582,7 +604,9 @@ function drawTrial() {
       ftxt(t('tt_score') + '  ' + last.score, 480, 200, 24, '#ffd76a');
     }
     ftxt(name, 480, 260, 36, '#eef3fa', 'center', '#b48cff');
-    ftxt(t('tt_get_ready'), 480, 320, 18, '#8aa2b5');
+    // after a miss at a node the beat says so — and that the puzzle goes on
+    if (TRI.retry) ftxt('✗  ' + t('rd_retry'), 480, 322, 24, '#ff8a94', 'center', '#ff5f6d');
+    else ftxt(t('tt_get_ready'), 480, 320, 20, '#a9bccb');
     return;
   }
   if (TRI.st === 'result') {
@@ -663,7 +687,12 @@ function drawTrial() {
       if (done) { c.fillStyle = '#c9a6ff'; c.shadowColor = '#b48cff'; c.shadowBlur = 10; c.fill(); c.shadowBlur = 0; }
       else { c.strokeStyle = 'rgba(150,175,200,0.55)'; c.lineWidth = 1.6; c.stroke(); }
     }
-    ftxt(TRI.memPhase === 'show' ? t('tt_q_mem_watch')
-         : t('tt_q_mem') + '  (' + TRI.memIn + '/' + n2 + ')', 480, 420, 16, '#8aa2b5');
+    // WATCH, THEN YOUR TURN — said big enough to read at arm's length on a
+    // phone. The hand-over used to be a 16 px grey line; a player copying the
+    // lights had no clear moment at which the lights stopped being a
+    // demonstration and started being the test.
+    if (TRI.memPhase === 'show') ftxt(t('tt_q_mem_watch'), 480, 424, 22, '#a9bccb');
+    else if (TRI.memGo > 0) ftxt(t('tt_mem_go'), 480, 424, 26, '#e6d6ff', 'center', '#b48cff');
+    else ftxt(t('tt_q_mem') + '  (' + TRI.memIn + '/' + n2 + ')', 480, 424, 20, '#c3d2de');
   }
 }

@@ -855,6 +855,28 @@ function drawTouchUI() {
       tcx.globalAlpha = 0.5;
       tCircle(L.lgx, H - 110, Math.min(42, TOUCH.gut / 2 - 10), false, '✥');
       tcx.globalAlpha = 1;
+      // THE STICK BEING TAUGHT. A door that asks for UP and a walk that asks
+      // for RIGHT are both taught on the stick, which has no button to ring —
+      // so the way to push it is drawn on it: a pulsing chevron on the side to
+      // push toward, travelling outward. Without it a phone player was told
+      // "press ▲" with nothing under the thumb that said where ▲ is.
+      if (TOUCH.hiDir) {
+        const r0 = Math.min(42, TOUCH.gut / 2 - 10), cx0 = L.lgx, cy0 = H - 110;
+        const ang = { up: -Math.PI / 2, right: 0, left: Math.PI, down: Math.PI / 2 }[TOUCH.hiDir] || 0;
+        const ph = (performance.now() / 700) % 1;
+        tcx.save();
+        tcx.translate(cx0, cy0); tcx.rotate(ang);
+        tcx.strokeStyle = 'rgba(55,255,208,' + (0.55 + Math.sin(performance.now() / 240) * 0.35).toFixed(2) + ')';
+        tcx.lineWidth = 3;
+        tcx.beginPath(); tcx.arc(0, 0, r0 + 8, -0.6, 0.6); tcx.stroke();
+        for (let k = 0; k < 2; k++) {
+          const d = r0 + 14 + ((ph + k / 2) % 1) * 22;
+          tcx.globalAlpha = 1 - ((ph + k / 2) % 1);
+          tcx.fillStyle = '#37ffd0';
+          tcx.beginPath(); tcx.moveTo(d + 12, 0); tcx.lineTo(d - 2, -12); tcx.lineTo(d + 2, 0); tcx.lineTo(d - 2, 12); tcx.closePath(); tcx.fill();
+        }
+        tcx.restore();
+      }
     }
     for (const b of L.btns) if (b.show()) {
       if (b.code === 'VHEAL' && typeof player !== 'undefined' && player && player.volts >= 33 && player.cores < player.maxCores()) {

@@ -54,10 +54,34 @@ try {
 function drawMechanicalTutorialArrow(target) {
   if (!target || typeof c === 'undefined' || typeof cam === 'undefined') return;
   const bob = Math.sin(performance.now() / 260) * 4;
-  const x = typeof worldScreenX === 'function' ? worldScreenX(target.x) : target.x - cam.x;
-  const y = (typeof worldScreenY === 'function' ? worldScreenY(target.y) : target.y - cam.y) - 82 + bob;
+  const sx = typeof worldScreenX === 'function' ? worldScreenX(target.x) : target.x - cam.x;
+  const sy = typeof worldScreenY === 'function' ? worldScreenY(target.y) : target.y - cam.y;
+  // The glyph is drawn pointing DOWN and turned to the step's direction:
+  // 'up' floats above her head pointing up (a door entered with UP), 'right'
+  // and 'left' stand short of the target pointing the way to walk.
+  const dir = target.dir || 'down';
+  let x = sx, y = sy - 82 + bob, rot = 0;
+  if (dir === 'up') { y = sy - 136 - bob; rot = Math.PI; }
+  else if (dir === 'right') { x = sx - 64 + bob; y = sy - 44; rot = -Math.PI / 2; }
+  else if (dir === 'left') { x = sx + 64 - bob; y = sy - 44; rot = Math.PI / 2; }
   const col='#37ffd0', dark='#14242b', steel='#35505a', hi='#9fffea';
-  c.save(); c.translate(x,y); c.shadowColor=col; c.shadowBlur=13; c.globalAlpha=.96;
+  // THE KEY, BESIDE THE ARROW. A door asks for UP; the arrow says up, and the
+  // cap next to it says which control is up on this player's hands.
+  if (dir === 'up' && target.key) {
+    const pu = 0.6 + Math.sin(performance.now() / 220) * 0.4;
+    c.save();
+    c.font = '800 22px "Segoe UI", Tahoma, sans-serif';
+    const kw = Math.max(40, c.measureText(target.key).width + 22);
+    c.globalAlpha = 0.95; c.shadowColor = col; c.shadowBlur = 8 + pu * 10;
+    c.fillStyle = '#e7edef';
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x + 30, y - 44, kw, 36, 7); else c.rect(x + 30, y - 44, kw, 36);
+    c.fill();
+    c.shadowBlur = 0; c.fillStyle = '#17262d'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(target.key, x + 30 + kw / 2, y - 25);
+    c.restore();
+  }
+  c.save(); c.translate(x,y); if (rot) c.rotate(rot); c.shadowColor=col; c.shadowBlur=13; c.globalAlpha=.96;
   c.strokeStyle=steel; c.lineWidth=4; c.lineCap='round';
   c.beginPath(); c.moveTo(0,-28); c.lineTo(0,-13); c.moveTo(-14,-20); c.lineTo(-8,-8); c.moveTo(14,-20); c.lineTo(8,-8); c.stroke();
   c.strokeStyle='#0b1419'; c.lineWidth=1.5; c.beginPath(); c.moveTo(0,-28); c.lineTo(0,-13); c.stroke();

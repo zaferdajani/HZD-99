@@ -143,6 +143,7 @@ const SUITE = [
   ['wake',      'the opening: film, waking floor, move -> jump -> gates -> straight into Ratchet\'s booth'],
   ['lesson',    'every power teaches itself and completes on real use'],
   ['nodes',     'all eight Mind Nodes open a puzzle and pay out'],
+  ['memnode-retry', 'copying the lights never answers, and a miss at a Mind Node asks again instead of ejecting her'],
   ['film',      'the intro reel plays all eight shots without falling back'],
   ['filmflow',  'the opening plays as one film: no black, no caption freeze, between shots'],
   ['cutskip',   'a tap does not spend the story, and a film starts at its start'],

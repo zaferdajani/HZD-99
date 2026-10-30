@@ -5778,13 +5778,13 @@ function drawCut() {
       c.save();
       c.globalAlpha = a;
       const txt = t(ct.cap);
-      c.font = '600 17px "Segoe UI", Tahoma, sans-serif';
-      const w2 = Math.min(880, c.measureText(txt).width + 40);
+      c.font = '600 22px "Segoe UI", Tahoma, sans-serif';
+      const w2 = Math.min(900, c.measureText(txt).width + 40);
       const g2 = c.createLinearGradient(0, 432, 0, 500);
       g2.addColorStop(0, 'rgba(4,8,12,0)'); g2.addColorStop(0.5, 'rgba(4,8,12,0.72)');
       g2.addColorStop(1, 'rgba(4,8,12,0)');
       c.fillStyle = g2; c.fillRect(480 - w2 / 2 - 30, 432, w2 + 60, 68);
-      ftxt(txt, 480, 468, 17, '#eaf4ff', 'center', 'rgba(0,0,0,0.85)', '600');
+      ftxt(txt, 480, 468, Math.min(22, 22 * 860 / Math.max(1, c.measureText(txt).width)), '#eaf4ff', 'center', 'rgba(0,0,0,0.85)', '600');
       c.restore();
       c.globalAlpha = 1;
     }
@@ -5797,7 +5797,7 @@ function drawCut() {
     // the second of deliberate pressure reads as progress rather than as the
     // game ignoring them — and letting go visibly costs nothing.
     c.globalAlpha = k > 0 ? 1 : 0.35 + Math.sin(performance.now() / 420) * 0.12;
-    ftxt(t('cut_skip'), 480, 516, 13, k > 0 ? '#eaf4ff' : '#9fb8c8', 'center');
+    ftxt(t('cut_skip'), 480, 516, 15, k > 0 ? '#eaf4ff' : '#9fb8c8', 'center');
     if (k > 0) {
       const W = 96, H = 3, X = 480 - W / 2, Y = 524;
       c.fillStyle = 'rgba(160,190,210,0.28)';
@@ -13305,6 +13305,21 @@ function tutEnter(st) {
 // with, so a chip and a line can never disagree). Walking steps show the
 // direction to go, not the name of the stick.
 const TUT_DIR = { move: '← →', out: '→', go: '→' };
+// WHICH WAY THE STEP POINTS, as a direction the world arrow and the touch stick
+// can both draw. The marker used to be one shape for everything — an arrow
+// pointing DOWN at its target — so the first instruction of the game, "walk
+// right", was illustrated by an arrow pointing at the floor, and the door that
+// asks for UP had an arrow aimed down at her head. Owner, 2026-10-30: "the
+// arrow direction is downward instead of to the right, which is confusing ...
+// they just stand there and do not know what to do", and "when they reach the
+// door, press up should be more obvious".
+function tutDir(st, pv) {
+  if (!st || !pv || pv.suppressed) return null;
+  if (pv.action === 'UP') return 'up';
+  if (pv.action && pv.action !== 'MOVE') return null;
+  const h = tutHand(pv);
+  return h === '←' ? 'left' : (h === '→' || h === '← →') ? 'right' : null;
+}
 const TUT_ACTION = { jump: 'JUMP', note: 'INT', drawer: 'INT', repair: 'INT', pod: 'INT', pack: 'INT',
   heal: 'HEAL', atk: 'ATK', burst: 'ATK', node: 'INT' };
 function tutHand(st) {
@@ -13483,7 +13498,7 @@ function updateTutor(dt) {
   if (sv.flags && sv.flags.tut) return;
   if (TUT_ROOMS[G.roomId] === undefined) {       // the whole waking is behind her
     if (sv.flags) sv.flags.tut = 1;
-    G.tut = null; if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = null;
+    G.tut = null; if (typeof TOUCH !== 'undefined' && TOUCH) { TOUCH.hi = null; TOUCH.hiDir = null; }
     return;
   }
   // THE LESSON IS ONE WAY, AND IT USED TO FORGET THAT ON EVERY RELOAD.
@@ -13511,6 +13526,7 @@ function updateTutor(dt) {
   if (typeof TOUCH !== 'undefined' && TOUCH) {
     const prompt = st && tutPrompt(st);
     TOUCH.hi = (prompt && prompt.vb && TOUCH.enabled) ? prompt.vb : null;
+    TOUCH.hiDir = TOUCH.enabled && !(prompt && prompt.vb) ? tutDir(st, prompt) : null;
   }
   // THE DOOR WAITS. Nothing here can hurt her and nothing here can trap her —
   // but a teaching room she can walk straight out of teaches only the first
@@ -13581,13 +13597,13 @@ function drawTutor() {
   // THE THING BEING TAUGHT, RINGED. A card that names a verb teaches nothing if
   // the player cannot see what it is about — so the step gets a ring while the
   // jump is being taught and the machine gets one while the claw is.
-  const mark = (wx, wy, r, col) => {
+  const mark = (wx, wy, r, col, dir, key) => {
     const sx = projectX(wx), sy = projectY(wy);
     c.save();
     c.strokeStyle = col; c.lineWidth = 2.5; c.globalAlpha = 0.35 + pu * 0.5;
     c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 70;
     if (typeof drawMechanicalTutorialArrow === 'function' && sx >= 26 && sx <= 934 && sy >= 90 && sy <= 580) {
-      c.setLineDash([]); drawMechanicalTutorialArrow({x:wx,y:wy,radius:r});
+      c.setLineDash([]); drawMechanicalTutorialArrow({x:wx,y:wy,radius:r,dir,key});
     } else if (typeof drawMechanicalTutorialArrow !== 'function') {
       c.beginPath(); c.arc(sx,sy,r+pu*3,0,7); c.stroke();
     }
@@ -13601,8 +13617,12 @@ function drawTutor() {
     // pointing the way, with the distance under it. It is the one-way sign a
     // walk needs: there is only ever one thing rung, and it is always in view
     // or pointed at.
+    // ...and EVERY target the arrow is not drawn over gets the chevron. The two
+    // tests used to leave a band at each edge (26 px in from the frame to r
+    // past it) where neither was drawn — which is exactly where a room's exit
+    // sits, so the first room's way out had no marker at all.
     const M = 26;
-    if (sx < -r || sx > 960 + r || sy < -r || sy > 540 + r) {
+    if (!(sx >= 26 && sx <= 934 && sy >= 90 && sy <= 580)) {
       const ex = Math.max(M, Math.min(960 - M, sx)), ey = Math.max(M + 40, Math.min(540 - M - 60, sy));
       const ang = Math.atan2(sy - ey, sx - ex);
       c.globalAlpha = 0.55 + pu * 0.45;
@@ -13617,8 +13637,26 @@ function drawTutor() {
     c.restore(); c.globalAlpha = 1;
   };
   // One marker agrees with the one action card, including inside the booth.
-  const target = tutPrompt(st).target;
-  if (target) mark(target.x, target.y, target.radius, target.color);
+  const pv0 = tutPrompt(st), dir0 = tutDir(st, pv0);
+  const target = pv0.target;
+  if (target) mark(target.x, target.y, target.radius, target.color, dir0, dir0 === 'up' ? tutHand(pv0) : null);
+  // WALKING HAS A DIRECTION, so it is drawn at her feet: three chevrons running
+  // ahead of her the way she should go, the moment a step asks her to walk.
+  if ((dir0 === 'right' || dir0 === 'left') && !learned) {
+    const sgn = dir0 === 'right' ? 1 : -1, cy = projectY(player.y + player.h * 0.55);
+    const tt = performance.now() / 1000;
+    c.save();
+    c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 10;
+    for (let k = 0; k < 3; k++) {
+      const ph = (tt * 1.6 + k / 3) % 1;
+      const cx = px + sgn * (34 + ph * 70);
+      c.globalAlpha = Math.sin(ph * Math.PI) * 0.95;
+      c.beginPath();
+      c.moveTo(cx + sgn * 11, cy); c.lineTo(cx - sgn * 5, cy - 12); c.lineTo(cx - sgn * 1, cy);
+      c.lineTo(cx - sgn * 5, cy + 12); c.closePath(); c.fill();
+    }
+    c.restore(); c.globalAlpha = 1;
+  }
   // the push flare decays on the wall clock — this is a draw pass and has no dt
   {
     const now2 = performance.now();
@@ -16477,7 +16515,7 @@ function draw(tms) {
     // out — so the box is sized from the whole page, never from the part
     // typed so far, and does not grow under the reader's eye.
     const view = dialogView(d), body = view.page;
-    const lh = d.rs ? 21 : 22;
+    const lh = d.rs ? 25 : 28;
     const gh = d.rs ? 26 : 0;                      // the glyph row's own band
     const bh = Math.max(note ? 96 : 118, (note ? 40 : 62) + gh + body.length * lh + 26);
     const by = 504 - bh;                           // grows upward, foot stays put
@@ -16561,13 +16599,16 @@ function draw(tms) {
       if (player && player.moodSet)
         player.moodSet(expr === 'neutral' ? 'calm' : expr, 0.4);
     }
-    if (!note) ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16,
+    if (!note) ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 25, 19,
       d.lo && typeof LOADOUT_COL !== 'undefined' && LOADOUT_COL[d.lo] ? LOADOUT_COL[d.lo] : '#37ffd0', rtl ? 'right' : 'left');
     let ty = note ? by + 22 : by + 46;
     if (d.rs) { drawGlyphText(c, d.rs, tx0 + tw / 2, ty, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)'); ty += gh; }
     // Arabic is set from the right edge and typed a whole word at a time
     // (js/reveal.js), so its letters are always joined as they will finally be
-    const fs = d.rs ? 15 : 16;
+    // 21 px, not 16: on a phone the 960-wide frame is drawn at about two
+    // thirds, so 16 arrived as 11 px — owner, 2026-10-30: "very small, barely
+    // readable". The page is wrapped and paginated at this size (dlgFont).
+    const fs = d.rs ? 19 : 21;
     c.font = '600 ' + fs + 'px "Segoe UI", Tahoma, sans-serif';
     drawRevealLines(c, view.R, rtl ? tx0 + tw : tx0, ty + 12, lh, rtl ? 'right' : 'left',
       (str, x, y, al) => ftxt(str, x, y, fs, '#e6eef6', al, null, '600'));
@@ -16853,13 +16894,13 @@ function drawCine() {
     if (a > 0.01) {
       c.save(); c.globalAlpha = a;
       const txt = t(cap);
-      c.font = '600 17px "Segoe UI", Tahoma, sans-serif';
-      const w2 = Math.min(880, c.measureText(txt).width + 40);
+      c.font = '600 22px "Segoe UI", Tahoma, sans-serif';
+      const w2 = Math.min(900, c.measureText(txt).width + 40);
       const g2 = c.createLinearGradient(0, 432, 0, 500);
       g2.addColorStop(0, 'rgba(4,8,12,0)'); g2.addColorStop(0.5, 'rgba(4,8,12,0.72)');
       g2.addColorStop(1, 'rgba(4,8,12,0)');
       c.fillStyle = g2; c.fillRect(480 - w2 / 2 - 30, 432, w2 + 60, 68);
-      ftxt(txt, 480, 468, 17, '#eaf4ff', 'center', 'rgba(0,0,0,0.85)', '600');
+      ftxt(txt, 480, 468, Math.min(22, 22 * 860 / Math.max(1, c.measureText(txt).width)), '#eaf4ff', 'center', 'rgba(0,0,0,0.85)', '600');
       c.restore(); c.globalAlpha = 1;
     }
   }
@@ -16873,7 +16914,7 @@ function drawCine() {
   if (ci.t > 1.6 || ci.i > 0) {
     c.save();
     c.globalAlpha = 0.35 + Math.sin(performance.now() / 420) * 0.12;
-    ftxt(t('gate_next'), 480, 524, 12, '#9fb8c8', 'center');
+    ftxt(t('gate_next'), 480, 524, 15, '#9fb8c8', 'center');
     c.restore();
   }
   drawSoundChip(performance.now() / 1000);

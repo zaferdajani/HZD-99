@@ -97,7 +97,7 @@ const DLG_DWELL = 0.25;   // a complete page must have been visible this long
 const DLG_GAP = 0.22;     // a press this soon after the last one is a mash
 const DLG_LINES = 4;      // lines per page
 const DLG_W = 548, DLG_NOTE_W = 660;
-function dlgFont(d) { return '600 ' + (d.rs ? 15 : 16) + 'px "Segoe UI", Tahoma, sans-serif'; }
+function dlgFont(d) { return '600 ' + (d.rs ? 19 : 21) + 'px "Segoe UI", Tahoma, sans-serif'; }
 function dlgLineText(d) {
   const s = d.lines[d.i];
   return Array.isArray(s) ? s.join(' ') : String(s == null ? '' : s);
@@ -286,8 +286,8 @@ function reduceMotionToggle() {
 // edges of the frame, and Chinese, which has no spaces, never wrapped at all.
 // It is wrapped to the frame now, paged at three lines, and typed out; a
 // reader object carries all of that so the film and the stills share it.
-const CAP_FONT = '600 17px "Segoe UI", Tahoma, sans-serif';
-const CAP_W = 820, CAP_LINES = 3, CAP_LH = 23;
+const CAP_FONT = '600 22px "Segoe UI", Tahoma, sans-serif';
+const CAP_W = 820, CAP_LINES = 3, CAP_LH = 29;
 function capReader(text) {
   const pages = paginate(c, String(text || ''), CAP_W, CAP_LINES, CAP_FONT);
   return { text: String(text || ''), pages, pg: 0, R: revealStart(pages[0], {}), last: -1e9, clock: 0 };
@@ -336,7 +336,7 @@ function drawCaption(cr, alpha, yBase) {
   c.fillStyle = g2; c.fillRect(480 - w2 / 2 - 30, top, w2 + 60, h);
   const y0 = yMid - (n - 1) * CAP_LH / 2;
   drawRevealLines(c, cr.R, 480, y0, CAP_LH, 'center',
-    (str, x, y, al) => ftxt(str, x, y, 17, '#eaf4ff', al, 'rgba(0,0,0,0.85)', '600'));
+    (str, x, y, al) => ftxt(str, x, y, 22, '#eaf4ff', al, 'rgba(0,0,0,0.85)', '600'));
   c.restore();
   c.globalAlpha = 1;
 }
