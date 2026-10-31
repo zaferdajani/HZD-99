@@ -247,6 +247,10 @@ function questTake(item) {
 }
 // paid out by the NPC who asked, face to face
 function questPay(q) {
+  // Payment owns its own replay guard. UI routing normally hides completed
+  // errands, but queued callbacks, reload recovery and future callers must not
+  // be able to award the same scrap/IQ/relic twice.
+  if (!q || !G.save || qState(q.id) === 'done') return false;
   const r = q.reward || {};
   if (r.scrap) { G.save.scrap += r.scrap; G.toast('+' + r.scrap + ' ' + t('scrap')); }
   if (r.iq) { G.save.iq += r.iq; if (typeof iqNudge === 'function') iqNudge(); }
@@ -258,6 +262,7 @@ function questPay(q) {
   // the forge is a REWARD KIND, not a special-cased NPC: any future quest can
   // end in a making (see forgeCrystal in game.js — the cinematic's code hook)
   if (r.forge && typeof forgeCrystal === 'function') forgeCrystal();
+  return true;
 }
 // how many are open, for the pause screen
 function questOpen() {

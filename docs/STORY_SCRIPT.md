@@ -43,7 +43,7 @@ cannot be spent. §2.5 is that scene.
 | **Lumen** | The Lost Nymph. Glows harder when afraid; always glowing. | A small luminous unit whose glow keeps one pocket of the Nest clean. | E1B, the Hollow |
 | **The seven chamber sages** | The kingdoms' protectors, kneeling under the Song two rooms behind each guardian. | Kneeling figures with a black halo and an ember rim while infected; the halo goes blue when purified. | Every G\*D deep chamber |
 | **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
-| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one red eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
+| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one purple boss-infection eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
 | **THE ALPHA** | Leader of the wolf pack. Not a guardian; not the Eye's. | A great wolf-frame with the pack behind it. | A10 |
 | **TALONHOST** | Guardian of the Conduits. The Iron Eagle. | Hangs from above, drops and slams. | B4 |
 | **The Prism Prowler** | The rival robo-cat. The one machine the network never indexed, so the Song never touched it — never infected. Keeps Kerf's second blade. | A clear, blue crystal cat under a skin of virus-red; the same body either way. | X1 |
@@ -410,8 +410,9 @@ he breaks it. Silence is the first thing she ever takes away from the Eye.
 
 ### 2.14 The Alpha's den — A10
 
-**Where.** On the road, not off it: the first fight you can lose. Hulk middens at both
-ends of a clean floor.
+**Where.** Optional and off the required road: after the Purifier is forged, Ratchet's
+offer points to A2's depth door and the A10 den. The mandatory A2 → A3 → A4 route and
+B1 progression never require this branch. Hulk middens mark both ends of its clean floor.
 **What happens.** *THE ALPHA — the pack answers to this.* Three hundred points of wolf.
 There is no fork here; taming is the only ending. *THE PACK IS YOURS — It yielded.
 Every wolf in the machine world knows it now — they will not raise a tooth to you

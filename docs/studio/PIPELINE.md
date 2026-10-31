@@ -37,6 +37,11 @@ deploy them automatically; Claude integrates using the generated handoff.
    --output docs/studio/runs/YYYY-MM-DD/automated`. Use `--profile focus` for
    intermediate checks only. Missing tools, timeout, missing tests and unknown test
    names are failures/blocked evidence, never passes. Save all logs and hashes.
+   Preflight the chosen wrapper's execution permission and actual browser glyph
+   coverage/layout for the supported CJK/RTL reader, not only Fontconfig's host
+   fallback name. Pin browser, fonts/configuration and source before the full
+   collector. Keep any later environment comparison separate; a permission-blocked
+   alternate browser is not a successful rerun or authority to bypass the block.
 3. **Player journey:** fresh save, ordinary input, wake through chapter-two teaser.
    Record objective changes, deaths, confusion, pickups, pod, repair, forge, Sage,
    CHIME, lion and every cave. No injected inventory/flags/teleports in the campaign
@@ -45,6 +50,9 @@ deploy them automatically; Claude integrates using the generated handoff.
    Compare hero/pack/Alpha at gameplay scale; inspect all pose states, grounded feet,
    eye anchors and fade, rescue, text pacing, panel identity and sound/haptic cues.
    Every cave needs an outcome; ordinary exit IDs do not establish a payoff.
+   Inspect portrait CUT/panels as well as landscape: photographing a cropped
+   frame does not verify visible rotation guidance. `hasTouch` and staged item
+   hand-ins do not establish physical touch play or side-quest acquisition.
 5. **Fix:** prioritize P0 crashes/data loss, P1 progression/identity blockers, P2
    clarity/quality, P3 maintenance. GPT fixes reproducible bounded defects and art
    presentation where supported; record before/after. Use approved assets first.
@@ -58,6 +66,13 @@ deploy them automatically; Claude integrates using the generated handoff.
    REPORT.md and CLAUDE_PROMPT.md in the run directory. Include commit URLs, role
    verdicts, findings, fixes, test scope, missing art, exact acceptance criteria and
    one copyable prompt. Never send Claude a message automatically.
+   Verify saved log hashes against the collector record before publishing. Retain
+   and report a mismatch as a failed evidence gate; a later passing rerun is a
+   separate execution, never a silent replacement or rewritten original hash.
+   The collector snapshots the same closed-file bytes it hashes in
+   `content_base64`, then revalidates every raw log at completion. Preserve both
+   the snapshot and raw file: this is retention/detection, not a cure for an
+   unexplained writer truncating a log. A damaged snapshot also fails closed.
 
 ## Mandatory report schema
 

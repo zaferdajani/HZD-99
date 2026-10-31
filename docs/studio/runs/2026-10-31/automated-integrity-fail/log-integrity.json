@@ -1,0 +1,995 @@
+{
+  "ok": false,
+  "files": [
+    {
+      "log": "build.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "pack.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat-impact-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat-impact-browser.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "purification-controls.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "purification.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat-impact-input.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "repair-browser.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "repair-lifecycle.log",
+      "disk_matches": false,
+      "snapshot_matches": true
+    },
+    {
+      "log": "quest-payment-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "lion-studio.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-opening.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-order.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "caves-ch1.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "survey-a7.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "den-gate.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "comic-rewards.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-battery.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-rescue.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-meeting.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "first-sage-route.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "script-route.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "alpha-optional-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "guardian-break.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage-quiet.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "mobile-platform.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gesture-input.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "input-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "winch-integration.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "winch-purpose.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "manhwa-reader.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "panels.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "entrance-integration.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero-cache-regression.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "scratch-visual.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "scratch-reach.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero-move-coverage.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero-feedback.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero-delivery.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero-frame-alpha.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero-alpha.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tutorial-controller.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "offline-release.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "release-polish.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "chapter-one.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage-specials.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tutorial-clarity.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "story-progression.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "input-focus.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "voice-handoff.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "desktop-protocol.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cave-passage.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cave-ground.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "seam-route.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "shadow-ground.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "visual-depth.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "dialogue-audio.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "weapons.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gear.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "motion-sampling.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combo-routing.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "regress.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "wake.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "lesson.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "nodes.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "memnode-retry.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "film.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "filmflow.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cutskip.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "frames.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "whatplays.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "overlap.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cuepitch.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cues.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "herofoley.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "feel.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "attacks.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "credits.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "brand.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "slashsnd.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "voxmeas.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "speed2.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "saw.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "boss-counters.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "combat.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "pace.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "ceiling.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "ceillock.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tutor.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tells.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "threat.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "errands.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "deadend.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "benchloop.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "padlife.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "climbout.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cover.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tap.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "textreveal.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "text-rules.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "servo-presence.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "bosspace.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "daze.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "openings.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "guardians.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "arc.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "meet.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "secrets.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "secrettell.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tails.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "kingdom.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "artbible.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "grammar.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "battery.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "minis.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hzdvox.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "wolves.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gravehorn.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "furnace.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "retired.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gait.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "motion.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "tinker.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "folk.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "rubble.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cavedark.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "terrainrun.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "enemygait.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gravehorn-eye-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-eyes.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-roster.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "infection-poses.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "reach.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "gatecue.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cuefamily.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "shopread.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "beacon.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "doorway.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cross.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "look.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "seam.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "vlink.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "seam-look.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "roomcache.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "mapgrid.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "mapexits.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "shaftfit.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "glowcost.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "meadow.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "drawclock.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "guard.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "shield.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "airattack.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "grapple.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "grapple-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "reel-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hitshape.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "slashlayer.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "crestfight.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "face.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "glide.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "dmglog.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "loadout.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "soar.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "shopscale.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "foescale.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "contrast.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "foelevel.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "scrapmoves.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "conduits.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "foundry.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "archives.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "nestmoves.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cachemoves.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "cacheroster.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "npcstrip.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "opening.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "opening-order.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "campaign-ch1.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "campaign-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "hero.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "preload.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "boot.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "lowres.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "demo.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "twin.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "crystal.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage-walk-contract.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "sage-walk.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "kingdom1.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "memnote.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "platform.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "packs.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "warp.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "denlight.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "bake3d.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    },
+    {
+      "log": "forge.log",
+      "disk_matches": true,
+      "snapshot_matches": true
+    }
+  ]
+}
