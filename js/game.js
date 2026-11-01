@@ -3343,6 +3343,7 @@ function pauseItems() {
   // to hover. Same row shape as the pace and quality dials, so the pause menu's
   // one geometry keeps covering its tap target.
   if (pauseHasTouch()) it.push({ id: 'gest', label: t('gest') + ':  ' + (G.save && G.save.gestOff ? t('off') : t('on')) + '   ◂ ▸', arrows: 1, hint: t('gest_d') });
+  it.push({ id: 'legal', label: t('pm_legal') });
   it.push({ id: 'restart', label: t('pm_restart'), icon: '↻', warn: 1, hint: t('pm_restart_d') });
   it.push({ id: 'quit', label: t('to_menu'), icon: '⏻', warn: 1, out: 1 });
   return it;
@@ -3385,6 +3386,17 @@ function pauseLayout() {
   const xa = rtl ? 662 : 298, xb = rtl ? 298 : 662;
   return { items, step, y0, cols: 2, colW: 340, split: left.length,
     pos: i => i < left.length ? { x: xa, y: y0 + i * step } : { x: xb, y: y0 + (i - left.length) * step } };
+}
+// Store review needs Privacy / Terms / Support reachable inside the app. The
+// pages ship with every build (tools/pack-www.cjs); in the native shell the
+// in-app browser is used when the Browser plugin is present.
+function openLegal() {
+  const url = 'privacy.html';
+  try {
+    const B = typeof capPlugin === 'function' ? capPlugin('Browser') : null;
+    if (B && B.open) { B.open({ url: new URL(url, location.href).href }); return; }
+    window.open(url, '_blank', 'noopener');
+  } catch (e) {}
 }
 function updatePause() {
   const PL = pauseLayout(), pm = PL.items, n = pm.length;
@@ -3451,6 +3463,7 @@ function updatePause() {
       fresh.theme = gameLock() || (G.save && G.save.theme) || 'robo';
       startGame(fresh);
     }
+    else if (cur.id === 'legal') openLegal();
     else if (cur.id === 'quit') {
       // Continue reloads a stored object. Preserve a finishing guardian's
       // earned reward in that object before leaving this run behind.
