@@ -144,7 +144,7 @@ function ghPlateTint(part, im, mode) {
 const GHC = {
   hi: '#7c858f', mid: '#5b636d', lo: '#3a4048', deep: '#262b31',
   far: ['#4b525a', '#3b4148', '#2a2f35'],
-  red: '#a8291f', redHi: '#d0392b', bone: '#cfc4ac', boneLo: '#958a73', eye: '#ff3b2a',
+  red: '#a8291f', redHi: '#d0392b', bone: '#cfc4ac', boneLo: '#958a73', eye: '#ba5cff',
   melt: '#ff3b1f',
 };
 function ghTone(sty, i) { return sty.sil ? sty.sil : sty.far ? GHC.far[i] : [GHC.hi, GHC.mid, GHC.lo][i]; }
@@ -1402,8 +1402,10 @@ function drawGravehorn(c, b) {
   c.save();
   c.globalCompositeOperation = 'lighter';
   const tk = P.tell || 0;
-  // the identity red LERPS toward the amber during a wind-up (Hue Law §3.5)
-  const eyeCol = tk > 0 ? ghMix('#ff3b2a', TELL_COL, tk) : '#ff3b2a';
+  // Boss infection is purple; only the combat tell lerps toward warning amber.
+  // Keeping this base aligned with infection-eyes prevents a red core inside a
+  // purple smoke trail on the same creature.
+  const eyeCol = tk > 0 ? ghMix(GHC.eye, TELL_COL, tk) : GHC.eye;
   const eyeP = P.headRig(-36, -12);
   // the infection looks out through this eye (js/infection-eyes.js): reported
   // where it is drawn this frame, in the head's own transform — so it rides
@@ -1411,7 +1413,7 @@ function drawGravehorn(c, b) {
   if (typeof infEyeMark === 'function') infEyeMark(c, eyeP[0], eyeP[1]);
   const er = 5 + 3 * Math.max(0, (P.eye || 1) - 1);
   const g1 = c.createRadialGradient(eyeP[0], eyeP[1], 0.5, eyeP[0], eyeP[1], er * 3.2);
-  g1.addColorStop(0, '#ffffff'); g1.addColorStop(0.25, eyeCol); g1.addColorStop(1, 'rgba(255,40,30,0)');
+  g1.addColorStop(0, '#ffffff'); g1.addColorStop(0.25, eyeCol); g1.addColorStop(1, 'rgba(186,92,255,0)');
   c.globalAlpha = clamp(P.eye, 0.2, 1);
   c.fillStyle = g1; c.beginPath(); c.arc(eyeP[0], eyeP[1], er * 3.2, 0, 6.2832); c.fill();
   if (P.glance) {

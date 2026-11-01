@@ -89,6 +89,7 @@ const SUITE = [
   ['combat-impact-input', 'real keyboard tap and held charge through the normal game loop in a staged arena'],
   ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
+  ['quest-payment-contract', 'quest rewards are internally once-only across replayed callbacks', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
@@ -101,6 +102,7 @@ const SUITE = [
   ['story-meeting', 'interactive guardian warning and real contact'],
   ['first-sage-route', 'pre-guardian route through quarry maintenance passage'],
   ['script-route', 'the story script draws the route the game plays', {noBrowser:true}],
+  ['alpha-optional-contract', 'Alpha remains a forged-blade depth-door branch, never the mandatory road', {noBrowser:true}],
   ['guardian-break', "comic page 29: NULLFANG lets go, and the bell writes the order back"],
   ['sage-quiet', "comic page 26: the sage's promise closes its end of the network"],
   ['mobile-platform', 'the shipped touch recognizer and the two-state pause, in both built pages'],
@@ -213,6 +215,7 @@ const SUITE = [
   ['cavedark',  'the cave is dark, and light is the only map of it'],
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['enemygait', 'machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground'],
+  ['gravehorn-eye-contract', 'Gravehorn uses one purple boss-infection class for eye and trail', {noBrowser:true}],
   ['infection-eyes', 'red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending'],
   // every placed kind and guardian in its own room: the one harness that is a
   // survey of the whole cast, so it gets a survey's time
@@ -279,6 +282,8 @@ const SUITE = [
   ['twin',      'the swirl: four passes, a ring not a punch, and two blades afterwards'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
   ['sage',      'the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift'],
+  ['sage-walk-contract', 'purified Sage movement selects distance gait and purified walk art', {noBrowser:true}],
+  ['sage-walk', 'the rescued Sage walks in purified authored frames instead of sliding in its kneeling pose'],
   ['kingdom1',  'kingdom 1 holds its rules: the den rest catches deaths, the tunnel tells the sage, NPCs own their places'],
   ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
