@@ -82,6 +82,7 @@ function servedCheck(when) {
 }
 
 const SUITE = [
+  ['pack-timeout', 'stalled pack downloads release queued Start', { noBrowser: true }],
   ['combat-impact-contract', 'armor, protected contacts, charged weight and bounded combat ledger', {noBrowser:true}],
   ['combat-impact-browser', 'rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export'],
   ['purification-controls', 'mobile hold/cancel, focus-loss safety and restored save'],
