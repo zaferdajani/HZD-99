@@ -47,6 +47,9 @@ for (const f of ['index.html', 'odyssey.html']) {
   html = require('./package-html.cjs')(html);
   fs.writeFileSync(path.join(WWW, f), html);
 }
+// store-required static pages (privacy, terms, support, account deletion)
+for (const f of ['privacy.html', 'terms.html', 'support.html', 'delete-account.html'])
+  if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(WWW, f));
 const a = copyDir(path.join(ROOT, 'assets'), path.join(WWW, 'assets'), true);
 // campaign packs ship too — RULE ONE: a DLC that exists on the web page and
 // not in the app is two different games. The folder is small (JSON + any
