@@ -1,0 +1,11 @@
+
+── tails  — every authored sound decays to silence instead of stopping
+── tails — every authored sound decays to silence instead of stopping (88 files)
+  measured 82 one-shots, skipped 6 loops
+  hottest tails: hzd_hurtbad.wav -35.6 dB, fz_break.ogg -36.1 dB, fz_roar.ogg -36.3 dB, hzd_win2.wav -36.7 dB
+  ok   every one-shot ends at least 35 dB under its peak, and none starts on a click
+
+OK — nothing is cut; every sound has its decay
+   (tails: 0.8 s)
+
+all 1 harnesses ran
