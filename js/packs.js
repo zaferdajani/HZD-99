@@ -116,8 +116,12 @@ function packApply(def) {
     if (!PACK.pending) return;
     const s = PACK.pending; PACK.pending = null; startGame(s);
   };
-  fetch('packs/' + id + '/pack.json')
+  // Bound both headers and body: a stalled download must release a queued Start.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  fetch('packs/' + id + '/pack.json', { signal: controller.signal })
     .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then((def) => { packApply(def); PACK.ready = true; release(); })
-    .catch((e) => { PACK.err = String(e); console.error('pack ' + id + ': ' + PACK.err); release(); });
+    .catch((e) => { PACK.err = String(e); console.error('pack ' + id + ': ' + PACK.err); release(); })
+    .finally(() => clearTimeout(timer));
 })();

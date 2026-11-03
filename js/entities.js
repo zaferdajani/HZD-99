@@ -532,9 +532,11 @@ const FACE_RATE = 5.5;       // faceVis units per second, the rate it always tur
 const HOP_LAND_T = 0.32;
 const TURRET_KICK_T = 0.3;
 // the kinds that walk on the floor and therefore turn with their feet. The
-// sage is a duelist that BACKS AWAY while facing her on purpose, which is a
-// step, not a moonwalk, and keeps its own footwork.
-const WALKERS = { crawler: 1, guard: 1, blob: 1, hopper: 1 };
+// hostile sage is a duelist that BACKS AWAY while facing her on purpose, but
+// once it is purified the shared calm branch gives it ordinary ground travel;
+// that travel must use the gait too or the rescued body snaps/slides between
+// its stops.
+const WALKERS = { crawler: 1, guard: 1, blob: 1, hopper: 1, sage: 1 };
 // which side the picture shows: the sign of the eased facing
 function faceSide(e) { return (e.faceVis == null ? (e.dir || 1) : e.faceVis) >= 0 ? 1 : -1; }
 // where a walker's picture is heading: wherever it is moving, and only once it
@@ -11375,7 +11377,11 @@ function sageTame(e) {
 function drawSage(c, e) {
   const cx = e.x + e.w / 2, base = e.y + e.h;
   const t2 = e.anim;
-  const kneel = e.locked || e.tame;
+  // A rescued sage kneels only while resting. Once its calm AI walks, use the
+  // authored purified walk strip; otherwise its body translates in one frozen
+  // kneeling plate and reads as a sleeping character sliding over the floor.
+  const sageWalking = !!e.tame && Math.abs(e.vx || 0) > 12;
+  const kneel = e.locked || (!!e.tame && !sageWalking);
   const bob = kneel ? 0 : Math.sin(t2 * 2.2) * 1.6;
   // the aura sense: the black halo, under everything
   if (typeof auraSense === 'function' && auraSense() && !e.tame) {
@@ -11397,7 +11403,7 @@ function drawSage(c, e) {
   // fight reads — amber on exactly the three telegraph states, ember gone and
   // crystal blue on pure. The procedural monk below stays as the fallback
   // while a plate is in flight, which is the house arrangement everywhere.
-  const sagePlate = e.tame ? 'sagePure'
+  const sagePlate = e.tame && !sageWalking ? 'sagePure'
     : e.locked ? 'sageLock'
     : e.gatherT > 0 ? 'sageGather'
     : e.coilT > 0 ? 'sageCoil'
@@ -11425,7 +11431,8 @@ function drawSage(c, e) {
     // one stride per 56 px of floor it covers (moveEnt's walkD), like every
     // walker — never the clock, or the robe would pace faster than the feet
     const cell = Math.floor(((((e.walkD || 0) / 56) % 1) + 1) % 1 * 8);
-    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer);
+    // pureArt applies the clean cyan/white material to the same authored gait.
+    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer, !!e.tame);
   }
   if (!sageDrew) {
     if (exhale) {
