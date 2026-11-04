@@ -787,12 +787,11 @@ const ROOMS = {
       });
       rect(g, 80, 12, 81, 13, 'B'); rect(g, 80, 14, 81, 14, '.');
     } },
-  // ---- THE DEN. The first fight in the game you can lose, and it is on the
-  // way rather than off it: the pack has been in the meadow since the first
+  // ---- THE DEN. An optional post-Purifier depth-door branch from A2, outside
+  // the required road to B1. The pack has been in the meadow since the first
   // room, and this is where the thing that leads it has been the whole time.
-  // It sits between the meadow and the save point on purpose — you meet the
-  // Alpha, you take the pack, and THEN you walk into the room with the bench
-  // and the trader in it, which is where the run's first breath is.
+  // The player may free Alpha and befriend the pack, or remain on the mandatory
+  // route without entering this room; neither choice gates A2 -> A3 -> A4.
   A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: {},
     ents: [['boss', 27, 15, 'alpha']],
     build(g) {
