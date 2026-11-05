@@ -46,6 +46,14 @@ assets were preserved.
 | Evidence-integrity SHA-256 | `a9902117fced37505c2e47578ad16a067b5d48e3cca563448631c898d74d69ec` |
 | Production action | none; review branch only |
 
+Publication boundary: the authenticated Git-data publisher could not publish
+the four multi-megabyte generated HTML blobs. The remote review branch therefore
+uses published authored-source ancestor `f0265a35...` and adds this report plus
+the complete Nov 5 evidence directory. The exact local audited build remains
+`ecc45d7a...`; an integrator must run `node build.cjs` after selecting the
+authored source. This is stated explicitly rather than presenting the remote
+branch head as the exact audited local object.
+
 Compared with November 4, there is no production, authorized-integration, side-
 branch, gameplay-source, or asset delta. The review source still contains 17
 authored files over production and preserves the previously bounded Sage gait,
