@@ -213,21 +213,32 @@ function storyToast(text) {
 // replacing it unread.
 function sceneCaption(text) {
   const cr = capReader(text); cr.fade = 0;
-  (G.sceneCaps || (G.sceneCaps = [])).push(cr);
-  while (G.sceneCaps.length > 3) G.sceneCaps.shift();          // never a wall of text
+  const L = G.sceneCaps || (G.sceneCaps = []);
+  const Q = G.sceneCapQ || (G.sceneCapQ = []);
+  // Three captions are the most the frame can display without turning into a
+  // wall of text. A fourth story line waits instead of evicting the first one
+  // while it is still being typed/read. The queued reader is kept intact, so
+  // its reveal begins only when a visible slot opens.
+  if (L.length < 3) L.push(cr);
+  else Q.push(cr);
 }
+function sceneCaptionAll() { return (G.sceneCaps || []).concat(G.sceneCapQ || []); }
 function sceneCaptionShown() {
-  return !(G.sceneCaps || []).some(cr => !(cr.pg + 1 >= cr.pages.length && revealDone(cr.R)));
+  return !sceneCaptionAll().some(cr => !(cr.pg + 1 >= cr.pages.length && revealDone(cr.R)));
 }
-function sceneCaptionRead() { return !(G.sceneCaps || []).some(cr => !capRead(cr)); }
+function sceneCaptionRead() { return !sceneCaptionAll().some(cr => !capRead(cr)); }
 function sceneCaptionTick(dt) {
   const L = G.sceneCaps;
-  if (!L || !L.length) return;
-  for (const cr of L) {
-    capTick(cr, dt); capAutoTurn(cr);
-    if (capRead(cr)) cr.fade += dt;
+  const Q = G.sceneCapQ;
+  if (L && L.length) {
+    for (const cr of L) {
+      capTick(cr, dt); capAutoTurn(cr);
+      if (capRead(cr)) cr.fade += dt;
+    }
+    G.sceneCaps = L.filter(cr => cr.fade <= 1.2);
   }
-  G.sceneCaps = L.filter(cr => cr.fade <= 1.2);
+  const live = G.sceneCaps || (G.sceneCaps = []);
+  while (live.length < 3 && Q && Q.length) live.push(Q.shift());
 }
 function drawSceneCaption() {
   const L = G.sceneCaps;

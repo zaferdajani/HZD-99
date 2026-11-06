@@ -119,9 +119,9 @@ const SUITE = [
   ['scratch-reach', 'scratch contact boundary, facing and non-damaging recovery wake', { noBrowser: true }],
   ['hero-move-coverage', 'actual renderer coverage for movement, aerial attacks, reactions and departure'],
   ['hero-feedback', 'haptic device routing and duplicate pulse suppression', { noBrowser: true }],
-  ['hero-delivery', 'source provenance, frame gutters, scale and floor registration', { noBrowser: true }],
-  ['hero-frame-alpha', 'discrete sprites never blend into doubled silhouettes', { noBrowser: true }],
-  ['hero-alpha', 'original transparent artwork retains its dark visor', { noBrowser: true }],
+  ['hero-delivery', 'source provenance, frame gutters, scale and floor registration'],
+  ['hero-frame-alpha', 'discrete sprites never blend into doubled silhouettes'],
+  ['hero-alpha', 'original transparent artwork retains its dark visor'],
   ['tutorial-controller', 'complete production tutorial, contextual locks and transition recovery', { noBrowser: true }],
   ['offline-release', 'scoped version cache, media seeking and storage-denied fallback', { noBrowser: true }],
   ['release-polish', 'cold artwork, actual screen scale, camera, input edges, workshop and movies'],
@@ -180,6 +180,7 @@ const SUITE = [
   ['cover',     'the platform she is standing on stops a shot, from either side'],
   ['tap',       'tap where a thing is drawn and that thing happens'],
   ['textreveal','words typed at a reading pace, paged, read before they turn, one overlay at a time'],
+  ['scene-caption-contract', 'a fourth story caption waits without evicting unread text', { noBrowser: true }],
   ['text-rules', 'cards pause combat; one tap/press never reveals and dismisses; numbers stay immediate; five languages at phone width'],
   ['servo-presence', 'Old Servo stood beside, not inside: prompt before contact, talk stand-off, grounded, whole arc on desktop and phone'],
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
@@ -217,6 +218,7 @@ const SUITE = [
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['enemygait', 'machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground'],
   ['gravehorn-eye-contract', 'Gravehorn uses one purple boss-infection class for eye and trail', {noBrowser:true}],
+  ['infection-eye-authority-contract', 'story and art authority keep ordinary infection red and bosses purple', {noBrowser:true}],
   ['infection-eyes', 'red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending'],
   // every placed kind and guardian in its own room: the one harness that is a
   // survey of the whole cast, so it gets a survey's time

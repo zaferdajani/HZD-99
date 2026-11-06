@@ -33,7 +33,9 @@ function openR(g) { const w = g[0].length; rect(g, w - 1, 11, w - 1, 14, '.'); }
 // horizontal join in the game is a doorway with eleven tiles of rock over her
 // head. Measured across kingdom 1, every one of them reads the same:
 //
-//     ###########....##        A1|A2, A2|A10, A10|A3, A3|A4 — all of them
+//     ###########....##        A1|A2, A2|A3, A3|A4 — the required road
+// Alpha's A10 den is a separate optional depth-door branch from A2, not an
+// inline seam between A2 and A3 (tests/alpha-optional-contract.cjs).
 //
 // The camera carries through a crossing now (tests/cross.cjs) and the room
 // under it keeps running — but it carries her through a DOOR, and two rooms
