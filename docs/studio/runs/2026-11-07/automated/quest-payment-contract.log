@@ -1,0 +1,6 @@
+
+── quest-payment-contract  — quest rewards are internally once-only across replayed callbacks
+PASS quest payment is once-only even when its callback is replayed
+   (quest-payment-contract: 0.1 s)
+
+all 1 harnesses ran
