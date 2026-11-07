@@ -27,6 +27,23 @@ suite entries are source/headless contracts; four more are build, package and
 served-identity infrastructure gates. None substitutes for rendered gameplay,
 the uninterrupted campaign, or a physical-device run.
 
+### Remote publication attestation
+
+The branch was fetched back after publication rather than trusted from the
+upload response alone.
+
+| Object | Remote commit/tree | Verified local object |
+|---|---|---|
+| Authored source | `e7f64c2cd38b6dd793905e547a841019cbb4cc82` / `952179949c89e60c5f391a0b936e628529c288b0` | source tree from `5b05f20...` is exactly `952179...` |
+| Evidence before this attestation note | `0901114429a18da0548686a31518dfab38a7fa1f` / `1728c6d4f1d53eeb879f633cd66c33b2f8803c61` | evidence tree from `953c39a...` is exactly `1728c6...` |
+| Canonical game core on remote branch | blob `c8c027fbf7bc2159103b5dce1f1082b8102d08a4` | 987,836 bytes, 18,206 lines, syntax PASS |
+
+All 222 changed blobs were created only after their returned Git blob SHA
+matched `git rev-parse <local-commit>:<path>`. A fresh `git fetch` then proved
+both complete remote tree SHAs equal their local trees, and proved the corrupt
+Nov 6 commit is not an ancestor. This attestation note is a documentation-only
+fast-forward on top of those verified objects.
+
 ## P0 correction to the November 6 report
 
 The previous report described a safe source publication. Remote readback now
