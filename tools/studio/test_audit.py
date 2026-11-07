@@ -16,6 +16,24 @@ SPEC.loader.exec_module(audit)
 
 
 class AuditBudgets(unittest.TestCase):
+    def test_final_log_is_atomic_and_immune_to_late_raw_path_reuse(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            raw = root / 'sample.log.running'
+            final = root / 'sample.log'
+            original = b'header\nPASS actual assertion\n'
+            raw.write_bytes(original)
+            record = audit.finalize_log(raw, final)
+            self.assertFalse(raw.exists())
+            self.assertEqual(final.read_bytes(), original)
+            self.assertTrue(audit.validate_logs(root, [record])['ok'])
+
+            # A late process reopening the old temporary pathname cannot alter
+            # the canonical file or the already captured evidence bytes.
+            raw.write_bytes(b'late detached writer\n')
+            self.assertEqual(final.read_bytes(), original)
+            self.assertTrue(audit.validate_logs(root, [record])['ok'])
+
     def test_delayed_closed_log_flush_settles_before_snapshot(self):
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / 'delayed.log'
@@ -44,6 +62,18 @@ class AuditBudgets(unittest.TestCase):
             self.assertFalse(audit.browser_test('contract', root))
             self.assertIn('missing', audit.browser_block_reason('visual', env, root))
             self.assertIsNone(audit.browser_block_reason('contract', env, root))
+
+    def test_runner_never_labels_playwright_harness_browser_free(self):
+        source = (audit.ROOT / 'tests/run.cjs').read_text()
+        suite = source.split('const SUITE = [', 1)[1].split('\n];', 1)[0]
+        marked = []
+        for line in suite.splitlines():
+            name = __import__('re').match(r"\s*\['([^']+)'", line)
+            if name and __import__('re').search(r'\bnoBrowser\s*:\s*true\b', line):
+                marked.append(name.group(1))
+        mislabeled = [name for name in marked if audit.browser_test(name)]
+        self.assertEqual(mislabeled, [],
+            'Playwright harnesses bypassed runner browser identity/preflight: ' + ', '.join(mislabeled))
 
     @unittest.skipUnless(os.name == 'posix', 'executable-bit regression requires POSIX')
     def test_browser_preflight_accepts_an_executable(self):

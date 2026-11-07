@@ -11,6 +11,8 @@ assert.match(story, /Optional and off the required road/);
 assert.doesNotMatch(story, /On the road, not off it/);
 assert.match(caves, /Alpha is\s*\n?optional and outside it/);
 assert.match(world, /optional post-Purifier depth-door branch from A2/);
+assert.doesNotMatch(world, /A2\|A10,\s*A10\|A3/,
+  'the seam diagram must not put optional Alpha inline on the required road');
 assert.doesNotMatch(world, /way rather than off it/,
   'world authority must not describe optional Alpha as mandatory-road content');
 assert.match(game, /A2:\s*\{\s*at:\s*0\.84,\s*to:\s*'A10'/,

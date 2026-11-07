@@ -19,6 +19,21 @@ def capture_log(path):
     return {'log': path.name, 'sha256': hashlib.sha256(payload).hexdigest(),
             'bytes': len(payload), 'content_base64': base64.b64encode(payload).decode('ascii')}
 
+def finalize_log(source, destination):
+    """Publish one closed raw log atomically, then snapshot only that inode."""
+    payload = source.read_bytes()
+    stage = destination.with_name(destination.name + '.finalizing')
+    with stage.open('wb') as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(stage, destination)
+    try:
+        source.unlink()
+    except FileNotFoundError:
+        pass
+    return capture_log(destination)
+
 def wait_log_quiet(path, quiet_seconds=.35, deadline_seconds=3.0):
     """Require a closed log to stay unchanged before its evidence snapshot."""
     deadline = time.monotonic() + deadline_seconds
@@ -255,18 +270,20 @@ def main():
     run_env = {}
     def run(name, cmd, timeout):
         log = out/(name+'.log')
+        raw_log = out/(name+'.log.running')
         started = datetime.datetime.now(datetime.timezone.utc)
-        with log.open('w') as f:
+        with raw_log.open('w') as f:
             try:
                 code, state = run_owned(cmd, cwd=ROOT, log=f, timeout=timeout, env=run_env.get('env'))
             except OSError as e: f.write(str(e)); code, state = None, 'blocked'
-        log_quiet = wait_log_quiet(log)
+        log_quiet = wait_log_quiet(raw_log)
         if not log_quiet and state == 'pass':
             state = 'fail'
+        recorded_log = finalize_log(raw_log, log)
         entry = {'name': name, 'status': state, 'exit_code': code,
                  'seconds': (datetime.datetime.now(datetime.timezone.utc)-started).total_seconds(),
                  'timeout_seconds': timeout, 'log_quiet': log_quiet,
-                 **capture_log(log)}
+                 **recorded_log}
         campaign_result = out/'campaign-ch1'/'result.json'
         if name == 'campaign-ch1' and campaign_result.exists():
             entry['campaign'] = json.loads(campaign_result.read_text())
