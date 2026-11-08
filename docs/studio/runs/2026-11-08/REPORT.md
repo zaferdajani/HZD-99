@@ -26,6 +26,19 @@ The 40 passes comprise 36 source/headless harnesses and four infrastructure
 gates (build, package, served identity at start/end). They do not certify motion,
 timing, audio, haptics, input feel, or a natural player journey.
 
+### Remote publication attestation
+
+The published source/evidence commit is
+`c753cc0737e122364995842f3762ac88f110beea` with tree
+`e870d6fb5949413c53636d62040e57c2724566b4`. That tree exactly equals local
+evidence commit `a42a326...`; all 24 new blobs were accepted only after the
+connector-returned SHA matched the local Git blob, and 199 unchanged-content
+blobs reuse objects already present in the verified November 7 tree. A fresh
+fetch confirmed the complete tree equality, `js/game.js` remains 988,450 bytes /
+18,223 lines and parses, and corrupt November 6 commit `2718f6e...` is not an
+ancestor. This attestation paragraph is a documentation-only fast-forward on
+top of that verified tree.
+
 ## Change since November 7
 
 There is no production, integration, authored-art, sound, VFX, or cinematic
