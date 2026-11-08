@@ -1655,6 +1655,15 @@ const HERO_MOOD = {
   afraid:     { sq: 1.38, tl:  0.30, gl: 0.88, ar: 0.78, pu: 11.0, as: 1.00 },  // a guardian roars
 };
 
+// The CV3 marble is the reason GRAVEHORN is there, not a pickup behind him.
+// Keeping this as a small pure gate makes the negative rule independently
+// testable without pretending a source contract is rendered boss evidence.
+function pillarRewardReady(s, save = G.save, room = G.roomId) {
+  const item = s && (s.extra || 'cshard');
+  return !(room === 'CV3' && item === 'cshard'
+    && !(save && save.flags && save.flags.bossHorn));
+}
+
 // ================= PLAYER =================
 class Player {
   constructor(x, y) {
@@ -2816,6 +2825,9 @@ class Player {
       if (s.type !== 'pillar') continue;
       const sx = s.x + s.w / 2, sy = s.y + s.h / 2;
       if (Math.hypot(sx - cx, sy - cy) > R + 60) continue;
+      // He is posted on the marble. Evading him must not award a shard that
+      // ghMigrate() would later interpret as proof he had already retreated.
+      if (!pillarRewardReady(s)) continue;
       G.statics.splice(i, 1);
       G.save.flags['pl_' + (s.extra || 'cshard')] = 1;
       sfx('glass');

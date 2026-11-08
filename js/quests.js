@@ -247,21 +247,45 @@ function questTake(item) {
 }
 // paid out by the NPC who asked, face to face
 function questPay(q) {
-  // Payment owns its own replay guard. UI routing normally hides completed
-  // errands, but queued callbacks, reload recovery and future callers must not
-  // be able to award the same scrap/IQ/relic twice.
-  if (!q || !G.save || qState(q.id) === 'done') return false;
+  // THE HAND-IN IS ONE SAVE TRANSACTION. Relics and forging used to persist
+  // from inside their presentation helpers, either before the quest became
+  // done (duplicate scrap after a reload) or after it became done (a completed
+  // forge with no Purifier after interruption). Build the complete durable
+  // state off to the side, publish it once, then show cards/VFX.
+  if (!q || !G.save || qState(q.id) !== 'active' || !qDone(q)) return false;
   const r = q.reward || {};
-  if (r.scrap) { G.save.scrap += r.scrap; G.toast('+' + r.scrap + ' ' + t('scrap')); }
-  if (r.iq) { G.save.iq += r.iq; if (typeof iqNudge === 'function') iqNudge(); }
-  if (r.relic && typeof G.grantRelic === 'function') G.grantRelic(r.relic);
-  if (q.kind === 'fetch' && G.save.bag) delete G.save.bag[q.item];
-  qSet(q.id, 'done');
+  const before = G.save;
+  let next;
+  try { next = JSON.parse(JSON.stringify(before)); }
+  catch (e) { return false; }
+  next.quests = next.quests || {};
+  next.flags = next.flags || {};
+  if (r.scrap) next.scrap = (next.scrap || 0) + r.scrap;
+  if (r.iq) next.iq = (next.iq || 0) + r.iq;
+  if (r.relic) {
+    next.relics = next.relics || [];
+    if (next.relics.indexOf(r.relic) < 0) next.relics.push(r.relic);
+  }
+  if (q.kind === 'fetch' && next.bag) delete next.bag[q.item];
+  if (r.forge) {
+    if (typeof grantWeapon !== 'function' || !grantWeapon('single', next)) return false;
+    if (typeof revisedStory === 'function' && revisedStory()) next.flags.ratchetCamp = 1;
+  }
+  next.quests[q.id] = 'done';
+  G.save = next;
+  let stored = false;
+  try { stored = persist() !== false; }
+  catch (e) { stored = false; }
+  if (!stored) { G.save = before; return false; }
+
+  if (r.scrap) G.toast('+' + r.scrap + ' ' + t('scrap'));
+  if (r.iq && typeof iqNudge === 'function') iqNudge();
   sfx('win');
   burst(player.x + player.w / 2, player.y, 24, '#ffd76a', 280, 0.8, 120, 4, true);
-  // the forge is a REWARD KIND, not a special-cased NPC: any future quest can
-  // end in a making (see forgeCrystal in game.js — the cinematic's code hook)
-  if (r.forge && typeof forgeCrystal === 'function') forgeCrystal();
+  // These calls are presentation-only: their durable state is already in the
+  // single successful write above.
+  if (r.relic && G.grantRelic) G.grantRelic(r.relic, true);
+  if (r.forge && typeof forgeCrystal === 'function') forgeCrystal(true);
   return true;
 }
 // how many are open, for the pause screen

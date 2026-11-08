@@ -218,6 +218,8 @@ const SUITE = [
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['enemygait', 'machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground'],
   ['gravehorn-eye-contract', 'Gravehorn uses one purple boss-infection class for eye and trail', {noBrowser:true}],
+  ['gravehorn-quarry-contract', 'CV3 marble cannot be quarried before Gravehorn legitimately retreats', {noBrowser:true}],
+  ['tile-signature-contract', 'room bakes distinguish equal-count broken-tile layouts', {noBrowser:true}],
   ['infection-eye-authority-contract', 'story and art authority keep ordinary infection red and bosses purple', {noBrowser:true}],
   ['infection-eyes', 'red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending'],
   // every placed kind and guardian in its own room: the one harness that is a

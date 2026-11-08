@@ -26,7 +26,7 @@ stronger, but also it can kick if you're standing behind it."* And earlier:
 | Zone | A (chapter one) — the quarry cavern **CV3**, standing on the raw marble |
 | **Difficulty slot** | *proposed* — **the answer test** (registry §4 is frozen: see INTERFACES) |
 | ID prefix | `horn.` (`G.dmgLog` keys: `horn.missile`, `horn.blast`, `horn.charge`, `horn.trample`, `horn.toss`, `horn.kick`, `horn.rock`) — *proposed*, see INTERFACES |
-| Palette | telegraph amber `#ffc24a` (every wind-up; his identity red lerps toward it); lock cyan `#8ff6ff` (the missile's lock flash, the small horn's aim line — "you are targeted specifically"); danger red `#ff5f6d` (the rock shadows' rim, the blast); his own identity red `#ff3b2a` (eye, nozzles, phase-two cracks) |
+| Palette | telegraph amber `#ffc24a` (every wind-up; his attack red lerps toward it); lock cyan `#8ff6ff` (the missile's lock flash, the small horn's aim line — "you are targeted specifically"); danger red `#ff5f6d` (the rock shadows' rim, the blast); boss-infection purple `#ba5cff` (eye); his attack identity red `#ff3b2a` (nozzles, phase-two cracks) |
 | Art | **class B parts rig** (ART_BIBLE §1/§3). Plates briefed in `docs/ART_QUEUE.md` §2bf, none fired yet; every part draws a flat gunmetal **stand-in** in its plate's frame until `assets/characters/gravehorn/<part>.webp` exists (see *Authored-art ledger*) |
 | State machine | `js/gravehorn.js` `ghStep` (dispatched from `Boss.update` before any guardian logic: no fork, no midpoint, no purification) |
 | HP | `BSTAT.horn.hp` 220 → **329 per phase** on Normal (×1.15 FOE_HP ×1.3 ZONE_ATK.A; 247 on the easiest preset); two phases. Fought with **claws and the Volt Burst only** (the blade is forged from what he guards) |
