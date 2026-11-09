@@ -147,7 +147,22 @@ function qReadDone(q) {
 //   * never asked, but visited A7: nothing to change — the early-discovery
 //     path now asks about the survey, not the room.
 function questMigrate(save) {
-  if (!save || !save.qbase) return save;
+  if (!save) return save;
+  // FORGE-01. Older hand-ins persisted `done` before forgeCrystal persisted
+  // the Purifier. A crash in that gap created a completed main-story quest
+  // with no blade. Completion is unambiguous authority to restore this unique
+  // reward; unlike the shared coin relic, it has no alternate provenance.
+  const quests = save.quests || {}, flags = save.flags = save.flags || {};
+  if (quests.ratchet_forge === 'done' && !flags.crystal) {
+    if (typeof grantWeapon === 'function') grantWeapon('single', save);
+    else {
+      flags.crystal = 1;
+      save.weaponVersion = save.weaponVersion || 1;
+      save.weaponMode = 'single';
+    }
+    flags.ratchetCamp = 1;
+  }
+  if (!save.qbase) return save;
   for (const q of QUESTS)
     if (q.kind === 'read' && save.qbase[q.id] && save.qbase[q.id].reached != null) delete save.qbase[q.id];
   return save;

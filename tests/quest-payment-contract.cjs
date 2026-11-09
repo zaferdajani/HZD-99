@@ -98,4 +98,27 @@ function harness(save, persistResult = true) {
   assert.equal(out.bursts, 0);
 }
 
-console.log('PASS quest payments persist reward, ownership, item removal and done state atomically');
+// Old releases could persist forge=done before the Purifier. The completed
+// quest is sufficient authority to restore that unique main-story reward;
+// active or unoffered quests must never be promoted by migration.
+{
+  const broken = { quests: { ratchet_forge: 'done' }, flags: {}, weaponVersion: 1, weaponMode: 'claws' };
+  const { ctx } = harness(broken);
+  vm.runInContext('questMigrate(G.save)', ctx);
+  assert.equal(ctx.G.save.flags.crystal, 1);
+  assert.equal(ctx.G.save.flags.ratchetCamp, 1);
+  assert.equal(ctx.G.save.weaponMode, 'single');
+  const repaired = JSON.stringify(ctx.G.save);
+  vm.runInContext('questMigrate(G.save)', ctx);
+  assert.equal(JSON.stringify(ctx.G.save), repaired, 'forge migration is not idempotent');
+
+  for (const state of ['none', 'active']) {
+    const candidate = { quests: state === 'none' ? {} : { ratchet_forge: state }, flags: {}, weaponVersion: 1, weaponMode: 'claws' };
+    const h = harness(candidate);
+    vm.runInContext('questMigrate(G.save)', h.ctx);
+    assert.equal(h.ctx.G.save.flags.crystal, undefined, state + ' forge was granted by migration');
+    assert.equal(h.ctx.G.save.flags.ratchetCamp, undefined, state + ' camp move was granted by migration');
+  }
+}
+
+console.log('PASS quest payments are atomic and completed legacy forge saves recover their Purifier');

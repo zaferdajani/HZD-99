@@ -91,6 +91,7 @@ const SUITE = [
   ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['quest-payment-contract', 'quest rewards are internally once-only across replayed callbacks', {noBrowser:true}],
+  ['npc-restore-contract', 'NPC cell, awake state and durable gift settle in one write', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
