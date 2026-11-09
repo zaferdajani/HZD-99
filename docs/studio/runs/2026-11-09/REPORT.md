@@ -15,7 +15,7 @@ manhwa parity. No completed art, audio, VFX or film was regenerated.
 | Previous review | `codex/studio-review-2026-11-08` at `b25e66d291b58e1306601002d8701403326d07f1` |
 | Exact audited source | `27121725487a0758c80d29bfe0337e600874350e` |
 | Audited source tree | `b9be3eba184827d887fad4711c54f763de586b8f` |
-| Evidence content commit | `EVIDENCE_COMMIT_TO_BE_ATTESTED` |
+| Evidence content commit | `1050bb647a727a9cdece9cc90b61b6ecf3bf2bcf` |
 | Review branch | `codex/studio-review-2026-11-09` |
 | Build/package | PASS |
 | Automated evidence | 206 records: 41 pass, 165 blocked |
@@ -39,6 +39,21 @@ comprehension, or sustained device performance.
 | Visually inspected | LIMITED | Six existing still/sprite assets inspected at gameplay scale; no fresh runtime frames |
 | Integrated into `main`/authorized integration | NO | All three refs remain `7da3c87...` |
 | Deployed to production | NO | Explicitly not attempted |
+
+### Remote publication attestation
+
+The remotely retrievable evidence content commit is
+`1050bb647a727a9cdece9cc90b61b6ecf3bf2bcf` with tree
+`b7aa125b5b9e4b10ab84b69c1d497bc4f47b7482`. A fresh fetch matched the local
+evidence tree exactly. Fourteen new-content blobs were accepted only after each
+connector-returned SHA matched the local Git blob; the other 197 files reuse
+content already present in the verified parent object graph. The fetched
+`results.json` names reachable source `27121725487a0758c80d29bfe0337e600874350e`,
+contains 206 records (41 pass / 165 blocked), and reports log integrity true.
+`js/game.js` is 989,957 bytes / 18,257 lines and parses. Corrupt November 6
+commit `2718f6e...` is not an ancestor. The final branch head is a
+documentation-only fast-forward that replaces the publication placeholders
+and adds this attestation; source and automated evidence are unchanged.
 
 ## Change since November 8
 
