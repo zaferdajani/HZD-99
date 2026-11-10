@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Evidence collector. Does not claim to replace the 15-role human/agent review."""
-import argparse, base64, binascii, ctypes, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
+import argparse, base64, binascii, ctypes, datetime, hashlib, json, math, os, pathlib, re, signal, socket, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
@@ -106,8 +106,8 @@ def browser_test(name, root=ROOT):
         return False
     return bool(re.search(r"require\(\s*(['\"])playwright\1\s*\)", source))
 
-def browser_block_reason(name, env=None, root=ROOT):
-    """Fail closed before launch when the browser executable is unavailable."""
+def browser_block_reason(name, env=None, root=ROOT, socket_factory=socket.socket):
+    """Fail closed before launch when Chromium cannot start in this environment."""
     env = os.environ if env is None else env
     if not browser_test(name, root):
         return None
@@ -116,6 +116,16 @@ def browser_block_reason(name, env=None, root=ROOT):
         return 'Chromium executable is missing: ' + str(executable)
     if not os.access(executable, os.X_OK):
         return 'Chromium executable is not executable: ' + str(executable)
+    # Chromium creates a process-singleton Unix socket before Playwright can
+    # connect.  Some managed containers expose an executable but forbid Unix
+    # sockets; without this probe every rendered lane is falsely recorded as a
+    # gameplay failure even though no page was opened.
+    if os.name == 'posix':
+        try:
+            probe = socket_factory(socket.AF_UNIX, socket.SOCK_STREAM)
+            probe.close()
+        except OSError as error:
+            return 'Chromium cannot create its required Unix socket: ' + str(error)
     return None
 
 def enable_subreaper():

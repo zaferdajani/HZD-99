@@ -85,8 +85,28 @@ class AuditBudgets(unittest.TestCase):
             browser = root / 'chromium'
             browser.write_text('#!/bin/sh\nexit 0\n')
             browser.chmod(0o755)
+            class SocketProbe:
+                def close(self): pass
             self.assertIsNone(audit.browser_block_reason(
-                'visual', {'CHROMIUM_PATH': str(browser)}, root))
+                'visual', {'CHROMIUM_PATH': str(browser)}, root,
+                socket_factory=lambda *_: SocketProbe()))
+
+    @unittest.skipUnless(os.name == 'posix', 'Unix-socket regression requires POSIX')
+    def test_browser_preflight_blocks_when_unix_sockets_are_forbidden(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'tests').mkdir()
+            (root / 'tests' / 'visual.cjs').write_text(
+                'const { chromium } = require("playwright");\n')
+            browser = root / 'chromium'
+            browser.write_text('#!/bin/sh\nexit 0\n')
+            browser.chmod(0o755)
+            def forbidden(*_):
+                raise PermissionError(1, 'Operation not permitted')
+            reason = audit.browser_block_reason(
+                'visual', {'CHROMIUM_PATH': str(browser)}, root,
+                socket_factory=forbidden)
+            self.assertIn('Unix socket', reason)
 
     def test_log_snapshot_survives_later_truncation_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:

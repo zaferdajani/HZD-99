@@ -36,4 +36,13 @@ const migration = fs.readFileSync('js/gravehorn.js', 'utf8');
 assert(/sv\.flags\.pl_cshard[^\n]+sv\.flags\.bossHorn\s*=\s*1/.test(migration),
   'migration no longer exposes why illicit marble would erase the boss on reload');
 
+const caveLedger = fs.readFileSync('docs/CAVES_CH1.md', 'utf8');
+const cv3Row = caveLedger.split('\n').find(line => line.includes('| **CV3** the quarry')) || '';
+assert(cv3Row.includes('Gravehorn owns the marble seam'),
+  'chapter-one cave ledger hides Gravehorn from the required quarry route');
+assert(cv3Row.includes('legitimate retreat') && cv3Row.includes('`bossHorn`'),
+  'chapter-one cave ledger no longer names the authored retreat gate');
+assert(cv3Row.includes('cannot reward while he stands'),
+  'chapter-one cave ledger falsely presents the marble as a loose pickup');
+
 console.log('PASS CV3 marble remains visible but unrewarded until Gravehorn legitimately retreats');
