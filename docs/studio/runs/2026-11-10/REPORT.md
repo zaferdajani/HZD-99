@@ -42,6 +42,20 @@ campaign comprehension, or sustained device performance.
 | Integrated into production/authorized integration | NO | All authoritative refs remain `7da3c87...` |
 | Deployed | NO | Explicitly not attempted |
 
+### Remote publication attestation
+
+The remotely retrievable audited source is
+`db9eb3bd156219c803a5b89c26e0d6b31749678f` with tree
+`4171a5d14c1f9b8b5e7dac5ce969bd82c7833bbd`. The evidence content commit is
+`e9db5b3b1f9707336711b60e62ff0cdabd6146d9` with tree
+`580bd2bdf95a77de375ce28237e2509f59b5982f`; all 48 unique review blobs were
+accepted only after each connector-returned SHA matched the local Git blob.
+The evidence commit is a direct child of the audited source. Its
+`results.json` names that reachable source, records 41 pass / 165 blocked / 0
+fail or timeout, and reports log integrity true. The final branch head is this
+documentation-only attestation child; source and automated evidence are
+unchanged. Neither `main` nor an authorized integration ref was updated.
+
 ## Change since November 9
 
 There is no production, integration, authored-art, sound, VFX or cinematic
