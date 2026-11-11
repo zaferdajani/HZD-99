@@ -245,12 +245,38 @@ function moveEnt(e, dt) {
   e.y += e.vy * dt;
   const x0 = Math.floor(e.x / TILE), x1 = Math.floor((e.x + e.w - 1) / TILE);
   if (e.vy >= 0) {
-    const ty = Math.floor((e.y + e.h) / TILE);
-    for (let tx = x0; tx <= x1; tx++) {
-      const c = tileAt(tx, ty);
-      // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
-      // pounce at a player on the floor below them)
-      if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) { e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; break; }
+    // A FALL IS SWEPT, NOT SAMPLED.
+    //
+    // This looked only at the row the feet LANDED in, which is correct for as
+    // long as a step is shorter than a tile — and the step is not always
+    // shorter than a tile. The fall cap is 1020 px/s and SIM_STEP is 1/30, so a
+    // body at terminal velocity covers 34 px through 32 px tiles, and the row
+    // it passed through is never asked. Measured, before this: feet starting
+    // exactly on a surface ended 31.99 px BELOW it, vy zeroed — standing a
+    // whole tile inside the floor — and a ledge one tile thick is the case that
+    // is passed clean through instead.
+    //
+    // It needs a long fall (terminal takes ~170 px) and a step at the full
+    // 1/30, which the loop only takes when a frame cost 33 ms or more. So this
+    // is a slow-device bug, which is the worst kind to leave in: it cannot be
+    // reproduced on the machine it is written on.
+    //
+    // The sweep walks the rows the feet crossed, nearest first, and the first
+    // solid one stops her. At 60 fps that is the same single row it always was.
+    // The cap is not touched: lowering terminal velocity would change how
+    // falling feels, and this is a resolver bug, not a feel decision.
+    const r1 = Math.floor((e.y + e.h) / TILE);
+    const r0 = Math.max(Math.floor(prevB / TILE), r1 - 64);   // 64 rows is two rooms: a guard, not a budget
+    let hit = false;
+    for (let ty = r0; ty <= r1 && !hit; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const c = tileAt(tx, ty);
+        // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
+        // pounce at a player on the floor below them)
+        if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) {
+          e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; hit = true; break;
+        }
+      }
     }
   } else {
     const ty = Math.floor(e.y / TILE);

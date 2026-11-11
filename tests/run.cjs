@@ -52,6 +52,7 @@ const SUITE = [
   ['mobile-platform', 'the shipped touch recognizer and the two-state pause, in both built pages'],
   ['gesture-input', 'the picture answers taps and swipes, and nothing the controller owns changes'],
   ['input-contract', 'one struct the game reads: the devices unchanged, and a struct alone can play'],
+  ['fallthrough', 'a fall at terminal velocity lands on the floor it crossed, not a tile inside it'],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],
