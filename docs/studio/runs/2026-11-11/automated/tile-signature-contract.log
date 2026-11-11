@@ -1,0 +1,6 @@
+
+── tile-signature-contract  — room bakes distinguish equal-count broken-tile layouts
+PASS room bake signature distinguishes equal-count broken-tile layouts
+   (tile-signature-contract: 2.3 s)
+
+all 1 harnesses ran

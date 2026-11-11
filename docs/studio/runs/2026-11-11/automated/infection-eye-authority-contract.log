@@ -1,0 +1,6 @@
+
+── infection-eye-authority-contract  — story and art authority keep ordinary infection red and bosses purple
+PASS story, runtime and art authority agree: ordinary infected eyes red, bosses purple
+   (infection-eye-authority-contract: 4.0 s)
+
+all 1 harnesses ran

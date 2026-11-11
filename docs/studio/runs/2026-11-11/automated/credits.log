@@ -1,0 +1,11 @@
+
+── credits  — every shipped sound traces to a line in assets/CREDITS.md
+126 shipped audio files, 52 coverage patterns in CREDITS.md
+  ok   the picture table declares generation
+  ok   there is a generated-audio section
+  ok   the Steam disclosure requirement is written down
+
+OK — every shipped sound traces to a line in assets/CREDITS.md
+   (credits: 0.2 s)
+
+all 1 harnesses ran

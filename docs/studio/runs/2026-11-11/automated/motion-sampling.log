@@ -1,0 +1,6 @@
+
+── motion-sampling  — static clips rejected and full action windows retained
+OK — static/noisy clips rejected, complete strike and return retained without padding
+   (motion-sampling: 0.2 s)
+
+all 1 harnesses ran
