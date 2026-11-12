@@ -168,6 +168,7 @@ const SUITE = [
   ['ceillock',  'the roof plate is nailed to the room grid: it never slides against the rock it hangs from'],
   ['tutor',     'the opening chain: booth, letter, battery, repair, pod, Volt Pack, heal, winch, monument, road'],
   ['tells',     'every boss wind-up carries BOTH channels — no silently one-channel telegraphs'],
+  ['bosswindow', 'how long every guardian warns, move by move, against its floor'],
   ['threat',    'threat concentration per screen, and the forbidden compositions'],
   ['errands',   'every errand has a goal that exists and can be reached'],
   ['deadend',   'no broken exits, no one-way doors, no unreachable rooms, every leaf pays'],

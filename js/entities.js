@@ -13514,11 +13514,35 @@ class Boss {
             const gdx = Math.abs(px - this.cx());
             const gb = gdx < 160 ? 0 : gdx < 380 ? 1 : 2;
             const pick = bossDraw(this, [['pounce', [3, 1, 0.5][gb]], ['dash', [1, 3, 2][gb]], ['spread', [0.5, 1, 3][gb]]]);
+            // ...AND THE WARNING SAYS WHICH ONE IT IS (2026-11-12).
+            //
+            // All three used TELL_FAST, the pounce at 0.86 of it, and
+            // tests/bosswindow.cjs measured them at 333 / 367 / 367 ms: three
+            // different attacks announcing themselves for the same third of a
+            // second, inside the one fight where the doctrine says no two
+            // telegraphs may read alike. The deck already separates them by
+            // DISTANCE — pounce close, dash mid, spread far — so the player
+            // could infer the move from the gap, and then the gap is doing the
+            // whole job and the tell is carrying nothing.
+            //
+            // Now the length is information. The three sizes already exist and
+            // already mean something, so they are used as meant: a line you
+            // step out of is quick, a leap that commits is the middle, and the
+            // arena-changing one gets the heavy tell it was always owed.
+            //
+            //   dash    TELL_FAST   350 ms  unchanged — a line, answered by a step
+            //   pounce  301 -> 500 ms       it was the SHORTEST warning in the
+            //                               fight attached to the closest and
+            //                               most committed move, which is
+            //                               backwards; TELL_SWIPE
+            //   spread  350 -> 700 ms       TELL_HEAVY, whose documented job is
+            //                               the arena-changing move, which is
+            //                               exactly what a spread of light is
             if (pick === 'dash') { this.st = 'dashwarn'; this.t = TELL_FAST; this.vx = 0; }
-            else if (pick === 'pounce') { this.st = 'pouncewarn'; this.t = TELL_FAST * 0.86; this.vx = 0; }
+            else if (pick === 'pounce') { this.st = 'pouncewarn'; this.t = TELL_SWIPE; this.vx = 0; }
             // THE SPREAD HAD NO WIND-UP (docs/combat/AAA_BOSS_AUDIT: "fires
             // from idle with no dedicated tell"). It gathers like the others.
-            else { this.st = 'spreadwarn'; this.t = TELL_FAST; this.vx = 0; }
+            else { this.st = 'spreadwarn'; this.t = TELL_HEAVY; this.vx = 0; }
           }
         } else if (this.st === 'spreadwarn') {
           this.vx = 0; this.t -= dt;

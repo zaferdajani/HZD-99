@@ -158,3 +158,15 @@ chest that frees the second sword. Unchanged.
 | move selection (2026-10-08) | `cycle++ % 3` → dash, pounce, spread | range deck (§B7) | the same three at every distance |
 | spread tell | none — fired from `idle` | `spreadwarn` 350 ms (`TELL_FAST`), amber, automatic cue | a damage source with no wind-up (AAA audit) |
 | hit-group break | none | `dazeAt 6`, span 2.4 s, 1.5 / 1.2 s, cooldown 5.5 / 7 s | plan §3.6 |
+| pounce tell (2026-11-12) | 301 ms (`TELL_FAST × 0.86`) | **500 ms** (`TELL_SWIPE`) | it was the shortest warning in the fight attached to the closest, most committed move — backwards |
+| spread tell (2026-11-12) | 350 ms (`TELL_FAST`) | **700 ms** (`TELL_HEAVY`) | `TELL_HEAVY`'s documented job is the arena-changing move, which is what a spread of light is |
+
+**Why both moved at once (2026-11-12).** `tests/bosswindow.cjs` measured the
+fight's three telegraphs at 333 / 367 / 367 ms — three different attacks
+announcing themselves for the same third of a second, in the one fight where
+the doctrine says no two telegraphs may read alike. The deck already separates
+them by distance (pounce close, dash mid, spread far), so the gap was carrying
+the whole read and the tell was carrying nothing. They now measure
+367 / 533 / 733 ms: the length says which move it is, short for a line you step
+out of and long for the arena about to change. The dash is unchanged at
+`TELL_FAST`, so the fastest thing that can reach her at close range still is.
