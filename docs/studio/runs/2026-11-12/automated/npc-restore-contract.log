@@ -1,0 +1,6 @@
+
+── npc-restore-contract  — NPC cell, awake state and durable gift settle in one write
+PASS NPC restore commits cell, awake/repaired state and durable gift atomically
+   (npc-restore-contract: 0.0 s)
+
+all 1 harnesses ran

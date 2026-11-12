@@ -1,0 +1,28 @@
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 2.354s
+
+OK
+PASS fallthrough contract: swept terminal falls stop on floor, ledge, and one-way; thruPlat remains deliberate
+PASS production combat: damage/armor, protected targets, charged contact, bounded effects/log, weapon progression
+PASS repair lifecycle: ordered puzzle, wrong inputs, prefix reload, boot interruption, once-only NPC rewards, forge quest, stale room/save events, lost cell, menu preservation, visibility cleanup, orphan recovery, legacy save and both loading paths
+PASS quest payments are atomic and completed legacy forge saves recover their Purifier
+PASS NPC restore commits cell, awake/repaired state and durable gift atomically
+PASS Alpha is documented and wired as an optional forged-blade depth branch
+PASS Gravehorn eye core, glow, anchor and art brief agree on boss purple
+PASS CV3 marble remains visible but unrewarded until Gravehorn legitimately retreats
+PASS room bake signature distinguishes equal-count broken-tile layouts
+PASS story, runtime and art authority agree: ordinary infected eyes red, bosses purple
+PASS scene captions retain unread lines, display three, and promote queued text in FIFO order
+PASS purified Sage source wiring uses distance gait, walk strip and rest kneel
+PASS: battery waking, automatic quest, earned forge, distinct sword/connector pickups and first sage story gate
+OK — focus loss clears all input, background input is blocked, fresh input recovers and touch cancellation cannot fire
+  ok   clean complete route certifies  {"result":"complete","certified":true,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   missing required passage fails  {"result":"complete-without-required-panels","certified":false,"missing":["passage"],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a timed-out story beat fails  {"result":"complete-with-missed-panels","certified":false,"missing":[],"missed":["cave"],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a page error fails  {"result":"complete-with-page-errors","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":1,"full":true}
+  ok   a late cave introduction fails chronology  {"result":"complete-with-panel-order-errors","certified":false,"missing":[],"missed":[],"orderErrors":["marble","forge"],"pageErrors":0,"full":true}
+  ok   restored segment is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+  ok   developer stop is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+
+all campaign certificate checks passed
