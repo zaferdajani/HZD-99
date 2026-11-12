@@ -259,12 +259,21 @@ function moveEnt(e, dt) {
   e.y += e.vy * dt;
   const x0 = Math.floor(e.x / TILE), x1 = Math.floor((e.x + e.w - 1) / TILE);
   if (e.vy >= 0) {
-    const ty = Math.floor((e.y + e.h) / TILE);
-    for (let tx = x0; tx <= x1; tx++) {
-      const c = tileAt(tx, ty);
-      // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
-      // pounce at a player on the floor below them)
-      if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) { e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; break; }
+    // Terminal velocity is 1020 px/s and the largest simulation step is 1/30,
+    // so feet may travel 34 px across a 32 px tile row in one update. Check
+    // every crossed row in order instead of sampling only the landing row.
+    const r1 = Math.floor((e.y + e.h) / TILE);
+    const r0 = Math.max(Math.floor(prevB / TILE), r1 - 64);
+    let hit = false;
+    for (let ty = r0; ty <= r1 && !hit; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const c = tileAt(tx, ty);
+        // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
+        // pounce at a player on the floor below them)
+        if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) {
+          e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; hit = true; break;
+        }
+      }
     }
   } else {
     const ty = Math.floor(e.y / TILE);

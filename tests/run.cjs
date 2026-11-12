@@ -110,6 +110,8 @@ const SUITE = [
   ['mobile-platform', 'the shipped touch recognizer and the two-state pause, in both built pages'],
   ['gesture-input', 'the picture answers taps and swipes, and nothing the controller owns changes'],
   ['input-contract', 'one struct the game reads: the devices unchanged, and a struct alone can play'],
+  ['fallthrough-contract', 'terminal falls sweep every crossed tile row and preserve deliberate one-way descent', {noBrowser:true}],
+  ['fallthrough', 'a terminal fall lands on the first floor row crossed in the assembled game'],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
   ['winch-purpose', 'the jammed winch arm blocks the road, every strike knocks scrap she collects, the burst lifts the arm; reloads and NOSTOS unaffected'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
