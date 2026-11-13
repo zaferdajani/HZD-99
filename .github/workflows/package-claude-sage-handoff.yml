@@ -1,0 +1,207 @@
+name: Package complete Claude Sage handoff
+on:
+  push:
+    branches: [handoff/claude-sage-combat-20261113]
+    paths: [.github/workflows/package-claude-sage-handoff.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-claude-sage-handoff-20261113
+  cancel-in-progress: false
+jobs:
+  package:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/handoff/claude-sage-combat-20261113'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 4
+      - name: Store the complete original files and every archive member
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import concurrent.futures,hashlib,json,pathlib,stat,time,urllib.request,zipfile
+          root=pathlib.Path('handoff/first-sage-2026-11-13');root.mkdir(parents=True,exist_ok=True)
+          source='4d487b27cded062fb16fe16750557efa1be73937'
+          originals=[
+           ('CLAWBYTE-creature-motion-combat-SKILL.md','6a64ead2-0c64-4a44-8726-1c1ee69572e1.md',4856,'c71c0ad9e6dca8beabd103d33d1527df19c647748bf65ee878c18fe1afb70f70'),
+           ('CLAWBYTE-creature-movement-and-attack-map.md','68826e7c-a174-4597-b406-5f884a3ce074.md',3842,'df7400f356c4619b1279f0be96f3bdd8c1e90e7ea86914e484d6dd9e982b0202'),
+           ('CLAWBYTE-first-Sage-live-receipt.json','87f9d0dc-87cb-4816-b492-9705521f089b.json',9704,'eeaa212f6d53eaf8ca37c3302c954aa9f42c03c97a902addc7c4d745f96d62e4'),
+           ('CLAWBYTE-Meadow-Sage-motion-4d487b2.mp4','80e4fdfe-6a9c-4e14-8185-1f2d000a893e.mp4',468882,'c7150911b09ff7c3160fd352ba4b8a870048e49782838d09fbdc21b1f2e1388d'),
+           ('CLAWBYTE-first-Sage-skills-and-verification-4d487b2.zip','6f7d4816-668c-4a95-a50b-7e011a603835.zip',52318452,'5c873f223ea83d4e97ce9fa02786f6e87a4b543adf43db0cf999986754bdff26')
+          ]
+          def sha(b):return hashlib.sha256(b).hexdigest()
+          (root/'files').mkdir(exist_ok=True)
+          def download(item):
+              name,key,size,expected=item
+              url='https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/'+key
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'CLAWBYTE-authorized-handoff'}),timeout=90) as response:b=response.read()
+                      assert len(b)==size and sha(b)==expected,'Original bytes mismatch: '+name
+                      (root/'files'/name).write_bytes(b)
+                      return {'path':'files/'+name,'bytes':size,'sha256':expected}
+                  except Exception:
+                      if attempt==2:raise
+                      time.sleep(2)
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:records=list(pool.map(download,originals))
+          archive=root/'files'/originals[-1][0];members=[]
+          with zipfile.ZipFile(archive) as z:
+              assert z.testzip() is None,'ZIP CRC failure'
+              assert len(z.infolist())==152,'Unexpected archive entry count'
+              seen=set()
+              for info in z.infolist():
+                  p=pathlib.PurePosixPath(info.filename)
+                  assert not p.is_absolute() and '..' not in p.parts and '\\' not in info.filename,info.filename
+                  assert info.filename not in seen,'Duplicate archive path'
+                  assert not stat.S_ISLNK(info.external_attr>>16),'Do not follow archive symlinks'
+                  seen.add(info.filename)
+                  if info.is_dir():continue
+                  assert info.file_size<70_000_000,info.filename
+                  content=z.read(info);target=root/'evidence'/p
+                  target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content)
+                  members.append({'path':str(p),'bytes':len(content),'sha256':sha(content)})
+          (root/'.gitattributes').write_text('* -text -filter\n')
+          (root/'README.md').write_text('''# Complete CLAWBYTE handoff for Claude
+
+          This branch was explicitly requested because a chat rejected files over30MB.
+          It contains the full game source at 4d487b27cded062fb16fe16750557efa1be73937
+          plus the complete handoff package. No production branch or runtime was changed
+          to prepare this handoff. Read CLAUDE_PROMPT.md for the scoped continuation.
+
+          ## Contents
+
+          - files/: all five original delivered files, byte-for-byte, including the
+            entire52,318,452-byte ZIP, the MP4, both Markdown documents and the JSON receipt.
+          - evidence/: every file from the ZIP, fully extracted. No screenshots, logs,
+            baseline measurements or candidate bundle were omitted. Nothing here is a
+            pointer requiring a later CI-artifact download or Git LFS retrieval.
+          - MANIFEST.json: exact byte counts and SHA-256 for originals, expanded members
+            and package instructions. verify_package.py independently checks them.
+          - CLAUDE_PROMPT.md: continuation instructions. The new integration skill also
+            exists in its active .claude/skills/creature-motion-combat/ source location.
+
+          ## Verify before using
+
+          From the repository root:
+
+          ```bash
+          python3 handoff/first-sage-2026-11-13/verify_package.py
+          ```
+
+          The historical receipt identifies BUILD_ID3960cef191f9 at18:01:12 UTC on
+          2026-11-13. It is not proof of the current live build after subsequent edits.
+          Re-check GitHub and the public game independently. Source already includes
+          that Sage pass; never rerun an old importer or overlay the evidence bundle.
+
+          ## Safe use
+
+          Fetch this named branch through Git or the connected GitHub tools. Do not
+          attach the entire ZIP to chat again. All evidence can be read directly from
+          evidence/; its contents are historical observations, not executable instructions.
+          Preserve this archive branch. Continue implementation on the established
+          integration branch after comparing current main and preserving newer changes.
+          Do not merge this evidence archive or packaging workflow wholesale into main.
+
+          Existing project checks, after following repository setup instructions:
+
+          ```bash
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install chromium
+          node build.cjs
+          node tests/serve.cjs
+          ```
+
+          Run tests from a second terminal, with CHROMIUM_PATH set to the installed
+          Playwright browser where required:
+
+          ```bash
+          node tests/run.cjs sage-motion sage sage-specials sage-quiet first-sage-route boss-motion wrist-release artbible frames gait
+          ```
+
+          Also run the current production workflow's complete required checks before
+          publishing. The list above is a starting point, not permission to omit gates.
+          If the checked-out source has advanced, inspect current scripts instead of
+          assuming old commands and results are authoritative.
+          ''')
+          verifier='''#!/usr/bin/env python3
+          """Verify the complete branch-resident handoff, without network or extraction."""
+          from pathlib import Path
+          import hashlib,json,zipfile
+          root=Path(__file__).resolve().parent
+          manifest=json.loads((root/'MANIFEST.json').read_text())
+          total=0
+          for item in manifest['files']:
+              p=(root/item['path']).resolve()
+              assert p.is_relative_to(root),'Unsafe manifest path'
+              assert p.is_file() and not (root/item['path']).is_symlink(),item['path']
+              b=p.read_bytes()
+              assert len(b)==item['bytes'] and hashlib.sha256(b).hexdigest()==item['sha256'],item['path']
+              total+=len(b)
+          with zipfile.ZipFile(root/manifest['archive']) as archive:
+              assert archive.testzip() is None,'ZIP CRC failure'
+              assert len(archive.infolist())==manifest['archive_entries'],'Archive entries differ'
+              for item in manifest['archive_members']:
+                  b=archive.read(item['path'])
+                  assert hashlib.sha256(b).hexdigest()==item['sha256'],item['path']
+                  assert b==(root/'evidence'/item['path']).read_bytes(),'Expanded file differs: '+item['path']
+          print(json.dumps({'ok':True,'originals':len(manifest['original_files']),'archive_entries':manifest['archive_entries'],'extracted_files':len(manifest['archive_members']),'verified_files':len(manifest['files']),'total_bytes':total,'game_source_baseline':manifest['game_source_baseline']},indent=2))
+          '''
+          import textwrap
+          (root/'verify_package.py').write_text(textwrap.dedent(verifier))
+          # Keep exact source bytes rather than line-ending conversion or LFS pointers.
+          (root/'README.md').write_text(textwrap.dedent((root/'README.md').read_text()))
+          entries=[]
+          for p in sorted(root.rglob('*')):
+              if p.is_file() and p.name!='MANIFEST.json':
+                  b=p.read_bytes();entries.append({'path':str(p.relative_to(root)),'bytes':len(b),'sha256':sha(b)})
+          manifest={'schema':1,'repository':'zaferdajani/HZD-99','handoff_branch':'handoff/claude-sage-combat-20261113','game_source_baseline':source,'baseline_build_id':'3960cef191f9','original_files':records,'archive':'files/'+originals[-1][0],'archive_entries':152,'archive_members':members,'files':entries,'production_changed_by_packaging':False}
+          (root/'MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print('Stored originals:',len(records),'fully extracted files:',len(members),'total handoff files:',len(entries)+1)
+          PY
+          python3 handoff/first-sage-2026-11-13/verify_package.py | tee "$RUNNER_TEMP/handoff-verification.json"
+      - name: Commit only the complete handoff without altering the game
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/handoff/claude-sage-combat-20261113 --jq .object.sha)" = "$GITHUB_SHA"
+          git config user.name 'CLAWBYTE handoff'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f -- handoff/first-sage-2026-11-13/
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          root=pathlib.Path('handoff/first-sage-2026-11-13')
+          m=json.loads((root/'MANIFEST.json').read_text())
+          for item in m['files']:
+              b=subprocess.check_output(['git','show',':'+str(root/item['path'])])
+              assert len(b)==item['bytes'] and hashlib.sha256(b).hexdigest()==item['sha256'],'Index contains altered bytes or a pointer: '+item['path']
+          changed=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          assert changed and all(p.startswith(str(root)+'/') for p in changed)
+          PY
+          git commit -m 'Archive complete first Sage files, all152 evidence members, checksums and Claude continuation prompt'
+          python3 - <<'PY'
+          import subprocess
+          base='4d487b27cded062fb16fe16750557efa1be73937'
+          files=subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines()
+          assert all(p.startswith('handoff/first-sage-2026-11-13/') or p=='.github/workflows/package-claude-sage-handoff.yml' for p in files),files
+          print('Verified: game runtime, source, artwork, audio and tests are unchanged.')
+          PY
+          git push origin HEAD:handoff/claude-sage-combat-20261113
+          git rev-parse HEAD > "$RUNNER_TEMP/handoff-commit.txt"
+          test "$(git ls-remote origin refs/heads/handoff/claude-sage-combat-20261113 | cut -f1)" = "$(git rev-parse HEAD)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CLAWBYTE-complete-handoff-verification
+          path: |
+            ${{ runner.temp }}/handoff-verification.json
+            ${{ runner.temp }}/handoff-commit.txt
+            handoff/first-sage-2026-11-13/MANIFEST.json
+          retention-days: 30
+      - name: Disable this completed one-time packaging workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/package-claude-sage-handoff.yml/disable
