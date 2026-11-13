@@ -1,0 +1,130 @@
+name: Validate boss motion and combat readability
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/boss-motion-pass.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-boss-motion-pass
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Pin current release and apply the reviewed source changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-evidence/boss-motion
+          gh api repos/$GITHUB_REPOSITORY/branches?per_page=100 > release-evidence/boss-motion/refs-before.json
+          git rev-parse HEAD > release-evidence/boss-motion/starting-commit.txt
+          git show b1ec3ab00f40448364bfbd2c0768701c77118b11:index.html > "$RUNNER_TEMP/baseline.html"
+          echo "BASELINE_HTML=$RUNNER_TEMP/baseline.html" >> "$GITHUB_ENV"
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/10a05495-6bf7-4e7a-9038-d5e9bc8f4dc6.zip' -o "$RUNNER_TEMP/boss-motion.zip"
+          echo "32486c66310fdd8168020f865cd49a727869b2455f3764313c99c1dbbf1ebf48  $RUNNER_TEMP/boss-motion.zip" | sha256sum --check
+          python3 - <<'PY'
+          import json,zipfile,pathlib,hashlib,os
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          with zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/boss-motion.zip') as z:
+              m=json.loads(z.read('manifest.json'))
+              assert len(m['files'])==17 and set(z.namelist())==set(m['files'])|{'manifest.json'}
+              assert h(pathlib.Path(os.environ['RUNNER_TEMP']+'/baseline.html').read_bytes())==m['baseline_page_sha256']
+              for name,v in m['files'].items():
+                  p=pathlib.Path(name)
+                  assert not p.is_absolute() and '..' not in p.parts and not name.startswith(('.github/','assets/')), name
+                  assert (h(p.read_bytes()) if p.exists() else None)==v['before'], 'Concurrent source change: '+name
+                  assert h(z.read(name))==v['after'], 'Wrong payload bytes: '+name
+              for name,expected in m['protected'].items():
+                  assert h(pathlib.Path(name).read_bytes())==expected, 'Protected current release changed: '+name
+              for name in m['files']:
+                  p=pathlib.Path(name);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(z.read(name))
+              pathlib.Path('release-evidence/boss-motion/payload-manifest.json').write_text(json.dumps(m,indent=2))
+          PY
+          node build.cjs
+          for f in js/boss-motion.js js/entities.js js/eagle.js js/glaciere.js js/furnace.js js/mother.js js/prism.js js/beast.js js/wolves.js tests/boss-motion.cjs; do node --check "$f"; done
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          import json,subprocess
+          m=json.load(open('release-evidence/boss-motion/payload-manifest.json'))
+          subprocess.run(['git','add','--',*m['files'],'index.html','odyssey.html','forge.html','forge-odyssey.html'],check=True)
+          PY
+          git commit -m 'Make boss motion simulation-owned; correct PRISM tells, landing and solid hit reactions'
+          git rev-parse HEAD > release-evidence/boss-motion/candidate-commit.txt
+          git bundle create release-evidence/boss-motion/candidate.bundle HEAD ^${{ github.sha }}
+      - name: Install locked browser runtime and assemble app content
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          node tools/pack-www.cjs
+          mkdir -p tests/out
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Reproduce baseline defects and verify repaired authored motion
+        run: |
+          set -euo pipefail
+          node tests/boss-motion.cjs --baseline | tee release-evidence/boss-motion/baseline.log
+          node tests/boss-motion.cjs | tee release-evidence/boss-motion/verified.log
+          node tests/build-integrity.cjs | tee release-evidence/boss-motion/build-integrity.log
+          node tests/reconciliation.cjs | tee release-evidence/boss-motion/reconciliation.log
+      - name: Preserve combat, movement, story and release guarantees
+        run: |
+          set -euo pipefail
+          node tests/run.cjs boss-motion wrist-release repair-browser panels purification-controls purification combat-impact-contract combat-impact-browser combat-impact-input bosswindow tells bosspace boss-counters openings daze wolves minis furnace artbible shield entrance-integration hero-cache-regression voice-handoff scratch-reach scratch-visual release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 regress | tee release-evidence/boss-motion/regressions.log
+          node tests/boss-motion-capture.cjs | tee release-evidence/boss-motion/capture.log
+          python3 - <<'PY'
+          import pathlib,hashlib,json,subprocess
+          m=json.load(open('release-evidence/boss-motion/payload-manifest.json'))
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          for name,expected in m['protected'].items():
+              assert h(pathlib.Path(name).read_bytes())==expected,name
+          assert not subprocess.check_output(['git','diff','--name-only','b1ec3ab00f40448364bfbd2c0768701c77118b11','HEAD','--','assets']).strip(), 'Artwork/audio changed'
+          before=json.load(open('release-evidence/boss-motion/baseline.json'))
+          after=json.load(open('release-evidence/boss-motion/verified.json'))
+          assert before['hero']==after['hero'], 'Hero movement/state/collision changed'
+          assert all(c['pass'] for c in after['checks']), 'Targeted motion checks failed'
+          pathlib.Path('release-evidence/boss-motion/protected-files.json').write_text(json.dumps(m['protected'],indent=2))
+          PY
+          git diff --exit-code -- js assets tests source-files.json dev.html index.html odyssey.html forge.html forge-odyssey.html
+      - name: Push only the tested integration candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)
+          test "$current" = "$GITHUB_SHA" || { echo 'Another author advanced integration; preserve candidate and do not overwrite.'; exit 1; }
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+          # No Pages deployment or main/odyssey mutation here. Promote after
+          # inspecting this exact candidate and its complete evidence.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-boss-motion-evidence-${{ github.sha }}
+          path: |
+            release-evidence/boss-motion/
+            release-evidence/finish/
+            tests/out/
+            docs/combat/BOSS_MOTION_PASS_2026-11-13.md
+          retention-days: 90
+          if-no-files-found: error
+      - name: Disable completed one-time integrator
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/boss-motion-pass.yml/disable
