@@ -1,0 +1,37 @@
+{
+  "base_commit": "27b7beae3cef8163372562008ad799c2d777c1e3",
+  "baseline_commit": "71509477db8cebf5615bb4e3bcb14bfd350f87fd",
+  "baseline_page_sha256": "a2fcbe0ebbe1af443b7b0dee8a28982544ba3ff8a0abee6822c14cbebaf871ec",
+  "files": {
+    "js/sage-motion.js": {
+      "before": "f902ba6414c337269effe49b14197035f61de448a949b0a3c0c7a506bd7552db",
+      "after": "1c4956b88ff6bdbd812385a374aa8149f7c21e7e1eab5282b75110f504db8a5b"
+    },
+    "tests/sage-motion.cjs": {
+      "before": "acca158cd70be556bcd8db7c0d8c71ab3e00b655a82fefca329a554b767cbca7",
+      "after": "07bd76a656d835cc796b72fe04f5aedae557aab64b1821cf892841f392a79c72"
+    },
+    "docs/combat/SAGE_MOTION_PASS_2026-11-13.md": {
+      "before": "a67a45c592fd38bde1da5c3c364c20ce37e955acb30cf217af88dd0db88ec761",
+      "after": "17a9fd85b602c2cc77167f008a021a898fa2c8e01aa8b5da796f4fefbb8c983c"
+    }
+  },
+  "protected": {
+    "js/game.js": "626506ef0fc08decfc23cd4e7e67748e0502bfeffcb4045db4afc720275bfc6b",
+    "js/boss-motion.js": "be93132f40a5df1bbdd1eada3522ae48de5537a34cd2696a93aae859ca132101",
+    "js/engine.js": "f4b12176b3616bb7a3c69a56d0bbb7ca5424a012f17d92a5d736cecd1745567e",
+    "js/audio.js": "4ab9c77c870404ce3c32902347039f3467546632ec4e3678f0c37924aa577a41",
+    "js/world.js": "81cca97c46ef78deae801ebe6f163bcabdf3aadfff6e6782e2d3c9669e51b07d",
+    "js/weapons.js": "ba1b05fde4c5adb8358ff5abf7de4dd7358f301cb051fe12d09fc2371fc0ecae",
+    "js/gear.js": "b03c99a711b78b257b6756b4281af022f82584f4053a956e09af97321af20f0c",
+    "js/beast.js": "35cf06ce14ec08fb0be31ee9d27124a6744b64a90da644869a3ade74f85171f4",
+    "js/wolves.js": "1bcecc01871e703677a0d27fa08a8a113294b35352889f1c649d264814a915a3",
+    "js/ratchet-release.js": "403ddc0ca380d30435955e4c620220ce490fdea9763390147337cb0e5977ad84",
+    "tests/sage.cjs": "652cb4fe6bf59bfbefb186b0e58007f6ada98bb2ee78a34ee108b78749c96b80",
+    "tests/sage-quiet.cjs": "51675c1ea9e6931deae2d3dbae730ac7049afded59f9a1df4d332bfffa2cd8e9",
+    "tests/sage-specials.cjs": "bb74d989c475810f2c0a0c5c57d4f40df1aebf866bc29de699581ca6dd9e0e12",
+    "assets/characters/hero/gait/walk.webp": "4d71edab37a592ea3a8e50324d54babaed6bc0bbc4ad15ccdc360d31b961cb5d",
+    "assets/characters/hero/gait/run.webp": "374a82f47d48a2fc7c895193a1140a28aea5516a270b0b270b098ac75386ff63",
+    "assets/sfx/vox/hzd_yalla.wav": "eec30e2cf0d307c6d56846bdd4c41a4a57d7ba3f42bb2cd17b1f431404c54630"
+  }
+}

@@ -1,0 +1,9 @@
+PASS real Data Conduits NPC exists ""
+PASS Mono resolves beyond generic 46-unit interaction range ""
+PASS Mono does not activate from arbitrary distance ""
+PASS Mono light is drawn after clear, before one world projection ["clear","accent","projection"]
+PASS charge drawing no longer has a second runtime installer ""
+PASS latest smaller sizing is preserved, not inferred from test constants {"actor":1,"presentation":1,"zoom":1.52}
+PASS one actor multiplier is actually applied 1
+PASS combined charge and landing renders the running strip "gaitRun:0"
+PASS accepted jump keeps held input and horizontal air control ""

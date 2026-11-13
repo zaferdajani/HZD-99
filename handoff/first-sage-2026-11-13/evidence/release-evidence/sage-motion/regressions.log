@@ -1,0 +1,565 @@
+
+── combat-impact-contract  — armor, protected contacts, charged weight and bounded combat ledger
+PASS production combat: damage/armor, protected targets, charged contact, bounded effects/log, weapon progression
+   (combat-impact-contract: 0.0 s)
+
+── combat-impact-browser  — rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export
+PASS staged real renderer: white silhouette/expiry, metal count/lifetime/cap, charged recoil/stop, protected actors, all special values, downloadable ledger
+   (combat-impact-browser: 5.5 s)
+
+── wrist-release  — supplied Ratchet reaction, real contact, skip, saved interruption and unchanged rewards
+PASS all four supplied poses are drawn by the actual NPC renderer
+PASS scene ends once, clears controls, and records completion
+PASS reaction is not a damage or reward event
+PASS contact uses the rendered hand anchor
+PASS authored feet stay on one floor across all four poses
+PASS completed save cannot replay the first awakening reaction
+PASS Escape exits in one action, with no menu/resume loop
+PASS GP_BACK exits in one action, with no menu/resume loop
+PASS VBACK exits in one action, with no menu/resume loop
+PASS touch/click Continue cannot leak into the next conversation
+PASS room changes remove controls and leave no stale callback
+PASS pause/resume retains this scene rather than orphaning its controls
+PASS earned repair runs wrist release before the existing explanation
+PASS the original quest, battery and spare handoff are unchanged
+PASS failed artwork loading cannot trap the player
+PASS stale controls cannot complete a newer scene
+PASS saved interruption resumes at the NPC without duplicating completion
+PASS contact remains aligned when approached from -1
+PASS contact remains aligned when approached from 1
+PASS active tutorial never intercepts the scene exit
+PASS backgrounding freezes the reaction and resuming continues it
+PASS no browser errors
+   (wrist-release: 2.6 s)
+
+── first-sage-route  — pre-guardian route through quarry maintenance passage
+PASS first-sage maintenance route before guardian [
+  { from: 'CV3', to: 'GA1T', x: 628 },
+  { from: 'GA1T', to: 'CV3', x: 1140 }
+]
+   (first-sage-route: 1.0 s)
+
+── sage-quiet  — comic page 26: the sage's promise closes its end of the network
+PASS sage-quiet: the chamber stands down in the moment (1 machines), all three rooms of the network wake calm on a fresh load, and no other cave or surface is touched {
+  before: { chamber: 1, n: 1 },
+  beforeTunnel: 1,
+  company: 1,
+  afterMoment: 0,
+  net: {
+    GA1: { hostile: 0, total: 0 },
+    GA1T: { hostile: 0, total: 1 },
+    GA1D: { hostile: 0, total: 1 }
+  },
+  otherNet: 1,
+  meadow: 2,
+  flagged: true
+}
+   (sage-quiet: 1.0 s)
+
+── entrance-integration  — painted entrances share world anchors without duplicate mouth overlays
+PASS painted cave/city thresholds follow world anchors through camera travel; no duplicate cave-mouth overlay
+   (entrance-integration: 1.6 s)
+
+── hero-cache-regression  — third-hit cached sheet geometry and supplied idle in every mood
+PASS third-hit gameplay renders six complete cells; incompatible cached sheet rejected; all 64 idle frame/mood/facing cases keep supplied art; voice and art URLs match build
+   (hero-cache-regression: 1.1 s)
+
+── scratch-visual  — pixel-measured cyan scratch reach, mirroring and fading recovery
+PASS 16 pixel-measured scratch/fade samples, facing symmetry, visual/contact reach; build 3960cef191f9
+   (scratch-visual: 1.0 s)
+
+── scratch-reach  — scratch contact boundary, facing and non-damaging recovery wake
+PASS scratch contact boundaries, both facings, charge direction, no repeated damage, 180ms recovery wake: [{"face":1,"combo":0,"reach":86},{"face":1,"combo":1,"reach":86},{"face":1,"combo":2,"reach":100},{"face":-1,"combo":0,"reach":86},{"face":-1,"combo":1,"reach":86},{"face":-1,"combo":2,"reach":100}]
+   (scratch-reach: 0.1 s)
+
+── tutorial-controller  — complete production tutorial, contextual locks and transition recovery
+PASS: complete tutorial controller — free travel, the taught verb always answers, one verb at a time, menus, jump readiness, no frozen enemies and input edges
+   (tutorial-controller: 0.0 s)
+
+── offline-release  — scoped version cache, media seeking and storage-denied fallback
+PASS: versioned app-only caches, fresh manifests, media seeking, offline fallback, cache denial and no partial-response corruption
+   (offline-release: 0.1 s)
+
+── release-polish  — cold artwork, actual screen scale, camera, input edges, workshop and movies
+PASS cold desktop viewport fills available 16:9 area {"width":1280,"height":720,"pixels":1280}
+PASS cold-start canonical art without external gait downloads {"build":"3960cef191f9","core":[{"key":"heroStates","embedded":true,"width":7680},{"key":"gaitWalk","embedded":true,"width":2560},{"key":"gaitRun","embedded":true,"width":5120},{"key":"hzdIdle","embedded":true,"width":2560}],"run":{"key":"gaitRun","cells":16,"k":1.441025641025641,"from":0,"to":15}}
+PASS pressed edges consumed once during multi-step frames {"pressed":1,"held":3,"steps":3}
+PASS buffered combat/jump inputs and immediate pause during hitstop {"attack":0.2,"jump":0.12}
+PASS reported workshop approach moves with stale locks present {"dx":85.50000000000023,"prompt":"UP","lock":null,"legacy":null}
+PASS touch movement remains held until finger release {"dx":108.16666666666694,"heldAfterFrame":true}
+PASS actual rendered hero size {"height":71,"viewportRatio":0.19985185185185186,"zoom":1.52,"renderer":"hzdIdle:0"}
+PASS seven room camera/framing transitions [{"id":"W1","zoom":1.52,"x":442,"y":392.81342548828127},{"id":"W2","zoom":1.52,"x":442,"y":382},{"id":"A0","zoom":1.52,"x":442,"y":406.69293476562507},{"id":"A0B","zoom":1.52,"x":442,"y":406.69293476562507},{"id":"A1","zoom":1.52,"x":442,"y":406.69293476562507},{"id":"CV1","zoom":1.52,"x":442,"y":382},{"id":"A3","zoom":1.52,"x":442,"y":406.69293476562507}]
+PASS charged locomotion, real idle and no legacy run fallback {"state":"run_a","missing":"loading:run_b"}
+PASS save persistence {"saved":true,"scrap":137,"tutorial":7}
+Production clip playback [{"key":"intro1","started":true,"time":0.110383,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro1.mp4","phase":"play","error":null},{"key":"intro2","started":true,"time":0.111151,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro2.mp4","phase":"play","error":null},{"key":"intro3","started":true,"time":0.08021,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro3.mp4","phase":"play","error":null},{"key":"intro4","started":true,"time":0.09529,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro4.mp4","phase":"play","error":null},{"key":"intro5","started":true,"time":0.115387,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro5.mp4","phase":"play","error":null},{"key":"intro6","started":true,"time":0.080135,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro6.mp4","phase":"play","error":null},{"key":"intro7","started":true,"time":0.083485,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro7.mp4","phase":"play","error":null},{"key":"intro8","started":true,"time":0.096128,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro8.mp4","phase":"play","error":null}]
+PASS all eight intro clips really decode and advance [{"key":"intro1","started":true,"time":0.110383,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro1.mp4","phase":"play","error":null},{"key":"intro2","started":true,"time":0.111151,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro2.mp4","phase":"play","error":null},{"key":"intro3","started":true,"time":0.08021,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro3.mp4","phase":"play","error":null},{"key":"intro4","started":true,"time":0.09529,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro4.mp4","phase":"play","error":null},{"key":"intro5","started":true,"time":0.115387,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro5.mp4","phase":"play","error":null},{"key":"intro6","started":true,"time":0.080135,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro6.mp4","phase":"play","error":null},{"key":"intro7","started":true,"time":0.083485,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro7.mp4","phase":"play","error":null},{"key":"intro8","started":true,"time":0.096128,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro8.mp4","phase":"play","error":null}]
+   (release-polish: 8.2 s)
+
+── chapter-one  — one earned rescue, quarry, forge and sage save chain
+PASS connected first-chapter quest and reloads { quest: 'done', sword: 'single', sage: true }
+   (chapter-one: 1.2 s)
+
+── sage-specials  — charged attacks obey purification and protected-target rules
+OK — held specials cleanse sages, protect allies and respect defenses
+   (sage-specials: 0.0 s)
+
+── input-focus  — focus loss clears input and cancelled touches cannot fire
+OK — focus loss clears all input, background input is blocked, fresh input recovers and touch cancellation cannot fire
+   (input-focus: 0.0 s)
+
+── voice-handoff  — foreground voice ownership across actions and charge
+PASS: vocal handoffs, uninterrupted foley, missing takes, charge ownership, damage and dialogue priority
+   (voice-handoff: 0.0 s)
+
+── wake  — the opening: film, waking floor, move -> jump -> gates -> straight into Ratchet's booth
+{"room":"W1","state":"PLAY","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":false,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":414.79585570000006,"input":false,"suspended":false}
+{"room":"W1","state":"PANELS","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":false,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":421.76588497500006,"input":false,"suspended":false}
+{"room":"W1","state":"PLAY","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":true,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":427.26191162109376,"input":false,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":161.00136333333336,"on":true,"hold":0.5499333333333317,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":426.9789831542969,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":257.2780299999994,"on":true,"hold":0.2667666666666668,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.27543090820313,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":353.5320299999988,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.2452490234375,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":415.84269666666614,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":433.3763220214844,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":506.49802999999923,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":438.3249304199219,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":574.4640299999992,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":434.71784423828126,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":665.1193633333329,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":431.28202270507813,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":727.4413633333327,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":439.5201513671875,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":818.0400299999998,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":434.252939453125,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":903.0286966666669,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":425.985361328125,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":982.3053633333342,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":431.10590576171876,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1044.6046966666675,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.33194946289063,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1135.237363333334,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.89069580078126,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1225.836030000001,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":429.4493200683594,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1282.434696666668,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.13874267578126,"input":true,"suspended":false}
+{"room":"W2","state":"PANELS","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":22,"on":true,"hold":-0.016333333333331736,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":430.13874267578126,"input":false,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":22,"on":true,"hold":0.5000333333333339,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":435.66471313476563,"input":false,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":103.42968333333367,"on":true,"hold":0.18359999999999832,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":425.59784912109376,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"MOVE","control":"→","target":416,"x":171.373016666667,"on":true,"hold":-0.016233333333335022,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.89933227539063,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"MOVE","control":"→","target":416,"x":256.32768333333456,"on":true,"hold":-0.016233333333335022,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.27543090820313,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":290.32768333333456,"on":true,"hold":-0.016233333333335022,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":"JUMP","vx":0,"y":436.26142333984376,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":378.0910233333355,"on":false,"hold":0.4334999999999962,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":244.53279728428473,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":412.0456900000036,"on":false,"hold":0.33363333333332523,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":238.04866549539634,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":485.67835666667077,"on":false,"hold":0.11706666666665716,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":283.1139762703991,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":559.2770233333372,"on":false,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":337.28374969722205,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":587.5763566666699,"on":false,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":375.55120164166505,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":653.4883366666667,"on":true,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":375.779306640625,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":732.7536699999998,"on":false,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":407.116850668446,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":823.3863366666659,"on":true,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":426.0435583496094,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"UP","control":null,"target":960,"x":880.041669999999,"on":true,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":417.93229125976563,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":true,"step":"gate","action":"UP","control":null,"target":960,"x":960,"on":true,"hold":-0.01610000000000951,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":false,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":-0.01610000000000951,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":false,"suspended":false}
+{"room":"A0","state":"PANELS","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":-0.01610000000000951,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":0.5000666666666644,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":443.99,"input":false,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":100.30667666666754,"on":true,"hold":0.2834666666666623,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":443.99,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":162.58334333333423,"on":true,"hold":0.10029999999999566,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.24283813476563,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":"MOVE","control":"→","target":399.36,"x":224.8826766666668,"on":true,"hold":-0.0329333333333355,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":424.382822265625,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":"MOVE","control":"→","target":399.36,"x":258.8373433333337,"on":true,"hold":-0.0329333333333355,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.56855224609376,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":"UP","control":null,"target":399.36,"x":326.79200999999944,"on":true,"hold":-0.0329333333333355,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":429.1667272949219,"input":true,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":null,"target":null,"x":115,"on":true,"hold":-0.0329333333333355,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":434.4061071777344,"input":false,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":null,"target":null,"x":162.31767999999965,"on":true,"hold":0.36666666666667036,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.24283813476563,"input":true,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":null,"target":null,"x":258.6283466666671,"on":true,"hold":0.08340000000000157,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.56855224609376,"input":true,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"note","action":"MOVE","control":"→","target":560,"x":292.6283466666671,"on":true,"hold":-0.016599999999998435,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":436.26142333984376,"input":true,"suspended":false}
+PASS fresh keyboard opening: wake, walk, obstacle jump, enter city, straight to and into the workshop, no fight on the way
+   (wake: 33.0 s)
+
+── frames  — every verb is a move, not one pose held for a quarter second
+── frames — a verb is a move, not a pose held for a quarter of a second
+
+  ok   claw_1 is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 48.5 / 51.2 / 0 / 49.7 / 39.1 %, mean 37.7, biggest step 51.2%
+  ok   claw_2 is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 60.2 / 57.2 / 53.6 / 43.5 / 60.1 %, mean 54.9, biggest step 60.2%
+  ok   finisher is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 55.4 / 62.2 / 69.7 / 63.8 / 64.7 %, mean 63.2, biggest step 69.7%
+  ok   burst is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 32.4 / 24.8 / 17.2 / 49.1 / 66.1 %, mean 37.9, biggest step 66.1%
+  ok   air: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   down: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   claw_1: the strip is played whole, every cell the film holds  declared 5 cells, the sheet holds 5
+  ok   claw_2: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   finisher: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   burstLegacy: the strip is played whole, every cell the film holds  declared 12 cells, the sheet holds 12
+  ok   burst: the strip is played whole, every cell the film holds  declared 12 cells, the sheet holds 12
+  ok   every strip in the game is a sequence, not a flip-book of one picture  air 6c  down 6c  claw_1 5c  claw_2 6c  finisher 6c  burstLegacy 12c  burst 12c  servo 16c  mono 16c  patch 13c  sage 11c  lumen 10c  kerf 8c
+  ok   the jump arc is indexed by her own vertical speed  vy -770..+690 asked for cells 0.00,1.26,2.28,2.62,3.64,4.97
+  ok   a grounded transition is indexed by the clock the physics keeps  over its timer it asked for cells 0.00,1.00,2.50,4.00,4.90
+  ok   a spent clock hands the frame back to the pose cell
+  ok   and with no strip fired every state falls through to its pose
+  ok   every wired strip is reachable in the state that owns it
+  ok   no page errors
+
+OK — the verbs move, and the transition layer draws the cell its clock asks for
+   (frames: 8.9 s)
+
+── feel  — input latency, hit-stop and camera lead, as frames
+run latency 1f   jump latency 1f   hit-stop 3f   camera answers a reversal in 2f
+  ok   a run starts within 2 frames of the key  1 frames
+  ok   a jump leaves the ground within 2 frames of the key  1 frames
+  ok   a claw hit freezes the world for at least 3 frames  3 frames
+  ok   the camera answers a reversal within 9 frames (150 ms)  2 frames
+  swirl, frame by frame (H pass, f frozen, . running): .........Hffffffff.........H........H.........H
+  ok   the swirl lands its four passes through the real frame  4 passes
+  ok   ...its FIRST pass freezes the world (the weight lands)  8 frozen frames
+  ok   ...and the later passes do not stutter it  frozen frames after each pass: 8 0 0 0
+  ok   no page errors
+
+OK — the body answers the hand, and the world answers the body
+   (feel: 2.7 s)
+
+── speed2  — movement speed is identical from 12 to 144 fps
+{"fps":144,"seconds":0.5,"simulated":0.4999999999999937,"travel":169.9999999999984,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":120,"seconds":0.5,"simulated":0.4999999999999953,"travel":169.99999999999898,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":60,"seconds":0.5,"simulated":0.5000000000000018,"travel":170.00000000000045,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":30,"seconds":0.5,"simulated":0.499999999999999,"travel":169.99999999999972,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":20,"seconds":0.5,"simulated":0.49999999999999994,"travel":170,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":12,"seconds":0.5,"simulated":0.49999999999999956,"travel":169.99999999999955,"expected":170,"velocity":340,"state":"PLAY"}
+PASS actual mainLoop preserves travel speed at 12, 20, 30, 60, 120 and 144 fps
+   (speed2: 1.3 s)
+
+── boss-motion  — simulation-owned boss motion, solid hit reactions, real landing and distinct tells
+PASS brood: secondary motion is identical with full, sparse or no rendering
+PASS brood: outline and repeated body draws cannot advance motion
+PASS brood: rendering cannot emit particles, sounds or camera shake
+PASS zero: secondary motion is identical with full, sparse or no rendering
+PASS zero: outline and repeated body draws cannot advance motion
+PASS zero: rendering cannot emit particles, sounds or camera shake
+PASS atlas: secondary motion is identical with full, sparse or no rendering
+PASS atlas: outline and repeated body draws cannot advance motion
+PASS atlas: rendering cannot emit particles, sounds or camera shake
+PASS mother: secondary motion is identical with full, sparse or no rendering
+PASS mother: outline and repeated body draws cannot advance motion
+PASS mother: rendering cannot emit particles, sounds or camera shake
+PASS glitch: struck armour remains solid
+PASS alpha: struck armour remains solid
+PASS brood: struck armour remains solid
+PASS atlas: struck armour remains solid
+PASS zero: struck armour remains solid
+PASS prism: struck armour remains solid
+PASS mother: struck armour remains solid
+PASS chime: struck armour remains solid
+PASS carrier: struck armour remains solid
+PASS moth: struck armour remains solid
+PASS lattice: struck armour remains solid
+PASS lens: struck armour remains solid
+PASS GLACIERE lancewarn triggers follow-through in actual recovery
+PASS GLACIERE novawarn triggers follow-through in actual recovery
+PASS PRISM lands and recovers on the actual elevated X1 platform
+PASS PRISM does not enter recovery in mid-air at the old row-14 threshold
+PASS PRISM tells select three different authored silhouettes
+PASS airborne pounce holds its flight pose instead of cycling grounded running legs
+PASS PRISM breathing remains planted rather than translating the entire sprite
+PASS warning sound starts in the same simulation step as the tell
+PASS the next update and extra draws do not repeat the entry cue
+PASS warning duration is captured on entry rather than by first render
+PASS visual simulation continues without a decoded sprite
+PASS no runtime errors in the real browser
+{"build":"3960cef191f9","passed":36,"total":36,"baseline":false}
+   (boss-motion: 1.8 s)
+
+── artbible  — ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor
+── artbible — the rules in ART_BIBLE.md, measured rather than asserted
+  ok   no atlas subject is declared and never drawn  known: 
+  ── NULLFANG
+  ok   NULLFANG: stalk vs crouch is a different SHAPE (IoU <= 0.86)  IoU 0.428
+  ok   NULLFANG: stalk vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.407
+  ok   NULLFANG: crouch vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.411
+  ok   NULLFANG: stalk vs swipe is a different SHAPE (IoU <= 0.9)  IoU 0.651
+  ok   NULLFANG: stalk vs daze is a different SHAPE (IoU <= 0.88)  IoU 0.661
+  ok   NULLFANG: crouch raises the amber above its own rest  61.0% vs rest 0.0%
+  ok   NULLFANG: stalk does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: pounce does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: stalk still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   NULLFANG: stalk has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: crouch has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: swipe has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: daze has its feet on the floor (±10 px)  -4 px
+  ── THE ALPHA
+  ok   THE ALPHA: rest vs coil is a different SHAPE (IoU <= 0.88)  IoU 0.308
+  ok   THE ALPHA: coil vs roarwarn is a different SHAPE (IoU <= 0.88)  IoU 0.841
+  ok   THE ALPHA: rest vs leap is a different SHAPE (IoU <= 0.85)  IoU 0.241
+  ok   THE ALPHA: coil raises the amber above its own rest  76.3% vs rest 0.7%
+  ok   THE ALPHA: clawwarn raises the amber above its own rest  78.8% vs rest 0.7%
+  ok   THE ALPHA: roarwarn raises the amber above its own rest  76.4% vs rest 0.7%
+  ok   THE ALPHA: rest does not pass for a wind-up  0.7% of lit pixels
+  ok   THE ALPHA: leap does not pass for a wind-up  0.3% of lit pixels
+  ok   THE ALPHA: rest still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   THE ALPHA: rest has its feet on the floor (±10 px)  -1 px
+  ok   THE ALPHA: coil has its feet on the floor (±10 px)  -1 px
+  ── TALONHOST
+  ok   TALONHOST: idle vs dive is a different SHAPE (IoU <= 0.9)  IoU 0.252
+  ok   TALONHOST: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   TALONHOST: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ── FURNACE CHOIR
+  ok   FURNACE CHOIR: idle vs lobwarn is a different SHAPE (IoU <= 0.94)  IoU 0.580
+  ok   FURNACE CHOIR: idle vs slamwarn is a different SHAPE (IoU <= 0.9)  IoU 0.545
+  ok   FURNACE CHOIR: idle vs ventwarn is a different SHAPE (IoU <= 0.9)  IoU 0.555
+  ok   FURNACE CHOIR: ventwarn vs vent is a different SHAPE (IoU <= 0.9)  IoU 0.415
+  ok   FURNACE CHOIR: idle vs dropcrouch is a different SHAPE (IoU <= 0.9)  IoU 0.506
+  ok   FURNACE CHOIR: ventwarn vs dropcrouch is a different SHAPE (IoU <= 0.9)  IoU 0.601
+  ok   FURNACE CHOIR: ventwarn vs recover is a different SHAPE (IoU <= 0.9)  IoU 0.597
+  ok   FURNACE CHOIR: dropcrouch vs hymn is a different SHAPE (IoU <= 0.9)  IoU 0.424
+  ok   FURNACE CHOIR: idle vs recover is a different SHAPE (IoU <= 0.9)  IoU 0.631
+  ok   FURNACE CHOIR: lobwarn raises the amber above its own rest  24.4% vs rest 10.5%
+  ok   FURNACE CHOIR: slamwarn raises the amber above its own rest  25.6% vs rest 10.5%
+  ok   FURNACE CHOIR: ventwarn raises the amber above its own rest  47.7% vs rest 10.5%
+  ok   FURNACE CHOIR: dropcrouch raises the amber above its own rest  38.5% vs rest 10.5%
+  ok   FURNACE CHOIR: hymn raises the amber above its own rest  46.2% vs rest 10.5%
+  ok   FURNACE CHOIR: idle does not pass for a wind-up  10.5% of lit pixels
+  ok   FURNACE CHOIR: recover does not pass for a wind-up  4.8% of lit pixels
+  ok   FURNACE CHOIR: idle still reads as PARTS, not one flat tone (>= 3 value bands)  7 of 8 bands carry area
+  ok   FURNACE CHOIR: idle has its feet on the floor (±10 px)  -5 px
+  ok   FURNACE CHOIR: lobwarn has its feet on the floor (±10 px)  -1 px
+  ok   FURNACE CHOIR: slamwarn has its feet on the floor (±10 px)  +3 px
+  ok   FURNACE CHOIR: ventwarn has its feet on the floor (±10 px)  +1 px
+  ok   FURNACE CHOIR: vent has its feet on the floor (±10 px)  +1 px
+  ok   FURNACE CHOIR: dropcrouch has its feet on the floor (±10 px)  -4 px
+  ok   FURNACE CHOIR: recover has its feet on the floor (±10 px)  +2 px
+  ── GLACIERE
+  ok   GLACIERE: idle vs lancewarn is a different SHAPE (IoU <= 0.94)  IoU 0.710
+  ok   GLACIERE: idle vs dashwarn is a different SHAPE (IoU <= 0.94)  IoU 0.670
+  ok   GLACIERE: idle vs daze is a different SHAPE (IoU <= 0.9)  IoU 0.274
+  ok   GLACIERE: lancewarn raises the amber above its own rest  13.3% vs rest 0.0%
+  ok   GLACIERE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: recover does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: daze does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ok   GLACIERE: daze has its feet on the floor (±10 px)  -3 px
+  ── GRAVEHORN
+  ok   GRAVEHORN: idle vs tossprep is a different SHAPE (IoU <= 0.86)  IoU 0.454
+  ok   GRAVEHORN: idle vs chargewarn is a different SHAPE (IoU <= 0.86)  IoU 0.521
+  ok   GRAVEHORN: idle vs hornprep is a different SHAPE (IoU <= 0.86)  IoU 0.523
+  ok   GRAVEHORN: tossprep vs toss is a different SHAPE (IoU <= 0.8)  IoU 0.433
+  ok   GRAVEHORN: idle vs toss is a different SHAPE (IoU <= 0.8)  IoU 0.672
+  ok   GRAVEHORN: idle vs kick is a different SHAPE (IoU <= 0.86)  IoU 0.818
+  ok   GRAVEHORN: chargewarn vs rush is a different SHAPE (IoU <= 0.9)  IoU 0.520
+  ok   GRAVEHORN: hornprep raises the amber above its own rest  45.3% vs rest 0.0%
+  ok   GRAVEHORN: chargewarn raises the amber above its own rest  46.7% vs rest 0.0%
+  ok   GRAVEHORN: tossprep raises the amber above its own rest  56.3% vs rest 0.0%
+  ok   GRAVEHORN: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: rush does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: stunned does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   GRAVEHORN: idle has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: hornprep has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: chargewarn has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: tossprep has its feet on the floor (±10 px)  +3 px
+  ok   GRAVEHORN: stunned has its feet on the floor (±10 px)  +2 px
+  ── CHIME
+  ok   CHIME: ringwarn raises the amber above its own rest  65.5% vs rest 0.0%
+  ok   CHIME: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CHIME: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── CARRIER
+  ok   CARRIER: tosswarn raises the amber above its own rest  69.6% vs rest 0.0%
+  ok   CARRIER: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CARRIER: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── KILN-MOTH
+  ok   KILN-MOTH: cinderwarn raises the amber above its own rest  81.2% vs rest 21.6%
+  ok   KILN-MOTH: idle does not pass for a wind-up  21.6% of lit pixels
+  ok   KILN-MOTH: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── LATTICE
+  ok   LATTICE: growwarn raises the amber above its own rest  62.1% vs rest 0.0%
+  ok   LATTICE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   LATTICE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   LATTICE: idle has its feet on the floor (±10 px)  -3 px
+  ok   LATTICE: growwarn has its feet on the floor (±10 px)  -4 px
+  ── THE LENS
+  ok   THE LENS: beamwarn raises the amber above its own rest  67.1% vs rest 2.5%
+  ok   THE LENS: idle does not pass for a wind-up  2.5% of lit pixels
+  ok   THE LENS: idle still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ── WOLF (crawler@A1)
+  ok   WOLF: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.621
+  ok   WOLF: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.533
+  ok   WOLF: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.578
+  ok   WOLF: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.413
+  ok   WOLF: active vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.490
+  ok   WOLF: windup raises the amber above its own rest  80.6% vs rest 0.1%
+  ok   WOLF: rest does not pass for a wind-up  0.1% of lit pixels
+  ok   WOLF: recovery does not pass for a wind-up  0.1% of lit pixels
+  ok   WOLF: rest has its feet on the floor (±10 px)  -1 px
+  ok   WOLF: windup has its feet on the floor (±10 px)  -1 px
+  ok   WOLF: recovery has its feet on the floor (±10 px)  +0 px
+  ── CHEETAH (crawler@C2)
+  ok   CHEETAH: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.484
+  ok   CHEETAH: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.785
+  ok   CHEETAH: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.484
+  ok   CHEETAH: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.511
+  ok   CHEETAH: active vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.552
+  ok   CHEETAH: windup raises the amber above its own rest  90.3% vs rest 47.1%
+  ok   CHEETAH: rest does not pass for a wind-up  47.1% of lit pixels
+  ok   CHEETAH: recovery does not pass for a wind-up  50.7% of lit pixels
+  ok   CHEETAH: rest has its feet on the floor (±10 px)  -1 px
+  ok   CHEETAH: windup has its feet on the floor (±10 px)  -1 px
+  ok   CHEETAH: recovery has its feet on the floor (±10 px)  -1 px
+  ── HOPPER-WOLF (hopper@A2)
+  ok   HOPPER-WOLF: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.385
+  ok   HOPPER-WOLF: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.428
+  ok   HOPPER-WOLF: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.640
+  ok   HOPPER-WOLF: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.154
+  ok   HOPPER-WOLF: windup raises the amber above its own rest  74.5% vs rest 0.2%
+  ok   HOPPER-WOLF: rest does not pass for a wind-up  0.2% of lit pixels
+  ok   HOPPER-WOLF: recovery does not pass for a wind-up  0.1% of lit pixels
+  ok   HOPPER-WOLF: rest has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-WOLF: windup has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-WOLF: recovery has its feet on the floor (±10 px)  +0 px
+  ── HOPPER-CHEETAH (hopper@C2)
+  ok   HOPPER-CHEETAH: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.460
+  ok   HOPPER-CHEETAH: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.280
+  ok   HOPPER-CHEETAH: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.252
+  ok   HOPPER-CHEETAH: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.491
+  ok   HOPPER-CHEETAH: windup raises the amber above its own rest  87.4% vs rest 46.1%
+  ok   HOPPER-CHEETAH: rest does not pass for a wind-up  46.1% of lit pixels
+  ok   HOPPER-CHEETAH: recovery does not pass for a wind-up  53.7% of lit pixels
+  ok   HOPPER-CHEETAH: rest has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-CHEETAH: windup has its feet on the floor (±10 px)  -2 px
+  ok   HOPPER-CHEETAH: recovery has its feet on the floor (±10 px)  -1 px
+  ── GUARD (guard@A1)
+  ok   GUARD: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.695
+  ok   GUARD: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.687
+  ok   GUARD: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.713
+  ok   GUARD: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.719
+  ok   GUARD: windup raises the amber above its own rest  31.6% vs rest 7.6%
+  ok   GUARD: rest does not pass for a wind-up  7.6% of lit pixels
+  ok   GUARD: recovery does not pass for a wind-up  5.4% of lit pixels
+  ok   GUARD: rest has its feet on the floor (±10 px)  +0 px
+  ok   GUARD: windup has its feet on the floor (±10 px)  +0 px
+  ok   GUARD: recovery has its feet on the floor (±10 px)  +0 px
+  ── FLIER (flier@A2)
+  ok   FLIER: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.221
+  ok   FLIER: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.162
+  ok   FLIER: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.637
+  ok   FLIER: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.304
+  ok   FLIER: windup raises the amber above its own rest  19.0% vs rest 0.2%
+  ok   FLIER: rest does not pass for a wind-up  0.2% of lit pixels
+  ok   FLIER: recovery does not pass for a wind-up  2.4% of lit pixels
+  ── BLOB (blob@C2)
+  ok   BLOB: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.636
+  ok   BLOB: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.537
+  ok   BLOB: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.439
+  ok   BLOB: rest has its feet on the floor (±10 px)  -1 px
+  ok   BLOB: windup has its feet on the floor (±10 px)  +0 px
+  ok   BLOB: recovery has its feet on the floor (±10 px)  -1 px
+  ── TURRET (turret@B1)
+  ok   TURRET: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.530
+  ok   TURRET: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.671
+  ok   TURRET: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.625
+  ok   TURRET: windup raises the amber above its own rest  28.3% vs rest 18.6%
+  ok   TURRET: rest does not pass for a wind-up  18.6% of lit pixels
+  ok   TURRET: recovery does not pass for a wind-up  21.9% of lit pixels
+  ok   TURRET: rest has its feet on the floor (±10 px)  +0 px
+  ok   TURRET: windup has its feet on the floor (±10 px)  +5 px
+  ok   TURRET: recovery has its feet on the floor (±10 px)  +5 px
+  ── BAT (bat@A1)
+  ok   BAT: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.620
+  ok   BAT: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.375
+  ok   BAT: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.314
+  ok   BAT: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.339
+  ok   BAT: windup raises the amber above its own rest  76.7% vs rest 0.0%
+  ok   BAT: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   BAT: recovery does not pass for a wind-up  0.3% of lit pixels
+  ── BREAKER (surge@B2)
+  ok   BREAKER: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.767
+  ok   BREAKER: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.605
+  ok   BREAKER: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.575
+  ok   BREAKER: windup raises the amber above its own rest  44.4% vs rest 1.8%
+  ok   BREAKER: rest does not pass for a wind-up  1.8% of lit pixels
+  ok   BREAKER: recovery does not pass for a wind-up  8.4% of lit pixels
+  ── KILN VENT (kiln@C2)
+  ok   KILN VENT: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.665
+  ok   KILN VENT: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.850
+  ok   KILN VENT: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.647
+  ok   KILN VENT: windup raises the amber above its own rest  54.0% vs rest 1.6%
+  ok   KILN VENT: rest does not pass for a wind-up  1.6% of lit pixels
+  ok   KILN VENT: recovery does not pass for a wind-up  5.3% of lit pixels
+  ── RIME COIL (rime@D1)
+  ok   RIME COIL: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.626
+  ok   RIME COIL: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.688
+  ok   RIME COIL: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.565
+  ok   RIME COIL: windup raises the amber above its own rest  29.9% vs rest 0.0%
+  ok   RIME COIL: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   RIME COIL: recovery does not pass for a wind-up  0.0% of lit pixels
+  ── NEST SNARE (snare@E1)
+  ok   NEST SNARE: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.342
+  ok   NEST SNARE: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.696
+  ok   NEST SNARE: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.333
+  ok   NEST SNARE: windup raises the amber above its own rest  71.0% vs rest 0.0%
+  ok   NEST SNARE: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   NEST SNARE: recovery does not pass for a wind-up  0.0% of lit pixels
+  ── SAGE (sage@A1)
+  ok   SAGE: rest vs windup is a different SHAPE (IoU <= 0.9)  IoU 0.603
+  ok   SAGE: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.778
+  ok   SAGE: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.537
+  ok   SAGE: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.449
+  ok   SAGE: windup raises the amber above its own rest  10.5% vs rest 0.0%
+  ok   SAGE: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   SAGE: recovery does not pass for a wind-up  0.0% of lit pixels
+  ok   SAGE: rest has its feet on the floor (±10 px)  -3 px
+  ok   SAGE: recovery has its feet on the floor (±10 px)  -2 px
+
+OK — the bible was followed, and this is how you know without looking
+   (artbible: 79.3 s)
+
+── gait  — she runs ON the ground: no bouncing, no falling plate mid-stride
+── gait — she runs on the ground, and the drawing agrees
+
+  ok   she does not skip: no one-frame departures from ground that is there  0 skip(s) of 1-2 frames; departures none over 48 floor frames (vx 340)
+  ok   the drawing never calls a stride a fall  0 airborne pose(s) mid-run: run_b run_a
+  ok   her feet follow the ground rather than bouncing on it  worst single-frame step 3.0 px
+  ok   she leaves the ground once and deliberately, not over and over  0 separate departure(s) from solid floor
+  ok   authored stride has genuine foot lift  filmed foot travel 8.65 world units
+  ok   run uses at least eight distinct recorded frames  distinct frames 16
+  ok   recorded gait is not given a second procedural bob  extra synthetic travel 0.00
+  ok   the stride length in the code is the stride length in the ART  plates say 29.5 world units per step (soles 109px apart in a 320px cell), HERO_STEP_WALK is 29.3
+  ok   walk_b is the passing pose, feet together  walk_b feet 0px apart, centre to centre, vs the contacts' soles 109
+  ok   the run turns its legs over like a runner (4-7.5 beats/s)  5.99 beats/sec at vx 340
+  ok   the walk turns its legs over like a walker (3-5.5 beats/s)  4.26 beats/sec at vx 185
+  ok   ...and the walk is slower-footed than the run  4.26 vs 5.99
+  ok   the foreground plate crosses in front of her, not under her feet  its top edge sits 25 px above her soles
+  ok   a light push on the phone stick is a walk, not a sprint  186 px/s at a light push vs 340 at full
+  ok   a thumb resting on the threshold does not chatter the input  0 on/off flips under a trembling thumb
+  ok   no page errors while running
+
+OK — she runs on the ground, and the drawing agrees
+   (gait: 14.8 s)
+
+── sage-motion  — Meadow Sage committed strikes, planted motion, matching ring contact and rescue invariants
+PASS the advertised exhale is a real contact-safe punish window {"cores":5,"winded":0.5833333333333333}
+PASS the wind-up cannot damage before its strike {"cores":5}
+PASS the actual lunge still damages on contact {"cores":4}
+PASS the announced lunge commits its original direction {"vx":587.1625267200001,"lunge":0.22}
+PASS crossing the Sage does not flip its active-strike artwork [false,false]
+PASS double lunge includes a stationary readable replant {"replant":0.18,"vx":0,"lunge":0}
+PASS replant neither slides nor causes an invisible hit {"dx":0,"cores":5}
+PASS second strike stops before displaying recovery {"winded":0.7,"vx":0}
+PASS ring release has an explicit non-attacking recovery {"radius":20,"recovery":0.55}
+PASS the ring drawing stays at its release location {"origin":{"x":433,"y":460.4116003417969},"centers":[{"x":433,"y":460.4116003417969}]}
+PASS ring collision agrees with that release location {"cores":4}
+PASS a separate elevated platform is not the ring floor lane {"cores":5}
+PASS jump remains a valid answer to the ember ring ""
+PASS walking feet are planted without a second floating bob [199,199,199,199,199]
+PASS lunge does not shrink to half the standing body {"stand":{"height":45,"bottom":198,"n":547},"strike":{"height":42,"bottom":199,"n":520},"ratio":0.9333333333333333}
+PASS the freed moving Sage uses its walking strip, not sliding kneeling artwork "sageWalk8:3"
+PASS rescued walking preserves the purified blue identity {"opaque":515,"blueRedRatio":2.6088218224027857}
+PASS drawing does not advance the fight clock or emit cues ""
+PASS an interrupted strike cannot resume as an untold lunge {"lunge":0,"recovery":0.35}
+PASS an already released ring advances independently of caster knockback {"before":20,"after":23.333333333333332}
+PASS the Pack Sage is not silently assigned the Meadow profile ""
+PASS song-lock cancels the pending chain and ring {"locked":true,"replant":0}
+PASS claws still cannot cleanse the Sage ""
+PASS four Purifier hits still rescue rather than kill {"count":4,"tame":1,"dead":false}
+PASS the Power Cell reward remains once-only ""
+PASS no browser errors []
+PASS hero movement, collision and boss simulation unchanged {"heroUpdate":"6a17c27f490a34c1160bb94e28e5a32dc067d61aeb5cf63beca7e5f29fd4629f","heroState":"861d9a3755df5336861ac4dd11e9f57089b43e2d89c297f0a10cdf2ec01b87bc","collision":"9f4fa1506507d7222c2750266bb1ba7dec0e987ff355b8bf843a5811ae9bedcb","bossUpdate":"f3f5a7f70cf2d7e41a19ec2364d2fba24c792c3d806821d398292640b88c99b8"}
+{"baseline":false,"build":"3960cef191f9","passed":27,"total":27}
+   (sage-motion: 1.1 s)
+
+── sage  — the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift
+── sage — the duelist that can only be cleansed
+  ok   a sage kneels in the deep chamber
+  ok   it duels: real tells, lunges, and the exhale opening  tells 2.58s
+  ok   claws break it to the floor and no further  locked true
+  ok   ...and glance off the song-lock for zero
+  ok   the crystal purifies it — tamed, never killed
+  ok   the gift pays, and pays once
+  ok   all seven sages have an identity, a story line and a gift, in both languages
+  ok   a purified sage cannot be harmed
+  ok   the purification is a save fact — it survives the room reload
+
+OK — broken by anything, cleansed by one thing, kept clean forever
+   (sage: 2.0 s)
+
+all 25 harnesses ran

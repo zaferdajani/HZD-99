@@ -1,0 +1,27 @@
+FAIL the advertised exhale is a real contact-safe punish window {"cores":4,"winded":0.5833333333333333}
+FAIL the wind-up cannot damage before its strike {"cores":4}
+PASS the actual lunge still damages on contact {"cores":4}
+FAIL the announced lunge commits its original direction {"vx":-775.0545352704,"lunge":0.22}
+FAIL crossing the Sage does not flip its active-strike artwork [true,false]
+FAIL double lunge includes a stationary readable replant {"replant":0,"vx":-587.1625267200001,"lunge":0.22}
+FAIL replant neither slides nor causes an invisible hit "No replant exists in baseline"
+FAIL second strike stops before displaying recovery {"winded":0.7,"vx":528.446274048}
+FAIL ring release has an explicit non-attacking recovery {"radius":20,"recovery":0}
+FAIL the ring drawing stays at its release location {"origin":{"x":433,"y":460.4116003417969},"centers":[{"x":533,"y":460.4116003417969}]}
+PASS ring collision agrees with that release location {"cores":4}
+PASS a separate elevated platform is not the ring floor lane {"cores":5}
+PASS jump remains a valid answer to the ember ring ""
+FAIL walking feet are planted without a second floating bob [199,200,201,200,198]
+FAIL lunge does not shrink to half the standing body {"stand":{"height":45,"bottom":198,"n":547},"strike":{"height":25,"bottom":199,"n":183},"ratio":0.5555555555555556}
+FAIL the freed moving Sage uses its walking strip, not sliding kneeling artwork ""
+PASS rescued walking preserves the purified blue identity {"opaque":311,"blueRedRatio":1.6831295376385174}
+PASS drawing does not advance the fight clock or emit cues ""
+FAIL an interrupted strike cannot resume as an untold lunge {"lunge":0.2,"recovery":0}
+FAIL an already released ring advances independently of caster knockback {"before":20,"after":20}
+PASS the Pack Sage is not silently assigned the Meadow profile ""
+PASS song-lock cancels the pending chain and ring {"locked":true}
+PASS claws still cannot cleanse the Sage ""
+PASS four Purifier hits still rescue rather than kill {"count":4,"tame":1,"dead":false}
+PASS the Power Cell reward remains once-only ""
+PASS no browser errors []
+{"baseline":true,"build":"353de4462b99","passed":12,"total":26}

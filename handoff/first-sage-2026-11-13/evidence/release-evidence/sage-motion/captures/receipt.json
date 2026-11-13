@@ -1,0 +1,1477 @@
+{
+  "build": "3960cef191f9",
+  "frames": [
+    {
+      "frame": 0,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 1,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 2,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 3,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 4,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 5,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 6,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 7,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 8,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 9,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 10,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 11,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 12,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 13,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 14,
+      "phase": "coil",
+      "pose": "sageCoil",
+      "face": -1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 15,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 1059,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 16,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 1041.3851241984,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 17,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 1023.7702483968001,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 18,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 1006.1553725952001,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 19,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 988.5404967936001,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 20,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 970.9256209920002,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 21,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": -1,
+      "x": 953.3107451904002,
+      "vx": -528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 22,
+      "phase": "replant",
+      "pose": "sageCoil",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 23,
+      "phase": "replant",
+      "pose": "sageCoil",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 24,
+      "phase": "replant",
+      "pose": "sageCoil",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 25,
+      "phase": "replant",
+      "pose": "sageCoil",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 26,
+      "phase": "replant",
+      "pose": "sageCoil",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 27,
+      "phase": "replant",
+      "pose": "sageCoil",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 28,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 935.6958693888002,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 29,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 953.3107451904002,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 30,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 970.9256209920002,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 31,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 988.5404967936001,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 32,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 1006.1553725952001,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 33,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 1023.7702483968001,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 34,
+      "phase": "lunge",
+      "pose": "sageLunge",
+      "face": 1,
+      "x": 1041.3851241984,
+      "vx": 528.446274048,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 35,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.7
+    },
+    {
+      "frame": 36,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.6666666666666666
+    },
+    {
+      "frame": 37,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.6333333333333333
+    },
+    {
+      "frame": 38,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.6
+    },
+    {
+      "frame": 39,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.5666666666666667
+    },
+    {
+      "frame": 40,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.5333333333333333
+    },
+    {
+      "frame": 41,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.5
+    },
+    {
+      "frame": 42,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.4666666666666667
+    },
+    {
+      "frame": 43,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.43333333333333335
+    },
+    {
+      "frame": 44,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.4
+    },
+    {
+      "frame": 45,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.3666666666666667
+    },
+    {
+      "frame": 46,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.33333333333333337
+    },
+    {
+      "frame": 47,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.30000000000000004
+    },
+    {
+      "frame": 48,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.2666666666666667
+    },
+    {
+      "frame": 49,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.2333333333333334
+    },
+    {
+      "frame": 50,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.20000000000000007
+    },
+    {
+      "frame": 51,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.16666666666666674
+    },
+    {
+      "frame": 52,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.13333333333333341
+    },
+    {
+      "frame": 53,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.10000000000000009
+    },
+    {
+      "frame": 54,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.06666666666666676
+    },
+    {
+      "frame": 55,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0.03333333333333343
+    },
+    {
+      "frame": 56,
+      "phase": "exhale",
+      "pose": "sageExhale",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 9.71445146547012e-17
+    },
+    {
+      "frame": 57,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": 1,
+      "x": 1059,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 58,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1062.2027046912,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 59,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1065.4054093824002,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 60,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1068.6081140736003,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 61,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1071.8108187648004,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 62,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1075.0135234560005,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 63,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1078.2162281472006,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 64,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1081.4189328384007,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 65,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 96.081140736,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 66,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 67,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 68,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 69,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 70,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 71,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 72,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 73,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 74,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 75,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 76,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 77,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 78,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 79,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 80,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 81,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 82,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 83,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 84,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 85,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 86,
+      "phase": "gather",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 87,
+      "phase": "ring-release",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 20,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.55
+    },
+    {
+      "frame": 88,
+      "phase": "ring-release",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 26.666666666666668,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.5166666666666667
+    },
+    {
+      "frame": 89,
+      "phase": "ring-release",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 33.333333333333336,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.4833333333333334
+    },
+    {
+      "frame": 90,
+      "phase": "ring-release",
+      "pose": "sageGather",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 40,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.45000000000000007
+    },
+    {
+      "frame": 91,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 46.666666666666664,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.41666666666666674
+    },
+    {
+      "frame": 92,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 53.33333333333333,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.3833333333333334
+    },
+    {
+      "frame": 93,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 59.99999999999999,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.3500000000000001
+    },
+    {
+      "frame": 94,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 66.66666666666666,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.31666666666666676
+    },
+    {
+      "frame": 95,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 73.33333333333333,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.28333333333333344
+    },
+    {
+      "frame": 96,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 80,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.2500000000000001
+    },
+    {
+      "frame": 97,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 86.66666666666667,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.21666666666666679
+    },
+    {
+      "frame": 98,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 93.33333333333334,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.18333333333333346
+    },
+    {
+      "frame": 99,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 100.00000000000001,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.15000000000000013
+    },
+    {
+      "frame": 100,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 106.66666666666669,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.11666666666666681
+    },
+    {
+      "frame": 101,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 113.33333333333336,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.08333333333333348
+    },
+    {
+      "frame": 102,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 120.00000000000003,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.05000000000000015
+    },
+    {
+      "frame": 103,
+      "phase": "ring-release",
+      "pose": "sageExhale",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 126.6666666666667,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0.016666666666666816
+    },
+    {
+      "frame": 104,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1084.6216375296008,
+      "vx": 0,
+      "ring": 133.33333333333337,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 105,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1087.8243422208009,
+      "vx": 96.081140736,
+      "ring": 140.00000000000003,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 106,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1091.027046912001,
+      "vx": 96.081140736,
+      "ring": 146.66666666666669,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 107,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1094.229751603201,
+      "vx": 96.081140736,
+      "ring": 153.33333333333334,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 108,
+      "phase": "idle",
+      "pose": "sageWalk8",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 96.081140736,
+      "ring": 160,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 109,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 166.66666666666666,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 110,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 173.33333333333331,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 111,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 179.99999999999997,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 112,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 186.66666666666663,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 113,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 193.3333333333333,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 114,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 199.99999999999994,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 115,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 206.6666666666666,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 116,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 213.33333333333326,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 117,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 219.99999999999991,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 118,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 226.66666666666657,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 119,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 233.33333333333323,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 120,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 239.9999999999999,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 121,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": 246.66666666666654,
+      "ringOrigin": {
+        "x": 1097.6216375296008,
+        "y": 504.72318481445313
+      },
+      "winded": 0
+    },
+    {
+      "frame": 122,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 123,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 124,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 125,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 126,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 127,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 128,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 129,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 130,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    },
+    {
+      "frame": 131,
+      "phase": "idle",
+      "pose": "sageStand",
+      "face": -1,
+      "x": 1097.4324562944012,
+      "vx": 0,
+      "ring": null,
+      "ringOrigin": null,
+      "winded": 0
+    }
+  ],
+  "errors": [],
+  "scope": "Staged actual GA1D renderer at30fps simulation samples; camera is normal. No new art pixels or new hero gait."
+}

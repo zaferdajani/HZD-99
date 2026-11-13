@@ -1,0 +1,28 @@
+PASS the advertised exhale is a real contact-safe punish window {"cores":5,"winded":0.5833333333333333}
+PASS the wind-up cannot damage before its strike {"cores":5}
+PASS the actual lunge still damages on contact {"cores":4}
+PASS the announced lunge commits its original direction {"vx":587.1625267200001,"lunge":0.22}
+PASS crossing the Sage does not flip its active-strike artwork [false,false]
+PASS double lunge includes a stationary readable replant {"replant":0.18,"vx":0,"lunge":0}
+PASS replant neither slides nor causes an invisible hit {"dx":0,"cores":5}
+PASS second strike stops before displaying recovery {"winded":0.7,"vx":0}
+PASS ring release has an explicit non-attacking recovery {"radius":20,"recovery":0.55}
+PASS the ring drawing stays at its release location {"origin":{"x":433,"y":460.4116003417969},"centers":[{"x":433,"y":460.4116003417969}]}
+PASS ring collision agrees with that release location {"cores":4}
+PASS a separate elevated platform is not the ring floor lane {"cores":5}
+PASS jump remains a valid answer to the ember ring ""
+PASS walking feet are planted without a second floating bob [199,199,199,199,199]
+PASS lunge does not shrink to half the standing body {"stand":{"height":45,"bottom":198,"n":547},"strike":{"height":42,"bottom":199,"n":520},"ratio":0.9333333333333333}
+PASS the freed moving Sage uses its walking strip, not sliding kneeling artwork "sageWalk8:3"
+PASS rescued walking preserves the purified blue identity {"opaque":515,"blueRedRatio":2.6088218224027857}
+PASS drawing does not advance the fight clock or emit cues ""
+PASS an interrupted strike cannot resume as an untold lunge {"lunge":0,"recovery":0.35}
+PASS an already released ring advances independently of caster knockback {"before":20,"after":23.333333333333332}
+PASS the Pack Sage is not silently assigned the Meadow profile ""
+PASS song-lock cancels the pending chain and ring {"locked":true,"replant":0}
+PASS claws still cannot cleanse the Sage ""
+PASS four Purifier hits still rescue rather than kill {"count":4,"tame":1,"dead":false}
+PASS the Power Cell reward remains once-only ""
+PASS no browser errors []
+PASS hero movement, collision and boss simulation unchanged {"heroUpdate":"6a17c27f490a34c1160bb94e28e5a32dc067d61aeb5cf63beca7e5f29fd4629f","heroState":"861d9a3755df5336861ac4dd11e9f57089b43e2d89c297f0a10cdf2ec01b87bc","collision":"9f4fa1506507d7222c2750266bb1ba7dec0e987ff355b8bf843a5811ae9bedcb","bossUpdate":"f3f5a7f70cf2d7e41a19ec2364d2fba24c792c3d806821d398292640b88c99b8"}
+{"baseline":false,"build":"3960cef191f9","passed":27,"total":27}

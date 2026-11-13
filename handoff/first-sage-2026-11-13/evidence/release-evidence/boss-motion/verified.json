@@ -1,0 +1,842 @@
+{
+  "build": "3960cef191f9",
+  "revision": "combat-motion-20261113-r1",
+  "checks": [
+    {
+      "name": "brood: secondary motion is identical with full, sparse or no rendering",
+      "pass": true,
+      "detail": [
+        {
+          "drawEvery": 1,
+          "snapshot": {
+            "st": "idle",
+            "t": 2.5,
+            "x": 182.3480876,
+            "y": 53.94558,
+            "hp": 534,
+            "cabA": -0.0033418,
+            "cabV": -0.0181769,
+            "stT": 2.4833333,
+            "tell": 0
+          }
+        },
+        {
+          "drawEvery": 6,
+          "snapshot": {
+            "st": "idle",
+            "t": 2.5,
+            "x": 182.3480876,
+            "y": 53.94558,
+            "hp": 534,
+            "cabA": -0.0033418,
+            "cabV": -0.0181769,
+            "stT": 2.4833333,
+            "tell": 0
+          }
+        },
+        {
+          "drawEvery": 0,
+          "snapshot": {
+            "st": "idle",
+            "t": 2.5,
+            "x": 182.3480876,
+            "y": 53.94558,
+            "hp": 534,
+            "cabA": -0.0033418,
+            "cabV": -0.0181769,
+            "stT": 2.4833333,
+            "tell": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "brood: outline and repeated body draws cannot advance motion",
+      "pass": true,
+      "detail": {
+        "before": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 291.4059353,
+          "y": 64.0672524,
+          "hp": 534,
+          "cabA": 0.0928441,
+          "cabV": 0.4045476,
+          "stT": 0.3166667,
+          "tell": 0
+        },
+        "after": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 291.4059353,
+          "y": 64.0672524,
+          "hp": 534,
+          "cabA": 0.0928441,
+          "cabV": 0.4045476,
+          "stT": 0.3166667,
+          "tell": 0
+        }
+      }
+    },
+    {
+      "name": "brood: rendering cannot emit particles, sounds or camera shake",
+      "pass": true,
+      "detail": {
+        "particlesBefore": 0,
+        "particlesAfter": 0,
+        "shakeBefore": 0,
+        "shakeAfter": 0
+      }
+    },
+    {
+      "name": "zero: secondary motion is identical with full, sparse or no rendering",
+      "pass": true,
+      "detail": [
+        {
+          "drawEvery": 1,
+          "snapshot": {
+            "st": "idle",
+            "t": 0.531,
+            "x": 230.0770129,
+            "y": 348.560078,
+            "hp": 920,
+            "tell": 0,
+            "glcGait": 11.9064413,
+            "glcRecoil": 0,
+            "glcStamp": 0,
+            "glcSettle": 0
+          }
+        },
+        {
+          "drawEvery": 6,
+          "snapshot": {
+            "st": "idle",
+            "t": 0.531,
+            "x": 230.0770129,
+            "y": 348.560078,
+            "hp": 920,
+            "tell": 0,
+            "glcGait": 11.9064413,
+            "glcRecoil": 0,
+            "glcStamp": 0,
+            "glcSettle": 0
+          }
+        },
+        {
+          "drawEvery": 0,
+          "snapshot": {
+            "st": "idle",
+            "t": 0.531,
+            "x": 230.0770129,
+            "y": 348.560078,
+            "hp": 920,
+            "tell": 0,
+            "glcGait": 11.9064413,
+            "glcRecoil": 0,
+            "glcStamp": 0,
+            "glcSettle": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "zero: outline and repeated body draws cannot advance motion",
+      "pass": true,
+      "detail": {
+        "before": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 288.5767654,
+          "y": 314.063098,
+          "hp": 920,
+          "tell": 0,
+          "glcGait": 2.6126818,
+          "glcRecoil": 0,
+          "glcStamp": 0,
+          "glcSettle": 0
+        },
+        "after": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 288.5767654,
+          "y": 314.063098,
+          "hp": 920,
+          "tell": 0,
+          "glcGait": 2.6126818,
+          "glcRecoil": 0,
+          "glcStamp": 0,
+          "glcSettle": 0
+        }
+      }
+    },
+    {
+      "name": "zero: rendering cannot emit particles, sounds or camera shake",
+      "pass": true,
+      "detail": {
+        "particlesBefore": 4,
+        "particlesAfter": 4,
+        "shakeBefore": 0,
+        "shakeAfter": 0
+      }
+    },
+    {
+      "name": "atlas: secondary motion is identical with full, sparse or no rendering",
+      "pass": true,
+      "detail": [
+        {
+          "drawEvery": 1,
+          "snapshot": {
+            "st": "lobwarn",
+            "t": 0.2333333,
+            "x": 280.5826667,
+            "y": 400.2979834,
+            "hp": 846,
+            "tell": 0.45,
+            "fc": {
+              "pSt": "lobwarn",
+              "slamT": 0,
+              "roarT": 0,
+              "pulseT": 0,
+              "hymnR": 0,
+              "pStruck": 0,
+              "step": 1,
+              "gait": 4.3155806,
+              "deadT": 0
+            }
+          }
+        },
+        {
+          "drawEvery": 6,
+          "snapshot": {
+            "st": "lobwarn",
+            "t": 0.2333333,
+            "x": 280.5826667,
+            "y": 400.2979834,
+            "hp": 846,
+            "tell": 0.45,
+            "fc": {
+              "pSt": "lobwarn",
+              "slamT": 0,
+              "roarT": 0,
+              "pulseT": 0,
+              "hymnR": 0,
+              "pStruck": 0,
+              "step": 1,
+              "gait": 4.3155806,
+              "deadT": 0
+            }
+          }
+        },
+        {
+          "drawEvery": 0,
+          "snapshot": {
+            "st": "lobwarn",
+            "t": 0.2333333,
+            "x": 280.5826667,
+            "y": 400.2979834,
+            "hp": 846,
+            "tell": 0.45,
+            "fc": {
+              "pSt": "lobwarn",
+              "slamT": 0,
+              "roarT": 0,
+              "pulseT": 0,
+              "hymnR": 0,
+              "pStruck": 0,
+              "step": 1,
+              "gait": 4.3155806,
+              "deadT": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "atlas: outline and repeated body draws cannot advance motion",
+      "pass": true,
+      "detail": {
+        "before": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 363.7866667,
+          "y": 395.1451208,
+          "hp": 846,
+          "tell": 0,
+          "fc": {
+            "pSt": "idle",
+            "slamT": 0,
+            "roarT": 0,
+            "pulseT": 0,
+            "hymnR": 0,
+            "pStruck": 0,
+            "step": 0,
+            "gait": 1.0379244,
+            "deadT": 0
+          }
+        },
+        "after": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 363.7866667,
+          "y": 395.1451208,
+          "hp": 846,
+          "tell": 0,
+          "fc": {
+            "pSt": "idle",
+            "slamT": 0,
+            "roarT": 0,
+            "pulseT": 0,
+            "hymnR": 0,
+            "pStruck": 0,
+            "step": 0,
+            "gait": 1.0379244,
+            "deadT": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "atlas: rendering cannot emit particles, sounds or camera shake",
+      "pass": true,
+      "detail": {
+        "particlesBefore": 0,
+        "particlesAfter": 0,
+        "shakeBefore": 0,
+        "shakeAfter": 0
+      }
+    },
+    {
+      "name": "mother: secondary motion is identical with full, sparse or no rendering",
+      "pass": true,
+      "detail": [
+        {
+          "drawEvery": 1,
+          "snapshot": {
+            "st": "idle",
+            "t": 2.5,
+            "x": 188.7717248,
+            "y": 145.1161421,
+            "hp": 1682,
+            "tell": 0,
+            "mv": {
+              "haloA": 3.35,
+              "beatPh": 14.1371669,
+              "deathT": 0
+            }
+          }
+        },
+        {
+          "drawEvery": 6,
+          "snapshot": {
+            "st": "idle",
+            "t": 2.5,
+            "x": 188.7717248,
+            "y": 145.1161421,
+            "hp": 1682,
+            "tell": 0,
+            "mv": {
+              "haloA": 3.35,
+              "beatPh": 14.1371669,
+              "deathT": 0
+            }
+          }
+        },
+        {
+          "drawEvery": 0,
+          "snapshot": {
+            "st": "idle",
+            "t": 2.5,
+            "x": 188.7717248,
+            "y": 145.1161421,
+            "hp": 1682,
+            "tell": 0,
+            "mv": {
+              "haloA": 3.35,
+              "beatPh": 14.1371669,
+              "deathT": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "mother: outline and repeated body draws cannot advance motion",
+      "pass": true,
+      "detail": {
+        "before": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 364.0116794,
+          "y": 124.6812032,
+          "hp": 1682,
+          "tell": 0,
+          "mv": {
+            "haloA": 0.9666667,
+            "beatPh": 1.8849556,
+            "deathT": 0
+          }
+        },
+        "after": {
+          "st": "idle",
+          "t": 4.6666667,
+          "x": 364.0116794,
+          "y": 124.6812032,
+          "hp": 1682,
+          "tell": 0,
+          "mv": {
+            "haloA": 0.9666667,
+            "beatPh": 1.8849556,
+            "deathT": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "mother: rendering cannot emit particles, sounds or camera shake",
+      "pass": true,
+      "detail": {
+        "particlesBefore": 0,
+        "particlesAfter": 0,
+        "shakeBefore": 0,
+        "shakeAfter": 0
+      }
+    },
+    {
+      "name": "glitch: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 6734,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "alpha: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 7875,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "brood: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 7648,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "atlas: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 12508,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "zero: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 6137,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "prism: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 3837,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "mother: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 26393,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "chime: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 5212,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "carrier: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 1764,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "moth: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 3764,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "lattice: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 5033,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "lens: struck armour remains solid",
+      "pass": true,
+      "detail": {
+        "samples": 3673,
+        "medianOpacity": 1
+      }
+    },
+    {
+      "name": "GLACIERE lancewarn triggers follow-through in actual recovery",
+      "pass": true,
+      "detail": {
+        "state": "recover",
+        "pulse": 1,
+        "projectiles": 1,
+        "nova": false
+      }
+    },
+    {
+      "name": "GLACIERE novawarn triggers follow-through in actual recovery",
+      "pass": true,
+      "detail": {
+        "state": "recover",
+        "pulse": 1,
+        "projectiles": 0,
+        "nova": true
+      }
+    },
+    {
+      "name": "PRISM lands and recovers on the actual elevated X1 platform",
+      "pass": true,
+      "detail": {
+        "state": "rest",
+        "feet": 255.99,
+        "expected": 256
+      }
+    },
+    {
+      "name": "PRISM does not enter recovery in mid-air at the old row-14 threshold",
+      "pass": true,
+      "detail": {
+        "state": "pounce",
+        "feet": 453.25,
+        "vy": 195
+      }
+    },
+    {
+      "name": "PRISM tells select three different authored silhouettes",
+      "pass": true,
+      "detail": {
+        "dashwarn": "[425,295,146,113]",
+        "pouncewarn": "[693,295,154,113]",
+        "spreadwarn": "[210,2,118,145]"
+      }
+    },
+    {
+      "name": "airborne pounce holds its flight pose instead of cycling grounded running legs",
+      "pass": true,
+      "detail": [
+        "[583,635,174,96]",
+        "[583,635,174,96]",
+        "[583,635,174,96]",
+        "[583,635,174,96]"
+      ]
+    },
+    {
+      "name": "PRISM breathing remains planted rather than translating the entire sprite",
+      "pass": true,
+      "detail": [
+        393,
+        393,
+        393,
+        393,
+        393,
+        393,
+        393
+      ]
+    },
+    {
+      "name": "warning sound starts in the same simulation step as the tell",
+      "pass": true,
+      "detail": {
+        "entered": "pouncewarn",
+        "cue": "tell_prism",
+        "count": 1
+      }
+    },
+    {
+      "name": "the next update and extra draws do not repeat the entry cue",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "warning duration is captured on entry rather than by first render",
+      "pass": true,
+      "detail": {
+        "stored": 0.5,
+        "current": 0.5
+      }
+    },
+    {
+      "name": "visual simulation continues without a decoded sprite",
+      "pass": true,
+      "detail": {
+        "gait": 3.6696466746706005
+      }
+    },
+    {
+      "name": "no runtime errors in the real browser",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "cadence": {
+    "brood": [
+      {
+        "drawEvery": 1,
+        "snapshot": {
+          "st": "idle",
+          "t": 2.5,
+          "x": 182.3480876,
+          "y": 53.94558,
+          "hp": 534,
+          "cabA": -0.0033418,
+          "cabV": -0.0181769,
+          "stT": 2.4833333,
+          "tell": 0
+        }
+      },
+      {
+        "drawEvery": 6,
+        "snapshot": {
+          "st": "idle",
+          "t": 2.5,
+          "x": 182.3480876,
+          "y": 53.94558,
+          "hp": 534,
+          "cabA": -0.0033418,
+          "cabV": -0.0181769,
+          "stT": 2.4833333,
+          "tell": 0
+        }
+      },
+      {
+        "drawEvery": 0,
+        "snapshot": {
+          "st": "idle",
+          "t": 2.5,
+          "x": 182.3480876,
+          "y": 53.94558,
+          "hp": 534,
+          "cabA": -0.0033418,
+          "cabV": -0.0181769,
+          "stT": 2.4833333,
+          "tell": 0
+        }
+      }
+    ],
+    "zero": [
+      {
+        "drawEvery": 1,
+        "snapshot": {
+          "st": "idle",
+          "t": 0.531,
+          "x": 230.0770129,
+          "y": 348.560078,
+          "hp": 920,
+          "tell": 0,
+          "glcGait": 11.9064413,
+          "glcRecoil": 0,
+          "glcStamp": 0,
+          "glcSettle": 0
+        }
+      },
+      {
+        "drawEvery": 6,
+        "snapshot": {
+          "st": "idle",
+          "t": 0.531,
+          "x": 230.0770129,
+          "y": 348.560078,
+          "hp": 920,
+          "tell": 0,
+          "glcGait": 11.9064413,
+          "glcRecoil": 0,
+          "glcStamp": 0,
+          "glcSettle": 0
+        }
+      },
+      {
+        "drawEvery": 0,
+        "snapshot": {
+          "st": "idle",
+          "t": 0.531,
+          "x": 230.0770129,
+          "y": 348.560078,
+          "hp": 920,
+          "tell": 0,
+          "glcGait": 11.9064413,
+          "glcRecoil": 0,
+          "glcStamp": 0,
+          "glcSettle": 0
+        }
+      }
+    ],
+    "atlas": [
+      {
+        "drawEvery": 1,
+        "snapshot": {
+          "st": "lobwarn",
+          "t": 0.2333333,
+          "x": 280.5826667,
+          "y": 400.2979834,
+          "hp": 846,
+          "tell": 0.45,
+          "fc": {
+            "pSt": "lobwarn",
+            "slamT": 0,
+            "roarT": 0,
+            "pulseT": 0,
+            "hymnR": 0,
+            "pStruck": 0,
+            "step": 1,
+            "gait": 4.3155806,
+            "deadT": 0
+          }
+        }
+      },
+      {
+        "drawEvery": 6,
+        "snapshot": {
+          "st": "lobwarn",
+          "t": 0.2333333,
+          "x": 280.5826667,
+          "y": 400.2979834,
+          "hp": 846,
+          "tell": 0.45,
+          "fc": {
+            "pSt": "lobwarn",
+            "slamT": 0,
+            "roarT": 0,
+            "pulseT": 0,
+            "hymnR": 0,
+            "pStruck": 0,
+            "step": 1,
+            "gait": 4.3155806,
+            "deadT": 0
+          }
+        }
+      },
+      {
+        "drawEvery": 0,
+        "snapshot": {
+          "st": "lobwarn",
+          "t": 0.2333333,
+          "x": 280.5826667,
+          "y": 400.2979834,
+          "hp": 846,
+          "tell": 0.45,
+          "fc": {
+            "pSt": "lobwarn",
+            "slamT": 0,
+            "roarT": 0,
+            "pulseT": 0,
+            "hymnR": 0,
+            "pStruck": 0,
+            "step": 1,
+            "gait": 4.3155806,
+            "deadT": 0
+          }
+        }
+      }
+    ],
+    "mother": [
+      {
+        "drawEvery": 1,
+        "snapshot": {
+          "st": "idle",
+          "t": 2.5,
+          "x": 188.7717248,
+          "y": 145.1161421,
+          "hp": 1682,
+          "tell": 0,
+          "mv": {
+            "haloA": 3.35,
+            "beatPh": 14.1371669,
+            "deathT": 0
+          }
+        }
+      },
+      {
+        "drawEvery": 6,
+        "snapshot": {
+          "st": "idle",
+          "t": 2.5,
+          "x": 188.7717248,
+          "y": 145.1161421,
+          "hp": 1682,
+          "tell": 0,
+          "mv": {
+            "haloA": 3.35,
+            "beatPh": 14.1371669,
+            "deathT": 0
+          }
+        }
+      },
+      {
+        "drawEvery": 0,
+        "snapshot": {
+          "st": "idle",
+          "t": 2.5,
+          "x": 188.7717248,
+          "y": 145.1161421,
+          "hp": 1682,
+          "tell": 0,
+          "mv": {
+            "haloA": 3.35,
+            "beatPh": 14.1371669,
+            "deathT": 0
+          }
+        }
+      }
+    ]
+  },
+  "prismTells": {
+    "dashwarn": "[425,295,146,113]",
+    "pouncewarn": "[693,295,154,113]",
+    "spreadwarn": "[210,2,118,145]"
+  },
+  "hero": {
+    "update": "6a17c27f490a34c1160bb94e28e5a32dc067d61aeb5cf63beca7e5f29fd4629f",
+    "state": "861d9a3755df5336861ac4dd11e9f57089b43e2d89c297f0a10cdf2ec01b87bc",
+    "collision": "9f4fa1506507d7222c2750266bb1ba7dec0e987ff355b8bf843a5811ae9bedcb"
+  },
+  "roomRoster": {
+    "glitch": "A4",
+    "alpha": "A10",
+    "brood": "B4",
+    "atlas": "C3",
+    "zero": "D3",
+    "prism": "X1",
+    "mother": "E3",
+    "horn": "CV3",
+    "chime": "A9",
+    "carrier": "B8",
+    "moth": "C7",
+    "lattice": "D6",
+    "lens": "E6"
+  },
+  "errors": []
+}

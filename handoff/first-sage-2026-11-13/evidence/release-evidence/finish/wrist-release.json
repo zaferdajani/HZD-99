@@ -1,0 +1,352 @@
+{
+  "build": "3960cef191f9",
+  "npc": {
+    "x": 540,
+    "y": 415.6517028808594,
+    "w": 40,
+    "h": 56
+  },
+  "checks": [
+    {
+      "name": "all four supplied poses are drawn by the actual NPC renderer",
+      "pass": true,
+      "detail": {
+        "started": true,
+        "seen": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "pixels": [
+          6775,
+          6731,
+          6780,
+          6613
+        ],
+        "bounds": [
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:0"
+          },
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:1"
+          },
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:2"
+          },
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:3"
+          }
+        ],
+        "before": {
+          "cores": 5,
+          "scrap": 0,
+          "cell": 0,
+          "spare": 0,
+          "x": 498
+        },
+        "after": {
+          "cores": 5,
+          "scrap": 0,
+          "cell": 0,
+          "spare": 0
+        },
+        "done": 1,
+        "state": "PLAY",
+        "flag": 1,
+        "pending": 0,
+        "controls": false,
+        "contact": {
+          "npc": {
+            "x": 516.88,
+            "y": 405.37836954752606
+          },
+          "hero": {
+            "x": 516.88,
+            "y": 407.94208749624397
+          },
+          "error": 2.5637179487179083
+        }
+      }
+    },
+    {
+      "name": "scene ends once, clears controls, and records completion",
+      "pass": true,
+      "detail": {
+        "started": true,
+        "seen": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "pixels": [
+          6775,
+          6731,
+          6780,
+          6613
+        ],
+        "bounds": [
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:0"
+          },
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:1"
+          },
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:2"
+          },
+          {
+            "top": 59,
+            "bottom": 189,
+            "renderer": "wrist-release:3"
+          }
+        ],
+        "before": {
+          "cores": 5,
+          "scrap": 0,
+          "cell": 0,
+          "spare": 0,
+          "x": 498
+        },
+        "after": {
+          "cores": 5,
+          "scrap": 0,
+          "cell": 0,
+          "spare": 0
+        },
+        "done": 1,
+        "state": "PLAY",
+        "flag": 1,
+        "pending": 0,
+        "controls": false,
+        "contact": {
+          "npc": {
+            "x": 516.88,
+            "y": 405.37836954752606
+          },
+          "hero": {
+            "x": 516.88,
+            "y": 407.94208749624397
+          },
+          "error": 2.5637179487179083
+        }
+      }
+    },
+    {
+      "name": "reaction is not a damage or reward event",
+      "pass": true,
+      "detail": {
+        "cores": 5,
+        "scrap": 0,
+        "cell": 0,
+        "spare": 0
+      }
+    },
+    {
+      "name": "contact uses the rendered hand anchor",
+      "pass": true,
+      "detail": {
+        "npc": {
+          "x": 516.88,
+          "y": 405.37836954752606
+        },
+        "hero": {
+          "x": 516.88,
+          "y": 407.94208749624397
+        },
+        "error": 2.5637179487179083
+      }
+    },
+    {
+      "name": "authored feet stay on one floor across all four poses",
+      "pass": true,
+      "detail": [
+        {
+          "top": 59,
+          "bottom": 189,
+          "renderer": "wrist-release:0"
+        },
+        {
+          "top": 59,
+          "bottom": 189,
+          "renderer": "wrist-release:1"
+        },
+        {
+          "top": 59,
+          "bottom": 189,
+          "renderer": "wrist-release:2"
+        },
+        {
+          "top": 59,
+          "bottom": 189,
+          "renderer": "wrist-release:3"
+        }
+      ]
+    },
+    {
+      "name": "completed save cannot replay the first awakening reaction",
+      "pass": true
+    },
+    {
+      "name": "Escape exits in one action, with no menu/resume loop",
+      "pass": true
+    },
+    {
+      "name": "GP_BACK exits in one action, with no menu/resume loop",
+      "pass": true
+    },
+    {
+      "name": "VBACK exits in one action, with no menu/resume loop",
+      "pass": true
+    },
+    {
+      "name": "touch/click Continue cannot leak into the next conversation",
+      "pass": true
+    },
+    {
+      "name": "room changes remove controls and leave no stale callback",
+      "pass": true
+    },
+    {
+      "name": "pause/resume retains this scene rather than orphaning its controls",
+      "pass": true
+    },
+    {
+      "name": "earned repair runs wrist release before the existing explanation",
+      "pass": true,
+      "detail": {
+        "began": "RATCHET_RELEASE",
+        "told": "DIALOG",
+        "spare": 1,
+        "cell": 0,
+        "quest": "active",
+        "sword": false,
+        "released": 1
+      }
+    },
+    {
+      "name": "the original quest, battery and spare handoff are unchanged",
+      "pass": true,
+      "detail": {
+        "began": "RATCHET_RELEASE",
+        "told": "DIALOG",
+        "spare": 1,
+        "cell": 0,
+        "quest": "active",
+        "sword": false,
+        "released": 1
+      }
+    },
+    {
+      "name": "failed artwork loading cannot trap the player",
+      "pass": true,
+      "detail": {
+        "done": 1,
+        "state": "PLAY",
+        "controls": false
+      }
+    },
+    {
+      "name": "stale controls cannot complete a newer scene",
+      "pass": true,
+      "detail": {
+        "active": true,
+        "done": 0
+      }
+    },
+    {
+      "name": "saved interruption resumes at the NPC without duplicating completion",
+      "pass": true,
+      "detail": {
+        "noOrphan": true,
+        "resumed": true,
+        "state": "RATCHET_RELEASE",
+        "flag": 1,
+        "pending": 0,
+        "explain": "DIALOG"
+      }
+    },
+    {
+      "name": "contact remains aligned when approached from -1",
+      "pass": true,
+      "detail": {
+        "side": -1,
+        "contact": {
+          "npc": {
+            "x": 516.88,
+            "y": 405.37836954752606
+          },
+          "hero": {
+            "x": 516.88,
+            "y": 407.94208749624397
+          },
+          "error": 2.5637179487179083
+        },
+        "frame": "wrist-release:1",
+        "hero": "ratchet-reaction:3"
+      }
+    },
+    {
+      "name": "contact remains aligned when approached from 1",
+      "pass": true,
+      "detail": {
+        "side": 1,
+        "contact": {
+          "npc": {
+            "x": 603.12,
+            "y": 405.37836954752606
+          },
+          "hero": {
+            "x": 603.1199999999999,
+            "y": 407.94208749624397
+          },
+          "error": 2.5637179487179083
+        },
+        "frame": "wrist-release:1",
+        "hero": "ratchet-reaction:3"
+      }
+    },
+    {
+      "name": "active tutorial never intercepts the scene exit",
+      "pass": true,
+      "detail": {
+        "done": 1,
+        "state": "PLAY"
+      }
+    },
+    {
+      "name": "backgrounding freezes the reaction and resuming continues it",
+      "pass": true,
+      "detail": {
+        "elapsed": 0.05,
+        "frozen": 0.05,
+        "resumed": 0.1
+      }
+    },
+    {
+      "name": "no browser errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "notes": [
+    "Controller and touch aliases tested; not a physical-device certification.",
+    "Alpha/winch/story progression use the newer main implementation, not rejected September candidates."
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "project": "CLAWBYTE / zaferdajani/HZD-99",
+  "commit": "4d487b27cded062fb16fe16750557efa1be73937",
+  "build_id": "3960cef191f9",
+  "live_check_time_utc": "2026-11-13T18:01:12.445795+00:00",
+  "live_url": "https://zaferdajani.github.io/HZD-99/",
+  "identity_method": "Observed by the live verification script in the remote browser sandbox: public HTML and 16 additional sources/assets exactly matched the tested commit. release.json returned404, so identity is not inferred from a manifest or workflow color.",
+  "branches": {
+    "main": "4d487b27cded062fb16fe16750557efa1be73937",
+    "odyssey": "4d487b27cded062fb16fe16750557efa1be73937",
+    "claude/clawbyte-repo-migration-byhyl8": "4d487b27cded062fb16fe16750557efa1be73937"
+  },
+  "public_files": [
+    {
+      "path": "index.html",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "30b0ea75fdf4a9290cb1ab4d5bcfcc0ebd19cd3d0c3f68e032a4e1fc5f391cd7",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "source-files.json",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "8245ab32c6d8b51a7bc7668a6822edd0b4c6c597c67c0777f4b3ba422b13b6a7",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "js/sage-motion.js",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "1c4956b88ff6bdbd812385a374aa8149f7c21e7e1eab5282b75110f504db8a5b",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "js/entities.js",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "d488d6aa1ef30dc1eeaa91e21f854f169fdb18203faba8a85d9c375c560e331d",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "js/boss-motion.js",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "be93132f40a5df1bbdd1eada3522ae48de5537a34cd2696a93aae859ca132101",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "js/game.js",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "626506ef0fc08decfc23cd4e7e67748e0502bfeffcb4045db4afc720275bfc6b",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "js/ratchet-release.js",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "403ddc0ca380d30435955e4c620220ce490fdea9763390147337cb0e5977ad84",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/stand.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "8fc823ee32fbb3319efbf853270d1d0735bb3baf5d45df3ea1009af813638178",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/coil.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "29e7b7f81e46ea15369336f22117a90a563db24e64695ece2f9cb4e9316ce6d6",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/lunge.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "84ce5318b4e13f0d77ff294f93bdc56cf7d82ad04be54f424f1173e6efee88b4",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/gather.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "9a0b429f915228f0573493dac2d21da518b4477707491beaef75fe7df1937a67",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/exhale.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "d882165c8ae51006ea981ee1c0926cc39d5c3f364993796d875ba0ce1cab388f",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/walk8.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "b3dd2e1e32a63ae83a788958eb987784bf3cbb8ace07f8a3c9363210bce5bb4f",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/sage/pure.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "9bfcfd6de68512d3e62dd6bd1075e021faad1c9dc5134e861e2b13c07ea3e72a",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/hero/gait/walk.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "4d71edab37a592ea3a8e50324d54babaed6bc0bbc4ad15ccdc360d31b961cb5d",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/characters/hero/gait/run.webp",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "374a82f47d48a2fc7c895193a1140a28aea5516a270b0b270b098ac75386ff63",
+      "matches_tested_commit": true
+    },
+    {
+      "path": "assets/sfx/vox/hzd_yalla.wav",
+      "http_status": 200,
+      "source_http_status": 200,
+      "sha256": "eec30e2cf0d307c6d56846bdd4c41a4a57d7ba3f42bb2cd17b1f431404c54630",
+      "matches_tested_commit": true
+    }
+  ],
+  "live_browser": {
+    "checks_passed": 27,
+    "checks_total": 27,
+    "errors": [],
+    "checks": [
+      {
+        "name": "the advertised exhale is a real contact-safe punish window",
+        "pass": true
+      },
+      {
+        "name": "the wind-up cannot damage before its strike",
+        "pass": true
+      },
+      {
+        "name": "the actual lunge still damages on contact",
+        "pass": true
+      },
+      {
+        "name": "the announced lunge commits its original direction",
+        "pass": true
+      },
+      {
+        "name": "crossing the Sage does not flip its active-strike artwork",
+        "pass": true
+      },
+      {
+        "name": "double lunge includes a stationary readable replant",
+        "pass": true
+      },
+      {
+        "name": "replant neither slides nor causes an invisible hit",
+        "pass": true
+      },
+      {
+        "name": "second strike stops before displaying recovery",
+        "pass": true
+      },
+      {
+        "name": "ring release has an explicit non-attacking recovery",
+        "pass": true
+      },
+      {
+        "name": "the ring drawing stays at its release location",
+        "pass": true
+      },
+      {
+        "name": "ring collision agrees with that release location",
+        "pass": true
+      },
+      {
+        "name": "a separate elevated platform is not the ring floor lane",
+        "pass": true
+      },
+      {
+        "name": "jump remains a valid answer to the ember ring",
+        "pass": true
+      },
+      {
+        "name": "walking feet are planted without a second floating bob",
+        "pass": true
+      },
+      {
+        "name": "lunge does not shrink to half the standing body",
+        "pass": true
+      },
+      {
+        "name": "the freed moving Sage uses its walking strip, not sliding kneeling artwork",
+        "pass": true
+      },
+      {
+        "name": "rescued walking preserves the purified blue identity",
+        "pass": true
+      },
+      {
+        "name": "drawing does not advance the fight clock or emit cues",
+        "pass": true
+      },
+      {
+        "name": "an interrupted strike cannot resume as an untold lunge",
+        "pass": true
+      },
+      {
+        "name": "an already released ring advances independently of caster knockback",
+        "pass": true
+      },
+      {
+        "name": "the Pack Sage is not silently assigned the Meadow profile",
+        "pass": true
+      },
+      {
+        "name": "song-lock cancels the pending chain and ring",
+        "pass": true
+      },
+      {
+        "name": "claws still cannot cleanse the Sage",
+        "pass": true
+      },
+      {
+        "name": "four Purifier hits still rescue rather than kill",
+        "pass": true
+      },
+      {
+        "name": "the Power Cell reward remains once-only",
+        "pass": true
+      },
+      {
+        "name": "no browser errors",
+        "pass": true
+      },
+      {
+        "name": "hero movement, collision and boss simulation unchanged",
+        "pass": true
+      }
+    ],
+    "method_hashes": {
+      "heroUpdate": "6a17c27f490a34c1160bb94e28e5a32dc067d61aeb5cf63beca7e5f29fd4629f",
+      "heroState": "861d9a3755df5336861ac4dd11e9f57089b43e2d89c297f0a10cdf2ec01b87bc",
+      "collision": "9f4fa1506507d7222c2750266bb1ba7dec0e987ff355b8bf843a5811ae9bedcb",
+      "bossUpdate": "f3f5a7f70cf2d7e41a19ec2364d2fba24c792c3d806821d398292640b88c99b8"
+    },
+    "note": "The same 27 names/pass outcomes were returned by the separate GAME_URL public-site run; CI-only numerical detail is intentionally not represented as live measurement."
+  },
+  "ci": {
+    "run": 43477162622,
+    "outcome": "success",
+    "artifact": 14064535114,
+    "artifact_sha256": "5c873f223ea83d4e97ce9fa02786f6e87a4b543adf43db0cf999986754bdff26",
+    "regression_groups": 25,
+    "targeted_checks": 27
+  },
+  "pages_verification": {
+    "run": 43478135019,
+    "outcome": "success",
+    "publisher": "Existing branch publisher; custom workflow verifies rather than publishes a second artifact."
+  },
+  "preserved": [
+    "All existing source asset files",
+    "Hero walking/running artwork",
+    "Player.update, heroState, moveEnt and Boss.update",
+    "Purifier-based rescue, once-only Power Cell and network pacification",
+    "Other Sage networks and prior guardian changes"
+  ],
+  "scope_limits": [
+    "New motion profile applies to Meadow Sage GA1D only. Other actor profiles are documented plans, not claimed implementations.",
+    "Approved existing frames reused; no new multi-frame limb performance generated.",
+    "Video is a silent 4.4-second staged sample from the actual compiled game, not an unassisted campaign clear.",
+    "No claim of certification on every physical controller."
+  ],
+  "research_skill_paths": [
+    ".claude/skills/creature-motion-combat/SKILL.md",
+    ".claude/skills/creature-motion-combat/references/roster.md",
+    "docs/combat/research/creature-motion-skills-2026-11-13.json"
+  ]
+}
