@@ -39,7 +39,8 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only');   /
     await p.waitForFunction(() => typeof startGame === 'function');
     // every strip the lion can ask for, resident before the first frame: a film
     // of the parts-rig fallback would be a film of a different animal
-    await p.evaluate(() => { window.requestAnimationFrame = () => 0; for (const k of BEAST_STRIPS) mediaFetch(k, true); beastImg(); });
+    // this machine has no graphics card; the shader effects layer is what is being filmed (js/fxgl.js fxglInit)
+    await p.evaluate(() => { window.FXGL_FORCE = 1; if (typeof FXGL !== 'undefined') FXGL.ok = null; window.requestAnimationFrame = () => 0; for (const k of [...BEAST_STRIPS, 'beastStudioIdle']) { try { mediaFetch(k, true); } catch (e) {} } beastImg(); });
     await p.waitForFunction(() => BEAST_STRIPS.every(k => MEDIA_RAW[k] && MEDIA_RAW[k].complete && MEDIA_RAW[k].naturalWidth) && beastImg() && beastImg().naturalWidth, null, { timeout: 60000 });
     await p.evaluate((phase) => {
       let s = 0x51f0c0de; Math.random = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);

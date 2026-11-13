@@ -181,7 +181,18 @@ function fxglInit() {
   FXGL.ok = false;
   try {
     const cvs = document.createElement('canvas');
-    const gl = cvs.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+    // A SOFTWARE GPU IS NO GPU. With no graphics hardware the browser will
+    // still hand out a WebGL context — rasterised on the CPU, and copied back
+    // to the 2D canvas the slow way — and measured in the test browser that
+    // cost enough per frame to slow the whole game while an effect was up
+    // (tests/combat-impact-input.cjs: 0.9 s of real time no longer cleared a
+    // 0.65 s particle). So the context is asked for on the condition that it
+    // is fast; where it is not, this is the no-GPU case and the Canvas rings
+    // draw. FXGL_FORCE lifts the condition for the harness and the film tool,
+    // which need to see the layer on a machine that has no graphics card.
+    const opts = { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false };
+    if (!(typeof window !== 'undefined' && window.FXGL_FORCE)) opts.failIfMajorPerformanceCaveat = true;
+    const gl = cvs.getContext('webgl', opts);
     if (!gl) return false;
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };

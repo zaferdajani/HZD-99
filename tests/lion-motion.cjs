@@ -165,6 +165,11 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         out.strips[st] = { key: S.key, ax: S.ax == null ? null : S.ax, anchor: meta && meta.anchor, mean, swing: mean ? (Math.max(...lum) - Math.min(...lum)) / (mean[0] * 0.2126 + mean[1] * 0.7152 + mean[2] * 0.0722) : null };
       }
       // ---- G. the effects layer -----------------------------------------------------
+      // The test browser has no graphics card, which the game treats as "no
+      // shader layer" (see fxglInit). Record that verdict, then lift it: the
+      // layer itself is what is under test here.
+      out.fxNoGpu = typeof fxglInit === 'function' ? fxglInit() : null;
+      window.FXGL_FORCE = 1; if (typeof FXGL !== 'undefined') FXGL.ok = null;
       { const b = fresh(53, 1); const fxOk = typeof fxglInit === 'function' && fxglInit();
         out.fx = { present: typeof fx === 'function', ok: !!fxOk, err: typeof FXGL !== 'undefined' ? FXGL.err || null : 'absent' };
         if (typeof fx === 'function') {
@@ -215,6 +220,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
       check(st + ': the same plating colour as the stalk', dc <= 5, S.mean ? S.mean.map(v => v.toFixed(0)).join(',') + ' (Δ' + dc.toFixed(1) + ')' : 'no image');
     }
     check('the shader effects layer comes up', R.fx.present && R.fx.ok, JSON.stringify({ ok: R.fx.ok, err: R.fx.err }));
+    check('...and stands down by itself on a software GPU (this browser has no graphics card)', R.fxNoGpu === false, String(R.fxNoGpu));
     if (R.fx.present) {
       check('the swipe throws its claws', (R.fx.swipe || []).includes('slash'), JSON.stringify(R.fx.swipe));
       check('the landing cracks the ground and sends a wave along it', ['ground', 'cracks', 'flash'].every(n => (R.fx.landing || []).includes(n)), JSON.stringify(R.fx.landing));

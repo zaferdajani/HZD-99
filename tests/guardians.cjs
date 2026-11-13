@@ -363,8 +363,13 @@ const FIGHTS = process.env.GUARDIANS
   console.log('       straight up: ' + nf.straight.path + '  settle ' + nf.straight.recMs + ' ms');
   check('NULLFANG: a leap at a player beside the hulk lands on her floor, not on the hulk (<= 20 px)',
     nf.hulk.lift != null && nf.hulk.lift <= 20, nf.hulk.lift + ' px');
-  check('NULLFANG: a leap straight up settles in full — the watchdog does not take it (>= 250 ms, then idle)',
-    nf.straight.recMs >= 250 && nf.straight.path === 'crouch>pounce>recover>idle', nf.straight.path + ' ' + nf.straight.recMs + ' ms');
+  // What the watchdog stole was the SETTLE: it fired a wrench pounce out of it,
+  // so the path read crouch>pounce>recover>pounce. The settle must run in full
+  // and end in a state the lion chose. Since 2026-11-13 that is either the idle
+  // or — she is standing under it here, inside the paw's reach — the swipe's
+  // wind-up (BOSS_NULLFANG changelog, the pounce -> swipe chain).
+  check('NULLFANG: a leap straight up settles in full — the watchdog does not take it (>= 250 ms, then idle or the paw)',
+    nf.straight.recMs >= 250 && /^crouch>pounce>recover>(idle|swipewarn)$/.test(nf.straight.path), nf.straight.path + ' ' + nf.straight.recMs + ' ms');
 
   // ---- 4. the reward chain ----------------------------------------------
   // Each guardian pays the key to the NEXT one's plating (the Mega Man X loop

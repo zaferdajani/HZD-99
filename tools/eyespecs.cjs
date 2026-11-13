@@ -122,10 +122,17 @@ module.exports = [
     ({ key: k, rule: 'none', at: { 0: [x, y] } })),
   // ---- NULLFANG ----------------------------------------------------------------
   ...[['beastStudioStalk', 24], ['beastGallop', 24], ['beastStudioLeap', 30], ['beastStudioRoar', 30],
-      ['beastStudioSwipe', 24], ['beastRearSwipe', 30], ['beastHurt', 12], ['beastFall', 12]].map(([k, n]) =>
+      ['beastStudioSwipe', 24], ['beastRearSwipe', 30], ['beastHurt', 12], ['beastFall', 12],
+      ['beastStudioIdle', 24]].map(([k, n]) =>
     ({ key: k, cells: n, col: 'red|orange|purple', rule: 'front', region: [0, 0, 0.3, 0.6],
        // the pounce's two landing frames bury the face in the mane: placed
        at: k === 'beastStudioLeap' ? { 15: [0.15, 0.50], 24: [0.16, 0.70], 25: [0.15, 0.70] } : null })),
+  // THE TURN goes through three views: profile LEFT (the snout is the left tip),
+  // front-on (the highest glow and its partner), profile RIGHT (the right tip).
+  // One rule and one region per cell, in the order the pivot plays.
+  { key: 'beastStudioTurn', cells: 18, col: 'red|orange|purple', eyes: 2,
+    colRule: [...Array(5).fill('front'), ...Array(7).fill('top'), ...Array(6).fill('frontR')],
+    colRegion: [...Array(5).fill([0, 0, 0.42, 0.6]), ...Array(7).fill([0.12, 0, 0.88, 0.5]), ...Array(6).fill([0.58, 0, 1, 0.6])] },
   // ---- GLACIERE (faces left), the FURNACE dragon (faces right) ---------------
   // Both figures PLACED on the violet eye from 2%-grid renders (2026-10-10).
   // Detection took a glint at the horn's base on the flying figure, and the
