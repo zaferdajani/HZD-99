@@ -7507,6 +7507,7 @@ class Enemy {
     // patrol-and-perch, declared here for the same reason as every timer above
     this.landT = 0; this.kickT = 0;
     this.pat = null; this.patLeg = 0; this.legT = 0; this.perchT = 0; this.perched = false; this.faceT = this.dir;
+    if(typeof sageDuelInit==='function')sageDuelInit(this);
   }
   // THE HOOK A KINGDOM SESSION WRITES AGAINST. Its kind's row in FOE_MOVES says
   // what the move costs; this says whether THIS machine could afford it when it
@@ -7540,6 +7541,7 @@ class Enemy {
       return;
     }
     this.anim += dt; this.hurtT -= dt;
+    if(typeof sageDuelTick==='function')sageDuelTick(this,dt);
     if (this.landT > 0) this.landT -= dt;
     const attackDt = dt * (this.attackSpeed || 1);
     if (this.kickT > 0) this.kickT -= dt;
@@ -7613,7 +7615,8 @@ class Enemy {
       this.vx *= Math.pow(0.02, dt);
       if (onSpike(this)) { this._envDeath = 1; this.die(Math.sign(this.vx) || 1, -0.4); return; }
       if (this.y > G.roomDef.h * TILE + 40) { this._envDeath = 1; this.die(0, 1); return; }
-      if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, this.x + this.w / 2, this.kind + '.knockback');
+      if (!player.dead && aabb(this, player) && !(typeof sageDuelActive==='function'&&sageDuelActive(this)))
+        player.hurt(DF().edmg, this.x + this.w / 2, this.kind + '.knockback');
       return;
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
@@ -8035,6 +8038,7 @@ class Enemy {
       //   gather -> EMBER RING                 (grounded; jump it)
       // Three denied openings force a long exhale — the cold-dice floor.
       case 'sage': {
+        if(typeof sageDuelActive==='function'&&sageDuelActive(this)){sageDuelStep(this,dt);break;}
         if (this.tame) {
           // purified: it kneels in peace and cannot touch her (return skips
           // the contact hit at the bottom, the wolves' own law)
@@ -8751,7 +8755,9 @@ class Enemy {
     this.parryable = this.kind === 'guard' && !this.plateShed
       && (this.lungeT > 0 || (this.coilT > 0 && this.coilT <= PARRY_LEAD));
     // touch damage
-    if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, cx, undefined, this);
+    const sageContact=typeof sageDuelActive==='function'&&sageDuelActive(this);
+    if (!player.dead && aabb(this, player) && (!sageContact||sageDuelContact(this)))
+      player.hurt(DF().edmg,cx,sageContact?'sage.lunge':undefined,this);
   }
   // VOLATILE: it takes the room with it. Telegraphed by its own colour on the
   // body and by a beat of warning light, so it is a thing you step away from
@@ -11274,6 +11280,7 @@ function sageStruck(e, dm, x, y) {
   if (e.hp - dm <= floor) {
     e.hp = floor; e.locked = true; e.hurtT = 0.2;
     e.coilT = e.gatherT = e.lungeT = e.windedT = 0; e.ringR = null;
+    if(typeof sageDuelReset==='function')sageDuelReset(e,'locked');
     G.flash = Math.max(G.flash, 0.3);
     cam.shake = Math.max(cam.shake, 6);
     sfx('tell');
@@ -11298,6 +11305,7 @@ const SAGE_GIFT = {
   GE1D: () => invAdd('batt'),                                    // it knelt closest and held on
 };
 function sageTame(e) {
+  if(typeof sageDuelReset==='function')sageDuelReset(e,'pure');
   e.tame = 1; e.locked = false; e.calm = true; e.pureM = 1;
   const key = 'sageTame_' + G.roomId;
   G.save.flags[key] = 1;
@@ -11376,7 +11384,7 @@ function drawSage(c, e) {
   const cx = e.x + e.w / 2, base = e.y + e.h;
   const t2 = e.anim;
   const kneel = e.locked || e.tame;
-  const bob = kneel ? 0 : Math.sin(t2 * 2.2) * 1.6;
+  const bob = kneel || (typeof sageDuelActive==='function'&&sageDuelActive(e)) ? 0 : Math.sin(t2 * 2.2) * 1.6;
   // the aura sense: the black halo, under everything
   if (typeof auraSense === 'function' && auraSense() && !e.tame) {
     const fl = 0.75 + Math.sin(t2 * 7 + Math.sin(t2 * 13)) * 0.25;
@@ -11417,11 +11425,11 @@ function drawSage(c, e) {
   // opposite way to the front-on set. The bow transform stays only as the
   // fallback while the exhale plate is in flight. Cell heights are matched to
   // the standing plate's 1.12 hitboxes of body (the bow stands a little lower).
-  let sageDrew = false;
+  let sageDrew = typeof drawSageDuelBody==='function'&&drawSageDuelBody(c,e);
   const towardHer = !sageFlip;
-  if (exhale && typeof drawStripCell === 'function')
+  if (!sageDrew && exhale && typeof drawStripCell === 'function')
     sageDrew = drawStripCell(c, 'sageExhale', 0, 1, cx, base, e.h * 1.07, towardHer);
-  else if (!kneel && sagePlate === 'sageStand' && Math.abs(e.vx || 0) > 12 && typeof drawStripCell === 'function') {
+  else if (!sageDrew && !kneel && sagePlate === 'sageStand' && Math.abs(e.vx || 0) > 12 && typeof drawStripCell === 'function') {
     // one stride per 56 px of floor it covers (moveEnt's walkD), like every
     // walker — never the clock, or the robe would pace faster than the feet
     const cell = Math.floor(((((e.walkD || 0) / 56) % 1) + 1) % 1 * 8);
@@ -11501,15 +11509,16 @@ function drawSage(c, e) {
   // her feet: a squashed ellipse crawling outward, not a hoop in the air
   // (the first render read as a giant circle over the whole room)
   if (e.ringR != null) {
+    const origin=typeof sageRingOrigin==='function'?sageRingOrigin(e):{x:cx,y:base};
     c.save(); c.globalCompositeOperation = 'lighter';
     c.globalAlpha = clamp(1 - e.ringR / 250, 0.12, 0.55);
     c.strokeStyle = '#ff6a3a'; c.lineWidth = 3;
     c.shadowColor = '#ff5a2a'; c.shadowBlur = 6;
-    c.beginPath(); c.ellipse(cx, base, e.ringR, 9, 0, Math.PI, Math.PI * 2); c.stroke();
+    c.beginPath(); c.ellipse(origin.x, origin.y, e.ringR, 9, 0, Math.PI, Math.PI * 2); c.stroke();
     // sparks riding the wavefront
     for (const s of [-1, 1]) {
       c.fillStyle = '#ffb08a';
-      c.beginPath(); c.arc(cx + s * e.ringR, base - 2, 2, 0, 7); c.fill();
+      c.beginPath(); c.arc(origin.x + s * e.ringR, origin.y - 2, 2, 0, 7); c.fill();
     }
     c.shadowBlur = 0; c.restore();
   }

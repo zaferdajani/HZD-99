@@ -281,6 +281,7 @@ const SUITE = [
   ['demo',      'the free chapter ends at one door, and she can walk back in'],
   ['twin',      'the swirl: four passes, a ring not a punch, and two blades afterwards'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
+  ['sage-motion', 'Meadow Sage committed strikes, planted motion, matching ring contact and rescue invariants'],
   ['sage',      'the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift'],
   ['kingdom1',  'kingdom 1 holds its rules: the den rest catches deaths, the tunnel tells the sage, NPCs own their places'],
   ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],

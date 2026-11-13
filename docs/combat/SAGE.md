@@ -70,3 +70,24 @@ unchanged. `tests/artbible.cjs`: rest/exhale IoU 0.60, coil/exhale 0.57.
 `tests/sage.cjs`: tells fire on both channels; claws stop at the floor and
 cannot finish; crystal purifies to tame; the tame persists across room
 reloads; the gift pays once; the halo flips black→blue.
+
+
+## 2026-11-13 — first-Sage profile (GA1D only)
+
+The researched creature-motion-combat skill now routes the actual Meadow Sage
+to js/sage-motion.js. Other networks retain the earlier behavior. The double
+lunge keeps its500ms anticipation and two220ms strikes but inserts a180ms
+stationary replant; recovery stays700ms and is contact-safe. The ring has a
+550ms release recovery, a fixed world origin and matching ground-lane collision.
+An interrupted attack cancels into350ms recovery instead of returning as an
+untold lunge. The ring keeps its independent clock if the caster is knocked back.
+Purification amount, gifts, identities, room access and save facts are unchanged.
+
+Source art is unchanged: no new limb performance is claimed. Existing walk
+frames are distance-clocked without a second floating bob; active-strike facing
+is committed; the oversized height jump between the old small lunge plate and
+standing plate is corrected. A moving rescued Sage walks rather than gliding
+in its kneeling picture. Rendering does not advance a combat timer.
+
+See SAGE_MOTION_PASS_2026-11-13.md for values and limitations, and
+`tests/sage-motion.cjs` for before/after gameplay and actual-rendering probes.

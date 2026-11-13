@@ -1,0 +1,34 @@
+[
+  {
+    "repository": "MengTo/Skills",
+    "path": "agent-skills/game-development/design-action-combat/SKILL.md",
+    "blob_sha": "dffd12790216e2739728e270753ba8b60d85ce04",
+    "sha256": "0b6289f0c651987554e2c82dda45e18582eb2a21412672778ed76cd1a214df17",
+    "url": "https://github.com/MengTo/Skills/blob/main/agent-skills/game-development/design-action-combat/SKILL.md",
+    "consulted_only": true
+  },
+  {
+    "repository": "MengTo/Skills",
+    "path": "agent-skills/game-combat/game-dev-combat-animation/SKILL.md",
+    "blob_sha": "3176811d6a3d400224fd5275301491d0086802c0",
+    "sha256": "a0ea4fcd84ac57673c16d8f7ad116f5d900d0556c4cecdd08b23fdb623181ac0",
+    "url": "https://github.com/MengTo/Skills/blob/main/agent-skills/game-combat/game-dev-combat-animation/SKILL.md",
+    "consulted_only": true
+  },
+  {
+    "repository": "arjun988/blender-skills",
+    "path": ".claude/skills/animation/SKILL.md",
+    "blob_sha": "84e7e15f948388ed94c9a6935a46459b6f0e490d",
+    "sha256": "a7c5fcef13d4f68c017a3f5052194cea3b359e38fb0807eb308f8075b1f398d6",
+    "url": "https://github.com/arjun988/blender-skills/blob/main/.claude/skills/animation/SKILL.md",
+    "consulted_only": true
+  },
+  {
+    "repository": "JCaraballo113/agent-skills",
+    "path": "skills/blender-character/ANIMATION.md",
+    "blob_sha": "363105c511befaf31bcb5334f521f15f753172d9",
+    "sha256": "cf9f0d340c31264fa73648e1e32433522c56b93d10a75501b245fc7f0c8f901b",
+    "url": "https://github.com/JCaraballo113/agent-skills/blob/main/skills/blender-character/ANIMATION.md",
+    "consulted_only": true
+  }
+]
