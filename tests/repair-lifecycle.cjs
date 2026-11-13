@@ -52,7 +52,7 @@ const ctx=vm.createContext({console,document,addEventListener:window.addEventLis
   player:{vx:9,atkBuf:1,jbuf:1,chargeT:1},G:{roomId:'A0B',state:'PLAY',save:null,toast:noop}});
 const run=s=>vm.runInContext(s,ctx);
 for(const name of ['weapons','quests','story-opening','story-repair'])run(fs.readFileSync('js/'+name+'.js','utf8'));
-for(const name of ['saveKeyFor','persist','invCount','invAdd','invTake','npcKey','npcCellItem','npcLive','npcCharge','doInteract','forgeCrystal','update'])run(fn(name));
+for(const name of ['saveKeyFor','persist','invCount','invAdd','invTake','npcKey','npcCellItem','npcLive','npcCharge','npcRestoreTransaction','doInteract','forgeCrystal','update'])run(fn(name));
 run(game.slice(game.indexOf('const NPC_GIFT ='),game.indexOf('\n};',game.indexOf('const NPC_GIFT ='))+3));
 ctx.showItem=(name,desc)=>{ctx.G.state='DIALOG';ctx.G.dialog={name,lines:[desc],onEnd:null};};
 const npc={type:'npc',room:'A0B',extra:'ratchet',x:0,y:0,w:20,h:20};

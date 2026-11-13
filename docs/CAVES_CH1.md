@@ -55,7 +55,7 @@ No vertical link anywhere leads into A4; its only exit is L.
 | **CV1** entry hall | A5's mouth (rubble) | one bound crawler, a second buried mouth, a chest in the climb-only pocket | **useful upgrade**: a spare core (`coresMax + 1`, refilled) | `ch_CV1_1`, `rubbleCV1B` | bound bodies left here ask to be freed after the forge |
 | **CV1B** the Seam | CV1's buried side mouth | a rest pod, a mouth onward to CV2 | **restored facility**: resting wakes the quarrymen's survey pod and charts CV1–CV3 on the map; **shortcut** past CV1's corridor | `pgSurvey`, `charted.*` | a rest point on the quarry road |
 | **CV2** the long dark | CV1 R, or CV1B's mouth | the Deaf System's founding log (terminal 5) — the sound she has followed since the meadow | **story evidence**; the lure settles | `beacon` | — |
-| **CV3** the quarry | CV2 R | the marble, shining at the end of the dark; claws glance, the Volt Burst frees it | **the sword material** (`cshard`) | `pl_cshard` | **after the forge:** the pillar is a dark cut stump with a glowing cut line; the maintenance passage beside it is built and breathes cold blue light; the marks point at it; a line says so, once (`pgCv3Back`) |
+| **CV3** the quarry | CV2 R | Gravehorn owns the marble seam; the pillar stays visible but cannot reward while he stands, and only his legitimate retreat releases it; then claws glance and the Volt Burst frees the marble | **boss encounter** + **the sword material** (`cshard`) | `bossHorn`, then `pl_cshard` | **after the forge:** the pillar is a dark cut stump with a glowing cut line; the maintenance passage beside it is built and breathes cold blue light; the marks point at it; a line says so, once (`pgCv3Back`) |
 | **GA1T** maintenance tunnel | CV3's passage (needs the forged blade) | the meadow refuge's own log (terminal 6): how the counting sage was carried under | **story evidence**; the junction (grotto west, chamber east) | — | wakes freed after the Sage |
 | **GA1** grotto | GA1T west | a rest pod and scrap | **rest before the Sage**; after NULLFANG, the **shortcut** door into his enclosure | `bossGlitch` builds the door | — |
 | **GA1D** deep chamber | GA1T east | the Meadow Sage, kneeling in the song-lock | **rescue** (cleansing, never a kill) + **revelation** (CHIME; lines adapt if the bell or lion is already done) + **visible change** (the chamber's people freed on the spot with the cure's circle; GA1–GA1T wake freed on every load) + a cell and the Sage's card; the bell's ward falls | `sageTame_GA1D`, `chimeRevealed`, `sageGift_GA1D` | calm, freed network |
@@ -77,7 +77,9 @@ not the thing anybody asked for.
 
 ### The return to the quarry is different
 
-After the forge the same road reads differently: the marks turn sage-blue and
+The first quarry visit is not a loose pickup: Gravehorn owns CV3, the marble
+pillar remains readable throughout the encounter, and the reward cannot settle
+until his authored retreat sets `bossHorn`. After the forge the same road reads differently: the marks turn sage-blue and
 lead past the stump to the lit passage, every machine she knocked down on the
 way in is still lying there bound and the room says so once
 (`pg_bound_wait`) — the blade can free them now, each with the rescue's light

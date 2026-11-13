@@ -22,8 +22,8 @@ need opposite answers.
 | id | state | tell | active | recovery | tell state | tell ms | channels | dmg | intended_counter | opening_ms |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `pp.dash` | `dashwarn`→`dashslash` | **350** (`TELL_FAST`) | 420 ms at **720 px/s** | `rest` **850 (p1) / 500 (p2)** | ✓ | 350 | amber + coils low + cue | 1 core | **jump** — it runs the floor | **817 / 467** |
-| `pp.pounce` | `pouncewarn`→`pounce` | **300** (`TELL_FAST × 0.86`) | ballistic arc | `rest` **700** | ✓ | 300 | amber + coils low + cue | 1 core | **move laterally** — it commits to an arc | **667** |
-| `pp.spread` | from `idle` | none | 3 bolts at ±0.3 rad, 300 px/s, while it hops back (`vy −480`) | `rest` **950 / 600** | — | — | `shoot` | 1 core | **out-range or gap** | **917 / 567** |
+| `pp.pounce` | `pouncewarn`→`pounce` | **500** (`TELL_SWIPE`) | ballistic arc | `rest` **700** | ✓ | 500 | amber + coils low + cue | 1 core | **move laterally** — it commits to an arc | **667** |
+| `pp.spread` | `spreadwarn`→`spread` | **700** (`TELL_HEAVY`) | 3 bolts at ±0.3 rad, 300 px/s, while it hops back (`vy −480`) | `rest` **950 / 600** | ✓ | 700 | amber muzzle sparks + cue | 1 core | **out-range or gap** | **917 / 567** |
 | `pp.lightsplit` | `lsvanish` | **950** | three glowing spots appear; **one holds the real body**, the two fakes fire aimed bolts, the real one pounces | — | hand-cued: `sfx('wave')` on entry | **950** | amber + the body vanishes + three lit afterimages + cue | 1 core | **identify** — watch which spot is not a decoy | n/a |
 | `pp.arcoverload` | `arcspin` | **1200** | it vanishes into its own lightning; `stormT` makes it untouchable | — | ✓ (`spin`) | 1200 | amber + turntable overcharge + cue → `cast` | — | **wait it out** | n/a (see audit) |
 
@@ -59,15 +59,14 @@ the tightest in the game; it is simply a fair one.
 
 | Move | Mechanism | The arithmetic |
 |---|---|---|
-| `pp.dash` / `pp.pounce` | **specific, and this is the fight** | Both start from the same low coil. Their tells differ by **50 ms** (350 vs 300) and by silhouette alone. Dash is answered by **jumping**; pounce is answered by **moving sideways** — and each answer is *wrong* for the other move. The skill is identification, not reaction. |
+| `pp.dash` / `pp.pounce` | **specific, and this is the fight** | Both start from the same low coil, but their budgets are now deliberately separated (**350 vs 500 ms**) as a second readability channel. Dash is answered by **jumping**; pounce is answered by **moving sideways** — and each answer is *wrong* for the other move. The skill remains identification, not guessing. |
 | `pp.lightsplit` | **conditional** | 950 ms in which the body is not on screen. The opening after it exists only if you picked the right spot to be standing near; pick wrong and the pounce lands on you while two bolts arrive from the sides. |
 | `pp.spread` | **greedy** | 917 ms while it is airborne and retreating. Chasing it into the corner it is hopping toward is the trap. |
 
-**Why the 50 ms tell difference is legitimate.** It is well under the reaction
-floor and could not be told apart on timing — so it is not asked to be. The
-telegraphs differ in *shape*: the dash squares up along the floor line, the
-pounce gathers under itself. Timing is not the discriminator, and the fight does
-not pretend it is.
+**Why the timing separation changed.** The previous 50 ms nominal difference
+collapsed to effectively equal sampled windows. Shape remains the primary read:
+dash squares up along the floor line and pounce gathers under itself. The extra
+time is a supporting channel, not permission to leave either silhouette vague.
 
 ---
 
@@ -75,7 +74,7 @@ not pretend it is.
 
 | Phase | Threshold | Added | Modified | **Teaches** |
 |---|---|---|---|---|
-| 1 | 100–35% | dash, pounce, spread, light split | — | *These two look the same and are not.* |
+| 1 | 100–35% | dash, pounce, spread, light split | — | *These attacks begin alike; read direction, shape and budget.* |
 | 2 | < 35% | `pp.arcoverload` once | dash rest 850→500; pounce cycle tightened; spread rest 950→600 | *The same tell, with less room to be wrong in.* |
 
 ### Teaching pass
@@ -89,7 +88,7 @@ not pretend it is.
 
 | Phase | ≥1 guaranteed punish | no unreactable damage | no mid-commitment transition | every source visible |
 |---|---|---|---|---|
-| 1 | ✓ dash rest, 817 ms | ✓ shortest tell 300 ms | ✓ | ✓ the split's fakes are lit before they fire |
+| 1 | ✓ dash rest, 817 ms | ✓ shortest tell 350 ms | ✓ | ✓ the split's fakes are lit before they fire |
 | 2 | ✓ dash rest, 467 ms | ✓ **no tell shortens in phase two** | ✓ `arcspin` deals no damage and makes it untouchable rather than dangerous | ✓ |
 
 ---
@@ -107,10 +106,9 @@ not pretend it is.
 same fight are deliberately similar.** Registry §B5 requires uniqueness per
 fight; this is a stated, argued exception, because the fight's assigned slot IS
 identification. The silhouettes are genuinely different — long-and-low against
-compact-and-high — and that difference is the content. If it ever fails to read
-at 960×540, the fix is to exaggerate the two poses, **not** to separate the tell
-lengths, which would turn an identification test into a reaction test and
-duplicate NULLFANG's slot.
+compact-and-high — and that difference is the content. If it fails to read at
+gameplay size, exaggerate the poses and world-space cues; the separated budgets
+support that identification but do not replace it.
 
 ---
 
@@ -139,8 +137,8 @@ changed is what it chooses, and the one move that fired without a tell:
   it cannot reach yet. Bands < 160 / < 380 / ≥ 380 px: pounce 3 / 1 / 0.5,
   dash 1 / 3 / 2, spread 0.5 / 1 / 3; recency debt ×0.5. Measured: near draws
   ~58–65 % pounce, far draws ~51–53 % spread.
-- **`spreadwarn`** — the spread gathers for `TELL_FAST` (350 ms) like the dash
-  and the pounce, amber sparks off the muzzle, cue automatic (the state name
+- **`spreadwarn`** — the spread gathers for `TELL_HEAVY` (700 ms), amber sparks
+  off the muzzle, cue automatic (the state name
   says *warn*). The AAA audit's "SPREAD fires from idle with no dedicated
   tell" is closed.
 - **The break:** `dazeAt 6`, `dazeSpan 2.4 s`, **1.5 s (p1) / 1.2 s (p2)** in

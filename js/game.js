@@ -271,11 +271,17 @@ const G = {
     stopMusic(); sfx('dieSting');
     this.state = 'DEAD'; this.deadT = 1.8;
   },
-  grantRelic(id) {
+  grantRelic(id, presentStored) {
     if (!this.save.relics) this.save.relics = [];
-    if (this.save.relics.indexOf(id) >= 0) return;
-    this.save.relics.push(id);
-    persist(); sfx('win');
+    const stored = this.save.relics.indexOf(id) >= 0;
+    if (stored && !presentStored) return;
+    if (!stored) {
+      // A caller asking only to present an atomically stored reward must never
+      // create it here. Ordinary drops retain the original durable path.
+      if (presentStored) return;
+      this.save.relics.push(id);
+      persist(); sfx('win');
+    }
     loadoutTagCard(showItem(t('rl_' + id), t('rl_' + id + 'd')), 'relic', id);
   },
   maybeDropRelic(x, y) {
@@ -1037,9 +1043,11 @@ function npcLive(s) {
   if (NPC_AWAKE.has(npcKey(s))) return true;
   return !!G.save.flags['on_' + npcKey(s)];
 }
-function npcCharge(s) {
-  G.save.flags['on_' + npcKey(s)] = 1;
-  persist();
+function npcCharge(s, presentStored) {
+  if (!presentStored) {
+    G.save.flags['on_' + npcKey(s)] = 1;
+    if (persist() === false) return false;
+  }
   const cx = s.x + s.w / 2, cy = s.y + s.h / 2;
   sfx('powerUp'); sfx('chargeReady');
   G.flash = Math.max(G.flash || 0, 0.22);
@@ -1048,6 +1056,7 @@ function npcCharge(s) {
   burst(cx, cy, 26, '#ffd76a', 260, 0.7, 60, 3, true);
   burst(cx, cy, 14, '#ffffff', 150, 0.5, -40, 2, true);
   if (typeof roarWave === 'function') roarWave(cx, s.y + s.h, '#ffd76a');
+  return true;
 }
 // evolution fanfare: when a power milestone pushes the tier up, the character
 // visibly grows and gains gear (drawn in entities.js) — announce it
@@ -2372,10 +2381,10 @@ const NPC_GIFT = {
   // burstUnlocked and the cell branch of updateShop). He wakes, he hands her
   // the kit, he opens the shop; the shop is where she becomes a machine that
   // can spend what she knocks out of other machines.
-  'A0B|ratchet': () => {
-    invAdd('kit');
+  'A0B|ratchet': (presentStored) => {
+    if (!presentStored) invAdd('kit');
     // His own cell stays installed. This separately stored spare is for Servo.
-    if (!isHero() && G.save.storyVersion >= 2 && !G.save.flags.ratchetSpareGiven) {
+    if (!presentStored && !isHero() && G.save.storyVersion >= 2 && !G.save.flags.ratchetSpareGiven) {
       G.save.flags.ratchetSpareGiven = 1;
       invAdd('batt');
     }
@@ -2384,22 +2393,58 @@ const NPC_GIFT = {
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
   // does not exist until the lion's cell has paid for it
   'A3|ratchet': () => { G.toast(t('npc_shop_open')); },
-  'A1|servo':  () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
-  '*': () => { G.save.scrap += 25; G.toast(t('npc_thanks_scrap')); },
+  'A1|servo':  (presentStored) => { if (!presentStored) invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
+  '*': (presentStored) => { if (!presentStored) G.save.scrap += 25; G.toast(t('npc_thanks_scrap')); },
 };
+// One durable NPC restoration. Previously invTake, npcCharge, repaired state,
+// kit and spare-cell gifts each wrote separately. A crash after the first write
+// could reload a dark Ratchet with his only cell already gone. Build the whole
+// durable outcome on a clone, write it once, and present only after success.
+function npcRestoreTransaction(s, key) {
+  if (!G.save) return false;
+  const before = G.save, item = npcCellItem(s);
+  let next;
+  try { next = JSON.parse(JSON.stringify(before)); }
+  catch (e) { return false; }
+  next.items = next.items || {};
+  if ((next.items[item] || 0) < 1) return false;
+  next.items[item]--;
+  if (next.items[item] <= 0) delete next.items[item];
+  next.flags = next.flags || {};
+  next.flags['on_' + key] = 1;
+  if (key === 'A0B|ratchet') next.flags.ratchetRepaired = 1;
+  if (key === 'A0B|ratchet') {
+    next.items.kit = (next.items.kit || 0) + 1;
+    if (!isHero() && next.storyVersion >= 2 && !next.flags.ratchetSpareGiven) {
+      next.flags.ratchetSpareGiven = 1;
+      next.items.batt = (next.items.batt || 0) + 1;
+    }
+  } else if (key === 'A1|servo') next.items.kit = (next.items.kit || 0) + 1;
+  else next.scrap = (next.scrap || 0) + 25;
+  G.save = next;
+  let stored = false;
+  try { stored = persist() !== false; }
+  catch (e) { stored = false; }
+  if (!stored) { G.save = before; return false; }
+  return true;
+}
 // THE FORGING — the payoff of the game's first quest. She brings the pillar
 // shard back to Ratchet; he makes the PURIFIER out of it. The cartoonish
 // forging cinematic is queued in ART_QUEUE (§1d, Higgsfield); this function
 // is its code hook — when the film asset lands it plays from here, and until
 // then the moment is the flash, the sting and the card. The grant itself
 // never waits on the art.
-function forgeCrystal() {
-  if (!grantWeapon('single')) return;
-  // ...and the trader packs his tools for the camp by the lion's door: the
-  // next time a room is loaded he stands there, not here (npcPlaced). He says
-  // so as he hands the job over (sl_ratchet_moving), never silently.
-  if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
-  persist();
+function forgeCrystal(presentStored) {
+  if (presentStored) {
+    if (!weaponOwned('single')) return false;
+  } else {
+    if (!grantWeapon('single')) return false;
+    // ...and the trader packs his tools for the camp by the lion's door: the
+    // next time a room is loaded he stands there, not here (npcPlaced). He says
+    // so as he hands the job over (sl_ratchet_moving), never silently.
+    if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
+    if (persist() === false) return false;
+  }
   sfx('chargeReady');
   G.flash = Math.max(G.flash, 0.6);
   if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
@@ -2417,6 +2462,7 @@ function forgeCrystal() {
   const card = showItem(t('i_crystal'), t('i_crystald'));
   if (card) card.onEnd = () => alphaQuestOffer();
   else if (G.dialog) G.dialog.onEnd = () => alphaQuestOffer();
+  return true;
 }
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
@@ -2473,9 +2519,8 @@ function doInteract(s) {
         i: 0, npc: s.extra,
         onEnd: () => {
           const restore = () => {
-          if (!invTake(npcCellItem(s))) return;
-          npcCharge(s);
-          if (key === 'A0B|ratchet') { G.save.flags.ratchetRepaired = 1; persist(); }
+          if (!npcRestoreTransaction(s, key)) return;
+          npcCharge(s, true);
           G.toast(t('npc_woke').replace('%s', t('n_' + s.extra)));
           // WHAT IT GIVES BACK. Every unit repays the cell, because a hand-off
           // that buys nothing is a fetch quest wearing a story. The first one
@@ -2483,7 +2528,7 @@ function doInteract(s) {
           // from the person who needed her most, which is the whole game in
           // one exchange.
           const gift = NPC_GIFT[key] || NPC_GIFT['*'];
-          if (gift) gift();
+          if (gift) gift(true);
           // THE STORY RIDES THE WAKING. A unit that just came back has the
           // most to say of its whole life, and making the player guess to
           // press E a second time is how the first story beat got missed
@@ -7440,13 +7485,19 @@ function tileGridId(id) {
   if (!n) { n = ++tileGridN; tileGridIds.set(g, n); }
   return n;
 }
+function tileBrokenSig(id, broken) {
+  const out = [], pre = id + ':';
+  for (const k in (broken || {})) {
+    if (broken[k] && k.lastIndexOf(pre, 0) === 0) out.push(k.slice(pre.length));
+  }
+  out.sort();
+  return out.length ? out.join(',') : '0';
+}
 function tileSig(id) {
   const def = ROOMS[id];
   if (!def) return '';
   const f = (G.save && G.save.flags) || {}, B = (G.save && G.save.broken) || {};
-  let br = 0;
-  const pre = id + ':';
-  for (const k in B) if (B[k] && k.lastIndexOf(pre, 0) === 0) br++;
+  const br = tileBrokenSig(id, B);
   const ik = def.indoor ? (INDOOR_ART[id] || 'floorDen') : '';
   // the fracture modifier re-faces loose '#' as 'B' inside the bake, so a run
   // that gains or loses it must not reuse a bake made without it
