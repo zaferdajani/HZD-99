@@ -730,11 +730,17 @@ function addPart(x, y, vx, vy, life, color, size, grav, glow) {
 }
 // Tiny cosmetic hardware, never pickups or lost robot limbs. Shares the
 // existing particle budget, room cleanup and clock; no new unbounded emitter.
-function metalBurst(x, y, count, heavy) {
+// `away` (optional, +1/-1): the side the blow came through to. Scrap leaves a
+// struck plate the way the blow was going — three pieces in four — and the
+// rest kicks back toward the striker, which is what makes it read as a hit and
+// not as a leak.
+function metalBurst(x, y, count, heavy, away) {
   let available = Math.max(0, 80 - parts.filter(p => p.metal).length);
   for (let i = 0; i < Math.min(count, available); i++) {
-    const p = addPart(x, y, rnd(-1, 1) * (heavy ? 210 : 130), rnd(-210, -70),
-      rnd(0.32, 0.65), i % 2 ? '#aeb9c8' : '#e6edf4', rnd(2, 4), 680, false);
+    const side = away ? (i % 4 === 3 ? -away * 0.5 : away) : 0;
+    const vx = side ? side * rnd(0.25, 1) * (heavy ? 320 : 230) : rnd(-1, 1) * (heavy ? 210 : 130);
+    const p = addPart(x, y, vx, rnd(-260, -70),
+      rnd(0.32, 0.65), i % 2 ? '#aeb9c8' : '#e6edf4', away ? rnd(3, 5.5) : rnd(2, 4), 680, false);
     if (p) Object.assign(p, { metal: i % 2 ? 'shard' : 'screw', angle: rnd(0, Math.PI), spin: rnd(-14, 14), bounced: false });
   }
 }

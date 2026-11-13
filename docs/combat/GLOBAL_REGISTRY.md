@@ -318,3 +318,16 @@ quick-swipes block shortens her active window, not her recovery, so no
 existing opening classification moves. Every other block LENGTHENS recovery,
 which only makes an opening harder for her to fill, never easier.
 
+## Changelog — 2026-11-13 (owner: "add the effects of hitting such as step backwards, clash sound, flashing body, metal scraps scatter")
+
+Every blow that LANDS (confirmed contact only — `combatImpact`, js/combat-stats.js) now does four things, on every machine in the robot world:
+
+| Effect | Before | After | Where |
+|---|---|---|---|
+| flashing body | one white blink, 45 / 65 / 85 ms (normal / finisher / charged) | a **double flash** — white, itself, a dimmer white — over 110 / 140 / 170 ms | `COMBAT_IMPACT.flash`, `impactAt`; drawn by js/foeread.js through the same anatomy stencil |
+| metal scrap | 5 / 9 / 14 pieces, 2–4 px, thrown at random | **10 / 15 / 22** pieces, 3–5.5 px, three in four thrown the way the blow was going; still capped at 80 live and gone inside 0.65 s; plus 7 (charged 12) hot sparks drawn as streaks | `metalBurst(x, y, n, heavy, away)` |
+| clash sound | the move's own thud only (`hit`); the plate's ring only on charged and elemental hits | **`clash`** on every landed blow: an inharmonic ring (2.1 / 3.4 / 5.1 kHz, detuned per strike) over a 30 ms crack, at most one per 70 ms | js/audio.js |
+| step backwards | lesser machines were thrown by the move's knockback; a guardian did not move at all | a struck **guardian steps back** — 21 px for a claw, 30 for a finisher, 43 for a charged blow (half for GRAVEHORN and the FURNACE dragon) — through the real movement resolver, never off its ledge | `bossHitKick` / `bossKickStep`, js/boss-motion.js |
+
+The step is taken **only out of a state the guardian is not committed to** (`idle`, `stalk`, `run`, `rest`, `recover`, `daze`): a blow never moves a wind-up's reach or a strike's box, so every tell and every hitbox documented in the BOSS files is where it was. Fliers and the core (TALONHOST, GLACIERE, MOTHER-V) have no feet and do not step. Damage, HP, hit-stop and the player's own recoil are unchanged. `tests/combat-impact-contract.cjs` and `tests/combat-impact-browser.cjs` carry the new flash and scrap numbers; `tests/lion-motion.cjs` measures the step, the ring, the flash and the scatter on NULLFANG, and that a wind-up does not move.
+

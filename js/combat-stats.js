@@ -9,9 +9,15 @@ const COMBAT_ARMOR = Object.freeze({ crawler: 0, guard: 12, flier: 0, turret: 12
 const COMBAT_ZONE_ARMOR = Object.freeze({ A: 0, B: 2, C: 4, D: 6, E: 8, X: 8 });
 const COMBAT_HERO_CD = Object.freeze([0.26, 0.23, 0.33]);
 const COMBAT_IMPACT = Object.freeze({
-  normal: { flash: 0.045, fragments: 5, shake: 2.5, stop: 0.05 },
-  heavy: { flash: 0.065, fragments: 9, shake: 5, stop: 0.085 },
-  charged: { flash: 0.085, fragments: 14, shake: 7, stop: 0.12 },
+  // (owner, 2026-11-13: "add the effects of hitting such as step backwards,
+  // clash sound, flashing body, metal scraps scatter". The flash was one 45 ms
+  // blink and the scrap five 3 px squares — both there, neither seen. `flash`
+  // is now the length of a DOUBLE flash (js/foeread.js), `fragments` twice the
+  // scrap, thrown away from the blow, and `kick` the speed a struck guardian
+  // steps back at, px/s — js/boss-motion.js bossHitKick.)
+  normal: { flash: 0.11, fragments: 10, shake: 2.5, stop: 0.05, kick: 150 },
+  heavy: { flash: 0.14, fragments: 15, shake: 5, stop: 0.085, kick: 210 },
+  charged: { flash: 0.17, fragments: 22, shake: 7, stop: 0.12, kick: 300 },
 });
 function combatProfile(e) {
   const kind = e && (e.mechanism === 'winch' ? 'winch' : e.kind) || 'npc';
@@ -101,8 +107,26 @@ function combatImpact(e, x, y, move) {
   const p = COMBAT_IMPACT[charged ? 'charged' : move === 'finisher' ? 'heavy' : 'normal'];
   const reduced = typeof infEyeReduced === 'function' && infEyeReduced();
   // Real time: the short white flash ends even while the combat clock pauses.
-  e.impactUntil = performance.now() + (reduced ? 0 : p.flash * 1000);
-  if (typeof metalBurst === 'function') metalBurst(x, y, reduced ? 2 : p.fragments, charged);
+  const now = performance.now();
+  e.impactAt = now; e.impactUntil = now + (reduced ? 0 : p.flash * 1000);
+  // which way the blow was travelling: from her, through the body
+  const from = typeof player !== 'undefined' && player ? player.x + (player.w || 0) / 2 : NaN;
+  const away = Math.sign(e.x + (e.w || 0) / 2 - from) || (typeof player !== 'undefined' && player && player.face) || 1;
+  if (typeof metalBurst === 'function') metalBurst(x, y, reduced ? 2 : p.fragments, charged, away);
+  if (!reduced) {
+    // SPARKS OFF THE PLATE, thrown the way the scrap goes: hot, fast, gone in a
+    // quarter of a second (they draw as streaks — js/engine.js drawParts)
+    if (typeof addPart === 'function') for (let i = 0; i < (charged ? 12 : 7); i++)
+      addPart(x, y, away * rnd(140, 460), rnd(-300, 80), rnd(0.16, 0.32), i % 3 ? '#ffd9a0' : '#ffffff', rnd(2, 3.2), 520, true);
+    // THE CLASH: metal on metal, on every blow that lands. The caller still
+    // owns the thud of the move itself; this is the ring of the plate it hit.
+    // One per 70 ms, so a multi-hit special rings rather than buzzes.
+    if (typeof sfx === 'function' && typeof G !== 'undefined' && now - (G.clashAt || 0) > 70) { G.clashAt = now; sfx('clash'); }
+    // A STRUCK GUARDIAN GIVES GROUND. Lesser machines are already thrown by the
+    // move's own knockback (attackKnock); a guardian is too heavy to throw, and
+    // used to take a blow without moving at all.
+    if (typeof bossHitKick === 'function' && typeof Boss !== 'undefined' && e instanceof Boss) bossHitKick(e, away, p.kick);
+  }
   // the blow's own light, at the point it landed: confirmed contact only
   if (!reduced && typeof fx === 'function')
     fx('flash', x, y, { rx: charged ? 130 : 78, ry: charged ? 130 : 78, dur: charged ? 0.28 : 0.17, col: '#7de8ff', hot: '#ffffff', power: charged ? 1.25 : 0.95 });

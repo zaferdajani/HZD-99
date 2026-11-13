@@ -28,7 +28,7 @@ const {chromium}=require('playwright');
   G.save.weaponMode='claws';G.state='CREST';
   return {build:BUILD_ID,before,during,after,normal,charged,normalParts,chargedParts,stop,recoil,capped,expired,protectedDamage,protectedHp:e.hp===hp,modes,log:combatLogData()};
  });
- assert.equal(r.normal,12);assert.equal(r.charged,38);assert.equal(r.normalParts,5);assert.equal(r.chargedParts,14);
+ assert.equal(r.normal,12);assert.equal(r.charged,38);assert.equal(r.normalParts,10);assert.equal(r.chargedParts,22);   /* twice the scrap, owner 2026-11-13 */
  assert.ok(r.during.white>r.before.white+100,'white flash affects silhouette pixels');
  assert.ok(r.after.white<r.during.white/2,'white flash expires in real time');
  assert.ok(r.during.opaque<960*540/10,'flash never fills screen/rectangle');

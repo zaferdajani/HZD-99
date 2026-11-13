@@ -14,7 +14,8 @@ const run=s=>vm.runInContext(s,ctx);
 run('var pl = new Player(200,400); player = pl; var e = new Enemy("crawler",250,400); e.hp=100; e.hpMax0=100;');
 assert.equal(run('e.defense'),0);
 assert.equal(run('dealDmg(e,12,null,250,400,true,"slash")'),12);
-assert.equal(run('e.hp'),88); assert.equal(run('e.impactUntil'),1045); assert.equal(debris.length,1);
+assert.equal(run('e.hp'),88); assert.equal(run('e.impactUntil'),1110); assert.equal(debris.length,1);   // the double flash, 2026-11-13
+assert.equal(debris[0][2],10); assert.ok(sounds.includes('clash'),'a landed blow rings');
 run('e.defense=25');
 assert.equal(run('dealDmg(e,12,null,250,400,true,"slash")'),9);
 assert.equal(run('combatDamage(0,50)'),0); assert.equal(run('combatDamage(NaN,50)'),0);
@@ -29,8 +30,8 @@ assert.equal(run('combatProtected(e)'),false,'calm tutorial winch remains strike
 run('e.mechanism=null'); assert.equal(run('combatProtected(e)'),true);
 run('e.calm=false');
 run('player.burstImpactDone=false; player.vx=0; G.hitStop=0; combatImpact(e,250,400,"burst")');
-assert.equal(run('G.hitStop'),.12); assert.equal(run('player.vx'),-90); assert.equal(run('e.impactUntil'),1085);
-assert.equal(debris.at(-1)[2],14);
+assert.equal(run('G.hitStop'),.12); assert.equal(run('player.vx'),-90); assert.equal(run('e.impactUntil'),1170);
+assert.equal(debris.at(-1)[2],22);
 run('combatImpact(e,250,400,"burst")'); assert.equal(run('player.vx'),-90,'area burst recoils once, not once per victim');
 run('player.swirlImpactDone=false; player.vx=0; combatImpact(e,250,400,"swirl"); combatImpact(e,250,400,"swirl")');
 assert.equal(run('player.vx'),-90,'hurricane contact does not stack recoil');

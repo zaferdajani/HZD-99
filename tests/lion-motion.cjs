@@ -140,6 +140,23 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         for (let f = 0; f < 120; f++) { place(b, -1, 60); step(b); n++; if (b.st !== prev) { seq.push([prev, Math.round(n * 1000 / 60)]); prev = b.st; n = 0; } if (seq.length >= 3) break; }
         out.chain = seq;
       }
+      // ---- H. struck: it steps back, rings, flashes twice, sheds scrap -------------
+      { const b = fresh(61, 1); place(b, -1, 70); b.st = 'idle'; b.t = 9; b.face = b.faceVis = -1; b.swipeCD = 9;
+        for (let i = 0; i < 4; i++) { b.t = 9; step(b); }
+        const sounds = []; const realSfx = sfx; sfx = (n) => { sounds.push(n); };
+        parts.length = 0; const x0 = b.x, hp0 = b.hp;
+        dealDmg(b, 12, null, b.cx() - 30, b.cy(), true, 'slash');
+        const metal = parts.filter(q => q.metal), flashMs = b.impactUntil - b.impactAt;
+        const away = metal.filter(q => q.vx > 0).length;
+        for (let i = 0; i < 24; i++) { b.t = 9; b.swipeCD = 9; step(b); }
+        out.struck = { step: +(b.x - x0).toFixed(1), clash: sounds.includes('clash'), flashMs: Math.round(flashMs), scrap: metal.length, away, lost: hp0 - b.hp };
+        // ...but not out of a wind-up: the paw's reach is where the tell put it
+        b.st = 'swipewarn'; b.t = 0.4; b._kickV = 0; const x1 = b.x;
+        dealDmg(b, 12, null, b.cx() - 30, b.cy(), true, 'slash');
+        for (let i = 0; i < 6; i++) { place(b, -1, 70); step(b); }
+        out.struck.windupStep = +(b.x - x1).toFixed(1);
+        sfx = realSfx;
+      }
       // ---- F. one spot, one colour: the table against the takes ---------------------
       out.strips = {};
       const table = typeof BEAST_STRIP !== 'undefined' ? BEAST_STRIP : {};
@@ -211,6 +228,12 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
     const ch = R.chain;
     check('a pounce that lands beside her goes straight into the paw', ch.length >= 2 && ch[0][0] === 'recover' && ch[1][0] === 'swipewarn', JSON.stringify(ch));
     check('...after an opening she can use, and with the whole tell', ch.length >= 2 && ch[0][1] >= 283 && ch[1][1] >= 480, ch[0] && ch[0][1] + ' ms open, ' + (ch[1] && ch[1][1]) + ' ms tell');
+    const K = R.struck || {};
+    check('struck, it steps back from the blow', K.step >= 12 && K.step <= 40, K.step + ' px');
+    check('...the plate rings', K.clash === true);
+    check('...the body flashes twice, long enough to see', K.flashMs >= 100 && K.flashMs <= 200, K.flashMs + ' ms');
+    check('...and scrap scatters, mostly the way the blow went', K.scrap >= 10 && K.away >= K.scrap * 0.6, K.scrap + ' pieces, ' + K.away + ' away');
+    check('...but a blow never moves a wind-up', K.windupStep === 0, K.windupStep + ' px');
     const ref = R.strips.stalk && R.strips.stalk.mean;
     for (const st in R.strips) {
       const S = R.strips[st];

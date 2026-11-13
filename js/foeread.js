@@ -194,10 +194,18 @@ function foeDraw(c, e) {
   // Reuse the anatomy stencil, not a white rectangle or brightness filter.
   // This covers every drawn enemy/guardian without changing sprite pixels,
   // eye anchors, collision or the telegraph layers excluded from the stencil.
-  if ((e.impactUntil || 0) > performance.now() && !e.rescued && !e.tame && e.st !== 'purified') {
+  // A STRUCK BODY FLASHES TWICE: white, itself, white again — the first pulse
+  // is the blow, the gap is what lets the eye see there WAS a flash, and the
+  // second, dimmer one is the body ringing. One 45 ms blink was under three
+  // frames and read as nothing. (impactAt is absent for a caller that sets the
+  // window by hand — the purification's own flash — which stays solid.)
+  const nowMs = performance.now();
+  const span = e.impactAt ? e.impactUntil - e.impactAt : 0;
+  const ph = span > 0 ? (nowMs - e.impactAt) / span : 0;
+  if ((e.impactUntil || 0) > nowMs && !(ph > 0.5 && ph < 0.72) && !e.rescued && !e.tame && e.st !== 'purified') {
     T.globalCompositeOperation = 'source-in'; T.fillStyle = '#ffffff'; T.fillRect(0, 0, w, h);
     T.globalCompositeOperation = 'source-over';
-    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 0.92;
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = ph >= 0.72 ? 0.66 : 0.92;
     c.drawImage(FR_T, 0, 0, w, h, ox, oy, w / q, h / q); c.restore();
   }
 }

@@ -6,12 +6,49 @@ function bossPoseRandom(b){let x=b._visualSeed;if(!x){x=2166136261;for(const c o
 function bossPoseRange(b,a,z){return a+(z-a)*bossPoseRandom(b);}
 function bossPoseEmit(b,key,rate,dt,emit){const clocks=b._poseEmit||(b._poseEmit={});const value=(clocks[key]||0)+Math.max(0,rate)*dt;const n=Math.min(3,Math.floor(value));clocks[key]=value-Math.floor(value);for(let i=0;i<n;i++)emit();}
 function bossOwnsGroundMotion(b){return ['glitch','alpha','atlas','prism','horn','chime','carrier','moth','lattice','lens'].includes(b.kind);}
+// A STRUCK GUARDIAN STEPS BACK (owner, 2026-11-13). Only out of a state it is
+// not committed to — standing, prowling, settling, broken open — so a blow
+// never moves a wind-up's reach or a strike's box, and only on its feet. The
+// step is collision-aware and will not walk it off the ledge it stands on:
+// 21 px for a claw, 30 for a finisher, 43 for a charged blow (speed / 7), half
+// that for the two that weigh most.
+function bossKickable(b){
+  if(!b||b.dead||b.purified||b.meet||(b.stagT||0)>0&&b.st!=='daze')return false;
+  if(['brood','zero','mother'].includes(b.kind))return false;        // flyers and the core have no feet to step with
+  // (the state is the test for "on its feet": gravity leaves a standing body's
+  // vy anywhere from 0 to a frame's worth of fall, so a speed test flickers)
+  return /^(idle|stalk|run|rest|recover|daze|walk)$/.test(String(b.st||''));
+}
+function bossHitKick(b,away,speed){
+  if(typeof isHero==='function'&&isHero())return;
+  if(!bossKickable(b)||!away||!(speed>0))return;
+  b._kickV=away*speed*(b.kind==='horn'||b.kind==='atlas'?.5:1);
+}
+function bossKickStep(b,dt){
+  let v=b._kickV||0;if(!v)return;
+  if(!bossKickable(b)){b._kickV=0;return;}
+  // It steps back the way it walks: through the real resolver, so the meadow's
+  // rises and the room's walls treat a recoil exactly as they treat a prowl.
+  // (A hand-rolled tile test stopped it dead at the first rise in the ground.)
+  const nx=b.x+v*dt,lead=v>0?nx+b.w:nx,tx=Math.floor(lead/TILE);
+  // ...but not off the ledge it is standing on: there must be ground somewhere
+  // from a tile above its feet to two below, where it is stepping to
+  const fr=Math.floor((b.y+b.h+2)/TILE),ground=(c2)=>c2==='#'||c2==='B'||c2==='=';
+  if(!ground(tileAt(tx,fr-1))&&!ground(tileAt(tx,fr))&&!ground(tileAt(tx,fr+1))&&!ground(tileAt(tx,fr+2))){b._kickV=0;return;}
+  const vx0=b.vx,vy0=b.vy;
+  b.vx=v;b.vy=0;
+  const col=moveEnt(b,dt);
+  b.vx=vx0;b.vy=vy0;
+  if(col&&(col.l||col.r))v=0;
+  v*=Math.exp(-7*dt);b._kickV=Math.abs(v)<10?0:v;
+}
 function bossMotionBegin(b,dt){
   if(typeof isHero==='function'&&isHero())return;
   b._poseStart={x:b.x,y:b.y,st:b.st,vx:b.vx||0,vy:b.vy||0};
 }
 function bossMotionEnd(b,dt){
   if((typeof isHero==='function'&&isHero())||!b._poseStart||!(dt>0))return;
+  bossKickStep(b,dt);
   const old=b._poseStart;
   const dx=b.x-old.x,dy=b.y-old.y;
   const jump=Math.hypot(dx,dy)>Math.max(80,dt*2400);

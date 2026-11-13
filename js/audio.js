@@ -1228,6 +1228,21 @@ function sfx(n) {
     case 'wave': whoosh(0.16, 1200, 3400, 0.06); tone(900, 0.14, 'sine', 0.045, 1800); break;
     case 'hit': hiss(0.06, 0.09); tone(170, 0.08, 'square', 0.06, 90); break;
     case 'bosshit': hiss(0.09, 0.11); tone(92, 0.13, 'square', 0.1, 44); break;
+    // THE CLASH (owner, 2026-11-13): metal on metal, on every blow that lands
+    // on a machine. A struck plate rings at pitches that are not multiples of
+    // each other — that inharmonic stack is what the ear calls metal — over a
+    // 30 ms crack of noise, and it is short: it sits ON the move's own thud
+    // rather than after it. Each strike is detuned a little so a combo is
+    // three blows and not one sample three times.
+    case 'clash': {
+      const d = 0.94 + Math.random() * 0.14;
+      hiss(0.03, 0.12);
+      tone(2140 * d, 0.16, 'triangle', 0.055, 1980 * d);
+      tone(3370 * d, 0.11, 'square', 0.022, 3180 * d);
+      tone(5120 * d, 0.07, 'triangle', 0.026, 4700 * d);
+      tone(760 * d, 0.09, 'square', 0.04, 520 * d);
+      break;
+    }
     case 'hurt': tone(120, 0.28, 'sawtooth', 0.12, 50); hiss(0.2, 0.08); break;
     case 'block': tone(700, 0.09, 'square', 0.07, 1400); hiss(0.03, 0.05); break;
     case 'pick': tone(880, 0.07, 'sine', 0.05, 1370); break;
