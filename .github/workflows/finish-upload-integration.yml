@@ -1,0 +1,122 @@
+name: Finish supplied gameplay integration
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/finish-upload-integration.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-finish-upload-integration
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Preserve starting refs and apply only the reviewed payload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-evidence/finish
+          git rev-parse HEAD > release-evidence/finish/start-commit.txt
+          gh api repos/$GITHUB_REPOSITORY/branches?per_page=100 > release-evidence/finish/refs-before.json
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/554f44f4-6dae-4f3d-862d-1a775ea8ca0c.zip' -o "$RUNNER_TEMP/integration.zip"
+          echo "7f109e8c209c39d58e222e7f987155fbf1fbe94b5b256fd2f06f48a4b64a04e4  $RUNNER_TEMP/integration.zip" | sha256sum --check
+          python3 - <<'PY'
+          import pathlib,zipfile,hashlib,os,json,subprocess
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          with zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/integration.zip') as z:
+              m=json.loads(z.read('manifest.json'))
+              assert len(m['files'])==17 and set(z.namelist())==set(m['files'])|{'manifest.json'}
+              for name,v in m['files'].items():
+                  p=pathlib.Path(name)
+                  assert not p.is_absolute() and '..' not in p.parts and not name.startswith('.github/'), name
+                  assert (h(p.read_bytes()) if p.exists() else None)==v['before'], 'Concurrent source change: '+name
+                  assert h(z.read(name))==v['after'], 'Wrong payload bytes: '+name
+              for name,expected in m['protected'].items():
+                  assert h(pathlib.Path(name).read_bytes())==expected, 'Protected latest work changed: '+name
+              for name in m['files']:
+                  p=pathlib.Path(name);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(z.read(name))
+              pathlib.Path('release-evidence/finish/payload-manifest.json').write_text(json.dumps(m,indent=2))
+          PY
+          node build.cjs
+          for f in js/ratchet-release.js js/game.js js/opening.js js/story-repair.js tests/wrist-release.cjs; do node --check "$f"; done
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          import json,subprocess
+          m=json.load(open('release-evidence/finish/payload-manifest.json'))
+          subprocess.run(['git','add','-f','--',*m['files'],'index.html','odyssey.html','forge.html','forge-odyssey.html'],check=True)
+          PY
+          git commit -m 'Integrate supplied Ratchet wrist reaction and atomic story-panel arrival; preserve newer Alpha, winch and gait'
+          git rev-parse HEAD > release-evidence/finish/candidate-commit.txt
+          git bundle create release-evidence/finish/candidate.bundle HEAD ^${{ github.sha }}
+      - name: Install locked runtime and assemble app files
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          node tools/pack-www.cjs
+          mkdir -p tests/out
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Verify actual gameplay, story, assets and unchanged movement
+        run: |
+          set -euo pipefail
+          node tests/build-integrity.cjs | tee release-evidence/finish/build-integrity.log
+          node tests/reconciliation.cjs | tee release-evidence/finish/reconciliation.log
+          node tests/run.cjs wrist-release repair-browser repair-lifecycle story-opening story-battery story-rescue winch-integration winch-purpose wolves panels story-order sage-quiet manhwa-reader entrance-integration hero-cache-regression voice-handoff scratch-reach scratch-visual release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 artbible | tee release-evidence/finish/regressions.log
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          m=json.load(open('release-evidence/finish/payload-manifest.json'))
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          for name,v in m['protected'].items():
+              assert h(pathlib.Path(name).read_bytes())==v,name
+          for name in ['docs/studio/runs/2026-10-11/images/winch-after-burst.png','docs/studio/runs/2026-10-11/images/winch-strike-scrap.png']:
+              p=pathlib.Path(name)
+              if p.exists():
+                  pathlib.Path('release-evidence/finish/'+p.name).write_bytes(p.read_bytes())
+                  p.write_bytes(subprocess.check_output(['git','show','HEAD:'+name]))
+          pathlib.Path('release-evidence/finish/protected-files.json').write_text(json.dumps(m['protected'],indent=2))
+          PY
+          git diff --exit-code -- js assets source-files.json dev.html index.html odyssey.html forge.html forge-odyssey.html tests
+      - name: Push only the tested integration candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)
+          test "$current" = "$GITHUB_SHA" || { echo 'Concurrent integration changed; candidate preserved without overwriting it.'; exit 1; }
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+          # Production is promoted separately after reviewing this exact run.
+          # No main/odyssey writes and no independent Pages publisher here.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-finished-upload-integration-${{ github.sha }}
+          path: |
+            release-evidence/finish/
+            tests/out/
+            docs/artwork/finish-2026-11-13.md
+            docs/artwork/finish-2026-11-13-protected.json
+            assets/source/ratchet/wrist-release/manifest.json
+          retention-days: 90
+          if-no-files-found: error
+      - name: Disable completed one-time importer
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/finish-upload-integration.yml/disable
