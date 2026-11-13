@@ -1,0 +1,115 @@
+name: Verify first Sage release after visual review
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/first-sage-release.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-first-sage-release
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Apply only the reviewed purified-stride correction
+        run: |
+          set -euo pipefail
+          mkdir -p release-evidence/sage-motion
+          git show 71509477db8cebf5615bb4e3bcb14bfd350f87fd:index.html > "$RUNNER_TEMP/sage-baseline.html"
+          echo "BASELINE_HTML=$RUNNER_TEMP/sage-baseline.html" >> "$GITHUB_ENV"
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/329e717e-ce13-4621-ab8a-3cedb2e7a4c7.zip' -o "$RUNNER_TEMP/sage-color.zip"
+          echo "951a0b6eaed2df35e6f0e987c70ee806af9592955cb094e493796131e3c7f20e  $RUNNER_TEMP/sage-color.zip" | sha256sum --check
+          python3 - <<'PY'
+          import zipfile,pathlib,json,hashlib,os
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          allowed={'js/sage-motion.js','tests/sage-motion.cjs','docs/combat/SAGE_MOTION_PASS_2026-11-13.md'}
+          with zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/sage-color.zip') as z:
+              m=json.loads(z.read('manifest.json'))
+              assert set(m['files'])==allowed and set(z.namelist())==allowed|{'manifest.json'}
+              assert h(pathlib.Path(os.environ['RUNNER_TEMP']+'/sage-baseline.html').read_bytes())==m['baseline_page_sha256']
+              for name,v in m['files'].items():
+                  assert h(pathlib.Path(name).read_bytes())==v['before'],'Concurrent edit: '+name
+                  assert h(z.read(name))==v['after'],name
+              for name,expected in m['protected'].items():
+                  assert h(pathlib.Path(name).read_bytes())==expected,name
+              for name in allowed:pathlib.Path(name).write_bytes(z.read(name))
+              pathlib.Path('release-evidence/sage-motion/payload-manifest.json').write_text(json.dumps(m,indent=2))
+          PY
+          node build.cjs
+          node --check js/sage-motion.js
+          node --check tests/sage-motion.cjs
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/sage-motion.js tests/sage-motion.cjs docs/combat/SAGE_MOTION_PASS_2026-11-13.md index.html odyssey.html forge.html forge-odyssey.html
+          git commit -m 'Keep rescued Sage blue through its approved walking cycle; retain source art and motion'
+          git rev-parse HEAD > release-evidence/sage-motion/candidate-commit.txt
+          git bundle create release-evidence/sage-motion/candidate.bundle HEAD ^${{ github.sha }}
+      - name: Install locked browser runtime
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          node tools/pack-www.cjs
+          mkdir -p tests/out
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Test the actual corrected release, not the preceding candidate
+        run: |
+          set -euo pipefail
+          node tests/sage-motion.cjs --baseline | tee release-evidence/sage-motion/baseline.log
+          node tests/sage-motion.cjs | tee release-evidence/sage-motion/verified.log
+          node tests/build-integrity.cjs | tee release-evidence/sage-motion/build-integrity.log
+          node tests/reconciliation.cjs | tee release-evidence/sage-motion/reconciliation.log
+          node tests/run.cjs sage-motion sage sage-specials sage-quiet first-sage-route combat-impact-contract combat-impact-browser boss-motion wrist-release artbible entrance-integration hero-cache-regression voice-handoff scratch-reach scratch-visual release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 | tee release-evidence/sage-motion/regressions.log
+          node tests/sage-motion-capture.cjs | tee release-evidence/sage-motion/capture.log
+          python3 - <<'PY'
+          import pathlib,hashlib,json,subprocess
+          m=json.load(open('release-evidence/sage-motion/payload-manifest.json'))
+          for name,h in m['protected'].items():
+              assert hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()==h,name
+          assert not subprocess.check_output(['git','diff','--name-only','71509477db8cebf5615bb4e3bcb14bfd350f87fd','HEAD','--','assets']).strip(),'Asset files changed'
+          a=json.load(open('release-evidence/sage-motion/baseline.json'));b=json.load(open('release-evidence/sage-motion/verified.json'))
+          assert a['methods']==b['methods'] and all(c['pass'] for c in b['checks'])
+          PY
+          git diff --exit-code -- js assets tests source-files.json dev.html index.html odyssey.html forge.html forge-odyssey.html
+      - name: Push the verified integration without overwriting concurrent work
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)" = "$GITHUB_SHA"
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-first-Sage-release-${{ github.sha }}
+          path: |
+            release-evidence/sage-motion/
+            release-evidence/boss-motion/verified.json
+            release-evidence/finish/wrist-release.json
+            tests/out/
+            .claude/skills/creature-motion-combat/
+            docs/combat/SAGE_MOTION_PASS_2026-11-13.md
+            docs/combat/research/creature-motion-skills-2026-11-13.json
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
+      - name: Disable the completed follow-up integrator
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/first-sage-release.yml/disable
