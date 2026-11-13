@@ -56,6 +56,12 @@ try{const p=await browser.newPage({viewport:{width:960,height:540},serviceWorker
  e=stage();e.vx=100;e.walkD=14;let feet=[];for(const t of [0,.4,.8,1.2,1.6]){e.anim=t;feet.push(body(e).bottom);}check('walking feet are planted without a second floating bob',Math.max(...feet)-Math.min(...feet)<=1,feet);
  e=stage();const stand=body(e);e.lungeT=.15;e.vx=e.spd*2.2;const strike=body(e);check('lunge does not shrink to half the standing body',strike.height/stand.height>=.8,{stand,strike,ratio:strike.height/stand.height});
  e=stage();e.tame=1;e.calm=true;e.vx=45;e.walkD=22;G.lastStrip='';drawSage(ctx,e);check('the freed moving Sage uses its walking strip, not sliding kneeling artwork',(G.lastStrip||'').startsWith('sageWalk8:'),G.lastStrip);
+ // Review-derived gate: the moving rescued actor must retain its blue state,
+ // not revert to the red/purple infected robe between idle and walk.
+ e=stage();e.tame=1;e.calm=true;e.vx=45;e.walkD=14;body(e);
+ const purePixels=ctx.getImageData(0,0,400,240).data;let reds=0,blues=0,opaque=0;
+ for(let i=0;i<purePixels.length;i+=4)if(purePixels[i+3]>180){reds+=purePixels[i];blues+=purePixels[i+2];opaque++;}
+ check('rescued walking preserves the purified blue identity',opaque>200&&blues>reds*1.3,{opaque,blueRedRatio:blues/Math.max(1,reds)});
  e=stage();let before=JSON.stringify(e.sageDuel);const sounds=[],oldSfx=sfx;sfx=(...v)=>sounds.push(v);
  try{for(let n=0;n<5;n++)drawSage(ctx,e);}finally{sfx=oldSfx;}
  check('drawing does not advance the fight clock or emit cues',before===JSON.stringify(e.sageDuel)&&sounds.length===0);

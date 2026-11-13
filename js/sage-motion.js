@@ -101,12 +101,35 @@ function sageDuelPose(e){
     if(Math.sign(e.vx)!==face)cell=7-cell;pose.cell=cell;pose.flip=face>0;return pose;}
   pose.sy=1+Math.sin(e.anim*2.2)*.004;return pose;
 }
+// The source stride is the same approved body. Grade its warm infected cloth
+// and eyes to the established purified blue; retain alpha, frames and pivots.
+const SAGE_PURE_WALK_CACHE = new WeakMap();
+function sagePureWalkImage(raw){
+  if(!raw||!raw.naturalWidth)return null;
+  const cached=SAGE_PURE_WALK_CACHE.get(raw);if(cached)return cached;
+  const cv=document.createElement('canvas');cv.width=raw.naturalWidth;cv.height=raw.naturalHeight;
+  const x=cv.getContext('2d');x.drawImage(raw,0,0);const image=x.getImageData(0,0,cv.width,cv.height),d=image.data;
+  for(let i=0;i<d.length;i+=4){
+    if(!d[i+3])continue;const r=d[i],g=d[i+1],b=d[i+2],l=.2126*r+.7152*g+.0722*b;
+    if(r>g*1.02&&r>=b*.90){
+      const eye=r>100&&g>55&&b<g*.8;
+      d[i]=Math.min(255,l*(eye?.65:.55));d[i+1]=Math.min(255,l*(eye?1.30:1.02));d[i+2]=Math.min(255,l*(eye?1.70:1.50));
+    }
+  }
+  x.putImageData(image,0,0);SAGE_PURE_WALK_CACHE.set(raw,cv);return cv;
+}
+function drawSagePureWalk(c,p,cx,feet,h){
+  mediaFetch(p.key,true);const raw=MEDIA_RAW[p.key];const im=sagePureWalkImage(raw);if(!im)return false;
+  const cw=im.width/p.cells,dw=h*cw/im.height;
+  c.save();try{c.translate(cx,feet);if(p.flip)c.scale(-1,1);c.drawImage(im,p.cell*cw,0,cw,im.height,-dw/2,-h,dw,h);}finally{c.restore();}
+  G.lastStrip=p.key+':'+p.cell;return true;
+}
 function drawSageDuelBody(c,e){
   if(!sageDuelActive(e))return false;
   const p=sageDuelPose(e),cx=e.x+e.w/2,feet=e.y+e.h;
   c.save();
   try{c.translate(cx,feet);c.rotate(p.lean);c.scale(p.sx,p.sy);c.translate(-cx,-feet);
-    const drawn=p.strip?drawStripCell(c,p.key,p.cell,p.cells,cx,feet,e.h*p.height,p.flip,p.pure)
+    const drawn=p.strip?(p.pure?drawSagePureWalk(c,p,cx,feet,e.h*p.height):drawStripCell(c,p.key,p.cell,p.cells,cx,feet,e.h*p.height,p.flip))
       :drawPlateAnchored(c,p.key,cx,feet,e.h*p.height,p.flip,true);
     if(drawn)G.sageMotion={revision:SAGE_DUEL_REVISION,home:e.sageDuel.home,phase:e.sageDuel.phase,pose:p.key,frame:p.cell,face:p.face};
     return drawn;

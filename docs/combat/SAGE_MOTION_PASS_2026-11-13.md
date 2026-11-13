@@ -33,7 +33,9 @@ resuming an untold lunge; released rings keep their own clock through knockback.
 The original
 artwork, hero gait, audio files and previous boss-motion pass remain untouched.
 The freed Sage can use the existing walking strip while its calm AI moves it;
-its kneeling portrait remains for rest. No animal species was invented for it.
+its kneeling portrait remains for rest. The warm stride pixels receive a cached
+purified-blue grade, retaining the source alpha and registration; the initial
+visual review caught the infected walk palette returning after the blue rest pose. No animal species was invented for it.
 
 ## Changed timing / behavior values
 
