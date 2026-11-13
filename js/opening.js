@@ -97,6 +97,7 @@ function opRatchet(s) {
   if (!f.opTold && ((typeof qState === 'function' && qState('ratchet_forge') !== 'none') || f.crystal)) {
     f.opTold = 1; persist();
   }
+  if(f.ratchetReleasePending&&!f.ratchetReleased&&typeof ratchetReleaseStart==='function'&&ratchetReleaseStart(s,()=>opRatchet(s)))return true;
   if (!f.opTold) { opExplain(s); return true; }
   // (a save whose walk is already behind her is not sent back to the pod)
   if (!f.opPod && !f.tut) { opSay(t('n_ratchet'), ['op_r_pod'], 'ratchet'); return true; }
@@ -116,8 +117,12 @@ function opRatchetRestored(s) {
   const f = G.save.flags;
   if (!invTake('ratchetCell')) return;
   npcCharge(s);
-  f.ratchetRepaired = 1; persist();
-  const go = () => opExplain(s);
+  f.ratchetRepaired = 1; f.ratchetReleasePending=1; persist();
+  if(typeof mediaFetch==='function')mediaFetch('ratchetWristRelease',true);
+  const go = () => {
+    if(typeof ratchetReleaseStart==='function'&&ratchetReleaseStart(s,()=>opExplain(s)))return;
+    opExplain(s);
+  };
   // THE WAKING FILM (owner, 2026-10-12): the cell goes home and he comes on.
   // Skipping it skips nothing: the explanation below plays either way, so the
   // errand is never film-only.

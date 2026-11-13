@@ -151,6 +151,10 @@ home; he stands here, and only here, until he has forged her blade (§2.10).
    across the relay, then **Restore power** (no timer; a wrong socket can always be
    retried; leaving keeps the placements). He wakes. If the memory film is on disk it
    plays here; skipping it skips nothing.
+   **In-world handoff (2026-11-13).** After the existing waking film, the supplied
+   four-pose wrist release plays with the cat's paw at Ratchet's hand. He lets go
+   before his explanation; it is skippable without a pause-menu detour and neither
+   hurts her nor grants another reward. Interrupted visits retain a safe continuation.
 4. **The explanation** — five short pages:
    > *…My own battery. You put it back. Thank you, little one — I’m Ratchet.*
    > *Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it.*

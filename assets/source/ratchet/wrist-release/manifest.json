@@ -1,0 +1,61 @@
+{
+  "source_archive": "character-artwork-20260924-212948.zip",
+  "source_member": "character-artwork/ratchet-wrist-release-runtime.webp",
+  "sha256": "6d9e18cdbde19d3ec364787960ed6236747dbc2005277a1ac2a1759831a15dac",
+  "cells": 4,
+  "cell": [
+    360,
+    360
+  ],
+  "floor_pivot": [
+    180,
+    355.5
+  ],
+  "hand_contact": [
+    264,
+    227
+  ],
+  "runtime": "js/ratchet-release.js",
+  "hook": "opRatchetRestored: after the existing revive film, before opExplain",
+  "durations": [
+    0.22,
+    0.36,
+    0.36,
+    0.38
+  ],
+  "flags": [
+    "ratchetReleasePending",
+    "ratchetReleased"
+  ],
+  "preserved": [
+    "Player.update",
+    "hero gait assets",
+    "quest/reward amounts",
+    "repair puzzle",
+    "winch",
+    "Alpha",
+    "audio files"
+  ],
+  "original_sha256": "e0cf9d044995a172b21ac924791eca3eb0eabf7f1841d2e42214221a74eff3a9",
+  "lowres_sha256": "6652c1e7ad8dd1ae4fc3429229db96d886eed07d2f1073d380560a72f427ce35",
+  "hero_reaction": {
+    "source": "assets/characters/hero/swing/uppercut.webp",
+    "frames": [
+      3,
+      4
+    ],
+    "measured_wrist": [
+      207,
+      62
+    ],
+    "scope": "scene-only reach/lowering; no attack created and no Player or locomotion code changed"
+  },
+  "state_safety": [
+    "bounded asset wait",
+    "once-only completion",
+    "Escape/controller/touch exits",
+    "stale callback guard",
+    "pause/focus recovery",
+    "pending restart recovery"
+  ]
+}

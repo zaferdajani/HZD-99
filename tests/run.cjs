@@ -87,6 +87,7 @@ const SUITE = [
   ['purification-controls', 'mobile hold/cancel, focus-loss safety and restored save'],
   ['purification', 'deliberate guardian rescue hold, cancellation, choreography and protected rewards'],
   ['combat-impact-input', 'real keyboard tap and held charge through the normal game loop in a staged arena'],
+  ['wrist-release', 'supplied Ratchet reaction, real contact, skip, saved interruption and unchanged rewards'],
   ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],

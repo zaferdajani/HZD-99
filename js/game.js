@@ -871,6 +871,7 @@ function tinkerTask(r, dt) {
 // and the caller should fall through to the atlas, exactly as every other
 // authored renderer in this file degrades.
 function drawTinker(c, s, talking) {
+  if(typeof drawRatchetRelease==='function'&&drawRatchetRelease(c,s))return true;
   if (typeof isHero === 'function' && isHero()) return false;   // NOSTOS has its own trader
   const r = tinkerRig(s);
   const now = performance.now() / 1000;
@@ -1146,6 +1147,7 @@ function settlePendingBossReward() {
   }
 }
 function loadRoom(id) {
+  if(typeof ratchetReleaseFinish==='function')ratchetReleaseFinish(false);
   if (typeof purificationCancel === 'function') purificationCancel();
   infEyeClearAll();                 // no smoke follows her through a door, a respawn or a load
   repairClose(false);
@@ -1443,6 +1445,7 @@ function applyTheme() {
   tileDirty = true;
 }
 function startGame(save) {
+  if(typeof ratchetReleaseFinish==='function')ratchetReleaseFinish(false);
   repairClose(false);
   // A run's pending reward belongs to THAT save, never the next one. Keep
   // same-object resumes legitimate; menu Quit settles before its saved copy
@@ -2838,6 +2841,7 @@ function update(dt) {
   if (G.state === 'PURIFY') { updatePurification(dt); return; }
   if (G.purificationReturn > 0) G.purificationReturn = Math.max(0,G.purificationReturn-dt);
   if (G.state === 'REPAIR') { updateRepair(dt); narrativeAudioTick(); return; }
+  if(typeof ratchetReleaseUpdate==='function'&&ratchetReleaseUpdate(dt)){narrativeAudioTick();return;}
   if (typeof ComicRewards !== 'undefined' && ComicRewards.tick(dt)) return;
   // THE STORY PANELS (js/panels.js): a story beat's manhwa crops take over at
   // the first safe moment after it — never mid-fight, mid-dialogue or mid-crossing
@@ -2880,7 +2884,12 @@ function update(dt) {
     // while the world underneath keeps running — so her walk never stops.
     if (G.trans) {
       G.trans.t -= dt;
-      if (!G.trans.half) { G.trans.half = true; applyTransition(); }
+      if (!G.trans.half) {
+        G.trans.half = true; applyTransition();
+        // Arrival panels own the same simulation step as the room swap. The
+        // old early tick saw the departing room and leaked one playable frame.
+        if (typeof panelsTick === 'function' && panelsTick(dt)) return;
+      }
       if (G.trans.t <= 0) G.trans = null;
     }
     {
@@ -14730,7 +14739,7 @@ function drawWorldFrame() {
     // to be put back.
     if (player.iT > 0 && Math.floor(player.iT * 18) % 2 === 0) c.globalAlpha = 0.4;
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
-    player.draw(c);
+    if(!(typeof drawRatchetReleaseHero==='function'&&drawRatchetReleaseHero(c)))player.draw(c);
     if (typeof drawPurificationWorld === 'function') drawPurificationWorld(c);
     c.globalAlpha = 1;
     if (typeof drawSlashLayer === 'function') drawSlashLayer(c, player);   // her cuts, on their own layer, with their glow

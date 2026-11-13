@@ -280,6 +280,7 @@ const MEDIA_SRC = {
     // this same body working, cut and keyed by tools/vidstrip.cjs — one
     // image, bottom-aligned, so the feet never move between cells.
     ratchetLoop: 'assets/characters/npc/ratchet/work_loop_six.webp',
+    ratchetWristRelease: 'assets/characters/npc/ratchet/wrist_release.webp',
     yardWinchBase: 'assets/characters/props/winch/base.png',
     yardWinchArm: 'assets/characters/props/winch/arm.png',
     // ...AND THE SAME TREATMENT FOR EVERYONE ELSE STANDING IN A ROOM. The

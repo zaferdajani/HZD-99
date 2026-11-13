@@ -1,0 +1,17 @@
+{
+  "baseline": "82cce7926e13edfb2bacc832bf2ae5b450aa5317",
+  "unchanged": {
+    "js/entities.js": "d99a5b728879ffe9fef43b86176cdc881ffaf0c8072936b0366d57ea8caefc6f",
+    "js/wolves.js": "85883bd009edb81043ab0e8ef767fc2b0c5cbf8a9d7cb8b2557eff34d64d2fa1",
+    "js/winch.js": "d893c529f2fc97479ebcc8c1800913e1d330e88565ec1f11e14d73e39afbf5de",
+    "js/engine.js": "f4b12176b3616bb7a3c69a56d0bbb7ca5424a012f17d92a5d736cecd1745567e",
+    "js/audio.js": "4ab9c77c870404ce3c32902347039f3467546632ec4e3678f0c37924aa577a41",
+    "js/world.js": "81cca97c46ef78deae801ebe6f163bcabdf3aadfff6e6782e2d3c9669e51b07d",
+    "js/gear.js": "b03c99a711b78b257b6756b4281af022f82584f4053a956e09af97321af20f0c",
+    "js/weapons.js": "ba1b05fde4c5adb8358ff5abf7de4dd7358f301cb051fe12d09fc2371fc0ecae",
+    "assets/characters/hero/gait/walk.webp": "4d71edab37a592ea3a8e50324d54babaed6bc0bbc4ad15ccdc360d31b961cb5d",
+    "assets/characters/hero/gait/run.webp": "374a82f47d48a2fc7c895193a1140a28aea5516a270b0b270b098ac75386ff63",
+    "assets/sfx/vox/hzd_yalla.wav": "eec30e2cf0d307c6d56846bdd4c41a4a57d7ba3f42bb2cd17b1f431404c54630",
+    "assets/characters/npc/ratchet/work_loop_six.webp": "ea82e6334a2e4882f11fc868495684e1511d213bb5426cdbe9d6091930a021ea"
+  }
+}

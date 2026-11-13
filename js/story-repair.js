@@ -30,6 +30,7 @@ function repairValid(s = repairSession) {
     invCount(npcCellItem(s.npc)) > 0;
 }
 function repairOpen(npc, onComplete) {
+  if(typeof mediaFetch==='function'){mediaFetch('ratchetWristRelease',true);mediaFetch('swingUppercut',true);}
   if (repairSession || npcLive(npc) || invCount(npcCellItem(npc)) < 1) return;
   const saved = G.save.repairRatchet;
   // A prefix only: corrupted/future data cannot connect wires without a cell.
