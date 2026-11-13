@@ -959,7 +959,7 @@ function drawAlpha(c, b, cx, cy) {
   c.save();
   c.translate(cx, b.y + b.h);
   c.scale((b.face || -1) > 0 ? -1 : 1, 1);
-  if (b.hurtT > 0) c.globalAlpha *= 0.85;
+  // Alpha stays opaque under its authored recoil and the confirmed-hit flash.
   drawStripCell(c, S.key, pick.cell, S.cells, 0, base, H, false, pure);
   const cw = sim.naturalWidth / S.cells, dw = H * (cw / sim.naturalHeight);
   // THE RISING AMBER. Only a state whose name says a blow is coming wears it,

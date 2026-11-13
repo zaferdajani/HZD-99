@@ -141,10 +141,8 @@ function egChestGlow(c, k) {
 // hangs, loose while the empty cable dangles over the perch. The AI injects
 // impulses into cabV (volley recoil, swoop departure, the catch on return);
 // integration lives here so the swing keeps settling even through hit-stagger.
-function egCableTick(b) {
-  const a0 = b._pa == null ? b.anim : b._pa;
-  const dtv = Math.max(0, Math.min(0.05, b.anim - a0));
-  b._pa = b.anim;
+function egCableTick(b, dt) {
+  const dtv = Math.max(0, Math.min(.05, dt));
   if (b.cabA == null) { b.cabA = 0; b.cabV = 0; }
   const hang = !b.dead && (b.st === 'idle' || b.st === 'dorm' || b.st === 'intro' ||
     b.st === 'volley' || b.st === 'broodcall');
@@ -189,10 +187,10 @@ function drawEagle(c, b) {
     const S = (b.w * 3.0) / 532;
     const cx = b.x + b.w / 2;
     let cy = b.y + b.h / 2;
-    const hang = egCableTick(b);
+    const hang = !b.dead && ['idle','dorm','intro','volley','broodcall'].includes(b.st);
     // the ceiling anchor is FIXED where she first roosted; everything the
     // cable does happens between that point and the mount on her back
-    const hangX = b.hangX != null ? b.hangX : (b.hangX = (b.spawnX != null ? b.spawnX : b.x) + b.w / 2);
+    const hangX = b.hangX != null ? b.hangX : (b.spawnX != null ? b.spawnX : b.x) + b.w / 2;
     const ancY = (b.homeY != null ? b.homeY : 60) + b.h / 2 - 300 * S;
     if (b.dead) {
       // drops out of the air onto the floor
@@ -220,13 +218,13 @@ function drawEagle(c, b) {
     }
     c.translate(cx, cy);
     c.scale(S, S);
-    if (b.hurtT > 0) c.globalAlpha = 0.72;
+    // Opaque body; confirmed contact flash is composited by foeDraw.
     if (b.st === 'dorm') c.globalAlpha *= 0.85;      // asleep on the line, dimmed
     if (b.st === 'intro') {
       // the waking shiver: it runs down the cable into her frame, hardest
       // just before the screech breaks
       const wk2 = Math.max(0, Math.min(1, 1 - (b.t || 0) / 2));
-      c.translate((Math.random() - 0.5) * wk2 * 6, (Math.random() - 0.5) * wk2 * 3);
+      c.translate((bossPoseNoise(b.anim, 21) - 0.5) * wk2 * 6, (bossPoseNoise(b.anim, 22) - 0.5) * wk2 * 3);
     }
     const t = b.anim;
     // while hung, the body tilts with the pendulum, plus a lean toward the
@@ -255,7 +253,7 @@ function drawEagle(c, b) {
       if (!b.fired) {
         // the shudder builds from a tremor to a full rattle before the fan
         const a2 = Math.min(1, (b._stT || 0) / 0.85); const sh = a2 * a2;
-        c.translate((Math.random() - 0.5) * 3.4 * sh, (Math.random() - 0.5) * 1.6 * sh);
+        c.translate((bossPoseNoise(b.anim, 23) - 0.5) * 3.4 * sh, (bossPoseNoise(b.anim, 24) - 0.5) * 1.6 * sh);
         c.rotate(tilt + Math.sin(t * (16 + 14 * a2)) * 0.014 * a2);
         egFigA(c, 'kCharge', 1, 0);
         egChestGlow(c, 0.5 + a2 * 0.7 + Math.sin(t * 14) * 0.3 * a2);
@@ -298,7 +296,7 @@ function drawEagle(c, b) {
     } else if (b.st === 'swoopwarn') {
       // agitated hover, locking on — the tremor builds until she commits
       const j = Math.min(1, (b._stT || 0) / 0.4);
-      c.translate((Math.random() - 0.5) * 3 * j, (Math.random() - 0.5) * 1.4 * j);
+      c.translate((bossPoseNoise(b.anim, 25) - 0.5) * 3 * j, (bossPoseNoise(b.anim, 26) - 0.5) * 1.4 * j);
       egFlap(c, t, 11, 0);
       egChestGlow(c, 1.3 + Math.sin(t * 16) * 0.3);
     } else if (b.st === 'broodcall') {

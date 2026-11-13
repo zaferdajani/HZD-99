@@ -170,3 +170,16 @@ the whole read and the tell was carrying nothing. They now measure
 367 / 533 / 733 ms: the length says which move it is, short for a line you step
 out of and long for the arena about to change. The dash is unchanged at
 `TELL_FAST`, so the fastest thing that can reach her at close range still is.
+
+
+### 2026-11-13 — pose, landing and contact follow-through
+
+The earlier timing/deck changes are retained. The renderer now selects separate
+authored poses for dashwarn (low stalk), pouncewarn (folded haunches) and
+spreadwarn (raised chest). Flight follows vy phases rather than a looping run.
+Pounce recovery starts on `moveEnt().d`, not feet > row14; the elevated X1
+platform and a still-airborne low-floor case are tested separately. Recovery
+length and attack damage are unchanged. The brief landed compression is
+visual-only. Ground stride is distance-clocked, breath stays at the feet, and
+the shared second whole-body bounce is excluded. See BOSS_MOTION_PASS_2026-11-13.md
+and the pinned before/after boss-motion test evidence.

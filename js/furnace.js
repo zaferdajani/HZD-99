@@ -1,3 +1,5 @@
+let DRG_DRAW_TIME = 0;
+function drgDrawRange(a,b,salt=1){return a+(b-a)*bossPoseNoise(DRG_DRAW_TIME,salt);}
 // ===========================================================================
 // FURNACE CHOIR, THE ATLAS — the owner's CORRUPTED MECHA DRAGON.
 // Every pixel here is the owner's sheet: three authored full poses (IDLE,
@@ -47,7 +49,7 @@ function drgHot() {
 function drgFig(c, key, wk, shake, rot, cool) {
   const im = drgImg(); const s = DRG_P[key];
   c.save();
-  if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake) * 0.5);
+  if (shake) c.translate(drgDrawRange(-shake, shake), drgDrawRange(-shake, shake) * 0.5);
   if (rot) { c.translate(0, -s[3] * 0.45); c.rotate(rot); c.translate(0, s[3] * 0.45); }
   c.drawImage(im, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3], s[2], s[3]);
   // COOLED: the sheet's own pixels under the warm-shadow copy (drgDark) — the
@@ -147,7 +149,7 @@ function drgWalkRig(c, ph, wk, shake, rot) {
   if (!cut) { drgFig(c, 'walk', wk, shake, rot); return; }
   const s = DRG_P.walk;
   c.save();
-  if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake) * 0.5);
+  if (shake) c.translate(drgDrawRange(-shake, shake), drgDrawRange(-shake, shake) * 0.5);
   if (rot) { c.translate(0, -s[3] * 0.45); c.rotate(rot); c.translate(0, s[3] * 0.45); }
   // ROTARY GALLOP timing, straight off NULLFANG: hind pair near-together,
   // front pair staggered, front vs hind NOT a clean half-cycle — the
@@ -286,6 +288,7 @@ function drgSleep(c, t, lift) {
 // drop's landing, the lock, the backdraft's cone) are gameplay, so they are
 // drawn whether or not the sheet is in yet — under him and over him
 function drawFurnace(c, b) {
+  DRG_DRAW_TIME = b.anim || 0;
   if (typeof fcDrawFx === 'function') fcDrawFx(c, b, 'under');
   const ok = drawFurnaceBody(c, b);
   if (typeof fcDrawFx === 'function') fcDrawFx(c, b, 'over');
@@ -297,34 +300,7 @@ function drawFurnaceBody(c, b) {
   try {
     // the roost is part of the room, not of him — drawn at its own anchor
     if (b.nestX != null && !b.dead) drgNest(c, b.nestX, b.nestFootY, b.anim);
-    // ---- visual-state memory: draw-side timers driven off b.anim ----------
-    const fc = b.fc || (b.fc = {
-      pSt: b.st, pAnim: b.anim, slamT: 0, roarT: 0, pulseT: 0,
-      hymnR: 0, pStruck: 0, step: 0, deadT: 0,
-    });
-    const dt = clamp(b.anim - fc.pAnim, 0, 0.1); fc.pAnim = b.anim;
-    if (fc.pSt !== b.st) {
-      // the slam has no smear: the warn pose cuts to the struck pose in one
-      // frame (too heavy to blur) and the tail stays planted, then pulls out
-      if (fc.pSt === 'slamwarn') fc.slamT = 0.5;
-      // the roar breaks: hold the reared figure while the first ring leaves
-      if (fc.pSt === 'hymn') { fc.roarT = 0.55; fc.pulseT = 0.25; }
-      fc.pSt = b.st;
-    }
-    fc.slamT = Math.max(0, fc.slamT - dt);
-    fc.roarT = Math.max(0, fc.roarT - dt);
-    fc.pulseT = Math.max(0, fc.pulseT - dt);
-    // each hymn ring rebirth is a fresh peal — flash the mouth in sync
-    if (b.hymn) {
-      if (b.hymn.r < fc.hymnR - 40) fc.pulseT = 0.22;
-      fc.hymnR = b.hymn.r;
-    } else fc.hymnR = 0;
-    // forgebell: pulse on every summon strike the AI emits
-    if ((b.fbStruck || 0) !== fc.pStruck) {
-      if (b.st === 'forgebell') fc.pulseT = 0.2;
-      fc.pStruck = b.fbStruck || 0;
-    }
-
+    const fc = b.fc || furnacePoseState(b);
     const S = (b.h * 1.9) / DRG_P.idle[3];         // grounded pose scale
     const HR = (b.h * 2.6) / DRG_P.hero[3] / S;    // hero figure, relative
     const PS = 0.34;                               // death pieces vs pose art
@@ -339,28 +315,11 @@ function drawFurnaceBody(c, b) {
     // on the crossing frame
     c.translate(0, (1 - ta) * 6);
     c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.05) * S);
-    if (b.hurtT > 0 && !b.dead) c.globalAlpha *= 0.72;
+    // Keep armour solid; foeDraw supplies the bounded confirmed-hit flash.
 
     // ---- DEATH: he breaks into the sheet's own parts, staggered — wings
     // tear free first, the head drops next, the legs buckle, the body falls
     if (b.dead && !b.purified) {
-      fc.deadT += dt;
-      if (!fc.shatter) {
-        const mk = (k, x, y, delay, vx, vy, vr, gy) =>
-          ({ k, x, y, delay, vx, vy, vr, rot: 0, gy, bounced: 0, rel: false });
-        fc.shatter = [
-          mk('wingL', -45, -115, 0.00, -70, -170, -2.6, -40),
-          mk('wingR', -22, -110, 0.14, -30, -210, 2.2, -40),
-          mk('head', 52, -118, 0.30, 80, -230, 1.8, -14),
-          mk('neck', 28, -100, 0.40, 45, -150, -1.2, -18),
-          mk('tail', -72, -55, 0.48, -70, -120, -1.5, -13),
-          mk('flegR', 18, -38, 0.55, 30, -70, 1.0, -20),
-          mk('hlegR', -28, -38, 0.62, -35, -60, -1.0, -19),
-          mk('flegL', 34, -40, 0.68, 55, -50, 1.4, -20),
-          mk('hlegL', -45, -40, 0.74, -55, -50, -1.4, -20),
-          mk('body', -5, -70, 0.82, 0, -40, 0.25, -21),
-        ];
-      }
       // phase 1: the whole machine shudders as the seams let go
       const preT = 0.35;
       if (fc.deadT < preT) {
@@ -373,33 +332,16 @@ function drawFurnaceBody(c, b) {
       // far-to-near paint order: wings behind, body last so it lands on top
       const order = ['wingL', 'tail', 'hlegL', 'flegL', 'neck', 'head', 'hlegR', 'flegR', 'body', 'wingR'];
       for (const key of order) {
-        const p = fc.shatter.find(q => q.k === key);
+        const p = (fc.shatter || []).find(q => q.k === key);
+        if (!p) continue;
         const live = fc.deadT - preT >= p.delay;
-        if (live) {
-          if (!p.rel) {                         // the moment it tears free
-            p.rel = true;
-            if (typeof burst === 'function')
-              burst(cx + p.x * S * sgn, footY + p.y * S, 6, '#ff7b3a', 150, 0.4, 200, 2.5, true);
-          }
-          p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
-          p.vy += 1500 * dt;
-          if (p.y >= p.gy) {                    // meets the floor, one bounce
-            p.y = p.gy;
-            if (p.bounced++ === 0 && p.vy > 60) {
-              p.vy = -p.vy * 0.3; p.vx *= 0.5; p.vr *= 0.4;
-            } else { p.vy = 0; p.vx = 0; p.vr = 0; }
-          }
-        }
         c.save();
         c.translate(p.x, p.y); c.rotate(p.rot);
-        if (!live) c.translate(rnd(-1.5, 1.5), rnd(-1, 1));   // straining
+        if (!live) c.translate(drgDrawRange(-1.5, 1.5), drgDrawRange(-1, 1));   // straining
         drgPiece(c, key, PS);
         c.restore();
       }
       // the heat leaves him: embers rising off the wreck
-      if (fade > 0.2 && typeof addPart === 'function' && chance(0.35))
-        addPart(cx + rnd(-40, 40), footY - rnd(0, 30), rnd(-20, 20), rnd(-80, -30),
-          0.5, chance(0.5) ? '#ff9a5a' : '#ff7b3a', 2.5, 0, true);
       c.restore(); return true;
     }
 
@@ -437,15 +379,12 @@ function drawFurnaceBody(c, b) {
         // light climbing through the seams, the whole machine knocking
         const u = wakeK2 / 0.45;
         c.save();
-        if (u > 0.3) c.translate(rnd(-1, 1) * u * 2.5, rnd(-1, 1) * u);
+        if (u > 0.3) c.translate(drgDrawRange(-1, 1) * u * 2.5, drgDrawRange(-1, 1) * u);
         drgSleep(c, b.anim, u);
         c.restore();
       } else if (t2 <= 0.6 && !b.nestLanded) {
         // ON THE WING: down from the roost, nose tipped into the glide
         drgFig(c, 'fly', wk, 0.6, clamp((b.vy || 0) / 2400, -0.22, 0.28));
-        if (typeof addPart === 'function' && chance(0.5))
-          addPart(cx + rnd(-30, 30), footY - b.h * 1.2, rnd(-40, 40), rnd(-90, -30),
-            0.4, '#ff7b3a', 2, 0, true);
       } else if (b.nestLanded) {
         // TOUCHDOWN: the landing squash settling out as the fight begins
         const ls = clamp(t2 / 0.1, 0, 1);
@@ -465,9 +404,6 @@ function drawFurnaceBody(c, b) {
         drgGlow(c, 266, -292, 20 + fl * 40, 0.3 + fl * 0.6, fl > 0.4);
         drgGlow(c, 40, -230, 26 + fl * 22, 0.22 + fl * 0.4, false);
         c.restore();
-        if (fl > 0.3 && typeof addPart === 'function' && chance(0.7))
-          addPart(cx + rnd(-40, 40), footY - b.h * 1.5, rnd(-80, 80), rnd(-160, -40),
-            0.5, chance(0.5) ? '#ff9a5a' : '#ff7b3a', 2.5, 0, true);
       }
     } else if (b.stagT > 0 || b.st === 'daze' || b.st === 'stagger'
       || (b.st === 'recover' && (b.recMv === 'vent' || b.recMv === 'drop'))) {
@@ -565,9 +501,6 @@ function drawFurnaceBody(c, b) {
         c.restore();
       }
       c.restore();
-      if (fc.pulseT > 0.16 && typeof addPart === 'function' && chance(0.8))
-        addPart(cx + rnd(-30, 30) * sgn, footY - b.h * 1.6, rnd(-160, -60) * sgn, rnd(-40, 20),
-          0.4, '#ff9a5a', 2.5, 0, true);   // molten, never reward gold (registry §2)
     } else if (b.st === 'slamwarn' || fc.slamT > 0) {
       // TAIL SLAM. The warn coils the authored tail overhead — that is the
       // tell — then it cuts to planted-in-the-ground with NO smear between.
@@ -585,36 +518,27 @@ function drawFurnaceBody(c, b) {
       // the overlay hands back to the pose's own baked tail without a pop
       if (!warm && fc.slamT < 0.08) c.globalAlpha *= fc.slamT / 0.08;
       c.translate(-45, -58); c.rotate(ang);
-      if (warm && wt > 0.6) c.translate(rnd(-1.5, 1.5), rnd(-1.5, 1.5));
+      if (warm && wt > 0.6) c.translate(drgDrawRange(-1.5, 1.5), drgDrawRange(-1.5, 1.5));
       c.drawImage(im, ts[0], ts[1], ts[2], ts[3], -8, -ts[3] * PS * 0.5, ts[2] * PS, ts[3] * PS);
       // flame tip glow
       drgGlow(c, ts[2] * PS - 12, 0, 14 + wt * 8, 0.5, false);
       c.restore();
       occl(c, -45, -52, 14, 8, 0.4);
       // stuck: the ground answers around the buried tip
-      if (!warm && fc.slamT > 0.2 && typeof addPart === 'function' && chance(0.6))
-        addPart(cx + 42 * sgn + rnd(-8, 8), footY - 2, rnd(-50, 50), rnd(-90, -20), 0.35, '#c8925c', 2.5, 300, true);
     } else if (!grounded) {
       // airborne: the authored FLY pose, nose riding the arc
       drgFig(c, 'fly', wk, shk, clamp((b.vy || 0) / 2400, -0.22, 0.22));
     } else if (Math.abs(b.vx || 0) > 20) {
       // the WALK pose with a weighty gait: the body sinks onto each planted
       // side and every footfall kicks dust and a 1px shake
-      const ph = b.anim * 7;
-      const sN = Math.floor(ph / Math.PI);
-      if (sN !== fc.step) {
-        fc.step = sN;
-        if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 1);
-        if (typeof addPart === 'function')
-          for (let i = 0; i < 3; i++)
-            addPart(cx + (sN % 2 ? 26 : -20) * sgn + rnd(-6, 6), footY - 2,
-              rnd(-40, 40), rnd(-70, -20), 0.3, '#c8925c', 2.5, 300, true);
-      }
-      c.translate(0, -Math.abs(Math.sin(ph)) * 3 + 1);
+      const ph = fc.gait || 0;
+      // Weight flexes about the planted feet; it does not lift the whole body.
+      const sink = Math.abs(Math.sin(ph)) * .015;
+      c.scale(1 + sink*.3, 1 - sink);
       drgWalkRig(c, ph, wk, shk, Math.sin(ph) * 0.035);
     } else {
       // stand: breathing, the core light swelling and settling
-      c.translate(0, Math.sin(b.anim * 1.8) * 1.5);
+      c.scale(1, 1 + Math.sin(b.anim * 1.8) * .006);
       drgFig(c, 'idle', wk, shk, Math.sin(b.anim * 1.8) * 0.012);
     }
 

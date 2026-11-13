@@ -10732,7 +10732,7 @@ function drawMini(c, b, cx, cy) {
     c.translate(0, bob);
     c.rotate(lean);
     c.scale(pop * (b.face > 0 ? -1 : 1), pop);
-    if (b.hurtT > 0) c.globalAlpha *= 0.85;
+    // Boss contact flash is applied once by foeDraw, without fading its metal body.
     drawStripCell(c, S.key, pick.cell, S.cells, 0, H / 2, H, false);
     if (b.hurtT > 0) {
       c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
@@ -10772,7 +10772,7 @@ function drawMini(c, b, cx, cy) {
     c.translate(0, bob + foot);
     c.rotate(lean + (A.spin ? t * A.spin : 0));
     c.scale(pop * (b.face > 0 ? -1 : 1), pop);
-    if (b.hurtT > 0) { c.globalAlpha *= 0.85; }
+    // Keep the mini-boss opaque during a confirmed hit.
     c.drawImage(im, -w / 2, -h / 2, w, h);
     infEyeArt(c, warn ? A.warn : A.rest, 0, -w / 2, -h / 2, w, h);
     // hurt flash: the plate re-drawn as pure white through a lighter pass
@@ -12039,8 +12039,20 @@ class Boss {
     }
     sfx('ringshot');
   }
+  syncMotionTell() {
+    if (this.kind === 'horn') return; // its cinematic/shot machine owns its cues
+    if (this.st !== this._tellSt) {
+      this._tellSt = this.st;
+      this._tellDur = !this.dead && TELL_ST.test(this.st || '')
+        ? Math.max(.18, this.st === 'nwcharge' ? this.nwT || .4 : this.t || .4) : 0;
+      if (!this.dead) {
+        if (TELL_ST.test(this.st || '')) sfx(this.tellCue());
+      }
+    }
+  }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    if (typeof bossMotionBegin === 'function') bossMotionBegin(this, dt);
     const lionMotion = this.kind === 'glitch' && !this.meet;
     if (lionMotion) beastMotionBegin(this);
     if (this.kind === 'alpha') alphaMotionBegin(this);
@@ -12063,28 +12075,15 @@ class Boss {
       }
       ghStep(this, dt); return;
     }
-    // THE WEIGHT PASS (#93, the code half). Every guardian carries momentum
-    // now, from one place, for every boss that exists or will ever exist:
-    // a lean INTO acceleration, and a landing squash when a fall dies. The
-    // matching draw-side transform lives at the top of Boss.draw; per-plate
-    // walk cycles are the art half (ART_QUEUE boss-motion block).
+    if (typeof isHero === 'function' && isHero()) {
     const wAx = dt > 1e-4 ? (this.vx - (this._pvx == null ? this.vx : this._pvx)) / dt : 0;
     const wantLean = clamp(this.vx / 460, -1, 1) * 0.055 + clamp(wAx / 4200, -0.6, 0.6) * 0.035;
     this._lean = (this._lean || 0) + (wantLean - (this._lean || 0)) * (1 - Math.pow(0.002, dt));
     if ((this._pvy || 0) > 150 && Math.abs(this.vy) < 24 && !this._squashT) this._squashT = 0.22;
     if (this._squashT > 0) this._squashT = Math.max(0, this._squashT - dt);
     this._pvx = this.vx; this._pvy = this.vy;
-    // THE WARNING GETS THE SOUND. It used to arrive with the hit, which is
-    // feedback, not a telegraph — and the ear is faster than the eye (an
-    // auditory stimulus reaches the brain in 8-10 ms against 20-40 ms for a
-    // visual one, ~140-160 ms of reaction against ~180-200 ms). Firing the cue
-    // the frame a tell BEGINS is therefore worth about 40 ms of the player's
-    // reaction budget for free, and it costs one line, here, for every boss
-    // move that exists or will ever exist.
-    if (this.st !== this._tellSt) {
-      this._tellSt = this.st;
-      if (TELL_ST.test(this.st || '')) sfx(this.tellCue());
     }
+    this.syncMotionTell();
     // FURNACE CHOIR's state log and his parry glint's reset (js/furnace-fight.js)
     if (this.kind === 'atlas') fcLogStep(this, dt);
     if (this.roarBuzzT > 0) {
@@ -13563,7 +13562,8 @@ class Boss {
           if (this.trailT <= 0) { this.trailT = 0.03; addPart(this.cx(), this.cy(), 0, 0, 0.3, PAL.X.glow, 5, 0, true); }
           if (this.t <= 0) { this.st = 'rest'; this.t = bossRest(this, 0.75); this.vx = 0; }
         } else if (this.st === 'pounce') {
-          if (this.vy > 0 && this.y + this.h > 14 * TILE) { this.st = 'rest'; this.t = bossRest(this, 0.75); this.vx = 0; cam.shake = 6; }
+          // Landing is decided by the actual collision below, not row 14.
+          // The old threshold could rest in mid-air or never recover on a ledge.
         } else if (this.st === 'rest') {
           this.vx = 0; this.t -= dt;
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.3, 0.7); }
@@ -13642,7 +13642,11 @@ class Boss {
           }
         }
         const col = (this.st === 'lsvanish' || this.st === 'arcstorm') ? {} : moveEnt(this, dt);
-        if (this.st === 'dashslash' && (col.l || col.r)) { this.st = 'rest'; this.t = bossRest(this, 0.8); }
+        if (this.st === 'pounce' && col.d) {
+          this.st = 'rest'; this.t = bossRest(this, 0.75); this.vx = 0;
+          this.przLandT = .16; cam.shake = Math.max(cam.shake, 6); sfx('land');
+        }
+        if (this.st === 'dashslash' && (col.l || col.r)) { this.st = 'rest'; this.t = bossRest(this, 0.8); this.vx = 0; }
         break;
       }
       // ---- MOTHER-V: the Null Core ----
@@ -13965,6 +13969,8 @@ class Boss {
     } finally {
       if (lionMotion) beastMotionEnd(this, dt);
       if (this.kind === 'alpha') alphaMotionEnd(this, dt);
+      if (typeof bossMotionEnd === 'function') bossMotionEnd(this, dt);
+      if (!this.meet && !(typeof isHero === 'function' && isHero())) this.syncMotionTell();
     }
   }
   // ---- the three signature systems -----------------------------------------
@@ -14379,7 +14385,9 @@ class Boss {
     // frame it woke. It stays solid; the rise and the roar carry the moment.
     let a = 1;
     if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
-    c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
+    // Metal does not become transparent when struck. The confirmed-contact
+    // flash is owned by foeDraw; authored recoil remains the body's response.
+    c.save(); c.globalAlpha = a * (heroWorld && this.hurtT > 0 ? .6 : 1);
     if (!heroWorld && this.kind === 'glitch') beastContactFx(c, this);
     // THE TELEGRAPH WASH, and it lives HERE rather than in each guardian's own
     // file on purpose. TELL_ST has fired the warning SOUND for every boss since
@@ -14406,7 +14414,7 @@ class Boss {
     if (!this.dead && !G.artProbe && this.st && TELL_ST.test(this.st)) {
       // ramp over the wind-up's own length, so the bloom grows as the blow
       // approaches instead of switching on
-      const dur = Math.max(0.18, this._tellDur || (this._tellDur = Math.max(0.18, this.t || 0.4)));
+      const dur = Math.max(0.18, this._tellDur || this.t || 0.4);
       const k = clamp(1 - (this.t || 0) / dur, 0, 1);
       const e = Math.pow(k, 0.62);              // §3.6 — lit from the first frame
       // A FLOOR ON THE RADIUS, not a pure multiple of the body. Scaled purely
@@ -14434,7 +14442,7 @@ class Boss {
       c.ellipse(bx, this.y + this.h - 2, this.w * (0.6 + e * 0.5), 9 + e * 6, 0, 0, 7);
       c.stroke();
       c.restore();
-    } else if (!FOE_READ.sil) this._tellDur = 0;   // the rim's stencil pass (js/foeread.js) raises the probe; it must not reset the ramp
+    } // The simulation owns the ramp; outline/extra draws cannot reset it.
     // GRAVEHORN draws his own rig (js/gravehorn.js): his weight is in his legs,
     // not in the shared lean below
     if (!heroWorld && this.kind === 'horn' && typeof drawGravehorn === 'function') { drawGravehorn(c, this); c.restore(); return; }
@@ -14456,7 +14464,8 @@ class Boss {
     // and for the dead (their collapses are choreographed per guardian).
     // The rim's stencil (js/foeread.js) raises the probe for decoration only:
     // the lean is pose, and the rim has to fit the body that is drawn.
-    if (!this.dead && (!G.artProbe || FOE_READ.sil)) {
+    if (!this.dead && (!G.artProbe || FOE_READ.sil)
+        && (heroWorld || typeof bossOwnsGroundMotion !== 'function' || !bossOwnsGroundMotion(this))) {
       const wx = this.cx(), wy = this.y + this.h;
       const spd = Math.abs(this.vx);
       const bob = Math.abs(this.vy) < 30 && spd > 26

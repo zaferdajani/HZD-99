@@ -69,8 +69,8 @@ function przClip(b) {
     const pt = b.pureT || 0;
     if (pt < 0.5) return R.p_turn[0];        // body cleared, tail still red
     if (pt < 3.2) return seq(R.p_play, 3.4); // belly-up, exactly where the film left off
-    if (spd > 240) return seq(R.p_run, 11);
-    if (spd > 34) return seq(R.p_walk, 9);
+    if (spd > 240) return R.p_run[Math.floor((b.przStride || 0)*R.p_run.length)%R.p_run.length];
+    if (spd > 34) return R.p_walk[Math.floor((b.przStride || 0)*R.p_walk.length)%R.p_walk.length];
     // left alone it behaves like a cat with nothing left to guard: it rolls on
     // its back batting at its own tail crystal, stretches, then loafs
     const cyc = (t * 1) % 17;
@@ -83,13 +83,17 @@ function przClip(b) {
   if ((b.stagT || 0) > 0 || st === 'daze') return R.i_hurt[0];   // the break wears the hurt plate
   if (st === 'dorm') return seq(R.i_dorm, 0.42);
   if (st === 'intro') return seq(R.i_roar, 5.5);
+  if (st === 'dashwarn') return R.i_idle[1];    // low, lengthwise load
+  if (st === 'pouncewarn') return R.i_run[1];    // folded haunches, paws planted
+  if (st === 'spreadwarn') return R.i_roar[0]; // raised chest; not another crouch
   if (st === 'arcspin') return R.i_spin[0];
   if (st === 'dashslash') return R.i_slash[0];
   if (st === 'lsvanish' || st === 'lsarrive') return R.i_burst[0];
   if (st === 'beam' || st === 'aim') return R.i_beam[0];
-  if (st === 'pounce') return seq(R.i_run, 12);
-  if (spd > 240) return seq(R.i_run, 12);
-  if (spd > 34) return seq(R.i_walk, 9);
+  if (st === 'pounce') return b.vy < -120 ? R.i_run[3] : b.vy > 150 ? R.i_run[0] : R.i_run[2];
+  if (st === 'rest' && (b.przLandT || 0) > 0) return R.i_run[1];
+  if (spd > 240) return R.i_run[Math.floor((b.przStride || 0) * R.i_run.length) % R.i_run.length];
+  if (spd > 34) return R.i_walk[Math.floor((b.przStride || 0) * R.i_walk.length) % R.i_walk.length];
   return seq(R.i_idle, 1.5);
 }
 
@@ -112,7 +116,7 @@ function drawPrismSheet(c, b) {
   const dw = sw * S, dh = sh * S;
 
   // breath and the settle after a landing, in world pixels
-  const bob = (b.st === 'dorm' || b.dead) ? 0 : Math.sin((b.anim || 0) * 2.2) * 1.2;
+  const breath = (b.st === 'dorm' || b.dead) ? 0 : Math.sin((b.anim || 0) * 2.2) * .006;
 
   c.save();
   // contact shadow, so a painted sprite still sits on the floor
@@ -121,7 +125,8 @@ function drawPrismSheet(c, b) {
   c.beginPath(); c.ellipse(cx, footY - 1, dw * 0.30, dh * 0.055, 0, 0, 7); c.fill();
   c.restore();
 
-  c.translate(cx, footY + bob);
+  c.translate(cx, footY);
+  c.scale(1, 1 + breath);
   // the turn is a real squash through the vertical, matching the turntable
   c.scale(dir * (0.88 + 0.12 * ta), 1);
   c.drawImage(im, sx, sy, sw, sh, -dw / 2, -dh, dw, dh);

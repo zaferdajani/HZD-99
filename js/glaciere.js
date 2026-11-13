@@ -1,3 +1,4 @@
+let GLC_DRAW_TIME = 0;
 // ===========================================================================
 // GLACIERE, THE FROZEN PURIFIER — the corrupted unicorn of the void.
 // Every pixel here is the owner's sheet: two full authored figures (the
@@ -58,7 +59,7 @@ function glcFig(c, key, rot, shake, alpha) {
   const s = GLC_P[key];
   c.save();
   if (alpha != null) c.globalAlpha *= alpha;
-  if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake));
+  if (shake) c.translate((bossPoseNoise(GLC_DRAW_TIME,3)*2-1)*shake, (bossPoseNoise(GLC_DRAW_TIME,7)*2-1)*shake);
   if (rot) c.rotate(rot);
   c.drawImage(im, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3], s[2], s[3]);
   if (alpha == null || alpha >= 0.5) infEyeArt(c, 'glaciereParts:' + key, 0, -s[2] / 2, -s[3], s[2], s[3]);
@@ -160,7 +161,7 @@ function glcHeroRig(c, rot, shake, gait, k, tuck) {
   if (!cut) { glcFig(c, 'hero', rot, shake); return; }
   const s = GLC_P.hero;
   c.save();
-  if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake));
+  if (shake) c.translate((bossPoseNoise(GLC_DRAW_TIME,3)*2-1)*shake, (bossPoseNoise(GLC_DRAW_TIME,7)*2-1)*shake);
   if (rot) c.rotate(rot);
   // NULLFANG's rotary-gallop timing: hind pair near-together, front pair
   // staggered off-beat — the off-beat is what reads as a living stride
@@ -188,6 +189,7 @@ function glcHeroRig(c, rot, shake, gait, k, tuck) {
 }
 
 function drawGlaciere(c, b) {
+  GLC_DRAW_TIME = b.anim || 0;
   GLC_PURE = !!b.purified;
   const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return false;
   c.save();
@@ -198,41 +200,7 @@ function drawGlaciere(c, b) {
     const fv = b.faceVis == null ? (b.face || 1) : b.faceVis;
     const sgn = fv < 0 ? 1 : -1;               // authored art faces LEFT
     const ta = Math.max(0.001, Math.abs(fv));
-    // ---- the visual clock: every drama timer rides b.anim, so pausing the
-    // game freezes her mid-beat and no gameplay number is ever touched ----
-    const dtA = clamp(b.anim - (b.glcAnimP == null ? b.anim : b.glcAnimP), 0, 0.1);
-    b.glcAnimP = b.anim;
-    // visual velocity from position deltas — her idle glide moves by lerp, so
-    // b.vx stays 0 and only the drawn position knows she is moving
-    if (dtA > 0) {
-      b.glcVX = clamp((cx - (b.glcPX == null ? cx : b.glcPX)) / dtA, -900, 900);
-      b.glcVY = clamp((footY - (b.glcPY == null ? footY : b.glcPY)) / dtA, -900, 900);
-      b.glcPX = cx; b.glcPY = footY;
-    }
     const vxV = b.glcVX || 0, vyV = b.glcVY || 0;
-    if (!b.dead) {
-      // attack drama beats, armed the frame a state ends (seen from the draw
-      // side — the update logic never learns these exist)
-      if (b.glcPrevSt !== b.st) {
-        if (b.glcPrevSt === 'lancewarn') b.glcRecoil = 1;  // the lance just left
-        if (b.glcPrevSt === 'novawarn') b.glcStamp = 1;    // the ring released
-        if (b.glcPrevSt === 'dash') b.glcSettle = 1;       // arrival overshoot
-        b.glcPrevSt = b.st;
-      }
-      b.glcRecoil = Math.max(0, (b.glcRecoil || 0) - dtA * 2.8);
-      b.glcStamp = Math.max(0, (b.glcStamp || 0) - dtA * 2.4);
-      b.glcSettle = Math.max(0, (b.glcSettle || 0) - dtA * 2.0);
-      // FROST PRESENCE: her passage rimes the air — sparse crystalline motes
-      // hang near her, and her glide leaves a drift trail of tiny ice
-      if (typeof addPart === 'function' && dtA > 0) {
-        if (chance(0.12)) addPart(cx + rnd(-b.w * 0.9, b.w * 0.9), footY - rnd(4, H * 0.9),
-          rnd(-10, 10), rnd(6, 22), rnd(0.5, 0.9), chance(0.5) ? '#bfe8ff' : '#e0f7fa', rnd(1, 2), 30, true);
-        const spdV = Math.hypot(vxV, vyV);
-        if (spdV > 60 && chance(clamp(spdV / 700, 0, 0.55)))
-          addPart(cx - vxV * 0.06 + rnd(-8, 8), footY - H * 0.5 - vyV * 0.06 + rnd(-16, 16),
-            -vxV * 0.12 + rnd(-14, 14), -vyV * 0.12 + rnd(-12, 12), rnd(0.3, 0.5), '#bfe8ff', 1.8, 0, true);
-      }
-    }
     c.translate(cx, footY);
     // THE TURN LAW, tier 3: no authored front exists, so the flex never
     // drops below 0.85, the pivot crouches into the hooves, and the update
@@ -240,7 +208,7 @@ function drawGlaciere(c, b) {
     c.translate(0, (1 - ta) * 6);
     const sclX = sgn * (0.85 + 0.15 * ta) * S, sclY = (1 - (1 - ta) * 0.05) * S;
     c.scale(sclX, sclY);
-    if (b.hurtT > 0) c.globalAlpha = 0.72;
+    // Opaque armour; recoil and foeDraw own hit feedback.
     // dormant/wake clock: she KNEELS on the arena floor before the fight —
     // the standing assembly, dark and still — and RISES to hover height as
     // she wakes, the ignition timed to the roar
@@ -255,37 +223,9 @@ function drawGlaciere(c, b) {
       // DEATH: she breaks into the sheet's own parts row — and the pieces
       // FALL: gravity takes them, each bounces once on the floor line, and
       // they settle where they lie with dying spin. Nothing drifts forever.
-      b.glcDeathT = (b.glcDeathT || 0) + dtA;
-      if (!b.glcShatter) {
-        b.glcShatter = ['head', 'neck', 'body', 'legF', 'legH', 'tail'].map((pk, i) => ({
-          pk,
-          x: (i - 2.5) * 30, y: -220 + (i % 3) * 60,
-          vx: (i - 2.5) * 95 + rnd(-40, 40), vy: rnd(-460, -160),
-          rot: 0, vr: rnd(-3, 3), bounced: false, rest: false,
-        }));
-      }
-      const fade = clamp(1 - (b.glcDeathT - 1.6) / 1.1, 0, 1);
-      for (const sh of b.glcShatter) {
+      const fade = clamp(1 - ((b.glcDeathT || 0) - 1.6) / 1.1, 0, 1);
+      for (const sh of b.glcShatter || []) {
         const sp = GLC_P[sh.pk];
-        const restY = -sp[3] * 0.34;           // lying on the floor line
-        if (!sh.rest && dtA > 0) {
-          sh.vy += 6200 * dtA;                 // local-space gravity
-          sh.x += sh.vx * dtA; sh.y += sh.vy * dtA;
-          sh.rot += sh.vr * dtA;
-          if (sh.y >= restY && sh.vy > 0) {
-            sh.y = restY;
-            if (!sh.bounced) {
-              sh.bounced = true;               // one bounce, frost kicked up
-              sh.vy *= -0.36; sh.vx *= 0.5; sh.vr *= -0.45;
-              if (typeof addPart === 'function') for (let d = 0; d < 3; d++)
-                addPart(cx + sh.x * sclX, footY - 2, rnd(-70, 70), rnd(-60, -14),
-                  0.35, '#cfe8f4', 2.2, 260, true);
-            } else { sh.rest = true; sh.vy = 0; sh.vx = 0; }
-          }
-        } else if (sh.rest && dtA > 0) {
-          sh.vr *= Math.pow(0.05, dtA);        // the spin dies where it lies
-          sh.rot += sh.vr * dtA;
-        }
         c.save();
         c.globalAlpha *= fade;
         c.translate(sh.x, sh.y);
@@ -303,8 +243,7 @@ function drawGlaciere(c, b) {
     // a slow hover-paddle at rest, a full airborne gallop on the charge
     const spdG = Math.hypot(vxV, vyV);
     const gaitK = b.st === 'dash' ? 1 : clamp(spdG / 620, 0, 1);
-    b.glcGait = (b.glcGait || 0) + dtA * (2.6 + gaitK * 7.2);
-    const gait = b.glcGait;
+    const gait = b.glcGait || 0;
     const pitch = clamp((b.vy || 0) / -1400, -0.16, 0.16) + Math.sin(b.anim * 1.1) * 0.022;
     c.translate(0, (-14 + bob) * riseK + groundOff);   // grounded → riding the air
     const swell = Math.sin(b.anim * 0.9);      // the slow body swell, breathing
@@ -337,9 +276,7 @@ function drawGlaciere(c, b) {
         const sc2 = 1.32 - (wakeK / 0.5) * 0.32;
         c.scale(sc2, sc2);
         glcFig(c, 'asm', 0.025 - wakeK * 0.05, wakeK * 4.5);
-        if (typeof addPart === 'function' && chance(wakeK * 0.7))
-          addPart(cx + rnd(-b.w, b.w), footY + groundOff * sclY - rnd(0, 20),
-            rnd(-20, 20), rnd(-60, -20), 0.5, '#bfe8ff', 2, 0, true);
+        // Rising frost is emitted by glaciereMotionTick, once per simulation step.
       } else {
         // IGNITION: she is airborne in the hero figure, the horn flaring
         // with the shriek, frost blown off the lift
@@ -369,8 +306,13 @@ function drawGlaciere(c, b) {
       // hanging out of the gallop, the body heaving on a slow breath. The
       // opening has to LOOK open or nobody learns to take it.
       const br = Math.sin(b.anim * 4.2);
-      c.translate(0, 5 + br * 1.6);
-      glcHeroRig(c, -0.1 + br * 0.012 + roll * 0.5, 0, gait, 0, 0.14);
+      const recoil = (b.glcRecoil || 0) ** 2;
+      const stamp = (b.glcStamp || 0) ** 2;
+      // Recoil belongs to the actual recovered action. The old draw-side
+      // latch only played after idle; these moves now enter recover instead.
+      c.translate(recoil * 20, 5 + br * 1.6 + stamp * 7);
+      c.scale(1 + stamp * .08, 1 - stamp * .10);
+      glcHeroRig(c, -0.1 + br * 0.012 + roll * 0.5 + recoil * .05, 0, gait, 0, 0.14);
     } else if (b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush') {
       // gathered: the standing assembly, trembling as power collects
       glcFig(c, 'asm', 0, b.st === 'novawarn' ? 2 : 0.8);

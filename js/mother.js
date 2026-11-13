@@ -277,25 +277,15 @@ function mvArtBody(c, b, P) {
 }
 
 function drawMother(c, b) {
-  // ---- shared rhythm bookkeeping (visual only — never touches AI state) ----
-  const S = b._mv || (b._mv = { last: b.anim, haloA: 0.6, beatPh: 0, deathT: 0 });
-  let d = b.anim - S.last; S.last = b.anim;
-  if (!(d >= 0 && d < 0.25)) d = 0;
+  const S = b._mv || { haloA:.6, beatPh:0, deathT:0 };
   const hpFrac = mvClamp((b.hpMax ? b.hp / b.hpMax : 1), 0, 1);
   const ph = b.mPhase || 0;
-  const dorm = b.st === 'dorm';
-  const charging = b.st === 'nwcharge';
+  const dorm = b.st === 'dorm', charging = b.st === 'nwcharge';
   const dark = (typeof G !== 'undefined' && (G.darkT || 0) > 0) && !b.dead;
   const song = b.st === 'msong';
-  // the hit-group break reads as the same exposed, reeling shell
   const stag = ((b.stagT || 0) > 0 || b.st === 'daze') && !b.dead;
   const grabbing = b.st === 'grabwarn' || b.st === 'grab';
   const hurt = (b.hurtT || 0) > 0 && !b.dead;
-  // the heartbeat: ~0.9 Hz at full health, racing toward 1.8 Hz near death
-  const rate = (0.9 + (1 - hpFrac) * 0.9) * (dorm ? 0.55 : 1);
-  if (!b.dead) S.beatPh += d * rate * MV_TAU;
-  if (!charging && !b.dead) S.haloA += d * (1.1 + (1 - hpFrac) * 0.8);
-  if (b.dead) S.deathT += d;
   const bp = S.beatPh % MV_TAU;
   const lub = Math.pow(Math.max(0, Math.sin(bp)), 3);
   const dub = Math.pow(Math.max(0, Math.sin(bp - 2.1)), 6) * 0.55;

@@ -208,3 +208,15 @@ The plan's six fixes, as built:
 | D2 second flier | flier (40,7) | **hopper** (41,11) | registry §6.1 — two disruptors on one screen, on ice, where you cannot stop |
 | `ROOMS.D4` | — | the Cold Stacks | zone D had ONE fighting room — the second-hardest kingdom was the thinnest |
 | `QUESTS.sage_index` | — | new fetch errand | the Archivist had nothing to ask |
+
+
+### 2026-11-13 — simulation-owned pose and correct release state
+
+`glaciereMotionTick` now advances flight gait, sampled displacement, recoil,
+settling and particles at the simulation step. Repeated/outline draws cannot
+consume motion or manufacture frost. Lance/nova follow-through recognizes the
+current `recover` transition (and lance-to-dash chaining); the old visual link
+expected idle after release, which is no longer the fight's state machine.
+The authored recovered pose now visibly carries that recoil. Damage, decks,
+chain tells, sink-to-reach recovery and rewards are unchanged. Opacity no longer
+drops on impact beneath the existing confirmed-hit flash.

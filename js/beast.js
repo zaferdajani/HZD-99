@@ -238,7 +238,7 @@ function bFig(c, key, rot, shake, sqx, sqy) {
   const s = BEAST_P[key];
   const w = s[2] * BEAST_F, h = s[3] * BEAST_F;
   c.save();
-  if (shake) c.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake * 0.5);
+  if (shake) c.translate((bossPoseNoise(BEAST_LIVE.t,41)-.5)*shake, (bossPoseNoise(BEAST_LIVE.t,43)-.5)*shake*.5);
   // squash & stretch about the ground contact — anticipation compresses,
   // launch stretches past 1.0, the art itself is never resampled oddly
   if (sqx || sqy) c.scale(sqx || 1, sqy || 1);
@@ -733,10 +733,7 @@ function beastDazeFx(c, b) {
   // machine is visibly LOSING material rather than spending it. addPart, not a
   // hand-rolled push: the particle record has a shape (life0, grav, glow) and
   // a device budget, and both live in engine.js.
-  if (Math.random() < 0.4) {
-    addPart(b.cx() + rnd(-60, 60), b.y + 40 + rnd(-30, 30),
-            rnd(-70, 70), rnd(-140, -30), 0.5, '#d68cff', rnd(1.5, 3), 420, true);
-  }
+  // Sparks are emitted by bossMotionEnd, not by the outline/body draw passes.
 }
 // THE COIL, which is also the tell. `k` runs 0 (settling) to 1 (about to go).
 function beastCoil(P, b, t, k, deep) {
@@ -1374,14 +1371,14 @@ function drawBeast(c, b) {
       c.scale((0.82 + 0.18 * k) * fs, fs);
       c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
       c.beginPath(); c.ellipse(0, 2, 132, 15, 0, 0, 7); c.fill(); c.restore();
-      if (b.hurtT > 0) c.globalAlpha = 0.72;
+      // Keep authored armour opaque; foeDraw supplies the contact flash.
       c.drawImage(turnFront, -120, -274);
       c.restore();
       return true;
     }
     c.translate(0, (1 - ta) * 7);
     c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
-    if (b.hurtT > 0) c.globalAlpha = 0.72;
+    // Keep authored armour opaque; foeDraw supplies the contact flash.
     // ground shadow lives with every representation
     c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
     c.beginPath(); c.ellipse(0, 4, 205, 17, 0, 0, 7); c.fill(); c.restore();
@@ -1484,7 +1481,7 @@ function drawBeast(c, b) {
       // the stir: head off the paws first, chest following — still down
       const k = clamp(1 - (b.t || 0) / 2, 0, 1);
       c.save();
-      if (k > 0.2) c.translate(rnd(-1, 1) * k * 3, rnd(-1, 1) * k);
+      if (k > 0.2) c.translate((bossPoseNoise(b.anim,47)*2-1)*k*3, (bossPoseNoise(b.anim,49)*2-1)*k);
       bSleep(c, b.anim, clamp(k / 0.5, 0, 1));
       c.restore();
     } else if (b.st === 'intro' && !b.dead) {
