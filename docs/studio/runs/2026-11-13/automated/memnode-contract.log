@@ -1,0 +1,6 @@
+
+── memnode-contract  — Mind Node Back exits every countdown and answer phase without payment
+PASS memnode-contract: Back exits initial, retry, show and input phases without payment
+   (memnode-contract: 0.1 s)
+
+all 1 harnesses ran
