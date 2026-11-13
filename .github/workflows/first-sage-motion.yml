@@ -1,0 +1,137 @@
+name: Validate first Sage motion and combat skills
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/first-sage-motion.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-first-sage-motion
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Preserve release identity and apply reviewed first-Sage source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-evidence/sage-motion
+          gh api repos/$GITHUB_REPOSITORY/branches?per_page=100 > release-evidence/sage-motion/refs-before.json
+          git rev-parse HEAD > release-evidence/sage-motion/start-commit.txt
+          git show 71509477db8cebf5615bb4e3bcb14bfd350f87fd:index.html > "$RUNNER_TEMP/sage-baseline.html"
+          echo "BASELINE_HTML=$RUNNER_TEMP/sage-baseline.html" >> "$GITHUB_ENV"
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/a4da86a4-9e40-48c4-8677-0e721a2e837e.zip' -o "$RUNNER_TEMP/sage-pass.zip"
+          echo "b3a749203bb4db11e9c340f558e5027c74fa77991468a59e494e945bf5c7a34e  $RUNNER_TEMP/sage-pass.zip" | sha256sum --check
+          python3 - <<'PY'
+          import json,zipfile,pathlib,hashlib,os
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          with zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/sage-pass.zip') as z:
+              m=json.loads(z.read('manifest.json'))
+              assert len(m['files'])==12 and set(z.namelist())==set(m['files'])|{'manifest.json'}
+              assert h(pathlib.Path(os.environ['RUNNER_TEMP']+'/sage-baseline.html').read_bytes())==m['baseline_page_sha256']
+              for name,v in m['files'].items():
+                  p=pathlib.Path(name)
+                  assert not p.is_absolute() and '..' not in p.parts and not name.startswith(('.github/','assets/')), name
+                  assert not name.startswith('.') or name.startswith('.claude/skills/creature-motion-combat/'),name
+                  assert (h(p.read_bytes()) if p.exists() else None)==v['before'], 'Concurrent source change: '+name
+                  assert h(z.read(name))==v['after'], 'Wrong payload bytes: '+name
+              for name,expected in m['protected'].items():
+                  assert h(pathlib.Path(name).read_bytes())==expected, 'Protected current release changed: '+name
+              for name in m['files']:
+                  p=pathlib.Path(name);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(z.read(name))
+              pathlib.Path('release-evidence/sage-motion/payload-manifest.json').write_text(json.dumps(m,indent=2))
+          PY
+          node build.cjs
+          node --check js/sage-motion.js
+          node --check js/entities.js
+          node --check tests/sage-motion.cjs
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          import json,subprocess
+          m=json.load(open('release-evidence/sage-motion/payload-manifest.json'))
+          subprocess.run(['git','add','--',*m['files'],'index.html','odyssey.html','forge.html','forge-odyssey.html'],check=True)
+          PY
+          git commit -m 'Apply first Sage committed strikes, planted motion and ring recovery; record creature-specific skills'
+          git rev-parse HEAD > release-evidence/sage-motion/candidate-commit.txt
+          git bundle create release-evidence/sage-motion/candidate.bundle HEAD ^${{ github.sha }}
+      - name: Install locked browser tools and assemble the actual game
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          node tools/pack-www.cjs
+          mkdir -p tests/out
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Reproduce the old faults and test first-Sage choreography
+        run: |
+          set -euo pipefail
+          node tests/sage-motion.cjs --baseline | tee release-evidence/sage-motion/baseline.log
+          node tests/sage-motion.cjs | tee release-evidence/sage-motion/verified.log
+          node tests/build-integrity.cjs | tee release-evidence/sage-motion/build-integrity.log
+          node tests/reconciliation.cjs | tee release-evidence/sage-motion/reconciliation.log
+      - name: Preserve purification, previous boss work and hero movement
+        run: |
+          set -euo pipefail
+          node tests/run.cjs sage-motion sage sage-specials sage-quiet first-sage-route combat-impact-contract combat-impact-browser boss-motion wrist-release artbible entrance-integration hero-cache-regression voice-handoff scratch-reach scratch-visual release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 | tee release-evidence/sage-motion/regressions.log
+          node tests/sage-motion-capture.cjs | tee release-evidence/sage-motion/capture.log
+          python3 - <<'PY'
+          import pathlib,hashlib,json,subprocess
+          m=json.load(open('release-evidence/sage-motion/payload-manifest.json'))
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          for name,expected in m['protected'].items():
+              assert h(pathlib.Path(name).read_bytes())==expected,name
+          assert not subprocess.check_output(['git','diff','--name-only','71509477db8cebf5615bb4e3bcb14bfd350f87fd','HEAD','--','assets']).strip(), 'Approved art/audio changed'
+          before=json.load(open('release-evidence/sage-motion/baseline.json'))
+          after=json.load(open('release-evidence/sage-motion/verified.json'))
+          assert before['methods']==after['methods'], 'Hero movement or previous boss update changed'
+          assert all(c['pass'] for c in after['checks']), 'Sage acceptance failed'
+          pathlib.Path('release-evidence/sage-motion/protected-files.json').write_text(json.dumps(m['protected'],indent=2))
+          PY
+          git diff --exit-code -- js assets tests source-files.json dev.html index.html odyssey.html forge.html forge-odyssey.html
+      - name: Push the tested candidate to the existing integration branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)
+          test "$current" = "$GITHUB_SHA" || { echo 'Integration advanced; preserve candidate without overwriting newer work.'; exit 1; }
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+          # No Pages publisher or main/odyssey changes here. Promote only after
+          # reviewing the tested commit and its evidence through the existing route.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-first-Sage-evidence-${{ github.sha }}
+          path: |
+            release-evidence/sage-motion/
+            release-evidence/boss-motion/verified.json
+            release-evidence/finish/wrist-release.json
+            tests/out/
+            .claude/skills/creature-motion-combat/
+            docs/combat/SAGE_MOTION_PASS_2026-11-13.md
+            docs/combat/research/creature-motion-skills-2026-11-13.json
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
+      - name: Disable this completed one-time integrator
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/first-sage-motion.yml/disable
