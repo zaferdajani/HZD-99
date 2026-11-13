@@ -24,6 +24,10 @@ const MEDIA_SRC = {
     beastStudioRoar: 'assets/characters/beast/studio-roar.webp',
     beastRearSwipe: 'assets/characters/beast/studio-rake.webp',
     beastHurt: 'assets/characters/beast/studio-hurt.webp',
+    // the turn (a planted pivot through the front, LEFT to RIGHT) and the
+    // standing idle — filmed 2026-11-13 from the same standing frame
+    beastStudioTurn: 'assets/characters/beast/studio-turn.webp',
+    beastStudioIdle: 'assets/characters/beast/studio-idle.webp',
     beastFall: 'assets/characters/beast/fall.webp',
     demon: 'assets/characters/demon-idle.png',
     // pre-rendered 3D turnaround atlas: 11 subjects x 8 yaw angles

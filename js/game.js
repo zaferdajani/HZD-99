@@ -1456,6 +1456,7 @@ function startGame(save) {
   // Previously a paused reward's impact panel and dash lesson followed a
   // restart into the cradle, even though the new cat owned no dash.
   G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = [];
+  if (typeof FXGL !== 'undefined') FXGL.list.length = 0;
   G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
   G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null; G.sceneCaps = null;
   if (typeof overlayClear === 'function') overlayClear();
@@ -14633,7 +14634,9 @@ function drawWorldFrame() {
   if (!G.artProbe) infEyeDraw(c);    // the infection's eyes and the smoke they leave
   drawParts(c);
   drawLights(P);
-  if (G.rings.length && !G.artProbe) drawRings(c);
+  // the shader layer draws the rings, the roar waves and every fx() record
+  // here; with no GPU the Canvas rings draw as they always did (js/fxgl.js)
+  if (!G.artProbe) { if (typeof fxglOn === 'function' && fxglOn()) fxglDraw(c); else if (G.rings.length) drawRings(c); }
   drawSeals(P);
   c.restore();
   // THE NEAR PLATE IS OFF UNTIL IT IS RE-FIRED, and the reason is a mistake in

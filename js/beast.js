@@ -1208,6 +1208,7 @@ function beastSound(cue) {
 }
 function beastContactFx(c, b) {
   if (G.artProbe || b.dead || !(b._slashT > 0)) return;
+  if (typeof fxglOn === 'function' && fxglOn()) return;   // the shader claw (fx 'slash') carries it
   const p = 1 - b._slashT / .18, f = b.face || 1;
   // Four light traces mark the committed contact volume. They fade out in
   // recovery and never extend the damage box or become another damaging wave.
@@ -1224,29 +1225,65 @@ function beastContactFx(c, b) {
   }
   c.restore();
 }
+// `ax` IS WHERE THE STANDING ANIMAL STANDS IN ITS OWN CELLS (strip px right of
+// the cell's centre, the art facing LEFT). tools/lion-studio.py centres each
+// take on its own envelope so an extended paw never clips, which put the same
+// standing lion at a different x in every take — 25.7 px right of centre in
+// the pounce, 1.7 in the stalk, 29.9 in the swipe — and the body stepped up to
+// 17 screen px sideways at every cut between states. The number is the take's
+// `anchor` in its .motion.json; tests/lion-motion.cjs holds the two in step.
 const BEAST_STRIP = {
-  stalk:      { key: 'beastStudioStalk', cells: 24, k: 1,   loop: 24 },
-  run:        { key: 'beastGallop',     cells: 24, k: 1,    loop: 24 },
-  idle:       { key: 'beastStudioLeap', cells: 30, k: 1,    from: 0, to: 0, loop: 1 },
-  roar:       { key: 'beastStudioRoar', cells: 30, k: 1,    t0: 1.25 },
-  intro:      { key: 'beastStudioRoar', cells: 30, k: 1, from: 6, t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
-  swipewarn:  { key: 'beastStudioSwipe', cells: 24, k: 1, from: 0, to: 14 }, // load shoulder, raise paw
-  swipe:      { key: 'beastStudioSwipe', cells: 24, k: 1, from: 15, to: 23 }, // contact, follow-through, settle
-  crouch:     { key: 'beastStudioLeap', cells: 30, k: 1, from: 0, to: 10 },
-  springwarn: { key: 'beastStudioLeap', cells: 30, k: 1, from: 0, to: 10 },
-  pounce:     { key: 'beastStudioLeap', cells: 30, k: 1, from: 11, to: 23, air: 1 },
-  recover:    { key: 'beastStudioLeap', cells: 30, k: 1, from: 24, to: 29 },
-  spring:     { key: 'beastStudioLeap', cells: 30, k: 1, from: 11, to: 18, u: 1 },
-  dive:       { key: 'beastStudioLeap', cells: 30, k: 1, from: 18, to: 23, u: 1 },
-  perch:      { key: 'beastStudioLeap', cells: 30, k: 1, from: 10, to: 10, loop: 1 },
-  daze:       { key: 'beastHurt',       cells: 12, k: 1 },
-  nullcharge: { key: 'beastStudioRoar', cells: 30, k: 1, from: 0, to: 7 },
-  nullhop:    { key: 'beastStudioLeap', cells: 30, k: 1, from: 8, to: 10 },
-  nullend:    { key: 'beastStudioLeap', cells: 30, k: 1, from: 24, to: 27 },
+  stalk:      { key: 'beastStudioStalk', cells: 24, k: 1, ax: 1.7,  loop: 24 },
+  run:        { key: 'beastGallop',     cells: 24, k: 1, ax: 8.2,  loop: 24 },
+  // the standing idle is its own filmed take now (four seconds, breathing, the
+  // tail swaying), not cell 0 of the leap held still under a scale wobble
+  idle:       { key: 'beastStudioIdle', cells: 24, k: 1, ax: -6.9, loop: 6 },
+  roar:       { key: 'beastStudioRoar', cells: 30, k: 1, ax: 7,    t0: 1.25 },
+  intro:      { key: 'beastStudioRoar', cells: 30, k: 1, ax: 7, from: 6, t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
+  swipewarn:  { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 0, to: 14 }, // load shoulder, raise paw
+  swipe:      { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 15, to: 23 }, // contact, follow-through, settle
+  crouch:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 0, to: 10 },
+  springwarn: { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 0, to: 10 },
+  pounce:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 23, air: 1, root: 1 },
+  recover:    { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 24, to: 29, root: 1 },
+  spring:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 18, u: 1 },
+  dive:       { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 18, to: 23, u: 1, root: 1 },
+  perch:      { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 10, to: 10, loop: 1 },
+  daze:       { key: 'beastHurt',       cells: 12, k: 1, ax: -9 },
+  nullcharge: { key: 'beastStudioRoar', cells: 30, k: 1, ax: 7, from: 0, to: 7 },
+  nullhop:    { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 8, to: 10 },
+  nullend:    { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 24, to: 27, root: 1 },
   dead:       { key: 'beastFall',       cells: 12, k: 1,    death: 1 },
 };
+// THE TURN IS FILMED (2026-11-13). It used to be the side view squeezed to a
+// sliver and, through the middle of it, a DIFFERENT DRAWING — the old parts
+// atlas mirror-composited into a white front-facing figure half the lion's
+// width — for a tenth of a second, at every change of facing. The take is one
+// planted pivot through the front, LEFT to RIGHT, starting on the standing
+// frame and ending on its mirror; a turn to the left plays the same cells
+// mirrored. faceVis is the clock, and Boss.update owns it.
+const BEAST_TURN = { key: 'beastStudioTurn', cells: 18, k: 1, ax: 0.9 };
+// THE LANDED LION IS LONGER THAN THE STANDING ONE: forepaws 47 strip px ahead
+// of where they stand at rest, hind paws 14 behind (the take's `feet`, cell 29
+// against cell 0). There are no frames between that stretch and the stand, so
+// the cut to idle moves something whatever is done; anchoring the two poses on
+// the midpoint of their paws moves each end the same 30 px and the body's mass
+// 10 px on screen, where the take's own placement moved the mass 21.
+const BEAST_LEAP_ROOT = 17;
+function beastTurnState(b) {
+  if (b.dead || b.stagT > 0) return null;
+  const to = b.face || 1, fv = b.faceVis == null ? to : b.faceVis;
+  if (Math.abs(to - fv) < 0.02) return null;
+  if (!/^(idle|stalk|run|perch|recover|crouch|springwarn|nullhop)$/.test(b.st) && !b.purified) return null;
+  const im = (typeof MEDIA_RAW !== 'undefined') && MEDIA_RAW[BEAST_TURN.key];
+  if (!im || !im.naturalWidth) { if (typeof mediaFetch === 'function') mediaFetch(BEAST_TURN.key, true); return null; }
+  if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return null;
+  // 0 the instant it starts to turn, 1 as it settles facing `to`
+  const p = clamp((1 + fv * to) / 2, 0, 0.999);
+  return { cell: Math.floor(p * BEAST_TURN.cells), mirror: to < 0 };
+}
 // every key above, once — prefetched the moment the fight is entered
-const BEAST_STRIPS = [...new Set([...Object.values(BEAST_STRIP).map(s => s.key), 'beastRearSwipe', 'beastHurt'])];
+const BEAST_STRIPS = [...new Set([...Object.values(BEAST_STRIP).map(s => s.key), 'beastRearSwipe', 'beastHurt', 'beastStudioTurn'])];
 // Draws the strip cell for the boss's current state in RIG SPACE (origin at
 // the feet, the body transform already applied by drawBeast), or returns
 // false so the caller draws the rig instead. G.beastRig forces the rig, which
@@ -1254,18 +1291,28 @@ const BEAST_STRIPS = [...new Set([...Object.values(BEAST_STRIP).map(s => s.key),
 function beastStrip(c, b) {
   if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return false;
   let st = b.purified ? (b.petWalk ? 'stalk' : 'idle') : b.dead ? 'dead' : b.st;
+  // A LION THAT HAS NOT TAKEN A STEP IS STANDING. `stalk` is also where the
+  // state machine decides what to do next, and a decision made on its first
+  // frame used to show one cell of mid-stride prowl between the standing lion
+  // and the wind-up that followed it.
+  // (0.12 s: at the prowl's acceleration that is under 8 px of ground, less
+  // than one cell of the stride.)
+  if (st === 'stalk' && !b.purified && (b._motionElapsed || 0) < 0.12) st = 'idle';
   // Field pounces still use the flight sequence; their slower gravity is
   // represented by the duration recorded from their launch velocity.
   let S = BEAST_STRIP[st];
   if ((st === 'swipewarn' || st === 'swipe') && b.swiped2)
-    S = { key: 'beastRearSwipe', cells: 30, k: 1,
+    S = { key: 'beastRearSwipe', cells: 30, k: 1, ax: 10.2,
       from: st === 'swipewarn' ? 0 : 11, to: st === 'swipewarn' ? 10 : 29 };
   if (!b.dead && b.stagT <= 0 && (b._recoilT || 0) > 0 && /^(idle|stalk|run|recover)$/.test(st))
-    S = { key: 'beastHurt', cells: 12, k: 1, recoil: true };
+    S = { key: 'beastHurt', cells: 12, k: 1, ax: -9, recoil: true };
+  const turn = beastTurnState(b);
+  if (turn) S = BEAST_TURN;
   if (!S || (S.when && !S.when(b))) return false;
   const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
   let cell;
-  if (S.recoil) cell = Math.min(11, Math.floor((1 - b._recoilT / .3) * 12));
+  if (turn) cell = turn.cell;
+  else if (S.recoil) cell = Math.min(11, Math.floor((1 - b._recoilT / .3) * 12));
   else if (st === 'roar') {
     const e = clamp(1.25 - (b.t || 0), 0, 1.25);
     // The jaw opens on the same fixed-step event that emits the roar.
@@ -1300,8 +1347,12 @@ function beastStrip(c, b) {
     : /^(beastStudio|beastGallop|beastRearSwipe|beastHurt)/.test(S.key) ? 256 : 320;
   const height = cellH * BEAST_STRIP_PX * S.k;
   // freed, the violet at every joint is washed teal (media.js pureArt)
-  const drew = drawStripCell(c, S.key, cell, S.cells, 0, 0, height, false, !!b.purified);
-  b._stripPose = drew ? {key:S.key, cell, cells:S.cells, height} : null;
+  // the standing animal on the body's own spot, whichever take is playing
+  const px = BEAST_STRIP_PX * S.k;
+  const root = S.root && !turn ? BEAST_LEAP_ROOT * clamp((cell - 10) / 14, 0, 1) : 0;
+  const ox = (root - (S.ax || 0)) * px;
+  const drew = drawStripCell(c, S.key, cell, S.cells, ox, 0, height, false, !!b.purified);
+  b._stripPose = drew ? {key:S.key, cell, cells:S.cells, height, ox} : null;
   return drew;
 }
 
@@ -1334,11 +1385,11 @@ function drawBeast(c, b) {
       const sA = BEAST_P.aAtk, gw = sA[2] * BEAST_F, gh = sA[3] * BEAST_F;
       for (let i = b._smear.length - 1; i >= 0; i--) {
         const sm = b._smear[i], age = (b.anim || 0) - sm.t;
-        if (age > 0.26) { b._smear.splice(i, 1); continue; }
+        if (age > 0.18 || !leaping) { b._smear.splice(i, 1); continue; }
         if (!vim || age < 0.03) continue;
         c.save();
         c.globalCompositeOperation = 'lighter';
-        c.globalAlpha *= 0.32 * (1 - age / 0.26);
+        c.globalAlpha *= 0.18 * (1 - age / 0.18);
         c.translate(sm.x, sm.y);
         c.scale(sm.sgn * S, S);
         if (sm.rot) { c.translate(0, -gh * 0.4); c.rotate(sm.rot); c.translate(0, gh * 0.4); }
@@ -1346,18 +1397,22 @@ function drawBeast(c, b) {
         if (frame && frame.naturalWidth) {
           const cw = frame.naturalWidth / pose.cells, dw = pose.height * cw / frame.naturalHeight;
           c.drawImage(frame, pose.cell * cw, 0, cw, frame.naturalHeight,
-            -dw / 2, -pose.height, dw, pose.height);
+            -dw / 2 + (pose.ox || 0), -pose.height, dw, pose.height);
         } else c.drawImage(vim, sA[0], sA[1], sA[2], sA[3], -gw / 2, -gh, gw, gh);
         c.restore();
       }
     }
     c.save();
     c.translate(cx, footY);
-    const sgn = fv < 0 ? 1 : -1;                     // authored facing LEFT
-    const ta = Math.abs(fv);
+    // A FILMED TURN IS NOT SQUEEZED AND NOT SWAPPED. While the take is playing
+    // it owns the whole change of facing: full width, mirrored only by which
+    // way the turn is going, and the old front composite stays out of it.
+    const turn = beastTurnState(b);
+    const sgn = turn ? (turn.mirror ? -1 : 1) : (fv < 0 ? 1 : -1);   // authored facing LEFT
+    const ta = turn ? 1 : Math.abs(fv);
     // through-the-front turn: inside the window the constructed FRONT view
     // (the artist's pixels, mirror-composited) looks at the camera
-    const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0
+    const turnFront = !turn && ta < 0.3 && !b.dead && b.stagT <= 0
       && b.st !== 'pounce' && b.st !== 'crouch' && b.st !== 'roar'
       && b.st !== 'springwarn' && b.st !== 'spring' && b.st !== 'dive'
       && b.st !== 'nullhop' && b.st !== 'nullend' && b.st !== 'daze'
@@ -1435,12 +1490,18 @@ function drawBeast(c, b) {
       // a heavy animal going over the top rather than a picture sliding on a
       // curve. Pivot at the body's middle. The rig faces LEFT, so a positive
       // rotation lifts the nose.
-      if (b.st === 'pounce') {
-        const pitch = Math.max(-0.3, Math.min(0.26, -(b.vy || 0) / 2600));
-        c.translate(0, -135); c.rotate(pitch); c.translate(0, 135);
+      // ...which the FILMED leap already does, in its own frames: nose up off
+      // the launch, extended over the top, forepaws reaching for the ground.
+      // Pitching and stretching those frames again bent a filmed body by a
+      // second, invented arc. The rig still needs both; the take needs neither.
+      if (!beastStrip(c, b)) {
+        if (b.st === 'pounce') {
+          const pitch = Math.max(-0.3, Math.min(0.26, -(b.vy || 0) / 2600));
+          c.translate(0, -135); c.rotate(pitch); c.translate(0, 135);
+        }
+        c.scale(1 - up * 0.10 + dn * 0.05, 1 + up * 0.16 - dn * 0.04);
+        beastDraw(c, b, beastPose(b));
       }
-      c.scale(1 - up * 0.10 + dn * 0.05, 1 + up * 0.16 - dn * 0.04);
-      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
     } else if ((b.st === 'swipe' || b.st === 'swipewarn') && !b.dead) {
       // THE CLAW, which is the whole point of a lion's swipe and which this
       // fight did not previously show. The pose rotated a foreleg and the game
@@ -1511,15 +1572,20 @@ function drawBeast(c, b) {
       // WEIGHT ON THE GROUND. A touchdown squashes the body into its legs and
       // lets it back up over a fifth of a second; standing, it breathes. Both
       // anchored at the feet (the origin), so the paws never leave the floor.
-      const since = (b.anim || 0) - (b.landAt == null ? -9 : b.landAt);
-      if (b.st === 'recover' && since < 0.22) {
-        const k = 1 - since / 0.22;
-        c.scale(1 + 0.08 * k, 1 - 0.12 * k);
-      } else if (b.st === 'idle') {
-        const br = Math.sin((b.anim || 0) * 2.4);
-        c.scale(1 - 0.006 * br, 1 + 0.016 * br);
+      // (The rig's, that is. The filmed landing compresses into its own legs
+      // and the filmed idle breathes; scaling either a second time is the
+      // double bob the boss-motion pass removed everywhere but here.)
+      if (!beastStrip(c, b)) {
+        const since = (b.anim || 0) - (b.landAt == null ? -9 : b.landAt);
+        if (b.st === 'recover' && since < 0.22) {
+          const k = 1 - since / 0.22;
+          c.scale(1 + 0.08 * k, 1 - 0.12 * k);
+        } else if (b.st === 'idle') {
+          const br = Math.sin((b.anim || 0) * 2.4);
+          c.scale(1 - 0.006 * br, 1 + 0.016 * br);
+        }
+        beastDraw(c, b, beastPose(b));
       }
-      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
     }
     c.restore();
     return true;

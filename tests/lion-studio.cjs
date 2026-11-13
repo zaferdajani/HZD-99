@@ -23,7 +23,8 @@ const { chromium } = require('playwright');
       // image URL is insufficient: an over-aggressive matte can erase a body.
       const assets=[];
       for (const k of BEAST_STRIPS.filter(k=>/^(beastStudio|beastGallop|beastRearSwipe|beastHurt)/.test(k))) {
-        const im=MEDIA_RAW[k], n=k==='beastHurt'?12:/Swipe$/.test(k)&&k!=='beastRearSwipe'||k==='beastStudioStalk'||k==='beastGallop'?24:30;
+        // the turn (18 cells) and the standing idle (24) joined the set 2026-11-13
+        const im=MEDIA_RAW[k], n=k==='beastHurt'?12:k==='beastStudioTurn'?18:/Swipe$/.test(k)&&k!=='beastRearSwipe'||k==='beastStudioStalk'||k==='beastGallop'||k==='beastStudioIdle'?24:30;
         const mask=document.createElement('canvas');mask.width=im.width;mask.height=im.height;
         const q=mask.getContext('2d',{willReadFrequently:true});q.drawImage(im,0,0);
         const cw=im.width/n, counts=[];
@@ -32,7 +33,11 @@ const { chromium } = require('playwright');
           for(let i=3;i<d.length;i+=4)if(d[i]>32)count++;
           counts.push(count);
         }
-        assets.push({key:k,ratio:Math.min(...counts)/Math.max(...counts),frames:n});
+        // A side-view take keeps one silhouette area, so half of it missing is a
+        // body lost to the keyer. The TURN passes through a front view, which is
+        // honestly about four tenths of the side view's area (measured .41 on the
+        // master); its floor is the one tools/lion-studio.py derives it under.
+        assets.push({key:k,ratio:Math.min(...counts)/Math.max(...counts),frames:n,floor:k==='beastStudioTurn'?.3:.5});
       }
       const audio=[]; const decoder=new OfflineAudioContext(1,32000,32000);
       for(const cue of ['step','breath','coil','leap','swipe','land','hurt','roar','arrive','awake']) {
@@ -85,7 +90,7 @@ const { chromium } = require('playwright');
       return out;
     });
     assert.deepEqual(result.missing,[],'every integrated motion asset loads');
-    for(const a of result.assets)assert(a.ratio>.5,a.key+' loses its body during keying');
+    for(const a of result.assets)assert(a.ratio>a.floor,a.key+' loses its body during keying ('+a.ratio.toFixed(2)+')');
     for(const a of result.audio) {
       assert(a.duration>.1 && a.duration<1.5,a.cue+' event length');
       assert(a.peak<1 && a.rms>.001,a.cue+' silent or clipping');

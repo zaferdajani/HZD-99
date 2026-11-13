@@ -103,6 +103,9 @@ function combatImpact(e, x, y, move) {
   // Real time: the short white flash ends even while the combat clock pauses.
   e.impactUntil = performance.now() + (reduced ? 0 : p.flash * 1000);
   if (typeof metalBurst === 'function') metalBurst(x, y, reduced ? 2 : p.fragments, charged);
+  // the blow's own light, at the point it landed: confirmed contact only
+  if (!reduced && typeof fx === 'function')
+    fx('flash', x, y, { rx: charged ? 130 : 78, ry: charged ? 130 : 78, dur: charged ? 0.28 : 0.17, col: '#7de8ff', hot: '#ffffff', power: charged ? 1.25 : 0.95 });
   // Existing move callers own normal contact sounds, knockback and hit-stop.
   // Charged release may light up on a miss, but the impact pause only happens
   // here, AFTER damage. Multi-hit specials pause only their first contact.

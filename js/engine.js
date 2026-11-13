@@ -537,6 +537,8 @@ function updateRoarFX(dt) {
   }
 }
 function drawRoarFX(c) {
+  // drawn by the shader layer, from this same state, when there is one (js/fxgl.js)
+  if (typeof fxglOn === 'function' && fxglOn()) return;
   for (const r of ROARFX) {
     if (r.t < 0) continue;
     c.save(); c.globalCompositeOperation = 'lighter';
@@ -743,6 +745,9 @@ function burst(x, y, n, color, sp, life, grav, size, glow) {
   }
 }
 function updateParts(dt) {
+  // the shader effects ride the particles' clock: wherever the simulation
+  // advances its sparks (and slows them, through a hit-stop), it advances these
+  if (typeof fxglUpdate === 'function') fxglUpdate(dt);
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i];
     p.life -= dt;
@@ -764,6 +769,22 @@ function drawParts(c) {
   const glowOK = typeof QUAL === 'undefined' || QUAL.glow;
   for (const p of parts) {
     c.globalAlpha = Math.max(0, p.life / p.life0);
+    // A SPARK IS A STREAK. A glowing particle was a square with a shadowBlur:
+    // a blurred dot that looks the same at any speed, and one Canvas blur each.
+    // It is drawn along its own velocity now — a hot white core inside a tail
+    // of its colour, additive, as long as it is fast — which is what a thrown
+    // spark looks like and costs two strokes and no blur.
+    if (p.glow && !p.metal) {
+      const sp = Math.hypot(p.vx, p.vy), k = Math.max(0, p.life / p.life0);
+      const len = Math.min(26, 2 + sp * 0.035), ux = sp > 1 ? p.vx / sp : 0, uy = sp > 1 ? p.vy / sp : 1;
+      c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+      c.strokeStyle = p.color; c.lineWidth = p.size * (0.7 + 0.5 * k);
+      c.beginPath(); c.moveTo(p.x - ux * len, p.y - uy * len); c.lineTo(p.x, p.y); c.stroke();
+      c.strokeStyle = '#ffffff'; c.globalAlpha *= 0.85; c.lineWidth = Math.max(0.8, p.size * 0.34);
+      c.beginPath(); c.moveTo(p.x - ux * len * 0.45, p.y - uy * len * 0.45); c.lineTo(p.x, p.y); c.stroke();
+      c.restore();
+      continue;
+    }
     if (p.glow && glowOK) { c.shadowColor = p.color; c.shadowBlur = 10; }
     c.fillStyle = p.color;
     if (p.metal) {

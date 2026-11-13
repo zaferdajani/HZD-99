@@ -1,0 +1,27 @@
+{
+  "provider": "Higgsfield",
+  "model": "seedance_2_5",
+  "mode": "omni_reference",
+  "resolution": "720p",
+  "duration": 4,
+  "audio": false,
+  "start_image": "assets/source/beast/studio-2026-11-13/start_left.png (frame 0.02 s of studio-2026-10-04/pounce.mp4 \u2014 the standing pose the game already draws)",
+  "jobs": [
+    {
+      "name": "turn",
+      "job_id": "8b8753e0-2b81-4651-bd0c-83386f619854",
+      "credits": 28,
+      "end_image": "start_left.png mirrored",
+      "prompt": "Locked-off static side-view camera, pure black background. The mechanical lion from the first frame turns around on the spot to face the opposite direction. A heavy big-cat pivot in place: its weight settles back onto the hind legs, the head and shoulders swing round toward the camera, the forepaws lift and re-plant one after the other as the forequarters come round through a front three-quarter view, the hindquarters step round after them, and the tail swings last as a counterbalance. It finishes standing still in exactly the mirrored pose of the last frame. It never walks away from its spot, never changes size, and stays centred in frame with all four paws on the same ground line. Same ivory armour plates, same violet joint lights and eyes, same mane, no redesign. No camera movement, no zoom, no ground plane, no cast shadow, no dust, no sparks, no glow effects, no text."
+    },
+    {
+      "name": "idle",
+      "job_id": "14231970-afa7-4c10-9c01-cf4ede27889b",
+      "credits": 28,
+      "end_image": "start_left.png (loop)",
+      "prompt": "Locked-off static side-view camera, pure black background. The mechanical lion from the first frame stands watching, alert and alive, without moving from its spot: its ribcage rises and falls with two slow heavy breaths, the head lifts a little and settles, the jaw loosens and closes, the mane plates flex, and the tail sways slowly from side to side as a counterweight. All four paws stay planted exactly where they are for the whole shot \u2014 no step, no walk, no turn. It ends in exactly the same pose it started in, so the shot loops. Same size, same position, same ivory armour plates, same violet joint lights and eyes. No camera movement, no zoom, no ground plane, no cast shadow, no dust, no sparks, no glow effects, no text."
+    }
+  ],
+  "delivery": "tools/lion-studio.py \u2014 turn: --frames 18 --start 0.95 --end 3.35 --rest 0.04 --drift --min-coverage .3 --threshold 22; idle: --frames 24 --start 0 --end 4.02 --rest 0.04 --threshold 22; both --grade ../studio-2026-10-04/grade.json",
+  "note": "Generated 2026-11-13 for the lion's turn and standing idle. Assistant-reviewed; awaiting the owner's eye."
+}

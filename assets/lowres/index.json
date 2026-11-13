@@ -6,6 +6,8 @@
  "beastStudioRoar": "assets/lowres/beastStudioRoar.webp",
  "beastRearSwipe": "assets/lowres/beastRearSwipe.webp",
  "beastHurt": "assets/lowres/beastHurt.webp",
+ "beastStudioTurn": "assets/lowres/beastStudioTurn.webp",
+ "beastStudioIdle": "assets/lowres/beastStudioIdle.webp",
  "beastFall": "assets/lowres/beastFall.webp",
  "roster": "assets/lowres/roster.webp",
  "npcs": "assets/lowres/npcs.webp",
@@ -56,6 +58,7 @@
  "ratchetTalk2": "assets/lowres/ratchetTalk2.webp",
  "ratchetVent": "assets/lowres/ratchetVent.webp",
  "ratchetLoop": "assets/lowres/ratchetLoop.webp",
+ "ratchetWristRelease": "assets/lowres/ratchetWristRelease.webp",
  "yardWinchBase": "assets/lowres/yardWinchBase.webp",
  "yardWinchArm": "assets/lowres/yardWinchArm.webp",
  "swingDual": "assets/lowres/swingDual.webp",
@@ -87,6 +90,5 @@
  "rockA": "assets/lowres/rockA.webp",
  "rockC": "assets/lowres/rockC.webp",
  "rockD": "assets/lowres/rockD.webp",
- "rockE": "assets/lowres/rockE.webp",
- "ratchetWristRelease": "assets/lowres/ratchetWristRelease.webp"
+ "rockE": "assets/lowres/rockE.webp"
 }

@@ -41,5 +41,24 @@
   "rootMotion": "vertical removed; simulation supplies trajectory",
   "reference": "standing envelope: 320x210px",
   "reviewed": true,
-  "review": "Assistant inspected source motion and runtime-alpha contacts; not owner art approval."
+  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-13); not owner art approval.",
+  "grade": {
+    "reference": "assets/source/beast/studio-2026-10-04/grade.json",
+    "takeMean": [
+      151.65,
+      143.09,
+      144.17
+    ],
+    "target": [
+      115.46,
+      102.5,
+      96.93
+    ],
+    "after": [
+      113.1,
+      100.35,
+      96.28
+    ],
+    "method": "delivered strip regraded; master keying not reproducible"
+  }
 }

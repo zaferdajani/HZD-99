@@ -91,6 +91,7 @@ const SUITE = [
   ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
+  ['lion-motion', 'Nullfang in the real loop: the filmed turn, committed launches, one spot and one colour across takes, the shader effects layer'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
   ['caves-ch1', 'every chapter-one cave pays something of its own; early finds remembered; a rescue never looks like a kill'],

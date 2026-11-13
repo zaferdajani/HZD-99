@@ -176,6 +176,6 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 
 ## Nullfang motion and creature foley — 2026-10-04
 
-`characters/beast/studio-*.webp` are frames from original Higgsfield Seedance 2.5 performances, anchored to this repository's Nullfang reference. No third-party game frames or recordings were used. Original takes and job IDs are retained under `assets/source/beast/studio-2026-10-04/`.
+`characters/beast/studio-*.webp` are frames from original Higgsfield Seedance 2.5 performances, anchored to this repository's Nullfang reference. No third-party game frames or recordings were used. Original takes and job IDs are retained under `assets/source/beast/studio-2026-10-04/`. The turn and the standing idle (`studio-turn.webp`, `studio-idle.webp`, 2026-11-13) are two further Seedance 2.5 takes started from frame 0.02 s of the pounce master; masters, prompts and job ids in `source/beast/studio-2026-11-13/`. All nine strips were re-derived that day to one tone curve (`source/beast/studio-2026-10-04/grade.json`); no pixel in them is hand-drawn. **Generated with Higgsfield.**
 
 `sfx/nullfang/{step,coil,leap,swipe,land,hurt,roar,arrive,awake,breath}.ogg` are generated creature sound and foley from those same Higgsfield performances, trimmed to event timing, peak-normalized, and faded with `tools/lion-audio.py`. `audio-cuts.json` records exact source windows and timing. These are generated audio, not field recordings or a licensed Disney soundtrack.

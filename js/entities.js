@@ -12377,7 +12377,10 @@ class Boss {
     // facing along its velocity even after the player crosses behind it.
     if (this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
       this.face = Math.sign(px - this.cx()) || this.face || 1;
-    const turn = dt * 5.5;
+    // NULLFANG's turn is a filmed pivot (js/beast.js BEAST_TURN): 0.42 s end to
+    // end, a touch slower than the 0.36 s every other machine whips round in,
+    // because a third of a ton of lion re-planting four paws needs the beat.
+    const turn = dt * (this.kind === 'glitch' ? 4.76 : 5.5);
     const pvSign = Math.sign(this.faceVis) || 1;
     this.faceVis += clamp((this.face || 1) - this.faceVis, -turn, turn);
     // the pivot kicks up dust the instant the body whips through centre, so a
@@ -12405,6 +12408,30 @@ class Boss {
         this.vy += 2100 * dt;
         this.swipeCD = this.swipeCD == null ? 0 : this.swipeCD - dt;
         const dist = px - this.cx(), adist = Math.abs(dist);
+        // ---- IT TURNS ON THE GROUND, AND IT FINISHES TURNING FIRST ----------
+        // (creature-motion-combat §3: store direction at commitment; turn at a
+        // stopped, replanted beat.) Filmed 2026-11-13 against the live build: a
+        // spring to a ledge behind it launched facing her and mirrored in mid
+        // air; a wind-up could begin while the body was still coming round. So
+        // a change of facing is one committed pivot — nothing re-aims it while
+        // it plays, nothing begins until it has landed — and a leap leaves the
+        // ground pointing where it is going.
+        let turning = Math.abs((this.faceVis == null ? (this.face || 1) : this.faceVis) - (this.face || 1)) > 0.02;
+        const lookAt = (side) => {
+          if (turning || !side || side === this.face) return;
+          this.face = side; this.turnStreak = (this.turnStreak || 0) + 1;
+          turning = true;                    // from this frame: nothing is chosen until it has landed
+        };
+        // ...AND IT CANNOT BE DANCED AROUND. Two turns with no attack between
+        // them means she is crossing under it faster than it can face her, and
+        // a pivot-locked boss that only ever turns is a boss switched off. The
+        // answer is the move that needs no facing: the roar, which shoves from
+        // both sides. Same 500 ms inhale, same cue, same harmless shove.
+        if ((this.turnStreak || 0) >= 2 && !turning && (this.st === 'idle' || this.st === 'stalk' || this.st === 'run')) {
+          this.turnStreak = 0;
+          this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false;
+          this.roarCD = rnd(5.5, 7); this.lastMove = 'roar';
+        }
         // ---- THE BREAK ----------------------------------------------------
         // dealDmg counts hits landed close together and raises `dazeReq`. It
         // is taken HERE and only here, and only out of a state the boss is not
@@ -12419,7 +12446,8 @@ class Boss {
             || this.st === 'nullcharge' || this.st === 'nullhop' || this.st === 'nullend'
             || this.st === 'intro' || this.st === 'dorm' || this.st === 'daze';
           if (!committed) {
-            this.st = 'daze';
+            this.st = 'daze'; this.replanted = false;
+            if (this.coilFx) { this.coilFx.cut = 1; this.coilFx = null; }
             // phase two shrugs it off faster — the same read, a smaller prize
             this.dazeDur = this.phase === 2 ? 1.25 : 1.7;
             this.t = this.dazeDur;
@@ -12455,12 +12483,12 @@ class Boss {
         }
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
-          this.face = Math.sign(dist) || 1;
+          lookAt(Math.sign(dist) || 1);
           // the ambush clock runs between moves too: with the prowl cut to
           // under a second it spent 5% of the fight in stalk and the dive
           // never came (measured 0 of 90 s in tests/openings.cjs)
           if (this.ambushCD != null) this.ambushCD -= dt;
-          if (this.t <= 0) {
+          if (this.t <= 0 && !turning) {
             this.roarCD = this.roarCD || rnd(4, 5.5); if (this.ambushCD == null) this.ambushCD = rnd(5, 8);
             // THE COLD-DICE FLOOR (.claude/skills/boss-openings §4): three
             // blows in a row that landed mean she has had no opening she could
@@ -12480,16 +12508,32 @@ class Boss {
             // pounce (recency debt — a pounce loop is one skill wearing a coat),
             // and the prowl in front of everything else is 0.4-0.8 s.
             const inBand = adist > 170 && adist < 470;
-            if (inBand && this.lastMove !== 'pounce') {
-              this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0;
+            // THE SWIPE STARTS FROM THE IDLE IT WAS STANDING IN. It used to pass
+            // through one frame of `stalk` first — one cell of mid-stride prowl
+            // flashed between the standing lion and the rising paw, before
+            // every swipe in the fight. Same decision, same priority (the null
+            // field and the ambush still go first), one frame sooner.
+            const nullDue = !this.nullUsed && this.hp <= this.hpMax * 0.5;
+            if (!nullDue && this.ambushCD > 0 && adist < 130 && this.swipeCD <= 0) {
+              this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
+              this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
+            } else if (inBand && this.lastMove !== 'pounce') {
+              this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0; this.turnStreak = 0; this.replanted = false;
               this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
+              if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
             } else {
               this.st = adist > 520 ? 'run' : 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
             }
           }
         } else if (this.st === 'stalk' || this.st === 'run') {
           // low prowl toward you, patient, gathering pounce distance
-          this.face = Math.sign(dist) || 1;
+          lookAt(Math.sign(dist) || 1);
+          // mid-pivot it plants: the paws are re-placing, not prowling, and
+          // nothing is chosen until the body faces what it chose
+          if (turning) {
+            this.vx += clamp(-this.vx, -1400 * dt, 1400 * dt);
+            this.roarCD -= dt; this.ambushCD -= dt;
+          } else {
           if (adist > 520) this.st = 'run';
           else if (adist < 370) this.st = 'stalk';
           const pace = this.st === 'run' ? 285 : (this.phase === 2 ? 210 : 165);
@@ -12516,19 +12560,22 @@ class Boss {
             if (per.length) {
               per.sort((a2, b2) => Math.abs(a2[0] - this.cx()) - Math.abs(b2[0] - this.cx()));
               this.perch = per[0];
-              this.st = 'springwarn'; this.t = 0.42; this.vx = 0; this.lastMove = 'dive';
+              this.st = 'springwarn'; this.t = 0.42; this.vx = 0; this.lastMove = 'dive'; this.turnStreak = 0;
+              // it looks at the ledge it is about to take — and if that ledge is
+              // behind it, it turns to it on the ground, inside the tell
+              this.face = Math.sign(per[0][0] - this.cx()) || this.face;
             }
             this.ambushCD = rnd(this.phase === 2 ? 6 : 9, this.phase === 2 ? 9 : 12);
           } else if (adist < 130 && this.swipeCD <= 0) {
             // the same trap FURNACE's slam was in: gated on range alone, so a
             // player who stays in melee sees one telegraph and nothing else
-            this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe';
+            this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
             // 0.9-1.3 s, was 1.5-2.4: measured as a 1.2 s opening after every
             // swipe (p75), which is a gift on the fight's commonest move. The
             // idle below is the opening; the cooldown only has to outlast it.
             this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
           }
-          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); this.lastMove = 'roar'; }
+          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); this.lastMove = 'roar'; this.turnStreak = 0; }
           else if (this.t <= 0 && adist > 170 && adist < 470) {
             // THE COIL IS THE FIGHT'S BIGGEST SENTENCE, so it gets a second.
             //
@@ -12545,10 +12592,12 @@ class Boss {
             // crawling up from the paws, and the claws coming out. See
             // beastCoilFx. The difficulty is paid for on the other side: the
             // leap leads her now, and in phase two it lands and goes again.
-            this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0;
+            this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0; this.turnStreak = 0; this.replanted = false;
             this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
+            if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
           }
           else if (this.t <= 0) this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
+          }
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
           this.vx = 0; this.t -= dt; this.windT = 0.3;
@@ -12561,6 +12610,8 @@ class Boss {
             const f = this.face || 1;
             const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
             burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
+            // four claws through the air, exactly over the box they strike
+            if (typeof fx === 'function') fx('slash', this.cx() + f * 44, this.cy() - 4, { rx: 104, ry: 96, dur: 0.3, flip: f < 0, power: 4, col: '#b06aff', hot: '#f4e6ff' });
             beastSound('swipe');
             if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
           }
@@ -12580,7 +12631,7 @@ class Boss {
             // with a full tell. The pressure comes back as a shorter gap
             // afterwards, which is the lever that does not cost readability.
             if (this.phase === 2 && !this.swiped2) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
-            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.45, 0.7); }
+            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.40, 0.62); }
           }
         } else if (this.st === 'crouch') {
           // flat to the ground, trembling with intent — then the pounce
@@ -12610,15 +12661,27 @@ class Boss {
               if (typeof padRumble === 'function') padRumble(0.8, 0.55, 140);
             }
           }
-          if (this.t <= 0) {
-            this.st = 'pounce';
-            this.face = Math.sign(dist) || 1;
+          // THE REPLANT. She crossed under it during the coil. It used to launch
+          // anyway — backwards, the picture mirroring in the air on the way. It
+          // re-plants now: one pivot on the ground, still coiled, still amber,
+          // the flash fired again for the new line — and then it goes. That is
+          // 0.44 s more warning for her, bought by running at a coiling lion.
+          if (this.t <= 0 && !this.replanted && (Math.sign(dist) || this.face) !== this.face) {
+            this.replanted = true; this.face = Math.sign(dist) || this.face;
+            this.t = 0.44; this.coilFlashed = false;
+          }
+          if (this.t <= 0 && !turning) {
+            this.st = 'pounce'; this.replanted = false;
             // AND IT LEADS HER. Aiming at where she is standing makes one
             // sidestep the whole answer — you can beat it without moving your
             // feet until the launch. Aiming at where she is GOING means the
             // dodge has to be a real change of direction, which is the fight
             // this move was always supposed to be.
             let lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
+            // COMMITTED: it leaves the ground along the line its body is on. A
+            // second crossing after the replant is behind it, and it does not
+            // get a third aim — it lands a body-length ahead of itself.
+            if ((Math.sign(lead) || this.face) !== this.face) lead = this.face * 150;
             // ...on HER floor: a led spot that would put the body on top of
             // the furniture beside her slides back along the leap until it
             // fits (bossLandClear) — a landing she cannot reach is no landing
@@ -12656,6 +12719,10 @@ class Boss {
             }
             if (typeof roarWave === 'function')
               roarWave(this.cx(), this.y + this.h - 10, TELL_COL);
+            if (typeof fx === 'function') {
+              fx('ground', this.cx() - this.face * 20, this.y + this.h - 2, { rx: 190, ry: 30, dur: 0.5, col: TELL_COL, hot: '#fff6df', power: 1.2 });
+              fx('flash', this.cx(), this.y + this.h - 30, { rx: 150, ry: 150, dur: 0.22, col: TELL_COL, hot: '#fffbe8' });
+            }
             // launch kickback: the hind paws throw dirt out behind the leap
             for (let i = 0; i < 7; i++)
               addPart(this.cx() - this.face * rnd(10, 40), this.y + this.h - rnd(0, 6),
@@ -12684,6 +12751,9 @@ class Boss {
             this.roarBuzzT = 0.6;
             if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
             if (typeof roarWave === 'function') roarWave(this.cx() + this.face * 30, this.cy() - 10, '#b48cff');
+            // the roar as pressure leaving the throat, both ways: it shoves from either side
+            if (typeof fx === 'function') for (const sd of [1, -1])
+              fx('cone', this.cx() + sd * 30, this.cy() - 12, { rx: 300, ry: 220, dur: 0.75, flip: sd < 0, col: '#b48cff', hot: '#ffffff', power: sd === this.face ? 1.2 : 0.8 });
             if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
             // the roar itself shoves you off your feet
             if (adist < 250 && !player.dead) {
@@ -12701,7 +12771,8 @@ class Boss {
           if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(0.6, 1.0); }   // was 1.6-2.6: a two-second lull after a shove
         } else if (this.st === 'springwarn') {
           // crouched, eyes up at the perch — dust already rising off its back
-          this.vx = 0; this.vy = 0; this.t -= dt; this.windT = 0.3;
+          this.vx = 0; this.vy = 0; this.windT = 0.3;
+          if (!turning) this.t -= dt;          // the crouch is counted from the end of the pivot
           if (chance(0.4)) addPart(this.cx() + rnd(-20, 20), this.y + rnd(0, 10), rnd(-30, 30), rnd(-120, -60), 0.3, '#b9a888', 2, 0, true);
           if (this.t <= 0) {
             this.st = 'spring'; this.u = 0;
@@ -12731,7 +12802,7 @@ class Boss {
           // up on the ledge, tracking you; it flattens and the eye flares
           // in the last half second — that is the dive coming
           this.vx = 0; this.vy = 0; this.t -= dt;
-          this.face = Math.sign(dist) || 1;
+          lookAt(Math.sign(dist) || 1);
           // The dive's telegraph is the LAST 450 ms of the perch, not the whole
           // of it — it sits up there tracking you for a second first, and a cue
           // on entry would be a warning that arrives before there is anything
@@ -12741,7 +12812,8 @@ class Boss {
             this.windT = 0.3;
             if (!this.perchTold) { this.perchTold = true; sfx('tellbig'); }
           }
-          if (this.t <= 0) {
+          if (this.t <= 0 && !turning) {
+            this.turnStreak = 0;
             this.st = 'dive'; this.u = 0;
             this.sx = this.x; this.sy = this.y;
             this.tx = clamp(px - this.w / 2, 20, G.roomDef.w * TILE - this.w - 20);
@@ -12760,6 +12832,12 @@ class Boss {
           if (u2 >= 1) {
             this.st = 'recover'; this.t = this.phase === 2 ? 0.22 : 0.30;   // measured 1.0 s at 0.45, 917 ms at 0.36 — the ceiling is 900
             cam.shake = 10; beastSound('land');
+            if (typeof fx === 'function') {
+              const ly = this.y + this.h - 2;
+              fx('ground', this.cx(), ly, { rx: 300, ry: 46, dur: 0.65, col: '#b06aff', hot: '#f1dcff', power: 1.35 });
+              fx('cracks', this.cx(), ly + 3, { rx: 210, ry: 30, dur: 1.7, col: '#8a3df0', hot: '#f1dcff', power: 1.3 });
+              fx('flash', this.cx(), ly - 16, { rx: 190, ry: 190, dur: 0.26, col: '#c69bff', hot: '#ffffff', power: 1.15 });
+            }
             for (let i = 0; i < 12; i++)
               addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
                 rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true);
@@ -12785,7 +12863,22 @@ class Boss {
           this.vx *= 0.8; this.t -= dt;
           // settle + idle is the window: 0.36 + 0.35..0.55 = the three-hit
           // combo (0.72 s) and no more — the prowl after it no longer counts
-          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.30, 0.45); }
+          // IT LANDS AND GOES AGAIN. A pounce that came down beside her used to
+          // be followed by a third of a second of settle, another third of
+          // standing, and a stroll — the lion handing the fight back after its
+          // biggest move, every time. If she is still inside the paw's reach
+          // and in front of it when it has its feet, the paw is already coming
+          // up: the settle is the opening (one hit, 300 ms and more), and the
+          // swipe that follows has its whole tell. Staying to trade is a
+          // choice now, and so is leaving.
+          if (this.t <= 0) {
+            const chain = adist < 135 && (Math.sign(dist) || this.face) === this.face && !turning && this.swipeCD <= 0.5
+              && !(!this.nullUsed && this.hp <= this.hpMax * 0.5) && !(this.nullSeq > 0);
+            if (chain) {
+              this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
+              this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
+            } else { this.st = 'idle'; this.t = rnd(0.30, 0.45); }
+          }
         } else if (this.st === 'ringcharge') {
           this.vx = 0; this.nwT -= dt;
           const kk = 1 - clamp(this.nwT / 0.7, 0, 1);
@@ -12817,9 +12910,10 @@ class Boss {
           G.lowGravT = Math.max(G.lowGravT || 0, 1.2);
           if (chance(0.5)) addPart(rnd(40, G.roomDef.w * TILE - 40), rnd(60, G.roomDef.h * TILE - 50),
             rnd(-20, 20), rnd(-30, 10), 0.5, '#b06aff', 2, 0, true);
-          if (this.t <= 0) {
+          // each field pounce turns to her on the ground before it leaves it
+          if (!turning) this.face = Math.sign(dist) || this.face;
+          if (this.t <= 0 && Math.abs((this.faceVis == null ? this.face : this.faceVis) - this.face) <= 0.02) {
             const d2 = px - this.cx();
-            this.face = Math.sign(d2) || 1;
             this.vx = clamp(d2 * 1.9, -720, 720) * spd;
             this.vy = -(380 + Math.min(240, Math.abs(d2) * 0.45));
             this.leapT0 = this.anim || 0;
@@ -12846,6 +12940,14 @@ class Boss {
         const col = (this.st === 'spring' || this.st === 'dive') ? {} : moveEnt(this, dt);
         if (this.st === 'pounce' && col.d) {
           cam.shake = 8; beastSound('land');
+          // THE LANDING: a wave along the ground, the ground itself cracking
+          // alight under the forepaws and cooling, and the light of the hit
+          if (typeof fx === 'function') {
+            const lx = this.cx() + this.face * 24, ly = this.y + this.h - 2;
+            fx('ground', lx, ly, { rx: 250, ry: 40, dur: 0.6, col: '#b06aff', hot: '#f1dcff', power: 1.25 });
+            fx('cracks', lx, ly + 3, { rx: 170, ry: 26, dur: 1.5, col: '#8a3df0', hot: '#f1dcff', power: 1.2 });
+            fx('flash', lx, ly - 14, { rx: 150, ry: 150, dur: 0.24, col: '#c69bff', hot: '#ffffff' });
+          }
           if (typeof padRumble === 'function') padRumble(.65, .35, 160);
           for (let i = 0; i < 10; i++)
             addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
