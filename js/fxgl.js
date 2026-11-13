@@ -194,6 +194,14 @@ function fxglInit() {
     if (!(typeof window !== 'undefined' && window.FXGL_FORCE)) opts.failIfMajorPerformanceCaveat = true;
     const gl = cvs.getContext('webgl', opts);
     if (!gl) return false;
+    // ...and Chromium's own software rasteriser does not count itself as a
+    // caveat, so it is asked by name as well.
+    if (opts.failIfMajorPerformanceCaveat) {
+      const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+      const who = String((dbg && gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) || gl.getParameter(gl.RENDERER) || '');
+      FXGL.renderer = who;
+      if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(who)) { FXGL.err = 'software renderer: ' + who; return false; }
+    }
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
     const pr = gl.createProgram();
