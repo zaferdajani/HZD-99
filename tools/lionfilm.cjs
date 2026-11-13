@@ -10,7 +10,7 @@
 // to pounce range, and CROSSES BEHIND IT while it is winding up.
 //
 //   node tools/lionfilm.cjs <outdir> [--html <index.html to film instead>]
-//                           [--seconds N] [--phase 2]
+//                           [--seconds N] [--phase 2] [--attack] [--bodies-only] [--every N]
 //
 // Emits frames/NNNN.png (960x540, one per simulated 1/60 s), film.mp4 at 60 fps
 // (normal speed), bodies/NNNN.png + bodies.png (the lion alone on a neutral
@@ -24,7 +24,7 @@ const args = process.argv.slice(2);
 const out = args[0] || 'release-evidence/lion-film';
 const opt = (name, d) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : d; };
 const html = opt('--html', null), seconds = +opt('--seconds', 26), phase = +opt('--phase', 1);
-const every = +opt('--every', 4), noFrames = args.includes('--bodies-only');   // --bodies-only: the fast pass, no screenshots and no film
+const every = +opt('--every', 4), noFrames = args.includes('--bodies-only'), attack = args.includes('--attack');   // --bodies-only: the fast pass, no screenshots and no film
 
 (async () => {
   fs.mkdirSync(path.join(out, 'frames'), { recursive: true });
@@ -57,7 +57,7 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only');   /
     }, phase);
     const N = Math.round(seconds * 60), frames = [];
     for (let f = 0; f < N; f++) {
-      const rec = await p.evaluate(([f, every]) => {
+      const rec = await p.evaluate(([f, every, ATTACK]) => {
         const b = __lion, S = __script, t = f / 60;
         // ── THE SCRIPTED PLAYER ──────────────────────────────────────────
         // 0-9 s   in its face (the swipe); crosses behind on the 2nd wind-up
@@ -65,7 +65,7 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only');   /
         // 19 s+   the roar and the perch are released
         const prev = S.st; S.st = b.st;
         if (prev !== b.st) S.n[b.st] = (S.n[b.st] || 0) + 1;
-        if (t < 9) S.dist = 110; else S.dist = 330;
+        if (t < 9) S.dist = ATTACK ? 74 : 110; else S.dist = 330;       // inside her claw's reach when she is fighting back
         if (t > 19) { if (b.roarCD > 50) b.roarCD = 0.2; }
         if (t > 22) { if (b.ambushCD > 50) b.ambushCD = 0.2; }
         if (b.st === 'swipewarn' && S.n.swipewarn === 2 && !S.crossed.swipe && b.t < 0.30) { S.crossed.swipe = 1; S.side = -S.side; }
@@ -73,10 +73,18 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only');   /
         const want = b.cx() + S.side * S.dist, px = player.x + player.w / 2;
         for (const k of ['ArrowLeft', 'ArrowRight']) keys[k] = 0;
         if (Math.abs(want - px) > 14) keys[want > px ? 'ArrowRight' : 'ArrowLeft'] = 1;
+        // ...and she FIGHTS BACK in its openings (--attack): a claw when it is
+        // standing or settling inside her reach, so the film shows a landed
+        // blow — the step back, the double flash, the scrap — and not only a
+        // lion performing at a spectator.
+        if (ATTACK && Math.abs(player.x + player.w / 2 - b.cx()) < 96 && /^(idle|recover|daze)$/.test(b.st) && f % 16 === 0) {
+          player.face = Math.sign(b.cx() - (player.x + player.w / 2)) || player.face;
+          keysP.KeyX = 1; keys.KeyX = 1;
+        } else keys.KeyX = 0;
         // keep her inside the arena rather than pinned on a wall
         const W = G.roomDef.w * TILE;
         if (want < 70 || want > W - 70) S.side = -S.side;
-        player.iT = 9; player.cores = 5; b.hp = Math.max(b.hp, b.hpMax * (b.phase === 2 ? 0.2 : 0.6));
+        player.iT = 9; player.cores = 5; if (b.hp < b.hpMax * (b.phase === 2 ? 0.2 : 0.6)) b.hp = b.hpMax * (b.phase === 2 ? 0.2 : 0.6);
         update(1 / 60);
         for (const k in keysP) keysP[k] = 0;
         cam.shake = 0;
@@ -98,8 +106,8 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only');   /
         return { f, st: b.st, t: +(b.t || 0).toFixed(3), face: b.face, faceVis: +(b.faceVis || 0).toFixed(3),
           x: +b.x.toFixed(1), y: +b.y.toFixed(1), vx: +(b.vx || 0).toFixed(1), vy: +(b.vy || 0).toFixed(1),
           strip: sp.key || null, cell: sp.cell == null ? null : sp.cell, px: +(player.x + player.w / 2 - b.cx()).toFixed(1),
-          hurt: player.hurtT > 0 ? 1 : 0, body };
-      }, [f, every]);
+          hurt: player.hurtT > 0 ? 1 : 0, hp: Math.round(b.hp), body };
+      }, [f, every, attack]);
       if (rec.body) fs.writeFileSync(path.join(out, 'bodies', String(f).padStart(4, '0') + '.png'), Buffer.from(rec.body.split(',')[1], 'base64'));
       delete rec.body; frames.push(rec);
       if (!noFrames) await p.screenshot({ path: path.join(out, 'frames', String(f).padStart(4, '0') + '.png') });
