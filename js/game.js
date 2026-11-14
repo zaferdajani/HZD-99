@@ -2911,6 +2911,7 @@ function update(dt) {
       G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); infEyeUpdate(dt * 0.25); return;
     }
     meetCheck(); if (G.meet) meetStep(dt);
+    if (typeof glimpseTick === 'function') glimpseTick(dt);   // NULLFANG seen down the road, once (js/glimpse.js)
     // THE BREAK (js/story-opening.js): the one moment NULLFANG lets go of the
     // order, staged between the sage and the bell. Same shape as the meeting —
     // a check that may open it, a step that drives the body by hand.
@@ -14573,6 +14574,7 @@ function drawWorldFrame() {
   // beside this and hits it, so it belongs in the world layer with everything
   // else that has a hitbox, in front of the terrain and behind her.
   if (typeof drawProgressGround === 'function') drawProgressGround(c);   // the quarry marks, the hub's dust
+  if (typeof drawGlimpse === 'function') drawGlimpse(c);                 // ...and the shape in the road (js/glimpse.js)
   if (G.rubbles && typeof drawRubble === 'function')
     for (const rb of G.rubbles) drawRubble(rb, rb.x, rubbleFoot(rb) + 4, PAL[G.roomDef.zone]);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
