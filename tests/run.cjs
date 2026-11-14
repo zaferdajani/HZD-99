@@ -149,6 +149,7 @@ const SUITE = [
   ['nodes',     'all eight Mind Nodes open a puzzle and pay out'],
   ['memnode-retry', 'copying the lights never answers, and a miss at a Mind Node asks again instead of ejecting her'],
   ['denfloor', 'the den stands on one floor — her, the tinker and the table — and a door is a two-second run'],
+  ['bossbench', 'a save point one door from every boss, and every pod standing clear on something'],
   ['grounded', 'every cannon is bolted to something and every trap has ground under it, room by room'],
   ['dighub', 'the hub hatch: nothing shown before the lion (no light, no crack, no prompt), and after him the lit floor breaks into the first cave'],
   ['camjump', 'a jump does not move the frame; landing, falling and the top edge do'],

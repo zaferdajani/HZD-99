@@ -18024,7 +18024,8 @@ function drawMap() {
     c.strokeStyle = P.edge; c.globalAlpha = 0.45; c.lineWidth = 1;
     c.strokeRect(rc.x + 0.5, rc.y + 0.5, rc.w - 1, rc.h - 1);
     c.globalAlpha = 1;
-    if (BENCH_ROOMS.indexOf(id) >= 0 || (ROOMS[id].cave && ROOMS[id].ents.some(e => e[0] === 'bench')))
+    // every room with a pod in it: the map is where she looks for the way back to one
+    if (BENCH_ROOMS.indexOf(id) >= 0 || ROOMS[id].ents.some(e => e[0] === 'bench'))
       ftxt('◆', rc.x + 10, rc.y + 11, 11, '#aef7d8');
     if (id === 'A3') ftxt('⚙', rc.x + 10, rc.y + rc.h - 11, 11, '#ffd76a');
     // THE CAVE SIGN (owner: "the caves on the map should appear as a cave

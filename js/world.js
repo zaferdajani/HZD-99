@@ -748,6 +748,13 @@ const ROOMS = {
       hline(g, 24, 29, 27, '=');
       hull(g, 30, 38, 2, 141);
     } },
+  // A SAVE POINT BEFORE EVERY BOSS (owner's order, 2026-11-14, after the review
+  // of what keeps a player in a game like this: the walk back after a death is
+  // where they put it down). Ten rooms led straight into a guardian or a
+  // sub-boss with the nearest rest two to four rooms behind: A2 (the Alpha),
+  // A8 (CHIME), CV2 (GRAVEHORN), B5 (the Prowler), B7, C2, C6, D2, D5 and E5.
+  // Each now holds a pod at the end the fight is entered from.
+  // tests/bossbench.cjs measures the rule for every boss in the world list.
   A2: { zone: 'A', sky: 1, w: 88, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5', T: 'A8' },
     // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
     // withdraw; two of them harassing from opposite angles leaves nothing to do
@@ -756,7 +763,9 @@ const ROOMS = {
     // question the guard beside it asks — can you wait for the right moment —
     // instead of asking the player to be in two places at once.
     ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['hopper', 52, 15], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12],
-           ['scrap', 65, 10, 15], ['scrap', 80, 15, 20]],
+           ['scrap', 65, 10, 15], ['scrap', 80, 15, 20],
+           ['bench', 55, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g); seamL(g); seamR(g);
       // ---- THE WEST THIRD IS THE JUNCTION, AND IT DOES NOT MOVE -----------
@@ -1025,7 +1034,9 @@ const ROOMS = {
   // The east side leads where the three-sigil vault leads (V1), so it opens on
   // the vault's own condition: an open side door was the way around the lock.
   B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: { to: 'V1', flag: 'vaultOpen', why: 'gate_vault_side' } },
-    ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
+    ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15],
+           ['bench', 26, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g); openL(g); openR(g); hline(g, 8, 15, 12, '=');
       // the secret shaft up to the Crystal Cache — the kingdom's true end,
@@ -1258,7 +1269,9 @@ const ROOMS = {
     // and peak unchanged (blob and kiln are both 2); the hall keeps its
     // second blob, so zone C's denial lesson still stands where it stood.
     ents: [['plat', 33, 12, [5, 0, 3.6]], ['kiln', 16, 15], ['turret', 22, 15], ['hopper', 42, 15], ['guard', 46, 15], ['blob', 55, 15], ['scrap', 5, 15, 12],
-           ['saw', 40, 15, [6, 0, 3.0]]],
+           ['saw', 40, 15, [6, 0, 3.0]],
+           ['bench', 28, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g); openR(g); openL(g);
       rect(g, 22, 0, 25, 0, '.');           // ceiling opening from C1
@@ -1335,8 +1348,10 @@ const ROOMS = {
     // Lattice descent sat sealed behind an unbroken frame. Found by building
     // the grid and reading the rows, not the graph: deadend.cjs reads exits,
     // and exits lie when the wall disagrees (the C5 lesson, one kingdom up).
-    ents: [['rime', 6, 15], ['guard', 25, 15], ['hopper', 41, 11], ['guard', 44, 15], ['turret', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
-           ['saw', 19, 15, [7, 0, 3.4]]],
+    ents: [['rime', 6, 15], ['guard', 25, 15], ['hopper', 41, 11], ['guard', 44, 15], ['turret', 57, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
+           ['saw', 19, 15, [7, 0, 3.4]],
+           ['bench', 54, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g); openL(g); openR(g);
       rect(g, 15, 0, 18, 0, '.');           // up into the Cold Stacks (D4's chute)
@@ -1509,7 +1524,9 @@ const ROOMS = {
   A8: { zone: 'A', w: 44, h: 21,
     exits: { B: 'A2', T: { to: 'A9', flag: 'sageTame_GA1D', or: ['bossChime', 'bossGlitch'], robo: 1, why: 'gate_chime_ward' } },
     ents: [['crawler', 8, 15], ['flier', 18, 9], ['scrap', 4, 15, 20], ['scrap', 21, 9, 25],
-           ['scrap', 31, 12, 25]],
+           ['scrap', 31, 12, 25],
+           ['bench', 27, 19]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g);
       // both openings answer to the room on the other side of them — A2's
@@ -1691,7 +1708,9 @@ const ROOMS = {
     // beacon to the way on is a walk now rather than four tiles.
     ents: [['hopper', 14, 15], ['hopper', 33, 15], ['crawler', 56, 15],
            ['bat', 28, 6], ['term', 26, 15, 5],
-           ['scrap', 22, 7, 25], ['scrap', 48, 7, 20], ['scrap', 8, 15, 20]],
+           ['scrap', 22, 7, 25], ['scrap', 48, 7, 20], ['scrap', 8, 15, 20],
+           ['bench', 59, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       caveCarve(g, 'CV2', {
         mouth: 1, open: ['L', 'R'], ledges: 5,
@@ -1736,7 +1755,9 @@ const ROOMS = {
 
   // ---- ZONE B: the Carrier, still running its route ------------------------
   B7: { zone: 'B', w: 32, h: 22, exits: { B: 'B2', T: 'B8' },
-    ents: [['turret', 6, 15], ['flier', 20, 8], ['blob', 24, 15], ['scrap', 12, 15, 30]],
+    ents: [['turret', 6, 15], ['flier', 20, 8], ['blob', 24, 15], ['scrap', 12, 15, 30],
+           ['bench', 27, 20]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g);
       rect(g, 13, 20, 16, 21, '.');
@@ -1761,7 +1782,9 @@ const ROOMS = {
 
   // ---- ZONE C: the Kiln-Moth, gone to the heat -----------------------------
   C6: { zone: 'C', w: 32, h: 22, exits: { B: 'C3', T: 'C7' },
-    ents: [['hopper', 9, 15], ['turret', 20, 11], ['blob', 15, 15], ['scrap', 4, 15, 35]],
+    ents: [['hopper', 9, 15], ['turret', 20, 11], ['blob', 15, 15], ['scrap', 4, 15, 35],
+           ['bench', 27, 20]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g);
       rect(g, 11, 20, 14, 21, '.');
@@ -1783,7 +1806,9 @@ const ROOMS = {
 
   // ---- ZONE D: the Lattice, growing under the archives ---------------------
   D5: { zone: 'D', w: 32, h: 24, exits: { T: 'D2', B: 'D6' }, ice: true,
-    ents: [['blob', 8, 22, 0], ['turret', 21, 16], ['flier', 14, 8], ['scrap', 4, 22, 40]],
+    ents: [['blob', 8, 22, 0], ['turret', 21, 16], ['flier', 14, 8], ['scrap', 4, 22, 40],
+           ['bench', 25, 22]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g);
       rect(g, 12, 0, 15, 0, '.');
@@ -1821,7 +1846,9 @@ const ROOMS = {
 
   // ---- ZONE E / the Eye: the Lens, watching the nest -----------------------
   E5: { zone: 'E', w: 32, h: 24, exits: { T: 'E2', B: 'E6' },
-    ents: [['blob', 7, 22, 1], ['hopper', 17, 22], ['turret', 25, 15], ['scrap', 4, 22, 45]],
+    ents: [['blob', 7, 22, 1], ['hopper', 17, 22], ['turret', 25, 15], ['scrap', 4, 22, 45],
+           ['bench', 9, 22]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+          ],
     build(g) {
       frame(g);
       rect(g, 13, 0, 16, 0, '.');
