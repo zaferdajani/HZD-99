@@ -3057,6 +3057,15 @@ class Player {
       this.hitFlashAt = now; this.hitFlashUntil = now + (guarded ? 110 : 230);
       if (typeof fx === 'function')
         fx('flash', this.x + this.w / 2, this.y + this.h * 0.45, { rx: big ? 130 : 95, ry: big ? 130 : 95, dur: 0.24, col: '#ff5f6d', hot: '#ffffff', power: guarded ? 0.7 : 1.15 });
+      // ...AND IT RINGS (owner, 2026-11-14: "hitting the enemy or the enemy hits
+      // me will produce the frozen moment with flash sound clashing"). She is
+      // metal too: the same clash a struck machine gives, under her own cry.
+      if (!guarded && typeof sfx === 'function' && now - (G.clashAt || 0) > 70) { G.clashAt = now; sfx('clash'); }
+      // a guardian's blow is the bigger event on every channel, not only the freeze
+      if (big && !guarded) {
+        cam.shake = Math.max(cam.shake, 12);
+        if (typeof padRumble === 'function') padRumble(1, 0.75, 320);
+      }
     }
     // a braced hit still shoves her, just far less — she stood her ground,
     // she was not thrown by it

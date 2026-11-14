@@ -160,6 +160,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
       // ---- I. its blow lands on HER: the freeze, the throw, the flash -------------
       { const b = fresh(71, 1); place(b, -1, 60); b.st = 'swipewarn'; b.t = 0.03; b.swipeCD = 9; b.face = b.faceVis = -1;
         player.iT = 0; player.cores = 5; G.hitStop = 0; G.dmgLog = {}; const cores0 = player.cores, x0 = player.x;
+        const heard = []; const sfxWas = sfx; sfx = (n) => { heard.push(n); };
         let hitAt = -1, stop = 0, flashMs = 0;
         for (let f = 0; f < 40 && hitAt < 0; f++) { player.cores = Math.max(player.cores, 2); b.hp = b.hpMax; update(1 / 60); for (const k in keysP) keysP[k] = 0;
           if (player.cores < cores0) { hitAt = f; stop = G.hitStop; flashMs = player.hitFlashUntil - player.hitFlashAt; } }
@@ -174,7 +175,8 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         const xStop = player.x; let frozen = 0; while (G.hitStop > 0 && frozen < 30) { update(1 / 60); frozen++; }
         const heldStill = Math.abs(player.x - xStop) < 1.5;
         for (let f = 0; f < 14; f++) { update(1 / 60); }
-        out.heroHit = { hitAt, stop: +stop.toFixed(3), flashMs: Math.round(flashMs), plain, lit, frozen, heldStill, src: Object.keys(G.dmgLog || {}).join(','), thrown: +(player.x - xStop).toFixed(1), away: Math.sign(player.x - xStop) === Math.sign(player.x + player.w / 2 - b.cx()), fx: FXGL.list.map(e => e.name) };
+        sfx = sfxWas;
+        out.heroHit = { heard: [...new Set(heard)], hitAt, stop: +stop.toFixed(3), flashMs: Math.round(flashMs), plain, lit, frozen, heldStill, src: Object.keys(G.dmgLog || {}).join(','), thrown: +(player.x - xStop).toFixed(1), away: Math.sign(player.x - xStop) === Math.sign(player.x + player.w / 2 - b.cx()), fx: FXGL.list.map(e => e.name) };
       }
       // ---- F. one spot, one colour: the table against the takes ---------------------
       out.strips = {};
@@ -255,6 +257,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
     check('...but a blow never moves a wind-up', K.windupStep === 0, K.windupStep + ' px');
     const HH = R.heroHit || {};
     check('its paw lands on her and the world stops for it', HH.hitAt >= 0 && HH.stop >= 0.1 && HH.frozen >= 5 && HH.heldStill, JSON.stringify({ stop: HH.stop, frames: HH.frozen, src: HH.src }));
+    check('...it rings: the clash, under her own cry', (HH.heard || []).includes('clash') && (HH.heard || []).includes('hurt'), JSON.stringify(HH.heard));
     check('...her body flashes', HH.flashMs >= 180 && HH.lit > HH.plain + 250, HH.flashMs + ' ms, ' + HH.plain + ' → ' + HH.lit + ' white px');
     check('...and then she is thrown back from the blow', HH.away === true && Math.abs(HH.thrown) >= 18, HH.thrown + ' px');
     const ref = R.strips.stalk && R.strips.stalk.mean;
