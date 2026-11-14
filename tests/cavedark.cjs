@@ -337,7 +337,15 @@ const check = (name, ok, detail) => {
       const b2 = lum(0, 130, 960, 340);
       G.darkProbe = 0;
       if (Math.abs(b1 - b2) > 1.2) { await rest(30); continue; }
-      out.meadow = a2; out.meadowProbe = b2; out.meadowTries = attempt + 1;
+      // ...AND THE MEADOW IS NOT A STILL ANY MORE. Since 2026-11-14 its west end
+      // has a fight in it and a lion crossing the far ridge, so two reads twenty
+      // frames apart differ by two or three points with nothing switched at all
+      // — which read exactly like the pass leaking (71.1 with, 69.1 without, on a
+      // build where the pass does nothing here). The probe read is compared
+      // against the scene on BOTH sides of it: a drift cancels, a leak does not.
+      await rest(10);
+      const a3 = lum(0, 130, 960, 340);
+      out.meadow = +((a2 + a3) / 2).toFixed(2); out.meadowProbe = b2; out.meadowTries = attempt + 1; out.meadowDrift = +(a3 - a2).toFixed(2);
       break;
     }
     // hand the clock back and RE-ARM the loop — restoring requestAnimationFrame

@@ -202,7 +202,7 @@ const check = (name, ok, detail) => {
       const stDesc = Object.getOwnPropertyDescriptor(G, 'state');
       Object.defineProperty(G, 'state', { get: () => 'PLAY', set: () => {}, configurable: true });
       G.dialog = null; G.toasts = [];
-      let last = player.x, run = 0, travelled = 0;
+      let last = player.x, run = 0, travelled = 0, thrown = 0;
       const hits = [];
       const t0 = G.simClock || 0;
       // THE BACKSTOP IS FOR A STALLED PAGE, NOT FOR A HEAVY ROOM. At 20 s it
@@ -238,7 +238,11 @@ const check = (name, ok, detail) => {
         if (dx < 0.4) run++; else run = 0;
         last = player.x;
         // a real halt, not one slow frame: a fifth of a second of no progress
-        if (run === 12) hits.push(Math.round(riseAhead()));
+        // ...and not one she was THROWN into. A hazard that hurts her now throws her
+        // back for a real beat (js/entities.js knockT; before 2026-11-14 the throw was
+        // braked in five frames and never reached twelve), and a fifth of a second of
+        // going backwards from a lava lip is the lava, not a step. Counted apart.
+        if (run === 12) { if (player.iT > 0 || player.knockT > 0) thrown++; else hits.push(Math.round(riseAhead())); }
         // ...and one snapshot taken WHILE THE KEY IS HELD. Sampling after the
         // loop reports vx 0 for every room, including the ones that walked the
         // whole way, because the input was released a line earlier — a
@@ -262,7 +266,7 @@ const check = (name, ok, detail) => {
       // or she never landed — and telling those apart by re-running the harness
       // and squinting is how an evening disappears.
       const why = mid || { note: 'never sampled' };
-      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames, why, endedBy, attempt });
+      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, thrown, simRan, frames, why, endedBy, attempt });
       if (!(endedBy === 'left' && frames < 30)) break;
       out.stalls.pop();
       }
@@ -309,8 +313,9 @@ const check = (name, ok, detail) => {
   //    which is the ground breathing, and the allowance in entities.js is 20.
   //    Anything that still stops her is meant to.
   const small = r.stalls.flatMap(s => s.rises.filter(v => v < 24).map(v => s.room + ' @' + v + 'px'));
+  const thrownIn = r.stalls.filter(s => s.thrown).map(s => s.room + ' ×' + s.thrown);
   check('nothing under a step stops her', small.length === 0,
-        small.length ? small.slice(0, 6).join(', ') : 'every halt was a rise of 24 px or more');
+        small.length ? small.slice(0, 6).join(', ') : 'every halt was a rise of 24 px or more' + (thrownIn.length ? ' (thrown back by a hazard, not counted: ' + thrownIn.join(', ') + ')' : ''));
   // ...and she gets off the mark in every room. The floor is deliberately low:
   // how FAR she gets before a real step stops her is a fact about where that
   // room put its first step, not about the collider, and the check above
