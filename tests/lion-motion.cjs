@@ -160,6 +160,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
       // ---- I. its blow lands on HER: the freeze, the throw, the flash -------------
       { const b = fresh(71, 1); place(b, -1, 60); b.st = 'swipewarn'; b.t = 0.03; b.swipeCD = 9; b.face = b.faceVis = -1;
         player.iT = 0; player.cores = 5; G.hitStop = 0; G.dmgLog = {}; const cores0 = player.cores, x0 = player.x;
+        G.clashAt = 0;      // the limiter is real time, and the blow she landed a section ago was microseconds back
         const heard = []; const sfxWas = sfx; sfx = (n) => { heard.push(n); };
         let hitAt = -1, stop = 0, flashMs = 0;
         for (let f = 0; f < 40 && hitAt < 0; f++) { player.cores = Math.max(player.cores, 2); b.hp = b.hpMax; update(1 / 60); for (const k in keysP) keysP[k] = 0;
