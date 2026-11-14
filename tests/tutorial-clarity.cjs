@@ -41,7 +41,7 @@ ctx.KEYB = { UP: ['ArrowUp', 'KeyW'], INT: ['KeyE'], JUMP: ['KeyZ', 'Space'], AT
 const engine = fs.readFileSync(path.join(__dirname, '../js/engine.js'), 'utf8');
 vm.runInContext(engine.slice(engine.indexOf('function howToOpen('),
   engine.indexOf('// The same answer, phrased')), ctx);
-ctx.padLabel = n => ({ 0: 'A', 1: 'B', 2: 'X', 5: 'RB', 9: 'Start' }[n] || '—');
+ctx.padLabel = n => ({ 0: 'A', 1: 'B', 2: 'X', 5: 'RB', 9: 'Start', 12: 'D-Up', 13: 'D-Down' }[n] || '—');
 
 // THE BOOTH IS THE FIRST STEP PAST THE GATES. Approaching it teaches only
 // movement (an arrow, no button lit); at its door the one control is UP.
@@ -53,6 +53,11 @@ ctx.player.x = 488;
 assert.equal(hand('booth'), '↑');
 assert.equal(prompt('booth').action, 'UP');
 assert.equal(prompt('booth').target.x, 500);
+ctx.PAD.on = true; ctx.PAD.map = { JUMP: 5, INT: 2, SKILL: -1, PAUSE: 9 };
+assert.equal(hand('booth'), 'D-Up', 'fixed d-pad direction, never a pause-menu route');
+ctx.PAD.on = false; ctx.TOUCH.enabled = true;
+assert.equal(hand('booth'), '▲', 'touch retains its direct door glyph');
+ctx.TOUCH.enabled = false;
 ctx.player.x = 600;
 assert.equal(hand('booth'), '←');
 

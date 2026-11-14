@@ -259,12 +259,21 @@ function moveEnt(e, dt) {
   e.y += e.vy * dt;
   const x0 = Math.floor(e.x / TILE), x1 = Math.floor((e.x + e.w - 1) / TILE);
   if (e.vy >= 0) {
-    const ty = Math.floor((e.y + e.h) / TILE);
-    for (let tx = x0; tx <= x1; tx++) {
-      const c = tileAt(tx, ty);
-      // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
-      // pounce at a player on the floor below them)
-      if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) { e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; break; }
+    // Terminal velocity is 1020 px/s and the largest simulation step is 1/30,
+    // so feet may travel 34 px across a 32 px tile row in one update. Check
+    // every crossed row in order instead of sampling only the landing row.
+    const r1 = Math.floor((e.y + e.h) / TILE);
+    const r0 = Math.max(Math.floor(prevB / TILE), r1 - 64);
+    let hit = false;
+    for (let ty = r0; ty <= r1 && !hit; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const c = tileAt(tx, ty);
+        // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
+        // pounce at a player on the floor below them)
+        if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) {
+          e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; hit = true; break;
+        }
+      }
     }
   } else {
     const ty = Math.floor(e.y / TILE);
@@ -532,9 +541,11 @@ const FACE_RATE = 5.5;       // faceVis units per second, the rate it always tur
 const HOP_LAND_T = 0.32;
 const TURRET_KICK_T = 0.3;
 // the kinds that walk on the floor and therefore turn with their feet. The
-// sage is a duelist that BACKS AWAY while facing her on purpose, which is a
-// step, not a moonwalk, and keeps its own footwork.
-const WALKERS = { crawler: 1, guard: 1, blob: 1, hopper: 1 };
+// hostile sage is a duelist that BACKS AWAY while facing her on purpose, but
+// once it is purified the shared calm branch gives it ordinary ground travel;
+// that travel must use the gait too or the rescued body snaps/slides between
+// its stops.
+const WALKERS = { crawler: 1, guard: 1, blob: 1, hopper: 1, sage: 1 };
 // which side the picture shows: the sign of the eased facing
 function faceSide(e) { return (e.faceVis == null ? (e.dir || 1) : e.faceVis) >= 0 ? 1 : -1; }
 // where a walker's picture is heading: wherever it is moving, and only once it
@@ -1652,6 +1663,15 @@ const HERO_MOOD = {
   relief:     { sq: 0.70, tl:  0.24, gl: 1.05, ar: 1.15, pu: 0.00, as: 1.00 },  // just after a repair lands
   afraid:     { sq: 1.38, tl:  0.30, gl: 0.88, ar: 0.78, pu: 11.0, as: 1.00 },  // a guardian roars
 };
+
+// The CV3 marble is the reason GRAVEHORN is there, not a pickup behind him.
+// Keeping this as a small pure gate makes the negative rule independently
+// testable without pretending a source contract is rendered boss evidence.
+function pillarRewardReady(s, save = G.save, room = G.roomId) {
+  const item = s && (s.extra || 'cshard');
+  return !(room === 'CV3' && item === 'cshard'
+    && !(save && save.flags && save.flags.bossHorn));
+}
 
 // ================= PLAYER =================
 class Player {
@@ -2814,6 +2834,9 @@ class Player {
       if (s.type !== 'pillar') continue;
       const sx = s.x + s.w / 2, sy = s.y + s.h / 2;
       if (Math.hypot(sx - cx, sy - cy) > R + 60) continue;
+      // He is posted on the marble. Evading him must not award a shard that
+      // ghMigrate() would later interpret as proof he had already retreated.
+      if (!pillarRewardReady(s)) continue;
       G.statics.splice(i, 1);
       G.save.flags['pl_' + (s.extra || 'cshard')] = 1;
       sfx('glass');
@@ -11383,8 +11406,13 @@ function sageTame(e) {
 function drawSage(c, e) {
   const cx = e.x + e.w / 2, base = e.y + e.h;
   const t2 = e.anim;
-  const kneel = e.locked || e.tame;
-  const bob = kneel || (typeof sageDuelActive==='function'&&sageDuelActive(e)) ? 0 : Math.sin(t2 * 2.2) * 1.6;
+  // A rescued sage kneels only while resting. Once its calm AI walks, use the
+  // authored purified walk strip; otherwise its body translates in one frozen
+  // kneeling plate and reads as a sleeping character sliding over the floor.
+  const sageWalking = !!e.tame && Math.abs(e.vx || 0) > 12;
+  const kneel = e.locked || (!!e.tame && !sageWalking);
+  const duelActive = typeof sageDuelActive === 'function' && sageDuelActive(e);
+  const bob = kneel || duelActive ? 0 : Math.sin(t2 * 2.2) * 1.6;
   // the aura sense: the black halo, under everything
   if (typeof auraSense === 'function' && auraSense() && !e.tame) {
     const fl = 0.75 + Math.sin(t2 * 7 + Math.sin(t2 * 13)) * 0.25;
@@ -11405,7 +11433,7 @@ function drawSage(c, e) {
   // fight reads — amber on exactly the three telegraph states, ember gone and
   // crystal blue on pure. The procedural monk below stays as the fallback
   // while a plate is in flight, which is the house arrangement everywhere.
-  const sagePlate = e.tame ? 'sagePure'
+  const sagePlate = e.tame && !sageWalking ? 'sagePure'
     : e.locked ? 'sageLock'
     : e.gatherT > 0 ? 'sageGather'
     : e.coilT > 0 ? 'sageCoil'
@@ -11433,7 +11461,8 @@ function drawSage(c, e) {
     // one stride per 56 px of floor it covers (moveEnt's walkD), like every
     // walker — never the clock, or the robe would pace faster than the feet
     const cell = Math.floor(((((e.walkD || 0) / 56) % 1) + 1) % 1 * 8);
-    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer);
+    // pureArt applies the clean cyan/white material to the same authored gait.
+    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer, !!e.tame);
   }
   if (!sageDrew) {
     if (exhale) {

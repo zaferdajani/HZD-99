@@ -372,6 +372,13 @@ function triDir(n) {
 function updateTrial(dt) {
   if (TRI.fb > 0) TRI.fb -= dt;
   triBuffer(dt);
+  // A Mind Node can be left during every phase, including the initial and
+  // wrong-answer retry countdowns. BACK is an escape, not an answer, and it
+  // must not be held hostage until the next question becomes interactive.
+  if (TRI.mode === 'node' && inP('BACK')) {
+    TRI.node = null; TRI.mode = 'full'; TRI.retry = false;
+    G.state = 'PLAY'; sfx('ui'); return;
+  }
   if (TRI.st === 'menu') {
     const n = 1 + TRI.order.length;
     if (inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }

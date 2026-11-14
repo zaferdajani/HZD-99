@@ -56,6 +56,56 @@ function opCard(nameKey, descKey, art, demo, onEnd) {
 // a beat that waits for the screen to be free (no window open) and a moment
 function opLater(sec, fn) { OP.later.push({ t: sec, fn }); }
 
+// Opening progression is a single settlement, not a sequence of saves.  A
+// battery may never disappear while the body it powers stays dark, and the
+// quest/spare-cell handoff may never remember the speech but lose its reward.
+// Build the complete result on a clone, then replace and persist it once.
+function opAtomicSave(change) {
+  if (!G.save) return false;
+  const before = G.save;
+  let next;
+  try { next = JSON.parse(JSON.stringify(before)); change(next); }
+  catch (e) { return false; }
+  G.save = next;
+  let stored = false;
+  try { stored = persist() !== false; }
+  catch (e) { stored = false; }
+  if (!stored) { G.save = before; return false; }
+  return true;
+}
+function opRestoreNpc(s, item, flags) {
+  const key = npcKey(s);
+  return opAtomicSave(save => {
+    save.items = save.items || {};
+    if ((save.items[item] || 0) < 1) throw new Error('missing opening cell');
+    save.items[item]--;
+    if (save.items[item] <= 0) delete save.items[item];
+    save.flags = save.flags || {};
+    save.flags['on_' + key] = 1;
+    Object.assign(save.flags, flags || {});
+  });
+}
+function opSettleRatchetAsk() {
+  return opAtomicSave(save => {
+    save.flags = save.flags || {};
+    save.quests = save.quests || {};
+    save.items = save.items || {};
+    save.flags.opTold = 1;
+    if (!save.quests.ratchet_forge) save.quests.ratchet_forge = 'active';
+    if (!save.flags.ratchetSpareGiven) {
+      save.flags.ratchetSpareGiven = 1;
+      save.items.batt = (save.items.batt || 0) + 1;
+    }
+  });
+}
+function opSkipRatchetRelease() {
+  return opAtomicSave(save => {
+    save.flags = save.flags || {};
+    save.flags.ratchetReleased = 1;
+    delete save.flags.ratchetReleasePending;
+  });
+}
+
 // ---------------------------------------------------------------------------
 // WHO SPEAKS. Called first thing from doInteract's NPC branch; returns true
 // when the opening has said something, false to hand back to the ordinary
@@ -114,14 +164,14 @@ function opRatchet(s) {
 }
 // the repair board's power came up: his battery is in, and he wakes
 function opRatchetRestored(s) {
-  const f = G.save.flags;
-  if (!invTake('ratchetCell')) return;
-  npcCharge(s);
-  f.ratchetRepaired = 1; f.ratchetReleasePending=1; persist();
+  if (!opRestoreNpc(s, 'ratchetCell', { ratchetRepaired: 1, ratchetReleasePending: 1 })) return;
+  npcCharge(s, true);
   if(typeof mediaFetch==='function')mediaFetch('ratchetWristRelease',true);
   const go = () => {
     if(typeof ratchetReleaseStart==='function'&&ratchetReleaseStart(s,()=>opExplain(s)))return;
-    opExplain(s);
+    // Retire an unavailable reaction before explaining; otherwise a later
+    // interaction can play the wrist beat after the story it should precede.
+    if (opSkipRatchetRelease()) opExplain(s);
   };
   // THE WAKING FILM (owner, 2026-10-12): the cell goes home and he comes on.
   // Skipping it skips nothing: the explanation below plays either way, so the
@@ -135,16 +185,11 @@ function opRatchetRestored(s) {
 // FIVE SHORT PAGES, then the spare cell, then the pod. Not the nine-line
 // dump the old waking read out with the shop already opening behind it.
 function opExplain(s) {
-  const f = G.save.flags;
   opSay(t('n_ratchet'), ['op_r1', 'op_r2', 'op_r3', 'op_r4', 'op_r5'], 'ratchet', () => {
-    f.opTold = 1;
-    // the errand is given here, so the goal line names it from now on
-    if (typeof qState === 'function' && qState('ratchet_forge') === 'none') qSet('ratchet_forge', 'active');
-    persist();
+    const hadSpare = !!G.save.flags.ratchetSpareGiven;
+    if (!opSettleRatchetAsk()) return;
     const pod = () => opSay(t('n_ratchet'), ['op_r_pod'], 'ratchet');
-    if (!f.ratchetSpareGiven) {
-      f.ratchetSpareGiven = 1;
-      invAdd('batt');
+    if (!hadSpare) {
       opCard('op_spare', 'op_spared', opArt('cell'), null, pod);
     } else pod();
   });
@@ -210,10 +255,8 @@ function opServo(s) {
   if (!npcLive(s)) {
     if (invCount('batt') <= 0) { opSay(t('n_servo'), ['op_sv_dark'], null); return true; }
     opSay(t('n_servo'), ['op_sv_seat'], null, () => {
-      if (!invTake('batt')) return;
-      npcCharge(s);
-      f.servoIntro = 1;                      // his first say is owed (survives a reload)
-      persist();
+      if (!opRestoreNpc(s, 'batt', { servoIntro: 1 })) return;
+      npcCharge(s, true);
       OP.servoWake = 1.6;
       // nothing lands on her while she watches him come back
       if (player) player.iT = Math.max(player.iT || 0, 1.8);

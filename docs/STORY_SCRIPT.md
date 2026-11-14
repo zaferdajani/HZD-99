@@ -42,8 +42,8 @@ cannot be spent. §2.5 is that scene.
 | **The Nine-Lives Sage** | On its ninth life. Knows GLACIERE, the Archives' sentinel, guards the Kernel Key. | A sage in a carrel; the one warm floor in a frozen kingdom. | D1B |
 | **Lumen** | The Lost Nymph. Glows harder when afraid; always glowing. | A small luminous unit whose glow keeps one pocket of the Nest clean. | E1B, the Hollow |
 | **The seven chamber sages** | The kingdoms' protectors, kneeling under the Song two rooms behind each guardian. | Kneeling figures with a black halo and an ember rim while infected; the halo goes blue when purified. | Every G\*D deep chamber |
-| **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
-| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one red eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
+| **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, purple boss-infection light behind the eyes; red/orange remains only in hazard markings and attack tells. | A2 (the meeting), A4 (the fight) |
+| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one purple boss-infection eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
 | **THE ALPHA** | Leader of the wolf pack. Not a guardian; not the Eye's. | A great wolf-frame with the pack behind it. | A10 |
 | **TALONHOST** | Guardian of the Conduits. The Iron Eagle. | Hangs from above, drops and slams. | B4 |
 | **The Prism Prowler** | The rival robo-cat. The one machine the network never indexed, so the Song never touched it — never infected. Keeps Kerf's second blade. | A clear, blue crystal cat under a skin of virus-red; the same body either way. | X1 |
@@ -51,8 +51,8 @@ cannot be spent. §2.5 is that scene.
 | **GLACIERE** | Guardian of the Archives — *THE FROZEN SENTINEL* (never "Purifier": that is the sword's name). The corrupted unicorn of the void. | Ice and void; shatters into parts on death. | D3 |
 | **The Eye's five constructs** | CHIME, CARRIER, KILN-MOTH, LATTICE, THE LENS. Built by the source of the Song, not infected — there is nobody inside. | Instruments, not monsters; each built around a Power Cell. | A9, B8, C7, D6, E6 |
 
-**The three rules of the picture** (from the art direction): red light behind the
-eyes means infected; nothing down here is new, everything is somebody's afterwards;
+**The three rules of the picture** (from the art direction): ordinary infected
+eyes glow red while bosses and guardians glow purple; nothing down here is new, everything is somebody's afterwards;
 the deeper she goes, the less it looks built and the more it looks grown.
 
 ---
@@ -282,7 +282,7 @@ Deaf System's:
 
 In CV3 the chalk arrows end in a long cavern — and something steps out of the dark at
 the far end of it, between her and the stone: GRAVEHORN, an armoured rhino the size of a
-room, one red eye, two horns. The exits close behind her. He speaks:
+room, one purple boss-infection eye, two horns. The exits close behind her. He speaks:
 > *So the little cleaner woke up.*
 > *I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone.*
 > *The Eye is the one who stole your Mother's Song. I guard what it took.*
@@ -307,8 +307,8 @@ MARBLE — a rounded raw nodule in its host rock, never a pointed crystal. Plain
 then release beside it.* The burst frees it (the pack is what makes the burst — §2.5).
 > **Raw marble** — *A rounded nodule freed from the host rock. Bring the material to Ratchet; it is not yet a blade.*
 
-Carrying the shard switches on her **aura sense**: she glows white; hostiles read
-purple; guardians red; woken and purified machines blue; an infected sage wears a
+Carrying the shard switches on her **aura sense**: she glows white; ordinary hostiles read
+red; bosses and guardians purple; woken and purified machines blue; an infected sage wears a
 black halo with an ember rim.
 **Story.** A second people lived down here — the deaf, who could not hear the Song and
 so survived it — and they quarried this seam. The stone Ratchet wears came from here.
@@ -317,7 +317,7 @@ Song knows it: it posted a soldier on the stone. GRAVEHORN is the first of the E
 stand in front of her and say whose he is — the story's enemy gets a name, and a reason to
 come back.
 **Panels.** The mouth breathing; the beacon; GRAVEHORN bursting out of the quarry dust in
-front of the glowing stone, towering over her (gh_intro_a); his head, red eye, horn raised
+front of the glowing stone, towering over her (gh_intro_a); his head, purple boss-infection eye, horn raised
 (gh_intro_b); the armour bursting open, both horns lit (gh_phase2); beaten, the big horn
 cracked, backing into the rock (gh_down); the pillar, white, taller than her; the storm on
 her chassis; the shard falling; her aura coming on in the dark.
@@ -414,8 +414,9 @@ he breaks it. Silence is the first thing she ever takes away from the Eye.
 
 ### 2.14 The Alpha's den — A10
 
-**Where.** On the road, not off it: the first fight you can lose. Hulk middens at both
-ends of a clean floor.
+**Where.** Optional and off the required road: after the Purifier is forged, Ratchet's
+offer points to A2's depth door and the A10 den. The mandatory A2 → A3 → A4 route and
+B1 progression never require this branch. Hulk middens mark both ends of its clean floor.
 **What happens.** *THE ALPHA — the pack answers to this.* Three hundred points of wolf.
 There is no fork here; taming is the only ending. *THE PACK IS YOURS — It yielded.
 Every wolf in the machine world knows it now — they will not raise a tooth to you

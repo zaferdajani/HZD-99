@@ -37,11 +37,16 @@ const EARLY = { glitch: 1, brood: 1, horn: 1 };
 // windT, lexically for the ones that never set it. Kept in step with that file
 // deliberately: two harnesses disagreeing about what a wind-up is would be
 // worse than either of them being wrong.
-const WINDUP_WORDS = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|perch|wind|tell|aim|rear|raise|summon|volley|call/i;
+const WINDUP_WORDS = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|perch|wind|tell|aim|rear|raise|summon|volley|call|vanish/i;
 // Wind-ups that are deliberately under the floor, with the reason. A move on
 // this list is a design decision somebody made in the open; a move not on it
 // that measures short is a bug.
 const SHORT_ON_PURPOSE = {};
+// A timing change is not covered unless every move it claims to change was
+// actually observed. PRISM is the first boss with a reviewed named manifest;
+// extend this table as the remaining boss documents are reconciled.
+const EXPECTED = { prism: ['dashwarn', 'pouncewarn', 'spreadwarn', 'lsvanish', 'arcspin'] };
+const DISTINCT = { prism: ['dashwarn', 'pouncewarn', 'spreadwarn'] };
 
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
@@ -57,7 +62,7 @@ const SHORT_ON_PURPOSE = {};
     out[kind] = await p.evaluate(async ({ kind, room }) => {
       loadRoom(room);
       let bo = G.boss;
-      if (!bo || bo.kind !== kind) { bo = new Boss(kind, 300, 300); G.boss = bo; }
+      if (!bo || bo.kind !== kind) throw new Error(room + ' did not load its ' + kind + ' boss');
       bo.st = 'idle'; bo.t = 0; bo.dead = false; bo.hp = bo.hpMax;
       player.x = bo.cx() - 120; player.y = bo.y;
 
@@ -77,7 +82,7 @@ const SHORT_ON_PURPOSE = {};
         player.x = bo.cx() + (i % 1200 < 600 ? -far : far); player.y = bo.y;
         const stBefore = bo.st;
         bo.windT = 0;
-        try { bo.update(STEP); } catch (e) { /* a state whose art is not loaded */ }
+        bo.update(STEP);
         if (bo.st === stBefore && bo.windT > 0) windSeen = true;
         if (bo.st !== cur) { close(); cur = bo.st; len = 1; windSeen = false; }
         else len++;
@@ -101,6 +106,7 @@ const SHORT_ON_PURPOSE = {};
     const states = out[kind] || [];
     const floor = EARLY[kind] ? 400 : 250;
     const winds = states.filter(s => s.wind || WINDUP_WORDS.test(s.st));
+    const byState = new Map(states.map(s => [s.st, s]));
     console.log('\n' + kind.toUpperCase() + '   floor ' + floor + ' ms   '
       + winds.length + ' wind-ups across ' + states.length + ' states');
     for (const s of winds) {
@@ -116,13 +122,15 @@ const SHORT_ON_PURPOSE = {};
         + s.min + ' ms, under the ' + floor + ' ms floor — a promise it breaks');
     }
     if (!winds.length) fails.push(kind + ' telegraphs nothing at all');
-    // ...and a fight whose every tell is the same LENGTH is one tell wearing
-    // different hats: the doctrine says compress late-game tells toward
-    // 250-350 ms and compensate with distinctness, never with shortness alone.
-    const spread = winds.length > 2
-      ? Math.max(...winds.map(w => w.med)) - Math.min(...winds.map(w => w.med)) : Infinity;
-    if (spread < 60) fails.push(kind + ' gives every move the same warning length ('
-      + winds.map(w => w.med).join('/') + ' ms) — the tells differ by ' + spread + ' ms');
+    for (const st of (EXPECTED[kind] || [])) {
+      if (!byState.has(st)) fails.push(kind + ' never exercised required tell ' + st);
+    }
+    const distinct = (DISTINCT[kind] || []).map(st => byState.get(st)).filter(Boolean);
+    for (let i = 0; i < distinct.length; i++) for (let j = i + 1; j < distinct.length; j++) {
+      const gap = Math.abs(distinct[i].med - distinct[j].med);
+      if (gap < 60) fails.push(kind + '.' + distinct[i].st + ' and ' + kind + '.'
+        + distinct[j].st + ' differ by only ' + gap + ' ms');
+    }
   }
   if (errs.length) fails.push('page errors: ' + errs.slice(0, 3).join(' | '));
 

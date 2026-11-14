@@ -97,6 +97,11 @@ function ctlName(a) {
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
   // the d-pad is not remappable (engine.js reads buttons 14/15 directly)
   if (a === 'MOVE') return touch ? CTL_TOUCH.MOVE : pad ? padLabel(14) + ' / ' + padLabel(15) : '← →';
+  // Door directions are read from the fixed d-pad/stick axes too. Sending
+  // them through howToOpen() invents a pause-menu route because UP/DOWN are
+  // not remappable pad actions.
+  if (pad && a === 'UP') return padLabel(12);
+  if (pad && a === 'DOWN') return padLabel(13);
   if (pad && typeof howToOpen === 'function') return howToOpen(a, t('pa_' + a));
   if (touch) return CTL_TOUCH[a] || t('pa_' + a);
   const codes = (typeof KEYB !== 'undefined' && KEYB[a]) || [];
