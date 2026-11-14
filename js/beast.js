@@ -1238,8 +1238,8 @@ const BEAST_STRIP = {
   // the standing idle is its own filmed take now (four seconds, breathing, the
   // tail swaying), not cell 0 of the leap held still under a scale wobble
   idle:       { key: 'beastStudioIdle', cells: 24, k: 1, ax: -6.9, loop: 6 },
-  roar:       { key: 'beastStudioRoar', cells: 30, k: 1, ax: 7,    t0: 1.25 },
-  intro:      { key: 'beastStudioRoar', cells: 30, k: 1, ax: 7, from: 6, t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
+  roar:       { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1,    t0: 1.25 },
+  intro:      { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1, from: 6, t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
   swipewarn:  { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 0, to: 14 }, // load shoulder, raise paw
   swipe:      { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 15, to: 23 }, // contact, follow-through, settle
   crouch:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 0, to: 10 },
@@ -1250,7 +1250,7 @@ const BEAST_STRIP = {
   dive:       { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 18, to: 23, u: 1, root: 1 },
   perch:      { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 10, to: 10, loop: 1 },
   daze:       { key: 'beastHurt',       cells: 12, k: 1, ax: -9 },
-  nullcharge: { key: 'beastStudioRoar', cells: 30, k: 1, ax: 7, from: 0, to: 7 },
+  nullcharge: { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1, from: 0, to: 7 },
   nullhop:    { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 8, to: 10 },
   nullend:    { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 24, to: 27, root: 1 },
   dead:       { key: 'beastFall',       cells: 12, k: 1,    death: 1 },

@@ -20,8 +20,17 @@
       "credits": 28,
       "end_image": "start_left.png (loop)",
       "prompt": "Locked-off static side-view camera, pure black background. The mechanical lion from the first frame stands watching, alert and alive, without moving from its spot: its ribcage rises and falls with two slow heavy breaths, the head lifts a little and settles, the jaw loosens and closes, the mane plates flex, and the tail sways slowly from side to side as a counterweight. All four paws stay planted exactly where they are for the whole shot \u2014 no step, no walk, no turn. It ends in exactly the same pose it started in, so the shot loops. Same size, same position, same ivory armour plates, same violet joint lights and eyes. No camera movement, no zoom, no ground plane, no cast shadow, no dust, no sparks, no glow effects, no text."
+    },
+    {
+      "name": "roar",
+      "job_id": "0f3d0d32-6779-4f26-8e00-51cf77728726",
+      "credits": 28,
+      "end_image": "start_left.png (loop)",
+      "fired": "2026-11-14",
+      "why": "the 2026-10-04 roar was filmed over a lit floor and haze; its cut-out lost chunks of the mane and legs and could not be re-keyed. This one is on clean black, from the same standing frame as the turn and the idle.",
+      "prompt": "Locked-off static side-view camera, pure black background. The mechanical lion from the first frame roars without leaving its spot. First second: it inhales \u2014 the chest swells, the head draws back and lifts, the shoulders rise, the jaw still closed. Then it ROARS: the head thrusts forward and up, the jaw opens very wide showing metal teeth, the mane plates flare outward, the whole body braces into it and trembles, held for a second and a half. Then the jaw closes, the head lowers, and it settles back into exactly the standing pose of the first frame. All four paws stay planted where they are the whole time \u2014 no step, no walk, no turn, no rearing onto the hind legs. Same size, same position, same ivory armour plates, same violet joint lights and eyes, no redesign. Nothing comes out of the mouth: no breath, no beam, no shockwave, no glow effects, no sparks, no dust. No camera movement, no zoom, no ground plane, no floor, no cast shadow, no spotlight, no haze, no text."
     }
   ],
-  "delivery": "tools/lion-studio.py \u2014 turn: --frames 18 --start 0.95 --end 3.35 --rest 0.04 --drift --min-coverage .3 --threshold 22; idle: --frames 24 --start 0 --end 4.02 --rest 0.04 --threshold 22; both --grade ../studio-2026-10-04/grade.json",
+  "delivery": "tools/lion-studio.py \u2014 turn: --frames 18 --start 0.95 --end 3.35 --rest 0.04 --drift --min-coverage .3 --threshold 22; idle: --frames 24 --start 0 --end 4.02 --rest 0.04 --threshold 22; both --grade ../studio-2026-10-04/grade.json; roar: --times (8 cells 0.10-1.05 s inhale, 11 cells 1.12-2.30 s roar, 11 cells 2.42-3.95 s settle) --rest 0.04 --threshold 22",
   "note": "Generated 2026-11-13 for the lion's turn and standing idle. Assistant-reviewed; awaiting the owner's eye."
 }

@@ -157,10 +157,29 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         out.struck.windupStep = +(b.x - x1).toFixed(1);
         sfx = realSfx;
       }
+      // ---- I. its blow lands on HER: the freeze, the throw, the flash -------------
+      { const b = fresh(71, 1); place(b, -1, 60); b.st = 'swipewarn'; b.t = 0.03; b.swipeCD = 9; b.face = b.faceVis = -1;
+        player.iT = 0; player.cores = 5; G.hitStop = 0; G.dmgLog = {}; const cores0 = player.cores, x0 = player.x;
+        let hitAt = -1, stop = 0, flashMs = 0;
+        for (let f = 0; f < 40 && hitAt < 0; f++) { player.cores = Math.max(player.cores, 2); b.hp = b.hpMax; update(1 / 60); for (const k in keysP) keysP[k] = 0;
+          if (player.cores < cores0) { hitAt = f; stop = G.hitStop; flashMs = player.hitFlashUntil - player.hitFlashAt; } }
+        // her silhouette, lit: white pixels where she stands, the instant after the blow
+        const cvF = document.createElement('canvas'); cvF.width = 220; cvF.height = 200; const xf = cvF.getContext('2d', { willReadFrequently: true });
+        xf.setTransform(1, 0, 0, 1, 110 - player.x - player.w / 2, 120 - player.y - player.h / 2);
+        const count = () => { const d = xf.getImageData(0, 0, 220, 200).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 200 && d[i] > 240 && d[i + 1] > 240 && d[i + 2] > 240) n++; return n; };
+        xf.save(); player.draw(xf); xf.restore(); const plain = count();
+        xf.setTransform(1, 0, 0, 1, 0, 0); xf.clearRect(0, 0, 220, 200); xf.setTransform(1, 0, 0, 1, 110 - player.x - player.w / 2, 120 - player.y - player.h / 2);
+        player.draw(xf); drawHeroHitFlash(xf, player); const lit = count();
+        // the freeze holds her still, then the knockback carries her away from it
+        const xStop = player.x; let frozen = 0; while (G.hitStop > 0 && frozen < 30) { update(1 / 60); frozen++; }
+        const heldStill = Math.abs(player.x - xStop) < 1.5;
+        for (let f = 0; f < 14; f++) { update(1 / 60); }
+        out.heroHit = { hitAt, stop: +stop.toFixed(3), flashMs: Math.round(flashMs), plain, lit, frozen, heldStill, src: Object.keys(G.dmgLog || {}).join(','), thrown: +(player.x - xStop).toFixed(1), away: Math.sign(player.x - xStop) === Math.sign(player.x + player.w / 2 - b.cx()), fx: FXGL.list.map(e => e.name) };
+      }
       // ---- F. one spot, one colour: the table against the takes ---------------------
       out.strips = {};
       const table = typeof BEAST_STRIP !== 'undefined' ? BEAST_STRIP : {};
-      const entries = { stalk: 'studio-stalk', run: 'studio-gallop', idle: 'studio-idle', swipe: 'studio-swipe', crouch: 'studio-pounce', daze: 'studio-hurt' };
+      const entries = { stalk: 'studio-stalk', run: 'studio-gallop', idle: 'studio-idle', swipe: 'studio-swipe', crouch: 'studio-pounce', daze: 'studio-hurt', roar: 'studio-roar' };
       for (const st in entries) {
         const S = table[st]; if (!S) continue;
         const im = MEDIA_RAW[S.key]; let meta = null;
@@ -234,6 +253,10 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
     check('...the body flashes twice, long enough to see', K.flashMs >= 100 && K.flashMs <= 200, K.flashMs + ' ms');
     check('...and scrap scatters, mostly the way the blow went', K.scrap >= 10 && K.away >= K.scrap * 0.6, K.scrap + ' pieces, ' + K.away + ' away');
     check('...but a blow never moves a wind-up', K.windupStep === 0, K.windupStep + ' px');
+    const HH = R.heroHit || {};
+    check('its paw lands on her and the world stops for it', HH.hitAt >= 0 && HH.stop >= 0.1 && HH.frozen >= 5 && HH.heldStill, JSON.stringify({ stop: HH.stop, frames: HH.frozen, src: HH.src }));
+    check('...her body flashes', HH.flashMs >= 180 && HH.lit > HH.plain + 250, HH.flashMs + ' ms, ' + HH.plain + ' → ' + HH.lit + ' white px');
+    check('...and then she is thrown back from the blow', HH.away === true && Math.abs(HH.thrown) >= 18, HH.thrown + ' px');
     const ref = R.strips.stalk && R.strips.stalk.mean;
     for (const st in R.strips) {
       const S = R.strips[st];

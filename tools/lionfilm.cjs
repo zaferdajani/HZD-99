@@ -84,7 +84,10 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only'), att
         // keep her inside the arena rather than pinned on a wall
         const W = G.roomDef.w * TILE;
         if (want < 70 || want > W - 70) S.side = -S.side;
-        player.iT = 9; player.cores = 5; if (b.hp < b.hpMax * (b.phase === 2 ? 0.2 : 0.6)) b.hp = b.hpMax * (b.phase === 2 ? 0.2 : 0.6);
+        // with --attack she can be HIT (her own freeze, flash and knockback are
+        // part of what is being filmed); her cores are topped up so the film
+        // does not end on a death
+        if (!ATTACK) player.iT = 9; player.cores = 5; if (b.hp < b.hpMax * (b.phase === 2 ? 0.2 : 0.6)) b.hp = b.hpMax * (b.phase === 2 ? 0.2 : 0.6);
         update(1 / 60);
         for (const k in keysP) keysP[k] = 0;
         cam.shake = 0;

@@ -3034,6 +3034,30 @@ class Player {
     G.flash = Math.max(G.flash, guarded ? 0.2 : 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
     G.impact = { t: 0.09, t0: 0.09, x: this.x + this.w / 2, y: this.y + this.h / 2 };
     burst(this.x + this.w / 2, this.y + this.h / 2, 14, '#ff5f6d', 260, 0.5, 500, 3, true);
+    // BEING HIT IS AN EVENT TOO (owner, 2026-11-14, from the fight film: "when
+    // the lion is hitting me, I'm not actually being hit with a step back and
+    // frozen moment and flash"). The blow cost a core, shook the camera and
+    // threw her — but the world never STOPPED for it, and her own body never
+    // lit, so a hit read as a number going down. Now the frame freezes on the
+    // contact (longer for a guardian's blow than a crawler's), she flashes
+    // white and then red (drawHeroHitFlash, js/combat-stats.js), and the hit's
+    // light bursts where it landed — and only then does the knockback below
+    // carry her off. A braced hit gets the short version: she held.
+    {
+      // a guardian's blow, by whichever road it arrived: a named attacker, a
+      // source tagged with a guardian's kind, or — its body simply hitting hers,
+      // which carries no source at all — a living guardian standing on her
+      const gb = typeof G !== 'undefined' && G.boss && !G.boss.dead && G.boss.st !== 'dorm' ? G.boss : null;
+      const onHer = gb && Math.abs(gb.x + gb.w / 2 - pcx) < gb.w / 2 + this.w / 2 + 48
+        && Math.abs(gb.y + gb.h / 2 - (this.y + this.h / 2)) < gb.h / 2 + this.h / 2 + 48;
+      const big = (typeof Boss !== 'undefined' && foe instanceof Boss) || onHer
+        || /^(glitch|alpha|brood|zero|atlas|prism|horn|mother|chime|carrier|moth|lattice|lens)\./.test(String(src || ''));
+      G.hitStop = Math.max(G.hitStop || 0, guarded ? 0.04 : big ? 0.13 : 0.09);
+      const now = performance.now();
+      this.hitFlashAt = now; this.hitFlashUntil = now + (guarded ? 110 : 230);
+      if (typeof fx === 'function')
+        fx('flash', this.x + this.w / 2, this.y + this.h * 0.45, { rx: big ? 130 : 95, ry: big ? 130 : 95, dur: 0.24, col: '#ff5f6d', hot: '#ffffff', power: guarded ? 0.7 : 1.15 });
+    }
     // a braced hit still shoves her, just far less — she stood her ground,
     // she was not thrown by it
     const kbm = (relicHas('ember') ? 0.5 : 1) * (guarded ? 0.35 : 1);
@@ -12522,7 +12546,7 @@ class Boss {
               this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
               if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
             } else {
-              this.st = adist > 520 ? 'run' : 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
+              this.st = adist > 520 ? 'run' : 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.32, 0.62);
             }
           }
         } else if (this.st === 'stalk' || this.st === 'run') {
@@ -12536,7 +12560,7 @@ class Boss {
           } else {
           if (adist > 520) this.st = 'run';
           else if (adist < 370) this.st = 'stalk';
-          const pace = this.st === 'run' ? 285 : (this.phase === 2 ? 210 : 165);
+          const pace = this.st === 'run' ? 300 : (this.phase === 2 ? 210 : 180);   // p1 prowl 165 -> 180, run 285 -> 300 (2026-11-14)
           const desired = this.face * pace * spd;
           this.vx += clamp(desired - this.vx, -1050 * dt, 1050 * dt);
           this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
@@ -12630,8 +12654,17 @@ class Boss {
             // what "unlearnable" means. It is now always twice in phase two,
             // with a full tell. The pressure comes back as a shorter gap
             // afterwards, which is the lever that does not cost readability.
-            if (this.phase === 2 && !this.swiped2) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
-            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.40, 0.62); }
+            // ...AND IN PHASE ONE, TWICE IF SHE STAYS (owner, 2026-11-13: "not
+            // challenging... not exciting"; 2026-11-14: finish it). One paw, a
+            // long rest, one paw, a long rest was a metronome she could trade
+            // into forever. Now the first paw asks a question: still inside its
+            // reach and in front of it when the blow ends, and the heavy rake
+            // follows — whole tell, same answer (leave, or get behind it). Step
+            // out after the first and nothing has changed. Conditional, not
+            // random: the same choice always gets the same lion.
+            const stays = adist < 150 && (Math.sign(dist) || this.face) === this.face;
+            if (!this.swiped2 && (this.phase === 2 || stays)) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
+            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52); }
           }
         } else if (this.st === 'crouch') {
           // flat to the ground, trembling with intent — then the pounce
@@ -12768,7 +12801,9 @@ class Boss {
               burst(wx, this.y + this.h - 10, 12, '#b06aff', 220, 0.5, 260, 3, true);
             }
           }
-          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(0.6, 1.0); }   // was 1.6-2.6: a two-second lull after a shove
+          // (0.2-0.35 s since 2026-11-14: the shove has just put her at pounce
+          // range, and a lion that roars and then strolls has wasted its roar)
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(0.2, 0.35); }   // was 0.6-1.0, and 1.6-2.6 before that
         } else if (this.st === 'springwarn') {
           // crouched, eyes up at the perch — dust already rising off its back
           this.vx = 0; this.vy = 0; this.windT = 0.3;
@@ -12874,10 +12909,22 @@ class Boss {
           if (this.t <= 0) {
             const chain = adist < 135 && (Math.sign(dist) || this.face) === this.face && !turning && this.swipeCD <= 0.5
               && !(!this.nullUsed && this.hp <= this.hpMax * 0.5) && !(this.nullSeq > 0);
+            // AND IN PHASE TWO IT LEAPS AGAIN. She dodged the first pounce and
+            // is standing at pounce range, in front of it: it coils straight out
+            // of the landing — 0.75 s, above the heavy-tell floor, with every
+            // channel the first coil has — once. The second landing settles and
+            // rests like any other, so the pair still ends in an opening.
+            const again = this.phase === 2 && !this.pounced2 && !turning && adist > 170 && adist < 470
+              && (Math.sign(dist) || this.face) === this.face && !(this.nullSeq > 0) && (this.denied || 0) < 2;
             if (chain) {
-              this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
+              this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0; this.pounced2 = false;
               this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
-            } else { this.st = 'idle'; this.t = rnd(0.30, 0.45); }
+            } else if (again) {
+              this.pounced2 = true;
+              this.st = 'crouch'; this.t = 0.75; this.turnStreak = 0; this.replanted = false;
+              this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
+              if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
+            } else { this.st = 'idle'; this.t = rnd(0.30, 0.45); this.pounced2 = false; }
           }
         } else if (this.st === 'ringcharge') {
           this.vx = 0; this.nwT -= dt;

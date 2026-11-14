@@ -181,3 +181,5 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 `sfx/nullfang/{step,coil,leap,swipe,land,hurt,roar,arrive,awake,breath}.ogg` are generated creature sound and foley from those same Higgsfield performances, trimmed to event timing, peak-normalized, and faded with `tools/lion-audio.py`. `audio-cuts.json` records exact source windows and timing. These are generated audio, not field recordings or a licensed Disney soundtrack.
 
 `source/brand/appicon.png` — the app icon (HZD-99, bust, claw raised), Higgsfield GPT Image 2.6 from the canon HZD-99 element, 2026-11-14; prompt and job ids in `source/brand/jobs.json`. Every launcher icon and launch image in `ios/` and `android/` is cut from it by `tools/appicon.cjs`. **Generated with Higgsfield.** `aac/**` is a derived copy of `sfx/**/*.ogg` and `vox/*.ogg` (AAC, for devices that cannot decode Ogg) — no new recordings.
+
+`characters/beast/studio-roar.webp` was re-filmed 2026-11-14 (Higgsfield Seedance 2.5, clean black, from the same standing frame; master `source/beast/studio-2026-11-13/roar.mp4`); the 2026-10-04 take it replaces stays in `source/beast/studio-2026-10-04/`.

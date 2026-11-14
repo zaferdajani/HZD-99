@@ -14745,6 +14745,7 @@ function drawWorldFrame() {
     if(!(typeof drawRatchetReleaseHero==='function'&&drawRatchetReleaseHero(c)))player.draw(c);
     if (typeof drawPurificationWorld === 'function') drawPurificationWorld(c);
     c.globalAlpha = 1;
+    if (typeof drawHeroHitFlash === 'function') drawHeroHitFlash(c, player);   // struck: her body lights (js/combat-stats.js)
     if (typeof drawSlashLayer === 'function') drawSlashLayer(c, player);   // her cuts, on their own layer, with their glow
     if (typeof drawGlideJets === 'function') drawGlideJets(c, player);     // the hover jets (js/glide.js)
     if (typeof drawDizzy === 'function') drawDizzy(c, player);   // stars round her head

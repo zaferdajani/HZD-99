@@ -147,3 +147,30 @@ function combatImpact(e, x, y, move) {
     }
   }
 }
+
+// SHE FLASHES WHEN SHE IS STRUCK — the same double flash a struck machine gets
+// (js/foeread.js), drawn from her own silhouette: her body is drawn once more
+// into a scratch canvas, filled through itself, and laid back over her. White
+// for the blow, a gap, then red for the hurt. It runs on real time, like the
+// machines' flash, so it plays through the hit-stop that the blow itself began
+// (Player.hurt, js/entities.js) instead of being frozen by it.
+let HERO_FLASH_CV = null;
+function drawHeroHitFlash(c, p) {
+  const now = performance.now();
+  if (!p || p.dead || !(p.hitFlashUntil > now) || !p.hitFlashAt) return;
+  const ph = (now - p.hitFlashAt) / Math.max(1, p.hitFlashUntil - p.hitFlashAt);
+  if (ph > 0.42 && ph < 0.6) return;                       // the gap is what makes it a flash
+  const pad = 72, w = Math.ceil(p.w) + pad * 2, h = Math.ceil(p.h) + pad * 2, q = 2;
+  const cv = HERO_FLASH_CV || (HERO_FLASH_CV = document.createElement('canvas'));
+  if (cv.width !== w * q || cv.height !== h * q) { cv.width = w * q; cv.height = h * q; }
+  const x = cv.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
+  x.clearRect(0, 0, cv.width, cv.height);
+  x.setTransform(q, 0, 0, q, (pad - p.x) * q, (pad - p.y) * q);
+  try { p.draw(x); } catch (e) { return; }
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-in';
+  x.fillStyle = ph >= 0.6 ? '#ff8f9a' : '#ffffff'; x.fillRect(0, 0, cv.width, cv.height);
+  x.globalCompositeOperation = 'source-over';
+  c.save(); c.globalAlpha = ph >= 0.6 ? 0.62 : 0.92; c.drawImage(cv, p.x - pad, p.y - pad, w, h); c.restore();
+}
+

@@ -331,3 +331,16 @@ Every blow that LANDS (confirmed contact only — `combatImpact`, js/combat-stat
 
 The step is taken **only out of a state the guardian is not committed to** (`idle`, `stalk`, `run`, `rest`, `recover`, `daze`): a blow never moves a wind-up's reach or a strike's box, so every tell and every hitbox documented in the BOSS files is where it was. Fliers and the core (TALONHOST, GLACIERE, MOTHER-V) have no feet and do not step. Damage, HP, hit-stop and the player's own recoil are unchanged. `tests/combat-impact-contract.cjs` and `tests/combat-impact-browser.cjs` carry the new flash and scrap numbers; `tests/lion-motion.cjs` measures the step, the ring, the flash and the scatter on NULLFANG, and that a wind-up does not move.
 
+## Changelog — 2026-11-14 (owner, from the fight film: "when the lion is hitting me, I'm not actually being hit with a step back and frozen moment and flash")
+
+A blow that lands on HER (`Player.hurt`, unguarded) already cost a core, shook the camera, flashed the screen and threw her 250 px/s. It now also:
+
+| Effect | Before | After |
+|---|---|---|
+| frozen moment | none — the world never stopped for her being hit | **hit-stop: 130 ms for a guardian's blow** (named attacker, a `kind.state` source, or a living guardian's body on her), **90 ms for anything else**, 40 ms for a braced hit |
+| her body | the i-frame blink only | **a double flash on her own silhouette — white, a gap, red — over 230 ms** (`drawHeroHitFlash`), on real time so it plays through the freeze |
+| the hit's light | a red particle burst | plus the shader hit-light at the point of contact |
+| the throw | immediate | unchanged in size, but it now starts when the freeze ends — contact, then consequence |
+
+Cores, i-frames, knockback speed, the guard, the Oath and the relics are unchanged. (The film that prompted this showed no hit on her at all because the film tool had made her invulnerable; `tools/lionfilm.cjs --attack` now leaves her hittable.)
+

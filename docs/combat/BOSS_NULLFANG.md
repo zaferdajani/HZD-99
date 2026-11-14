@@ -240,3 +240,20 @@ to TALONHOST's plating (`BOSS_GATE.brood`). Both matter next; unchanged.
 
 **Effects.** `js/fxgl.js`: the fight's rings, roar waves and hits are fragment shaders on one small WebGL canvas composited into the world where the Canvas rings used to draw. Shock bands with a gaussian body, a hot core and noise breakup; ground that cracks alight under a landing and cools; four swept claw arcs; a gather that pulls light inward through the coil; a hit light with a fast attack and shaped decay. The simulation owns every clock; with no GPU the Canvas rings draw as before. Glowing particles are velocity streaks instead of blurred squares.
 
+### The pressure pass (2026-11-14, owner: "not challenging… not exciting", then "finish it")
+
+Nothing here shortens a tell or touches HP or damage. The fight is harder because the lion strings its moves together and stops standing around; every link in a chain keeps its full wind-up and every chain ends in an opening.
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| `nf.swipe` phase 1 follow-up | one paw, then rest | **the heavy rake follows if she is still within 150 px and in front of it when the first paw ends** — full 500 ms tell. Step out and nothing follows | A conditional chain: the first paw asks whether she is leaving. One paw / long rest / one paw was a metronome she could trade into forever. Phase 2 still always doubles. |
+| `nf.swipe` phase 1 rest | 400–620 ms | 340–520 ms | less standing; `swipe>idle` measured: worst 350 ms, median 467 (floor 250) |
+| `nf.pounce` phase 2 second leap | lands, settles, idles | **if she is at pounce range (170–470 px) and in front when the landing settles, it coils again: 750 ms** (≥ the 700 ms heavy-tell floor), flash and cue as the first — once per pair; skipped after two landed blows in a row (cold dice) | "It lands and goes again." The pair ends in the ordinary settle and rest. |
+| after `nf.roar` | `stalk` 0.6–1.0 s before it may choose | 0.2–0.35 s | the shove has just thrown her to pounce range; a lion that roars and then strolls has wasted its roar |
+| prowl / run speed, phase 1 | 165 / 285 px/s | 180 / 300 | closes the gap sooner; phase 2 prowl (210) unchanged |
+| first decision after an idle, phase 1 | 0.4–0.8 s of prowl | 0.32–0.62 s | — |
+
+Measured after the pass (`tests/openings.cjs`): `pounce>recover` worst 700 ms / median 800; `dive>recover` worst 667 / median 750; `swipe>idle` worst 350 / median 467 — every move still opens for at least one hit and none is a gift.
+
+**The roar is re-filmed** (2026-11-14): the first take was shot over a lit floor and its cut-out lost chunks of the mane and legs. The new take is on clean black, from the same standing frame as the turn and the idle, cut to the same three roles the fight times it by (cells 0–7 inhale, 8–18 the roar, 19–29 settle). Awaiting the owner's eye.
+
