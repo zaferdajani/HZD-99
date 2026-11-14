@@ -6481,3 +6481,38 @@ and that is the half only a repaint fixes.
   paint itself is rich.
 - **The others:** the owner said "just like the others" — once Ratchet's take is
   approved, the same palette brief runs for `servoLoop`, `patchLoop`, `lumenLoop`.
+
+### 1-imp. SHE RUNS OUT OF PATIENCE — `heroImpatient` (8, loop) ✱ NEW 2026-11-14 (code session, owner's order)
+
+Owner: *"Look for how Sonic used to stamp with his feet and cross his hand when
+he's idle and waiting, and give the character the same move when it says yalla."*
+
+Wired today: the patience clock itself (js/entities.js `heroOccupied`) — "yalla"
+and the fidget now come only out of real idleness, never out of a conversation,
+a lesson, a toast or a reward. What the fidget strip CANNOT do is this pose: its
+eight cells are all front-on, arms at her sides (assets/characters/hero/fidget.webp).
+The crossed arms and the tapping foot are a new strip.
+
+- **Subject:** HZD-99, canon element `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`
+  embedded in every plate (ART_BIBLE §2). Three-quarter view toward camera,
+  ARMS CROSSED over her chest, weight on the back leg, head tipped a few degrees,
+  visor eyes half-lidded / flat — unimpressed, waiting. The front foot TAPS: heel
+  planted, toe up, toe down.
+- **Strip:** 8 cells, one row, same cell size and floor line as `fidget.webp`
+  (so `drawStripCell('heroImpatient', cell, 8, …)` drops in at HERO_FLOOR):
+  0 settle into the cross · 1 toe up · 2 toe down (small dust tick at the toe) ·
+  3 toe up · 4 toe down · 5 toe up · 6 toe down, a glance at the camera ·
+  7 hold, one ear flick. Cells 1–6 are the tap and must differ ONLY in the foot,
+  the scarf tip and the ear — the body does not pump between them (art-prompts §3).
+- **Costumes:** bare first (the opening); then one per weapon tier with the blade
+  on her back, as the gate clips are done (`GATE_CLIP_ARMED`).
+- **Negatives:** no arms at her sides, no walking, no smile, no speech bubble,
+  no text, no ground, no cast shadow, no outline, pure black background, whole
+  figure in frame facing three-quarter RIGHT.
+- **Wiring (code session, on delivery):** `heroImpatient` in js/media.js; in
+  js/entities.js the bout that starts at `FIDGET_AFTER` plays this strip instead
+  of `HERO_FIDGET_BEATS` — settle (0) as `hzdSay('yalla')` fires, then the tap
+  1-2-3-4-5-6 at ~7 taps a second for the length of the line, hold on 7; the
+  procedural scarf, glow and ear twitch stay on top. A soft toe-tick SFX on the
+  down cells (audio session cue, AUDIO_QUEUE). `tests/hero-move-coverage.cjs`
+  gains the row; `tests/gait.cjs` feet rule applies.

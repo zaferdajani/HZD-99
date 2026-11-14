@@ -585,7 +585,10 @@ const ROOMS = {
     ents: [['npc', 17, 15, 'ratchet'], ['chest', 14, 15, 'it:batt'], ['bench', 28, 15]],  // pod BUILT INTO the corner facing him; chest left of him — the WORK TABLE stands to his right
     build(g) {
       frame(g);
-      hline(g, 19, 23, 12, '=');          // the workbench loft over his corner
+      // THE TABLETOP IS A LEDGE, and it is the table's own top: three tiles
+      // over the plate that stands at 22.6 (game.js DEN_TABLE_H), one row up.
+      // It was five tiles at row 12, sized to a table drawn 150px tall.
+      hline(g, 21, 23, 13, '=');
     } },
   // ============ ZONE A — Scrap Meadows ============
   A1: { zone: 'A', sky: 1, w: 56, h: 17, exits: { R: 'A2', T: 'A6', L: 'A0' },
@@ -638,7 +641,14 @@ const ROOMS = {
     // you can lose well. One flier to keep you honest in the air, one crawler
     // holding a ledge you have to land on — a threat you can choose to deal
     // with, which is what makes the climb a route rather than a gauntlet.
-    ents: [['flier', 8, 8], ['crawler', 16, 12], ['turret', 22, 12], ['scrap', 4, 12, 25],
+    // THE CANNON IS BOLTED TO SOMETHING (owner, 2026-11-14: "a floating canon
+    // that does not make any sense"). It stood at 22,12 — open air, directly
+    // over the drop back to A1, nine rows of nothing under it. A turret has no
+    // gravity, so it simply hung there. It sits on the east gantry now (the
+    // deck at 26-31, row 10): the same job, covering the climb to the coil,
+    // from something that could hold it. loadRoom's mountTurret is the net
+    // under every other one; tests/grounded.cjs measures them all.
+    ents: [['flier', 8, 8], ['crawler', 16, 12], ['turret', 29, 10], ['scrap', 4, 12, 25],
            ['item', 23, 6, 'coil'], ['plat', 10, 14, [0, -6, 3.2]], ['scrap', 37, 17, 30]],
     build(g) {
       frame(g);
@@ -662,7 +672,15 @@ const ROOMS = {
       seamL(g); rect(g, 1, 17, 2, 18, 'B');
       hline(g, 2, 6, 16, '='); hline(g, 13, 17, 13, '='); hline(g, 6, 10, 10, '=');
       hline(g, 15, 19, 8, '='); hline(g, 20, 24, 7, '#');
-      hline(g, 11, 14, 18, '^');              // the floor is not safe to fall to
+      // ...and the floor is not safe to fall to. A TRAP IS CUT INTO THE GROUND
+      // (owner, 2026-11-14: "the trap with the blade rotating... It's floating
+      // in the sky instead of actually being carved into the ground as a trap").
+      // The rail lay ON the floor at row 18, columns 11-14 — and column 11 is
+      // the last column of the drop to A1, so one end of it, and the wheel that
+      // patrols it, hung over the hole. It is a trench in the floor row now,
+      // 13-16, with rock under every tile and a tile of floor between it and
+      // the drop: the meadow's spike pits (A2) are built the same way.
+      hline(g, 13, 16, 19, '^');
       // THE GANTRIES RUN ON. The climb and the drop keep every tile they had —
       // the way out is this room's whole safety argument and nothing about it
       // moves — but the wing used to END four tiles after the coil, which made
@@ -1729,6 +1747,9 @@ const ROOMS = {
       hline(g, 3, 9, 10, '='); hline(g, 13, 20, 7, '=');
       hline(g, 4, 10, 4, '='); hline(g, 14, 21, 3, '=');
       hline(g, 22, 27, 12, '^');               // the drop you do not want
+      // ...on a deck, not on the air: a rail of teeth with nothing under it is
+      // a trap floating in the sky (owner, 2026-11-14). tests/grounded.cjs.
+      hline(g, 22, 27, 13, '=');
     } },
   B8: { zone: 'B', w: 32, h: 17, exits: { B: 'B7' },
     ents: [['boss', 20, 15, 'carrier']],
@@ -1749,6 +1770,8 @@ const ROOMS = {
       hline(g, 3, 9, 10, '='); hline(g, 14, 21, 7, '=');
       hline(g, 8, 15, 4, '=');
       hline(g, 17, 23, 17, '^');
+      // on a deck, as in B7: a hazard is fixed to something (tests/grounded.cjs)
+      hline(g, 17, 23, 18, '=');
     } },
   C7: { zone: 'C', w: 32, h: 18, exits: { B: 'C6' },
     ents: [['boss', 20, 16, 'moth']],

@@ -196,13 +196,20 @@ const G = {
     this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3 });
   },
   breakTile(tx, ty) {
-    // The first cave is below the hub, but the chapter first sends the player
-    // across A2 to meet NULLFANG. Keep only that cracked quarry hatch intact
-    // until the meeting, so an exploratory down-strike cannot reorder the
-    // inciting encounter. It still gives the ordinary hollow knock/tell.
-    const beforeLion = this.roomId === 'A2' && tx >= 12 && tx <= 14 && ty >= 15 && ty <= 16
-      && this.save && this.save.flags && !this.save.flags.nfMeet;
-    if (beforeLion) { this.knockTile(tx, ty, false); return false; }
+    // THE HUB'S HATCH OPENS WHEN IT IS STRUCK (owner, 2026-11-14: "I should be
+    // hitting the floor and going down... hitting the floor did not actually
+    // break it in the first area where I have to go down, where it says pale
+    // marble dust seeps up through the cracked floor... It's a glitch").
+    //
+    // A review pass sealed A2's 12-14 until the NULLFANG meeting (nfMeet), so an
+    // early dig could not reorder that encounter. But the meeting is forty-six
+    // tiles EAST of the hatch and nothing sends her there first: the light, the
+    // caption, the goal line ("strike down through the cracked floor at the
+    // hub's west end") and the strike prompt all said dig HERE, NOW, and the
+    // floor knocked and held. The canon is cave-before-sage (docs/STORY_CANON.md)
+    // and progressGoal already handles a blade forged before the lion is met, so
+    // the seal bought nothing the story needed and cost the chapter its first
+    // step. tests/dighub.cjs holds it open.
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     // THE GROUND CURVE IS RE-READ. The heightfield she stands on is built
     // from the grid once per room and cached by room id, so a floor she cut
@@ -1229,6 +1236,7 @@ function loadRoom(id) {
       const en = !isHero() && G.save.storyVersion >= 2 && id === 'A0' && kind === 'turret'
         ? new YardWinch(tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h)
         : new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      if (kind === 'turret' && typeof mountTurret === 'function') mountTurret(en);
       en.actorRole = STORY_ACTOR_ROLES[kind]; en.storyKey = storyKey;
       if (rescueState === 'disabled') { en.disabled = true; en.hp = 1; }
       if (rescueState === 'rescued') { en.rescued = true; en.calm = true; en.hypnoT = 1e9; }
@@ -1529,6 +1537,38 @@ function bossBarName(b) {
 //   leave   and bounds east out of the room, toward where she will meet it again
 // She keeps at least one core: this is a survival, never a scripted death.
 // ---------------------------------------------------------------------------
+// A CANNON IS BOLTED TO SOMETHING (owner, 2026-11-14: "a floating canon that
+// does not make any sense"). A turret has no gravity — it fires from where the
+// room list put it — so one authored a row or two off its ledge, or over open
+// air, hangs there for the rest of the game. Six did (A6, B7, C5, C6, D5, E5).
+// At spawn, a turret with nothing solid under its feet is moved to the nearest
+// surface that could carry it: a solid tile with open air above it (never a
+// hazard rail), within eight columns, dropping preferred over climbing so it
+// lands on the ledge it was written above rather than the one over its head.
+// A turret already standing on something is not touched.
+function mountTurret(en) {
+  if (!G.grid || !en) return;
+  const sol = (tx, ty) => { const ch = tileAt(tx, ty); return ch === '#' || ch === '=' || ch === 'B'; };
+  const H = G.grid.length, W = G.grid[0].length;
+  const tx0 = Math.floor((en.x + en.w / 2) / TILE), ty0 = Math.round((en.y + en.h) / TILE);
+  if (sol(tx0, ty0)) return;
+  let best = null, bd = 1e9;
+  for (let dx = -8; dx <= 8; dx++) {
+    const tx = tx0 + dx;
+    if (tx < 1 || tx >= W - 1) continue;
+    for (let ty = 1; ty < H; ty++) {
+      if (!sol(tx, ty)) continue;
+      const up = tileAt(tx, ty - 1);
+      if (up === '#' || up === '=' || up === 'B' || up === '^') continue;   // buried, or a trap's own bed
+      const dy = ty - ty0;
+      const d = Math.abs(dx) + (dy >= 0 ? dy * 0.6 : -dy * 1.4);
+      if (d < bd) { bd = d; best = { tx, ty }; }
+    }
+  }
+  if (!best) return;
+  en.x = best.tx * TILE + (TILE - en.w) / 2;
+  en.y = best.ty * TILE - en.h;
+}
 const MEET_ROOM = 'A2', MEET_X = 60 * TILE;
 function meetCheck() {
   if (G.meet || G.roomId !== MEET_ROOM || !G.save || G.save.flags.nfMeet) return;
@@ -12295,11 +12335,12 @@ function drawWinchHouse(wx, gy) {
 }
 // THE DEN TABLE'S HEIGHT, in world px (owner, 2026-11-14: "it looks like I'm
 // ... smaller than a table, which is nonsense"). It was 150 — as tall as the
-// tinker himself and twice her height. 97 puts the plate's work surface (85.5%
-// of its drawn height, measured off the forgeTable plate) on the loft at row 12
-// that she can jump onto — world.js A0B — so the top she lands on is the top
-// that is drawn, at the tinker's waist and about her own ears.
-const DEN_TABLE_H = 97;
+// tinker himself and nearly twice her drawn height (92). The plate's work
+// surface is 79.4% of its height from the feet (measured: the first row of the
+// forgeTable plate that is 80% of its full width), so 77 puts that surface 61px
+// above the floor — on the ledge at row 13 she can jump onto (world.js A0B),
+// at her chest and the tinker's thigh. The top she lands on is the top drawn.
+const DEN_TABLE_H = 77, DEN_TABLE_SURF = 0.794;
 function drawStatics(P) {
   for (const pr of (ROOM_PROPS[G.roomId] || []))
     if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
@@ -12903,8 +12944,17 @@ function drawStatics(P) {
     // (groundColumnAt): she measured 51px above the table's feet. The table
     // now takes its line from the same heightfield the bodies are put on.
     const ftop = (G.roomDef.h - 2) * TILE;
-    const gcol = typeof groundColumnAt === 'function' ? groundColumnAt(22.6 * TILE) : null;
-    const tb = gcol ? Math.min(ftop, gcol[0]) + 2 : ftop;
+    // ...under BOTH legs, and it stands on the lower of the two: a leg may sink a
+    // pixel or two into the curve, but neither is ever left in the air
+    let tb = ftop;
+    if (typeof groundColumnAt === 'function') {
+      const half = DEN_TABLE_H * (4 / 3) * 0.4;
+      const gl = groundColumnAt(22.6 * TILE - half), gr = groundColumnAt(22.6 * TILE + half);
+      // a column whose surface is the tabletop ledge itself (tile top above the
+      // floor) has flat floor under it: the curve there belongs to the ledge
+      const fl = q => !q || q[1] < ftop - 1 ? ftop : Math.min(ftop, q[0]);
+      tb = Math.max(fl(gl), fl(gr)) + 1;
+    }
     // §2r FIRED: the real forge-table plate stands in the moment it decodes;
     // the painting-crop stand-in below keeps the room whole until then.
     if (typeof mediaFetch === 'function') mediaFetch('forgeTable');

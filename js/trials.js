@@ -325,10 +325,16 @@ function triEndGame() {
 // ---------------------------------------------------------------------------
 const TRI_ACTS = ['LEFT', 'UP', 'RIGHT', 'DOWN'];
 const TRI_PAD = ['GP_PL', 'GP_PU', 'GP_PR', 'GP_PD'];
+// ...and the stick, now that engine.js reads it as a latched four-way choice
+// (padStick4): far push, one clear axis, back to centre before the next. That
+// reading cannot produce the diagonal or the roll the d-pad rule was written
+// against, so the thumb the player already has on the stick answers too.
+const TRI_STK = ['GP_SL', 'GP_SU', 'GP_SR', 'GP_SD'];
 // spend the press, so one press can never be read as two answers
 function triEatDirs() {
   for (const a of TRI_ACTS) for (const code of (KEYB[a] || [])) keysP[code] = 0;
   for (const c of TRI_PAD) keysP[c] = 0;
+  for (const c of TRI_STK) keysP[c] = 0;
 }
 // THE SAME FORGIVENESS SHE GETS. Her attack carries a 200 ms input buffer, so a
 // swing pressed slightly early still lands — and it is very nearly the single
@@ -348,9 +354,9 @@ function triDir(n) {
   // wrong and nothing in the puzzle could correct it.
   const TRI_V = ['VL', 'VU', 'VR', 'VD'];
   const down = TRI_PAD.map((cd, i) =>
-    (pad ? !!keys[cd] : !!inD(TRI_ACTS[i])) || !!keys[TRI_V[i]]);
+    (pad ? !!(keys[cd] || keys[TRI_STK[i]]) : !!inD(TRI_ACTS[i])) || !!keys[TRI_V[i]]);
   const press = TRI_PAD.map((cd, i) =>
-    (pad ? !!keysP[cd] : !!inP(TRI_ACTS[i])) || !!keysP[TRI_V[i]]);
+    (pad ? !!(keysP[cd] || keysP[TRI_STK[i]]) : !!inP(TRI_ACTS[i])) || !!keysP[TRI_V[i]]);
   let hit = -1, hits = 0;
   for (let i = 0; i < 4; i++) if (press[i]) { hits++; if (hit < 0) hit = i; }
   if (!hits) {
