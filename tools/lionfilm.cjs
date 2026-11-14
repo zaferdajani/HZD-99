@@ -109,7 +109,7 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only'), att
         return { f, st: b.st, t: +(b.t || 0).toFixed(3), face: b.face, faceVis: +(b.faceVis || 0).toFixed(3),
           x: +b.x.toFixed(1), y: +b.y.toFixed(1), vx: +(b.vx || 0).toFixed(1), vy: +(b.vy || 0).toFixed(1),
           strip: sp.key || null, cell: sp.cell == null ? null : sp.cell, px: +(player.x + player.w / 2 - b.cx()).toFixed(1),
-          hurt: player.hurtT > 0 ? 1 : 0, hp: Math.round(b.hp), body };
+          hurt: player.hurtPoseT > 0 ? 1 : 0, hp: Math.round(b.hp), body };
       }, [f, every, attack]);
       if (rec.body) fs.writeFileSync(path.join(out, 'bodies', String(f).padStart(4, '0') + '.png'), Buffer.from(rec.body.split(',')[1], 'base64'));
       delete rec.body; frames.push(rec);

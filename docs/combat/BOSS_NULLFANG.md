@@ -257,3 +257,5 @@ Measured after the pass (`tests/openings.cjs`): `pounce>recover` worst 700 ms / 
 
 **The roar is re-filmed** (2026-11-14): the first take was shot over a lit floor and its cut-out lost chunks of the mane and legs. The new take is on clean black, from the same standing frame as the turn and the idle, cut to the same three roles the fight times it by (cells 0–7 inhale, 8–18 the roar, 19–29 settle). Awaiting the owner's eye.
 
+**A bug this pass shipped and then removed (2026-11-14).** `stalk` still carried a patrol's reflex — `face *= -1` on any side contact. While facing was re-aimed every frame it was overwritten before anyone saw it; once a turn became one committed pivot it was not. Standing in the meadow's dip (x 620, a tile below the arena floor) with her beyond it, every step was a side contact: the lion pivoted away, pivoted back, was counted as danced-around, and roared — 11 turns and 2 roars in 7 s, never coiling (`tests/lion-motion.cjs`, on build 4327eed76e82, which was live for under an hour). The line is gone: `lookAt()` owns its facing. The film that found it is `tools/lionfilm.cjs --attack`.
+

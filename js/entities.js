@@ -13030,7 +13030,14 @@ class Boss {
             this.landAt = this.anim || 0;      // drawBeast's touchdown squash
           }
         }
-        if ((this.st === 'stalk' || this.st === 'run') && (col.l || col.r)) this.face *= -1;
+        // (IT USED TO TURN ROUND AT A WALL HERE — `face *= -1` on any side contact,
+        // a patrol's reflex left over from before it hunted. While facing was
+        // re-aimed every frame that flip was overwritten before anyone saw it.
+        // Once a turn became one committed pivot (2026-11-13) it was not: pressed
+        // against a rise in the meadow with her beyond it, the lion pivoted away,
+        // pivoted back, was counted as danced-around, and roared — over and over,
+        // never coiling, filmed on build 4327eed76e82. It hunts; it has no wall
+        // to patrol to. lookAt() owns its facing and nothing else does.)
         // ANTI-WEDGE WATCHDOG: a dive can end beneath a ledge and jam the
         // hunter in place. If it stops registering movement for 2.6s in an
         // active state it WRENCHES itself free toward open floor — and if

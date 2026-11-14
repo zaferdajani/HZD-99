@@ -78,21 +78,31 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         const fv = b.faceVis; for (let i = 0; i < 20; i++) picture(b); out.turn.drawStable = fv === b.faceVis;
       }
       // ---- B. a seeded fight with a player who keeps crossing it ----------------
-      const fight = (seed, phase, secs) => {
+      const fight = (seed, phase, secs, attack) => {
         const b = fresh(seed, phase); let side = -1, dist = 110; place(b, side, dist);
-        const log = { launches: [], starts: [], pops: [], runs: [], keys: [] };
+        const log = { launches: [], starts: [], pops: [], runs: [], keys: [], away: 0, roars: 0, crossings: 0 };
+        let pSide = Math.sign(player.x + player.w / 2 - b.cx()) || -1, pFace = b.face;
         let prevSt = b.st, runLen = 0, prevPic = null, prevX = b.cx(), prevTurning = false;
         for (let f = 0; f < secs * 60; f++) {
           const t = f / 60;
           if (t > 14) { if (b.roarCD > 50) b.roarCD = 1; if (b.ambushCD > 50) b.ambushCD = 2; }
-          dist = Math.floor(t / 7) % 2 ? 320 : 110;
+          dist = Math.floor(t / 7) % 2 ? 320 : (attack ? 74 : 110);
           if (f % 170 === 169) side = -side;                       // she crosses under it
           const want = b.cx() + side * dist, px = player.x + player.w / 2, W = G.roomDef.w * TILE;
           keys.ArrowLeft = keys.ArrowRight = 0;
           if (Math.abs(want - px) > 14) keys[want > px ? 'ArrowRight' : 'ArrowLeft'] = 1;
           if (want < 70 || want > W - 70) side = -side;
           const wasTurning = turning(b);
+          // the film's player: she strikes in its openings and its blows land on her,
+          // so it is knocked about the arena by her hits the way a real fight knocks it
+          if (attack && Math.abs(px - b.cx()) < 96 && /^(idle|recover|daze)$/.test(b.st) && f % 16 === 0) { player.face = Math.sign(b.cx() - px) || player.face; keysP.KeyX = 1; keys.KeyX = 1; } else keys.KeyX = 0;
+          if (attack) { player.cores = 5; if (b.hp < b.hpMax * 0.6) b.hp = b.hpMax * 0.6; update(1 / 60); for (const k in keysP) keysP[k] = 0; cam.shake = 0; } else
           step(b);
+          // IT TURNED AWAY FROM HER: its facing left her side while she stayed on it
+          { const sideNow = Math.sign(player.x + player.w / 2 - b.cx()) || pSide;
+            if (sideNow !== pSide) log.crossings++;
+            if (/^(idle|stalk|run)$/.test(b.st) && Math.abs(player.x + player.w / 2 - b.cx()) > 40 && sideNow === pSide && pFace === pSide && b.face !== pSide) log.away++;
+            pSide = sideNow; pFace = b.face; }
           const pic = picture(b);
           if (b.st !== prevSt) {
             log.runs.push([prevSt, runLen]);
@@ -100,6 +110,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
             if (prevPic && grounded.test(prevSt) && grounded.test(b.st) && !wasTurning && !turning(b))
               log.pops.push({ from: prevSt, to: b.st, px: +(pic.cx - prevPic.cx - 0).toFixed(1), moved: +(b.cx() - prevX).toFixed(1) });
             if (/^(pounce|spring|dive)$/.test(b.st)) log.launches.push({ st: b.st, face: b.face, vis: +b.faceVis.toFixed(3), vx: +(b.vx || 0).toFixed(0), from: prevSt });
+            if (b.st === 'roar') log.roars++;
             if (/^(swipewarn|crouch|roar|springwarn)$/.test(b.st) && prevSt !== 'swipe') log.starts.push({ st: b.st, turning: turning(b) && b.st !== 'springwarn', from: prevSt });
             prevSt = b.st; runLen = 0;
           }
@@ -114,6 +125,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
       };
       out.fight1 = fight(0x51f0c0de, 1, 70);
       out.fight2 = fight(0x0badcafe, 2, 60);
+      { const L3 = fight(0x51f0c0de, 1, 40, true); out.fight3 = { away: L3.away, roars: L3.roars, crossings: L3.crossings, coils: L3.starts.filter(x => x.st === 'crouch').length }; }
       // ---- C. the replant ------------------------------------------------------
       { const b = fresh(23, 1); place(b, -1, 300); b.st = 'crouch'; b.t = 1.0; b.coilTick = 0; b.coilFlashed = false; b.replanted = false; b.lastMove = 'pounce';
         let launchAt = null, f = 0, crossedAt = null;
@@ -178,6 +190,21 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         for (let f = 0; f < 14; f++) { update(1 / 60); }
         sfx = sfxWas;
         out.heroHit = { heard: [...new Set(heard)], hitAt, stop: +stop.toFixed(3), flashMs: Math.round(flashMs), plain, lit, frozen, heldStill, src: Object.keys(G.dmgLog || {}).join(','), thrown: +(player.x - xStop).toFixed(1), away: Math.sign(player.x - xStop) === Math.sign(player.x + player.w / 2 - b.cx()), fx: FXGL.list.map(e => e.name) };
+      }
+      // ---- J. down in the meadow's dip, walled by its sides, her beyond it ---------
+      // Where the film found it (x 620, y 456, a tile below the arena floor): it
+      // cannot walk out, so every step is a side contact. It must not answer
+      // that by turning round; it must coil and leap out.
+      { const b = fresh(83, 1); b.x = 620; b.y = 456; b.vx = b.vy = 0; b.st = 'idle'; b.t = 0.2; b.face = b.faceVis = 1; b.swipeCD = 9; b.lastMove = 'pounce';
+        let flips = 0, roars = 0, coilAt = null, prevFace = b.face, prevSt = b.st, depth = 0;
+        for (let f = 0; f < 420; f++) {
+          player.x = b.cx() + 336 - player.w / 2; player.y = 404 + 56 - player.h; player.vx = player.vy = 0;
+          step(b); depth = Math.max(depth, b.y);
+          if (b.face !== prevFace) { flips++; prevFace = b.face; }
+          if (b.st !== prevSt) { if (b.st === 'roar') roars++; if (b.st === 'crouch' && coilAt == null) coilAt = f; prevSt = b.st; }
+          if (coilAt != null && f > coilAt + 10) break;
+        }
+        out.walled = { flips, roars, coilAt, y: Math.round(depth) };
       }
       // ---- F. one spot, one colour: the table against the takes ---------------------
       out.strips = {};
@@ -261,6 +288,12 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
     check('...it rings: the clash, under her own cry', (HH.heard || []).includes('clash') && (HH.heard || []).includes('hurt'), JSON.stringify(HH.heard));
     check('...her body flashes', HH.flashMs >= 180 && HH.lit > HH.plain + 250, HH.flashMs + ' ms, ' + HH.plain + ' → ' + HH.lit + ' white px');
     check('...and then she is thrown back from the blow', HH.away === true && Math.abs(HH.thrown) >= 18, HH.thrown + ' px');
+    for (const [name, L] of [['phase one', R.fight1], ['phase two', R.fight2], ['a fight she fights back in', R.fight3]])
+      check(name + ': it never turns away from her on its own', L.away === 0, L.away + ' times' + (L.roars != null && L.coils != null ? ' (' + L.roars + ' roars, ' + L.coils + ' coils, ' + L.crossings + ' crossings)' : ''));
+    check('a fight she fights back in still has pounces in it, not a string of roars', R.fight3.coils >= 3 && R.fight3.roars <= R.fight3.coils, JSON.stringify(R.fight3));
+    const WL = R.walled || {};
+    check('walled in by the ground with her beyond it, it never turns its back and never roars at nothing', WL.flips === 0 && WL.roars === 0, JSON.stringify(WL));
+    check('...it coils and leaps out', WL.coilAt != null && WL.coilAt < 200, 'coil at frame ' + WL.coilAt);
     const ref = R.strips.stalk && R.strips.stalk.mean;
     for (const st in R.strips) {
       const S = R.strips[st];
