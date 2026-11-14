@@ -344,3 +344,18 @@ A blow that lands on HER (`Player.hurt`, unguarded) already cost a core, shook t
 
 Cores, i-frames, knockback speed, the guard, the Oath and the relics are unchanged. (The film that prompted this showed no hit on her at all because the film tool had made her invulnerable; `tools/lionfilm.cjs --attack` now leaves her hittable.)
 
+
+## Changelog — 2026-11-14 (owner: "feels like Nullfang is translucent" / "cracking floor looks fake and not blended with terrain")
+
+Two rules that bind every kingdom, both measured by `tests/solid-bodies.cjs`.
+
+| rule | was | is | where |
+|---|---|---|---|
+| **A hostile body keeps its pigment.** | Bodies were drawn into the world and then lit, bloomed and colour-washed with it; a pale machine came out with its shadows lifted to the fog's colour — read as see-through. Only the hero was exempt (drawn after the grade). | Every rimmed body is copied aside before the light pass and laid back after the grade, with the effects layer over it. The room keeps its light; the body is not made of it. | `js/foeread.js` `FOE_PIG` (`foePigMark` / `foePigSnap` / `foePigLay`), called from `drawWorldFrame` |
+| **A ground effect is drawn on the terrain the room has.** | The wave, the cracks and every guardian's wind-up floor light were ellipses at one height. | `fx('ground')` and `fx('cracks')` are born with the surface under them (`fxWalk`) and drawn as columns standing on it; the wind-up's amber is stroked along the same surface, found by dropping from the body if it is in the air, and not drawn at all over a pit. | `js/fxgl.js` `fxSurfaceY` / `fxWalk` / `fxglStrip` / `tellFloorLight`; `js/entities.js` Boss.draw |
+
+Consequences for anyone adding a fight:
+
+- **Do not draw a floor ring with `c.ellipse`.** A side view has no floor plane. Use `fx('ground', …)` for a wave and `tellFloorLight` for light on the floor; both stop at a ledge's edge by themselves.
+- **A new decoration that must sit OVER a body** has to be drawn before `foePigSnap` (anything in the world pass up to the particles is) or through the effects layer (`fx()`), which is laid over bodies again. Canvas drawn between the light pass and the grade is covered by the body it crosses.
+- **A new filmed strip** is keyed by `tools/lion-studio.py`, which now keeps a body's own dark interior; check a cut-out on a bright flat colour before trusting it on the game's dark rooms, where a hole in a body cannot be seen until the body is.

@@ -171,14 +171,14 @@
   "grade": {
     "reference": "assets/source/beast/studio-2026-10-04/grade.json",
     "takeMean": [
-      94.71,
-      85.84,
-      88.48
+      93.05,
+      84.26,
+      86.9
     ],
     "after": [
-      114.57,
-      101.65,
-      96.63
+      114.53,
+      101.85,
+      96.71
     ],
     "target": [
       115.46,
@@ -186,39 +186,38 @@
       96.93
     ],
     "steady": [
-      0.985,
-      0.983,
-      0.982,
       0.981,
-      0.981,
-      0.981,
-      0.983,
+      0.979,
+      0.978,
+      0.972,
+      0.972,
+      0.972,
+      0.972,
+      0.984,
       0.993,
-      0.997,
-      1.009,
-      1.01,
-      1.021,
-      1.025,
-      1.021,
-      1.021,
-      1.009,
-      1.009,
-      1.009,
-      1.008,
-      1.008,
+      1.029,
+      1.03,
+      1.03,
+      1.032,
+      1.033,
+      1.033,
+      1.033,
+      1.033,
+      1.033,
+      1.033,
+      1.032,
+      1.032,
+      1.031,
+      1.02,
       1.007,
-      1.007,
-      1.004,
-      1.003,
-      0.988,
-      0.983,
-      0.983,
-      0.983,
-      0.983,
-      0.983
+      0.981,
+      0.978,
+      0.978,
+      0.978,
+      0.978,
+      0.978
     ]
   },
   "reviewed": true,
-  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-14); not owner art approval.",
-  "cells": "0-7 inhale (the 500 ms tell), 8-18 the jaw opening and the roar, 19-29 hold, close and settle \u2014 the roles js/beast.js beastStrip times the roar by"
+  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-14); re-keyed 2026-11-14 so the body keeps its own dark interior (no see-through chest); not owner art approval."
 }

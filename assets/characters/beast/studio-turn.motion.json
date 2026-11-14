@@ -141,14 +141,14 @@
   "grade": {
     "reference": "assets/source/beast/studio-2026-10-04/grade.json",
     "takeMean": [
-      93.3,
-      85.69,
-      87.32
+      90.17,
+      82.73,
+      84.36
     ],
     "after": [
-      115.14,
-      102.65,
-      97.01
+      115.03,
+      102.23,
+      97.07
     ],
     "target": [
       115.46,
@@ -156,32 +156,32 @@
       96.93
     ],
     "steady": [
-      0.965,
+      0.948,
+      0.978,
+      0.978,
       0.99,
       0.99,
       0.99,
-      0.99,
-      0.99,
-      0.991,
-      1.009,
-      1.029,
-      1.083,
-      1.19,
-      1.19,
-      1.19,
-      1.181,
-      1.155,
-      1.111,
-      1.107,
-      1.072,
-      1.012,
-      0.982,
-      0.97,
-      0.954,
-      0.954,
-      0.954
+      1.004,
+      1.026,
+      1.084,
+      1.157,
+      1.162,
+      1.17,
+      1.17,
+      1.166,
+      1.166,
+      1.096,
+      1.088,
+      1.046,
+      0.996,
+      0.951,
+      0.943,
+      0.939,
+      0.939,
+      0.939
     ]
   },
   "reviewed": true,
-  "review": "Assistant inspected source motion (performed over a filmed real-lion turn reference), runtime-alpha contacts, the standing-pose endpoints and the grade match (2026-11-14); not owner art approval."
+  "review": "Assistant inspected source motion (performed over a filmed real-lion turn reference), runtime-alpha contacts, the standing-pose endpoints and the grade match (2026-11-14); re-keyed 2026-11-14 so the body keeps its own dark interior (no see-through chest); not owner art approval."
 }

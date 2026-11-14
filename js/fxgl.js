@@ -34,11 +34,17 @@ const FX_KIND = { shock: 0, ground: 1, cracks: 2, slash: 3, flash: 4, pillar: 5,
 const FXGL_VS = `
 attribute vec2 a_pos;
 uniform vec2 u_res, u_c, u_h; uniform float u_rot;
+// u_strip = (u0, u1, yl, yr): this quad is the slice u0..u1 of the effect, its
+// left edge dropped yl pixels and its right edge yr — a column standing on its
+// own piece of ground. (-1, 1, 0, 0) is the whole effect, unmoved.
+uniform vec4 u_strip;
 varying vec2 v_uv;
 void main() {
-  v_uv = a_pos;
-  vec2 p = a_pos * u_h; float s = sin(u_rot), c = cos(u_rot);
+  float sx = a_pos.x * 0.5 + 0.5;
+  v_uv = vec2(mix(u_strip.x, u_strip.y, sx), a_pos.y);
+  vec2 p = v_uv * u_h; float s = sin(u_rot), c = cos(u_rot);
   p = vec2(p.x * c - p.y * s, p.x * s + p.y * c) + u_c;
+  p.y += mix(u_strip.z, u_strip.w, sx);
   gl_Position = vec4(p.x / u_res.x * 2.0 - 1.0, 1.0 - p.y / u_res.y * 2.0, 0.0, 1.0);
 }`;
 const FXGL_FS = `
@@ -56,11 +62,41 @@ void main() {
   vec2 uv = vec2(v_uv.x * u_flip, v_uv.y);
   float r = length(uv), ang = atan(uv.y, uv.x), k = u_k;
   vec3 col = u_col; float a = 0.0, body = 0.0;
-  if (u_kind == 0 || u_kind == 1) {
+  if (u_kind == 1) {
+    // THE GROUND WAVE, SEEN FROM THE SIDE (owner, 2026-11-14: "cracking floor
+    // looks fake and not blended with terrain"). It was an ellipse — a ring
+    // lying on a floor plane this game does not have, hung at one height over a
+    // meadow that rises and dips. From the side a ground wave is two FRONTS
+    // racing apart ALONG THE SURFACE: a low crest of pressure and thrown dust
+    // standing on the ground, a hot line where it touches, a skin of light on
+    // the soil behind it. uv.x runs along the ground (0 the blow, 1 the reach);
+    // uv.y is height: 0 is the surface under this column, negative is air.
+    float ax = abs(uv.x), up = -uv.y;
+    float front = 0.06 + 0.94 * (1.0 - pow(1.0 - k, 2.6));
+    float w = 0.030 + 0.050 * k;
+    float band = exp(-pow((ax - front) / w, 2.0));
+    float core = exp(-pow((ax - front) / (w * 0.4), 2.0));
+    float n = fbm(vec2(uv.x * 9.0 + u_seed, up * 3.0 - k * 4.0));
+    // the crest stands tallest as it leaves and sinks as it runs out
+    float tall = (0.50 + 0.55 * n) * (1.0 - 0.6 * k);
+    float crest = band * smoothstep(tall, tall * 0.2, up);
+    float eat = smoothstep(0.28, 0.62, fbm(vec2(uv.x * 6.0 + u_seed + 4.0, up * 5.0 - k * 3.0))) * 1.05 + 0.2;
+    // the contact line, and the soil still lit behind the front
+    float skin = exp(-pow(up / 0.07, 2.0));
+    float behind = smoothstep(front, front - 0.45, ax) * smoothstep(0.0, 0.08, ax);
+    float dust = fbm(vec2(uv.x * 11.0 - sign(uv.x) * k * 2.0 + u_seed, up * 6.0 - k * 5.0)) * exp(-max(up, 0.0) * 5.0) * 0.55;
+    float fade = (1.0 - k) * (1.0 - k);
+    // nothing of it is under the ground: it stands ON the surface
+    float above = smoothstep(-0.10, -0.01, up);
+    a = (crest * eat * 1.25 + core * skin * 1.3 + behind * (skin * 0.55 + dust) * (1.0 - k)) * fade * above;
+    a *= smoothstep(1.0, 0.9, ax);
+    col = mix(u_col, u_hot, clamp(core * skin * 1.4 + crest * 0.25, 0.0, 1.0));
+    body = core * skin * fade * 0.3;
+  } else if (u_kind == 0) {
     // THE PRESSURE WAVE: an eased front, a gaussian body, a thin hot core, the
     // whole band eaten by noise, and a wake of thinning light behind it.
     float front = 0.10 + 0.90 * (1.0 - pow(1.0 - k, 2.6));
-    float w = (u_kind == 1 ? 0.05 : 0.03) + 0.07 * k;
+    float w = 0.03 + 0.07 * k;
     float band = exp(-pow((r - front) / w, 2.0));
     float core = exp(-pow((r - front) / (w * 0.32), 2.0));
     // torn, not dimmed: whole arcs of the band go missing and the gaps travel
@@ -70,36 +106,49 @@ void main() {
     float echo = exp(-pow((r - front * 0.78) / (w * 0.7), 2.0)) * 0.45 * smoothstep(0.34, 0.7, ring(ang, 4.0, u_seed + 9.0 + k * 2.0));
     float fade = (1.0 - k) * (1.0 - k);
     a = (band * eat * 1.3 + core * eat * 0.9 + echo + wake * (0.3 + 1.3 * ring(ang, 6.0, u_seed + r * 4.0))) * fade;
-    // a ground wave is seen edge-on: its two tips, where the ring runs along
-    // the line of sight, carry most of the light
-    if (u_kind == 1) a *= 0.45 + 0.95 * pow(abs(cos(ang)), 1.5);
     col = mix(u_col, u_hot, clamp(core * 1.3 + band * 0.25, 0.0, 1.0));
     a *= smoothstep(1.0, 0.9, r);
     body = core * fade * 0.35;
   } else if (u_kind == 2) {
-    // GROUND THAT CRACKS ALIGHT: cell edges of a jittered grid stretched along
-    // the radius, lit as the wave reaches them, cooling from hot to the wave's
-    // own colour to nothing.
-    vec2 q = vec2(ang * 2.6, r * 6.0), g = floor(q), f = fract(q);
+    // GROUND THAT CRACKS — IN THE GROUND. The same correction: the fracture is
+    // not a glowing web on an ellipse above the grass, it is fissures running
+    // DOWN from the surface into the soil under each column, deepest under the
+    // blow and a scratch at its reach. uv.y is depth here: 0 the surface,
+    // positive into the ground. Each fissure is a DARK gap (alpha, so the soil
+    // it opens in goes dark) with a hot seam of the virus's light down it; the
+    // light cools first and the scar closes after, so it ends as a mark on the
+    // terrain rather than switching off.
+    float ax = abs(uv.x), d = uv.y;
+    float reach = 0.10 + 0.90 * smoothstep(0.0, 0.22, k);
+    float lit = smoothstep(reach, reach - 0.12, ax) * smoothstep(1.0, 0.82, ax);
+    float maxd = 0.95 * pow(max(0.0, 1.0 - ax), 0.75) * (0.7 + 0.6 * noise(vec2(uv.x * 7.0 + u_seed, 3.1)));
+    // cells stretched down the depth, so their edges run into the ground
+    vec2 q = vec2(uv.x * 6.5 + 0.35 * noise(vec2(d * 5.0, u_seed)), d * 2.0 + 0.6), g = floor(q), f = fract(q);
     float d1 = 9.0, d2 = 9.0;
     for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
       vec2 o = vec2(float(x), float(y));
       vec2 h = vec2(hash(g + o + u_seed), hash(g + o + u_seed + 17.3));
-      vec2 c = o + h - f; float d = dot(c, c);
-      if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) { d2 = d; }
+      vec2 c = o + h - f; float dd = dot(c, c);
+      if (dd < d1) { d2 = d1; d1 = dd; } else if (dd < d2) { d2 = dd; }
     }
     float gap = sqrt(d2) - sqrt(d1);
-    float edge = 1.0 - smoothstep(0.0, 0.17, gap);
-    float seam = 1.0 - smoothstep(0.0, 0.05, gap);            // the white-hot line down each crack
-    float reach = 0.12 + 0.88 * smoothstep(0.0, 0.22, k);
-    float lit = smoothstep(reach, reach - 0.14, r) * smoothstep(1.0, 0.5, r);
-    float glow = smoothstep(0.0, 0.05, k) * (1.0 - smoothstep(0.2, 1.0, k));
-    float flick = 0.82 + 0.18 * sin(u_t * 31.0 + r * 30.0 + u_seed);
-    // ...and the ground between them glows from underneath while it is hottest
-    float under = exp(-r * r * 3.0) * (1.0 - smoothstep(0.0, 0.45, k)) * smoothstep(0.0, 0.04, k) * 0.5;
-    a = (edge * 0.9 + seam * 1.1) * lit * glow * flick + under;
-    col = mix(u_col, u_hot, clamp(seam * (1.2 - k) + (1.0 - r) * 0.35 * (1.0 - k), 0.0, 1.0));
-    body = seam * lit * glow * 0.5;
+    // a fissure is widest at the surface and closes to a hair at its foot
+    float taper = 1.0 - smoothstep(0.0, max(0.05, maxd), d) * 0.75;
+    float edge = 1.0 - smoothstep(0.0, 0.24 * taper, gap);
+    float seam = 1.0 - smoothstep(0.0, 0.10 * taper, gap);     // the hot line down each crack
+    float inGround = smoothstep(-0.03, 0.02, d) * smoothstep(maxd, maxd * 0.5, d);
+    // the broken lip of the surface itself
+    float lip = exp(-pow(d / 0.05, 2.0)) * (0.45 + 0.55 * noise(vec2(uv.x * 26.0 + u_seed, 1.7)));
+    float glow = smoothstep(0.0, 0.05, k) * (1.0 - smoothstep(0.18, 0.8, k));
+    float scar = smoothstep(0.0, 0.06, k) * (1.0 - smoothstep(0.7, 1.0, k));
+    float flick = 0.86 + 0.14 * sin(u_t * 31.0 + u_seed);
+    // light welling up under the blow while it is hottest, a little of it
+    // spilling above the surface — nothing else of this is in the air
+    float well = exp(-ax * ax * 6.0) * (1.0 - smoothstep(0.0, 0.4, k)) * smoothstep(0.0, 0.04, k);
+    float under = well * (d > 0.0 ? exp(-pow(d / 0.55, 2.0)) * 0.45 : exp(d * 9.0) * 0.4);
+    a = ((edge * 0.55 + seam * 1.25) * inGround + lip * 0.8) * lit * glow * flick + under;
+    col = mix(u_col, u_hot, clamp(seam * (1.2 - k) + lip * 0.5 * (1.0 - k) + well * 0.3, 0.0, 1.0));
+    body = edge * inGround * lit * scar * 0.6 + lip * lit * scar * 0.2;
   } else if (u_kind == 3) {
     // THE CLAW: a crescent that is swept, not stamped — a head that leads, a
     // tail that thins and erodes behind it, and (u_power lanes) one arc per
@@ -213,7 +262,7 @@ function fxglInit() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const ap = gl.getAttribLocation(pr, 'a_pos'); gl.enableVertexAttribArray(ap); gl.vertexAttribPointer(ap, 2, gl.FLOAT, false, 0, 0);
     const loc = {};
-    for (const n of ['u_res', 'u_c', 'u_h', 'u_rot', 'u_k', 'u_t', 'u_seed', 'u_power', 'u_flip', 'u_kind', 'u_col', 'u_hot']) loc[n] = gl.getUniformLocation(pr, n);
+    for (const n of ['u_res', 'u_c', 'u_h', 'u_rot', 'u_strip', 'u_k', 'u_t', 'u_seed', 'u_power', 'u_flip', 'u_kind', 'u_col', 'u_hot']) loc[n] = gl.getUniformLocation(pr, n);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
     // a lost context is the no-GPU case arriving late: fall back, and try
     // again only when the browser says the context is back
@@ -251,7 +300,127 @@ function fx(kind, x, y, o) {
     seed: ((x * 7.3 + y * 13.1) % 61 + 61) % 61, rot: 0, power: 1, delay: 0, flip: false, follow: null, dx: 0, dy: 0 };
   if (o) for (const k2 in o) e[k2] = o[k2];
   if (e.follow) { e.dx = x - e.follow.x; e.dy = y - e.follow.y; }
+  if (e.kind === 1 || e.kind === 2) fxProfile(e);
   FXGL.list.push(e); return e;
+}
+// THE GROUND UNDER A GROUND EFFECT. A wave or a fracture is laid on the terrain
+// the room actually has: FX_SEG + 1 surface heights across its reach (a column
+// every 7-9 px: a mound's face is steep, and at half as many the chord between
+// two samples cut 20 px under it), read once when it is born (terrain does not
+// move during a second of light).
+//
+// fxSurfaceY is the surface nearest a height in one column. Every tile top in
+// reach is a candidate, and a top the room's heightfield rides on
+// (groundColumnAt: [surface, the tile top under it]) is taken at the LIFTED
+// surface — a mound is material added above its tile, and the first version of
+// this took the tile top and drew the effect buried inside the hill. NaN when
+// the column has no ground in reach.
+//
+// fxWalk follows that surface outward from the blow, each column looked up
+// from its neighbour's height: the wave climbs a hill of any size the way it
+// would run, and STOPS at a drop or a wall taller than a stride — everything
+// beyond a cliff is NaN, so an effect ends at a ledge's edge instead of hanging
+// off it in the air or pouring down its face.
+const FX_SEG = 64;
+function fxSurfaceY(wx, y0, reach) {
+  if (typeof tileAt !== 'function' || typeof TILE === 'undefined') return NaN;
+  const R = reach || 44;
+  const gc = (typeof groundColumnAt === 'function') ? groundColumnAt(wx) : null;
+  const tx = Math.floor(wx / TILE), solid = (ty) => { const ch = tileAt(tx, ty); return ch === '#' || ch === 'B' || ch === '='; };
+  let best = NaN;
+  // a lifted surface can stand up to a tile and a half over its tile top
+  for (let ty = Math.floor((y0 - R) / TILE); ty <= Math.floor((y0 + R + TILE * 1.5) / TILE) + 1; ty++) {
+    if (!solid(ty) || solid(ty - 1)) continue;
+    // (the heightfield is sampled every few px and rounds to the nearer sample,
+    // so in the last pixels before a step its tile top is the NEIGHBOUR's: a
+    // match within one tile, not an exact one, or the surface drops a notch at
+    // every step)
+    const top = ty * TILE, y = gc && Math.abs(gc[1] - top) <= TILE + 2 && gc[0] <= top + 8 && gc[0] >= top - TILE * 1.6 ? gc[0] : top;
+    if (Math.abs(y - y0) <= R && (isNaN(best) || Math.abs(y - y0) < Math.abs(best - y0))) best = y;
+  }
+  return best;
+}
+// out[0..n] = the surface from x - half to x + half, walked out from the centre
+function fxWalk(x, y, half, n, out) {
+  const c = n >> 1, stride = Math.max(18, 2 * half / n * 1.7);
+  out[c] = fxSurfaceY(x - half + 2 * half * c / n, y, 56);
+  for (const dir of [1, -1]) {
+    let prev = out[c];
+    for (let i = c + dir; i >= 0 && i <= n; i += dir) {
+      out[i] = isNaN(prev) ? NaN : fxSurfaceY(x - half + 2 * half * i / n, prev, stride);
+      prev = out[i];
+    }
+  }
+  return !isNaN(out[c]);
+}
+function fxProfile(e) {
+  const p = new Float32Array(FX_SEG + 1);
+  // no terrain to read (a harness with no room, a blow in mid air): flat, as it was
+  if (!(typeof G !== 'undefined' && G.grid && fxWalk(e.x, e.y, e.rx, FX_SEG, p))) for (let i = 0; i <= FX_SEG; i++) p[i] = e.y;
+  e.prof = p;
+}
+// THE FLOOR UNDER A WIND-UP TAKES ITS LIGHT — the floor that is there. Every
+// guardian's tell used to stroke an ELLIPSE at its foot line: the same ring on
+// an imaginary floor plane, hung over the dips and through the mounds, and in
+// mid air under a guardian that flies. This is the same amber laid along the
+// real surface under the body: found by dropping from its feet (up to `drop`
+// px, fainter the further the light has to fall), then followed left and right
+// across the terrain, ending where the ground ends. Canvas, not the shader
+// layer: it is part of the telegraph and has to exist with no GPU.
+const TELL_FLOOR = new Float32Array(98);
+function tellFloorLight(c, x, y, half, e) {
+  if (typeof tileAt !== 'function' || typeof TILE === 'undefined') return;
+  let yc = fxSurfaceY(x, y), fall = 0;
+  if (isNaN(yc)) {
+    const drop = 230, tx = Math.floor(x / TILE);
+    for (let ty = Math.floor(y / TILE); ty * TILE <= y + drop; ty++) {
+      const ch = tileAt(tx, ty);
+      if (ch === '#' || ch === 'B' || ch === '=') { yc = fxSurfaceY(x, ty * TILE); if (isNaN(yc)) yc = ty * TILE; break; }
+    }
+    if (isNaN(yc)) return;                              // nothing under it to light
+    fall = clamp((yc - y) / drop, 0, 1);
+  }
+  const n = Math.min(96, Math.max(6, Math.ceil(half * 2 / 7))) & ~1;
+  if (!fxWalk(x, yc, half, n, TELL_FLOOR)) return;
+  const a = (0.22 + e * 0.5) * (1 - fall * 0.55);
+  const g = c.createLinearGradient(x - half, 0, x + half, 0);
+  g.addColorStop(0, 'rgba(255,206,116,0)'); g.addColorStop(0.22, 'rgba(255,206,116,' + a + ')');
+  g.addColorStop(0.5, 'rgba(255,236,184,' + Math.min(1, a * 1.25) + ')');
+  g.addColorStop(0.78, 'rgba(255,206,116,' + a + ')'); g.addColorStop(1, 'rgba(255,206,116,0)');
+  c.strokeStyle = g; c.lineCap = 'round'; c.lineJoin = 'round';
+  // a wide soft pass sunk a little into the soil, then the lit lip of the surface
+  for (let pass = 0; pass < 2; pass++) {
+    c.globalAlpha = pass ? 1 : 0.32; c.lineWidth = pass ? 2 + e * 3 : 8 + e * 10;
+    const dy = pass ? 0 : 3;
+    c.beginPath();
+    let pen = false;
+    for (let i = 0; i <= n; i++) {
+      const sy = TELL_FLOOR[i];
+      if (isNaN(sy)) { pen = false; continue; }
+      const wx = x - half + 2 * half * i / n;
+      if (pen) c.lineTo(wx, sy + dy); else { c.moveTo(wx, sy + dy); pen = true; }
+    }
+    c.stroke();
+  }
+  c.globalAlpha = 1;
+}
+// one ground effect, as FX_SEG columns each standing on its own ground
+function fxglStrip(gl, loc, m, e, k, W, H) {
+  const p = e.prof, cx = m.a * e.x + m.e, cy = m.d * e.y + m.f;
+  const hx = Math.abs(e.rx * m.a), hy = Math.abs(e.ry * (e.kind === 2 ? 1.5 : 1) * m.d);
+  if (cx + hx < 0 || cx - hx > W || cy + hy + 90 < 0 || cy - hy - 90 > H) return;
+  const col = fxRGB(e.col), hot = fxRGB(e.hot);
+  gl.uniform2f(loc.u_c, cx, cy); gl.uniform2f(loc.u_h, hx, hy); gl.uniform1f(loc.u_rot, 0);
+  gl.uniform1f(loc.u_k, k); gl.uniform1f(loc.u_t, e.t); gl.uniform1f(loc.u_seed, e.seed); gl.uniform1f(loc.u_power, e.power);
+  gl.uniform1f(loc.u_flip, 1); gl.uniform1i(loc.u_kind, e.kind);
+  gl.uniform3f(loc.u_col, col[0], col[1], col[2]); gl.uniform3f(loc.u_hot, hot[0], hot[1], hot[2]);
+  for (let i = 0; i < FX_SEG; i++) {
+    const yl = p[i], yr = p[i + 1];
+    if (isNaN(yl) || isNaN(yr)) continue;               // no ground under this column
+    gl.uniform4f(loc.u_strip, -1 + 2 * i / FX_SEG, -1 + 2 * (i + 1) / FX_SEG, (yl - e.y) * m.d, (yr - e.y) * m.d);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  FXGL.drawn++;
 }
 function fxglUpdate(dt) {
   const L = FXGL.list;
@@ -266,6 +435,7 @@ function fxglQuad(gl, loc, m, kind, x, y, rx, ry, k, t, seed, col, hot, power, f
   const ext = Math.max(hx, hy);
   if (cx + ext < 0 || cx - ext > W || cy + ext < 0 || cy - ext > H) return;
   gl.uniform2f(loc.u_c, cx, cy); gl.uniform2f(loc.u_h, hx, hy); gl.uniform1f(loc.u_rot, rot || 0);
+  gl.uniform4f(loc.u_strip, -1, 1, 0, 0);
   gl.uniform1f(loc.u_k, k); gl.uniform1f(loc.u_t, t); gl.uniform1f(loc.u_seed, seed); gl.uniform1f(loc.u_power, power);
   gl.uniform1f(loc.u_flip, flip ? -1 : 1); gl.uniform1i(loc.u_kind, kind);
   gl.uniform3f(loc.u_col, col[0], col[1], col[2]); gl.uniform3f(loc.u_hot, hot[0], hot[1], hot[2]);
@@ -301,7 +471,8 @@ function fxglDraw(c) {
   }
   for (const e of FXGL.list) {
     const tt = e.t - e.delay; if (tt < 0) continue;
-    fxglQuad(gl, loc, m, e.kind, e.x, e.y, e.rx, e.ry, clamp(tt / e.dur, 0, 1), e.t, e.seed, fxRGB(e.col), fxRGB(e.hot), e.power, e.flip, e.rot, W, H);
+    if (e.prof) fxglStrip(gl, loc, m, e, clamp(tt / e.dur, 0, 1), W, H);
+    else fxglQuad(gl, loc, m, e.kind, e.x, e.y, e.rx, e.ry, clamp(tt / e.dur, 0, 1), e.t, e.seed, fxRGB(e.col), fxRGB(e.hot), e.power, e.flip, e.rot, W, H);
   }
   if (!FXGL.drawn) return;
   c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';

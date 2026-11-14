@@ -14611,12 +14611,12 @@ class Boss {
       c.fillStyle = gg;
       c.beginPath(); c.ellipse(bx, by, R, R * 0.86, 0, 0, 7); c.fill();
       // and the floor under it takes the light — the one place a wind-up is
-      // always visible even when the animal itself is off the top of the screen
-      c.strokeStyle = 'rgba(255,206,116,' + (0.22 + e * 0.5) + ')';
-      c.lineWidth = 2 + e * 3;
-      c.beginPath();
-      c.ellipse(bx, this.y + this.h - 2, this.w * (0.6 + e * 0.5), 9 + e * 6, 0, 0, 7);
-      c.stroke();
+      // always visible even when the animal itself is off the top of the screen.
+      // THE FLOOR, not an ellipse at the foot line (owner, 2026-11-14: "looks
+      // fake and not blended with terrain"): the amber follows the ground that
+      // is actually under the body (js/fxgl.js tellFloorLight).
+      if (typeof tellFloorLight === 'function')
+        tellFloorLight(c, bx, this.y + this.h - 2, this.w * (0.6 + e * 0.5) + 14, e);
       c.restore();
     } // The simulation owns the ramp; outline/extra draws cannot reset it.
     // GRAVEHORN draws his own rig (js/gravehorn.js): his weight is in his legs,

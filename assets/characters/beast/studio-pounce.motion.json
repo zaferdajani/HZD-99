@@ -171,14 +171,14 @@
   "grade": {
     "reference": "assets/source/beast/studio-2026-10-04/grade.json",
     "takeMean": [
-      111.44,
-      101.73,
-      102.05
+      105.72,
+      96.36,
+      96.93
     ],
     "after": [
-      114.67,
-      102.19,
-      96.86
+      114.77,
+      101.88,
+      96.73
     ],
     "target": [
       115.46,
@@ -186,38 +186,38 @@
       96.93
     ],
     "steady": [
-      1.046,
-      1.041,
-      1.034,
-      1.03,
-      1.019,
-      1.008,
-      1.006,
+      1.045,
+      1.045,
+      1.038,
+      1.028,
+      1.014,
+      1.003,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.02,
+      1.085,
+      1.085,
+      1.085,
+      1.077,
       1.004,
-      1.004,
-      1.004,
-      1.017,
-      1.068,
-      1.068,
-      1.068,
-      1.059,
+      0.98,
+      0.967,
+      0.956,
+      0.946,
+      0.929,
+      0.929,
+      0.929,
+      0.946,
+      0.955,
+      0.992,
       0.996,
-      0.981,
-      0.958,
-      0.949,
-      0.932,
-      0.928,
-      0.928,
-      0.928,
-      0.944,
-      0.963,
-      0.994,
-      0.994,
-      0.994,
-      0.978,
-      0.978
+      0.999,
+      0.999,
+      0.999
     ]
   },
   "reviewed": true,
-  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-13); not owner art approval."
+  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-13); re-keyed 2026-11-14 so the body keeps its own dark interior (no see-through chest); not owner art approval."
 }

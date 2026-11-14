@@ -14633,6 +14633,8 @@ function drawWorldFrame() {
   }
   if (!G.artProbe) infEyeDraw(c);    // the infection's eyes and the smoke they leave
   drawParts(c);
+  // every hostile body, as authored, before the room lights it (js/foeread.js FOE_PIG)
+  if (typeof foePigSnap === 'function') foePigSnap(c);
   drawLights(P);
   // the shader layer draws the rings, the roar waves and every fx() record
   // here; with no GPU the Canvas rings draw as they always did (js/fxgl.js)
@@ -14710,6 +14712,9 @@ function drawWorldFrame() {
     c.fillStyle = vig; c.fillRect(0, 0, 960, 540);
     c.restore();
   }
+  // ...and the machines get back the bodies the light pass was given: a lit,
+  // bloomed, washed lion reads as a see-through one (js/foeread.js FOE_PIG)
+  if (typeof foePigLay === 'function') foePigLay(c);
   // the character herself, post-grade: full pigment, no bloom wash. Her own
   // emissive accents (visor, jets, claws) still glow via their shadowBlur.
   // ...and NOT while she is walking into the gates. drawGateWalk draws her

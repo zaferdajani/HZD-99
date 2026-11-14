@@ -68,6 +68,95 @@ const FOE_RIM = Object.freeze({
 const FOE_RIM_DEFAULT = '#fff0dc';
 
 let FR_S = null, FR_T = null, FR_R = null;          // silhouette, threshold, rim
+
+// A BODY KEEPS ITS PIGMENT (owner, 2026-11-14: "why isn't it opaque enough?
+// feels like Nullfang is translucent").
+//
+// It was not translucent — drawBeast over flat magenta measures a solid body.
+// It was LIT THROUGH. Every hostile body is drawn in the world, and the world
+// is then finished on top of it: drawLights lays additive pools over the room
+// (the guardian has a 180 px one of its own, in the kingdom's glow colour),
+// applyBloom adds a blurred copy of every bright thing back over itself — and
+// an ivory lion is the brightest thing in the meadow — and the cinematic grade
+// washes the frame in the zone's tint. Measured on the standing lion in A4
+// (scratch probe, 2026-11-14): its darkest twentieth sat at luminance 44 in
+// the art and 88 on screen, its mean went 106 → 154, and its ivory (117,102,99)
+// came out grey-green (151,155,146). Shadows lifted to the colour of the fog
+// behind it is exactly what a see-through body looks like.
+//
+// The hero has never had this: she is drawn AFTER the grade, "so she stays
+// solid and rich instead of being swallowed by the atmosphere" (game.js). A
+// body cannot simply move there with her — its eyes, the scrap knocked off it,
+// the parry glint and its own projectiles are drawn over it in the world and
+// would end up behind it.
+//
+// So the body is KEPT instead of moved. foeDraw already builds each body's
+// stencil for the rim; it is added to one frame-wide mask. After the last
+// thing the world draws on a body (particles) and before the first thing that
+// lights it (drawLights), the frame under that mask is copied aside — the body
+// with its eyes, its scrap and its telegraph wash, in the pigment it was
+// authored in. After the grade that copy is laid back. The room keeps its
+// light, bloom and wash; the body is no longer made of them. The effects layer
+// is laid back over the body the same way, so a claw arc or an impact flash
+// crossing it is not cut out by it.
+//
+// Cost: three blits of the bodies' bounding box and two more when an effect is
+// live. No allocation after the first frame, nothing when no body is rimmed.
+const FOE_PIG = { on: true, k: 1, n: 0, x0: 0, y0: 0, x1: 0, y1: 0, cv: null, snap: false };
+let FP_M = null, FP_S = null;                        // the frame's body mask, the kept pigment
+function foePigMark(c, ox, oy, w, h) {
+  if (!FOE_PIG.on) return;
+  const cvs = c.canvas, P = FOE_PIG;
+  if (!FP_M) { FP_M = frCanvas(cvs.width, cvs.height); FP_S = frCanvas(cvs.width, cvs.height); }
+  if (FP_M.width !== cvs.width || FP_M.height !== cvs.height) {
+    for (const k of [FP_M, FP_S]) { k.width = cvs.width; k.height = cvs.height; }
+    P.n = 0;
+  }
+  const M = FP_M.getContext('2d');
+  if (!P.n || P.cv !== cvs) {
+    M.setTransform(1, 0, 0, 1, 0, 0); M.globalAlpha = 1; M.globalCompositeOperation = 'source-over';
+    M.clearRect(0, 0, FP_M.width, FP_M.height);
+    P.n = 0; P.cv = cvs; P.snap = false;
+    P.x0 = ox; P.y0 = oy; P.x1 = ox + w; P.y1 = oy + h;
+  } else {
+    P.x0 = Math.min(P.x0, ox); P.y0 = Math.min(P.y0, oy);
+    P.x1 = Math.max(P.x1, ox + w); P.y1 = Math.max(P.y1, oy + h);
+  }
+  M.drawImage(FR_T, 0, 0, w, h, ox, oy, w, h);
+  P.n++;
+}
+// the world has drawn everything it draws ON a body; nothing has lit it yet
+function foePigSnap(c) {
+  const P = FOE_PIG;
+  if (!P.n || P.cv !== c.canvas) { P.n = 0; return; }
+  const w = P.x1 - P.x0, h = P.y1 - P.y0;
+  const S = FP_S.getContext('2d');
+  S.setTransform(1, 0, 0, 1, 0, 0); S.globalAlpha = 1;
+  S.globalCompositeOperation = 'copy'; S.drawImage(c.canvas, P.x0, P.y0, w, h, P.x0, P.y0, w, h);
+  S.globalCompositeOperation = 'destination-in'; S.drawImage(FP_M, P.x0, P.y0, w, h, P.x0, P.y0, w, h);
+  S.globalCompositeOperation = 'source-over';
+  P.snap = true;
+}
+// the frame is lit, bloomed and graded: the bodies go back as they were
+function foePigLay(c) {
+  const P = FOE_PIG;
+  if (!P.n || !P.snap || P.cv !== c.canvas) { P.n = 0; P.snap = false; return; }
+  const w = P.x1 - P.x0, h = P.y1 - P.y0;
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-over'; c.globalAlpha = P.k;
+  c.drawImage(FP_S, P.x0, P.y0, w, h, P.x0, P.y0, w, h);
+  // ...and the effects that were drawn over them in the world, over them again
+  if (typeof FXGL !== 'undefined' && FXGL.drawn && FXGL.cv && typeof fxglOn === 'function' && fxglOn()
+      && FXGL.cv.width === FP_S.width && FXGL.cv.height === FP_S.height) {
+    const S = FP_S.getContext('2d');
+    S.globalCompositeOperation = 'copy'; S.drawImage(FXGL.cv, P.x0, P.y0, w, h, P.x0, P.y0, w, h);
+    S.globalCompositeOperation = 'destination-in'; S.drawImage(FP_M, P.x0, P.y0, w, h, P.x0, P.y0, w, h);
+    S.globalCompositeOperation = 'source-over';
+    c.drawImage(FP_S, P.x0, P.y0, w, h, P.x0, P.y0, w, h);
+  }
+  c.restore();
+  P.n = 0; P.snap = false;
+}
 function frCanvas(w, h) {
   const cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
@@ -159,6 +248,7 @@ function foeDraw(c, e) {
   T.globalCompositeOperation = 'destination-in'; T.drawImage(FR_S, 0, 0, w, h, 0, 0, w, h);
   T.drawImage(FR_S, 0, 0, w, h, 0, 0, w, h);
   T.globalCompositeOperation = 'source-over';
+  if (q === 1) foePigMark(c, ox, oy, w, h);           // the same stencil keeps the body's pigment (FOE_PIG)
   // 3. dilate by the rim's width, cut the body back out, tint what is left
   const sc = Math.hypot(m.a, m.b) || 1;
   const r = Math.max(1, Math.max(2, Math.round(FOE_READ.width * sc)) * q), d = r * 0.7071;

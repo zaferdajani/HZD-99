@@ -121,6 +121,50 @@ def frame(t):
         if args.strict_borders or bright[label] < 12000: keep[label] = False
     keep[0] = False
     subject = ndimage.binary_fill_holes(keep[labels])
+    # THE BODY'S OWN DARK IS BODY (owner, 2026-11-14: "feels like Nullfang is
+    # translucent"). The key above calls anything darker than --threshold
+    # background if a dark path joins it to the border — and a machine lion has
+    # dark INSIDES: the shoulder socket behind a raised foreleg, the far legs,
+    # the underside of the chest. Lit at 10-40 they sit under the threshold, a
+    # dark seam between two plates is path enough, and the cut-out came back
+    # with the room showing through the animal's chest for the whole swipe
+    # wind-up. A second, much lower key (max < 6: the studio black itself
+    # measures 0-2) says what is truly background; whatever that key keeps and
+    # the first threw away is the body's own shadow, and it is put back where it
+    # lies INSIDE the animal — within the closing of the bright silhouette, four
+    # pixels clear of true black so the soft glow round the outline stays out,
+    # and touching the body.
+    lo = a.max(axis=2) < 6
+    seeds_lo = np.zeros(lo.shape, dtype=bool)
+    seeds_lo[0] = lo[0]; seeds_lo[-1] = lo[-1]; seeds_lo[:, 0] = lo[:, 0]; seeds_lo[:, -1] = lo[:, -1]
+    solid_lo = ndimage.binary_fill_holes(~ndimage.binary_propagation(seeds_lo, mask=lo))
+    inner = ndimage.binary_erosion(solid_lo, iterations=4)
+    pad = 64
+    hull = ndimage.binary_closing(np.pad(subject, pad), iterations=56)[pad:-pad, pad:-pad]
+    # ...and INSIDE means plating ALL ROUND it. The first cut of this rule had
+    # only the closing, and on the takes filmed over a faintly lit floor it
+    # hung a dark curtain under the belly — floor shadow between the legs is
+    # dark-but-not-black too. So a dark pixel is the body's only if a ray from
+    # it meets plating within 72 px in at least 15 of 16 directions: a shoulder
+    # socket is walled in, the space under the belly is open to the floor.
+    add = inner & hull & ~subject
+    if add.any():
+        L, pad2 = 72, 76
+        ys2, xs2 = np.where(subject)
+        y0, y1, x0, x1 = max(0, ys2.min() - 2), ys2.max() + 3, max(0, xs2.min() - 2), xs2.max() + 3
+        sub = np.pad(subject[y0:y1, x0:x1], pad2)
+        hits = np.zeros(sub.shape, dtype=np.uint8)
+        for d in range(16):
+            ang = d * np.pi / 8; dx, dy = np.cos(ang), np.sin(ang)
+            seen = np.zeros(sub.shape, dtype=bool)
+            for r in range(2, L + 1, 2):
+                seen |= np.roll(sub, (int(round(dy * r)), int(round(dx * r))), axis=(0, 1))
+            hits += seen
+        walled = np.zeros(subject.shape, dtype=bool)
+        walled[y0:y1, x0:x1] = hits[pad2:-pad2, pad2:-pad2] >= 15
+        add &= walled
+    add = ndimage.binary_propagation(ndimage.binary_dilation(subject, iterations=2) & add, mask=add)
+    subject = ndimage.binary_fill_holes(subject | add)
     alpha = subject.astype(np.uint8) * 255
     ys, xs = np.where(subject)
     if not len(xs):

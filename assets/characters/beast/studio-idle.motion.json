@@ -141,14 +141,14 @@
   "grade": {
     "reference": "assets/source/beast/studio-2026-10-04/grade.json",
     "takeMean": [
-      96.06,
-      87.47,
-      89.67
+      94.13,
+      85.65,
+      87.85
     ],
     "after": [
-      114.69,
-      101.69,
-      96.89
+      114.57,
+      101.77,
+      96.84
     ],
     "target": [
       115.46,
@@ -158,30 +158,30 @@
     "steady": [
       0.999,
       0.999,
+      0.999,
       1.0,
-      1.0,
-      1.001,
+      1.003,
+      1.004,
+      1.007,
+      1.008,
+      1.008,
+      1.008,
+      1.005,
       1.002,
-      1.003,
-      1.004,
-      1.004,
-      1.004,
-      1.003,
+      1.002,
+      1.002,
       1.0,
       1.0,
       1.0,
       1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.001
+      0.999,
+      0.999,
+      0.999,
+      0.999,
+      0.999,
+      0.999
     ]
   },
   "reviewed": true,
-  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-13); not owner art approval."
+  "review": "Assistant inspected source motion, runtime-alpha contacts and the grade match (2026-11-13); re-keyed 2026-11-14 so the body keeps its own dark interior (no see-through chest); not owner art approval."
 }
