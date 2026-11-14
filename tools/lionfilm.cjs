@@ -71,8 +71,12 @@ const every = +opt('--every', 4), noFrames = args.includes('--bodies-only'), att
         if (b.st === 'swipewarn' && S.n.swipewarn === 2 && !S.crossed.swipe && b.t < 0.30) { S.crossed.swipe = 1; S.side = -S.side; }
         if (b.st === 'crouch' && S.n.crouch === 2 && !S.crossed.coil && b.t < 0.55) { S.crossed.coil = 1; S.side = -S.side; S.dist = 200; }
         const want = b.cx() + S.side * S.dist, px = player.x + player.w / 2;
-        for (const k of ['ArrowLeft', 'ArrowRight']) keys[k] = 0;
+        for (const k of ['ArrowLeft', 'ArrowRight', 'KeyZ']) keys[k] = 0;
         if (Math.abs(want - px) > 14) keys[want > px ? 'ArrowRight' : 'ArrowLeft'] = 1;
+        // she cannot walk through it (js/solid.js): where the lion is between her
+        // and where she is going, she goes OVER it, as a player has to
+        const over = (want - b.cx()) * (px - b.cx()) < 0;
+        if (over && Math.abs(px - b.cx()) < 190) { keys.KeyZ = 1; if (player.on) keysP.KeyZ = 1; }
         // ...and she FIGHTS BACK in its openings (--attack): a claw when it is
         // standing or settling inside her reach, so the film shows a landed
         // blow — the step back, the double flash, the scrap — and not only a

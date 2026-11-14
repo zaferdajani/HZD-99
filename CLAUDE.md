@@ -420,6 +420,7 @@ the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
 | `media.js` | the lazy asset manifest |
 | `packs.js` | campaign packs: `?pack=<id>` loads `packs/<id>/pack.json` over the world — see `docs/PACKS.md` |
 | `editor.js` | THE FORGE (owner's editor) — only in `forge*.html`, never the game pages. `docs/PACKS.md` |
+| `solid.js` | she cannot walk through a hostile body: the wall round each one, built from `assets/bodybox.json` (`tools/bodybox.cjs`) |
 | `warp.js` | `?room=<id>` — the owner's jump into any room, behind the Forge's own passphrase. Inert without the query string; its own save slot |
 
 **State.** One global `G` holds the run (`G.state`, `G.enemies`, `G.save`,

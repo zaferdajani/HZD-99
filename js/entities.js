@@ -2393,8 +2393,11 @@ class Player {
     }
     // resolve movement
     const wasFalling = this.vy;
+    const xBeforeMove = this.x;
     const col = moveEnt(this, dt);
     this.lastCol = col;   // what the resolver met this step (js/soar.js reads the ceiling)
+    // ...and against the machines in the room: she cannot walk through one (js/solid.js)
+    if (typeof solidResolve === 'function') solidResolve(this, xBeforeMove, dt);
     if (col.d) {
       if (!this.on && wasFalling > 420) {
         this.landT = wasFalling > 700 ? 0.22 : 0.12; this.land0 = this.landT; sfx('land');

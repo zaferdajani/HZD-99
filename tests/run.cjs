@@ -92,6 +92,7 @@ const SUITE = [
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['lion-motion', 'Nullfang in the real loop: the filmed turn, committed launches, one spot and one colour across takes, the shader effects layer'],
+  ['solid-enemies', 'she cannot walk through a hostile body: it stops her at its drawn edge, she can jump it, bound machines do not block, and a pounce still lands', { timeout: 420000 }],
   ['solid-bodies', 'a machine keeps its pigment under the room\'s light, its cut-out has no window through it, and ground effects follow the terrain'],
   ['ios-ready', 'the Xcode project, icon and privacy manifest meet the App Store\'s checks; every Ogg has an AAC copy and an iPhone is handed it'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],

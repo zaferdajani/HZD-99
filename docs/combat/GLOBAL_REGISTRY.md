@@ -359,3 +359,23 @@ Consequences for anyone adding a fight:
 - **Do not draw a floor ring with `c.ellipse`.** A side view has no floor plane. Use `fx('ground', …)` for a wave and `tellFloorLight` for light on the floor; both stop at a ledge's edge by themselves.
 - **A new decoration that must sit OVER a body** has to be drawn before `foePigSnap` (anything in the world pass up to the particles is) or through the effects layer (`fx()`), which is laid over bodies again. Canvas drawn between the light pass and the grade is covered by the body it crosses.
 - **A new filmed strip** is keyed by `tools/lion-studio.py`, which now keeps a body's own dark interior; check a cut-out on a bright flat colour before trusting it on the game's dark rooms, where a hole in a body cannot be seen until the body is.
+
+## Changelog — 2026-11-14 (owner: "I shouldn't be able to walk through enemies")
+
+**A hostile body is a wall to her feet** (`js/solid.js`, held by `tests/solid-enemies.cjs`). It binds every kingdom and both worlds.
+
+| | was | is |
+|---|---|---|
+| walking into a machine | contact damage, a throw, then a second of invulnerability in which she walked through it | her own movement stops at its edge — hurt or invulnerable, walking or dashing |
+| getting past one | walk through it | go OVER it (only sideways movement is stopped; every body in the roster is under her jump), bind it, or phase with the phantom dash |
+| a machine coming over her | contact damage | unchanged: blocking stops her walking in, it never pushes her out ahead of an advancing body, so a pounce or a lunge still lands. Inside a hurt box she is eased out to her own side, or to the other if a wall has her pinned |
+| walking into one that is standing still | contact damage | a bump. It hurts when IT moves into her or attacks |
+| what blocks | — | living hostile bodies. Not the dead, bound, rescued, tamed, charmed or purified; not a sleeping or entering guardian; not a keeper who is not duelling; not a guardian that has left the world (`lsvanish`, `arcstorm`) |
+
+**The wall is the drawn body, not the hurt box.** `assets/bodybox.json` (measured from the art by `tools/bodybox.cjs`, compiled in as `BODY_BOX`) says how far each kind is drawn beyond its hurt box; the wall is the hurt box widened three quarters of the way out to the drawing, by at most 46 px so her shortest strike still reaches the hurt box from outside it. NULLFANG: hurt box ±42 px, wall ±88 px, drawn ±104 px. NOSTOS's creatures are not measured and use the hurt box.
+
+Consequences for anyone building a room or a fight:
+
+- **A corridor too low to jump a machine in is a corridor she must fight through.** Do not put a body she cannot bind in one.
+- **A new kind or re-authored art needs its row**: `node tools/bodybox.cjs && node build.cjs`. The harness fails when a body no longer measures as its row.
+- **A new staging state** in which a guardian must be walked through or stood inside belongs in `bodySolid`'s list, or the scene will shove her.
