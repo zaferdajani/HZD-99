@@ -317,6 +317,12 @@ const check = (name, ok, detail) => {
     // frame caught mid-load. So: two reads of the same state must agree before
     // the comparison is allowed to mean anything.
     await enter('A1', 14);
+    // ...and nothing may WALK through the sample while it is being compared. The
+    // meadow's crawler crossed this box between the two reads (452 -> 364 px,
+    // measured 2026-11-14) and a bright body moving through a mean reads exactly
+    // like the pass leaking: 71.07 against 69.07, every run, with the probe
+    // doing nothing at all. The question here is the light, not the wolf.
+    G.enemies = []; G.projs = [];
     await pin(1);
     await rest(40);
     for (let attempt = 0; attempt < 5; attempt++) {
