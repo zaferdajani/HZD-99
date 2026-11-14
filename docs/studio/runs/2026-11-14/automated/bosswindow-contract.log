@@ -1,0 +1,6 @@
+
+── bosswindow-contract  — PRISM timings, named move coverage and fail-closed warning harness
+PASS bosswindow-contract: PRISM timing, named coverage and fail-closed harness agree
+   (bosswindow-contract: 0.1 s)
+
+all 1 harnesses ran

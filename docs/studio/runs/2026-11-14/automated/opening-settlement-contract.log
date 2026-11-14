@@ -1,0 +1,6 @@
+
+── opening-settlement-contract  — actual Ratchet and Servo callbacks roll back failed writes and settle once
+PASS actual Ratchet/Servo callbacks settle durable opening state atomically
+   (opening-settlement-contract: 0.1 s)
+
+all 1 harnesses ran

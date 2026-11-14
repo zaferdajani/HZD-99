@@ -1,0 +1,6 @@
+
+── fallthrough-contract  — terminal falls sweep every crossed tile row and preserve deliberate one-way descent
+PASS fallthrough contract: swept terminal falls stop on floor, ledge, and one-way; thruPlat remains deliberate
+   (fallthrough-contract: 0.1 s)
+
+all 1 harnesses ran
