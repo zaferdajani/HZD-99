@@ -6530,8 +6530,10 @@ The crossed arms and the tapping foot are a new strip.
   player on 6, flicks an ear on 7. Its flip is NOT cancelled the way the front-on fidget's
   is: a three-quarter view turns with her. With no `heroImpatient` in the manifest none
   of it is reachable and nothing is fetched. `tests/impatient.cjs` holds both
-  sides of that. **To land the approved sheet:** cut it to one row of eight
-  320-px cells, soles at y=312, figure 203 tall (fidget.webp's frame); save as
+  sides of that. **To land the approved sheet:** `node tools/gridstrip.cjs
+  <sheet.png> <strip.png> [--per] [--h=…]` cuts the 4×2 sheet to one row of eight
+  320-px cells, soles at y=312 (fidget.webp's frame), dropping the glow and any
+  mark that is not her; save as
   `assets/characters/hero/impatient.webp`; add `heroImpatient` to js/media.js,
   `HERO_MOTION_KEYS` (js/mobility_fix.js) and `BODY_KEYS` (js/preload.js); a row
   in `tests/hero-move-coverage.cjs`; `node tools/lowres.cjs && node build.cjs`.
@@ -6542,5 +6544,19 @@ The crossed arms and the tapping foot are a new strip.
   `3e374119-6966-4c4c-883c-04255736a59b` (A) and
   `dc66b53a-49b3-4211-a7c5-75af1354624c` (B), 0.5 credit. Both hold her size
   to a pixel or two across all eight cells; B's toe lift reads more clearly; both
-  draw her a little slimmer in the head than the fidget strip does. Shown to him
-  as strips against the fidget and on the meadow. NOT keyed, NOT in the game.
+  draw her slimmer than her sprites and WITHOUT their dark outline — the fidget
+  strip is a front view and was the wrong thing to hand a three-quarter pose.
+  **Round two, same day:** `assets/source/hero/delivered/b5_interact.png` (her own
+  three-quarter cells, first and last figure) as the lead reference, the fidget
+  second, the outline and the head-wider-than-the-body said in words. Jobs
+  `203a1e3f-554a-47e4-b74a-45ea29cd7087` (C) and
+  `1185263c-b8d9-4e44-85b5-77c980551dd1` (D), 0.5 credit. Both carry the outline
+  and her proportions. **C is the code session's pick**: its eight cells sit on a
+  regular grid (left edge 55–57 px, height 319–320 of a 376 cell — nothing to
+  re-register), the toe lifts clearly, cell 7 opens her eyes at the player. It
+  drew a "!!" spark beside the ear in cell 8, which the cut drops (largest
+  connected body per cell). D's cells drift 45 px across a row and need
+  per-cell anchoring. Scale at landing: match her HEAD to the idle's, not the
+  cell height — a three-quarter head is narrower than a front one and height
+  alone lands her a size small. Shown to him as strips against the fidget and
+  on the meadow. NOT keyed, NOT in the game.
