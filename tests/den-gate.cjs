@@ -217,7 +217,7 @@ const check = (name, ok, detail) => {
     // ---- 9. the objective, in the chapter's order, from the save alone
     {
       fresh({});
-      const seq = [{}, { heal: 1 }, { heal: 1, beacon: 1 }, { heal: 1, pl_cshard: 1 }, { heal: 1, pl_cshard: 1, crystal: 1 },
+      const seq = [{}, { heal: 1 }, { heal: 1, nfMeet: 1 }, { heal: 1, nfMeet: 1, beacon: 1 }, { heal: 1, pl_cshard: 1 }, { heal: 1, pl_cshard: 1, crystal: 1 },
         { crystal: 1, sageTame_GA1D: 1 }, { crystal: 1, sageTame_GA1D: 1, bossChime: 1 },
         { crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 }, { crystal: 1, bossGlitch: 1 }];
       const base = { woke: 1, tut: 1, 'on_A0B|ratchet': 1 };
@@ -259,9 +259,11 @@ const check = (name, ok, detail) => {
     r.opened.inA4 && r.opened.fight && r.opened.boss === 'glitch', JSON.stringify(r.opened));
   check('the climb above the camp after the lion closes the chapter and queues no comic mid-room; the teaser is B1\'s doorway',
     r.teaser.calls.length === 0 && r.teaser.flag && r.teaser.b1 === 'ch2', JSON.stringify(r.teaser));
-  const want = ['pg_goal_pack', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_sage', 'pg_goal_chime',
+  // before the first meeting there is no hatch to name (progress.js pgHubSealed):
+  // the line sends her east, and the meeting turns it into the dig
+  const want = ['pg_goal_pack', 'pg_goal_cross', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_sage', 'pg_goal_chime',
     'pg_goal_east', 'pg_goal_lion', 'pg_goal_up'];
-  check('the chapter\'s goal follows the owner\'s order: pack, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up',
+  check('the chapter\'s goal follows the owner\'s order: pack, east to the first meeting, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up',
     JSON.stringify(r.goals) === JSON.stringify(want), r.goals.join(' > '));
   check('...in all five languages', !r.goalLangs.length, r.goalLangs.join(','));
   if (errs.length) check('no page errors', false, errs.slice(0, 3).join(' | '));

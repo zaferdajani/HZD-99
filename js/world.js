@@ -526,10 +526,26 @@ const ROOMS = {
     // ...then the yard runs on east to the meadow. The two teaching secrets
     // stay where they were (the pocket over the arrival, the crust in the last
     // heap) for a player who comes back for them; neither is on the lesson.
-    ents: [['crawler', 20, 15], ['riddle', 27, 15, 8], ['scrap', 2, 12, 20], ['scrap', 57, 15, 20]],
+    ents: [['crawler', 20, 15], ['riddle', 27, 15, 8], ['scrap', 2, 12, 20], ['scrap', 57, 15, 20],
+           // THE PROMISE (below) — LAST: entity order is a save key
+           ['chest', 23, 7, 'core']],
     build(g) {
       frame(g); seamR(g);
       hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
+      // THE PROMISE (owner's order, 2026-11-14, hook review item 4: "plant a
+      // visible, unreachable prize in the first rooms"). King's Pass shows a
+      // place you cannot get to yet, so the player leaves the first room with a
+      // reason to come back; this floor showed nothing it did not hand over.
+      //
+      // A deck over the road between the winch and the monument, eight rows up,
+      // with a lit chest on it — a whole core. Her jump tops out 6.28 tiles
+      // above the floor (JUMP_V): the deck is 1.7 tiles past that, in plain
+      // sight from the road, and the nearest thing to jump from (the yard
+      // gantry at 36) is twelve tiles east of it, farther than a running jump
+      // carries. The double jump takes it. tests/prize.cjs proves both halves
+      // with her real body: every jump the room allows, then the same with the
+      // jets.
+      hline(g, 22, 24, 7, '=');
       // THE FIRST HOLLOW WALL. The shelf's west end runs into a pocket in the
       // city wall's inner face: two tiles of air with scrap in it, a roof over
       // it and a brittle plug where it meets the shelf. Standing on the shelf

@@ -78,7 +78,7 @@ function progressGoal(f) {
     if (f.ghMet && !f.bossHorn) return 'pg_goal_gravehorn';   // the soldier on the stone
     if (f.beacon) return 'pg_goal_quarry';
     // before the meeting there is no hatch to name (pgHubSealed): send her east
-    return pgHubSealed() ? 'pg_goal_cross' : 'pg_goal_marble';
+    return pgHubSealed(f) ? 'pg_goal_cross' : 'pg_goal_marble';
   }
   if (f.bossGlitch) return 'pg_goal_up';           // an older save may hold the lion without the rest
   if (!f.sageTame_GA1D) return 'pg_goal_sage';
@@ -155,15 +155,20 @@ function pgHubBroken() {
 // The meeting itself throws her back west along the mound, and the light is
 // what she sees when she gets up.
 // A save that already cut the hatch (before the seal existed) keeps its hole.
-function pgHubSealed() {
-  const f = G.save && G.save.flags;
-  return !!f && !f.nfMeet && !pgHubBroken();
+// ...and so does one that has plainly been below it already — a save staged or
+// migrated into the caves is not walked back up to a floor that is rock again.
+function pgHubSealed(f) {
+  f = f || (G.save && G.save.flags);
+  if (!f || f.nfMeet || pgHubBroken()) return false;
+  if (f.crystal || f.pl_cshard || f.ghMet || f.bossHorn || f.beacon) return false;
+  const v = G.save && G.save.visited;
+  return !(v && (v.A5 || v.CV1 || v.CV2 || v.CV3));
 }
 function pgHubSealedTile(tx, ty) {
   return tx >= PG_HUB.tx0 && tx <= PG_HUB.tx1 && ty >= PG_HUB.ty && ty <= PG_HUB.ty + 1 && pgHubSealed();
 }
 // is the landmark lit? the one question the drawing asks
-function pgHubLit(f) { return !!pgTrailPhase(f) && !pgHubSealed(); }
+function pgHubLit(f) { return !!pgTrailPhase(f) && !pgHubSealed(f); }
 
 // ---- WARDS ------------------------------------------------------------------
 // The song, wound tight across a way through. Drawn as layered membranes whose

@@ -146,7 +146,10 @@ const check = (name, ok, detail) => {
     settle(60);
     stand(13, 15, 1);
     downStrike(13, 15);
-    out.hatchHeldBeforeMeet = tileAt(13, 15) === 'B' && !G.save.broken['A2:13,15'];
+    // ...and until then it is not a hatch at all: rock to everything that asks
+    // (owner, 2026-11-14 — "why are you showing it before?"), so nothing breaks,
+    // nothing knocks and no secret is told. tests/dighub.cjs plays it in full.
+    out.hatchHeldBeforeMeet = tileAt(13, 15) === '#' && !G.save.broken['A2:13,15'];
     G.save.flags.nfMeet = 1;
     stand(79, 12, 1);
     out.digBefore = tileAt(80, 12) + tileAt(80, 13);
