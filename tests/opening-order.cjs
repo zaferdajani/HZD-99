@@ -1,4 +1,14 @@
-// THE OPENING, PLAYED IN ORDER (owner's order, 2026-10-09).
+// THE OPENING, PLAYED IN ORDER (owner's order, 2026-10-09; re-ordered by the
+// owner 2026-11-14 after the hook review — "do all of them, 1 to 7").
+//
+// The 2026-11-14 order: Wake → move → jump → THE FIRST FIGHT (a small machine on
+// the road, claws from the first frame) → city gate → Ratchet's booth → letter
+// (one page), repair, two lines from him → pod → the yard winch (she strikes
+// it, it pays out its scrap and BITES BACK) → back to Ratchet for the Volt Pack
+// (two lines, and the reason to want it) → heal the core the winch took → the
+// Volt Burst that stops it → monument → meadow. The paragraph below is the
+// order this replaced; what it asks of the harness (real input only, one
+// control per prompt, nothing overlapping) is unchanged.
 //
 // "Wake → movement and jump → city gate → Ratchet's booth → letter and repair
 // → explanation → save/recharge pod → Volt Pack explanation and acquisition →
@@ -42,7 +52,7 @@ const check = (name, ok, detail) => {
   console.log('  ' + (ok ? 'ok   ' : 'FAIL ') + name + (detail == null ? '' : '  ' + (typeof detail === 'string' ? detail : JSON.stringify(detail))));
   if (!ok) fails.push(name);
 };
-const WANT = ['move', 'out', 'jump', 'gate', 'booth', 'note', 'drawer', 'repair', 'pod', 'pack', 'heal', 'atk', 'burst', 'node', 'go'];
+const WANT = ['move', 'out', 'jump', 'claw', 'gate', 'booth', 'note', 'drawer', 'repair', 'pod', 'atk', 'pack', 'heal', 'burst', 'node', 'go'];
 
 async function play(browser, mode) {
   const phone = mode === 'phone';
@@ -106,6 +116,7 @@ async function play(browser, mode) {
         bench: G.save.bench && G.save.bench.room, podBanner: typeof OP !== 'undefined' && OP.podBanner > 0,
         flagsTut: !!G.save.flags.tut, mem: typeof TRI !== 'undefined' && G.state === 'TRIAL' ? { phase: TRI.memPhase, seq: TRI.memSeq && TRI.memSeq.slice(), st: TRI.st, game: TRI.game } : null,
         pickups: Object.keys(G.save.flags).filter(k => /^sc_/.test(k)).length,
+        winchBit: !!G.save.flags.winchBit, firstKill: !!G.save.flags.firstKill, toasts: (G.toasts || []).map(q => q.text),
       };
     });
     if (s.overlays.length > 1) R.overlap.push(s.overlays.join('+') + '@' + s.step);
@@ -114,6 +125,9 @@ async function play(browser, mode) {
       if (a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y) R.goalOnChip.push(s.step);
     }
     if (s.podBanner) R.podBanner = true;
+    if (s.winchBit) R.winchBit = true;
+    if (s.firstKill && R.firstKillBeforeTalk == null) R.firstKillBeforeTalk = R.dialogs.filter(d => d.line).length === 0;
+    for (const tx of s.toasts || []) if (/It bit back/.test(tx) && !R.dialogs.some(d => d.line === tx)) R.dialogs.push({ step: s.step, room: s.room, name: 'toast', line: tx });
     R.pickups = s.pickups;
     if (s.step && s.step !== lastStep) {
       R.steps.push(s.step); lastStep = s.step;
@@ -318,25 +332,36 @@ async function play(browser, mode) {
       check('the letter is read before the battery is found', iLetter >= 0 && iBatt > iLetter, iLetter + ' < ' + iBatt);
       check('...his battery has its own card, with its art', iBatt >= 0, R.dialogs[iBatt] && R.dialogs[iBatt].line);
       check('...and he wakes after the repair, and says who he is', iWake > iBatt, iWake);
-      const expl = lines.slice(iWake, iWake + 6).join(' ');
-      check('the explanation: the song infected, the marble slowed it, the battery pulled, she was asleep, raw marble below, a white sword',
-        /infected/.test(expl) && /marble/.test(expl) && /battery out/.test(expl) && /asleep/.test(expl) && /raw marble/.test(expl) && /white sword/.test(expl));
+      // THE FIRST FIGHT comes before any of it: she has broken something
+      // before anyone has spoken to her
+      const sClaw = R.steps.indexOf('claw'), sGate = R.steps.indexOf('gate');
+      check('her first kill is on the road, before the gates and before anyone speaks', sClaw >= 0 && sClaw < sGate && R.firstKillBeforeTalk, { claw: sClaw, gate: sGate, before: R.firstKillBeforeTalk });
       const iSpare = R.dialogs.findIndex(d => /Spare Power Cell/.test(d.line || ''));
+      const expl = lines.slice(iWake, iSpare > iWake ? iSpare : iWake + 3).join(' ');
+      // TWO LINES (owner, 2026-11-14: the booth in three beats). Who he is, and
+      // the errand — and nothing else stands between the repair and the cell.
+      check('he wakes in two lines: who he is, and the errand — raw marble, a white sword',
+        iSpare - iWake === 2 && /infected/.test(expl) && /raw marble/.test(expl) && /white sword/.test(expl), (iSpare - iWake) + ' lines: ' + expl);
       check('the spare Power Cell is handed over with a card that names Servo', iSpare > iWake && /Servo/.test(lines[iSpare]), lines[iSpare]);
       const iPod = lines.findIndex(l => l === 'This pod saves your progress and recharges you. Use it before you leave.');
-      check('Ratchet sends her to the pod in the owner\'s words', iPod > iSpare, iPod);
-      const iPack = lines.findIndex(l => /Volt Pack fixes that/.test(l));
-      const podStep = R.stepLog.find(q => q.step === 'pack');
-      check('the pod saves first: the save point is in the den before the pack is introduced', podStep && podStep.bench === 'A0B', podStep);
+      check('...and no further page sends her to the pod: its chip does', iPod < 0, iPod);
+      const iPack = lines.findIndex(l => /Volt Pack is what stops it/.test(l));
+      const iBit = lines.findIndex(l => /It bit back/.test(l));
+      const podStep = R.stepLog.find(q => q.step === 'atk');
+      check('the pod saves first: the save point is in the den before she is sent out to the winch', podStep && podStep.bench === 'A0B', podStep);
       check('...and the save is confirmed on screen', R.podBanner);
-      check('the pack is explained — what, why, the cost — before the counter opens',
-        iPack > iPod && /12 scrap/.test(lines.slice(iPack, iPack + 3).join(' ')) && /marble/.test(lines.slice(iPack, iPack + 3).join(' ')));
+      // NEED BEFORE TEACH: the pack is pitched only after the winch has bitten her
+      const sAtk = R.steps.indexOf('atk'), sPack = R.steps.indexOf('pack'), sHeal = R.steps.indexOf('heal');
+      check('the winch is struck, and bites, BEFORE the pack is offered — and the heal comes after it is bought',
+        sAtk >= 0 && sAtk < sPack && sPack < sHeal && R.winchBit, { steps: [sAtk, sPack, sHeal], bit: R.winchBit });
+      check('the pack is explained in two lines — what it does, what it costs — and then the counter opens',
+        iPack >= 0 && /12 scrap/.test(lines.slice(iPack, iPack + 2).join(' ')) && /hold/i.test(lines[iPack]), lines.slice(iPack, iPack + 2).join(' | '));
       const iScrap = R.dialogs.findIndex(d => /^12 Scrap/.test(d.line || ''));
-      check('...he pays her the 12 scrap with a card that says what scrap is', iScrap > iPack && /money/.test(lines[iScrap]), lines[iScrap]);
+      check('...with no card about money in the way', iScrap < 0, iScrap);
       check('the counter opens on the Volt Pack, marked permanent, the rest locked until it is bought',
         R.shopRow && R.shopRow.type === 'cell' && /permanent/.test(R.shopRow.name) && R.shopRow.others.every(Boolean), R.shopRow);
       const iCard = R.dialogs.findIndex(d => d.demo === 'pack');
-      check('...and the purchase card shows the two verbs with her controls', iCard > iScrap && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
+      check('...and the purchase card shows the two verbs with her controls', iCard > iPack && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
     }
     check(mode + ': the Volt Pack is bought with zero scrap gathered from the floor', R.scrapAtShop === 12 && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
     if (R.monument) {

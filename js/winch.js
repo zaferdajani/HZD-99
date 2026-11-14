@@ -90,6 +90,17 @@ class YardWinch extends Enemy {
     if(typeof isHero==='function'&&isHero())return;
     const f=G.save&&G.save.flags; if(!f||f.burstDone)return;
     if(typeof opTeaching!=='function'||!opTeaching())return;
+    // IT BITES BACK (owner's order, 2026-11-14 — need before teach). On the
+    // third blow of the strike lesson the motor surges up the arm and into her:
+    // one core, never her last, and she is thrown clear of it. That is the
+    // whole reason Ratchet's Volt Pack is worth twelve scrap a minute later —
+    // claws only scratch this, and now she has something to mend. Counted in
+    // lesson blows, not in scrap knocks: she may have been hitting it since she
+    // came through the gates, and the knocks may be long spent.
+    if(typeof opStepId==='function'&&opStepId()==='atk'&&!f.winchBit&&!f.heal) {
+      this.lessonHits=(this.lessonHits|0)+1;
+      if(this.lessonHits>=3)this.bite();
+    }
     const n=f.winchKnock|0; if(n>=WINCH_KNOCKS)return;
     f.winchKnock=n+1;
     const side=this.face<0?-1:1, hx=this.x+this.w/2+side*(this.w/2-14), hy=this.y+this.h*0.35;
@@ -99,6 +110,26 @@ class YardWinch extends Enemy {
     G.pickups.push(s);
     burst(hx,hy,8,'#ffd76a',170,0.4,260,2.2,true);
     sfx('hollow'); this.pushT=0.25;
+    persist();
+  }
+  bite() {
+    const f=G.save.flags; if(f.winchBit)return;
+    f.winchBit=1;
+    const lens=this.point(YARD_WINCH.lens[0]), px=player.x+player.w/2, py=player.y+player.h/2;
+    if(player.cores>1) { player.cores-=1; G.coreFlash={i:player.cores,t:0.6}; }
+    player.iT=Math.max(player.iT||0,1.4);
+    // thrown back the way she came, off the arm
+    const away=px<this.x+this.w/2?-1:1;
+    player.vx=away*300; player.vy=-260; player.on=false;
+    cam.shake=Math.max(cam.shake,7); G.flash=Math.max(G.flash||0,0.5);
+    sfx('hurt'); sfx('castarc');
+    // the arc, housing to her, and the scatter where it lands
+    for(let i=0;i<=8;i++) { const k=i/8;
+      addPart(lens.x+(px-lens.x)*k+rnd(-7,7),lens.y+(py-lens.y)*k+rnd(-7,7),rnd(-30,30),rnd(-50,10),rnd(0.18,0.34),i%2?'#8ff6ff':'#ffffff',3,0,true); }
+    burst(px,py,18,'#8ff6ff',230,0.55,90,3,true);
+    if(typeof tBuzz==='function')tBuzz(70);
+    this.pushT=0.5;
+    G.toast(t('op_bit'));
     persist();
   }
   update(dt) {

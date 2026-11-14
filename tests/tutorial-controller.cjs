@@ -27,7 +27,8 @@ assert.equal(prompt().action,'MOVE');
 c.tutorialTick();assert.equal(c.tutAllows('RIGHT'),true);assert.equal(c.tutAllows('LEFT'),true);
 assert.equal(c.player.x,250);assert.equal(c.player.vx,160);assert.equal(c.keys.ArrowRight,1);
 assert.equal(c.G.walkthroughLock,null);assert.equal(c.G.tutHardLock,null);
-assert(!c.tutAllows('ATK'),'untaught verbs stay off while she walks');
+assert(!c.tutAllows('HEAL'),'untaught verbs stay off while she walks');
+assert(c.tutAllows('ATK'),'...but the claw is hers from the first frame (owner, 2026-11-14)');
 // At the door: UP works, its edge survives, and she can still walk away.
 c.player.x=628;c.tutorialTick();assert.equal(prompt().action,'UP');assert.equal(c.G.tutorialLock,null);
 assert(c.tutAllows('UP'));assert(c.tutAllows('RIGHT'),'no freeze at a door');assert.equal(c.keysP.ArrowUp,1);
@@ -39,7 +40,7 @@ const npc={type:'npc',extra:'ratchet',x:300,y:400,w:32,h:36};c.G.statics=[npc];
 c.tutorialTick();assert.equal(prompt().action,'MOVE');assert.equal(c.G.tutorialLock,null);assert(c.tutAllows('RIGHT'));
 c.G.near={x:100,y:400,w:32,h:36};assert(!c.tutAllows('INT'),'unrelated nearby object does not answer E');
 c.G.near=npc;c.tutorialTick();assert.equal(prompt().action,'INT');assert(c.tutAllows('INT'));
-assert(c.tutAllows('LEFT'),'she may still step away from him');assert(!c.tutAllows('ATK'),'one action at a time');
+assert(c.tutAllows('LEFT'),'she may still step away from him');assert(!c.tutAllows('HEAL'),'one action at a time');
 // Backtracking is voluntary: UP at a door she is standing at always works.
 c.player.x=628;assert(c.tutAllows('UP'),'any door she stands at');
 // Shop and other UI controls cannot be captured by a gameplay lesson.
@@ -52,7 +53,7 @@ c.G.state='PLAY';c.G.dialog={};c.tutorialTick();assert(c.tutAllows('OK'));c.G.di
 // wide), never freezing the machine or her.
 c.G.roomId='A0';c.G.near=null;step('atk');c.player.x=10;
 const update=()=>{}, enemy={x:200,y:400,w:120,h:36,hp:3,vx:30,vy:0,update};c.G.enemies=[enemy];
-assert.equal(prompt().action,'MOVE');c.tutorialTick();assert.equal(c.G.tutorialLock,null);assert(!c.tutAllows('ATK'));
+assert.equal(prompt().action,'MOVE');c.tutorialTick();assert.equal(c.G.tutorialLock,null);assert(c.tutAllows('ATK'),'a swing at nothing is hers to make');
 c.player.x=170;c.tutorialTick();assert.equal(prompt().action,'ATK');assert(c.tutAllows('ATK'));
 assert(c.tutAllows('RIGHT'),'no freeze');assert.equal(enemy.update,update,'the enemy is never swapped for a statue');
 assert.equal(enemy.vx,30);assert(!c.tutAllows('INT'),'one action at a time');

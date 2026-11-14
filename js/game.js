@@ -1298,6 +1298,23 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
+  // THE FIRST THING SHE FIGHTS (TUT_STEPS 'claw'): one small empty construct on
+  // the road between the jump and the gates — a slag mite, the little half a
+  // blob bursts into, which is the smallest hostile body the game has art for.
+  // Not a person (STORY_ACTOR_ROLES: an empty construct, so it breaks and stays
+  // broken and nothing waits to be cleansed), two swipes of hp, and it does not
+  // drip: it crawls at her and it stings, which is all a first enemy should
+  // know how to do. Once per save (flags.firstKill), and only in Ratchet's
+  // story — the hero's world wakes differently.
+  if (id === 'W2' && typeof opOn === 'function' && opOn() && !G.save.flags.firstKill
+      && !G.save.flags.gateOpened && !G.save.flags.ratchetRepaired && !G.save.flags.tut) {
+    const m = new Enemy('blob', 23 * TILE, (def.h - 2) * TILE - 16);
+    m.w = 20; m.h = 15; m.hp = 12; m.mini = true; m.firstFoe = true;
+    m.dir = -1; m.dripT = 1e9;               // it never pools the floor
+    m.moves = []; m.traits = [];
+    m.actorRole = 'empty-construct';
+    G.enemies.push(m);
+  }
   // THE MACHINE FOLK STAND ON THE GROUND SHE STANDS ON. A static is placed on
   // the tile grid, but the floor she walks is the heightfield (groundColumnAt),
   // which rides up to a couple of dozen px above the grid in the meadow — so
@@ -13327,6 +13344,17 @@ const TUT_STEPS = [
   { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', at: 'W2', room: 'W2',
     done: () => (!player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown))
       || (typeof tutOnJumpShelf === 'function' && tutOnJumpShelf()) },
+  // THE FIRST FIGHT, BEFORE ANYONE SPEAKS (owner's order, 2026-11-14, after
+  // the review of what hooks a player in the first minute: "a fight in the
+  // first minute or two... she should win something before anyone speaks").
+  // The opening used to hand her a letter, a drawer, a repair board, five pages
+  // and a shop before the first thing she could hit — and that thing was a
+  // jammed winch that did not hit back. One small hostile machine crawls the
+  // road to the gates now (loadRoom, W2), her claws answer from the first
+  // frame, and breaking it is the step. See TUT_UNLOCK: ATK is no longer a
+  // lesson's gift.
+  { id: 'claw', label: 'tut_claw', hint: 'tut_claw_h', at: 'W2', room: 'W2', robo: true,
+    done: () => !!G.save.flags.firstKill },
   // THE GATES: the only way into the city, and they close behind her.
   { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h', at: 'W2',
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 2 },
@@ -13348,19 +13376,28 @@ const TUT_STEPS = [
   // screen — the next lesson is only introduced after it (opening.js).
   { id: 'pod', label: 'op_pod', hint: 'op_pod_h', at: 'A0B', room: 'A0B', robo: true,
     done: () => !!G.save.flags.opPod },
-  // THE VOLT PACK: he says what it does, why she needs it and what it costs,
-  // pays her the twelve scrap for the repair, and his counter opens with the
-  // pack marked. One purchase; the step is the purchase.
+  // NEED BEFORE TEACH (same order, item 2: "move the shop pitch to after the
+  // first fight outside, when she actually needs to heal"). The pack used to be
+  // pitched in the den, cold, and its first surge had to be SCRIPTED to cost a
+  // core so there was something to heal. Now the winch does it for real: she
+  // strikes it, scrap flies out of the housing (twelve of it — the pack's own
+  // price), and on the third blow it bites back and takes a core
+  // (YardWinch.onStruck). Claws only scratch it. THEN Ratchet has something to
+  // sell, and she has the reason and the scrap to buy it.
+  { id: 'atk', label: 'op_atk', hint: 'op_atk_h', at: 'A0', room: 'A0', hero: ['tut_atk', 'tut_atk_h'],
+    done: () => (typeof isHero === 'function' && isHero())
+      ? (!!player.swing || player.comboT > 0)
+      : !!(G.save.flags.winchBit || G.save.flags.heal || G.save.flags.burstDone) },
+  // THE VOLT PACK: two lines — what it does, what it costs — and his counter
+  // opens with the pack marked. One purchase; the step is the purchase.
   { id: 'pack', label: 'op_pack', hint: 'op_pack_h', at: 'A0B', room: 'A0B', robo: true,
     done: () => !!G.save.flags.heal },
-  // THE FIRST SURGE. Repair cannot be taught at full health (tutEnter), so the
-  // pack's first surge costs one core, in the den, where nothing can follow it.
+  // THE CORE THE WINCH TOOK, mended with what she just bought. (A save that
+  // reaches this at full health — it rested at the pod on the way back — still
+  // gets the one scripted surge in tutEnter, because repair cannot be taught
+  // to somebody with nothing to repair.)
   { id: 'heal', label: 'op_heal', hint: 'op_heal_h', hero: ['tut_heal', 'tut_heal_h'],
     done: () => player.cores >= player.maxCores() },
-  // ...and the two things the claw does, at the yard winch jammed across the
-  // road outside: a strike, then the Volt Burst that stops it.
-  { id: 'atk', label: 'op_atk', hint: 'op_atk_h', at: 'A0', room: 'A0', hero: ['tut_atk', 'tut_atk_h'],
-    done: () => !!player.swing || player.comboT > 0 },
   { id: 'burst', label: 'op_burst', hint: 'op_burst_h', at: 'A0', room: 'A0', hero: ['tut_burst', 'tut_burst_h'],
     done: () => !!(G.save.flags && G.save.flags.burstDone) },
   // THE FIRST PUZZLE MONUMENT, just past the winch, on the same screen as the
@@ -13423,7 +13460,7 @@ function tutDir(st, pv) {
   const h = tutHand(pv);
   return h === '←' ? 'left' : (h === '→' || h === '← →') ? 'right' : null;
 }
-const TUT_ACTION = { jump: 'JUMP', note: 'INT', drawer: 'INT', repair: 'INT', pod: 'INT', pack: 'INT',
+const TUT_ACTION = { jump: 'JUMP', claw: 'ATK', note: 'INT', drawer: 'INT', repair: 'INT', pod: 'INT', pack: 'INT',
   heal: 'HEAL', atk: 'ATK', burst: 'ATK', node: 'INT' };
 function tutHand(st) {
   if (st.control) return st.control;
@@ -13491,7 +13528,7 @@ function tutPrompt(st) {
     const drawer = (G.statics || []).find(q => q.type === 'chest' && q.extra === 'it:batt' && !q.opened);
     if (!useAt(drawer)) useAt(ratchet);
   } else if (st.id === 'pod') useAt((G.statics || []).find(q => q.type === 'bench'), '#8ff6ff');
-  else if (st.id === 'atk' || st.id === 'burst') {
+  else if (st.id === 'atk' || st.id === 'burst' || st.id === 'claw') {
     const enemy = (G.enemies || []).find(q => q && !q.dead && !q.disabled);
     if (enemy) {
       point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
@@ -13548,7 +13585,13 @@ const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // that pressing jump before that point does what it looks like it should.
 // INTERACT arrives with the letter (the first thing she is asked to use), the
 // claw with the strike lesson at the winch, SKILL with the open road.
-const TUT_UNLOCK = { ATK: 'atk', INT: 'note', HEAL: 'heal', SKILL: 'go', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
+// THE CLAW IS NOT ON THIS LIST ANY MORE EITHER (owner, 2026-11-14: "claws
+// available from the start"). It waited for the winch lesson, eleven steps in,
+// so the thing every player tries third — after walking and jumping — did
+// nothing for the whole first act. It answers from the first frame; the lesson
+// (the 'claw' step, on the road to the gates) is where there is something to
+// hit, exactly as the jump's is where there is something to clear.
+const TUT_UNLOCK = { INT: 'note', HEAL: 'heal', SKILL: 'go', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
 function tutAllows(act) {
   if (typeof tutorialAllows === 'function') return tutorialAllows(act);
   const need = TUT_UNLOCK[act];
@@ -13569,6 +13612,7 @@ function tutAllows(act) {
 // letter again.
 const TUT_FROM_OLD = { atk: 'booth', kill: 'booth', coin: 'booth', buy: 'note', heal: 'heal', burst: 'atk', node: 'node', skill: 'go' };
 const TUT_SETTLED = {
+  claw: f => f.firstKill || f.gateOpened || f.ratchetRepaired,
   note: f => f.opNote || f.ratchetRepaired,
   drawer: (f, sv) => (sv.items && sv.items.ratchetCell) || f.ratchetRepaired,
   repair: f => f.ratchetRepaired && f.opTold,
@@ -13622,8 +13666,13 @@ function updateTutor(dt) {
   // winch is the strike and burst lessons' target, not an encounter: calm (it
   // holds its arm and never swings — winch.js) until the lessons are behind
   // her, so no lesson is ever interrupted by a hit she was not taught to read.
+  // ...with ONE exception, and it is the point of it: the small machine on the
+  // road to the gates (firstFoe) is her first fight, and a fight with something
+  // that cannot touch her is a chore. It stays live — and goes quiet only if
+  // she is down to two cores, because nobody dies in the first minute.
   for (const e of (G.enemies || [])) {
     if (!e || e.dead || e.disabled || e.rescued) continue;
+    if (e.firstFoe && player.cores > 2) { e.calm = false; e.hypnoT = 0; continue; }
     e.calm = true; e.hypnoT = Math.max(e.hypnoT || 0, 1);
   }
   if (typeof TOUCH !== 'undefined' && TOUCH) {

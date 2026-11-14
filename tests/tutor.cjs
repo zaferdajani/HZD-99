@@ -97,6 +97,20 @@ const { chromium } = require('playwright');
     player.on = false; player.vy = -300;
   });
   await record(now);
+  // THE FIRST FIGHT (owner, 2026-11-14): one small machine on the road to the
+  // gates, and her claws from the first frame. Stand beside it and swing — the
+  // real key, the real swing, until it breaks.
+  const foe0 = await p.evaluate(() => { const e = G.enemies.find(x => x && x.firstFoe); return e ? { hp: e.hp, role: e.actorRole, live: !e.calm } : null; });
+  now = await drive('claw', () => {
+    if (G.roomId !== 'W2') { loadRoom('W2'); return; }
+    const e = G.enemies.find(x => x && x.firstFoe && !x.dead);
+    if (!e) { update(1 / 60); return; }
+    player.x = e.x - player.w - 6; player.face = player.faceVis = 1; player.vx = 0; player.on = true; player.iT = 1;
+    keysP.KeyX = 1; keys.KeyX = 1; update(1 / 60); keys.KeyX = 0; keysP.KeyX = 0;
+    for (let i = 0; i < 16; i++) update(1 / 60);
+  });
+  await record(now);
+  const firstKill = await p.evaluate(() => ({ flag: !!G.save.flags.firstKill, told: 0 }));
   now = await drive('gate', () => { loadRoom('A0'); });
   await record(now);
   // ---- THE DEN (owner, 2026-10-09): booth -> letter -> drawer -> repair ->
@@ -146,11 +160,45 @@ const { chromium } = require('playwright');
     for (let i = 0; i < 400 && (G.recharge || !opPodSettled()); i++) update(1 / 30);`));
   await record(now);
   const saved = await p.evaluate(() => ({ bench: G.save.bench && G.save.bench.room, stored: JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).bench.room }));
+  // out of the den by its own door, to the jammed winch
+  const toWinch = () => {
+    if (G.roomId === 'A0B' && G.state === 'PLAY' && !G.gateWalk) {
+      const d = gateDoors()[0]; player.x = gateWorldX(d) - player.w / 2; player.vx = 0; player.on = true;
+      keysP.ArrowUp = 1; keys.ArrowUp = 1; update(1 / 60); keys.ArrowUp = 0; keysP.ArrowUp = 0;
+      for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
+      return null;
+    }
+    const e = G.enemies.find(x => x && !x.dead && !x.disabled);
+    if (e) { player.x = e.x + e.w / 2 - player.w / 2 + 40; player.vx = 0; player.on = true; update(1 / 60); }
+    return e;
+  };
+  // THE WINCH FIRST, AND IT BITES (owner, 2026-11-14 — need before teach): she
+  // strikes it, scrap flies out of the housing, and on the third blow it takes
+  // a core. Only then does Ratchet have a pack to sell her.
+  const before = await p.evaluate(() => ({ cores: player.cores, max: player.maxCores(), scrap: G.save.scrap }));
+  now = await drive('atk', new Function(`const e = (${toWinch})(); if (!e) return; if (player.iT > 0.2) { update(1 / 60); return; } keysP.KeyX = 1; keys.KeyX = 1; update(1 / 60); keys.KeyX = 0; keysP.KeyX = 0; for (let i = 0; i < 26; i++) update(1 / 60);`));
+  await record(now);
+  const winchCalm = await p.evaluate(() => { const e = G.enemies.find(x => x && x.mechanism === 'winch'); return e ? { calm: !!e.calm, phase: e.phase } : null; });
+  const bit = await p.evaluate(() => ({ flag: !!G.save.flags.winchBit, cores: player.cores, max: player.maxCores(), knocks: G.save.flags.winchKnock | 0, dead: !!player.dead,
+    winch: (() => { const e = G.enemies.find(x => x && x.mechanism === 'winch'); return e ? { hp: e.hp, disabled: !!e.disabled } : null; })() }));
+  // ...back through the booth door to him
+  const toRatchet = () => {
+    if (G.gateWalk) { for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10); return false; }
+    if (G.roomId === 'A0' && G.state === 'PLAY') {
+      const gr = gateDoors().find(d => d.style === 'booth');
+      player.x = gateWorldX(gr) - player.w / 2; player.vx = 0; player.on = true;
+      keysP.ArrowUp = 1; keys.ArrowUp = 1; update(1 / 60); keys.ArrowUp = 0; keysP.ArrowUp = 0;
+      for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
+      return false;
+    }
+    return G.roomId === 'A0B';
+  };
   const scrapBefore = await p.evaluate(() => G.save.scrap);
   let scrapAfter = null, pitch = null;
   now = await drive('pack', new Function(`
     if (G.state === 'SHOP') { window.__scrapAtShop = G.save.scrap; window.__row = SHOP[G.shopIdx].type; keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 60); keys['Enter'] = 0; return; }
     if (G.state === 'DIALOG') { window.__pitch = window.__pitch || G.dialog.lines.join(' '); (${page})(); return; }
+    if (!(${toRatchet})()) return;
     const s = ${near(ratchet)}; if (s && G.state === 'PLAY') doInteract(s);`));
   await record(now);
   scrapAfter = await p.evaluate(() => window.__scrapAtShop); pitch = await p.evaluate(() => ({ text: window.__pitch, row: window.__row }));
@@ -176,21 +224,6 @@ const { chromium } = require('playwright');
     G.save.flags.heal = had; G.save.flags.tut = tut;
     return { locked, had: !!had };
   });
-  // out of the den by its own door, to the jammed winch
-  const toWinch = () => {
-    if (G.roomId === 'A0B' && G.state === 'PLAY' && !G.gateWalk) {
-      const d = gateDoors()[0]; player.x = gateWorldX(d) - player.w / 2; player.vx = 0; player.on = true;
-      keysP.ArrowUp = 1; keys.ArrowUp = 1; update(1 / 60); keys.ArrowUp = 0; keysP.ArrowUp = 0;
-      for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
-      return null;
-    }
-    const e = G.enemies.find(x => x && !x.dead && !x.disabled);
-    if (e) { player.x = e.x + e.w / 2 - player.w / 2 + 40; player.vx = 0; player.on = true; update(1 / 60); }
-    return e;
-  };
-  now = await drive('atk', new Function(`const e = (${toWinch})(); if (!e) return; keysP.KeyX = 1; keys.KeyX = 1; update(1 / 60); keys.KeyX = 0; for (let i = 0; i < 20; i++) update(1 / 60);`));
-  await record(now);
-  const winchCalm = await p.evaluate(() => { const e = G.enemies.find(x => x && x.mechanism === 'winch'); return e ? { calm: !!e.calm, phase: e.phase } : null; });
   now = await drive('burst', new Function(`
     if (G.save.flags.opBurst) { update(1 / 60); return; }
     const e = (${toWinch})(); if (!e) return;
@@ -244,7 +277,11 @@ const { chromium } = require('playwright');
     // ...and the same swing in the room that teaches it DOES count
     loadRoom('A0'); G.state = 'PLAY'; G.dialog = null;
     G.tut.i = at('atk'); G.tut.t = 1; G.tut.hold = 0;
-    player.swing = { t: 0.2, t0: 0.2, combo: 1 };
+    // (three real blows land on the winch and it bites: that is the lesson now)
+    delete G.save.flags.winchBit; delete G.save.flags.heal; delete G.save.flags.burstDone;
+    updateTutor(1 / 60);                         // (the walk keeps the winch calm: let it say so first)
+    const wn = G.enemies.find(x => x && x.mechanism === 'winch'); if (wn) wn.lessonHits = 0;
+    for (let k = 0; k < 3 && wn; k++) wn.onStruck();
     for (let k = 0; k < 60; k++) updateTutor(1 / 60);
     const atkCounts = G.tut.i > at('atk') || G.tut.hold > 0;
     player.swing = null;
@@ -290,36 +327,43 @@ const { chromium } = require('playwright');
   console.log('reload mid-walk: ' + JSON.stringify(resume));
   console.log('steps reached: ' + seen.join(' -> '));
   console.log('Ratchet woke: ' + JSON.stringify(woke) + '   pod: ' + JSON.stringify(saved));
+  console.log('first fight: ' + JSON.stringify(foe0) + ' -> ' + JSON.stringify(firstKill));
+  console.log('the winch bit: ' + JSON.stringify(before) + ' -> ' + JSON.stringify(bit));
   console.log('scrap: ' + scrapBefore + ' before the pitch, ' + scrapAfter + ' at the counter (' + pitch.row + ')');
   console.log('after buying the pack: ' + JSON.stringify(bought));
   console.log('the hold before the pack: ' + JSON.stringify(burstLock));
-  console.log('the scripted first surge left: ' + hurtTo.cores + ' / ' + hurtTo.max + ' cores');
+  console.log('at the heal lesson she has: ' + hurtTo.cores + ' / ' + hurtTo.max + ' cores');
   console.log('the winch: ' + JSON.stringify(winchCalm) + ', stopped by the burst: ' + winchDown);
   console.log('door: ' + JSON.stringify(door));
   console.log('skipping the walk: ' + JSON.stringify(skip));
 
-  const want = ['move', 'out', 'jump', 'gate', 'booth', 'note', 'drawer', 'repair', 'pod', 'pack', 'heal', 'atk', 'burst', 'node', 'go'];
+  const want = ['move', 'out', 'jump', 'claw', 'gate', 'booth', 'note', 'drawer', 'repair', 'pod', 'atk', 'pack', 'heal', 'burst', 'node', 'go'];
   const fails = [];
   for (const w of want) if (!seen.includes(w)) fails.push('never reached the "' + w + '" step (got ' + seen.join(',') + ')');
   if (!letterRead) fails.push('the letter was not what the first E read');
   if (!woke.live || woke.spare !== 1 || woke.kit !== 0 || woke.quest !== 'active') fails.push('the repair did not wake him with the spare named and the errand given: ' + JSON.stringify(woke));
   if (saved.bench !== 'A0B' || saved.stored !== 'A0B') fails.push('the pod did not move the save point to the den: ' + JSON.stringify(saved));
-  if (scrapBefore !== 0) fails.push('she had scrap before Ratchet paid her (' + scrapBefore + ')');
-  if (scrapAfter !== 12) fails.push('the counter did not open with exactly the 12 he paid (' + scrapAfter + ')');
+  if (!foe0 || foe0.role !== 'empty-construct' || foe0.hp > 20) fails.push('the first foe is not a small empty construct: ' + JSON.stringify(foe0));
+  if (!firstKill.flag) fails.push('breaking the first machine was not recorded');
+  if (!bit.flag || bit.cores !== before.cores - 1 || bit.dead) fails.push('the winch did not bite one core off her: ' + JSON.stringify(before) + ' -> ' + JSON.stringify(bit));
+  if (!bit.winch || bit.winch.disabled || bit.winch.hp < 1) fails.push('claws broke the winch (they only scratch it): ' + JSON.stringify(bit.winch));
+  if (bit.knocks < 3) fails.push('the winch paid out no scrap for the blows (' + bit.knocks + ' knocks)');
+  if (scrapAfter < 12) fails.push('the counter opened on less than the pack costs (' + scrapAfter + ')');
   if (!pitch.text || !/12 scrap/.test(pitch.text)) fails.push('the pack was not pitched with its cost before the counter: ' + pitch.text);
   if (pitch.row !== 'cell') fails.push('the counter did not open on the pack');
   if (!bought.flag || !bought.heal) fails.push('buying the pack did not register / wire it');
   if (!burstLock.had) fails.push('the pack did not wire (flags.heal)');
   if (burstLock.locked > 0) fails.push('the claw charges before the pack is bought (chargeT ' + burstLock.locked + ')');
-  if (bought.scrap !== 0) fails.push('the pack did not cost the 12 scrap (' + bought.scrap + ' left)');
+  if (bought.scrap !== scrapAfter - 12) fails.push('the pack did not cost the 12 scrap (' + scrapAfter + ' -> ' + bought.scrap + ')');
   if (hurtTo.cores >= hurtTo.max) fails.push('the repair lesson opened at full health, so it teaches nothing');
+  if (hurtTo.cores !== bit.cores) fails.push('the heal lesson cost her a SECOND core on top of the winch\'s (' + bit.cores + ' -> ' + hurtTo.cores + ')');
   if (!winchCalm || !winchCalm.calm || winchCalm.phase !== 'idle') fails.push('the winch swings while she is being taught: ' + JSON.stringify(winchCalm));
   if (!winchDown) fails.push('the Volt Burst lesson did not stop the winch');
   if (!door.opened) fails.push('the way out never opened');
   if (skip.boothEarly !== 0) fails.push('the booth is open ' + skip.boothEarly + ' door(s) before the lesson that sends her in');
   if (!skip.killHeld) fails.push('the monument lesson completed away from the monument');
   if (!skip.atkHeld) fails.push('a swing inside the den finished the strike lesson');
-  if (!skip.atkCounts) fails.push('a swing on the waking floor did NOT finish the strike lesson');
+  if (!skip.atkCounts) fails.push('three blows on the winch did NOT finish the strike lesson');
   if (!(skip.boothLater > 0)) fails.push('the booth never opens for the lesson that sends her in');
   if (resume.stored !== resume.heal) fails.push('the step is not in the save (' + resume.stored + ')');
   if (resume.resumed !== 'node') fails.push('a reload restarted the lesson at "' + resume.resumed + '"');

@@ -45,7 +45,9 @@ async function boot(browser, page0) {
       window.requestAnimationFrame = () => 0;      // this harness owns the clock
       const sv = newSave(1); sv.time = 99;
       Object.assign(sv.flags, { woke: 1, opNote: 1, ratchetRepaired: 1, opTold: 1, ratchetSpareGiven: 1,
-        opPod: 1, heal: 1, opScrap: 1, sawScrap: 1, tutId: 'atk', tutI: 11 });
+        opPod: 1, firstKill: 1, tutId: 'atk', tutI: 11 });
+      // (since 2026-11-14 the winch is struck BEFORE the Volt Pack is bought —
+      // it is the reason to buy it — so the strike lesson is staged without it)
       startGame(sv); loadRoom('A0');
       G.state = 'PLAY'; G.wake = G.cut = G.trans = G.dialog = null; G.toasts = [];
       window.__toasts = [];
@@ -134,17 +136,23 @@ async function boot(browser, page0) {
 
     // ---- 2. every strike knocks scrap out of the housing ----
     const knocks = await page.evaluate(() => {
-      const e = W(), scrap0 = G.save.scrap, rows = [];
+      const e = W(), scrap0 = G.save.scrap, rows = [], cores0 = player.cores;
       for (let k = 0; k < 7; k++) {
+        player.iT = 0;                              // (the bite's own grace must not hide a second one)
         const before = scraps().length, hp = e.hp;
         strike();
         rows.push({ hurt: e.hurtT > 0, hp: e.hp, flag: G.save.flags.winchKnock | 0 });
       }
       const flag = G.save.flags.winchKnock | 0;
       const live = scraps().map(p => ({ x: Math.round(p.x), y: Math.round(p.y) }));
-      return { rows, flag, live, scrap0, stillJammed: !e.disabled && !G.save.flags.burstDone, step: opStepId() };
+      return { rows, flag, live, scrap0, stillJammed: !e.disabled && !G.save.flags.burstDone, step: opStepId(),
+        bit: !!G.save.flags.winchBit, lost: cores0 - player.cores, cores: player.cores, dead: !!player.dead, said: __toasts.slice(), want: t('op_bit') };
     });
-    check('the strike lesson finishes on a real strike at the winch', knocks.step === 'burst', knocks.step);
+    // IT BITES BACK, ONCE (owner, 2026-11-14): the third blow costs her a core,
+    // and that — not a single swing — is what finishes the strike lesson and
+    // sends her to Ratchet for the pack.
+    check('the winch bites back: seven blows cost her exactly one core, and she is told', knocks.bit && knocks.lost === 1 && !knocks.dead && knocks.said.includes(knocks.want), { lost: knocks.lost, cores: knocks.cores });
+    check('the strike lesson finishes on the bite, and the next step is the Volt Pack', knocks.step === 'pack', knocks.step);
     check('strikes knock scrap out (one piece per strike, capped at 4 per save)', knocks.flag === 4, knocks);
     check('strikes alone never stop the jammed winch', knocks.stillJammed, knocks);
     // photograph scrap mid-pop: a fresh strike with the cap lifted for the picture only
@@ -169,6 +177,12 @@ async function boot(browser, page0) {
     check('she collects every piece as ordinary scrap', collect.left === 0 && collect.gained === collect.worth && collect.gained > 0, collect);
 
     // ---- 3. the burst: out of reach it does not count; beside it, it stops it ----
+    // (the pack is bought and the core mended in the den — tests/tutor.cjs and
+    // tests/opening-order.cjs play that; here the walk is put on the burst)
+    await page.evaluate(() => {
+      G.save.flags.heal = 1; G.save.flags.opScrap = 1; G.save.flags.sawScrap = 1; player.cores = player.maxCores();
+      G.tut.i = TUT_STEPS.findIndex(q => q.id === 'burst'); G.tut.hold = 0; G.tut.t = 1; tutSave(G.save, G.tut);
+    });
     const far = await page.evaluate(() => {
       __toasts.length = 0;
       const e = W(), floor = e.y + e.h;

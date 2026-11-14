@@ -8897,6 +8897,9 @@ class Enemy {
     if (this.dead) return;
     if (this.plate) this.shear();          // killed mid-lunge: the plate falls
     this.dead = true;
+    // her first kill (game.js TUT_STEPS 'claw'): the step is this, and it is
+    // written down the frame it happens so a reload cannot ask for it twice
+    if (this.firstFoe && G.save && G.save.flags && !G.save.flags.firstKill) { G.save.flags.firstKill = 1; if (typeof persist === 'function') persist(); }
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     sfx('edie');
     player.gainVolts(8);
