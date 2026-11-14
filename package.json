@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "author": "VibeSolutions",
-  "description": "CLAWBYTE / NOSTOS — a zero-dependency canvas metroidvania, on the web and in a native shell",
+  "description": "CLAWBYTE / NOSTOS \u2014 a zero-dependency canvas metroidvania, on the web and in a native shell",
   "scripts": {
     "build": "node build.cjs",
     "serve": "http-server -p 8220 -s",
@@ -11,13 +11,16 @@
     "app:pack": "node build.cjs && node tools/pack-www.cjs",
     "app:sync": "npm run app:pack && cap sync",
     "app:android": "npm run app:sync && cap open android",
-    "app:apk": "npm run app:sync && cd android && ./gradlew assembleDebug"
+    "app:apk": "npm run app:sync && cd android && ./gradlew assembleDebug",
+    "app:ios": "npm run app:sync && cap open ios",
+    "app:icons": "node tools/appicon.cjs"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.1",
     "@capacitor/cli": "^6.2.1",
     "@capacitor/core": "^6.2.1",
     "@capacitor/haptics": "^6.0.3",
+    "@capacitor/ios": "^6.2.3",
     "@capacitor/screen-orientation": "^6.0.4",
     "@capacitor/splash-screen": "^6.0.4",
     "@capacitor/status-bar": "^6.0.3"

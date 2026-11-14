@@ -9,7 +9,10 @@
   },
   "ios": {
     "contentInset": "never",
-    "scrollEnabled": false
+    "scrollEnabled": false,
+    "backgroundColor": "#05070b",
+    "allowsLinkPreview": false,
+    "preferredContentMode": "mobile"
   },
   "plugins": {
     "SplashScreen": {

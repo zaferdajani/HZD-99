@@ -1233,12 +1233,31 @@ const AUDIO_CORE = [
   'hzd_dash', 'hzd_djump', 'hzd_land', 'hzd_heal', 'hzd_jump', 'hzd_charge',
   'hzd_release', 'hzd_evo',
 ];
+// AN OGG, OR ITS AAC COPY WHERE OGG CANNOT PLAY. iOS before 18.4 decodes no Ogg
+// at all and says so only by rejecting the decode, which the loader below (and
+// an <audio> element's error event) swallows: every recorded effect fell back
+// to its synth stand-in and every NPC line was silent, on most iPhones, with no
+// error anywhere. tools/aactier.cjs derives one .m4a per .ogg; this hands it
+// out only when the device itself says it cannot play Ogg Vorbis.
+let OGG_OK = null;
+function oggOK() {
+  if (OGG_OK == null) {
+    try { OGG_OK = document.createElement('audio').canPlayType('audio/ogg; codecs="vorbis"') !== ''; }
+    catch (e) { OGG_OK = true; }
+  }
+  return OGG_OK;
+}
+function audioSrc(p) {
+  if (typeof p !== 'string' || !/\.ogg$/i.test(p) || oggOK()) return p;
+  const tier = typeof window !== 'undefined' && window.AAC_TIER;
+  return (tier && tier[p]) || p;
+}
 const MBUF_PEND = {};
 function mediaAudio(k) {
   if (MBUF[k] || MBUF_PEND[k] || !MEDIA_SRC.audio[k]) return;
   if (typeof AC === 'undefined' || !AC) return;
   MBUF_PEND[k] = 1;
-  fetch(MEDIA_SRC.audio[k])
+  fetch(audioSrc(MEDIA_SRC.audio[k]))
     .then(r => r.arrayBuffer())
     .then(b => AC.decodeAudioData(b))
     .then(buf => { MBUF[k] = buf; })

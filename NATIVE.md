@@ -55,13 +55,23 @@ place to fix it is the render path, not the packaging.
 
 ## iOS
 
-`npx cap add ios` generates the Xcode project, but building it needs macOS,
-Xcode and an Apple Developer account. Two things to set there, matching what
-the Android side already does:
+The Xcode project is in `ios/` (Capacitor, CocoaPods). `npm run app:ios` builds,
+packs, syncs and opens it; building needs macOS and Xcode, and shipping needs
+the owner's Apple Developer account. Everything the App Store checks that can
+be settled in the repository is settled and tested — `docs/IOS_APP_STORE.md` is
+the list, and the list of what only a Mac, a phone and the account can do.
 
-- `WKWebViewConfiguration.mediaTypesRequiringUserActionForPlayback = []`
-  (the autoplay unlock)
-- `UISupportedInterfaceOrientations` limited to the two landscape values
+What the iOS shell does, matching Android: `GameViewController` (in
+`AppDelegate.swift`) lets the score and the opening film start without a tap,
+plays video inline, locks to landscape, hides the status bar, dims the home
+indicator, defers edge swipes (the touch controls live there) and keeps the
+screen awake. `.github/workflows/ios.yml` compiles and archives it, unsigned,
+on a macOS runner.
+
+**Sound.** iOS decoded no Ogg at all before 18.4, silently. Every Ogg the game
+plays has an AAC copy in `assets/aac/` (derived by `tools/aactier.cjs`) and
+`audioSrc()` in `js/media.js` hands it out wherever the device says Ogg cannot
+play. Run the tool after adding or changing any `.ogg`.
 
 ## Store note
 

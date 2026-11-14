@@ -457,3 +457,4 @@ measured within 2%.
 is the photograph.
 
 - `beast/studio-2026-11-13/` — NULLFANG's turn and standing idle: two Seedance 2.5 masters (`turn.mp4`, `idle.mp4`), their start frame (`start_left.png`, frame 0.02 s of `studio-2026-10-04/pounce.mp4`), prompts and job ids in `jobs.json`. Cut to `characters/beast/studio-{turn,idle}.webp` by `tools/lion-studio.py`. `beast/studio-2026-10-04/grade.json` is the one tone curve every lion strip is matched to.
+- `brand/` — the app icon master (`appicon.png`, 1024 square, opaque), the alternate take, and `jobs.json`. `tools/appicon.cjs` derives every store and launcher size from it.

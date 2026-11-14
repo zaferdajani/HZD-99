@@ -1981,7 +1981,7 @@ function stingPlay(key, vol) {
   try { if (STINGNODE) { STINGNODE.pause(); STINGNODE.src = ''; } } catch (e) {}
   try {
     const el = new Audio();
-    el.src = src; el.volume = vol; el.preload = 'auto';
+    el.src = typeof audioSrc === 'function' ? audioSrc(src) : src; el.volume = vol; el.preload = 'auto';
     STINGNODE = el;
     el.addEventListener('ended', () => { if (STINGNODE === el) STINGNODE = null; }, { once: true });
     const pr = el.play();
@@ -2011,7 +2011,7 @@ function npcSay(id, idx) {
   if (!src) return false;
   try {
     const el = new Audio();
-    el.src = src; el.volume = 0.85; el.preload = 'auto';
+    el.src = typeof audioSrc === 'function' ? audioSrc(src) : src; el.volume = 0.85; el.preload = 'auto';
     el.crossOrigin = 'anonymous';
     NPCNODE = el;
     npcVoiceChain(el, id);

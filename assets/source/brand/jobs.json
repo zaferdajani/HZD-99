@@ -1,0 +1,13 @@
+{
+  "provider": "Higgsfield",
+  "model": "gpt_image_2_6",
+  "aspect_ratio": "1:1",
+  "reference_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (HZD-99, the canon element; ART_BIBLE §2)",
+  "jobs": [
+    { "name": "appicon (chosen)", "job_id": "6b86a102-35c1-4ee4-a35b-6d0a5c5b0ae9", "file": "appicon.png" },
+    { "name": "appicon alternate", "job_id": "d02f64f8-138b-45ad-8a2b-9ca8655914a6", "file": "appicon_alt_asfired.jpg" }
+  ],
+  "prompt": "A mobile game app icon, square, full-bleed, no rounded corners, no border, no text, no letters, no logo. The subject is <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> — the small white robot cat with the dark visor face and two round cyan eye-lights and the red scarf — shown as a bold head-and-shoulders bust, three-quarter view, filling about three quarters of the square, looking out of the frame with a determined expression, one clawed paw raised with three cyan claw-light arcs trailing behind it. Keep her design exactly: same white armour plating, same ears, same visor, same cyan eyes, same red scarf, one-piece arms, no sword, no redesign. Background: a deep teal-to-near-black gradient with a soft cyan glow behind her head and a faint hint of a ruined machine-city skyline in silhouette low in the frame. Clean readable shapes, strong silhouette, high contrast so it reads at small sizes; same rendered style as the reference character. The whole square is opaque artwork edge to edge — no transparent areas, no white margin, no frame, no drop shadow, no UI.",
+  "delivery": "tools/appicon.cjs derives every store and launcher size from appicon.png",
+  "note": "Generated 2026-11-14 because both native shells still carried Capacitor's placeholder icon and splash, which the App Store rejects. Assistant-reviewed; awaiting the owner's eye."
+}

@@ -1,0 +1,92 @@
+name: Build iOS app
+
+# The App Store build is made and signed on the owner's Mac (docs/IOS_APP_STORE.md).
+# This job proves, on Apple's toolchain, that the project in ios/ compiles and
+# archives with nothing but what is in the repository — no signing identity, no
+# account — and that the bundle it produces carries the game, the icon, the
+# privacy manifest and the settings the store checks for.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['ios/**', 'capacitor.config.json', 'package*.json', 'tools/pack-www.cjs', '.github/workflows/ios.yml']
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare the Capacitor app
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run app:pack
+          npx cap sync ios
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          pod --version
+
+      - name: Build for the simulator (compiles Swift, storyboards and the asset catalog)
+        working-directory: ios/App
+        run: |
+          set -o pipefail
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/sim CODE_SIGNING_ALLOWED=NO build | tail -n 40
+
+      - name: Archive for a device, unsigned (what Xcode will sign on the owner's Mac)
+        working-directory: ios/App
+        run: |
+          set -o pipefail
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -archivePath build/CLAWBYTE.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" archive | tail -n 40
+
+      - name: Verify what the archive carries
+        run: |
+          python3 - <<'PY'
+          import pathlib, plistlib, hashlib, struct, sys
+          app = next(pathlib.Path('ios/App/build/CLAWBYTE.xcarchive/Products/Applications').glob('*.app'))
+          info = plistlib.load(open(app / 'Info.plist', 'rb'))
+          assert info['CFBundleIdentifier'] == 'io.github.zaferdajani.clawbyte', info['CFBundleIdentifier']
+          assert info['CFBundleShortVersionString'] == '1.0.0', info['CFBundleShortVersionString']
+          assert info['MinimumOSVersion'].split('.')[0] >= '14', info['MinimumOSVersion']
+          assert info.get('ITSAppUsesNonExemptEncryption') is False
+          assert info.get('UIRequiresFullScreen') is True
+          for key in ('UISupportedInterfaceOrientations', 'UISupportedInterfaceOrientations~ipad'):
+              assert sorted(info[key]) == ['UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight'], info[key]
+          assert info['UIRequiredDeviceCapabilities'] == ['arm64'], info['UIRequiredDeviceCapabilities']
+          privacy = plistlib.load(open(app / 'PrivacyInfo.xcprivacy', 'rb'))
+          assert privacy['NSPrivacyTracking'] is False and privacy['NSPrivacyCollectedDataTypes'] == []
+          same = lambda rel: (app / 'public' / rel).read_bytes() == pathlib.Path('www', rel).read_bytes()
+          for rel in ['index.html', 'assets/characters/hero/idle.webp', 'assets/characters/beast/studio-turn.webp',
+                      'assets/sfx/vox/hzd_yalla.wav', 'assets/aac/index.json', 'assets/aac/sfx/nullfang/roar.m4a']:
+              assert same(rel), rel
+          assert b'serviceWorker.register' not in (app / 'public/index.html').read_bytes(), 'the packaged page must not register a service worker'
+          assert (app / 'Assets.car').exists(), 'asset catalog missing'
+          frameworks = sorted(p.name for p in (app / 'Frameworks').glob('*.framework'))
+          for need in ['Capacitor.framework', 'CapacitorHaptics.framework']:
+              assert need in frameworks, frameworks
+          size = sum(f.stat().st_size for f in app.rglob('*') if f.is_file()) / 1048576
+          print(f'OK: {app.name} {info["CFBundleShortVersionString"]} ({info["CFBundleVersion"]}), iOS {info["MinimumOSVersion"]}+, {size:.0f} MB, frameworks: {", ".join(frameworks)}')
+          PY
+
+      - name: Package the unsigned app (for inspection; it cannot be installed or submitted unsigned)
+        run: |
+          cd ios/App/build/CLAWBYTE.xcarchive/Products/Applications
+          mkdir Payload && cp -R *.app Payload/ && zip -qry "$GITHUB_WORKSPACE/CLAWBYTE-unsigned.ipa" Payload
+          ls -lh "$GITHUB_WORKSPACE/CLAWBYTE-unsigned.ipa"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clawbyte-ios-unsigned
+          path: CLAWBYTE-unsigned.ipa
+          retention-days: 14

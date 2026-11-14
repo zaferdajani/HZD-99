@@ -8,6 +8,9 @@ android/local.properties
 android/app/src/main/assets/public/
 ios/App/App/public/
 ios/App/Pods/
+ios/App/build/
+ios/App/output/
+ios/DerivedData/
 .DS_Store
 .claude/worktrees/
 .claude/agents-run/

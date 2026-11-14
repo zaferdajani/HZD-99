@@ -5014,6 +5014,10 @@ did not make.
 
 ---
 
+### 0-icon. THE APP ICON ✅ FIRED AND WIRED 2026-11-14 — AWAITING THE OWNER'S EYE
+
+Both native shells carried Capacitor's placeholder icon and splash (a blue X on white), which App Review rejects. One GPT Image 2.6 take of HZD-99 from her canon element — bust, three-quarter, claw raised, teal night behind — two variants; the chosen one is `assets/source/brand/appicon.png`, the other is kept beside it. `tools/appicon.cjs` cuts the iOS App Store icon and launch images and every Android launcher and splash size from that one master. Prompt and job ids: `assets/source/brand/jobs.json`. If the owner refuses it, re-fire, replace the master, run the tool.
+
 ### 2ax. THE GUARDIANS MOVE — filmed takes per move, Nullfang first ✱ FIRING (owner "Ok", 2026-09-05)
 
 > **FIRED AND WIRED 2026-11-13 (code session, handoff: "produce the necessary authored … turn and recovery sequence through the project's approved artwork pipeline") — AWAITING THE OWNER'S EYE.** Two more Nullfang takes, 28 credits each, Seedance 2.5, started from frame 0.02 s of the pounce master so they begin on the pose the game already draws: **`turn`** (end frame = the start mirrored; an in-place pivot through the front, cut to 18 cells, played mirrored for the other direction) and **`idle`** (end frame = start; a four-second standing loop, 24 cells). Masters, prompts and job ids: `assets/source/beast/studio-2026-11-13/`. The same day every lion strip was re-derived to one tone curve and its standing anchor recorded (`tools/lion-studio.py --grade`, `anchor`). Do not re-fire either without reading that folder's `jobs.json`.
