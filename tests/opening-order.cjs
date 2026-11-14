@@ -116,6 +116,7 @@ async function play(browser, mode) {
         bench: G.save.bench && G.save.bench.room, podBanner: typeof OP !== 'undefined' && OP.podBanner > 0,
         flagsTut: !!G.save.flags.tut, mem: typeof TRI !== 'undefined' && G.state === 'TRIAL' ? { phase: TRI.memPhase, seq: TRI.memSeq && TRI.memSeq.slice(), st: TRI.st, game: TRI.game } : null,
         pickups: Object.keys(G.save.flags).filter(k => /^sc_/.test(k)).length,
+        clock: G.save.time || 0, glimpse: !!G.save.flags.nfGlimpse,
         winchBit: !!G.save.flags.winchBit, firstKill: !!G.save.flags.firstKill, toasts: (G.toasts || []).map(q => q.text),
       };
     });
@@ -126,6 +127,17 @@ async function play(browser, mode) {
     }
     if (s.podBanner) R.podBanner = true;
     if (s.winchBit) R.winchBit = true;
+    // THE HOOK, IN NUMBERS (owner's order, 2026-11-14, item 5: "so the next
+    // comparison uses numbers"): the game's own clock at each first, and the
+    // words she has been made to read by then.
+    const words = () => R.dialogs.reduce((n, d) => n + (d.line ? d.line.trim().split(/\s+/).length : 0), 0);
+    if (!R.hook) R.hook = { t0: s.clock };
+    const H = R.hook, mark = (k) => { if (H[k] == null) H[k] = { t: +(s.clock - H.t0).toFixed(1), words: words(), pages: R.dialogs.filter(d => d.line).length }; };
+    if (s.firstKill) mark('kill');
+    if (s.glimpse) mark('glimpse');
+    if (s.step === 'booth') mark('gates');
+    if (s.winchBit) mark('bite');
+    if (s.room === 'A1') mark('meadow');
     if (s.firstKill && R.firstKillBeforeTalk == null) R.firstKillBeforeTalk = R.dialogs.filter(d => d.line).length === 0;
     for (const tx of s.toasts || []) if (/It bit back/.test(tx) && !R.dialogs.some(d => d.line === tx)) R.dialogs.push({ step: s.step, room: s.room, name: 'toast', line: tx });
     R.pickups = s.pickups;
@@ -332,6 +344,18 @@ async function play(browser, mode) {
       check('the letter is read before the battery is found', iLetter >= 0 && iBatt > iLetter, iLetter + ' < ' + iBatt);
       check('...his battery has its own card, with its art', iBatt >= 0, R.dialogs[iBatt] && R.dialogs[iBatt].line);
       check('...and he wakes after the repair, and says who he is', iWake > iBatt, iWake);
+      // THE NUMBERS. Played by a harness that never hesitates, so these are
+      // floors, not averages — a person is slower — but they are the same
+      // measurement every time, and the ceilings are the promise:
+      //   a kill inside two minutes, with nothing read;
+      //   NULLFANG seen inside three;
+      //   the whole opening, to the meadow, in under 330 words of dialogue.
+      const H = R.hook || {};
+      console.log('\n    THE HOOK  first kill ' + JSON.stringify(H.kill) + '  through the gates ' + JSON.stringify(H.gates)
+        + '  NULLFANG seen ' + JSON.stringify(H.glimpse) + '  the winch bites ' + JSON.stringify(H.bite) + '  the meadow ' + JSON.stringify(H.meadow) + '\n');
+      check('THE HOOK: her first kill is inside two minutes, with not a word read', H.kill && H.kill.t <= 120 && H.kill.words === 0, H.kill);
+      check('THE HOOK: NULLFANG is seen inside three minutes, still with nothing read', H.glimpse && H.glimpse.t <= 180 && H.glimpse.words === 0, H.glimpse);
+      check('THE HOOK: the whole opening reaches the meadow in under 330 words of dialogue and cards', H.meadow && H.meadow.words <= 330, H.meadow);
       // THE FIRST FIGHT comes before any of it: she has broken something
       // before anyone has spoken to her
       const sClaw = R.steps.indexOf('claw'), sGate = R.steps.indexOf('gate');
@@ -363,7 +387,9 @@ async function play(browser, mode) {
       const iCard = R.dialogs.findIndex(d => d.demo === 'pack');
       check('...and the purchase card shows the two verbs with her controls', iCard > iPack && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
     }
-    check(mode + ': the Volt Pack is bought with zero scrap gathered from the floor', R.scrapAtShop === 12 && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
+    // (what the winch and the first machine threw out pays for it — or he makes up
+    // the difference — and no scrap pile lying in a room is ever needed)
+    check(mode + ': the Volt Pack is always affordable, with no room scrap gathered', R.scrapAtShop >= 12 && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
     if (R.monument) {
       const m = R.monument;
       check(mode + ': the monument is east of the booth door, within one screen, before the way out',

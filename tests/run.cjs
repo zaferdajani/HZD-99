@@ -149,6 +149,7 @@ const SUITE = [
   ['nodes',     'all eight Mind Nodes open a puzzle and pay out'],
   ['memnode-retry', 'copying the lights never answers, and a miss at a Mind Node asks again instead of ejecting her'],
   ['denfloor', 'the den stands on one floor — her, the tinker and the table — and a door is a two-second run'],
+  ['cadence', 'chapter one never goes flat: every room on the critical path gives her something she has not met, and a breath has to be earned'],
   ['glimpse', 'NULLFANG is seen before he is met: a head at the edge of the frame past the gates, one roar, gone east — once, and it takes nothing from her'],
   ['prize', 'the first room shows a prize she cannot reach: every real jump misses it, the double jump lands on it, and it is in the frame'],
   ['bossbench', 'a save point one door from every boss, and every pod standing clear on something'],
