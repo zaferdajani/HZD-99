@@ -11,7 +11,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
   const cases=[['idle','hzdIdle',{anim:.2}],['walk','gaitWalk',{vx:150,stridePh:1}],['run','gaitRun',{vx:340,stridePh:2}],
    ['takeoff','transTakeoff',{on:false,vy:-600,takeoffT:.06,takeoff0:.12}],['rise','transAir',{on:false,vy:-400}],['apex','transAir',{on:false,vy:0}],['fall','transAir',{on:false,vy:400}],
    ['land','transLand',{landT:.06,land0:.12}],['dash','transDash',{dashT:.08,dash0:.16}],['skid','transSkid',{skidT:.07,skid0:.14}],['wall','transWall',{on:false,wallSlide:1}],
-   ['guard','hzdGuard',{guardT:1}],['hurt','hzdHurt',{hurtPoseT:.15}],['heal','hzdHeal',{healT:.4}],['idle variation','heroFidget',{idleT:FIDGET_AFTER+.7}],
+   ['guard','hzdGuard',{guardT:1}],['hurt','hzdHurt',{hurtPoseT:.15}],['heal','hzdHeal',{healT:.4}],['idle variation','heroFidget',{idleT:heroIdleTimeFor(5,true)}],
    ['air attack','swingAir',{on:false,swingVis:{t:.12,t0:.24,combo:0,air:true,ay:0,weaponMode:'claws'}}],
    ['plunge','swingDown',{on:false,swingVis:{t:.06,t0:.24,combo:0,air:true,ay:1,weaponMode:'claws'}}],
    ['death','hzdDeath',{dead:true}],['recharge','heroRecharge',{}]];

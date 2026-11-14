@@ -6481,6 +6481,18 @@ and that is the half only a repaint fixes.
   paint itself is rich.
 - **The others:** the owner said "just like the others" — once Ratchet's take is
   approved, the same palette brief runs for `servoLoop`, `patchLoop`, `lumenLoop`.
+- **FIRED 2026-11-14, AWAITING THE OWNER'S PICK (code session, on his "finish it
+  all properly").** The style anchor only — `talk_1`, Nano Banana Pro, 2k, 1:1,
+  the current plate as the shape reference, the palette above in words. Two takes,
+  Higgsfield jobs `0f440ce1-02d6-4a00-a7e9-0e64bad2810b` (A) and
+  `368b40e6-3ce8-437f-8229-f3a8c3e65736` (B), 4 credits. Both held his outline
+  (aspect 0.698 against the plate's 0.700), both carry the steel pack, verdigris
+  seams, rust on belly/shoulder/boots and lit amber lenses. Shown to him in the
+  den at game scale with and without `NPC_LOOK`. NOT keyed, NOT archived, NOT in
+  the game: the other six plates and the loop fire from whichever he approves.
+  Keying note for whoever lands it: the plate has two ENCLOSED pockets of the
+  black field (hand-to-helmet, arm-to-hip) that `tools/blackkey.cjs`'s border
+  flood leaves in — they need a second pass.
 
 ### 1-imp. SHE RUNS OUT OF PATIENCE — `heroImpatient` (8, loop) ✱ NEW 2026-11-14 (code session, owner's order)
 
@@ -6509,10 +6521,26 @@ The crossed arms and the tapping foot are a new strip.
 - **Negatives:** no arms at her sides, no walking, no smile, no speech bubble,
   no text, no ground, no cast shadow, no outline, pure black background, whole
   figure in frame facing three-quarter RIGHT.
-- **Wiring (code session, on delivery):** `heroImpatient` in js/media.js; in
-  js/entities.js the bout that starts at `FIDGET_AFTER` plays this strip instead
-  of `HERO_FIDGET_BEATS` — settle (0) as `hzdSay('yalla')` fires, then the tap
-  1-2-3-4-5-6 at ~7 taps a second for the length of the line, hold on 7; the
-  procedural scarf, glow and ear twitch stay on top. A soft toe-tick SFX on the
-  down cells (audio session cue, AUDIO_QUEUE). `tests/hero-move-coverage.cjs`
-  gains the row; `tests/gait.cjs` feet rule applies.
+- **Wiring — DONE 2026-11-14, inert until the sheet lands.** js/entities.js:
+  `HERO_IMPATIENT`, `HERO_IMPATIENT_BEATS`, `heroImpatientReady()`; `heroIdleClip`
+  gives bouts 0, 2, 4… to this strip and leaves the fidget the bouts between, so
+  the bout "yalla" is said over opens on the settle cell (0), taps 1-2-3-4-5-…
+  at **3.5 taps a second** (0.14 s a cell — the "~7 a second" first written here
+  was a flicker, and the 2026-09-27 ruling is against flicker), looks at the
+  player on 6, flicks an ear on 7. Its flip is NOT cancelled the way the front-on fidget's
+  is: a three-quarter view turns with her. With no `heroImpatient` in the manifest none
+  of it is reachable and nothing is fetched. `tests/impatient.cjs` holds both
+  sides of that. **To land the approved sheet:** cut it to one row of eight
+  320-px cells, soles at y=312, figure 203 tall (fidget.webp's frame); save as
+  `assets/characters/hero/impatient.webp`; add `heroImpatient` to js/media.js,
+  `HERO_MOTION_KEYS` (js/mobility_fix.js) and `BODY_KEYS` (js/preload.js); a row
+  in `tests/hero-move-coverage.cjs`; `node tools/lowres.cjs && node build.cjs`.
+  A soft toe-tick SFX on the down cells is the audio session's (AUDIO_QUEUE).
+- **FIRED 2026-11-14, AWAITING THE OWNER'S PICK.** GPT Image 2.6 through
+  Higgsfield, canon element embedded, the fidget strip as the design reference,
+  one 16:9 sheet of 4×2 cells. Two takes, jobs
+  `3e374119-6966-4c4c-883c-04255736a59b` (A) and
+  `dc66b53a-49b3-4211-a7c5-75af1354624c` (B), 0.5 credit. Both hold her size
+  to a pixel or two across all eight cells; B's toe lift reads more clearly; both
+  draw her a little slimmer in the head than the fidget strip does. Shown to him
+  as strips against the fidget and on the meadow. NOT keyed, NOT in the game.

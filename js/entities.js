@@ -1293,6 +1293,40 @@ const HERO_FIDGET_BEATS = [[5, 0.7], [7, 0.35], [3, 0.2], [7, 0.32], [3, 0.2], [
   [7, 0.45], [4, 0.55], [0, 0.3], [6, 0.22], [1, 0.5], [2, 0.3]];
 const beatsLength = b => b.reduce((n, x) => n + x[1], 0);
 const FIDGET_BOUT = beatsLength(HERO_FIDGET_BEATS), IDLE_REST = 6.5;
+// SHE CROSSES HER ARMS AND TAPS HER FOOT (owner, 2026-11-14: "look for how Sonic
+// used to stamp with his feet and cross his hand when he's idle and waiting, and
+// give the character the same move when it says yalla"). The fidget strip cannot
+// do it — its eight cells are front-on with her arms at her sides — so this is
+// its own strip (ART_QUEUE 1-imp): 0 settle into the cross, 1/3/5 toe up,
+// 2/4/6 toe down (6 with a glance at the player), 7 the hold with an ear flick.
+// The bout that opens at FIDGET_AFTER — the one "yalla" is said over — plays it,
+// and so does every second bout after; the old fidget keeps the bouts between,
+// so the face she already had is not retired by the one she gained.
+// A tap is 0.28 s, three and a half a second: the body in cells 1-6 is one
+// drawing and only the foot moves, so this is the one script in the idle that is
+// allowed a rhythm (the 2026-09-27 ruling was against her whole FACE changing
+// six times a second, not against a foot).
+// INERT UNTIL THE SHEET EXISTS: with no `heroImpatient` in the manifest nothing
+// here is reachable and every bout is the fidget, exactly as before.
+// NOT mirrored-cancelled like the fidget: this is a three-quarter view facing
+// RIGHT, so it turns with her.
+let HERO_IMPATIENT = { key: 'heroImpatient', cells: 8, k: HERO_DELIVERY_K };
+const HERO_TAP = 0.14;
+const HERO_IMPATIENT_BEATS = (() => {
+  const T = HERO_TAP, b = [[0, 0.4],
+    [1, T], [2, T], [3, T], [4, T], [5, T], [2, T],
+    [1, T], [2, T], [3, T], [4, T], [5, T], [6, 0.6],     // ...and a look at whoever is keeping her
+    [1, T], [2, T], [3, T], [4, T], [7, 0.4]];
+  // it fills the fidget's own bout, so the rest between bouts starts where it always did
+  b.push([2, Math.max(0.2, FIDGET_BOUT - beatsLength(b))]);
+  return b;
+})();
+function heroImpatientReady() {
+  const P = HERO_IMPATIENT, im = P && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[P.key];
+  if (im && im.complete && im.naturalWidth) return true;
+  if (P && typeof mediaFetch === 'function') mediaFetch(P.key, true);   // a no-op for a key the manifest does not carry
+  return false;
+}
 function beatCell(beats, t) {
   let k = ((t % beatsLength(beats)) + beatsLength(beats)) % beatsLength(beats);
   for (const [cell, d] of beats) { if (k < d) return cell; k -= d; }
@@ -1305,10 +1339,10 @@ function beatTime(beats, cell) {
   return -1;
 }
 // the first idleT at which the combined schedule shows `cell` of one strip
-function heroIdleTimeFor(cell, fidget) {
+function heroIdleTimeFor(cell, fidget, imp) {
   for (let t = 0; t < 120; t += 0.01) {
     const q = heroIdleClip(t);
-    if (q.fidget === !!fidget && q.cell === cell) return t + 0.005;
+    if (q.fidget === !!fidget && !!q.imp === !!imp && q.cell === cell) return t + 0.005;
   }
   return -1;
 }
@@ -1318,7 +1352,11 @@ function heroIdleTimeFor(cell, fidget) {
 function heroIdleClip(t) {
   if (t <= FIDGET_AFTER) return { fidget: false, cell: beatCell(HERO_IDLE_BEATS, t) };
   const u = t - FIDGET_AFTER, P = FIDGET_BOUT + IDLE_REST, n = Math.floor(u / P), k = u - n * P;
-  if (k < FIDGET_BOUT) return { fidget: true, cell: beatCell(HERO_FIDGET_BEATS, k) };
+  if (k < FIDGET_BOUT) {
+    // bouts 0, 2, 4… are the crossed arms and the tapping foot, once that strip exists
+    if (n % 2 === 0 && heroImpatientReady()) return { fidget: true, imp: true, cell: beatCell(HERO_IMPATIENT_BEATS, k) };
+    return { fidget: true, cell: beatCell(HERO_FIDGET_BEATS, k) };
+  }
   return { fidget: false, cell: beatCell(HERO_IDLE_BEATS, FIDGET_AFTER + n * IDLE_REST + (k - FIDGET_BOUT)) };
 }
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
@@ -3466,6 +3504,9 @@ class Player {
         return true;
       }
     }
+    const P = HERO_IMPATIENT;
+    if (P && st === 'idle' && clip.imp
+      && drawHeroMotionCell(this, c, P.key, clip.cell, P.cells, 0, HERO_FLOOR, HERO_DH * (P.k || 1), false)) return true;
     const F = HERO_FIDGET;
     if (F && st === 'idle' && clip.fidget) {
       // the scripted bout (HERO_FIDGET_BEATS), not the strip run end to end

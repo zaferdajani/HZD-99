@@ -158,6 +158,7 @@ const SUITE = [
   ['dighub', 'the hub hatch: nothing shown before the lion (no light, no crack, no prompt), and after him the lit floor breaks into the first cave'],
   ['camjump', 'a jump does not move the frame; landing, falling and the top edge do'],
   ['padfeel', 'on a controller: the stick runs, the Mind Nodes do not slip, prompts show the shapes, and yalla waits for real idleness'],
+  ['impatient', 'arms crossed and a tapping foot over "yalla": wired, paced, turned with her — and inert until its sheet is approved'],
   ['film',      'the intro reel plays all eight shots without falling back'],
   ['filmflow',  'the opening plays as one film: no black, no caption freeze, between shots'],
   ['cutskip',   'a tap does not spend the story, and a film starts at its start'],
