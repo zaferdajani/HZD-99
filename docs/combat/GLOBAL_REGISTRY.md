@@ -372,6 +372,10 @@ Consequences for anyone adding a fight:
 | walking into one that is standing still | contact damage | a bump. It hurts when IT moves into her or attacks |
 | what blocks | — | living hostile bodies. Not the dead, bound, rescued, tamed, charmed or purified; not a sleeping or entering guardian; not a keeper who is not duelling; not a guardian that has left the world (`lsvanish`, `arcstorm`) |
 
+**A blow throws her, and throws her AWAY** (same day, found by this work). `hurt()` set 250 px/s of knockback and her own ground friction (2900 px/s²) braked it in five frames: nine pixels. The harness that had reported "thrown back 43 px" was reading an arrow key a previous section had left held — it was measuring her walking through the lion. Now the throw keeps its flight for the beat `hurt()` names (`knockT`: 0.16 s, 0.2 s for a guardian's blow, which also throws 1.35× as hard) and her stick cannot cancel it: about 40 px from a crawler, 64 px from NULLFANG's paw, measured with no key held. And a throw that would drive her INTO the body she is standing against is turned round (`solidThrowDir`) — a paw arrives from in front of her, past her, and used to knock her through the animal.
+
+**A charge passes over her; it does not plough her.** Eased out to "her own side" of a body running at her she would be pushed along in front of it to the far wall. A body moving faster than 220 px/s goes over her and she comes out behind it. The down-slash's contact (the pogo) is never eased.
+
 **The wall is the drawn body, not the hurt box.** `assets/bodybox.json` (measured from the art by `tools/bodybox.cjs`, compiled in as `BODY_BOX`) says how far each kind is drawn beyond its hurt box; the wall is the hurt box widened three quarters of the way out to the drawing, by at most 46 px so her shortest strike still reaches the hurt box from outside it. NULLFANG: hurt box ±42 px, wall ±88 px, drawn ±104 px. NOSTOS's creatures are not measured and use the hurt box.
 
 Consequences for anyone building a room or a fight:

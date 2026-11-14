@@ -20,7 +20,8 @@
 //     pounce that lands on her lands on her and a lunge that reaches her
 //     reaches her — the contact rules in Enemy.update and Boss.update are
 //     untouched. Only once she is inside a HURT box is she eased back out of
-//     it, to the side she is on, or to the other if a wall has her pinned.
+//     it: to the side she is on if it walked into her, out BEHIND it if it
+//     charged over her, and to the other side if a wall has her pinned.
 //   - What is not fighting her is not in her way: the dead, the bound, the
 //     rescued, the tamed, the charmed, a purified guardian, a sleeping one, a
 //     keeper who is not duelling, a guardian that has stepped out of the world
@@ -42,7 +43,7 @@
 // NOSTOS draws different creatures on the same kinds and has not been
 // measured: there the wall is the hurt box.
 // ---------------------------------------------------------------------------
-const SOLID = { on: true, pad: 46, lift: 60, out: 560, grace: 5 };
+const SOLID = { on: true, pad: 46, lift: 60, out: 560, grace: 5, charge: 220 };
 const SOLID_B = { x0: 0, x1: 0, y0: 0, y1: 0 };
 function bodySolid(e) {
   if (!e || e.dead || e.disabled || e.rescued || e.meet || e.tame || e.calm || e.calmed || e.purified) return false;
@@ -83,15 +84,28 @@ function solidOne(p, e, xBefore, dt) {
   if (xBefore + p.w <= B.x0 + 0.5) { p.x = B.x0 - p.w; if (p.vx > 0) p.vx = 0; p.bodyBlock = e; return; }
   if (xBefore >= B.x1 - 0.5) { p.x = B.x1; if (p.vx < 0) p.vx = 0; p.bodyBlock = e; return; }
   // SHE WAS ALREADY INSIDE THE WALL: it came over her, or she came down onto it.
+  // A CHARGE PASSES OVER HER; IT DOES NOT PLOUGH HER. Eased out to "her own
+  // side" of a body running at her, she would be pushed along in front of it
+  // every frame — carried the length of the arena on a rhino's nose and pinned
+  // to the far wall (tests/gravehorn.cjs: the charge that should miss and skid
+  // ran on to the wall with her in front of it). A body moving fast goes over
+  // her and she comes out BEHIND it, which is where the charge has already
+  // been; a body walking into her shoves her back the way she was facing it.
   const pc = p.x + p.w / 2, ec = e.x + e.w / 2;
-  const side = pc < ec ? -1 : pc > ec ? 1 : -(p.face || 1);
+  const side = Math.abs(e.vx || 0) > SOLID.charge ? -Math.sign(e.vx) : (pc < ec ? -1 : pc > ec ? 1 : -(p.face || 1));
   // ...she may always leave, and never go further in
   const moved = p.x - xBefore;
   if (moved * side < 0) { p.x = xBefore; if (p.vx * side < 0) p.vx = 0; p.bodyBlock = e; }
   // inside the HURT box itself she is eased out — to her own side, or through
   // to the other if a wall has her pinned (a body that could crush her against
   // a wall would be a softlock with a health bar)
-  if (p.x + p.w > e.x && p.x < e.x + e.w) {
+  // ...but NOT while she is striking down onto it. The down-slash lands on a
+  // body and rebounds off it (the pogo), and its ring is measured from where
+  // she is: nudged sideways for the three frames she is on its back, the ring
+  // missed the machine beside her (tests/attacks.cjs). The plunge owns that
+  // contact; she is gone again before there is anything to ease.
+  const plunging = !!(p.swing && p.swing.ay > 0.5);
+  if (!plunging && p.x + p.w > e.x && p.x < e.x + e.w && p.y + p.h > e.y + 2 && p.y < e.y + e.h) {
     const step = SOLID.out * dt;
     const want = side < 0 ? Math.max(e.x - p.w, p.x - step) : Math.min(e.x + e.w, p.x + step);
     if (solidTileFree(p, want)) p.x = want;
@@ -100,6 +114,29 @@ function solidOne(p, e, xBefore, dt) {
       if (solidTileFree(p, other)) p.x = other;
     }
   }
+}
+// WHICH WAY A BLOW THROWS HER. Player.hurt throws her away from the point the
+// blow came from, and a guardian's paw comes from in FRONT of her — past her,
+// on the side away from its body — so the throw used to carry her into the
+// lion and out of its back. With a wall there she would be thrown at it and
+// stop dead: a hit with no knockback. A throw that would drive her into a
+// solid body she is standing against is turned round: she is knocked back from
+// the animal, which is also where a blow from an animal sends anything.
+function solidThrowDir(p, dir) {
+  if (!SOLID.on || !dir || typeof G === 'undefined') return dir;
+  const pc = p.x + p.w / 2;
+  const at = (e) => {
+    if (!bodySolid(e)) return false;
+    const B = solidBox(e);
+    if (p.y + p.h <= B.y0 + SOLID.grace || p.y >= B.y1) return false;
+    const ec = e.x + e.w / 2;
+    if (Math.sign(ec - pc) !== dir) return false;            // the throw is not toward this one
+    // close enough that the throw (about 45 px) would reach its wall
+    return dir > 0 ? B.x0 - (p.x + p.w) < 48 : p.x - B.x1 < 48;
+  };
+  for (const e of G.enemies) if (at(e)) return -dir;
+  if (G.boss && at(G.boss)) return -dir;
+  return dir;
 }
 // Called by Player.update right after her own movement is resolved against the
 // room. xBefore is where she stood before that movement.

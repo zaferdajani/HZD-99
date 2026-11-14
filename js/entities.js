@@ -1742,6 +1742,7 @@ class Player {
     // nothing else. One rule, applied here once for every input device.
     const _dz = (this.dizzyT = Math.max(0, (this.dizzyT || 0) - dt)) > 0;
     this.flungT = Math.max(0, (this.flungT || 0) - dt);
+    this.knockT = Math.max(0, (this.knockT || 0) - dt);       // a blow's throw, still carrying her (hurt())
     const inD = _stun ? () => false : _dz ? (a => !DIZZY_BLOCK[a] && IN_D(a)) : IN_D;
     const inP = _stun ? () => false : _dz ? (a => !DIZZY_BLOCK[a] && IN_P(a)) : IN_P;
     if (_stun && chance(0.5))
@@ -1933,8 +1934,14 @@ class Player {
       // ground friction would stop a 980 px/s throw inside a third of a second
       // ...and a body THROWN (a guardian's toss, a charge) keeps its flight:
       // on the floor's friction a 600 px/s throw would stop in a fifth of a second
-      const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : this.flungT > 0 ? 420 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
-      if (dir !== 0 && !healing && !(this.flungT > 0)) {
+      // ...AND A BLOW THROWS HER. hurt() sets 250 px/s of knockback and this
+      // line then braked it at 2900 px/s²: gone in five frames, nine pixels of
+      // travel — a hit that left her standing where it found her. (The harness
+      // that reported "thrown back 43 px" was reading a key a previous section
+      // had left held down; it was measuring her WALKING.) For the beat hurt()
+      // names, the throw keeps its flight and her stick cannot cancel it.
+      const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : (this.flungT > 0 || this.knockT > 0) ? 420 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
+      if (dir !== 0 && !healing && !(this.flungT > 0) && !(this.knockT > 0)) {
         // TURN BOOST: reversing bites harder than accelerating. Pressing away
         // from current speed is always a correction the player already wants
         // finished — every feel-canon movement kit does this (not on ice:
@@ -2983,7 +2990,7 @@ class Player {
         const kb = 0.22;
         // ...and no hop: the brace needs her feet on the ground, so a block
         // that lifted her would drop the brace for the next blow of a chain
-        this.vx = (Math.sign(pcx - fromX) || -faceDir) * 250 * kb;
+        this.vx = (typeof solidThrowDir === 'function' ? solidThrowDir(this, Math.sign(pcx - fromX) || -faceDir) : (Math.sign(pcx - fromX) || -faceDir)) * 250 * kb;
         return;
       }
       // the third: the plate gives. This blow lands cut, and the brace is down
@@ -3056,6 +3063,7 @@ class Player {
       const big = (typeof Boss !== 'undefined' && foe instanceof Boss) || onHer
         || /^(glitch|alpha|brood|zero|atlas|prism|horn|mother|chime|carrier|moth|lattice|lens)\./.test(String(src || ''));
       G.hitStop = Math.max(G.hitStop || 0, guarded ? 0.04 : big ? 0.13 : 0.09);
+      this._bigHit = big && !guarded;
       const now = performance.now();
       this.hitFlashAt = now; this.hitFlashUntil = now + (guarded ? 110 : 230);
       if (typeof fx === 'function')
@@ -3073,7 +3081,12 @@ class Player {
     // a braced hit still shoves her, just far less — she stood her ground,
     // she was not thrown by it
     const kbm = (relicHas('ember') ? 0.5 : 1) * (guarded ? 0.35 : 1);
-    this.vx = (Math.sign(this.x + this.w / 2 - fromX) * 250 || 250) * kbm; this.vy = -240 * kbm;
+    // (away from the blow — unless that is INTO the machine she is standing against: js/solid.js)
+    const throwDir = Math.sign(this.x + this.w / 2 - fromX) || 1;
+    // a guardian's blow throws her further than a crawler's: about 60 px against 40
+    const heavy = this._bigHit ? 1.35 : 1; this._bigHit = false;
+    this.vx = (typeof solidThrowDir === 'function' ? solidThrowDir(this, throwDir) : throwDir) * 250 * kbm * heavy; this.vy = -240 * kbm;
+    this.knockT = guarded ? 0 : heavy > 1 ? 0.2 : 0.16;
     if (this.cores <= 0 && hasCrest('nine') && !G.save.usedNine) {
       G.save.usedNine = true; this.cores = 3; this.iT = 2.2;
       sfx('win'); G.toast(t('c_nine'));

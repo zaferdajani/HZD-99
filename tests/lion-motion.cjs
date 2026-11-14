@@ -86,16 +86,18 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
         for (let f = 0; f < secs * 60; f++) {
           const t = f / 60;
           if (t > 14) { if (b.roarCD > 50) b.roarCD = 1; if (b.ambushCD > 50) b.ambushCD = 2; }
-          dist = Math.floor(t / 7) % 2 ? 320 : (attack ? 74 : 110);
+          dist = Math.floor(t / 7) % 2 ? 320 : (attack ? 100 : 110);        // 100: against its body, which is as close as she can stand
           if (f % 170 === 169) side = -side;                       // she crosses under it
           const want = b.cx() + side * dist, px = player.x + player.w / 2, W = G.roomDef.w * TILE;
-          keys.ArrowLeft = keys.ArrowRight = 0;
+          keys.ArrowLeft = keys.ArrowRight = keys.KeyZ = 0;
           if (Math.abs(want - px) > 14) keys[want > px ? 'ArrowRight' : 'ArrowLeft'] = 1;
+          // she cannot walk through it (js/solid.js): to cross, she jumps it
+          if ((want - b.cx()) * (px - b.cx()) < 0 && Math.abs(px - b.cx()) < 190) { keys.KeyZ = 1; if (player.on) keysP.KeyZ = 1; }
           if (want < 70 || want > W - 70) side = -side;
           const wasTurning = turning(b);
           // the film's player: she strikes in its openings and its blows land on her,
           // so it is knocked about the arena by her hits the way a real fight knocks it
-          if (attack && Math.abs(px - b.cx()) < 96 && /^(idle|recover|daze)$/.test(b.st) && f % 16 === 0) { player.face = Math.sign(b.cx() - px) || player.face; keysP.KeyX = 1; keys.KeyX = 1; } else keys.KeyX = 0;
+          if (attack && Math.abs(px - b.cx()) < 108 && /^(idle|recover|daze)$/.test(b.st) && f % 16 === 0) { player.face = Math.sign(b.cx() - px) || player.face; keysP.KeyX = 1; keys.KeyX = 1; } else keys.KeyX = 0;
           if (attack) { player.cores = 5; if (b.hp < b.hpMax * 0.6) b.hp = b.hpMax * 0.6; update(1 / 60); for (const k in keysP) keysP[k] = 0; cam.shake = 0; } else
           step(b);
           // IT TURNED AWAY FROM HER: its facing left her side while she stayed on it
@@ -171,6 +173,9 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
       }
       // ---- I. its blow lands on HER: the freeze, the throw, the flash -------------
       { const b = fresh(71, 1); place(b, -1, 60); b.st = 'swipewarn'; b.t = 0.03; b.swipeCD = 9; b.face = b.faceVis = -1;
+        // NO KEY IS DOWN. The fights above leave their last arrow held, and for a month this section
+        // measured her walking through the lion and called it the throw.
+        for (const k in keys) keys[k] = 0; for (const k in keysP) keysP[k] = 0;
         player.iT = 0; player.cores = 5; G.hitStop = 0; G.dmgLog = {}; const cores0 = player.cores, x0 = player.x;
         G.clashAt = 0;      // the limiter is real time, and the blow she landed a section ago was microseconds back
         const heard = []; const sfxWas = sfx; sfx = (n) => { heard.push(n); };
@@ -287,7 +292,7 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
     check('its paw lands on her and the world stops for it', HH.hitAt >= 0 && HH.stop >= 0.1 && HH.frozen >= 5 && HH.heldStill, JSON.stringify({ stop: HH.stop, frames: HH.frozen, src: HH.src }));
     check('...it rings: the clash, under her own cry', (HH.heard || []).includes('clash') && (HH.heard || []).includes('hurt'), JSON.stringify(HH.heard));
     check('...her body flashes', HH.flashMs >= 180 && HH.lit > HH.plain + 250, HH.flashMs + ' ms, ' + HH.plain + ' → ' + HH.lit + ' white px');
-    check('...and then she is thrown back from the blow', HH.away === true && Math.abs(HH.thrown) >= 18, HH.thrown + ' px');
+    check('...and then she is thrown back from the blow, with no key held', HH.away === true && Math.abs(HH.thrown) >= 40, HH.thrown + ' px');
     for (const [name, L] of [['phase one', R.fight1], ['phase two', R.fight2], ['a fight she fights back in', R.fight3]])
       check(name + ': it never turns away from her on its own', L.away === 0, L.away + ' times' + (L.roars != null && L.coils != null ? ' (' + L.roars + ' roars, ' + L.coils + ' coils, ' + L.crossings + ' crossings)' : ''));
     check('a fight she fights back in still has pounces in it, not a string of roars', R.fight3.coils >= 3 && R.fight3.roars <= R.fight3.coils, JSON.stringify(R.fight3));

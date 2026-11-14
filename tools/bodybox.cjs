@@ -62,8 +62,15 @@ async function measure(url) {
           let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 128) n++;
           same = n === last && n > 40 ? same + 1 : 0; last = n;
         }
+        // several of these bodies bob, flare and wave: the row is the furthest the
+        // drawing reaches over a second of that, not one frame caught mid-motion
         let al = W, ar = -1, at = H, n = 0;
-        for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) if (d[(py * W + px) * 4 + 3] > 128) { n++; if (px < al) al = px; if (px > ar) ar = px; if (py < at) at = py; }
+        for (let k = 0; k < 10; k++) {
+          if (k) { await new Promise(r => setTimeout(r, 100)); e.anim = (e.anim || 0) + 0.1; d = shot(); }
+          let m = 0;
+          for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) if (d[(py * W + px) * 4 + 3] > 128) { m++; if (px < al) al = px; if (px > ar) ar = px; if (py < at) at = py; }
+          n = Math.max(n, m);
+        }
         if (n < 40) { out[w.key] = null; continue; }
         const cx = W / 2, floor = H - 120;
         out[w.key] = { hurt: [e.w, e.h], l: Math.round(cx - al), r: Math.round(ar - cx), top: Math.round(floor - at), px: n, room: w.id };
