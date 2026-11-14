@@ -1172,6 +1172,7 @@ function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   c.translate(cx, base);
   if (flip) c.scale(-1, 1);
   c.drawImage(im, i * cw, 0, cw, ch, -dw / 2, -h, dw, h);
+  if (NPC_SHEEN.on) npcSheen(c, im, i * cw, 0, cw, ch, -dw / 2, -h, dw, h);
   infEyeArt(c, key, i, -dw / 2, -h, dw, h);             // the eyes in this cell, for the infection
   c.restore();
   return true;
@@ -1202,9 +1203,70 @@ function drawSetPlate(c, key, cx, base, frameH, flip, refKey) {
   c.translate(cx, base);
   if (flip) c.scale(-1, 1);
   c.drawImage(im, -ft.cx * dw, -ft.y * dh, dw, dh);
+  if (NPC_SHEEN.on) npcSheen(c, im, 0, 0, im.naturalWidth, im.naturalHeight, -ft.cx * dw, -ft.y * dh, dw, dh);
   infEyeArt(c, key, 0, -ft.cx * dw, -ft.y * dh, dw, dh);
   c.restore();
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// THE MACHINE FOLK ARE METAL (owner, 2026-11-14, of Ratchet in his den: "not
+// well defined... like scrap of metal blended with the background. It does not
+// have its own identity or presence in the screen. The colors are very dull...
+// give it the metallic, nice metallic tint... a little bit of shine here and
+// there, make it more lively").
+//
+// Measured first: switching off every full-frame pass (the interior dark, the
+// lift, the light pass, the fringe, the bloom) moved his region by a few points
+// at most — the room was not what dulled him. His plates and his work strip are
+// drawn RAW (see drawSetPlate), while the old NPC sheet always took popArt's
+// lift, so the newest art of him was the flattest thing on screen.
+//
+// Two layers, both render-side, both on the art he already has:
+//  - NPC_LOOK, a canvas filter the caller sets around the body: brighter,
+//    richer, harder — copper reads as copper and not as the wall behind it;
+//  - the SHEEN, drawn here: his own highlights, isolated by a hard contrast and
+//    masked by a slow diagonal band, added as light. Shadows stay where they
+//    are, so it is shine on the metal and not a wash over the figure.
+// The repaint itself (rust patches, a second metal, real speculars) is a plate
+// job — ART_QUEUE §2r-ii — and this keeps working over whatever it delivers.
+// Skipped where canvas has no filter (older Safari) and below the quality dial's
+// glow floor, so a struggling phone pays nothing for it.
+const NPC_LOOK = 'brightness(1.16) saturate(1.35) contrast(1.14)';
+const NPC_SHEEN = { on: false, t: 0, k: 0.42, cv: null };
+function npcSheen(c, im, sx, sy, sw, sh, dx, dy, dw, dh) {
+  if (typeof c.filter !== 'string') return;
+  const W = Math.ceil(Math.abs(dw)), H = Math.ceil(Math.abs(dh));
+  if (W < 2 || H < 2 || W > 1024 || H > 1024) return;
+  let cv = NPC_SHEEN.cv;
+  if (!cv) cv = NPC_SHEEN.cv = document.createElement('canvas');
+  if (cv.width < W) cv.width = W;
+  if (cv.height < H) cv.height = H;
+  const x = cv.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
+  x.clearRect(0, 0, W, H);
+  // highlights only: a hard contrast sends the dark half of the body to black,
+  // which adds nothing under 'lighter'
+  x.filter = 'brightness(1.45) contrast(2.4) saturate(0.75)';
+  x.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+  x.filter = 'none';
+  // the band crosses the body every 3.4s, a quarter of the time in view; the
+  // floor of 0.3 keeps every highlight a little hot between passes
+  const ph = ((NPC_SHEEN.t % 3.4) / 3.4) * 2.4 - 0.7;
+  const g = x.createLinearGradient(W * (ph - 0.45), 0, W * (ph + 0.45), H * 0.7);
+  g.addColorStop(0, 'rgba(0,0,0,0.3)');
+  g.addColorStop(0.5, 'rgba(0,0,0,1)');
+  g.addColorStop(1, 'rgba(0,0,0,0.3)');
+  x.globalCompositeOperation = 'destination-in';
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'source-over';
+  c.save();
+  c.filter = 'none';
+  c.globalCompositeOperation = 'lighter';
+  c.globalAlpha *= NPC_SHEEN.k;
+  c.drawImage(cv, 0, 0, W, H, dx, dy, dw, dh);
+  c.restore();
 }
 
 // ---------------------------------------------------------------------------

@@ -11605,7 +11605,7 @@ function gateEnter() {
     // the align beat: how far, which way, and how long her legs would take
     ax0: player.x, axTo: gapX,
     align: Math.abs(need) < 6 ? 1 : 0,
-    alignT: 0, alignDur: Math.min(1.1, Math.abs(need) / GATE_STEP_VX),
+    alignT: 0, alignDur: Math.min(0.45, Math.abs(need) / GATE_STEP_VX),
   };
   // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
   // the only place in the game she is seen from behind, and the four plates that
@@ -11686,7 +11686,13 @@ function drawOneGatePrompt(def) {
 // "a careful steady walk into the unknown, getting smaller as I go deeper,
 // until fading." Steady means near-constant pace — the easing below keeps
 // the speed level instead of rushing the middle.
-const GATE_WALK = 3.4;
+//
+// SUPERSEDED (owner, 2026-11-14): "the motion of me going inside the portal or
+// the door is very slow, taking so much time to go deep inside. I shouldn't be
+// walking slowly. Instead, I should be running inside with a second or two."
+// The whole exit — run to the doorway, turn, run in — now fits in about one and
+// a half seconds, at her run, on the run clip.
+const GATE_WALK = 1.2;
 // THE WALK-AWAY IS ONE AUTHORED CLIP (2026-09-15), not two plates flipped.
 //
 // The strip is 0-3 the TURN — front-on, three-quarter, nearly behind, behind —
@@ -11721,7 +11727,8 @@ const GATE_CLIP_ARMED = {
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
-const GATE_STEP_VX = 150;
+// SUPERSEDED with GATE_WALK above (owner, 2026-11-14): she RUNS to the door.
+const GATE_STEP_VX = 300;
 // SHE TURNS BEFORE SHE WALKS (owner, 2026-08-26: "normal motion of turning...
 // gradually and smoothly to turn it to face the gate, then normal legs and
 // body movement of someone walking away"). The old shot cut from her side view
@@ -11731,7 +11738,8 @@ const GATE_STEP_VX = 150;
 // her legs start down the hall. 0.55s: three authored angles at a pace a body
 // actually turns at; longer reads as a hesitation, shorter reads as the cut
 // this replaces.
-const GATE_TURN = 0.55;
+// 0.3 since the owner's run order (2026-11-14): a runner turns on the move.
+const GATE_TURN = 0.3;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
   // ---- beat one: walk to the doorway, side-on, on her own legs -------------
@@ -11983,7 +11991,8 @@ function drawGateWalk() {
   // it. Unarmed, the cave takes her at a run and the gate at a walk.
   const wmode = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
   const armedClip = GATE_CLIP_ARMED[wmode] || null;
-  const CLIP = armedClip || (intoCave ? GATE_CLIP_RUN : GATE_CLIP);
+  // Unarmed she RUNS through every door now, gate or cave (owner, 2026-11-14).
+  const CLIP = armedClip || GATE_CLIP_RUN;
   // fall back to the unarmed walk if this tier's clip has not decoded — a cave
   // entered at a walk is a smaller wrong than her side view sliding into rock,
   // and a missing sword is a smaller wrong than no character at all
@@ -11991,7 +12000,9 @@ function drawGateWalk() {
   const CLIPU = gateBackImg(CLIP.key) ? CLIP : GATE_CLIP;
   const want = g.pair ? g.pair[b] : '';
   const im = clipIm ? null : (want ? gateBackImg(want) : null);
-  const departure=!armed && !intoCave && gateBackImg('heroDeparture');
+  // the supplied departure is a WALK-away: it still turns her at the door (the
+  // turn beat above), and recedes only if the run strip has not decoded
+  const departure=!armed && !gateBackImg(GATE_CLIP_RUN.key) && gateBackImg('heroDeparture');
   if(departure) {
     const col=3+Math.min(4,Math.floor(k*5)),cw=departure.naturalWidth/8;
     // Source already recedes. Compensate its perspective before applying the
@@ -12004,7 +12015,10 @@ function drawGateWalk() {
     const nBack = CLIPU.cells - CLIPU.turn;
     // the run turns its legs over faster, so its stride counter is shorter
     const step = CLIPU === GATE_CLIP_RUN ? 19 : 26;
-    const cell = k < CLIPU.turnFrac
+    // unarmed, the departure plate already turned her in the doorway — the run
+    // starts on her back, not with a second turn
+    const turned = !armed && !!gateBackImg('heroDeparture');
+    const cell = (k < CLIPU.turnFrac && !turned)
       ? Math.min(CLIPU.turn - 1, Math.floor(k / CLIPU.turnFrac * CLIPU.turn))
       : CLIPU.turn + (Math.floor(trav / step) % nBack);
     const cw = clipIm.naturalWidth / CLIPU.cells;
@@ -12279,6 +12293,13 @@ function drawWinchHouse(wx, gy) {
   c.restore();
   c.restore();
 }
+// THE DEN TABLE'S HEIGHT, in world px (owner, 2026-11-14: "it looks like I'm
+// ... smaller than a table, which is nonsense"). It was 150 — as tall as the
+// tinker himself and twice her height. 97 puts the plate's work surface (85.5%
+// of its drawn height, measured off the forgeTable plate) on the loft at row 12
+// that she can jump onto — world.js A0B — so the top she lands on is the top
+// that is drawn, at the tinker's waist and about her own ears.
+const DEN_TABLE_H = 97;
 function drawStatics(P) {
   for (const pr of (ROOM_PROPS[G.roomId] || []))
     if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
@@ -12719,6 +12740,16 @@ function drawStatics(P) {
       // job beat any angle of it standing still, so when the beat says work and
       // the strip has landed, that is what draws; the turntable covers every
       // other beat and every frame before the art arrives.
+      // METAL, NOT SCRAP — see NPC_LOOK / npcSheen in media.js. Around the body
+      // only: the filter is set here and taken off the moment it has drawn.
+      const metal = live && !(typeof isHero === 'function' && isHero()) && !G.artProbe
+        && typeof c.filter === 'string' && typeof NPC_LOOK === 'string';
+      const filter0 = metal ? c.filter : null;
+      if (metal) {
+        c.filter = NPC_LOOK;
+        NPC_SHEEN.on = (typeof richK === 'number' ? richK : 1) > 0.3;
+        NPC_SHEEN.t = performance.now() / 1000 + (s.x % 97) * 0.031;
+      }
       let stripDrew = false;
       if (npcBusy && s._job && s._job.work && !(typeof isHero === 'function' && isHero())) {
         const A = typeof atlasOf === 'function' && atlasOf(s.extra);
@@ -12741,6 +12772,7 @@ function drawStatics(P) {
           grounded: s.extra !== 'mono',
           col: jobCol,
         }));
+      if (metal) { c.filter = filter0; NPC_SHEEN.on = false; }
       c.save(); c.translate(s.x + s.w / 2, s.y + s.h + bob2 * 0.4);
       if (fdir < 0) c.scale(-1, 1);  // face the cat (or the bench — see fdir)
       if (talking) {
@@ -12863,18 +12895,27 @@ function drawStatics(P) {
   // forging of the crystal happens here. A dedicated fired object plate is
   // §2r on THE FIRING LIST; this crop is its stand-in and its reference.
   if (G.roomId === 'A0B') {
-    const tb = (G.roomDef.h - 1) * TILE + 6;
+    // ON THE FLOOR SHE STANDS ON (owner, 2026-11-14: "the table, the NPC and
+    // me, we are all on different levels... it looks like I'm standing on the
+    // leg of the table"). This read (h - 1) * TILE + 6 — the bottom row of the
+    // frame, which is buried rock. frame() makes the floor TWO rows deep, so
+    // bodies stand on the top of row h - 2, lifted again by the surface curve
+    // (groundColumnAt): she measured 51px above the table's feet. The table
+    // now takes its line from the same heightfield the bodies are put on.
+    const ftop = (G.roomDef.h - 2) * TILE;
+    const gcol = typeof groundColumnAt === 'function' ? groundColumnAt(22.6 * TILE) : null;
+    const tb = gcol ? Math.min(ftop, gcol[0]) + 2 : ftop;
     // §2r FIRED: the real forge-table plate stands in the moment it decodes;
     // the painting-crop stand-in below keeps the room whole until then.
     if (typeof mediaFetch === 'function') mediaFetch('forgeTable');
     const fIm = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.forgeTable;
     if (fIm && fIm.naturalWidth && typeof drawPlateAnchored === 'function') {
       if (typeof contactShadow === 'function') contactShadow(c, 22.6 * TILE, tb, 95, 0.5);
-      drawPlateAnchored(c, 'forgeTable', 22.6 * TILE, tb, 150, false);
+      drawPlateAnchored(c, 'forgeTable', 22.6 * TILE, tb, DEN_TABLE_H, false);
     } else if (typeof workTablePlate === 'function') {
       const tIm = workTablePlate();
       if (tIm) {
-        const TH = 150, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
+        const TH = DEN_TABLE_H, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
         const tx = 18.6 * TILE;
         // shadow first: the feathered legs let it show through, which is what
         // roots the bench on the den floor instead of floating over it

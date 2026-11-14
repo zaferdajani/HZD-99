@@ -250,7 +250,7 @@ const { chromium } = require('playwright');
       await new Promise(r => requestAnimationFrame(r));
     }
     const backDecoded = gateBackReady();
-    // 340 sim-frames covers the plate hold (<=0.75s) plus GATE_WALK's 3.4s
+    // 340 sim-frames covers the plate hold (<=0.75s) plus the run in (GATE_WALK)
     for (let f = 0; f < 340 && G.gateWalk; f++) {
       if (G.gateWalk.t > 0.2) {
         drewBack = true;
@@ -278,7 +278,7 @@ const { chromium } = require('playwright');
   // fallback, so both spellings of "bare" have to pass here.
   check('...and unarmed she wears the BARE back pair, not the sword she lacks',
     doorway.keys.length > 0
-      && doorway.keys.every(k => k.indexOf('BareBack') > 0 || k === 'heroGateWalk' || k === 'heroDeparture'),
+      && doorway.keys.every(k => k.indexOf('BareBack') > 0 || k === 'heroGateWalk' || k === 'heroGateRun' || k === 'heroDeparture'),
     doorway.keys.join(','));
 
   // ---- 7. NOTHING GLIDES -------------------------------------------------

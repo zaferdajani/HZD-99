@@ -6445,3 +6445,39 @@ machine slumps via `foeDrawDown` in js/foeread.js. A take of its own replaces it
 - **Wiring:** replace `wolfCrouch4` in `WOLF_ART.down`, delete the `hold` and
   `BEAST_RECOVER.down` flattening; `tests/artbible.cjs` feet rule applies.
 - **Cheetah:** the same brief for `cheetahDown4` once the wolf take is approved.
+
+### 2r-ii. RATCHET, REPAINTED AS METAL — the seven plates + `ratchetLoop` ✱ NEW 2026-11-14 (code session, owner's den screenshot)
+
+Owner, on the A0B screenshot: *"The NPC is not well defined. The characters'
+features are not showing correctly, just like the others. It looks like scrap of
+metal blended with the background. It does not have its own identity or presence
+in the screen. The colors are very dull, needs to be brighter, richer in color,
+and give it the metallic, nice metallic tint color with a little bit of rust, a
+little bit of shine here and there, make it more lively."*
+
+Wired today, render-side, on the art he already has: `NPC_LOOK` (brightness /
+saturation / contrast around every live machine NPC) and `npcSheen` (his own
+highlights under a slow travelling band) in js/media.js. That gives him presence;
+it cannot give him a SECOND COLOUR. His plates are one copper from head to boot,
+and that is the half only a repaint fixes.
+
+- **Subject:** the same Ratchet, same seven poses and the six-cell work loop
+  (`work_1, work_2, tic, notice, talk_1, talk_2, vent`, `work_loop_six`) — shape
+  taken from the current plates exactly (art-prompts §1: SHAPE from the plate,
+  STYLE from the words; restyle `talk_1` first and use it as the style anchor).
+- **Palette, in words:** polished warm copper body plates; darker oiled bronze
+  joints; brushed steel on the pack frame, bolts and tools; a dull teal-green
+  verdigris in the seams and a few patches of orange-brown RUST on the belly
+  plate, one shoulder and the boot rims — a little, not a wreck; hard white-gold
+  specular highlights on every curved plate, one committed key light from upper
+  right (his own lamp); eyes a bright amber-yellow glow. Clean readable face: the
+  two round eye lenses and the jaw line must read at 150 px tall.
+- **Negatives:** no cyan/white outline halo (the current plates carry one), no
+  flat single-hue copper, no pixel grid, no cel outline, no background, no floor,
+  no cast shadow, pure black backdrop, whole figure in frame.
+- **Wiring:** drop-in over `assets/characters/npc/ratchet/*.webp`; then
+  `node tools/lowres.cjs && node build.cjs`, `node tests/run.cjs tinker artbible`.
+  Re-judge `NPC_LOOK` against the new plates — it may want to come down once the
+  paint itself is rich.
+- **The others:** the owner said "just like the others" — once Ratchet's take is
+  approved, the same palette brief runs for `servoLoop`, `patchLoop`, `lumenLoop`.
