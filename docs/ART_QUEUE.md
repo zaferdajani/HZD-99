@@ -6445,3 +6445,74 @@ machine slumps via `foeDrawDown` in js/foeread.js. A take of its own replaces it
 - **Wiring:** replace `wolfCrouch4` in `WOLF_ART.down`, delete the `hold` and
   `BEAST_RECOVER.down` flattening; `tests/artbible.cjs` feet rule applies.
 - **Cheetah:** the same brief for `cheetahDown4` once the wolf take is approved.
+
+### 2r-ii. RATCHET, REPAINTED AS METAL — the seven plates + `ratchetLoop` ✱ NEW 2026-11-14 (code session, owner's den screenshot)
+
+Owner, on the A0B screenshot: *"The NPC is not well defined. The characters'
+features are not showing correctly, just like the others. It looks like scrap of
+metal blended with the background. It does not have its own identity or presence
+in the screen. The colors are very dull, needs to be brighter, richer in color,
+and give it the metallic, nice metallic tint color with a little bit of rust, a
+little bit of shine here and there, make it more lively."*
+
+Wired today, render-side, on the art he already has: `NPC_LOOK` (brightness /
+saturation / contrast around every live machine NPC) and `npcSheen` (his own
+highlights under a slow travelling band) in js/media.js. That gives him presence;
+it cannot give him a SECOND COLOUR. His plates are one copper from head to boot,
+and that is the half only a repaint fixes.
+
+- **Subject:** the same Ratchet, same seven poses and the six-cell work loop
+  (`work_1, work_2, tic, notice, talk_1, talk_2, vent`, `work_loop_six`) — shape
+  taken from the current plates exactly (art-prompts §1: SHAPE from the plate,
+  STYLE from the words; restyle `talk_1` first and use it as the style anchor).
+- **Palette, in words:** polished warm copper body plates; darker oiled bronze
+  joints; brushed steel on the pack frame, bolts and tools; a dull teal-green
+  verdigris in the seams and a few patches of orange-brown RUST on the belly
+  plate, one shoulder and the boot rims — a little, not a wreck; hard white-gold
+  specular highlights on every curved plate, one committed key light from upper
+  right (his own lamp); eyes a bright amber-yellow glow. Clean readable face: the
+  two round eye lenses and the jaw line must read at 150 px tall.
+- **Negatives:** no cyan/white outline halo (the current plates carry one), no
+  flat single-hue copper, no pixel grid, no cel outline, no background, no floor,
+  no cast shadow, pure black backdrop, whole figure in frame.
+- **Wiring:** drop-in over `assets/characters/npc/ratchet/*.webp`; then
+  `node tools/lowres.cjs && node build.cjs`, `node tests/run.cjs tinker artbible`.
+  Re-judge `NPC_LOOK` against the new plates — it may want to come down once the
+  paint itself is rich.
+- **The others:** the owner said "just like the others" — once Ratchet's take is
+  approved, the same palette brief runs for `servoLoop`, `patchLoop`, `lumenLoop`.
+
+### 1-imp. SHE RUNS OUT OF PATIENCE — `heroImpatient` (8, loop) ✱ NEW 2026-11-14 (code session, owner's order)
+
+Owner: *"Look for how Sonic used to stamp with his feet and cross his hand when
+he's idle and waiting, and give the character the same move when it says yalla."*
+
+Wired today: the patience clock itself (js/entities.js `heroOccupied`) — "yalla"
+and the fidget now come only out of real idleness, never out of a conversation,
+a lesson, a toast or a reward. What the fidget strip CANNOT do is this pose: its
+eight cells are all front-on, arms at her sides (assets/characters/hero/fidget.webp).
+The crossed arms and the tapping foot are a new strip.
+
+- **Subject:** HZD-99, canon element `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`
+  embedded in every plate (ART_BIBLE §2). Three-quarter view toward camera,
+  ARMS CROSSED over her chest, weight on the back leg, head tipped a few degrees,
+  visor eyes half-lidded / flat — unimpressed, waiting. The front foot TAPS: heel
+  planted, toe up, toe down.
+- **Strip:** 8 cells, one row, same cell size and floor line as `fidget.webp`
+  (so `drawStripCell('heroImpatient', cell, 8, …)` drops in at HERO_FLOOR):
+  0 settle into the cross · 1 toe up · 2 toe down (small dust tick at the toe) ·
+  3 toe up · 4 toe down · 5 toe up · 6 toe down, a glance at the camera ·
+  7 hold, one ear flick. Cells 1–6 are the tap and must differ ONLY in the foot,
+  the scarf tip and the ear — the body does not pump between them (art-prompts §3).
+- **Costumes:** bare first (the opening); then one per weapon tier with the blade
+  on her back, as the gate clips are done (`GATE_CLIP_ARMED`).
+- **Negatives:** no arms at her sides, no walking, no smile, no speech bubble,
+  no text, no ground, no cast shadow, no outline, pure black background, whole
+  figure in frame facing three-quarter RIGHT.
+- **Wiring (code session, on delivery):** `heroImpatient` in js/media.js; in
+  js/entities.js the bout that starts at `FIDGET_AFTER` plays this strip instead
+  of `HERO_FIDGET_BEATS` — settle (0) as `hzdSay('yalla')` fires, then the tap
+  1-2-3-4-5-6 at ~7 taps a second for the length of the line, hold on 7; the
+  procedural scarf, glow and ear twitch stay on top. A soft toe-tick SFX on the
+  down cells (audio session cue, AUDIO_QUEUE). `tests/hero-move-coverage.cjs`
+  gains the row; `tests/gait.cjs` feet rule applies.

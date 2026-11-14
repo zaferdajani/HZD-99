@@ -70,6 +70,10 @@ function tileAt(tx, ty) {
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if ((c === 'B' || c === 'v') && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
+  // THE HUB'S HATCH IS ROCK UNTIL THE STORY MAKES IT A HATCH (js/progress.js
+  // pgHubSealed) — the same shape as D3's sealed floor above. One answer here
+  // is the whole seal: the drawing, the knock, the prompt and the blade all ask.
+  if (c === 'B' && G.roomId === 'A2' && typeof pgHubSealedTile === 'function' && pgHubSealedTile(tx, ty)) return '#';
   // a FRACTURE world's loose rock is authored '#', so the broken check above
   // never saw it: the claw "broke" it, the save recorded it, and the wall
   // stood there. Checked through a per-room set so that every other solid
@@ -1251,6 +1255,27 @@ let HERO_FIDGET = { key: 'heroFidget', cells: 8, k: HERO_DELIVERY_K, fps: 6.5, i
 // braced again. k 0.9065 against the sheet's wall_cling cell 11 (232 of 300).
 let HERO_WALL_STRIP = { key: 'transWall', cells: 4, k: HERO_DELIVERY_K, fps: 5 };
 const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of patience
+// IS THE PLAYER BUSY WITH SOMETHING THAT IS NOT MOVING HER? Reading, being
+// taught, being given something, standing with someone. Every one of these
+// leaves her body still for longer than FIDGET_AFTER through no impatience of
+// the player's, and an impatient "yalla" over the top of it is the game
+// heckling him for reading its own text.
+//   - a person or a thing in reach (G.near): she is WITH it, not waiting
+//   - words on screen: a toast, a lesson chip, the opening's guide prompt
+//   - a ceremony: a meeting, a rest, an offer, a finisher, a break, a transition
+//   - the repair bench and the wrist-release it ends in
+function heroOccupied() {
+  if (typeof G === 'undefined' || !G) return false;
+  if (G.near || G.meet || G.recharge || G.offer || G.finish || G.break || G.trans || G.lesson || G.ghCard) return true;
+  if (G.toasts && G.toasts.length) return true;
+  if (G.zoneToast) return true;
+  // the opening's one-control-at-a-time guide is a thing being read
+  if (G.tut && !(G.save && G.save.flags && G.save.flags.tut)) return true;
+  if (typeof repairSession !== 'undefined' && repairSession) return true;
+  if (typeof ratchetReleaseSession !== 'undefined' && ratchetReleaseSession) return true;
+  if (typeof TRI !== 'undefined' && TRI && TRI.node) return true;
+  return false;
+}
 // SHE STANDS STILL, AND ACTS ONE THING AT A TIME (owner, 2026-09-27: "the
 // idle makes the character move very fast, impatiently glitching all around,
 // instead of smoothly — like Sonic left idle: he taps his foot on the ground").
@@ -1793,6 +1818,14 @@ class Player {
         && G.state === 'PLAY' && !G.dialog && !G.cut && !G.gateWalk && !G.wake && !G.bossEntry
         && !['LEFT','RIGHT','UP','DOWN','JUMP','ATK','INT','HEAL','DASH'].some(a => IN_D(a));
       this.wallT = (this.wallSlide !== 0 && !this.on) ? (this.wallT || 0) + dt : 0;
+      // IDLE IS NOT "STANDING STILL" (owner, 2026-11-14: "the character shouldn't
+      // be saying yalla when the player is reading or interacting with the NPC.
+      // That does not mean the character is idle... being idle is just standing
+      // still without doing anything, not interacting with anything"). While she
+      // is occupied her small life goes on — ears, tail, the look-around — but the
+      // patience clock does not run, so neither the fidget nor the line can come
+      // out of a conversation, a lesson or a reward. See heroOccupied().
+      if (idle && heroOccupied()) { this.idleT = 0; this.idleSpoke = false; }
       if (idle) {
         this.idleT += dt;
         this.earTwitchIn = (this.earTwitchIn == null ? rnd(1.0, 2.6) : this.earTwitchIn) - dt;
@@ -8880,6 +8913,9 @@ class Enemy {
     if (this.dead) return;
     if (this.plate) this.shear();          // killed mid-lunge: the plate falls
     this.dead = true;
+    // her first kill (game.js TUT_STEPS 'claw'): the step is this, and it is
+    // written down the frame it happens so a reload cannot ask for it twice
+    if (this.firstFoe && G.save && G.save.flags && !G.save.flags.firstKill) { G.save.flags.firstKill = 1; if (typeof persist === 'function') persist(); }
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     sfx('edie');
     player.gainVolts(8);

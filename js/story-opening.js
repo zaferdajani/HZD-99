@@ -96,7 +96,7 @@ function ctlName(a) {
   const touch = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
   // the d-pad is not remappable (engine.js reads buttons 14/15 directly)
-  if (a === 'MOVE') return touch ? CTL_TOUCH.MOVE : pad ? padLabel(14) + ' / ' + padLabel(15) : '← →';
+  if (a === 'MOVE') return touch ? CTL_TOUCH.MOVE : pad ? '◀ ▶' : '← →';   // stick or d-pad: the direction itself, not a button's name
   if (pad && typeof howToOpen === 'function') return howToOpen(a, t('pa_' + a));
   if (touch) return CTL_TOUCH[a] || t('pa_' + a);
   const codes = (typeof KEYB !== 'undefined' && KEYB[a]) || [];

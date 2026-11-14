@@ -122,10 +122,15 @@ const { chromium } = require('playwright');
   console.log('\n    lesson order: ' + order.ids.join(' -> ') + '\n');
   // (owner, 2026-10-09) ...and past the gates the first thing is Ratchet's
   // booth: the machine on the waking floor is met only after the Volt Pack.
-  const want = ['move', 'out', 'jump', 'gate', 'booth'];
-  check('the verbs come in the right order, and Ratchet comes before any machine',
-    JSON.stringify(order.ids.slice(0, 5)) === JSON.stringify(want)
-      && order.ids.indexOf('atk') > order.ids.indexOf('pack'),
+  // (owner, 2026-11-14, after the hook review) ...and now the first fight is on
+  // the road, BEFORE the gates and before anyone speaks; the winch is struck —
+  // and bites — before the Volt Pack is offered, so the pack is bought for a
+  // reason, and the heal mends a real wound.
+  const want = ['move', 'out', 'jump', 'claw', 'gate', 'booth'];
+  const at = id => order.ids.indexOf(id);
+  check('the verbs come in the right order: a fight before the gates, the winch before the pack, the heal after it',
+    JSON.stringify(order.ids.slice(0, 6)) === JSON.stringify(want)
+      && at('pod') < at('atk') && at('atk') < at('pack') && at('pack') < at('heal') && at('heal') < at('burst'),
     order.ids.join(' -> '));
   check('the lesson knows all three of its rooms',
     order.rooms.W1 === 0 && order.rooms.W2 === 1 && order.rooms.A0 === 2,
@@ -250,7 +255,7 @@ const { chromium } = require('playwright');
       await new Promise(r => requestAnimationFrame(r));
     }
     const backDecoded = gateBackReady();
-    // 340 sim-frames covers the plate hold (<=0.75s) plus GATE_WALK's 3.4s
+    // 340 sim-frames covers the plate hold (<=0.75s) plus the run in (GATE_WALK)
     for (let f = 0; f < 340 && G.gateWalk; f++) {
       if (G.gateWalk.t > 0.2) {
         drewBack = true;
@@ -278,7 +283,7 @@ const { chromium } = require('playwright');
   // fallback, so both spellings of "bare" have to pass here.
   check('...and unarmed she wears the BARE back pair, not the sword she lacks',
     doorway.keys.length > 0
-      && doorway.keys.every(k => k.indexOf('BareBack') > 0 || k === 'heroGateWalk' || k === 'heroDeparture'),
+      && doorway.keys.every(k => k.indexOf('BareBack') > 0 || k === 'heroGateWalk' || k === 'heroGateRun' || k === 'heroDeparture'),
     doorway.keys.join(','));
 
   // ---- 7. NOTHING GLIDES -------------------------------------------------

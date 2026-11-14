@@ -108,9 +108,12 @@ const PAD = (over) => Object.assign({
       }
       return Math.round(Math.abs(player.vx));
     };
-    const push = live({ axes: [1, 0, 0, 0] });
+    // A GENTLE push walks; the click runs; a FULL push runs on its own (owner,
+    // 2026-11-14: "in the controller I don't know how to run. It's only
+    // walking" — engine.js PAD_RUN_PUSH, measured in tests/padfeel.cjs).
+    const push = live({ axes: [0.6, 0, 0, 0] });
     const walk = sim([push], 60);
-    const click = live({ axes: [1, 0, 0, 0] });
+    const click = live({ axes: [0.6, 0, 0, 0] });
     click.buttons[PAD.map.RUN] = { pressed: true, value: 1 };
     sim([click], 2);
     const run = sim([push], 60);                             // click released, stick still held
@@ -121,7 +124,7 @@ const PAD = (over) => Object.assign({
   });
   console.log('  stick only ' + speeds.walk + '  click ' + speeds.run + '  released+pushed ' + speeds.again
     + '  (walk cap ' + speeds.walkCap + ', top ' + speeds.top + ', RUN on button ' + speeds.runBtn + ')');
-  check('stick alone walks', speeds.walk <= speeds.walkCap + 2 && speeds.walk >= speeds.walkCap - 30, true);
+  check('a gentle stick alone walks', speeds.walk <= speeds.walkCap + 2 && speeds.walk >= speeds.walkCap - 30, true);
   check('L3 while moving runs', speeds.run >= speeds.top - 10, true);
   check('stick released, next push walks again', speeds.again <= speeds.walkCap + 2, true);
   check('RUN defaults to L3', speeds.runBtn, 10);

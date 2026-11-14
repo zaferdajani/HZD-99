@@ -149,14 +149,19 @@ ctx.updateTutor(0.3); assert.equal(ctx.G.tut.i, 0); assert.equal(ctx.G.tut.hold,
 ctx.player.vx = 200; ctx.updateTutor(0.3);
 assert.equal(ctx.G.tut.i, 0); assert(ctx.G.tut.hold > 0);
 ctx.updateTutor(0.8); assert.equal(ctx.G.tut.i, 1); assert.equal(ctx.G.save.flags.tutId, 'out');
-assert.equal(ctx.tutAllows('ATK'), false);
+// (owner, 2026-11-14) the claw is hers from the first frame — the first fight is
+// on the road to the gates — while the verbs that ARE lessons still wait
+assert.equal(ctx.tutAllows('ATK'), true, 'the claw answers from the first frame');
+assert.equal(ctx.tutAllows('HEAL'), false, 'an untaught verb still waits for its lesson');
 assert.equal(ctx.tutAllows('JUMP'), true, 'already available movement remains responsive');
 // NOSTOS shares the rooms, not Ratchet's story: its walk passes over his steps.
 ctx.isHero = () => true; ctx.G.roomId = 'A0'; ctx.G.roomDef = { w: 64, exits: { R: 'A1' } };
 ctx.G.tut = { i: run("TUT_STEPS.findIndex(s => s.id === 'booth')"), t: 0, hold: 0 };
 for (let k = 0; k < 8; k++) ctx.updateTutor(0.1);
-assert.equal(run('TUT_STEPS[G.tut.i].id'), 'heal', 'the hero world skips the den lessons');
-assert.equal(prompt('heal').label, 'tut_heal', '...and keeps its own wording');
+// (since 2026-11-14 the strike comes before the pack, so that is where it lands)
+assert.equal(run('TUT_STEPS[G.tut.i].id'), 'atk', 'the hero world skips the den lessons');
+assert.equal(prompt('atk').label, 'tut_atk', '...and keeps its own wording');
+assert.equal(prompt('heal').label, 'tut_heal');
 ctx.isHero = () => false;
 console.log('PASS tutorial-clarity: contextual controls, one target, dialogue priority, save continuity, progression');
 

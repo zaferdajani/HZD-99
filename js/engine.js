@@ -34,20 +34,34 @@ let LIFE = null;   // the app's background/inactive state — see installLifecyc
 // ---------------------------------------------------------------------------
 const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR', 'GP_RUN', 'GP_GUARD', 'GP_GRAPPLE',
   // the d-pad alone, edge-detected like everything else — see pollGamepad
-  'GP_PL', 'GP_PR', 'GP_PU', 'GP_PD'];
+  'GP_PL', 'GP_PR', 'GP_PU', 'GP_PD',
+  // the left stick as ONE of four directions, latched — see padStick4
+  'GP_SL', 'GP_SR', 'GP_SU', 'GP_SD'];
 const GP_PREV = {};
+// the sideways push at which a stick stops walking and runs: past the walk's
+// 0.4 threshold by a wide margin, short of the rim so a worn stick still gets there
+const PAD_RUN_PUSH = 0.82;
 
 // Standard-mapping button indices, which every DualShock 4 / DualSense reports.
+//
+// THE FACE BUTTONS ARE THEIR SHAPES, NOT THE NAMES OF THEIR SHAPES (owner,
+// 2026-11-14: "instead of saying the name of the shape like triangle or circle,
+// show me the actual circle and triangle"). The button has no word printed on
+// it, so a prompt that says "Triangle" asks the player to translate; these are
+// the marks themselves, from the Geometric Shapes block every system font
+// carries — the same block the touch prompts already draw ▲ ▼ ◀ ▶ from. Every
+// prompt, toast, chip and the config screen reads through padLabel, so this one
+// table is the whole change. The d-pad is its arrow for the same reason.
 const PAD_BTN = {
-  0: 'Cross', 1: 'Circle', 2: 'Square', 3: 'Triangle',
+  0: '✕', 1: '○', 2: '□', 3: '△',
   4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
   8: 'Share', 9: 'Options', 10: 'L3', 11: 'R3',
-  12: 'D-Up', 13: 'D-Down', 14: 'D-Left', 15: 'D-Right', 16: 'PS',
+  12: 'D-pad ▲', 13: 'D-pad ▼', 14: 'D-pad ◀', 15: 'D-pad ▶', 16: 'PS',
 };
 const PAD_BTN_XB = {
   0: 'A', 1: 'B', 2: 'X', 3: 'Y', 4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
   8: 'View', 9: 'Menu', 10: 'LS', 11: 'RS',
-  12: 'D-Up', 13: 'D-Down', 14: 'D-Left', 15: 'D-Right', 16: 'Guide',
+  12: 'D-pad ▲', 13: 'D-pad ▼', 14: 'D-pad ◀', 15: 'D-pad ▶', 16: 'Guide',
 };
 // every action that lives on a face/shoulder button, in the order the config
 // screen lists them. Movement stays on the stick + d-pad and is not remappable.
@@ -255,6 +269,30 @@ addEventListener('touchstart', () => {
   if (performance.now() - (PAD.lastInput || 0) < 3000) return;
   padConnected(false, null);
 }, { passive: true, capture: true });
+// THE STICK AS A FOUR-WAY CHOICE (owner, 2026-11-14, of the Mind Nodes: "it is
+// hard to play it with the controller. It slips").
+//
+// The puzzles were taken OFF the stick for a good reason — read as two raw
+// thresholds it fires diagonals and answers nobody chose (see GP_PL above) —
+// and the cost was that the thumb every pad player actually has on the stick
+// did nothing at all in them, and the d-pad's own diagonals dropped presses.
+// The reason was the reading, not the stick. Read like this it cannot slip:
+//   - it must be pushed FAR (0.62 of the way) to choose anything;
+//   - one axis must clearly win (1.7x the other) — a diagonal chooses nothing;
+//   - once it has chosen it is LATCHED: rolling round the rim changes nothing,
+//     and it has to come back to the middle (under 0.3) before it can choose
+//     again. One push, one answer, however sloppy the release.
+// Returns 0 left, 1 up, 2 right, 3 down, or -1. Same order as TRI_ACTS.
+let PAD_S4 = -1;
+function padStick4(x, y) {
+  const m = Math.hypot(x, y);
+  if (PAD_S4 >= 0) { if (m < 0.3) PAD_S4 = -1; return PAD_S4; }
+  if (m < 0.62) return -1;
+  const ax = Math.abs(x), ay = Math.abs(y);
+  if (ax > ay * 1.7) PAD_S4 = x < 0 ? 0 : 2;
+  else if (ay > ax * 1.7) PAD_S4 = y < 0 ? 1 : 3;
+  return PAD_S4;
+}
 function pollGamepad() {
   if (inputSuspended || !navigator.getGamepads) return;
   let gp = null;
@@ -269,6 +307,7 @@ function pollGamepad() {
   // bare event), so learn the identity from the poll the moment it is available
   if (gp && gp.id && PAD.id !== gp.id) { PAD.id = gp.id; PAD.kind = padKindOf(gp.id); }
   PAD.gp = gp;                       // live handle for rumble
+  if (!gp) { PAD.ax = 0; PAD.dpx = false; PAD_S4 = -1; }
   const st = {};
   // Returning to the window must not turn a held controller button into a
   // new attack, menu confirmation or film skip. Release the pad first.
@@ -296,6 +335,11 @@ function pollGamepad() {
     // sequence a wrong answer costs the attempt, so the fight the player was
     // having was with the hardware.
     st.GP_PL = P(14); st.GP_PR = P(15); st.GP_PU = P(12); st.GP_PD = P(13);
+    // how hard the stick is pushed sideways, and whether the d-pad is what is
+    // moving her — pollInput turns these into walk or run (see PAD_RUN_PUSH)
+    PAD.ax = Math.abs(A0); PAD.dpx = !!(P(14) || P(15));
+    const s4 = padStick4(A0, A1);
+    st.GP_SL = s4 === 0; st.GP_SU = s4 === 1; st.GP_SR = s4 === 2; st.GP_SD = s4 === 3;
     // live state + edge capture, so the config screen can show presses and bind
     PAD.lastPress = -1;
     for (let i = 0; i < b.length; i++) {
@@ -490,10 +534,20 @@ function pollInput() {
   // the moment the stick comes back to centre — which is what makes the click a
   // decision rather than a toggle. Read off the raw GP codes rather than PAD.on
   // so a pad left plugged in beside a keyboard cannot slow the keyboard down.
+  //
+  // AND THE STICK ITSELF RUNS (owner, 2026-11-14: "in the controller I don't
+  // know how to run. It's only walking"). The click was the ONLY way to run and
+  // nothing on screen said so, so a pad player walked the whole game. A stick
+  // has a magnitude: pushed all the way it is asking for everything, exactly as
+  // the touch stick does, and a gentle push is still the walk the click was
+  // invented to protect. The d-pad has no magnitude, so like a key it runs.
+  // The click still works — it is how you run on a worn stick that no longer
+  // reaches the rim.
   const padMove = !!(keys.GP_L || keys.GP_R);
   if (!padMove) PAD.run = false;
   else if (inP('RUN')) PAD.run = true;
-  PI.run = !padMove || !!PAD.run;
+  const padFull = padMove && (!!PAD.dpx || (PAD.ax || 0) >= PAD_RUN_PUSH);
+  PI.run = !padMove || !!PAD.run || padFull;
   return PI;
 }
 function inD(n) {
@@ -644,6 +698,20 @@ const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null, 
 // how far it pans as a fraction of the visible height
 const LOOK_HOLD = 0.35, LOOK_SPAN = 0.32;
 let prevShake = 0;
+// how close her head may come to the top of the frame, in screen px, before a
+// free jump starts to lift it
+const CAM_TOP = 46;
+// Is she off the ground in the plain sense — a jump or a fall — rather than
+// climbing or flying? See the note in updateCam.
+function camJumping(p) {
+  if (p.wallSlide || (p.wallT || 0) > 0) return false;
+  if ((p.glideT || 0) > 0 || p.grap || p.soar || p.flungT > 0) return false;
+  if (typeof G !== 'undefined' && G && (G.gateWalk || G.cut || G.wake || G.bossEntry)) return false;
+  // under an opening into the room above, she is on her way somewhere
+  if (p.y < 4 * (typeof TILE === 'number' ? TILE : 32) && typeof vlinkSeamless === 'function' && vlinkSeamless('T')) return false;
+  if ((cam.extUp || 0) > 0 || (cam.extDn || 0) > 0) return false;
+  return true;
+}
 function updateCam(px, py, rw, rh, dt) {
   const robo = !(typeof isHero === 'function' && isHero()) && !(typeof window !== 'undefined' && window.EDITOR);
   const baseZoom = robo && typeof PRESENTATION !== 'undefined' ? PRESENTATION.explorationZoom : 1;
@@ -673,7 +741,29 @@ function updateCam(px, py, rw, rh, dt) {
   // a vertical pair is one shaft, and the frame follows her through it
   const eu=cam.extUp||0, ed=cam.extDn||0;
   const boundY=v=>rh<540/z?(rh-540)/2:clamp(v,-oy-eu,rh-540+oy+ed);
-  const fall=p ? clamp(p.vy/980,-1,1)*20 : 0;
+  // A JUMP DOES NOT MOVE THE FRAME (owner, 2026-11-14: "jumping with the cat is
+  // moving the camera with it upward, which is preventing me from seeing the
+  // ground when I try to hit it when I go down... the camera should not follow
+  // the cat. The cat should float into the space freely until it reaches the
+  // upper limit of the screen, and then you follow it with the camera.
+  // Otherwise, the camera stays still").
+  //
+  // The frame is aimed at THE GROUND SHE LAST STOOD ON (cam.gy), not at her
+  // body. Off the ground and above that line the aim does not move, so the
+  // floor she jumped from — the crust she is about to plunge on — stays exactly
+  // where it was. Three things still move it:
+  //   - she lands somewhere: the aim becomes that ground, and the frame eases to it;
+  //   - she drops BELOW the line (a ledge, a pit): the aim follows her down, a
+  //     fall has to show where it is going;
+  //   - she nears the top edge: the band below lifts the frame just enough to
+  //     keep her in it (CAM_TOP), which is the owner's "upper limit".
+  // And three things are not jumps, and keep the old body-follow: a wall she is
+  // climbing, a flight verb (glide, grapple, the soar), and the mouth of a room
+  // that continues upward — she has to see where she is going in all of them.
+  const free=!!(p&&!boss&&!p.on&&!snap&&camJumping(p));
+  if(p&&(!free||cam.gy==null||py>cam.gy)) cam.gy=py;
+  const aimY=free?cam.gy:py;
+  const fall=p ? clamp(p.vy/980,free?0:-1,1)*20*(free&&py<cam.gy-4?0:1) : 0;
   // LOOKING UP AND DOWN (owner, 2026-09-27: "looking down should move the
   // screen down or show me part of the down area; looking up does the same").
   // Hold UP or DOWN while standing still and, after a beat, the frame pans a
@@ -688,7 +778,7 @@ function updateCam(px, py, rw, rh, dt) {
   const lookWant=snap?0:(cam.lookHold>=LOOK_HOLD?vdir*LOOK_SPAN*540/z:0);
   cam.look=snap?0:lerp(cam.look||0,lookWant,1-Math.exp(-step*(lookWant?4.5:7)));
   const tx=boundX(px-480+cam.lead);
-  const ty=boundY(py-(robo?270+112/z:300)+fall+cam.look);
+  const ty=boundY(aimY-(robo?270+112/z:300)+fall+cam.look);
   cam.x=snap?tx:lerp(cam.x,tx,1-Math.exp(-step*11));
   cam.y=snap?ty:lerp(cam.y,ty,1-Math.exp(-step*9));
   // Keep the character within a safe vertical band even during a fast drop.
@@ -697,7 +787,10 @@ function updateCam(px, py, rw, rh, dt) {
     const centre=p.y+p.h/2;
     // ...a band that travels with the look, or the look is clamped straight off
     const lk=cam.look||0;
-    const banded=boundY(clamp(cam.y,centre-270-155/z+Math.min(0,lk),centre-270+120/z+Math.max(0,lk)));
+    // in a free jump the band's top is the top of the frame itself: she may rise
+    // until her head is CAM_TOP from the edge before anything moves
+    const hi=free?Math.max(centre-270+120/z,p.y-oy-CAM_TOP/z):centre-270+120/z;
+    const banded=boundY(clamp(cam.y,centre-270-155/z+Math.min(0,lk),hi+Math.max(0,lk)));
     // A SILENT ROOM CHANGE (game.js vlinkHandover) can leave her outside the
     // band for a moment — the old room's floor held the frame while she fell
     // past it. Snapping to the band there would be the very cut the handover

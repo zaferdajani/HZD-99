@@ -76,7 +76,9 @@ function progressGoal(f) {
     if (G.save.bag && G.save.bag.cshard || f.pl_cshard && !f.crystal) return 'pg_goal_return';
     if (!f.heal) return 'pg_goal_pack';
     if (f.ghMet && !f.bossHorn) return 'pg_goal_gravehorn';   // the soldier on the stone
-    return f.beacon ? 'pg_goal_quarry' : 'pg_goal_marble';
+    if (f.beacon) return 'pg_goal_quarry';
+    // before the meeting there is no hatch to name (pgHubSealed): send her east
+    return pgHubSealed(f) ? 'pg_goal_cross' : 'pg_goal_marble';
   }
   if (f.bossGlitch) return 'pg_goal_up';           // an older save may hold the lion without the rest
   if (!f.sageTame_GA1D) return 'pg_goal_sage';
@@ -135,6 +137,38 @@ function pgHubBroken() {
   for (let x = PG_HUB.tx0; x <= PG_HUB.tx1; x++) if (br['A2:' + x + ',' + PG_HUB.ty]) return true;
   return false;
 }
+// THE HATCH DOES NOT EXIST UNTIL IT CAN BE OPENED (owner, 2026-11-14: "if it's
+// supposed to go inside and dig after Nullfang, then why are you showing it
+// before?").
+//
+// The chapter puts the first meeting with NULLFANG — on the crest, forty-six
+// tiles east — before the first cave. The floor was sealed until then, and
+// everything ELSE about it was already live: a column of light, "pale marble
+// dust seeps up through the cracked floor", a goal line naming the spot, and a
+// prompt to jump, hold down and strike. He did, and it knocked and held: a
+// glitch, as far as anyone playing could tell.
+//
+// So the seal is total. Until the meeting these three columns ARE floor: tileAt
+// answers '#', which removes the fracture from the drawing, the hollow from the
+// knock and the prompt from the air in one place; the light and the caption
+// wait on this same answer; and the goal lines send her east instead of down.
+// The meeting itself throws her back west along the mound, and the light is
+// what she sees when she gets up.
+// A save that already cut the hatch (before the seal existed) keeps its hole.
+// ...and so does one that has plainly been below it already — a save staged or
+// migrated into the caves is not walked back up to a floor that is rock again.
+function pgHubSealed(f) {
+  f = f || (G.save && G.save.flags);
+  if (!f || f.nfMeet || pgHubBroken()) return false;
+  if (f.crystal || f.pl_cshard || f.ghMet || f.bossHorn || f.beacon) return false;
+  const v = G.save && G.save.visited;
+  return !(v && (v.A5 || v.CV1 || v.CV2 || v.CV3));
+}
+function pgHubSealedTile(tx, ty) {
+  return tx >= PG_HUB.tx0 && tx <= PG_HUB.tx1 && ty >= PG_HUB.ty && ty <= PG_HUB.ty + 1 && pgHubSealed();
+}
+// is the landmark lit? the one question the drawing asks
+function pgHubLit(f) { return !!pgTrailPhase(f) && !pgHubSealed(f); }
 
 // ---- WARDS ------------------------------------------------------------------
 // The song, wound tight across a way through. Drawn as layered membranes whose
@@ -324,7 +358,7 @@ function drawProgressGround(c) {
   const sage = phase === 'sage';
   const ink = sage ? '159,220,255' : '238,244,240';
   // the hub's landmark
-  if (G.roomId === PG_HUB.room && phase) {
+  if (G.roomId === PG_HUB.room && phase && !pgHubSealed()) {
     const x0 = PG_HUB.tx0 * TILE, x1 = (PG_HUB.tx1 + 1) * TILE, cx = (x0 + x1) / 2;
     const broken = pgHubBroken(), fy = broken ? PG_HUB.ty * TILE : Math.min(PG_HUB.ty * TILE, pgFloorY(cx));
     const pu = 0.6 + Math.sin(now * 1.7) * 0.4;

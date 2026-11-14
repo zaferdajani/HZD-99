@@ -12,6 +12,16 @@ changes here in the same commit.
 file is the *play-through* of that canon. When they conflict, the canon wins and
 this file is wrong — say so in §8 and fix the game.
 
+**Opening re-synced 2026-11-14 (owner: "do all of them, 1 to 7", after the hook
+review).** §2.2–§2.5 changed: there is a first fight on the road BEFORE the gates
+(a slag mite); NULLFANG is glimpsed down the road the moment she is through them;
+a lit chest sits out of reach over the street; the letter is one page; Ratchet
+wakes in two lines; the yard winch is struck — and bites — BEFORE the Volt Pack is
+offered, so the pack is bought for a reason and the first heal mends a real wound.
+The rest of Ratchet's explanation is said only to a player who comes back and asks.
+The hub's hatch (§2.7–§2.8) does not exist — no crack, no light — until NULLFANG
+has been met on the crest.
+
 **Opening re-synced 2026-10-09 with the rebuilt opening** (§2.2–§2.6: booth first, letter → drawer → repair → explanation → pod → Volt Pack → heal → winch → monument → meadow; comic pages p06–p12 predate it). **Re-synced 2026-10-08 with the story-order pass.** Every save now plays this story
 (old saves are migrated on load — `migrateStory`, js/story-opening.js); the order of
 chapter one is enforced by the game and walked by `tests/story-order.cjs` against
@@ -111,12 +121,17 @@ a small white cat standing up in a cradle too big for her.
 **Where.** Outside, under sky, the city gates at the far end.
 **What happens.** A fallen beam across the road: **Jump** — *A fallen beam blocks the
 road — press Z to hop it* (every control in a chip is the player's own binding: the
-key they bound, the pad button, or the on-screen glyph). Then the gates: **The city
+key they bound, the pad button, or the on-screen glyph). Then **the first fight**
+(2026-11-14): a slag mite — a small empty machine, not a person — crawls the road at
+her. **Strike** — *A broken machine crawls the road — press X to break it.* Two swipes
+break it; it can sting her once or twice and it leaves scrap. Her claws have answered
+since the first frame; nobody has spoken to her yet. Then the gates: **The city
 gates** — *Stand beneath them and press ↑.* The gates are the only way in, and they
 close behind her. The opening is one-way, like waking up is.
 **Story.** The city is standing. It is silent. The gates were built to be enormous —
 the only monument in the kingdom — and nobody has walked through them in a long time.
-**Panels.** A wide shot of the road with the gates small at the end; then the gates
+**Panels.** A wide shot of the road with the gates small at the end; the mite coming
+at her out of the grass and her first swing; the wreck and the scrap; then the gates
 huge above her; then the gates closing on the road behind her.
 
 ### 2.3 The waking floor — A0
@@ -125,7 +140,15 @@ huge above her; then the gates closing on the road behind her.
 is used: Ratchet's booth (the first thing past the gates), the yard winch jammed across
 the road, the Mind Node monument, and the road on to the meadow. Nothing fights her on
 the way to the booth (owner, 2026-10-09: the opening is "a clear, forward-moving
-tutorial", taught one action at a time, never a fight before Ratchet).
+tutorial", taught one action at a time; the one fight before Ratchet is the mite on
+the road, §2.2).
+**The glimpse (2026-11-14).** As she comes through the gates a dark shape stands in
+the road beyond the jammed winch — NULLFANG, head and shoulders at the edge of the
+frame, eyes lit. He roars once and bounds away east. She keeps her controls; nothing
+touches her; it happens once. It is a question, not a meeting: the meeting is §2.7.
+**The prize.** Over the road between the winch and the monument, eight rows up, a lit
+chest on a walkway — a whole core — one and a half tiles past her best jump. She
+cannot reach it in this chapter. It is the first thing the world shows her and keeps.
 **What happens.** **Ratchet's booth** — *A light is on inside — stand at the door and
 press ↑.* The goal line at the top left reads *Find who is still awake — Ratchet's
 booth*; it follows the story for the rest of the chapter.
@@ -140,9 +163,8 @@ the wall, a drawer, and a big round unit sitting dark at the bench. This is his 
 home; he stands here, and only here, until he has forged her blade (§2.10).
 **What happens, one step at a time.**
 1. **Read the letter** — *A switched-off robot with a letter on him — press E.*
-   > *A letter is tucked against his empty battery socket.*
-   > *“Mother’s song has been infected. My marble slowed the virus, but it cannot stop it. I took my battery out before it could take me.”*
-   > *“My battery is in the drawer beside this chair. Seat it, connect the positive wire, then the ground, and bridge the relay. If you are reading this, there may still be hope. — R.”*
+   One page (2026-11-14):
+   > *“Mother’s song is infected. I pulled my own battery before it could take me. It is in the drawer beside this chair — wire it back in, and there may still be hope. — R.”*
 2. **Open the drawer** — the card: **Ratchet's battery** (the repair board's own battery
    art) — *His own battery, hidden in his drawer. Wire it back into the empty socket in
    his chest to wake him.*
@@ -155,19 +177,19 @@ home; he stands here, and only here, until he has forged her blade (§2.10).
    four-pose wrist release plays with the cat's paw at Ratchet's hand. He lets go
    before his explanation; it is skippable without a pause-menu detour and neither
    hurts her nor grants another reward. Interrupted visits retain a safe continuation.
-4. **The explanation** — five short pages:
+4. **He wakes — two lines** (2026-11-14; it was five pages):
    > *…My own battery. You put it back. Thank you, little one — I’m Ratchet.*
-   > *Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it.*
-   > *So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast.*
-   > *Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out.*
-   > *One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him.*
+   > *Mother’s song is infected, and it is taking everyone. There is raw marble under the meadow — bring me a piece and I’ll forge a white sword that cuts the virus out.*
 
    The card: **Spare Power Cell** — *Ratchet’s spare, for Old Servo, the winch-keeper in
-   the meadow. Seat it in him to wake him.* The errand (bring raw cave marble) is taken
-   here, and the goal line becomes *Find the raw marble beneath the meadow* once the walk
-   is over.
-5. **Use the pod** — Ratchet: *This pod saves your progress and recharges you. Use it
-   before you leave.* The pod is marked; she steps in and rests; a confirmation fills the
+   the meadow. He switched himself off too — seat it in him to wake him.* The errand
+   (bring raw cave marble) is taken here.
+   **The rest of his story is for whoever asks.** The first time she talks to him again
+   with the lessons behind her (and no marble or blade to settle), two pages, once:
+   > *This marble on my necklace slowed the virus in me. It could not stop it — so I pulled my own battery before it took me.*
+   > *You were asleep in a recharge cradle — you never heard the broadcast. That is why you are still you.*
+5. **Use the pod** — no line from him now: the lesson chip points at it (*Step into the
+   pod and press E — it saves and recharges you*). She steps in and rests; a confirmation fills the
    middle of the screen — **✓ Progress saved · recharged** — *If you fall, you wake up
    here.* The save point is now the den. Only then is the next thing introduced.
 **Story.** The founding of the plot in one room. He nearly fell; the inherited marble
@@ -180,40 +202,46 @@ pod in the wall and the word SAVED.
 ### 2.5 The volt pack — A0B and the street (the pitch, the counter, the two verbs)
 
 **Where.** Ratchet's counter, then the street outside his door.
-**What happens.**
-1. **The Volt Pack** — *Press E at Ratchet — he will explain it.* He does, before
-   anything is sold — what it does, why she needs it, what it costs — and pays her the
-   scrap for the repair:
-   > *That ring of charge on you fills when your hits land. Right now you have no way to spend it.*
-   > *My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst.*
-   > *You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap.*
-   > *You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind.*
+**What happens (order changed 2026-11-14: need before teach).**
+1. **Strike the winch** — out of the den (*Back outside — stand at the den door and press
+   ↑*), to the yard winch jammed across the road: *Its infected arm blocks the road —
+   strike it with X and see what comes loose.* Every blow knocks scrap out of its housing
+   (twelve in all — the pack's own price). On the third blow **it bites back**: an arc up
+   the arm and into her, one core gone, and she is thrown clear. *It bit back — claws
+   only scratch it. Ratchet may have something that stops it.* It never takes her last
+   core and claws never break it.
+2. **The Volt Pack** — *Go back into the booth and press E at Ratchet — he has what stops
+   the winch.* Two lines, then the counter:
+   > *It bit you? Claws only scratch that winch. My Volt Pack is what stops it: hold F to mend a core, hold X and let go for a Volt Burst.*
+   > *It is yours for good, for 12 scrap — about what you just knocked out of it.*
 
-   The card: **12 Scrap** — *The money down here. Broken machines leave it behind;
-   Ratchet takes it for parts and upgrades.* Then **Ratchet's Emporium** opens on the
-   marked row — *BUY THIS FIRST* · **Volt Pack · permanent** — *Wires healing and the Volt
-   Burst into you. Bought once, yours for good.* (12). Every other row reads *After the
-   Volt Pack.* She buys it. The card, with the demo window showing both verbs:
+   (If she left the scrap lying in the road he makes up the difference: *You are short?
+   Take the rest for fixing me. Scrap is the money down here: broken machines leave it
+   behind.*) **Ratchet's Emporium** opens on the marked row — *BUY THIS FIRST* · **Volt
+   Pack · permanent** — *Wires healing and the Volt Burst into you. Bought once, yours for
+   good.* (12). Every other row reads *After the Volt Pack.* She buys it. The card, with
+   the demo window showing both verbs:
    > **Volt Pack (permanent)** — *Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst.*
 
    From then on the same row is **Volt Refill** — *Refills your volts to full*, a
    consumable.
-2. **Mend a core** — *The pack's first surge cost you a core — stand still and hold F.*
-3. **Strike the winch** — out of the den (*Back outside — stand at the den door and press
-   ↑*), to the yard winch jammed across the road: *press X beside it.* It does not swing
-   at her while she is being taught.
-4. **Volt Burst** — *Hold X until you crackle, then let go — the burst stops it.* The
-   winch shudders and stops (disabled, not destroyed: the blade can cleanse it later).
+3. **Mend a core** — *The winch cost you a core — stand still and hold F to mend it.* The
+   wound is the winch's own; nothing is scripted to hurt her for the lesson.
+4. **Volt Burst** — *Back to the winch — hold X, let go: the burst stops what claws only
+   scratch.* The winch shudders and stops (disabled, not destroyed: the blade can cleanse
+   it later), and its arm lifts clear of the road.
 5. **The monument** — the Mind Node stands just past the winch, on the same screen as the
    booth door: *Press E at the monument and solve its puzzle — puzzles earn IQ for
    skills.*
 6. **Into the meadow** — *The road east leads to the Scrap Meadows.*
 **Story — the owner's rule, drawn this way.** She wakes with no way to spend what she
-knocks out of other machines. Ratchet's pack is the mean: one purchase, two verbs, and
-it is named for what it is — a permanent charger, not a refill. The burst is what the
-marble in the cave needs.
-**Panels.** The counter and the marked row; the pack going into her back; the first
-surge; the jammed winch and the burst; the monument's riddle; the road east.
+knocks out of other machines. She finds that out on the winch: her claws scratch it,
+it pays her in scrap and it hurts her. Ratchet's pack is the answer to all three — one
+purchase, two verbs — and it is named for what it is: a permanent charger, not a refill.
+The burst is what the marble in the cave needs.
+**Panels.** Her claws on the winch and the scrap flying; the arc that throws her back;
+the counter and the marked row; the pack going into her back; the core mending; the
+burst and the arm lifting; the monument's riddle; the road east.
 
 ### 2.6 The meadow — A1 (Old Servo, the first fight)
 

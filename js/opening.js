@@ -80,7 +80,10 @@ function opRatchet(s) {
       const S = typeof panelsState === 'function' ? panelsState() : null;
       if (!f.opNote && S && !S.seen.letter && typeof panelsStart === 'function' && panelsSeq('letter')
           && panelsStart('letter', { then: () => { if (!f.opNote) { f.opNote = 1; persist(); } } })) return true;
-      opSay(t('op_letter'), f.opNote ? ['op_letter3'] : ['op_letter1', 'op_letter2', 'op_letter3'], null, () => {
+      // ONE PAGE (owner's order, 2026-11-14: the booth in three beats — the
+      // letter, the repair, two lines from him). It says the two things she
+      // needs: why he is dark, and where his battery is.
+      opSay(t('op_letter'), [f.opNote ? 'op_letter3' : 'op_letter2'], null, () => {
         if (!f.opNote) { f.opNote = 1; persist(); }
       });
       return true;
@@ -101,6 +104,10 @@ function opRatchet(s) {
   if (!f.opTold) { opExplain(s); return true; }
   // (a save whose walk is already behind her is not sent back to the pod)
   if (!f.opPod && !f.tut) { opSay(t('n_ratchet'), ['op_r_pod'], 'ratchet'); return true; }
+  // THE PACK IS OFFERED WHEN SHE HAS A REASON TO WANT IT: after the winch has
+  // bitten her (TUT_STEPS 'atk'). Before that he sends her out to try her
+  // claws on it — one line, no counter.
+  if (!f.heal && opStepId() === 'atk' && !f.winchBit) { opSay(t('n_ratchet'), ['op_r_try'], 'ratchet'); return true; }
   if (!f.heal) { opPackTalk(s); return true; }
   // the lessons the pack bought are still running: he points at the next one
   // and keeps his counter shut — the shop is not a place to stand mid-lesson
@@ -108,6 +115,18 @@ function opRatchet(s) {
     const id = opStepId();
     const k = id === 'heal' ? 'op_r_heal' : id === 'node' ? 'op_r_node' : id === 'go' ? 'op_r_go' : 'op_r_winch';
     opSay(t('n_ratchet'), [k], 'ratchet');
+    return true;
+  }
+  // THE REST OF HIS STORY IS FOR WHOEVER ASKS (same order: "move the rest of
+  // his explanation to talk again"). The necklace, the battery he pulled, why
+  // she alone never heard the song — two pages, once, the first time she comes
+  // back to him with the lessons behind her. Then his ordinary conversation.
+  // (never in front of business: a marble in her bag, a forged blade or an
+  // errand to settle is what she came in for — tests/story-order.cjs)
+  const busy = (G.save.bag && G.save.bag.cshard) || f.pl_cshard || f.crystal;
+  if (!f.opLore && !busy) {
+    f.opLore = 1; persist();
+    opSay(t('n_ratchet'), ['op_r3', 'op_r4'], 'ratchet');
     return true;
   }
   return false;
@@ -132,42 +151,46 @@ function opRatchetRestored(s) {
   }
   go();
 }
-// FIVE SHORT PAGES, then the spare cell, then the pod. Not the nine-line
-// dump the old waking read out with the shop already opening behind it.
+// TWO LINES, then the spare cell. It was five pages, a card and a sixth line
+// about the pod, all before she had hit anything (owner's order, 2026-11-14,
+// from the review of what loses a player in the first minutes: "less
+// talking"). He says who he is and what he needs — the marble, the sword — and
+// the card he hands her says in its own words who the cell is for. The pod is
+// the lesson chip's to point at; the rest of his story waits for whoever comes
+// back and asks (opRatchet, flags.opLore).
 function opExplain(s) {
   const f = G.save.flags;
-  opSay(t('n_ratchet'), ['op_r1', 'op_r2', 'op_r3', 'op_r4', 'op_r5'], 'ratchet', () => {
+  opSay(t('n_ratchet'), ['op_r1', 'op_r2'], 'ratchet', () => {
     f.opTold = 1;
     // the errand is given here, so the goal line names it from now on
     if (typeof qState === 'function' && qState('ratchet_forge') === 'none') qSet('ratchet_forge', 'active');
     persist();
-    const pod = () => opSay(t('n_ratchet'), ['op_r_pod'], 'ratchet');
     if (!f.ratchetSpareGiven) {
       f.ratchetSpareGiven = 1;
       invAdd('batt');
-      opCard('op_spare', 'op_spared', opArt('cell'), null, pod);
-    } else pod();
+      opCard('op_spare', 'op_spared', opArt('cell'), null, null);
+    }
   });
 }
 // THE VOLT PACK, pitched before it is sold: what it does, why she needs it,
 // what it costs — and then the scrap to pay with, handed over for the repair,
 // so the purchase can never wait on grinding or lock her out.
+// TWO LINES NOW: what it does, what it costs. The scrap is already in her
+// hands — the winch she has just been hitting threw out twelve of it, the
+// pack's own price (winch.js WINCH_KNOCKS x WINCH_KNOCK_SCRAP) — so he no
+// longer has to hand it over with a third page and a card explaining money.
+// If she left it lying on the road he makes up the difference, in one line,
+// because the purchase must still never wait on grinding or lock her out.
 function opPackTalk(s) {
   const f = G.save.flags;
-  const pages = ['op_p1', 'op_p2', 'op_p3'];
-  const owed = !f.opScrap;
-  if (owed || G.save.scrap < 12) pages.push('op_p4');
+  const pages = ['op_p1', 'op_p2'];
+  const short = G.save.scrap < 12;
+  if (short) pages.push('op_p4');
   opSay(t('n_ratchet'), pages, 'ratchet', () => {
-    const open = () => opOpenShop();
-    if (owed) {
-      f.opScrap = 1; f.sawScrap = 1;          // scrap is explained here, by him
-      G.save.scrap += 12;
-      persist();
-      opCard('op_scrap', 'op_scrapd', opArt('scrap'), null, open);
-    } else {
-      if (G.save.scrap < 12) { G.save.scrap = 12; persist(); }
-      open();
-    }
+    f.opScrap = 1; f.sawScrap = 1;
+    if (G.save.scrap < 12) G.save.scrap = 12;
+    persist();
+    opOpenShop();
   });
 }
 function opOpenShop() {
@@ -364,7 +387,8 @@ function opGoalKey() {
   if (zone && zone !== 'A' && f.bossGlitch) return null;   // chapter one is behind her
   // GRAVEHORN stands on the marble once she has met him (js/gravehorn.js)
   if (!f.crystal && !bag.cshard && !f.pl_cshard && f.ghMet && !f.bossHorn) return 'op_o_gravehorn';
-  if (!f.crystal && !bag.cshard) return 'op_o_marble';
+  // no hatch before the meeting (progress.js pgHubSealed): the line points east
+  if (!f.crystal && !bag.cshard) return typeof pgHubSealed === 'function' && pgHubSealed() ? 'op_o_cross' : 'op_o_marble';
   if (!f.crystal) return 'op_o_return';
   if (!f.sageTame_GA1D) return 'op_o_sage';
   if (!f.bossChime) return 'op_o_chime';

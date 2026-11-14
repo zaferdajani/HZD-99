@@ -196,13 +196,13 @@ const G = {
     this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3 });
   },
   breakTile(tx, ty) {
-    // The first cave is below the hub, but the chapter first sends the player
-    // across A2 to meet NULLFANG. Keep only that cracked quarry hatch intact
-    // until the meeting, so an exploratory down-strike cannot reorder the
-    // inciting encounter. It still gives the ordinary hollow knock/tell.
-    const beforeLion = this.roomId === 'A2' && tx >= 12 && tx <= 14 && ty >= 15 && ty <= 16
-      && this.save && this.save.flags && !this.save.flags.nfMeet;
-    if (beforeLion) { this.knockTile(tx, ty, false); return false; }
+    // The hub's hatch (A2, 12-14) is not handled here any more. It used to be
+    // refused at this point until the NULLFANG meeting — while the light, the
+    // caption, the goal line and the strike prompt all told the player to dig.
+    // The owner's ruling (2026-11-14): "if it's supposed to go inside and dig
+    // after Nullfang, then why are you showing it before?" So before the meeting
+    // it is not a hatch at all: tileAt reports it as rock (pgHubSealed), which
+    // is what every system that draws it, knocks on it or prompts for it reads.
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     // THE GROUND CURVE IS RE-READ. The heightfield she stands on is built
     // from the grid once per room and cached by room id, so a floor she cut
@@ -238,6 +238,9 @@ const G = {
     if (this.knockSave !== this.save) { this.knocks = {}; this.knockSave = this.save; }
     const room = this.knocks[this.roomId] || (this.knocks[this.roomId] = {}), k = tx + ty * 4096;
     const n = crack ? (room[k] = (room[k] | 0) + 1) : (room[k] | 0);
+    // ...and every tile that has answered a blow at all, cracked or not: the
+    // hint (drawBreakHint) speaks at once to somebody who has already tried
+    (room.rang || (room.rang = {}))[k] = 1;
     // one note per swing, however many tiles of the plug the blade crossed
     if (this.knockAt !== this.save.time) { this.knockAt = this.save.time; sfx('hollow'); cam.shake = Math.max(cam.shake, 2); }
     const P = PAL[this.roomDef.zone];
@@ -983,6 +986,13 @@ function bankScrap(v) {
   if (G.save.flags.sawScrap) return;
   if (G.state !== 'PLAY' || G.dialog || G.cut || G.bossEntry || (G.boss && !G.boss.dead)) return;
   G.save.flags.sawScrap = 1;
+  // ...BUT NOT IN RATCHET'S STORY (owner's order, 2026-11-14, hook review item
+  // 6: fewer words after the first lessons). There her first scrap falls out of
+  // the machine she has just broken on the road, the counter appears in the HUD
+  // as it lands, and a minute later Ratchet names his price in it — the
+  // currency introduces itself by being spent. The sentence stays for NOSTOS,
+  // which has no such scene.
+  if (typeof opOn === 'function' && opOn()) return;
   // A TOAST, NOT A CARD. The first version of this called showItem, which sets
   // G.state = 'DIALOG' — and a pickup happens while she is WALKING. Measured
   // on the meadow: she left A1 at 96, touched the first scrap at 323, and the
@@ -1229,6 +1239,7 @@ function loadRoom(id) {
       const en = !isHero() && G.save.storyVersion >= 2 && id === 'A0' && kind === 'turret'
         ? new YardWinch(tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h)
         : new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      if (kind === 'turret' && typeof mountTurret === 'function') mountTurret(en);
       en.actorRole = STORY_ACTOR_ROLES[kind]; en.storyKey = storyKey;
       if (rescueState === 'disabled') { en.disabled = true; en.hp = 1; }
       if (rescueState === 'rescued') { en.rescued = true; en.calm = true; en.hypnoT = 1e9; }
@@ -1297,6 +1308,23 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
+  // THE FIRST THING SHE FIGHTS (TUT_STEPS 'claw'): one small empty construct on
+  // the road between the jump and the gates — a slag mite, the little half a
+  // blob bursts into, which is the smallest hostile body the game has art for.
+  // Not a person (STORY_ACTOR_ROLES: an empty construct, so it breaks and stays
+  // broken and nothing waits to be cleansed), two swipes of hp, and it does not
+  // drip: it crawls at her and it stings, which is all a first enemy should
+  // know how to do. Once per save (flags.firstKill), and only in Ratchet's
+  // story — the hero's world wakes differently.
+  if (id === 'W2' && typeof opOn === 'function' && opOn() && !G.save.flags.firstKill
+      && !G.save.flags.gateOpened && !G.save.flags.ratchetRepaired && !G.save.flags.tut) {
+    const m = new Enemy('blob', 23 * TILE, (def.h - 2) * TILE - 16);
+    m.w = 20; m.h = 15; m.hp = 12; m.mini = true; m.firstFoe = true;
+    m.dir = -1; m.dripT = 1e9;               // it never pools the floor
+    m.moves = []; m.traits = [];
+    m.actorRole = 'empty-construct';
+    G.enemies.push(m);
+  }
   // THE MACHINE FOLK STAND ON THE GROUND SHE STANDS ON. A static is placed on
   // the tile grid, but the floor she walks is the heightfield (groundColumnAt),
   // which rides up to a couple of dozen px above the grid in the meadow — so
@@ -1529,6 +1557,38 @@ function bossBarName(b) {
 //   leave   and bounds east out of the room, toward where she will meet it again
 // She keeps at least one core: this is a survival, never a scripted death.
 // ---------------------------------------------------------------------------
+// A CANNON IS BOLTED TO SOMETHING (owner, 2026-11-14: "a floating canon that
+// does not make any sense"). A turret has no gravity — it fires from where the
+// room list put it — so one authored a row or two off its ledge, or over open
+// air, hangs there for the rest of the game. Six did (A6, B7, C5, C6, D5, E5).
+// At spawn, a turret with nothing solid under its feet is moved to the nearest
+// surface that could carry it: a solid tile with open air above it (never a
+// hazard rail), within eight columns, dropping preferred over climbing so it
+// lands on the ledge it was written above rather than the one over its head.
+// A turret already standing on something is not touched.
+function mountTurret(en) {
+  if (!G.grid || !en) return;
+  const sol = (tx, ty) => { const ch = tileAt(tx, ty); return ch === '#' || ch === '=' || ch === 'B'; };
+  const H = G.grid.length, W = G.grid[0].length;
+  const tx0 = Math.floor((en.x + en.w / 2) / TILE), ty0 = Math.round((en.y + en.h) / TILE);
+  if (sol(tx0, ty0)) return;
+  let best = null, bd = 1e9;
+  for (let dx = -8; dx <= 8; dx++) {
+    const tx = tx0 + dx;
+    if (tx < 1 || tx >= W - 1) continue;
+    for (let ty = 1; ty < H; ty++) {
+      if (!sol(tx, ty)) continue;
+      const up = tileAt(tx, ty - 1);
+      if (up === '#' || up === '=' || up === 'B' || up === '^') continue;   // buried, or a trap's own bed
+      const dy = ty - ty0;
+      const d = Math.abs(dx) + (dy >= 0 ? dy * 0.6 : -dy * 1.4);
+      if (d < bd) { bd = d; best = { tx, ty }; }
+    }
+  }
+  if (!best) return;
+  en.x = best.tx * TILE + (TILE - en.w) / 2;
+  en.y = best.ty * TILE - en.h;
+}
 const MEET_ROOM = 'A2', MEET_X = 60 * TILE;
 function meetCheck() {
   if (G.meet || G.roomId !== MEET_ROOM || !G.save || G.save.flags.nfMeet) return;
@@ -1541,6 +1601,10 @@ function meetCheck() {
   G.boss = b;
   G.meet = { t: 0, ph: 'fall', hit: false, interactive: !isHero() && G.save.storyVersion >= 2 };
   G.save.flags.nfMeet = 1;                    // set as it begins: a reload mid-beat keeps the sentence
+  // ...and the hub's floor stops being rock: the hatch, its fracture and its
+  // light exist from this moment (pgHubSealed), so the tile layer and the
+  // ground curve are re-read
+  tileDirty = true; if (typeof surfRoom !== 'undefined') surfRoom = null;
   if (typeof brMark === 'function') brMark('meet', G.roomId);
   if (typeof filmSee === 'function' && PURIFY_VID.meet) filmSee('meet');
   persist();
@@ -1625,6 +1689,10 @@ function meetStep(dt) {
       G.boss = null; G.meet = null;
       setMusic(G.roomDef.zone);
       persist();
+      // the hatch has just come into being behind her (progress.js pgHubSealed):
+      // say where, once, while she is still looking east after the lion
+      if (typeof pgRobo === 'function' && pgRobo() && !G.save.flags.crystal && typeof pgHubBroken === 'function' && !pgHubBroken())
+        G.toast(t('pg_hub_wakes'));
     }
   }
   beastMotionEnd(b, dt);
@@ -2870,6 +2938,7 @@ function update(dt) {
       G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); infEyeUpdate(dt * 0.25); return;
     }
     meetCheck(); if (G.meet) meetStep(dt);
+    if (typeof glimpseTick === 'function') glimpseTick(dt);   // NULLFANG seen down the road, once (js/glimpse.js)
     // THE BREAK (js/story-opening.js): the one moment NULLFANG lets go of the
     // order, staged between the sage and the bell. Same shape as the meeting —
     // a check that may open it, a step that drives the body by hand.
@@ -11605,7 +11674,7 @@ function gateEnter() {
     // the align beat: how far, which way, and how long her legs would take
     ax0: player.x, axTo: gapX,
     align: Math.abs(need) < 6 ? 1 : 0,
-    alignT: 0, alignDur: Math.min(1.1, Math.abs(need) / GATE_STEP_VX),
+    alignT: 0, alignDur: Math.min(0.45, Math.abs(need) / GATE_STEP_VX),
   };
   // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
   // the only place in the game she is seen from behind, and the four plates that
@@ -11686,7 +11755,13 @@ function drawOneGatePrompt(def) {
 // "a careful steady walk into the unknown, getting smaller as I go deeper,
 // until fading." Steady means near-constant pace — the easing below keeps
 // the speed level instead of rushing the middle.
-const GATE_WALK = 3.4;
+//
+// SUPERSEDED (owner, 2026-11-14): "the motion of me going inside the portal or
+// the door is very slow, taking so much time to go deep inside. I shouldn't be
+// walking slowly. Instead, I should be running inside with a second or two."
+// The whole exit — run to the doorway, turn, run in — now fits in about one and
+// a half seconds, at her run, on the run clip.
+const GATE_WALK = 1.2;
 // THE WALK-AWAY IS ONE AUTHORED CLIP (2026-09-15), not two plates flipped.
 //
 // The strip is 0-3 the TURN — front-on, three-quarter, nearly behind, behind —
@@ -11721,7 +11796,8 @@ const GATE_CLIP_ARMED = {
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
-const GATE_STEP_VX = 150;
+// SUPERSEDED with GATE_WALK above (owner, 2026-11-14): she RUNS to the door.
+const GATE_STEP_VX = 300;
 // SHE TURNS BEFORE SHE WALKS (owner, 2026-08-26: "normal motion of turning...
 // gradually and smoothly to turn it to face the gate, then normal legs and
 // body movement of someone walking away"). The old shot cut from her side view
@@ -11731,7 +11807,8 @@ const GATE_STEP_VX = 150;
 // her legs start down the hall. 0.55s: three authored angles at a pace a body
 // actually turns at; longer reads as a hesitation, shorter reads as the cut
 // this replaces.
-const GATE_TURN = 0.55;
+// 0.3 since the owner's run order (2026-11-14): a runner turns on the move.
+const GATE_TURN = 0.3;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
   // ---- beat one: walk to the doorway, side-on, on her own legs -------------
@@ -11983,7 +12060,8 @@ function drawGateWalk() {
   // it. Unarmed, the cave takes her at a run and the gate at a walk.
   const wmode = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
   const armedClip = GATE_CLIP_ARMED[wmode] || null;
-  const CLIP = armedClip || (intoCave ? GATE_CLIP_RUN : GATE_CLIP);
+  // Unarmed she RUNS through every door now, gate or cave (owner, 2026-11-14).
+  const CLIP = armedClip || GATE_CLIP_RUN;
   // fall back to the unarmed walk if this tier's clip has not decoded — a cave
   // entered at a walk is a smaller wrong than her side view sliding into rock,
   // and a missing sword is a smaller wrong than no character at all
@@ -11991,7 +12069,9 @@ function drawGateWalk() {
   const CLIPU = gateBackImg(CLIP.key) ? CLIP : GATE_CLIP;
   const want = g.pair ? g.pair[b] : '';
   const im = clipIm ? null : (want ? gateBackImg(want) : null);
-  const departure=!armed && !intoCave && gateBackImg('heroDeparture');
+  // the supplied departure is a WALK-away: it still turns her at the door (the
+  // turn beat above), and recedes only if the run strip has not decoded
+  const departure=!armed && !gateBackImg(GATE_CLIP_RUN.key) && gateBackImg('heroDeparture');
   if(departure) {
     const col=3+Math.min(4,Math.floor(k*5)),cw=departure.naturalWidth/8;
     // Source already recedes. Compensate its perspective before applying the
@@ -12004,7 +12084,10 @@ function drawGateWalk() {
     const nBack = CLIPU.cells - CLIPU.turn;
     // the run turns its legs over faster, so its stride counter is shorter
     const step = CLIPU === GATE_CLIP_RUN ? 19 : 26;
-    const cell = k < CLIPU.turnFrac
+    // unarmed, the departure plate already turned her in the doorway — the run
+    // starts on her back, not with a second turn
+    const turned = !armed && !!gateBackImg('heroDeparture');
+    const cell = (k < CLIPU.turnFrac && !turned)
       ? Math.min(CLIPU.turn - 1, Math.floor(k / CLIPU.turnFrac * CLIPU.turn))
       : CLIPU.turn + (Math.floor(trav / step) % nBack);
     const cw = clipIm.naturalWidth / CLIPU.cells;
@@ -12279,6 +12362,14 @@ function drawWinchHouse(wx, gy) {
   c.restore();
   c.restore();
 }
+// THE DEN TABLE'S HEIGHT, in world px (owner, 2026-11-14: "it looks like I'm
+// ... smaller than a table, which is nonsense"). It was 150 — as tall as the
+// tinker himself and nearly twice her drawn height (92). The plate's work
+// surface is 79.4% of its height from the feet (measured: the first row of the
+// forgeTable plate that is 80% of its full width), so 77 puts that surface 61px
+// above the floor — on the ledge at row 13 she can jump onto (world.js A0B),
+// at her chest and the tinker's thigh. The top she lands on is the top drawn.
+const DEN_TABLE_H = 77, DEN_TABLE_SURF = 0.794;
 function drawStatics(P) {
   for (const pr of (ROOM_PROPS[G.roomId] || []))
     if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
@@ -12719,6 +12810,16 @@ function drawStatics(P) {
       // job beat any angle of it standing still, so when the beat says work and
       // the strip has landed, that is what draws; the turntable covers every
       // other beat and every frame before the art arrives.
+      // METAL, NOT SCRAP — see NPC_LOOK / npcSheen in media.js. Around the body
+      // only: the filter is set here and taken off the moment it has drawn.
+      const metal = live && !(typeof isHero === 'function' && isHero()) && !G.artProbe
+        && typeof c.filter === 'string' && typeof NPC_LOOK === 'string';
+      const filter0 = metal ? c.filter : null;
+      if (metal) {
+        c.filter = NPC_LOOK;
+        NPC_SHEEN.on = (typeof richK === 'number' ? richK : 1) > 0.3;
+        NPC_SHEEN.t = performance.now() / 1000 + (s.x % 97) * 0.031;
+      }
       let stripDrew = false;
       if (npcBusy && s._job && s._job.work && !(typeof isHero === 'function' && isHero())) {
         const A = typeof atlasOf === 'function' && atlasOf(s.extra);
@@ -12741,6 +12842,7 @@ function drawStatics(P) {
           grounded: s.extra !== 'mono',
           col: jobCol,
         }));
+      if (metal) { c.filter = filter0; NPC_SHEEN.on = false; }
       c.save(); c.translate(s.x + s.w / 2, s.y + s.h + bob2 * 0.4);
       if (fdir < 0) c.scale(-1, 1);  // face the cat (or the bench — see fdir)
       if (talking) {
@@ -12863,18 +12965,36 @@ function drawStatics(P) {
   // forging of the crystal happens here. A dedicated fired object plate is
   // §2r on THE FIRING LIST; this crop is its stand-in and its reference.
   if (G.roomId === 'A0B') {
-    const tb = (G.roomDef.h - 1) * TILE + 6;
+    // ON THE FLOOR SHE STANDS ON (owner, 2026-11-14: "the table, the NPC and
+    // me, we are all on different levels... it looks like I'm standing on the
+    // leg of the table"). This read (h - 1) * TILE + 6 — the bottom row of the
+    // frame, which is buried rock. frame() makes the floor TWO rows deep, so
+    // bodies stand on the top of row h - 2, lifted again by the surface curve
+    // (groundColumnAt): she measured 51px above the table's feet. The table
+    // now takes its line from the same heightfield the bodies are put on.
+    const ftop = (G.roomDef.h - 2) * TILE;
+    // ...under BOTH legs, and it stands on the lower of the two: a leg may sink a
+    // pixel or two into the curve, but neither is ever left in the air
+    let tb = ftop;
+    if (typeof groundColumnAt === 'function') {
+      const half = DEN_TABLE_H * (4 / 3) * 0.4;
+      const gl = groundColumnAt(22.6 * TILE - half), gr = groundColumnAt(22.6 * TILE + half);
+      // a column whose surface is the tabletop ledge itself (tile top above the
+      // floor) has flat floor under it: the curve there belongs to the ledge
+      const fl = q => !q || q[1] < ftop - 1 ? ftop : Math.min(ftop, q[0]);
+      tb = Math.max(fl(gl), fl(gr)) + 1;
+    }
     // §2r FIRED: the real forge-table plate stands in the moment it decodes;
     // the painting-crop stand-in below keeps the room whole until then.
     if (typeof mediaFetch === 'function') mediaFetch('forgeTable');
     const fIm = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.forgeTable;
     if (fIm && fIm.naturalWidth && typeof drawPlateAnchored === 'function') {
       if (typeof contactShadow === 'function') contactShadow(c, 22.6 * TILE, tb, 95, 0.5);
-      drawPlateAnchored(c, 'forgeTable', 22.6 * TILE, tb, 150, false);
+      drawPlateAnchored(c, 'forgeTable', 22.6 * TILE, tb, DEN_TABLE_H, false);
     } else if (typeof workTablePlate === 'function') {
       const tIm = workTablePlate();
       if (tIm) {
-        const TH = 150, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
+        const TH = DEN_TABLE_H, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
         const tx = 18.6 * TILE;
         // shadow first: the feathered legs let it show through, which is what
         // roots the bench on the den floor instead of floating over it
@@ -12979,8 +13099,24 @@ function drawBreakHint() {
     if (below ? fl.taughtFloor : fl.taughtWall) continue;
     bd = d; best = { tx, ty }; bestTop = top; bestBelow = below;
   }
-  if (!best || bd > 132) return;
+  if (!best || bd > 132) { BREAK_LINGER.key = ''; BREAK_LINGER.t = 0; BREAK_LINGER.at = performance.now(); return; }
   const top = bestTop, below = bestBelow;
+  // THE ROCK TELLS FIRST; THE WORDS ONLY IF SHE NEEDS THEM (owner's order,
+  // 2026-11-14, hook review item 6: "teach the down-strike and wall-break with
+  // layout" — Team Cherry's rule, "you can guide them a little bit, and that's
+  // enough"). The sentence used to be in the air the moment she came within
+  // four tiles of any loose rock, before she had looked at it. Now the stone
+  // glows (below) and its fracture is drawn, and the line waits: it appears
+  // only once she has stood by the same rock for a few seconds without opening
+  // it, or straight away if she has struck it the wrong way and it only rang.
+  const now = performance.now(), hk = G.roomId + ':' + best.tx + ',' + top;
+  if (BREAK_LINGER.key !== hk) { BREAK_LINGER.key = hk; BREAK_LINGER.t = 0; }
+  BREAK_LINGER.t += Math.min(0.1, Math.max(0, (now - BREAK_LINGER.at) / 1000));
+  BREAK_LINGER.at = now;
+  const rangMap = G.knockSave === G.save && G.knocks[G.roomId] && G.knocks[G.roomId].rang;
+  let rang = false;
+  if (rangMap) for (const k2 in rangMap) { const tx2 = (+k2) % 4096, ty2 = ((+k2) - tx2) / 4096; if (Math.abs(tx2 - best.tx) <= 2 && Math.abs(ty2 - top) <= 2) { rang = true; break; } }
+  const say = rang || BREAK_LINGER.t >= BREAK_LINGER_S;
   const msg = t(below ? 'break_down' : 'break_hit');
   // a floor block sits at her feet, so the line has to clear her head
   const bx = best.tx * TILE + 16, by = top * TILE - (below ? 46 : 16);
@@ -12992,8 +13128,12 @@ function drawBreakHint() {
   gr.addColorStop(0, PAL[G.roomDef.zone].edge); gr.addColorStop(1, 'rgba(0,0,0,0)');
   c.fillStyle = gr; c.beginPath(); c.arc(bx, top * TILE + 16, 34, 0, 7); c.fill();
   c.restore();
-  ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
+  if (say) ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
 }
+// how long she may stand by an unopened rock before the words come, and the
+// clock that counts it (per rock: walking to another one starts it again)
+const BREAK_LINGER_S = 4;
+const BREAK_LINGER = { key: '', t: 0, at: 0 };
 // THE CRACK A KNOCK LEAVES. The baked tile layer draws the hairline every
 // secret wears; a blow that did not break it opens that hairline into a real
 // split across the stone, drawn live over the bake (a handful of tiles at
@@ -13005,6 +13145,7 @@ function drawKnocks() {
   const P = PAL[G.roomDef.zone];
   c.save();
   for (const key in room) {
+    if (key === 'rang') continue;                 // (the hint's own note — see knockTile)
     const k = +key, tx = k % 4096, ty = (k - tx) / 4096;
     const q = tileAt(tx, ty);
     if (q === '.') continue;                       // already broken
@@ -13234,6 +13375,17 @@ const TUT_STEPS = [
   { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', at: 'W2', room: 'W2',
     done: () => (!player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown))
       || (typeof tutOnJumpShelf === 'function' && tutOnJumpShelf()) },
+  // THE FIRST FIGHT, BEFORE ANYONE SPEAKS (owner's order, 2026-11-14, after
+  // the review of what hooks a player in the first minute: "a fight in the
+  // first minute or two... she should win something before anyone speaks").
+  // The opening used to hand her a letter, a drawer, a repair board, five pages
+  // and a shop before the first thing she could hit — and that thing was a
+  // jammed winch that did not hit back. One small hostile machine crawls the
+  // road to the gates now (loadRoom, W2), her claws answer from the first
+  // frame, and breaking it is the step. See TUT_UNLOCK: ATK is no longer a
+  // lesson's gift.
+  { id: 'claw', label: 'tut_claw', hint: 'tut_claw_h', at: 'W2', room: 'W2', robo: true,
+    done: () => !!G.save.flags.firstKill },
   // THE GATES: the only way into the city, and they close behind her.
   { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h', at: 'W2',
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 2 },
@@ -13255,19 +13407,28 @@ const TUT_STEPS = [
   // screen — the next lesson is only introduced after it (opening.js).
   { id: 'pod', label: 'op_pod', hint: 'op_pod_h', at: 'A0B', room: 'A0B', robo: true,
     done: () => !!G.save.flags.opPod },
-  // THE VOLT PACK: he says what it does, why she needs it and what it costs,
-  // pays her the twelve scrap for the repair, and his counter opens with the
-  // pack marked. One purchase; the step is the purchase.
+  // NEED BEFORE TEACH (same order, item 2: "move the shop pitch to after the
+  // first fight outside, when she actually needs to heal"). The pack used to be
+  // pitched in the den, cold, and its first surge had to be SCRIPTED to cost a
+  // core so there was something to heal. Now the winch does it for real: she
+  // strikes it, scrap flies out of the housing (twelve of it — the pack's own
+  // price), and on the third blow it bites back and takes a core
+  // (YardWinch.onStruck). Claws only scratch it. THEN Ratchet has something to
+  // sell, and she has the reason and the scrap to buy it.
+  { id: 'atk', label: 'op_atk', hint: 'op_atk_h', at: 'A0', room: 'A0', hero: ['tut_atk', 'tut_atk_h'],
+    done: () => (typeof isHero === 'function' && isHero())
+      ? (!!player.swing || player.comboT > 0)
+      : !!(G.save.flags.winchBit || G.save.flags.heal || G.save.flags.burstDone) },
+  // THE VOLT PACK: two lines — what it does, what it costs — and his counter
+  // opens with the pack marked. One purchase; the step is the purchase.
   { id: 'pack', label: 'op_pack', hint: 'op_pack_h', at: 'A0B', room: 'A0B', robo: true,
     done: () => !!G.save.flags.heal },
-  // THE FIRST SURGE. Repair cannot be taught at full health (tutEnter), so the
-  // pack's first surge costs one core, in the den, where nothing can follow it.
+  // THE CORE THE WINCH TOOK, mended with what she just bought. (A save that
+  // reaches this at full health — it rested at the pod on the way back — still
+  // gets the one scripted surge in tutEnter, because repair cannot be taught
+  // to somebody with nothing to repair.)
   { id: 'heal', label: 'op_heal', hint: 'op_heal_h', hero: ['tut_heal', 'tut_heal_h'],
     done: () => player.cores >= player.maxCores() },
-  // ...and the two things the claw does, at the yard winch jammed across the
-  // road outside: a strike, then the Volt Burst that stops it.
-  { id: 'atk', label: 'op_atk', hint: 'op_atk_h', at: 'A0', room: 'A0', hero: ['tut_atk', 'tut_atk_h'],
-    done: () => !!player.swing || player.comboT > 0 },
   { id: 'burst', label: 'op_burst', hint: 'op_burst_h', at: 'A0', room: 'A0', hero: ['tut_burst', 'tut_burst_h'],
     done: () => !!(G.save.flags && G.save.flags.burstDone) },
   // THE FIRST PUZZLE MONUMENT, just past the winch, on the same screen as the
@@ -13330,7 +13491,7 @@ function tutDir(st, pv) {
   const h = tutHand(pv);
   return h === '←' ? 'left' : (h === '→' || h === '← →') ? 'right' : null;
 }
-const TUT_ACTION = { jump: 'JUMP', note: 'INT', drawer: 'INT', repair: 'INT', pod: 'INT', pack: 'INT',
+const TUT_ACTION = { jump: 'JUMP', claw: 'ATK', note: 'INT', drawer: 'INT', repair: 'INT', pod: 'INT', pack: 'INT',
   heal: 'HEAL', atk: 'ATK', burst: 'ATK', node: 'INT' };
 function tutHand(st) {
   if (st.control) return st.control;
@@ -13398,7 +13559,7 @@ function tutPrompt(st) {
     const drawer = (G.statics || []).find(q => q.type === 'chest' && q.extra === 'it:batt' && !q.opened);
     if (!useAt(drawer)) useAt(ratchet);
   } else if (st.id === 'pod') useAt((G.statics || []).find(q => q.type === 'bench'), '#8ff6ff');
-  else if (st.id === 'atk' || st.id === 'burst') {
+  else if (st.id === 'atk' || st.id === 'burst' || st.id === 'claw') {
     const enemy = (G.enemies || []).find(q => q && !q.dead && !q.disabled);
     if (enemy) {
       point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
@@ -13455,7 +13616,13 @@ const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // that pressing jump before that point does what it looks like it should.
 // INTERACT arrives with the letter (the first thing she is asked to use), the
 // claw with the strike lesson at the winch, SKILL with the open road.
-const TUT_UNLOCK = { ATK: 'atk', INT: 'note', HEAL: 'heal', SKILL: 'go', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
+// THE CLAW IS NOT ON THIS LIST ANY MORE EITHER (owner, 2026-11-14: "claws
+// available from the start"). It waited for the winch lesson, eleven steps in,
+// so the thing every player tries third — after walking and jumping — did
+// nothing for the whole first act. It answers from the first frame; the lesson
+// (the 'claw' step, on the road to the gates) is where there is something to
+// hit, exactly as the jump's is where there is something to clear.
+const TUT_UNLOCK = { INT: 'note', HEAL: 'heal', SKILL: 'go', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
 function tutAllows(act) {
   if (typeof tutorialAllows === 'function') return tutorialAllows(act);
   const need = TUT_UNLOCK[act];
@@ -13476,6 +13643,7 @@ function tutAllows(act) {
 // letter again.
 const TUT_FROM_OLD = { atk: 'booth', kill: 'booth', coin: 'booth', buy: 'note', heal: 'heal', burst: 'atk', node: 'node', skill: 'go' };
 const TUT_SETTLED = {
+  claw: f => f.firstKill || f.gateOpened || f.ratchetRepaired,
   note: f => f.opNote || f.ratchetRepaired,
   drawer: (f, sv) => (sv.items && sv.items.ratchetCell) || f.ratchetRepaired,
   repair: f => f.ratchetRepaired && f.opTold,
@@ -13529,8 +13697,13 @@ function updateTutor(dt) {
   // winch is the strike and burst lessons' target, not an encounter: calm (it
   // holds its arm and never swings — winch.js) until the lessons are behind
   // her, so no lesson is ever interrupted by a hit she was not taught to read.
+  // ...with ONE exception, and it is the point of it: the small machine on the
+  // road to the gates (firstFoe) is her first fight, and a fight with something
+  // that cannot touch her is a chore. It stays live — and goes quiet only if
+  // she is down to two cores, because nobody dies in the first minute.
   for (const e of (G.enemies || [])) {
     if (!e || e.dead || e.disabled || e.rescued) continue;
+    if (e.firstFoe && player.cores > 2) { e.calm = false; e.hypnoT = 0; continue; }
     e.calm = true; e.hypnoT = Math.max(e.hypnoT || 0, 1);
   }
   if (typeof TOUCH !== 'undefined' && TOUCH) {
@@ -14481,6 +14654,7 @@ function drawWorldFrame() {
   // beside this and hits it, so it belongs in the world layer with everything
   // else that has a hitbox, in front of the terrain and behind her.
   if (typeof drawProgressGround === 'function') drawProgressGround(c);   // the quarry marks, the hub's dust
+  if (typeof drawGlimpse === 'function') drawGlimpse(c);                 // ...and the shape in the road (js/glimpse.js)
   if (G.rubbles && typeof drawRubble === 'function')
     for (const rb of G.rubbles) drawRubble(rb, rb.x, rubbleFoot(rb) + 4, PAL[G.roomDef.zone]);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
@@ -17932,7 +18106,8 @@ function drawMap() {
     c.strokeStyle = P.edge; c.globalAlpha = 0.45; c.lineWidth = 1;
     c.strokeRect(rc.x + 0.5, rc.y + 0.5, rc.w - 1, rc.h - 1);
     c.globalAlpha = 1;
-    if (BENCH_ROOMS.indexOf(id) >= 0 || (ROOMS[id].cave && ROOMS[id].ents.some(e => e[0] === 'bench')))
+    // every room with a pod in it: the map is where she looks for the way back to one
+    if (BENCH_ROOMS.indexOf(id) >= 0 || ROOMS[id].ents.some(e => e[0] === 'bench'))
       ftxt('◆', rc.x + 10, rc.y + 11, 11, '#aef7d8');
     if (id === 'A3') ftxt('⚙', rc.x + 10, rc.y + rc.h - 11, 11, '#ffd76a');
     // THE CAVE SIGN (owner: "the caves on the map should appear as a cave

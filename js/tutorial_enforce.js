@@ -128,13 +128,16 @@ function tutorialAllows(action) {
   const p = ctx.prompt, i = G.tut.i;
   // At the obstacle, the jump is the way on (tutorialTick).
   if (ctx.ready && p && p.action === 'JUMP') return action === 'JUMP';
+  // The claw is hers from the first frame (game.js TUT_UNLOCK): a swing at
+  // nothing costs nothing, and the first fight is ninety seconds in.
+  if (action === 'ATK') return true;
   // The control being taught always answers when she is where it works.
   if (ctx.ready && p && action === p.action) return true;
   // Walking and jumping are never taken away: they are the first two things
   // anyone tries, and a player who wants to look around is not breaking the
   // lesson. DOWN is a crouch/drop and is free once the claw is taught.
   if (action === 'LEFT' || action === 'RIGHT' || action === 'JUMP') return true;
-  if (action === 'DOWN') return i >= TUT_STEPS.findIndex(q => q.id === 'atk');
+  if (action === 'DOWN') return i >= TUT_STEPS.findIndex(q => q.id === 'claw');
   // UP walks through a door: the one the step points at, or — backtracking
   // stays voluntary — any door she is actually standing at.
   if (action === 'UP') return !!(typeof gateHere === 'function' && player && player.on && gateHere());
