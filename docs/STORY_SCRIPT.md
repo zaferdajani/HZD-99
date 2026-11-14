@@ -42,7 +42,7 @@ cannot be spent. §2.5 is that scene.
 | **The Nine-Lives Sage** | On its ninth life. Knows GLACIERE, the Archives' sentinel, guards the Kernel Key. | A sage in a carrel; the one warm floor in a frozen kingdom. | D1B |
 | **Lumen** | The Lost Nymph. Glows harder when afraid; always glowing. | A small luminous unit whose glow keeps one pocket of the Nest clean. | E1B, the Hollow |
 | **The seven chamber sages** | The kingdoms' protectors, kneeling under the Song two rooms behind each guardian. | Kneeling figures with a black halo and an ember rim while infected; the halo goes blue when purified. | Every G\*D deep chamber |
-| **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
+| **NULLFANG** | **The Meadow Sage** — the lion who kept the Meadows, and its guardian. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
 | **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one red eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
 | **THE ALPHA** | Leader of the wolf pack. Not a guardian; not the Eye's. | A great wolf-frame with the pack behind it. | A10 |
 | **TALONHOST** | Guardian of the Conduits. The Iron Eagle. | Hangs from above, drops and slams. | B4 |
@@ -334,7 +334,7 @@ The forging film plays (*The Forging*). The card:
 
 He offers the optional Alpha errand (§2.14). From now on he stands at the camp (A3), not
 in the den — the same machine, awake on the same battery. His standing line there:
-*The maintenance passage beside the marble quarry leads to the first Sage. Clear their
+*The maintenance passage beside the marble quarry leads to the Sage's keeper. Clear their
 binding before you face the guardian.*
 **Story.** The first sword is shaped, not found. The blade is now the only thing that
 can free anything: sages, the Alpha and every guardian refuse claws (§2.16).
@@ -350,7 +350,7 @@ can free anything: sages, the Alpha and every guardian refuse claws (§2.16).
   forge, Ratchet: *There is a shaft under the meadow nobody has stood in since the
   fall. See it for me.* → *You stood in it. Nobody has, in a long time. Here.*
 
-### 2.12 The maintenance door and the first sage — GA1T, GA1D (the blade's first work)
+### 2.12 The maintenance door and the first sage's keeper — GA1T, GA1D (the blade's first work)
 
 **Where.** Not behind the lair. **Beside the quarry.** The moment she carries the
 forged blade, a maintenance door opens in the wall of CV3, one room from the pillar she
@@ -366,13 +366,13 @@ In the chamber: *The sage kneels — the song holds its body together. Broken, b
 CLEAN.* Claws do nothing: *Claws cannot cleanse the song. The PURIFIER can.* Four cuts
 of the white blade and the halo goes from black to blue:
 > **A SAGE, PURIFIED** — *The song lets go. The sage remembers everything — and gives what it kept for whoever would come with clean light.*
-> **THE MEADOW SAGE** — *It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.* (+1 Power Cell)
+> **THE MEADOW KEEPER** — *It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.* (+1 Power Cell)
 
 **And then it tells her why she keeps losing.** The revelation is the kingdom's hinge
 and it fires the moment she stands up in that chamber:
 > *I called for the ones who had not answered. The order made me call louder.*
 > *Every answer told it where another survivor was hiding.*
-> *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.*
+> *NULLFANG, our Sage, is still resisting. But CHIME writes the command back whenever he breaks it.*
 > *Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet.*
 
 **What it says is what is true when she stands up** (`sageRevealLines`). The climb is
@@ -463,10 +463,10 @@ back. Your husk was still warm when I passed it.*
 **Where.** The end of the kingdom — and the last thing she does in it. The lair refuses
 her until the story is ready, saying what is missing at the door, in order: *Bring raw
 marble from the cave beneath the meadow to Ratchet. You need his cleansing blade.* →
-*The Sage knows the binding. Take the maintenance door beside the marble quarry and
+*The Sage's keeper knows the binding. Take the maintenance door beside the marble quarry and
 free them first.* → *CHIME keeps restoring the order. Take the climb above the meadow
 and silence the bell before returning to NULLFANG.*
-**What happens.** *NULLFANG, THE VIRUS BEAST.* *It remembers the corridor.* Two
+**What happens.** *NULLFANG, THE MEADOW SAGE.* *It remembers the corridor.* Two
 phases — at half health it stalks faster, crouches shorter, chains its leaps. It is
 the one guardian that can be dazed: *⚡ NULLFANG is reeling — hit it NOW.* When it is
 down it kneels, still looking at her — and the blade frees it. **There is no kill

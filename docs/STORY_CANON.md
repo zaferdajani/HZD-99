@@ -61,6 +61,31 @@ Read this before changing narrative, tutorials, quests, rooms, music or weapons.
 This overrides conflicting older lore. It specifies intent, not completion.
 NOSTOS remains a separate world sharing the engine.
 
+## THE SAGES ARE THE GUARDIANS (owner's ruling, 2026-11-13 and 2026-11-14)
+
+**"The first sage is a lion."** Asked what the hooded robot called "the Meadow
+Sage" was and where it had come from, the owner ruled that it is not a sage. A
+kingdom's sage is its animal guardian: **NULLFANG, the lion, is the Meadow
+Sage**, and each later kingdom's guardian is that kingdom's sage. Freeing the
+sages with the cleansing sword means freeing them.
+
+The hooded machines in the deep chambers (GA1D and its six siblings) stay in the
+game exactly as they play — the duel, the song-lock, the purification, the gift
+— but they are the sages' **keepers**, not sages: "THE MEADOW KEEPER", and so
+on. The Meadow Keeper is the one who tells her that *NULLFANG, our Sage, is
+still resisting*. No room, reward, fight or art was removed; this is a ruling
+about who is who, carried in the text (five languages) and in this file.
+
+Internal names are unchanged and are not story: the entity kind `sage`, the
+flags `sageTame_*`, `SAGE_NET`, `js/sage-motion.js`, `docs/combat/SAGE.md` and
+the test names all still say "sage" and all mean the keepers. "The Nine-Lives
+Sage" (the old cat in the Archives) is a nickname for an NPC and is untouched.
+
+The older sentence below — "preserve the distinction between sages and
+guardians where the existing implementation uses both" — now reads: preserve
+the two FIGHTS; the keeper's duel and the guardian's are different encounters.
+The guardian is the sage.
+
 ## World, song and infection
 
 This is a world of robots divided into kingdoms. Each kingdom has its own
