@@ -4,7 +4,10 @@
 const RATCHET_RELEASE_ART = Object.freeze({key:'ratchetWristRelease',cells:4,
   sourceFloor:355.5,sourceCenter:180,hand:[264,227],heightK:3.3,
   heroWrist:[207,62],durations:[.22,.36,.36,.38],loadingLimit:1.5});
-let ratchetReleaseSession=null;
+// var, not let: warp.js (earlier in source-files.json) loads a room at boot, and
+// loadRoom calls ratchetReleaseFinish before this line has run. A let would be in
+// its temporal dead zone there and throw; a var is merely undefined, i.e. no session.
+var ratchetReleaseSession=null;
 TEXT_LAYERS.push({robo:true,
  en:{rr_waking:'Easy… he is waking.',rr_continue:'Continue'},
  ar:{rr_waking:'على مهل… إنّه يستيقظ.',rr_continue:'متابعة'},
