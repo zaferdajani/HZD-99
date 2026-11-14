@@ -605,7 +605,9 @@ function drawTrial() {
     }
     ftxt(name, 480, 260, 36, '#eef3fa', 'center', '#b48cff');
     // after a miss at a node the beat says so — and that the puzzle goes on
-    if (TRI.retry) ftxt('✗  ' + t('rd_retry'), 480, 322, 24, '#ff8a94', 'center', '#ff5f6d');
+    // "watch again" only makes sense for the lights; the cubes and the
+    // balances simply hand over another question
+    if (TRI.retry) ftxt('✗  ' + t(TRI.game === 'mem' ? 'rd_retry' : 'rd_retry_q'), 480, 322, 24, '#ff8a94', 'center', '#ff5f6d');
     else ftxt(t('tt_get_ready'), 480, 320, 20, '#a9bccb');
     return;
   }

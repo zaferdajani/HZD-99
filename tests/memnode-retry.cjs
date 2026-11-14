@@ -53,6 +53,39 @@ const { chromium } = require('playwright');
     JSON.stringify(r.afterWrong));
   check('...then a fresh sequence plays and opens for input', r.replayed.state === 'TRIAL' && r.replayed.phase === 'input', JSON.stringify(r.replayed));
   check('the right sequence after a miss solves the node and hands the room back', r.solved.state === 'PLAY' && r.solved.flag, JSON.stringify(r.solved));
+  // EVERY MONUMENT, NOT ONLY THE FIRST (owner, 2026-11-14: "make the other
+  // monuments retry on a miss too"). All nine Mind Nodes — lights, cubes and
+  // balances — are answered wrong once and must stay open with a fresh question
+  // at the same level, then pay on the right answer.
+  const all = await p.evaluate(() => {
+    const K = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
+    const press = i => { keys[K[i]] = 1; keysP[K[i]] = 1; update(1 / 60); keys[K[i]] = 0; keysP[K[i]] = 0; };
+    const step = n => { for (let k = 0; k < n; k++) update(1 / 60); };
+    const toInput = () => { let g = 0; while (G.state === 'TRIAL' && !(TRI.st === 'play' && (TRI.game !== 'mem' || TRI.memPhase === 'input')) && g++ < 4000) step(1); };
+    const right = () => TRI.game === 'mem' ? TRI.memSeq[TRI.memIn] : TRI.game === 'log' ? TRI.q.ans : TRI.q.choices.correct;
+    const rows = [];
+    for (let i = 0; i < NODES.length; i++) {
+      // every flag cleared each time, so solving one never completes the set
+      // (the ninth would raise the relic card and leave the state on it)
+      G.state = 'PLAY'; G.dialog = null;
+      for (let j = 0; j < NODES.length; j++) G.save.flags['rd_n' + j] = 0;
+      triStartNode(i, { x: 100, y: 100 });
+      toInput();
+      const level0 = TRI.level, game = TRI.game;
+      const ans = right(), kk = TRI.game === 'log' ? TRI.q.k : TRI.game === 'mem' ? 4 : 3;
+      press((ans + 1) % kk);
+      const miss = { state: G.state, retry: !!TRI.retry, node: !!TRI.node, level: TRI.level, flag: !!G.save.flags['rd_n' + i] };
+      toInput();
+      let g = 0;
+      while (G.state === 'TRIAL' && g++ < 20) { press(right()); step(2); }
+      rows.push({ i, game, miss, level0, solved: G.state === 'PLAY' && !!G.save.flags['rd_n' + i] });
+    }
+    return rows;
+  });
+  for (const r2 of all)
+    check('monument ' + r2.i + ' (' + r2.game + ') stays open after a miss, same level, then pays',
+      r2.miss.state === 'TRIAL' && r2.miss.retry && r2.miss.node && !r2.miss.flag && r2.miss.level === r2.level0 && r2.solved,
+      JSON.stringify(r2));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.join(', ')); process.exit(1); }
