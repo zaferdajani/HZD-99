@@ -113,9 +113,15 @@ const check = (name, ok, detail) => {
     const prompts = [];
     const realFtxt = window.ftxt;
     window.ftxt = function (msg) { prompts.push(msg); return realFtxt.apply(this, arguments); };
-    const hintAt = (tx, rowTop) => {
-      prompts.length = 0; stand(tx, rowTop, 1);
-      c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); drawBreakHint(); c.restore();
+    // THE WORDS WAIT (owner, 2026-11-14 — fewer chips: the rock tells first).
+    // `linger` is how long she has stood by it: 0 is the moment she arrives.
+    const drawHint = () => { c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); drawBreakHint(); c.restore(); };
+    const hintAt = (tx, rowTop, linger) => {
+      stand(tx, rowTop, 1);
+      BREAK_LINGER.key = ''; drawHint();                       // she has just walked up to it
+      if (linger == null) linger = BREAK_LINGER_S + 0.1;
+      BREAK_LINGER.t = linger; BREAK_LINGER.at = performance.now();
+      prompts.length = 0; drawHint();
       return prompts.slice();
     };
     boot('A0', { taughtBreak: 1, taughtWall: 1 });
@@ -123,6 +129,14 @@ const check = (name, ok, detail) => {
     boot('A0', { taughtBreak: 1, taughtFloor: 1 });
     out.wallHintAfterFloor = hintAt(5, 12).includes(t('break_hit'));
     out.floorHintAfterFloor = hintAt(57, 13).includes(t('break_down'));
+    // ...on arrival the stone glows and says nothing; the line comes with lingering,
+    // or at once when she has struck it and it only rang
+    boot('A0', { taughtBreak: 1, taughtWall: 1 });
+    out.quietOnArrival = !hintAt(57, 13, 0).includes(t('break_down'));
+    out.quietAtTwo = !hintAt(57, 13, 2).includes(t('break_down'));
+    out.saidAfterLinger = hintAt(57, 13, BREAK_LINGER_S + 0.2).includes(t('break_down'));
+    stand(57, 13, 1); G.knockTile(57, 13, false);
+    out.saidAfterKnock = hintAt(57, 13, 0).includes(t('break_down'));
 
     // ---- 2. the floor: rings from the side, gives from above --------------
     boot('A0');
@@ -220,6 +234,9 @@ const check = (name, ok, detail) => {
   check('...and the hold pays', r.digPays);
   check('the floor prompt survives a wall opened first', r.floorHintAfterWall);
   check('...the wall prompt survives a floor cut first', r.wallHintAfterFloor);
+  check('the loose-rock words wait: nothing is said on arrival, nor two seconds in', r.quietOnArrival && r.quietAtTwo);
+  check('...they come once she has lingered by it', r.saidAfterLinger);
+  check('...or at once, when she has struck it and it only rang', r.saidAfterKnock);
   check('...and a floor cut retires only the floor prompt', !r.floorHintAfterFloor);
   check('a fracture world has loose rock to find', r.looseFound);
   check('...drawn with the loose rock\'s face', r.looseDrawnDiff > 4, 'mean channel difference ' + r.looseDrawnDiff + ' per pixel');

@@ -238,6 +238,9 @@ const G = {
     if (this.knockSave !== this.save) { this.knocks = {}; this.knockSave = this.save; }
     const room = this.knocks[this.roomId] || (this.knocks[this.roomId] = {}), k = tx + ty * 4096;
     const n = crack ? (room[k] = (room[k] | 0) + 1) : (room[k] | 0);
+    // ...and every tile that has answered a blow at all, cracked or not: the
+    // hint (drawBreakHint) speaks at once to somebody who has already tried
+    (room.rang || (room.rang = {}))[k] = 1;
     // one note per swing, however many tiles of the plug the blade crossed
     if (this.knockAt !== this.save.time) { this.knockAt = this.save.time; sfx('hollow'); cam.shake = Math.max(cam.shake, 2); }
     const P = PAL[this.roomDef.zone];
@@ -983,6 +986,13 @@ function bankScrap(v) {
   if (G.save.flags.sawScrap) return;
   if (G.state !== 'PLAY' || G.dialog || G.cut || G.bossEntry || (G.boss && !G.boss.dead)) return;
   G.save.flags.sawScrap = 1;
+  // ...BUT NOT IN RATCHET'S STORY (owner's order, 2026-11-14, hook review item
+  // 6: fewer words after the first lessons). There her first scrap falls out of
+  // the machine she has just broken on the road, the counter appears in the HUD
+  // as it lands, and a minute later Ratchet names his price in it — the
+  // currency introduces itself by being spent. The sentence stays for NOSTOS,
+  // which has no such scene.
+  if (typeof opOn === 'function' && opOn()) return;
   // A TOAST, NOT A CARD. The first version of this called showItem, which sets
   // G.state = 'DIALOG' — and a pickup happens while she is WALKING. Measured
   // on the meadow: she left A1 at 96, touched the first scrap at 323, and the
@@ -13089,8 +13099,24 @@ function drawBreakHint() {
     if (below ? fl.taughtFloor : fl.taughtWall) continue;
     bd = d; best = { tx, ty }; bestTop = top; bestBelow = below;
   }
-  if (!best || bd > 132) return;
+  if (!best || bd > 132) { BREAK_LINGER.key = ''; BREAK_LINGER.t = 0; BREAK_LINGER.at = performance.now(); return; }
   const top = bestTop, below = bestBelow;
+  // THE ROCK TELLS FIRST; THE WORDS ONLY IF SHE NEEDS THEM (owner's order,
+  // 2026-11-14, hook review item 6: "teach the down-strike and wall-break with
+  // layout" — Team Cherry's rule, "you can guide them a little bit, and that's
+  // enough"). The sentence used to be in the air the moment she came within
+  // four tiles of any loose rock, before she had looked at it. Now the stone
+  // glows (below) and its fracture is drawn, and the line waits: it appears
+  // only once she has stood by the same rock for a few seconds without opening
+  // it, or straight away if she has struck it the wrong way and it only rang.
+  const now = performance.now(), hk = G.roomId + ':' + best.tx + ',' + top;
+  if (BREAK_LINGER.key !== hk) { BREAK_LINGER.key = hk; BREAK_LINGER.t = 0; }
+  BREAK_LINGER.t += Math.min(0.1, Math.max(0, (now - BREAK_LINGER.at) / 1000));
+  BREAK_LINGER.at = now;
+  const rangMap = G.knockSave === G.save && G.knocks[G.roomId] && G.knocks[G.roomId].rang;
+  let rang = false;
+  if (rangMap) for (const k2 in rangMap) { const tx2 = (+k2) % 4096, ty2 = ((+k2) - tx2) / 4096; if (Math.abs(tx2 - best.tx) <= 2 && Math.abs(ty2 - top) <= 2) { rang = true; break; } }
+  const say = rang || BREAK_LINGER.t >= BREAK_LINGER_S;
   const msg = t(below ? 'break_down' : 'break_hit');
   // a floor block sits at her feet, so the line has to clear her head
   const bx = best.tx * TILE + 16, by = top * TILE - (below ? 46 : 16);
@@ -13102,8 +13128,12 @@ function drawBreakHint() {
   gr.addColorStop(0, PAL[G.roomDef.zone].edge); gr.addColorStop(1, 'rgba(0,0,0,0)');
   c.fillStyle = gr; c.beginPath(); c.arc(bx, top * TILE + 16, 34, 0, 7); c.fill();
   c.restore();
-  ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
+  if (say) ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
 }
+// how long she may stand by an unopened rock before the words come, and the
+// clock that counts it (per rock: walking to another one starts it again)
+const BREAK_LINGER_S = 4;
+const BREAK_LINGER = { key: '', t: 0, at: 0 };
 // THE CRACK A KNOCK LEAVES. The baked tile layer draws the hairline every
 // secret wears; a blow that did not break it opens that hairline into a real
 // split across the stone, drawn live over the bake (a handful of tiles at
@@ -13115,6 +13145,7 @@ function drawKnocks() {
   const P = PAL[G.roomDef.zone];
   c.save();
   for (const key in room) {
+    if (key === 'rang') continue;                 // (the hint's own note — see knockTile)
     const k = +key, tx = k % 4096, ty = (k - tx) / 4096;
     const q = tileAt(tx, ty);
     if (q === '.') continue;                       // already broken
