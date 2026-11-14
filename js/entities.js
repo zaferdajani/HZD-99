@@ -70,6 +70,10 @@ function tileAt(tx, ty) {
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if ((c === 'B' || c === 'v') && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
+  // THE HUB'S HATCH IS ROCK UNTIL THE STORY MAKES IT A HATCH (js/progress.js
+  // pgHubSealed) — the same shape as D3's sealed floor above. One answer here
+  // is the whole seal: the drawing, the knock, the prompt and the blade all ask.
+  if (c === 'B' && G.roomId === 'A2' && typeof pgHubSealedTile === 'function' && pgHubSealedTile(tx, ty)) return '#';
   // a FRACTURE world's loose rock is authored '#', so the broken check above
   // never saw it: the claw "broke" it, the save recorded it, and the wall
   // stood there. Checked through a per-room set so that every other solid

@@ -150,7 +150,7 @@ const SUITE = [
   ['memnode-retry', 'copying the lights never answers, and a miss at a Mind Node asks again instead of ejecting her'],
   ['denfloor', 'the den stands on one floor — her, the tinker and the table — and a door is a two-second run'],
   ['grounded', 'every cannon is bolted to something and every trap has ground under it, room by room'],
-  ['dighub', 'the lit floor in the hub is the floor that breaks: jump, hold down, strike, and she is in the first cave'],
+  ['dighub', 'the hub hatch: nothing shown before the lion (no light, no crack, no prompt), and after him the lit floor breaks into the first cave'],
   ['camjump', 'a jump does not move the frame; landing, falling and the top edge do'],
   ['padfeel', 'on a controller: the stick runs, the Mind Nodes do not slip, prompts show the shapes, and yalla waits for real idleness'],
   ['film',      'the intro reel plays all eight shots without falling back'],

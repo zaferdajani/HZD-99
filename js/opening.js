@@ -364,7 +364,8 @@ function opGoalKey() {
   if (zone && zone !== 'A' && f.bossGlitch) return null;   // chapter one is behind her
   // GRAVEHORN stands on the marble once she has met him (js/gravehorn.js)
   if (!f.crystal && !bag.cshard && !f.pl_cshard && f.ghMet && !f.bossHorn) return 'op_o_gravehorn';
-  if (!f.crystal && !bag.cshard) return 'op_o_marble';
+  // no hatch before the meeting (progress.js pgHubSealed): the line points east
+  if (!f.crystal && !bag.cshard) return typeof pgHubSealed === 'function' && pgHubSealed() ? 'op_o_cross' : 'op_o_marble';
   if (!f.crystal) return 'op_o_return';
   if (!f.sageTame_GA1D) return 'op_o_sage';
   if (!f.bossChime) return 'op_o_chime';

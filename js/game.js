@@ -196,20 +196,13 @@ const G = {
     this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3 });
   },
   breakTile(tx, ty) {
-    // THE HUB'S HATCH OPENS WHEN IT IS STRUCK (owner, 2026-11-14: "I should be
-    // hitting the floor and going down... hitting the floor did not actually
-    // break it in the first area where I have to go down, where it says pale
-    // marble dust seeps up through the cracked floor... It's a glitch").
-    //
-    // A review pass sealed A2's 12-14 until the NULLFANG meeting (nfMeet), so an
-    // early dig could not reorder that encounter. But the meeting is forty-six
-    // tiles EAST of the hatch and nothing sends her there first: the light, the
-    // caption, the goal line ("strike down through the cracked floor at the
-    // hub's west end") and the strike prompt all said dig HERE, NOW, and the
-    // floor knocked and held. The canon is cave-before-sage (docs/STORY_CANON.md)
-    // and progressGoal already handles a blade forged before the lion is met, so
-    // the seal bought nothing the story needed and cost the chapter its first
-    // step. tests/dighub.cjs holds it open.
+    // The hub's hatch (A2, 12-14) is not handled here any more. It used to be
+    // refused at this point until the NULLFANG meeting — while the light, the
+    // caption, the goal line and the strike prompt all told the player to dig.
+    // The owner's ruling (2026-11-14): "if it's supposed to go inside and dig
+    // after Nullfang, then why are you showing it before?" So before the meeting
+    // it is not a hatch at all: tileAt reports it as rock (pgHubSealed), which
+    // is what every system that draws it, knocks on it or prompts for it reads.
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     // THE GROUND CURVE IS RE-READ. The heightfield she stands on is built
     // from the grid once per room and cached by room id, so a floor she cut
@@ -1581,6 +1574,10 @@ function meetCheck() {
   G.boss = b;
   G.meet = { t: 0, ph: 'fall', hit: false, interactive: !isHero() && G.save.storyVersion >= 2 };
   G.save.flags.nfMeet = 1;                    // set as it begins: a reload mid-beat keeps the sentence
+  // ...and the hub's floor stops being rock: the hatch, its fracture and its
+  // light exist from this moment (pgHubSealed), so the tile layer and the
+  // ground curve are re-read
+  tileDirty = true; if (typeof surfRoom !== 'undefined') surfRoom = null;
   if (typeof brMark === 'function') brMark('meet', G.roomId);
   if (typeof filmSee === 'function' && PURIFY_VID.meet) filmSee('meet');
   persist();
@@ -1665,6 +1662,10 @@ function meetStep(dt) {
       G.boss = null; G.meet = null;
       setMusic(G.roomDef.zone);
       persist();
+      // the hatch has just come into being behind her (progress.js pgHubSealed):
+      // say where, once, while she is still looking east after the lion
+      if (typeof pgRobo === 'function' && pgRobo() && !G.save.flags.crystal && typeof pgHubBroken === 'function' && !pgHubBroken())
+        G.toast(t('pg_hub_wakes'));
     }
   }
   beastMotionEnd(b, dt);
