@@ -101,6 +101,7 @@ async function play(browser, mode) {
         volts: player.volts, scrap: G.save.scrap, iq: G.save.iq | 0,
         dialog: G.dialog ? { name: G.dialog.name, line: G.dialog.lines[G.dialog.i], i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art, demo: G.dialog.demo } : null,
         pan: G.state === 'PANELS' && G.panels ? { id: G.panels.seq.id, i: G.panels.i, cap: (G.panels.list[G.panels.i] || {}).cap || null } : null,
+        blk: !!(typeof player !== 'undefined' && player && player.bodyBlock) && (player.bodyBlock.kind || true),
         shopIdx: G.shopIdx, rech: !!G.recharge, wake: !!G.wake, cut: !!G.cut, gate: !!G.gateWalk, trans: !!G.trans,
         overlays, goal, goalRect: gr, chip,
         bench: G.save.bench && G.save.bench.room, podBanner: typeof OP !== 'undefined' && OP.podBanner > 0,
@@ -207,6 +208,11 @@ async function play(browser, mode) {
       if (s.target != null && Math.abs(s.target - s.x) < 70 && !['out', 'go', 'move'].includes(s.step)) {
         await steer(null); const k = right ? 'ArrowRight' : 'ArrowLeft';
         await page.keyboard.down(k); await page.waitForTimeout(45); await page.keyboard.up(k); await page.waitForTimeout(160);
+      } else if (s.blk) {
+        // A MACHINE IS IN THE ROAD (js/solid.js): she cannot walk through it, so
+        // she does what a player does — over it. Recorded, so the run says which.
+        (R.jumped = R.jumped || []).push(s.blk + '@' + Math.round(s.x) + ':' + s.step);
+        await steer(right ? 'ArrowRight' : 'ArrowLeft'); await page.keyboard.press('Space', { delay: 260 }); await page.waitForTimeout(80);
       } else { await steer(right ? 'ArrowRight' : 'ArrowLeft'); await page.waitForTimeout(80); }
     } else if (s.action === 'JUMP') {
       await steer('ArrowRight'); await page.keyboard.press('Space', { delay: 220 }); await page.waitForTimeout(80);
@@ -229,6 +235,9 @@ async function play(browser, mode) {
   // ---- the meadow: Old Servo ----
   const inMeadow = await page.evaluate(() => G.roomId);
   R.end = inMeadow;
+  // where she stopped, and against what — a run that ends short says why
+  R.stuck = await page.evaluate(() => ({ x: Math.round(player.x), room: G.roomId, step: G.tut && G.tut.step, state: G.state, blk: player.bodyBlock ? (player.bodyBlock.mechanism || player.bodyBlock.kind) : null,
+    near: G.enemies.filter(e => !e.dead && Math.abs(e.x - player.x) < 160).map(e => (e.mechanism || e.kind) + '@' + Math.round(e.x) + (typeof bodySolid === 'function' && bodySolid(e) ? ':solid' : '')) }));
   if (inMeadow === 'A1') {
     await page.waitForTimeout(600);
     await shot('meadow-arrival');
@@ -303,6 +312,8 @@ async function play(browser, mode) {
   for (const mode of ['desktop', 'phone']) {
     const R = await play(browser, mode);
     console.log('\n  [' + mode + '] steps: ' + R.steps.join(' -> ') + '   end: ' + R.end);
+    if (R.end !== 'A1') console.log('  [' + mode + '] stopped: ' + JSON.stringify(R.stuck));
+    if (R.jumped && R.jumped.length) console.log('  [' + mode + '] machines in the road, jumped: ' + [...new Set(R.jumped)].join(', '));
     check(mode + ': the opening reaches the meadow', R.end === 'A1', R.end);
     check(mode + ': every step, in the owner\'s order', JSON.stringify(R.steps) === JSON.stringify(WANT), R.steps.join(','));
     check(mode + ': every prompt names one control', !R.multiAction.length, R.multiAction.slice(0, 4));

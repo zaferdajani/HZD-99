@@ -28,6 +28,13 @@ async function measure(url) {
     await page.waitForFunction(() => typeof startGame === 'function');
     return await page.evaluate(async () => {
       window.requestAnimationFrame = () => 0;
+      // THE SAME ANSWER EVERY TIME. Bodies flicker on Math.random and breathe on
+      // performance.now(); measured on the real clock, a frost flare caught or
+      // missed moved RIME's row 24 px between two runs of this tool. The dice
+      // are seeded and the draw's clock is a fixed ten-frame second.
+      let seed = 0x0b0d1e5; Math.random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+      const realNow = performance.now.bind(performance); let fakeNow = null;
+      performance.now = () => fakeNow == null ? realNow() : fakeNow;
       const sv = newSave(1); sv.time = 99; sv.flags.tut = sv.flags.woke = 1; sv.flags.nfMeet = 1;
       startGame(sv);
       const W = 640, H = 520, cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
@@ -56,8 +63,8 @@ async function measure(url) {
           return x.getImageData(0, 0, W, H).data;
         };
         let d = shot(), last = -1, same = 0;
-        const t0 = performance.now();
-        while (performance.now() - t0 < 12000 && same < 6) {             // until the picture stops changing (art arriving)
+        const t0 = Date.now();
+        while (Date.now() - t0 < 12000 && same < 6) {             // until the picture stops changing (art arriving)
           await new Promise(r => setTimeout(r, 120)); d = shot();
           let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 128) n++;
           same = n === last && n > 40 ? same + 1 : 0; last = n;
@@ -66,7 +73,7 @@ async function measure(url) {
         // drawing reaches over a second of that, not one frame caught mid-motion
         let al = W, ar = -1, at = H, n = 0;
         for (let k = 0; k < 10; k++) {
-          if (k) { await new Promise(r => setTimeout(r, 100)); e.anim = (e.anim || 0) + 0.1; d = shot(); }
+          seed = 0x0b0d1e5 + k; fakeNow = 60000 + k * 100; e.anim = k * 0.1; d = shot(); fakeNow = null;
           let m = 0;
           for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) if (d[(py * W + px) * 4 + 3] > 128) { m++; if (px < al) al = px; if (px > ar) ar = px; if (py < at) at = py; }
           n = Math.max(n, m);

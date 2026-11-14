@@ -46,7 +46,10 @@
 const SOLID = { on: true, pad: 46, lift: 60, out: 560, grace: 5, charge: 220 };
 const SOLID_B = { x0: 0, x1: 0, y0: 0, y1: 0 };
 function bodySolid(e) {
-  if (!e || e.dead || e.disabled || e.rescued || e.meet || e.tame || e.calm || e.calmed || e.purified) return false;
+  if (!e || e.dead || e.disabled || e.rescued || e.meet || e.tame || e.calm || e.calmed || e.purified || e.friendly) return false;
+  // a mechanism is furniture with its own barrier rule (the yard winch's jammed arm, js/winch.js)
+  if (e.mechanism || e.st === 'purified' || e.st === 'yield') return false;
+  if (typeof isPet === 'function' && isPet(e)) return false;
   if ((e.hypnoT || 0) > 0) return false;
   if (typeof isWolf === 'function' && isWolf(e) && typeof packTamed === 'function' && packTamed()) return false;
   if (e.kind === 'sage' && !(typeof sageDuelActive === 'function' && sageDuelActive(e))) return false;
