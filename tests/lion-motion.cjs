@@ -258,8 +258,8 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
     });
     const T = R.turn;
     check('the filmed turn is delivered and decodes', R.has.turn && R.has.idle, JSON.stringify(R.has));
-    check('a change of facing plays the filmed pivot, and only it', T.frames >= 18 && T.keys.length === 1 && T.keys[0] === 'beastStudioTurn', T.frames + ' frames of ' + JSON.stringify(T.keys));
-    check('...start to finish, in order, to the far side', T.cells.every((c, i) => i === 0 || c >= T.cells[i - 1]) && T.cells[0] <= 1 && T.cells[T.cells.length - 1] >= 16 && T.endFace === 1 && T.endVis === 1, 'cells ' + T.cells[0] + '→' + T.cells[T.cells.length - 1]);
+    check('a change of facing plays the filmed turn, and only it', T.frames >= 28 && T.keys.length === 1 && T.keys[0] === 'beastStudioTurn', T.frames + ' frames of ' + JSON.stringify(T.keys));
+    check('...start to finish, in order, to the far side', T.cells.every((c, i) => i === 0 || c >= T.cells[i - 1]) && T.cells[0] <= 1 && T.cells[T.cells.length - 1] >= 22 && T.endFace === 1 && T.endVis === 1, 'cells ' + T.cells[0] + '→' + T.cells[T.cells.length - 1]);
     check('...as a body the whole way round, never a sliver', T.minArea > 2600, 'smallest frame ' + T.minArea + ' px');
     check('drawing the turn does not advance it', T.drawStable === true);
     for (const [name, L] of [['phase one', R.fight1], ['phase two', R.fight2]]) {

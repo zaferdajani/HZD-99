@@ -182,4 +182,6 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 
 `source/brand/appicon.png` — the app icon (HZD-99, bust, claw raised), Higgsfield GPT Image 2.6 from the canon HZD-99 element, 2026-11-14; prompt and job ids in `source/brand/jobs.json`. Every launcher icon and launch image in `ios/` and `android/` is cut from it by `tools/appicon.cjs`. **Generated with Higgsfield.** `aac/**` is a derived copy of `sfx/**/*.ogg` and `vox/*.ogg` (AAC, for devices that cannot decode Ogg) — no new recordings.
 
+`characters/beast/studio-turn.webp` was re-filmed 2026-11-14 (Higgsfield Seedance 2.5; master `source/beast/studio-2026-11-13/turn2.mp4`), performed over a motion reference of a realistic lion turning round that was itself generated with Higgsfield Seedance 2.5 (`turn2-reference-lion.mp4`, archived, never shipped). No third-party footage was used. The first take stays in the archive as `turn.mp4`.
+
 `characters/beast/studio-roar.webp` was re-filmed 2026-11-14 (Higgsfield Seedance 2.5, clean black, from the same standing frame; master `source/beast/studio-2026-11-13/roar.mp4`); the 2026-10-04 take it replaces stays in `source/beast/studio-2026-10-04/`.

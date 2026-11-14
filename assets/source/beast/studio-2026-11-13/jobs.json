@@ -29,8 +29,30 @@
       "fired": "2026-11-14",
       "why": "the 2026-10-04 roar was filmed over a lit floor and haze; its cut-out lost chunks of the mane and legs and could not be re-keyed. This one is on clean black, from the same standing frame as the turn and the idle.",
       "prompt": "Locked-off static side-view camera, pure black background. The mechanical lion from the first frame roars without leaving its spot. First second: it inhales \u2014 the chest swells, the head draws back and lifts, the shoulders rise, the jaw still closed. Then it ROARS: the head thrusts forward and up, the jaw opens very wide showing metal teeth, the mane plates flare outward, the whole body braces into it and trembles, held for a second and a half. Then the jaw closes, the head lowers, and it settles back into exactly the standing pose of the first frame. All four paws stay planted where they are the whole time \u2014 no step, no walk, no turn, no rearing onto the hind legs. Same size, same position, same ivory armour plates, same violet joint lights and eyes, no redesign. Nothing comes out of the mouth: no breath, no beam, no shockwave, no glow effects, no sparks, no dust. No camera movement, no zoom, no ground plane, no floor, no cast shadow, no spotlight, no haze, no text."
+    },
+    {
+      "name": "turn2-reference-lion",
+      "job_id": "8c7c31ae-98f6-4b9b-8b29-4ab9accfbe6f",
+      "credits": 28,
+      "mode": "t2v",
+      "fired": "2026-11-14",
+      "file": "turn2-reference-lion.mp4",
+      "why": "The owner asked for a video of a real lion turning round, replicated in metal. A web search found no freely licensed side-view clip of a lion turning on the spot (stock libraries: licensed footage, head turns and walk-pasts), so the motion reference was generated: a realistic lion performing the turn. It is a MOTION REFERENCE ONLY and is never shipped.",
+      "prompt": "Wildlife documentary footage, locked-off static camera, full-body side view of an adult male African lion standing on flat bare ground, facing left. He turns around to face the other way exactly as a real big cat does: the head and neck swing round first, the spine bends into a C, the shoulders follow, the front paws cross-step around one after the other while the hindquarters pivot and step after them, a tight U-turn inside about one body length, the tail swinging out as a counterbalance. He finishes standing in profile facing right, weight settling onto all four paws. The whole animal stays in frame the entire time at the same distance. Natural heavy feline movement, real muscle and weight. No camera movement, no zoom, no cuts, plain pale neutral background, even daylight, no other animals, no text."
+    },
+    {
+      "name": "turn2",
+      "job_id": "e9762ce1-d8fb-4816-ab8d-48a5ddf0dd93",
+      "credits": 28,
+      "fired": "2026-11-14",
+      "file": "turn2.mp4",
+      "start_image": "start_left.png",
+      "end_image": "start_left.png mirrored",
+      "video_references": "turn2-reference-lion (job 8c7c31ae-98f6-4b9b-8b29-4ab9accfbe6f)",
+      "why": "Owner, 2026-11-14: the first turn 'is turning as if it's a 3D object just rotating like a paper, instead of an actual lion turning around'. This take performs the real lion's turn on the mechanical body: head first, spine curling, paws stepping round through a rear three-quarter view, tail last. It REPLACES turn.mp4 as the source of studio-turn.webp; turn.mp4 is kept as the rejected take.",
+      "prompt": "The mechanical lion from the first frame performs exactly the turn-around of the real lion in the reference video \u2014 the same body motion and the same timing, on its own articulated metal body. It is a living animal turning, not an object rotating: the head and neck swing round first, the segmented spine bends into a C, the shoulders follow, the front paws lift and cross-step around one after the other while the hindquarters pivot and step after them, and the segmented tail whips round last as a counterbalance. A tight U-turn that stays on its spot, ending standing still in exactly the mirrored pose of the last frame. Take ONLY the motion from the reference video; keep the mechanical lion's own design exactly \u2014 ivory armour plates, violet joint lights and eyes, plated mane \u2014 no fur, no redesign. Locked-off static side-view camera, pure black background, the whole animal in frame at the same size throughout. No ground plane, no floor, no cast shadow, no dust, no sparks, no glow effects, no haze, no text."
     }
   ],
-  "delivery": "tools/lion-studio.py \u2014 turn: --frames 18 --start 0.95 --end 3.35 --rest 0.04 --drift --min-coverage .3 --threshold 22; idle: --frames 24 --start 0 --end 4.02 --rest 0.04 --threshold 22; both --grade ../studio-2026-10-04/grade.json; roar: --times (8 cells 0.10-1.05 s inhale, 11 cells 1.12-2.30 s roar, 11 cells 2.42-3.95 s settle) --rest 0.04 --threshold 22",
-  "note": "Generated 2026-11-13 for the lion's turn and standing idle. Assistant-reviewed; awaiting the owner's eye."
+  "delivery": "tools/lion-studio.py \u2014 turn: --frames 18 --start 0.95 --end 3.35 --rest 0.04 --drift --min-coverage .3 --threshold 22; idle: --frames 24 --start 0 --end 4.02 --rest 0.04 --threshold 22; both --grade ../studio-2026-10-04/grade.json; roar: --times (8 cells 0.10-1.05 s inhale, 11 cells 1.12-2.30 s roar, 11 cells 2.42-3.95 s settle) --rest 0.04 --threshold 22; turn2 (the shipped turn since 2026-11-14): --times 0.04,0.6,<19 samples 0.85-3.10>,3.4,3.7,3.98 (24 cells: the standing frame, the turn, the settle onto the mirrored stand) --rest 0.04 --drift --min-coverage .3 --threshold 22 --grade ../studio-2026-10-04/grade.json \u2014 exact times are in characters/beast/studio-turn.motion.json",
+  "note": "Generated 2026-11-13 for the lion's turn and standing idle. Assistant-reviewed; awaiting the owner's eye. 2026-11-14: the turn was re-filmed over a real-lion motion reference after the owner rejected the first take as an object rotating; the new take is assistant-reviewed and awaits his eye."
 }

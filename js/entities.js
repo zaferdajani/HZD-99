@@ -12410,10 +12410,11 @@ class Boss {
     // facing along its velocity even after the player crosses behind it.
     if (this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
       this.face = Math.sign(px - this.cx()) || this.face || 1;
-    // NULLFANG's turn is a filmed pivot (js/beast.js BEAST_TURN): 0.42 s end to
-    // end, a touch slower than the 0.36 s every other machine whips round in,
-    // because a third of a ton of lion re-planting four paws needs the beat.
-    const turn = dt * (this.kind === 'glitch' ? 4.76 : 5.5);
+    // NULLFANG's turn is a filmed lion turning (js/beast.js BEAST_TURN): 0.52 s
+    // end to end against the 0.36 s every other machine whips round in. It is
+    // not a pivot any more — the head leads, the paws step round, the tail
+    // follows — and four steps squeezed into 0.42 s read as a blur, not a turn.
+    const turn = dt * (this.kind === 'glitch' ? 3.85 : 5.5);
     const pvSign = Math.sign(this.faceVis) || 1;
     this.faceVis += clamp((this.face || 1) - this.faceVis, -turn, turn);
     // the pivot kicks up dust the instant the body whips through centre, so a
@@ -12707,10 +12708,11 @@ class Boss {
           // anyway — backwards, the picture mirroring in the air on the way. It
           // re-plants now: one pivot on the ground, still coiled, still amber,
           // the flash fired again for the new line — and then it goes. That is
-          // 0.44 s more warning for her, bought by running at a coiling lion.
+          // 0.54 s more warning for her (the turn's 0.52 and a frame to land
+          // it), bought by running at a coiling lion.
           if (this.t <= 0 && !this.replanted && (Math.sign(dist) || this.face) !== this.face) {
             this.replanted = true; this.face = Math.sign(dist) || this.face;
-            this.t = 0.44; this.coilFlashed = false;
+            this.t = 0.54; this.coilFlashed = false;
           }
           if (this.t <= 0 && !turning) {
             this.st = 'pounce'; this.replanted = false;

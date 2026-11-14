@@ -1258,11 +1258,21 @@ const BEAST_STRIP = {
 // THE TURN IS FILMED (2026-11-13). It used to be the side view squeezed to a
 // sliver and, through the middle of it, a DIFFERENT DRAWING — the old parts
 // atlas mirror-composited into a white front-facing figure half the lion's
-// width — for a tenth of a second, at every change of facing. The take is one
-// planted pivot through the front, LEFT to RIGHT, starting on the standing
-// frame and ending on its mirror; a turn to the left plays the same cells
-// mirrored. faceVis is the clock, and Boss.update owns it.
-const BEAST_TURN = { key: 'beastStudioTurn', cells: 18, k: 1, ax: 0.9 };
+// width — for a tenth of a second, at every change of facing.
+//
+// RE-FILMED 2026-11-14, FROM A LION. The first take was a planted pivot through
+// the front, and the owner named what it was: "turning as if it's a 3D object
+// just rotating like a paper, instead of an actual lion turning around". A
+// turntable is exactly that — one rigid figure revolving about its own axis,
+// which no animal does. This take was performed over a filmed reference of a
+// real lion turning (assets/source/beast/studio-2026-11-13/turn2-reference-
+// lion.mp4), and it turns the way the animal does: the HEAD goes first and
+// swings away, the spine curls after it, the forepaws step round one at a
+// time, the hindquarters walk the arc behind them through a rear three-quarter
+// view, and the tail whips across last. LEFT to RIGHT, starting on the
+// standing frame and ending on its mirror; a turn to the left plays the same
+// cells mirrored. faceVis is the clock, and Boss.update owns it.
+const BEAST_TURN = { key: 'beastStudioTurn', cells: 24, k: 1, ax: 0.7 };
 // THE LANDED LION IS LONGER THAN THE STANDING ONE: forepaws 47 strip px ahead
 // of where they stand at rest, hind paws 14 behind (the take's `feet`, cell 29
 // against cell 0). There are no frames between that stretch and the stand, so

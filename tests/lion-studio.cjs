@@ -23,8 +23,9 @@ const { chromium } = require('playwright');
       // image URL is insufficient: an over-aggressive matte can erase a body.
       const assets=[];
       for (const k of BEAST_STRIPS.filter(k=>/^(beastStudio|beastGallop|beastRearSwipe|beastHurt)/.test(k))) {
-        // the turn (18 cells) and the standing idle (24) joined the set 2026-11-13
-        const im=MEDIA_RAW[k], n=k==='beastHurt'?12:k==='beastStudioTurn'?18:/Swipe$/.test(k)&&k!=='beastRearSwipe'||k==='beastStudioStalk'||k==='beastGallop'||k==='beastStudioIdle'?24:30;
+        // the turn (24 cells since the 2026-11-14 re-film from a real lion's turn;
+        // 18 before) and the standing idle (24) joined the set 2026-11-13
+        const im=MEDIA_RAW[k], n=k==='beastHurt'?12:/Swipe$/.test(k)&&k!=='beastRearSwipe'||k==='beastStudioStalk'||k==='beastGallop'||k==='beastStudioIdle'||k==='beastStudioTurn'?24:30;
         const mask=document.createElement('canvas');mask.width=im.width;mask.height=im.height;
         const q=mask.getContext('2d',{willReadFrequently:true});q.drawImage(im,0,0);
         const cw=im.width/n, counts=[];
