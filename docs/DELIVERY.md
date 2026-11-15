@@ -301,6 +301,14 @@ so nothing else changed, and a sheet without a bitmap draws exactly as before.
   device (112–288 MB on a phone or tablet, 512 MB on a desktop); the least recently drawn
   sheet that is not near her is closed to make room, and its `<img>` still draws.
 - **Never add `img.decode()` to warm art for a canvas.** It does nothing there.
+- **The decode runs in a Worker**, which is what makes this true on iOS. The
+  table above is Chromium's (Android's WebView, the desktop shell); WebKit does
+  not promise that the page-side call leaves the page's thread alone, and no
+  WebKit could be run where this was written. Inside a worker the decode cannot
+  touch the main thread in any engine, and the finished bitmap is transferred
+  back. No worker: Chromium falls back to the measured call, every other engine
+  turns the scheme off and draws as it did before. WebKit's ceiling is the
+  lowest (96 MB), and three failures of any kind turn it off for the session.
 
 The other thing a phone's GPU cannot do in passing is a readback. The
 brightness probe (`liftProbe`) read the whole frame back twice a second for as

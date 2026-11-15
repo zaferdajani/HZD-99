@@ -776,21 +776,42 @@ function mediaDirty(k) {
 // A sheet the prefetcher brought in for a FAR room is not decoded at all until
 // she comes within a door of it.
 //
+// ON A WORKER, SO IT IS TRUE ON AN iPHONE TOO (owner, 2026-11-15: "make sure
+// that fixing the lag applies to the iOS too"). The table above is Chromium's
+// — Android's WebView and the desktop shell. WebKit, which is every browser on
+// iOS and the iOS app, does not promise that createImageBitmap(Blob) called on
+// the page leaves the page's thread alone, and no WebKit could be run where
+// this was written to find out. Called inside a Worker it cannot touch the
+// main thread in ANY engine: the decode runs on the worker's thread and the
+// finished bitmap is handed back (it is transferable, so nothing is copied).
+// So that is where it is made, everywhere. If the worker cannot be had, a
+// Chromium page falls back to the measured call above and every other engine
+// turns the whole scheme off and draws as it did before today — never a
+// decode moved onto the main thread at a moment of this code's choosing.
+// The same caution sets WebKit's ceiling lowest, and three failures of any
+// kind (a bitmap that will not be made, or comes back the wrong size) turn it
+// off for the session.
+//
 // MEMORY: every sheet in the game decoded is 861 MB, so the bitmaps live under
 // a ceiling — the device's, not the game's — and the least recently drawn one
 // that is not within a door of her is closed to make room. Its <img> remains
 // and draws the old way if it is ever needed before it is warmed again.
 // ===========================================================================
 const ART_BM = { t: 0, bytes: 0, n: 0, made: 0, evict: 0, failed: 0, cap: 0, items: [], near: {}, q: [], busy: 0,
+  worker: null, jobs: {}, jobN: 0, onWorker: 0, onPage: 0,
+  // Chromium (Android's WebView, Chrome, the desktop shell) or not: the one
+  // engine where the page-side call was measured to stay off the main thread
+  chromium: typeof navigator !== 'undefined' && /Chrome\/|Chromium\//.test(navigator.userAgent || ''),
   off: typeof createImageBitmap !== 'function' || typeof fetch !== 'function'
     || (typeof location !== 'undefined' && /[?&]nobm=1/.test(location.search || '')) };
 function artBmCap() {
   if (ART_BM.cap) return ART_BM.cap;
   const nav = typeof navigator !== 'undefined' ? navigator : {};
   const mem = nav.deviceMemory || 0, touch = (nav.maxTouchPoints || 0) > 0;
-  // (a touch device that will not say how much memory it has is an iPhone:
-  // the tightest of them, so it gets the careful number)
-  ART_BM.cap = (mem && mem <= 2 ? 112 : touch ? (mem >= 8 ? 288 : mem >= 4 ? 208 : 160) : 512) * 1048576;
+  // (a touch device that is not Chromium is an iPhone or an iPad: the engine
+  // this could not be measured on, and the one with the hardest memory limits
+  // — it gets the careful number. Her body and the room she is in fit in it.)
+  ART_BM.cap = (touch && !ART_BM.chromium ? 96 : mem && mem <= 2 ? 112 : touch ? (mem >= 8 ? 288 : mem >= 4 ? 208 : 160) : 512) * 1048576;
   return ART_BM.cap;
 }
 function artBmDrop(im) {
@@ -819,6 +840,40 @@ function artBmEvict(need) {
   ART_BM.items = L.filter(im => im.__bm);
   return ART_BM.bytes + need <= cap;
 }
+// THE DECODE, ON ANOTHER THREAD. A worker made from a few lines of text (no
+// file to ship, nothing for a packer to forget): it is posted the Blob, makes
+// the bitmap, and transfers it back.
+function artBmWorker() {
+  if (ART_BM.worker !== null) return ART_BM.worker;       // false: cannot be had
+  try {
+    const src = 'self.onmessage=function(e){var d=e.data;try{createImageBitmap(d.b).then(function(bm){try{self.postMessage({i:d.i,bm:bm},[bm]);}catch(x){self.postMessage({i:d.i});}},function(){self.postMessage({i:d.i});});}catch(x){self.postMessage({i:d.i});}};';
+    const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+    const w = new Worker(url);
+    w.onmessage = (e) => { const d = e.data || {}, j = ART_BM.jobs[d.i]; delete ART_BM.jobs[d.i]; if (j) j(d.bm || null); };
+    w.onerror = () => {                                   // it died: everything it was holding fails, and it is not asked again
+      ART_BM.worker = false;
+      const J = ART_BM.jobs; ART_BM.jobs = {};
+      for (const i in J) J[i](null);
+    };
+    ART_BM.worker = w;
+  } catch (e) { ART_BM.worker = false; }
+  return ART_BM.worker;
+}
+// Blob -> ImageBitmap (or null), never on the main thread
+function artBmDecode(blob) {
+  const w = artBmWorker();
+  if (w) {
+    return new Promise((res) => {
+      const i = ++ART_BM.jobN;
+      ART_BM.jobs[i] = (bm) => { if (bm) ART_BM.onWorker++; res(bm); };
+      try { w.postMessage({ i, b: blob }); } catch (e) { delete ART_BM.jobs[i]; res(null); }
+    });
+  }
+  // no worker. Chromium's own call was measured to stay off the main thread;
+  // nobody else's was, so nobody else gets one.
+  if (!ART_BM.chromium) { ART_BM.off = true; return Promise.resolve(null); }
+  return createImageBitmap(blob).then((bm) => { ART_BM.onPage++; return bm; }, () => null);
+}
 // `then` is called exactly once: when the bitmap is on the image, when it
 // cannot be made, or after 2.5 s — a promise a parked tab never settles must
 // not keep a sheet off the screen. A bitmap that arrives after that is kept.
@@ -832,17 +887,21 @@ function artBmMake(im, then) {
   im.__bmP = [tell];
   const fin = (bm) => {
     const w = im.__bmP; im.__bmP = null;
-    if (bm && !im.__bm && artBmEvict(bytes)) {
+    // (it must be the same picture at the same size, or it is not used)
+    const right = bm && bm.width === im.naturalWidth && bm.height === im.naturalHeight;
+    if (right && !im.__bm && artBmEvict(bytes)) {
       im.__bm = bm; im.__bmB = bytes; im.__use = ART_BM.t;
       ART_BM.bytes += bytes; ART_BM.n++; ART_BM.made++; ART_BM.items.push(im);
-    } else if (bm) { try { bm.close(); } catch (e) {} }
+    } else if (bm) { try { bm.close(); } catch (e) {} if (!right) ART_BM.failed++; }
     else ART_BM.failed++;
+    // three failures and it is not this engine's day: back to how it was
+    if (ART_BM.failed >= 3 && !ART_BM.off) { ART_BM.off = true; ART_BM.q = []; for (const q of ART_BM.items.slice()) artBmDrop(q); ART_BM.items = []; }
     if (w) for (const f of w) f();
   };
   try {
     (im.__blob ? Promise.resolve(im.__blob)
                : fetch(src).then(r => { if (!r.ok) throw new Error('art'); return r.blob(); }).then(b => (im.__blob = b)))
-      .then(b => createImageBitmap(b)).then(fin, () => fin(null));
+      .then(b => artBmDecode(b)).then(fin, () => fin(null));
   } catch (e) { fin(null); }
   setTimeout(tell, 2500);
 }

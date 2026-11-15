@@ -388,9 +388,10 @@ sheet decodes it on the main thread, in that frame: 50–190 ms each on a deskto
 CPU, several times that on a phone. `img.decode()` does NOT help a canvas, and
 `createImageBitmap(<img>)` blocks for the whole decode; only
 `createImageBitmap(Blob)` is both off the main thread and cheap to draw.
-`js/media.js` (DECODED BEFORE IT IS DRAWN) does that for every sheet that is
-wanted or within a door of her, under a per-device memory ceiling, and one
-patched `drawImage` uses the bitmap. `docs/DELIVERY.md` §5.2 has the table;
+`js/media.js` (DECODED BEFORE IT IS DRAWN) does that — in a Worker, so it holds
+on iOS's WebKit too, which cannot be run in this environment — for every sheet
+that is wanted or within a door of her, under a per-device memory ceiling, and
+one patched `drawImage` uses the bitmap. `docs/DELIVERY.md` §5.2 has the table;
 `tests/decode-ahead.cjs` measures it. Do not read a canvas back (`getImageData`
 on the frame) in the play loop either: on a phone's GPU that stalls the frame.
 

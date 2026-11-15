@@ -19,7 +19,10 @@
 //      closed sheet still draws;
 //   F  in the app's own configuration, a room's art has its pixels within
 //      moments of her entering;
-//   G  the brightness probe reads the canvas back a sixth as often.
+//   G  the brightness probe reads the canvas back a sixth as often;
+//   H  the decode is on a WORKER (so it is off the main thread on an iPhone's
+//      WebKit too, which could not be run here), and an engine that is not
+//      Chromium and cannot have the worker is left exactly as it was.
 //
 //   node tests/decode-ahead.cjs      (needs the repo served on :8220)
 const { chromium } = require('playwright');
@@ -87,9 +90,19 @@ const { chromium } = require('playwright');
           out.cap = { before, capMB: +(ART_BM.cap / 1048576).toFixed(1), bytesMB: +(ART_BM.bytes / 1048576).toFixed(1), under: ART_BM.bytes <= ART_BM.cap, closed: closed.length,
             freshKept: !!fresh.__bm, nearKept: !!kept.__bm, newHas: !!(MEDIA_RAW[k] && MEDIA_RAW[k].__bm), newHere: !!MEDIA_RAW[k], drew, lit, evict: ART_BM.evict };
           ART_BM.cap = cap0; }
+        out.worker = { is: typeof Worker !== 'undefined' && ART_BM.worker instanceof Worker, onWorker: ART_BM.onWorker, onPage: ART_BM.onPage, made: ART_BM.made, failed: ART_BM.failed };
+        // ---- H: an engine that is not Chromium, with no worker to be had ----
+        { const k = Object.keys(MEDIA_SRC.images).find(q => /^assets\/characters\/beast\//.test(MEDIA_SRC.images[q]) && !MEDIA_RAW[q] && !MEDIA_PEND[q]);
+          const w0 = ART_BM.worker, c0 = ART_BM.chromium, made0 = ART_BM.made; ART_BM.worker = false; ART_BM.chromium = false;
+          mediaFetch(k, 1); await until(() => MEDIA_RAW[k] && MEDIA_LOW[k] === 3, 8000); await new Promise(r => setTimeout(r, 500));
+          let drew = true; try { c.clearRect(0, 0, 960, 540); c.drawImage(MEDIA_RAW[k], 0, 0, 960, 540); } catch (e) { drew = false; }
+          out.noWorker = { k, here: !!MEDIA_RAW[k], bm: !!(MEDIA_RAW[k] && MEDIA_RAW[k].__bm), off: ART_BM.off, made: ART_BM.made - made0, drew };
+          ART_BM.worker = w0; ART_BM.chromium = c0; ART_BM.off = false; }
         return out;
       });
       check('the browser can do it at all (bitmaps from blobs)', !R.off);
+      check('the decode runs in a worker — off the main thread in every engine, the iPhone\'s included', R.worker.is && R.worker.onWorker >= 4 && R.worker.onPage === 0 && R.worker.failed === 0, R.worker.onWorker + ' bitmaps made on the worker, ' + R.worker.onPage + ' on the page, ' + R.worker.failed + ' failed');
+      check('H  an engine that is not Chromium and has no worker gets no page-side decode: the scheme turns itself off and the sheet draws the old way', R.noWorker.here && !R.noWorker.bm && R.noWorker.off && R.noWorker.made === 0 && R.noWorker.drew, JSON.stringify(R.noWorker));
       for (const r of R.rows) {
         check('A  ' + r.k + ' (' + r.px + ') has its pixels a moment after it loads, and its first draw is a fraction of a cold one', r.has && r.warm < r.cold * 0.4 && r.warm < 30, 'first draw ' + r.warm + ' ms; the same file cold ' + r.cold + ' ms (published at ' + r.pub + ' ms, pixels ready by ' + r.bmAt + ' ms)');
       }
