@@ -288,7 +288,25 @@ Rules: pure flat black backgrounds, no ground, no shadow, no text; key with
 
 ---
 
-## 2bf. GRAVEHORN — the Eye's rhino, the marble's guard (chapter one boss) ✱ QUEUED 2026-10-11 (code session, owner's order) — FIRE FIRST
+## 2bf. GRAVEHORN — the Eye's rhino, the marble's guard (chapter one boss) ◐ PHASE ONE FIRED AND WIRED 2026-11-15 — phase-two plates and the four panels still owed
+
+**Landed 2026-11-15** (owner: "the rhino looks so fake... it's the same box"): rows 1–11
+below are in the game — `design` (job `0e24ded2`), a body-and-heads sheet (`0d8755d3`),
+and the horns, leg segments, a separate level HOOF and the tail cut from the design by
+`tools/ghparts.cjs`, which also prints every anchor row. Archive and what was refused
+for lack of credits: `assets/source/gravehorn/provenance.json`.
+
+**Still owed, in firing order (needs credits — the balance was 1.12 when this was written):**
+1. **Rows 12–15, phase two**: `body2`, `head2`, `horn_big2`, `horn_small2` as edits of
+   `assets/characters/gravehorn/{body,head,horn_big,horn_small}.webp` — same silhouette
+   exactly, plates blown open, molten cracks, jet vents. Until then phase two is light
+   on the phase-one plates (`drawGravehorn`), which reads but is not a new body.
+2. **A true hind leg** (`hleg_up`, `hleg_low`): the design hides it behind the far leg,
+   so the hind legs wear the foreleg's plates.
+3. **Rows 16–19**, the four comic panels, with `design.webp` as his reference.
+
+The original brief, kept:
+
 
 **The owner, 2026-10-11:** *"a very dangerous, evil rhino that works under the
 robot that stole the mother's song ... let it introduce itself as its right hand

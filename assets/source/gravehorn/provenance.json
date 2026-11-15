@@ -1,0 +1,28 @@
+{
+ "provider": "Higgsfield",
+ "model": "gpt_image_2_6",
+ "quality": "high",
+ "resolution": "2k",
+ "aspect_ratio": "16:9",
+ "background": "transparent",
+ "fired": "2026-11-15",
+ "why": [
+  "Owner, 2026-11-15: 'I just found the rhino boss. The rhino looks so fake. You need to find a better way to create a rhino... It's the same box we thought of... for every character you have in the game, you should look for an equal real-life character... convert it into actual metallic version.'",
+  "He was right about the box: GRAVEHORN shipped on flat three-tone stand-ins (standin_before.jpg). The brief to fire his parts was queued 'FIRE FIRST' on 2026-10-11 (ART_QUEUE §2bf) and never fired."
+ ],
+ "jobs": {
+  "design.webp": "0e24ded2-51c3-4033-b84b-ca8b19818195 — THE reference. Real white-rhinoceros anatomy (barrel, shoulder hump, low square-lipped head, column legs, three-toed hooves) built as a machine. References: the stand-in rig for geometry only (side view facing left, proportions, stance); one cell of the Wolf King's rest strip for material, finish and light only.",
+  "sheet_a.webp": "0d8755d3-7f90-40c5-aec8-ece675d6ca29 — the body alone, the head with EMPTY horn sockets, the same head roaring; fired against design.webp."
+ },
+ "not_fired": "A second sheet (the two horns, the four leg segments, the tail as separate parts) was refused for lack of credits (balance 1.12). Those parts are cut from design.webp instead, where each is whole and in front: tools/ghparts.cjs. The hind leg stands behind the far one in the design and cannot be cut clean, so the hind legs wear the foreleg's plates (the same machined leg, widened across the thigh). PHASE TWO's own plates (body2, head2, horn_big2, horn_small2) are not fired either: phase two is carried by light on the phase-one plates (molten seams, the jet vents) until they are.",
+ "delivery": [
+  "node tools/ghparts.cjs — cuts each part from its master, turns it the way the rig's stand-in is turned (a leg hangs straight down from its joint, a horn stands on its collar leaning as the stand-in leans), pins the head by its two sockets, and prints the GH_BOX row each plate needs. No anchor number in js/gravehorn.js is typed by eye.",
+  "The hoof is its own plate, planted level by the rig while the shin swings.",
+  "The eye light, the nozzle glow, the wind-up's amber and phase two's molten seams are the engine's (additive), drawn over the plates."
+ ],
+ "sheets": [
+  "standin_before.jpg — what he was",
+  "rig_poses.jpg — the rig wearing the plates in nine states",
+  "ingame.jpg — in the quarry: idle, the toss wind-up, the buck, phase two's horn"
+ ]
+}

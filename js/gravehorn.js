@@ -42,7 +42,7 @@ const GH = {
   skidDec: 1500, recover: 0.62, stun: 1.2, stun2: 1.0, wallTurn: 0.5,
   // HORN TOSS (and its parry)
   tossReach: 78, tossTell: 0.45, toss: 0.30, tossHit: 0.20,
-  tossRecover: 0.68, tossRecover2: 0.60, parryLead: 0.15, stagger: 0.9,
+  tossRecover: 0.68, tossRecover2: 0.60, parryLead: 0.15, parryClean: 0.5, stagger: 0.9,
   tossKB: [520, 700], tossKB2: [640, 820], dizzy: 1.4, dizzy2: 1.8,
   // REAR KICK (phase two)
   kickReach: 104, kickTell: 0.35, kick: 0.22, kickRecover: 0.55,
@@ -50,6 +50,11 @@ const GH = {
   kneel: 0.9, rage: 1.7, beaten: 1.0, retreat: 2.8,
   // the hit-group break
   daze: 1.4, daze2: 1.1,
+  // THE BUCK: his answer to the air above him (ghStep). The whole machine drops
+  // on its legs for buckTell, then heaves — anything over his back is thrown.
+  buckTell: 0.32, buck: 0.34, buckLive: 0.22, buckReach: 118, buckDwell: 0.30, buckKB: [470, 540],
+  // HIS HIDE: a blow thrown into a wind-up or a strike turns on the plate
+  hide: 0.5,
 };
 // the rig, in px. Facing LEFT (the guardian convention): local -x is forward,
 // the origin is the floor under the collider's centre, +y is down.
@@ -81,17 +86,22 @@ const GH_DUR = {
   toss: GH.toss, tossrecover: GH.tossRecover, stagger: GH.stagger, kickprep: GH.kickTell,
   kick: GH.kick, kickrecover: GH.kickRecover, turn: GH.turnT, daze: GH.daze, kneel: GH.kneel,
   rage: GH.rage, beaten: GH.beaten, retreat: GH.retreat, ghwake: 2.0, ghbellow: 1.3,
-  wallturn: GH.wallTurn, rest: 1.0,
+  wallturn: GH.wallTurn, rest: 1.0, buckprep: GH.buckTell, buck: GH.buck,
 };
 // committed states: the hit-group break and the Song's stagger wait for them
-const GH_BUSY = { rush: 1, toss: 1, kick: 1, hornfire: 1, wallslam: 1, kneel: 1, rage: 1,
+const GH_BUSY = { rush: 1, toss: 1, kick: 1, buck: 1, hornfire: 1, wallslam: 1, kneel: 1, rage: 1,
   beaten: 1, retreat: 1, ghwake: 1, ghspeak: 1, ghbellow: 1, daze: 1, stunned: 1, wallturn: 1 };
+// the states the BUCK can be taken from (never a committed blow, never the
+// hornless window — that opening is its own bargain), and the ones his hide
+// turns a blow in
+const GH_BUCKS = { idle: 1, rest: 1, walk: 1, recover: 1, tossrecover: 1, kickrecover: 1, turn: 1, skid: 1 };
+const GH_ARMED = { chargewarn: 1, rush: 1, tossprep: 1, toss: 1, kickprep: 1, kick: 1, hornprep: 1, hornfire: 1, buckprep: 1, buck: 1, wallturn: 1 };
 // the cinematic beats: no damage lands, she is held, the bar is his to refill
 const GH_CINE = { ghwake: 1, ghspeak: 1, ghbellow: 1, kneel: 1, rage: 1, beaten: 1, retreat: 1 };
 
 // ---- the plates: registered only when they are on disk --------------------
 const GH_PART_KEYS = ['body', 'head', 'head_roar', 'horn_big', 'horn_small', 'fleg_up', 'fleg_low',
-  'hleg_up', 'hleg_low', 'tail', 'body2', 'head2', 'horn_big2', 'horn_small2'];
+  'hleg_up', 'hleg_low', 'hoof', 'tail', 'body2', 'head2', 'horn_big2', 'horn_small2'];
 (function ghRegister() {
   const on = (typeof window !== 'undefined' && window.GH_FILES) || [];
   if (typeof MEDIA_SRC === 'undefined') return;
@@ -103,17 +113,23 @@ const GH_PART_KEYS = ['body', 'head', 'head_roar', 'horn_big', 'horn_small', 'fl
 // fractions of the plate. The stand-ins are drawn in the same box, so a plate
 // that lands replaces its stand-in in place; re-measure the fractions from the
 // keyed plate when it arrives (one number per part, no code).
+// THE PLATES LANDED 2026-11-15, and these rows are MEASURED, not typed: each is
+// printed by tools/ghparts.cjs, which cuts the part from its master, turns it
+// the way the rig's own stand-in is turned and reports where its pivot fell.
+// (The stand-ins below are still drawn in their own frames wherever a plate is
+// not on disk; their boxes were within a few px of these.)
 const GH_BOX = {
-  body: { x: -92, y: -56, w: 186, h: 96, ax: 0.49, ay: 0.58 },
-  head: { x: -92, y: -34, w: 102, h: 70, ax: 0.90, ay: 0.49 },
-  head_roar: { x: -92, y: -34, w: 102, h: 78, ax: 0.90, ay: 0.44 },
-  horn_big: { x: -26, y: -66, w: 38, h: 70, ax: 0.68, ay: 0.94 },
-  horn_small: { x: -14, y: -34, w: 24, h: 38, ax: 0.58, ay: 0.90 },
-  fleg_up: { x: -16, y: -6, w: 32, h: 50, ax: 0.5, ay: 0.12 },
-  fleg_low: { x: -15, y: -4, w: 30, h: 46, ax: 0.5, ay: 0.09 },
-  hleg_up: { x: -19, y: -8, w: 38, h: 52, ax: 0.5, ay: 0.15 },
-  hleg_low: { x: -15, y: -4, w: 30, h: 46, ax: 0.5, ay: 0.09 },
-  tail: { x: -8, y: -4, w: 26, h: 36, ax: 0.3, ay: 0.11 },
+  body: { x: -90, y: -61.3, w: 183.3, h: 104.8, ax: 0.491, ay: 0.5849 },   // turned 0°, 0.1512 units/px
+  head: { x: -81, y: -39.3, w: 80.3, h: 73.3, ax: 1.0087, ay: 0.5362 },   // turned -3.7°, 0.1447 units/px, {"eye":[-41.6,-10.2]}
+  head_roar: { x: -81, y: -39, w: 80.3, h: 92.3, ax: 1.0087, ay: 0.4225 },   // turned -3.7°, 0.1447 units/px, {"eye":[-42,-10.6]}
+  horn_big: { x: -20.5, y: -58.8, w: 34.8, h: 64.8, ax: 0.5891, ay: 0.9074 },   // turned 17.2°, 0.1122 units/px
+  horn_small: { x: -8.5, y: -30, w: 17.8, h: 32.5, ax: 0.4775, ay: 0.9231 },   // turned 16.6°, 0.1349 units/px
+  fleg_up: { x: -19, y: -11.8, w: 32.5, h: 49.8, ax: 0.5846, ay: 0.2369 },   // turned -7°, 0.1029 units/px
+  fleg_low: { x: -21, y: -11, w: 33.5, h: 42.3, ax: 0.6269, ay: 0.26 },   // turned -6.3°, 0.1246 units/px
+  hleg_up: { x: -21.3, y: -11.8, w: 36.3, h: 49.8, ax: 0.5868, ay: 0.2369 },   // turned -7°, 0.1029 units/px
+  hleg_low: { x: -21, y: -11, w: 33.5, h: 42.3, ax: 0.6269, ay: 0.26 },   // turned -6.3°, 0.1246 units/px
+  hoof: { x: -32.3, y: -11.8, w: 46.8, h: 11.8, ax: 0.6902, ay: 1 },   // turned 0°, 0.1246 units/px
+  tail: { x: -3.3, y: -0.8, w: 10.5, h: 33.8, ax: 0.3143, ay: 0.0237 },   // turned 33.2°, 0.0943 units/px
 };
 GH_BOX.body2 = GH_BOX.body; GH_BOX.head2 = GH_BOX.head;
 GH_BOX.horn_big2 = GH_BOX.horn_big; GH_BOX.horn_small2 = GH_BOX.horn_small;
@@ -123,6 +139,10 @@ function ghPlate(part) {
   const im = MEDIA_IMG[k];
   return im && im.naturalWidth ? im : null;
 }
+// where his eye is, in the head's frame: the stand-in drew it at (-36,-12); the
+// fired head has it a hand further forward (measured off the plate by
+// tools/ghparts.cjs). Everything that lights or reads the eye asks here.
+function ghEyeAt() { return ghPlate('head') ? [-41.6, -10.2] : [-36, -12]; }
 // a darkened (far side) or silhouetted (in the dark) copy of a plate, made once
 const GH_TINT = {};
 function ghPlateTint(part, im, mode) {
@@ -423,6 +443,17 @@ function ghPose(b) {
       P.lift[2] = [66, 30]; P.lift[3] = [60, 36];
       break;
     }
+    case 'buckprep': {
+      // he DROPS: the barrel sinks onto the legs, the head goes down with it
+      P.by += 11 * Math.pow(k, 0.6); P.hr = 0.16 + 0.36 * Math.pow(k, 0.6); P.tell = Math.pow(k, 0.6); P.steam = 1;
+      break;
+    }
+    case 'buck': {
+      // ...and heaves: the back comes up through whatever is on it
+      const up = Math.sin(Math.PI * Math.min(1, k * 1.5));
+      P.by += 6 - 17 * up; P.q = frontQ; P.br = -0.13 * up; P.hr = 0.3 - 0.5 * up;
+      break;
+    }
     case 'turn': P.br = 0.06 * Math.sin(Math.PI * k); P.hr = 0.25; break;
     case 'wallturn': P.hr = 0.3; P.br = 0.05; break;
     case 'kneel': case 'beaten': {
@@ -620,6 +651,25 @@ function ghStep(b, dt) {
     if (!GH_BUSY[b.st] && b.st !== 'dorm' && b.st !== 'stagger') { ghSet(b, 'stagger', Math.max(0.5, b.stagT)); b.stagT = 0; }
   }
   const face = b.face || -1;
+  // ---- THE AIR ABOVE HIM, AND HIS HIDE ------------------------------------
+  // (owner, 2026-11-15: "hitting the rhino downward with a hit constantly is a
+  // easy hack to beat it, which should not happen.") Nothing he owned reached
+  // his own back: the toss hooks forward, the kick goes behind, the charge
+  // runs the floor — so standing on him was the one safe place in his room.
+  // Struck from above (Player's swing sets plungedT), or hung over for
+  // buckDwell, and from any state he is not committed to he BUCKS: the whole
+  // machine drops on its legs (buckprep — named so it wears the amber and the
+  // warning), then heaves, and what is over his back is thrown clear.
+  if ((b.plungedT || 0) > 0) b.plungedT -= dt;
+  { const over = !player.on && Math.abs(px - b.cx()) < 96 && player.y + player.h < b.y + b.h - 92;
+    b.overT = over ? (b.overT || 0) + dt : 0;
+    if (((b.plungedT || 0) > 0 || b.overT >= GH.buckDwell) && GH_BUCKS[b.st] && !((player.dizzyT || 0) > 0) && !player.dead) {
+      b.plungedT = 0; b.overT = 0; ghSet(b, 'buckprep', GH.buckTell); b.vx = 0; b.buckHit = false;
+    } }
+  // a blow into a wind-up or a strike turns on the plate; his openings — the
+  // rests, the recoveries, the hornless head, the stun at the wall, the break
+  // — take it whole (types.js dealDmg reads hideK)
+  b.hideK = GH_ARMED[b.st] ? GH.hide : 1;
   const front = (Math.sign(dist) || face) === face;
   const snoutX = b.cx() + face * 150, rumpX = b.cx() - face * 100;
   const dSnout = Math.abs(px - snoutX), dRump = Math.abs(px - rumpX);
@@ -669,6 +719,36 @@ function ghStep(b, dt) {
         G.ghCard = { t: 2.8, t0: 2.8 };
       }
       if (b.t <= 0) { G.ghHold = null; b.hideBar = false; ghSet(b, 'idle', 0.5); }
+      break;
+    }
+    // --------------------------------------------------------------- the buck
+    case 'buckprep': {
+      want = 0;
+      if (b.t <= 0) {
+        ghSet(b, 'buck', GH.buck); b.buckHit = false;
+        sfx('slam'); sfx('quake'); cam.shake = Math.max(cam.shake, 8);
+        if (typeof padRumble === 'function') padRumble(0.7, 0.6, 220);
+        const fy = b.y + b.h;
+        if (!G.artProbe) { burst(b.cx() - 60, fy, 9, '#8a7f6c', 240, 0.45, 300, 3); burst(b.cx() + 60, fy, 9, '#8a7f6c', 240, 0.45, 300, 3); }
+        if (typeof fx === 'function') fx('pillar', b.cx(), fy - 120, { rx: 120, ry: GH.buckReach + 40, dur: 0.3, col: '#ff5a3a', hot: '#ffe9d6', power: 1.1 });
+      }
+      break;
+    }
+    case 'buck': {
+      want = 0;
+      if (!b.buckHit && b._el <= GH.buckLive && !player.dead && player.iT <= 0) {
+        const fy = b.y + b.h;
+        if (aabb({ x: b.cx() - 104, y: fy - 132 - GH.buckReach, w: 208, h: GH.buckReach + 44 }, player)) {
+          b.buckHit = true;
+          const c0 = player.cores;
+          ghHurtBy(b, b.cx(), 'horn.buck');
+          if (player.cores < c0) {
+            player.vx = (Math.sign(px - b.cx()) || -face) * GH.buckKB[0]; player.vy = -GH.buckKB[1]; player.on = false; player.flungT = 0.45;
+            cam.shake = Math.max(cam.shake, 9); G.hitStop = Math.max(G.hitStop, 0.08);
+          }
+        }
+      }
+      if (b.t <= 0) ghSet(b, 'recover', GH.recover);
       break;
     }
     // ------------------------------------------------------------ neutral
@@ -912,7 +992,7 @@ function ghStep(b, dt) {
 // the head's world position (eye), for effects
 function ghHeadWorld(b) {
   const P = ghPose(b), m = -(b.face || -1);
-  const h = P.headRig(-36, -12);
+  const h = P.headRig(ghEyeAt()[0], ghEyeAt()[1]);
   return [b.cx() + h[0] * m, b.y + b.h + h[1]];
 }
 function ghHornTip(b) {
@@ -1144,6 +1224,12 @@ function ghProjStep(b, dt) {
 // hit on the same frame, so the window means what it says.
 function ghParry(b) {
   if (player.dead || !player.swing || player.swing.t <= 0 || player.swing.ghClash) return false;
+  // A PARRY IS ONE CLEAN STRIKE. Measured 2026-11-15: a player pressing ATTACK
+  // without pause turned every toss he threw — the window is 0.35 s and her
+  // swings come every 0.37 — so the move the fight was built round was beaten
+  // by not reading it. The strike that turns the horn is one she HELD for: her
+  // blade quiet for parryClean before it. Stop swinging when he drops his head.
+  if ((player.swing.gap == null ? 9 : player.swing.gap) < GH.parryClean) return false;
   if (b.st === 'tossprep' && b.t > GH.parryLead) return false;
   const pcx = player.x + player.w / 2;
   const facing = (Math.sign(b.cx() - pcx) || 1) === (player.face || 1);
@@ -1381,8 +1467,12 @@ function drawGravehorn(c, b) {
   const leg = (Lg, sty) => {
     ghPart(c, Lg.L.up, Lg.hip[0], Lg.hip[1], Lg.a1 - Math.PI / 2, sty, p2);
     ghPart(c, Lg.L.lo, Lg.kn.x, Lg.kn.y, Lg.a2 - Math.PI / 2, sty, p2);
-    // the stand-in's hoof, level; a lower-leg plate carries its own
-    if (!ghPlate(Lg.L.lo)) { c.save(); c.translate(Lg.foot[0], Lg.foot[1]); c.rotate(clamp((Lg.a2 - Math.PI / 2) * 0.25, -0.2, 0.2)); ghHoof(c, sty, 0); c.restore(); }
+    // THE HOOF IS LEVEL — its own plate, planted on the floor while the shin
+    // above it swings (a hoof baked onto the shin stood on its toes at every
+    // stride); the stand-in's own where the plate is not here
+    c.save(); c.translate(Lg.foot[0], Lg.foot[1]); c.rotate(clamp((Lg.a2 - Math.PI / 2) * 0.25, -0.2, 0.2));
+    if (ghPlate('hoof')) ghPart(c, 'hoof', 0, 0, 0, sty, p2); else if (!ghPlate(Lg.L.lo)) ghHoof(c, sty, 0);
+    c.restore();
   };
   // far side first: the far hind leg, the far foreleg, the tail
   leg(legs[3], far); leg(legs[1], far);
@@ -1404,7 +1494,7 @@ function drawGravehorn(c, b) {
   const tk = P.tell || 0;
   // the identity red LERPS toward the amber during a wind-up (Hue Law §3.5)
   const eyeCol = tk > 0 ? ghMix('#ff3b2a', TELL_COL, tk) : '#ff3b2a';
-  const eyeP = P.headRig(-36, -12);
+  const eyeP = P.headRig(ghEyeAt()[0], ghEyeAt()[1]);
   // the infection looks out through this eye (js/infection-eyes.js): reported
   // where it is drawn this frame, in the head's own transform — so it rides
   // the toss, the kneel, the hornless sag and the phase-two head alike
@@ -1429,6 +1519,21 @@ function drawGravehorn(c, b) {
   };
   nozzle(P.sockBig, P.glowB, ghMix('#ff4a2a', TELL_COL, tk), 22);
   if (p2) nozzle(P.sockSmall, Math.max(P.glowS, b.hornSmall ? 0.35 + 0.15 * Math.sin((b.anim || 0) * 18) : 0), ghMix('#ff3b1f', TELL_COL, tk), 14);
+  if (p2 && ghPlate('body') && !ghPlate('body2')) {
+    // PHASE TWO ON THE PLATES. The advanced body (body2/head2) is not fired
+    // yet, so what changes him is LIGHT, which is the engine's to draw: the
+    // seams between his plates run molten, breathing, the same cracks the
+    // stand-in carried — in his own frame, so they ride every pose.
+    const pu = 0.62 + 0.38 * Math.sin((b.anim || 0) * 7.3);
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    const seam = (pts, map, wd) => { c.beginPath(); pts.forEach((q, i) => { const w = map(q[0], q[1]); if (i) c.lineTo(w[0], w[1]); else c.moveTo(w[0], w[1]); }); c.lineWidth = wd; c.stroke(); };
+    for (const [wd, al, col] of [[7, 0.16, '#ff3b1f'], [2.6, 0.72, '#ff7a3a'], [1, 0.9, '#ffe2b0']]) {
+      c.globalAlpha = al * pu; c.strokeStyle = col;
+      for (const crk of [[[-60, -30], [-48, -14], [-56, 4]], [[-12, -34], [-2, -16], [-14, 8], [-4, 22]], [[30, -28], [42, -10], [34, 10]], [[66, -22], [74, -4]]]) seam(crk, P.toRig, wd);
+      seam([[-10, -26], [-18, -14], [-12, -2]], P.headRig, wd); seam([[-50, -20], [-58, -8]], P.headRig, wd);
+    }
+    c.globalAlpha = 1;
+  }
   if (p2 && !G.artProbe) {
     // the jet vents along the spine breathe red
     for (const vx of [-40, -6, 28]) {

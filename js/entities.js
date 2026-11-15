@@ -2026,6 +2026,7 @@ class Player {
   healCost() { return relicHas('coolant') ? 28 : 33; }
   gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
   update(dt) {
+    this.sinceSwing = (this.sinceSwing == null ? 9 : this.sinceSwing) + dt;
     if (this.dead) return;
     // ---- STUNNED: THE CONTROLS ARE GONE, AND THEY ARE GONE ALL AT ONCE ------
     // Gating each input site separately is how a stun ends up letting you dash
@@ -2487,6 +2488,9 @@ class Player {
       const tk = blk ? blk.t : 1;
       this.swing = { t: 0.15 * tk, t0: 0.15 * tk, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield,
                      pure: wield >= 1, twin, weaponMode: mode, crest };
+      // how long her blade was quiet before this one (a parry is one clean
+      // strike, not the next of a mash: js/gravehorn.js ghParry)
+      this.swing.gap = this.sinceSwing == null ? 9 : this.sinceSwing; this.sinceSwing = 0;
       // ay and air ride along so the RENDERER can tell an airborne or downward
       // strike from a standing one — see heroSwingState. They are the swing's
       // own aim and stance at the moment it started, not the body's current

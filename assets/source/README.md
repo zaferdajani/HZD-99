@@ -119,6 +119,14 @@ was refused, the six-cell strip they replace, a size check against her jab's
 standing cell and the dive photographed in the game. `prompts.json` has the
 prompts, the job ids and the exact cut.
 
+`gravehorn/` is GRAVEHORN'S BODY (2026-11-15, owner: "the rhino looks so fake...
+it's the same box"). He had been drawn in flat stand-ins since October. The
+design plate (real white-rhino anatomy, built as a machine, in the Wolf King's
+finish), the body-and-heads sheet, the stand-in he replaced, the rig wearing
+the plates in nine states and in the quarry. `provenance.json` has the job ids
+and what could not be fired; `tools/ghparts.cjs` cuts the eleven plates and
+measures their anchors.
+
 `gates/ring_*` are THE RING GATES (2026-11-15, owner: "we are in a universe
 full of robots... something that looks like a Stargate"). Four machine rings as
 fired — quarry, meadow, the Wolf King's fanged den, and one braced into a cave

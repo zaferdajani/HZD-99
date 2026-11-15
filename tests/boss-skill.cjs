@@ -42,7 +42,7 @@ const { chromium } = require('playwright');
       const B = () => G.boss || G.enemies.find(e => e.kind === 'alpha' || e.boss);
       for (; frames < 60 * 150; frames++) {
         clear(); const bo = B(); if (!bo) { update(1 / 60); continue; }
-        if (t0 < 0 && bo.st !== 'dorm' && bo.st !== 'intro') { t0 = frames; bhp = bo.hpMax; }
+        if (t0 < 0 && !{ dorm: 1, intro: 1, ghwake: 1, ghspeak: 1, ghbellow: 1 }[bo.st]) { t0 = frames; bhp = bo.hpMax; }
         if (bo.st !== last) { st[bo.st] = (st[bo.st] || 0) + 1; if (bo.st === 'coil' && last === 'leap') chains++; last = bo.st; }
         if (bo.dead || bo.purified || bo.tamed || bo.hp <= 0) break;
         for (const k in keys) keys[k] = 0; for (const k in keysP) keysP[k] = 0;
@@ -123,7 +123,16 @@ const { chromium } = require('playwright');
       wins.length > 0 && wins.every(d => { const k = kit(d); return k.howl >= 1 && k.rend >= 2 && k.leap >= 3 && k.roar >= 1 && k.close >= 2 && k.spring >= 1 && k.fury === 1; }),
       wins.map(d => JSON.stringify(kit(d))).join(' | '));
     check('ALPHA  ...including the fury\'s chain: after half health it pounces more than once without resting', wins.length > 0 && wins.some(d => (d.chains || 0) >= 1), wins.map(d => (d.chains || 0) + ' chained pounces').join(' | '));
-    //@GRAVEHORN@
+    // ---- GRAVEHORN ----
+    // (his own harness, tests/gravehorn.cjs, carries the player who reads him: its autopilot jumps the
+    // charge, turns the toss and takes the hornless window, and must win. Here: the two who do not.)
+    const H = { mash: [], pogo: [] };
+    for (const bot of ['mash', 'pogo']) for (let r = 0; r < 3; r++) H[bot].push(await fight('CV3', 'single', bot, r));
+    check('GRAVEHORN  mash: a player who only presses ATTACK never beats him', H.mash.every(d => !d.won), H.mash.map(line).join(' | '));
+    check('GRAVEHORN  ...the toss is not turned by a mash: a parry is one clean strike', H.mash.every(d => !(d.states.stagger > 0) && d.srcs.indexOf('horn.toss') >= 0), H.mash.map(d => (d.states.stagger || 0) + ' parries, hurt by ' + d.srcs.join(',')).join(' | '));
+    check('GRAVEHORN  pogo: bouncing on his back never beats him', H.pogo.every(d => !d.won), H.pogo.map(line).join(' | '));
+    check('GRAVEHORN  ...and it does not get her there: he has more than half of the phase\'s health when she falls', H.pogo.every(d => d.died && parseInt(d.bossHp, 10) >= 329 * 0.5), H.pogo.map(d => d.bossHp).join(' | '));
+    check('GRAVEHORN  ...struck from above, he bucks', H.pogo.some(d => d.srcs.indexOf('horn.buck') >= 0 || (d.states.buck || 0) > 0), H.pogo.map(d => (d.states.buck || 0) + ' bucks').join(' | '));
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await b.close(); }
   console.log(fails.length ? '\nFAILED ' + fails.length + ': ' + fails.join('; ') : '\nboss-skill: all checks passed');
