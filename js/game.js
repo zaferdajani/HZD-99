@@ -1318,8 +1318,19 @@ function loadRoom(id) {
   // story — the hero's world wakes differently.
   if (id === 'W2' && typeof opOn === 'function' && opOn() && !G.save.flags.firstKill
       && !G.save.flags.gateOpened && !G.save.flags.ratchetRepaired && !G.save.flags.tut) {
-    const m = new Enemy('blob', 23 * TILE, (def.h - 2) * TILE - 16);
+    // ON LEVEL GROUND (owner, 2026-11-15: "the enemy is set up on the top of a
+    // hill, which is a very bad location to start with"). It stood at tile 23,
+    // which is the far slope of the mound the jump lesson climbs — her first
+    // fight was a small body above or below her on a ramp (the floor 40 px
+    // either side of it was 35 px off its feet). The road past that mound
+    // rolls the whole way to the gates; its one level stretch is the low
+    // terrace at x 928-1040 — 110 px of floor that varies by 3 px — so that is
+    // where it waits, in the middle, and it is LEASHED there (tutStep): it
+    // shuffles at her and never leaves the flat. She walks up to it and fights
+    // it standing on the same level it is.
+    const m = new Enemy('blob', 30 * TILE + 14, (def.h - 2) * TILE - 16);
     m.w = 20; m.h = 15; m.hp = 12; m.mini = true; m.firstFoe = true;
+    m.homeX = m.x;
     m.dir = -1; m.dripT = 1e9;               // it never pools the floor
     m.moves = []; m.traits = [];
     m.actorRole = 'empty-construct';
@@ -13791,11 +13802,28 @@ function updateTutor(dt) {
   // her, so no lesson is ever interrupted by a hit she was not taught to read.
   // ...with ONE exception, and it is the point of it: the small machine on the
   // road to the gates (firstFoe) is her first fight, and a fight with something
-  // that cannot touch her is a chore. It stays live — and goes quiet only if
-  // she is down to two cores, because nobody dies in the first minute.
+  // that cannot touch her is a chore. It stays live — and stops being able to
+  // HURT her only if she is down to two cores, because nobody dies in the
+  // first minute.
+  //
+  // IT IS STILL THERE TO BE HIT (owner, 2026-11-15, on the phone: "attacking
+  // the first enemy is not actually doing any damage. It's passing through the
+  // enemy"). That mercy used to be `calm`, and calm is the CURED state: a calm
+  // machine cannot be hurt and cannot be touched. So a player who had been
+  // stung twice found her claw going through the thing it was pointed at, with
+  // the lesson still asking her to strike it. It goes MEEK instead — it keeps
+  // its body and its hit points and loses only its sting (Enemy.update).
   for (const e of (G.enemies || [])) {
     if (!e || e.dead || e.disabled || e.rescued) continue;
-    if (e.firstFoe && player.cores > 2) { e.calm = false; e.hypnoT = 0; continue; }
+    if (e.firstFoe) {
+      e.calm = false; e.hypnoT = 0; e.meek = player.cores <= 2;
+      // and it keeps to its flat: never up the mound behind it, never off down the road
+      if (e.homeX != null) {
+        if (e.x < e.homeX - 14) { e.x = e.homeX - 14; if (e.vx < 0) e.vx = 0; }
+        else if (e.x > e.homeX + 14) { e.x = e.homeX + 14; if (e.vx > 0) e.vx = 0; }
+      }
+      continue;
+    }
     e.calm = true; e.hypnoT = Math.max(e.hypnoT || 0, 1);
   }
   if (typeof TOUCH !== 'undefined' && TOUCH) {

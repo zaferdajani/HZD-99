@@ -7742,7 +7742,7 @@ class Enemy {
       this.vx *= Math.pow(0.02, dt);
       if (onSpike(this)) { this._envDeath = 1; this.die(Math.sign(this.vx) || 1, -0.4); return; }
       if (this.y > G.roomDef.h * TILE + 40) { this._envDeath = 1; this.die(0, 1); return; }
-      if (!player.dead && aabb(this, player) && !(typeof sageDuelActive==='function'&&sageDuelActive(this)))
+      if (!player.dead && !this.meek && aabb(this, player) && !(typeof sageDuelActive==='function'&&sageDuelActive(this)))
         player.hurt(DF().edmg, this.x + this.w / 2, this.kind + '.knockback');
       return;
     }
@@ -8894,7 +8894,9 @@ class Enemy {
       && (this.lungeT > 0 || (this.coilT > 0 && this.coilT <= PARRY_LEAD));
     // touch damage
     const sageContact=typeof sageDuelActive==='function'&&sageDuelActive(this);
-    if (!player.dead && aabb(this, player) && (!sageContact||sageDuelContact(this))) {
+    // (a MEEK body has lost its sting and nothing else: the opening's first
+    // machine, once she is down to two cores — js/game.js tutStep)
+    if (!player.dead && !this.meek && aabb(this, player) && (!sageContact||sageDuelContact(this))) {
       const cores0 = player.cores;
       player.hurt(DF().edmg,cx,sageContact?'sage.lunge':undefined,this);
       // a wolf's bite that LANDED is held and worried (js/wolfhunt.js)

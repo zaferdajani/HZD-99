@@ -467,3 +467,14 @@ Also the leaping pack wolf (the hopper in the wolves' kingdoms) wears the threat
 
 Reduced motion keeps the wave, its light and the step back, and drops the bend, the shimmer and the nudge. The low quality tier bends one front with half the sub-rings. Nothing is drawn under the art probe. The interface never bends: the wave is laid before the HUD.
 
+## Changelog — 2026-11-15 (owner, on the phone: "attacking the first enemy is not actually doing any damage. It's passing through the enemy. And the enemy is set up on the top of a hill")
+
+**Her first fight can be won** (`js/game.js` tutStep and the W2 spawn, `js/entities.js`, `tests/first-foe.cjs`).
+
+| | before | after |
+|---|---|---|
+| at two cores or fewer | the opening's first machine turned `calm` — the cured state: it could not be hurt and could not be touched, so her claw went through it while the lesson still asked her to strike it | it turns `meek`: it keeps its body and its 12 hp and loses only its sting (no contact damage). Two swipes still break it |
+| where it stands | tile 23 of W2, the far slope of the mound the jump lesson climbs: the floor 40 px either side was 35 px off its feet | the middle of the road's one level stretch (the terrace at x 928-1040, floor varying by 3 px), leashed to within 14 px of it |
+
+Not a phone fault: the same build behaved the same on every platform; it showed on the phone because that is where she had been stung twice.
+
