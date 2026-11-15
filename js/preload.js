@@ -173,7 +173,7 @@ function preloadRoom(roomId) {
 // strips exist to replace. So the first blow of a session was the defect, every
 // session. They are 0.27 MB together.
 const BODY_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle', 'transAir',
-  'transLand', 'transSkid', 'transDash', 'hzdHurt', 'heroFidget', 'transWall',
+  'transLand', 'transSkid', 'transDash', 'hzdHurt', 'heroFidget', 'heroImpatient', 'transWall',
   'swingClawJab', 'swingClaw1', 'swingUppercut', 'swingClawCharge', 'swingSingleFx'];
 
 function preloadBoot() {

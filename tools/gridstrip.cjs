@@ -20,7 +20,7 @@
 // One scale and one sole line for the whole strip, taken from the tallest cell,
 // so nothing pumps between cells that the drawing itself did not pump.
 //
-//   node tools/gridstrip.cjs <sheet.png> <out.png> [--per] [--h=203] [--cell=320] [--floor=312]
+//   node tools/gridstrip.cjs <sheet.png> <out.png|out.webp> [--per] [--h=203] [--cell=320] [--floor=312]
 //
 // --h is the figure's height in the cell, ear-tips to soles. 203 is the fidget's
 // (a FRONT view). A three-quarter head is narrower than a front one, so matching
@@ -34,7 +34,7 @@ const fs = require('fs');
   if (!inp || !out) { console.log('usage: gridstrip.cjs <sheet.png> <out.png> [--per] [--h=203] [--cell=320] [--floor=312]'); process.exit(1); }
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
-  const r = await p.evaluate(async ({ d, per, HT, CELL, FLOOR }) => {
+  const r = await p.evaluate(async ({ d, per, HT, CELL, FLOOR, webp }) => {
     const i = new Image(); i.src = 'data:image/png;base64,' + d; await i.decode();
     const W = i.naturalWidth, H = i.naturalHeight, cw = Math.floor(W / 4), ch = Math.floor(H / 2);
     const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -80,8 +80,8 @@ const fs = require('fs');
         n * CELL + (CELL - dw) / 2 - 2 * k, FLOOR - HT - 2 * k, dw + 4 * k, HT + 4 * k);
     });
     return { sheet: W + 'x' + H, cell: cw + 'x' + ch, left: boxes.map(q => q[0]), width: boxes.map(q => q[2] - q[0]), height: boxes.map(q => q[3] - q[1]),
-      scale: +k.toFixed(3), dropped, url: o.toDataURL('image/png') };
-  }, { d: fs.readFileSync(inp).toString('base64'), per: argv.includes('--per'), HT: opt('h', 203), CELL: opt('cell', 320), FLOOR: opt('floor', 312) });
+      scale: +k.toFixed(3), dropped, url: webp ? o.toDataURL('image/webp', 0.95) : o.toDataURL('image/png') };
+  }, { d: fs.readFileSync(inp).toString('base64'), per: argv.includes('--per'), HT: opt('h', 203), CELL: opt('cell', 320), FLOOR: opt('floor', 312), webp: out.endsWith('.webp') });
   fs.writeFileSync(out, Buffer.from(r.url.split(',')[1], 'base64')); delete r.url;
   const spread = Math.max(...r.left) - Math.min(...r.left);
   console.log(JSON.stringify(r));

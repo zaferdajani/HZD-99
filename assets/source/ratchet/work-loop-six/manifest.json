@@ -24,5 +24,15 @@
   "source_hashes_before": {
     "js/game.js": "e6121cf704dd60dfba023af533b33849a9d2f5bb9a81b3981658e6da1055567a",
     "js/media.js": "0bed583d0b2523d56c98f61e56bd13e928d0898141624d36f7f5ac052ef61ad6"
+  },
+  "repaint_2026_11_15": {
+    "what": "Repainted as metal (docs/ART_QUEUE.md 2r-ii): the same cells, the same boxes, new paint. The owner-supplied strip is kept byte for byte beside this file as supplied.webp and still matches sha256 above.",
+    "runtime": "assets/characters/npc/ratchet/work_loop_six.webp",
+    "runtime_sha256": "c12c8365c27394676fa040c4532a28ba743eaca154d2ffd105fa19b6f62c8e01",
+    "generator": "Higgsfield, Nano Banana Pro, 2k; job 5e03604a-50f4-4961-9efa-09c487c60462",
+    "as_fired": "assets/source/ratchet/metal/work_loop_six_asfired.jpg",
+    "cut": "tools/reframe.cjs --grid",
+    "lowres_sha256": "128e8bcf6840c97e9202cfdb7c0a6d4a501884bbe5b54695c5d1694971bdf4ae",
+    "revert": "copy supplied.webp back over the runtime file, then node tools/lowres.cjs && node build.cjs"
   }
 }
