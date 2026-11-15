@@ -38,6 +38,34 @@ request needs one; the VIDEO session fires top to bottom, same as ART_QUEUE.)*
 
 ---
 
+## V-WAKE-2. The Waking, in his new metal ✱ QUEUED 2026-11-15 (code session)
+
+Ratchet was repainted as metal on 2026-11-15 (ART_QUEUE §2r-ii): polished copper
+plates, oiled bronze joints, a brushed steel pack, verdigris in the seams, rust on
+the belly and boots. The film below still shows the machine he was — a dull
+grey-brown hulk — and it plays at the one moment the player is looking hardest at
+him: the repair board powers him, the film runs six seconds of the grey Ratchet,
+and it cuts to the copper one standing in the same chair. Nothing is broken; it is
+a continuity cut the owner will see the first time he replays the opening.
+
+- **For:** the same cutscene beat, `PURIFY_VID.revive`. Same six seconds, same
+  five beats in the same order (the cell into the hatch · light up to the chest
+  crystal · visor on amber · head lifts · hand opens toward her). Not a new scene.
+- **What changes:** his materials only. Opening frame redrawn (Nano Banana Pro)
+  with `hzd99-canon` and, as his reference, the repaint's anchor —
+  `assets/source/ratchet/metal/talk_1_asfired.jpg` — plus the resting plate for
+  the chair and the slump (`assets/source/ratchet/metal/resting_asfired.jpg`).
+  Shape from the current film's first frame, finish from the anchor
+  (art-prompts §2, two references, two stated jobs).
+- **Negatives that already cost a take last time:** nothing in her paw but the
+  cell — no blade, green or otherwise. She has no tail (the current film gave her
+  one; do not carry it over). No sword on her back: this is before the forging.
+- **Contract:** silent, 6 s, 16:9, the same cut points so the audio bed and the
+  skip behave as they do; `mp4` (H.264) + `webm` + `light/` via
+  `node tools/lightvid.cjs`. The owner reviews the take before it is cut in.
+- **Until it lands the old film stays.** It is the owner's approved take, and a
+  six-second colour mismatch is better than no waking.
+
 ## THE WAKING — Ratchet's cell goes home (FIRED + WIRED 2026-10-12)
 
 Owner, 2026-10-12: *"there is no need now for the video that shows Ratchet
