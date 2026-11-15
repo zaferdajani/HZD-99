@@ -14259,6 +14259,9 @@ class Boss {
       if (this.kind === 'alpha') alphaMotionEnd(this, dt);
       if (typeof bossMotionEnd === 'function') bossMotionEnd(this, dt);
       if (!this.meet && !(typeof isHero === 'function' && isHero())) this.syncMotionTell();
+      // the guardians' shared effect beats (js/boss-fx.js) — after the tell
+      // has been given its final length, which syncMotionTell may have set
+      if (typeof bossFxStep === 'function' && !(typeof isHero === 'function' && isHero())) bossFxStep(this, dt, this._poseStart);
     }
   }
   // ---- the three signature systems -----------------------------------------

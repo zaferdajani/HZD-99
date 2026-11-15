@@ -73,6 +73,22 @@ function wolfFrame(e, dt) {
   if ((e.snapT || 0) > 0) e.snapT -= dt;
   if ((e.snarlCD || 0) > 0) e.snarlCD -= dt;
   if ((e.rollT || 0) > 0) e.rollT -= dt;
+  // THE LEAPING WOLF NOTICES HER TOO. The hopper's own machine is untouched —
+  // it gathers and leaps exactly as it did — but it is the same animal, so it
+  // wears the same two pictures: the threat display when she first comes into
+  // its ground, and the low snarl while it waits out the gap between leaps.
+  if (e.kind === 'hopper' && !e.dead && !e.disabled && typeof player !== 'undefined' && player
+      && !(typeof packTamed === 'function' && packTamed())) {
+    const near = !player.dead && Math.abs(player.x + player.w / 2 - e.x - e.w / 2) < 380
+      && Math.abs(player.y + player.h / 2 - e.y - e.h / 2) < WOLF_HUNT.loseY;
+    if (near && !e.hunt) {
+      e.hunt = 1;
+      if (!((e.snarlCD || 0) > 0) && e.on !== false && !((e.crouchT || 0) > 0)) {
+        e.snarlT = WOLF_HUNT.snarl; e.snarl0 = e.snarlT; e.snarlCD = WOLF_HUNT.snarl + WOLF_HUNT.again;
+        if (typeof sfx === 'function') sfx('wolf_snarl');
+      }
+    } else if (!near && e.hunt) e.hunt = 0;
+  }
   // THE THROW. attackKnock writes kbT and adds the blow to vx in one frame; a
   // kbT that went UP since last frame is a new blow, and a hard one rolls it.
   // Not through a lunge: that is the committed half of its own attack, and

@@ -438,3 +438,17 @@ Unchanged: every existing tell and rest (claw 350-667 ms, bite 383-667 ms, leap>
 **What the old moves wear now** — claw: a slash arc and its own whoosh; bite: a flash at the jaw and a snap; each whip of the clinch: an arc and the worry growl; howl: a pillar, a shock ring, embers, and the wolves it calls arrive already hunting (red flash, teeth out); roar: a shock ring, a wave through the ground it stands on and cracks under it, a growl under the bark.
 New sounds: `alpha_rendwarn`, `alpha_rend`, `alpha_claw`, `alpha_snap`, `alpha_furywarn`, `alpha_fury`, `alpha_quake` (and the pack's `wolf_snarl`, `wolf_lunge`, `wolf_bite`, `wolf_snap`, `wolf_yelp`), on a new `growl()` synth voice.
 
+## Changelog — 2026-11-15 (owner: "improve the fights for all the sages and the microbosses")
+
+**Every guardian's blow has light on it** (`js/boss-fx.js`, `tests/boss-fx.cjs`). The shader layer was NULLFANG's alone. From one rule, the other five sages (TALONHOST, FURNACE CHOIR, GLACIERE, the Prism Prowler, MOTHER-V) and the micro-bosses (GRAVEHORN and the five Eye constructs) now have the same three beats:
+
+| beat | when | what | what it may never do |
+|---|---|---|---|
+| the wind-up gathers | entering any TELL_ST state with ≥ 0.3 s to run | the tell's amber drawn in toward the body, riding it, for exactly as long as the tell runs (re-read each frame; cut if the wind-up is broken off) | shorten or hide a tell — it is the tell's own colour, added to it |
+| the strike lights | a wind-up that ran its length ends | one effect at the body, in that guardian's colour: an arc for a blow named like a claw, a ring for one named like a roar, a flash otherwise | claim a reach — nothing is drawn wider than 190 px or the body's own size |
+| the landing goes through the ground | a walker falling at > 260 px/s comes to a stand | a wave along the terrain it landed on, and cracks | draw under the art probe |
+
+No timing, damage, tell or opening changed. Measured over 45 s of each fight on seeded dice: 8-33 wind-ups and 7-33 strikes per guardian, all lit.
+
+Also the leaping pack wolf (the hopper in the wolves' kingdoms) wears the threat display when she first comes into its ground and the low snarl between leaps; its machine is untouched.
+

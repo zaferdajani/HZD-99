@@ -93,6 +93,7 @@ const SUITE = [
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['lion-motion', 'Nullfang in the real loop: the filmed turn, committed launches, one spot and one colour across takes, the shader effects layer'],
   ['boss-hitfeel', 'all thirteen bosses: a blow in any opening steps them back, never moves a wind-up, always rings, flashes and throws scrap; and each one\'s blow freezes, lights and throws her', { timeout: 900000 }],
+  ['boss-fx', 'the five sages after NULLFANG and the micro-bosses: every wind-up gathers light for as long as it runs, every strike that follows fires an effect at the body, a walker\'s hard landing goes through the ground, and nothing is drawn wider than the body', { timeout: 900000 }],
   ['alpha-kit', 'the Wolf King\'s own moves: the rend runs the ground and is jumped, the fury follows the midpoint and throws without hurting, a fury leap\'s quake is painted where it lands, and every old move wears an effect and a sound', { timeout: 420000 }],
   ['wolf-hunt', 'a pack wolf hunts: threat display, charge, stalk, a bite from the distance its lunge covers, the bite held and thrashed, at bay at a ledge, the roll under her finisher — tell and opening unchanged', { timeout: 420000 }],
   ['solid-enemies', 'she cannot walk through a hostile body: it stops her at its drawn edge, she can jump it, bound machines do not block, and a pounce still lands', { timeout: 420000 }],
