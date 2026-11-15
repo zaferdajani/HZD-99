@@ -11,7 +11,7 @@
 //
 // The four things the old den blurred together are kept apart by name, art
 // and purpose, and each is introduced before or as it is handed over:
-//   RATCHET'S BATTERY   his own, in his drawer; the repair board installs it
+//   RATCHET'S BATTERY   his own, in the toolbox on his den floor; the repair board installs it
 //   SPARE POWER CELL    handed over after the repair, for Old Servo
 //   VOLT PACK           bought once, permanent: healing and the Volt Burst
 //   VOLT REFILL         the same counter row afterwards, a consumable

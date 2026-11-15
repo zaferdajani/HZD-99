@@ -6469,6 +6469,47 @@ machine slumps via `foeDrawDown` in js/foeread.js. A take of its own replaces it
   `BEAST_RECOVER.down` flattening; `tests/artbible.cjs` feet rule applies.
 - **Cheetah:** the same brief for `cheetahDown4` once the wolf take is approved.
 
+### 2r-iii. THE DEN TOOLBOX ×2, and the two comic panels round it ✔ LANDED 2026-11-15 (owner's order, fired and wired by the code session the same day)
+
+**The order, in his words:** *"the hero is looking in the drawers for the battery
+when it's actually in the toolbox down. You need to change it."* — *"improve the
+art of the toolbox to make it show uniquely on the ground when I enter the room.
+Make it shiny ... to blend with the ground, but in a unique way to direct the
+player there."* — *"Differentiate between a toolbox and working station for the
+NPC. This is the working table station, not the toolbox."*
+
+**What it is:** the chest `it:batt` in A0B was the generic brown procedural chest,
+the words called it a drawer, and the comic drew a waist-high drawer. It is now
+one object everywhere: a small **oxblood-red steel toolbox** with brass latches
+and corner caps, on the floor at Ratchet's LEFT. The work table (§2r) is a
+different object on his right and is untouched.
+
+- **Plates** (nano_banana_pro 2k, 4:3): `assets/backgrounds/toolbox.webp` — shut,
+  the lid a finger ajar, the battery's cyan leaking under it (job `b039228b`);
+  `assets/backgrounds/toolbox_open.webp` — the same box, lid up, empty, dark
+  (job `4995abaa`, the closed plate as its reference). Cut on one scale with one
+  right edge and one floor line. 8 credits with the refused takes.
+- **Wired:** `denToolbox` / `denToolboxOpen` in js/media.js; `drawDenToolbox` in
+  js/game.js draws them BY WIDTH (60 px) on the heightfield she stands on. The
+  light is ours and is the direction: a cyan pool on the floorboards and the seam
+  both breathing, a brass glint whose first flash comes half a second after she
+  walks in, a mote now and then, and a cyan `lightAt` reaching further than a
+  chest's gold latch. All of it stops when the battery is out. `G.artProbe`
+  suppresses the ground light. The generic chest stands in until the plate decodes.
+- **Panels** (nano_banana_pro 2k, 16:9, drawn from the plate, the old panel handed
+  back as "this is wrong about where the battery is"): `game/toolbox.webp`
+  replaces `game/drawer.webp` in the `drawer` sequence (job `7a08eab6`);
+  `game/l_cell.webp` redrawn in place — he lowers it into the toolbox (job
+  `95691dc4`). 8 credits.
+- **Words:** drawer → toolbox in all five languages (letter, hint, card, captions),
+  docs/STORY_SCRIPT.md §2.4, docs/MANHWA_EVENT_MAP.md, and the p07 row of the
+  manhua ruling in docs/MANHUA.md.
+- **Measured by** tests/toolbox.cjs. Archive: `assets/source/den/toolbox/`,
+  `assets/source/manhua/ch1/game/toolbox-2026-11-15.json`.
+- **Open:** every OTHER chest in the game is still the procedural stand-in (its
+  plate is not briefed here); the lettered manhua page p07 does not show the box
+  at all and waits on the owner's ruling like the rest of that list.
+
 ### 2r-ii. RATCHET, REPAINTED AS METAL — the seven plates + `ratchetLoop` ✔ LANDED 2026-11-15 (fired and wired by the code session on the owner's "finish it all properly"; brief 2026-11-14)
 
 Owner, on the A0B screenshot: *"The NPC is not well defined. The characters'

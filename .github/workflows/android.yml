@@ -9,9 +9,8 @@ on:
 jobs:
   apk:
     runs-on: ubuntu-latest
-    # the last step replaces one file on the rolling `android-latest` release
     permissions:
-      contents: write
+      contents: write          # the release below; nothing else is written
     steps:
       - uses: actions/checkout@v4
 
@@ -57,24 +56,27 @@ jobs:
           name: clawbyte-android-debug
           path: android/app/build/outputs/apk/debug/*.apk
 
-      # A FIXED LINK FOR A PHONE (owner, 2026-11-15: "a way to download it
-      # directly to an Android mobile"). An Actions artifact is a zip behind a
-      # GitHub sign-in, which is a poor thing to hand a phone's browser. Every
-      # build of main also replaces one file on one rolling pre-release, so
-      #   https://github.com/<owner>/<repo>/releases/download/android-latest/CLAWBYTE.apk
-      # is always the newest APK, as an .apk: open it on the phone, download,
-      # tap, allow the install. A debug-signed build — for the owner's own
-      # devices, not a store submission.
-      - name: Publish the APK at a fixed link
+      # A DOWNLOAD ANYONE CAN USE (owner, 2026-11-15: "i need apk link for non
+      # github account user"). A workflow artifact needs a signed-in GitHub
+      # account and arrives as a zip; a release asset needs neither. So the APK
+      # of what is on main is also attached to ONE rolling release, replaced on
+      # every build, and its address never changes:
+      #   https://github.com/zaferdajani/HZD-99/releases/download/android-latest/CLAWBYTE.apk
+      # Only main publishes there: the public link is the published game, not a
+      # branch somebody is still testing.
+      - name: Publish the APK at a link that needs no GitHub account
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk CLAWBYTE.apk
-          NOTES="The newest Android build of CLAWBYTE, replaced on every update of main. Built from ${GITHUB_SHA} on $(date -u +%Y-%m-%d). Debug-signed: install it by opening CLAWBYTE.apk on the phone and allowing the install."
-          if gh release view android-latest --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release edit android-latest --repo "$GITHUB_REPOSITORY" --notes "$NOTES"
+          cp "$(ls android/app/build/outputs/apk/debug/*.apk | head -n 1)" CLAWBYTE.apk
+          sha=$(git rev-parse --short=8 HEAD)
+          notes="CLAWBYTE for Android, built from ${sha} on $(date -u '+%Y-%m-%d %H:%M') UTC. Download CLAWBYTE.apk, open it, and allow installing from this source when Android asks. This file is replaced every time the game is published, so the same link is always the newest build."
+          if gh release view android-latest >/dev/null 2>&1; then
+            gh release upload android-latest CLAWBYTE.apk --clobber
+            gh release edit android-latest --notes "$notes"
           else
-            gh release create android-latest --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" --title "CLAWBYTE for Android — latest build" --notes "$NOTES"
+            gh release create android-latest CLAWBYTE.apk --target "$GITHUB_SHA" --latest=false \
+              --title "CLAWBYTE for Android (always the newest build)" --notes "$notes"
           fi
-          gh release upload android-latest CLAWBYTE.apk --repo "$GITHUB_REPOSITORY" --clobber
+          ls -lh CLAWBYTE.apk

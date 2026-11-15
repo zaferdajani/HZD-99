@@ -99,16 +99,19 @@ const PANEL_SEQ = [
       { ref: 'game: letter', src: PANEL_GAME('letter'), crop: PG_FULL, cap: 'pc_l_tag', move: 'in', focus: [0.3, 0.45] },
       { ref: 'game: l_song', src: PANEL_GAME('l_song'), crop: [0, 0, 1600, 893], cap: 'pc_l_song', move: 'in', focus: [0.35, 0.45] },
       { ref: 'game: l_marble', src: PANEL_GAME('l_marble'), crop: [0, 0, 1600, 893], cap: 'pc_l_marble', move: 'in', focus: [0.5, 0.45] },
-      { ref: 'game: l_cell', src: PANEL_GAME('l_cell'), crop: [0, 0, 1600, 893], cap: 'pc_l_cell', move: 'in', focus: [0.6, 0.65] },
+      { ref: 'game: l_cell', src: PANEL_GAME('l_cell'), crop: [0, 0, 1600, 893], cap: 'pc_l_cell', move: 'in', focus: [0.55, 0.7] },
       { ref: 'game: letter', src: PANEL_GAME('letter'), crop: PG_FULL, cap: 'pc_l_hope', move: 'out', focus: [0.55, 0.45] },
     ] },
-  // the drawer, after she has opened it: his battery, where he said
+  // the TOOLBOX on the floor, after she has opened it: his battery, where he
+  // said. (The sequence keeps the id 'drawer' — it is a save key, G.save.panels
+  // — but the picture was wrong: it had her at a waist-high drawer, and the
+  // battery is in the toolbox on the den floor. Owner, 2026-11-15.)
   { id: 'drawer', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
-    event: "his battery taken from the drawer (ratchetCell in hand), before the repair",
+    event: "his battery taken from the toolbox on the den floor (ratchetCell in hand), before the repair",
     when: f => !!f.opNote && !f.ratchetRepaired && typeof invCount === 'function' && invCount('ratchetCell') > 0,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet'] || f.pl_cshard || f.crystal),
     panels: [
-      { ref: 'game: drawer', src: PANEL_GAME('drawer'), crop: PG_FULL, cap: 'pc_drawer', move: 'in', focus: [0.35, 0.6] },
+      { ref: 'game: toolbox', src: PANEL_GAME('toolbox'), crop: PG_FULL, cap: 'pc_drawer', move: 'in', focus: [0.35, 0.6] },
     ] },
   // AFTER the board: him waking, and what he tells her. (The letter and the
   // drawer used to play here, after the repair — the story told backwards.)

@@ -2777,7 +2777,7 @@ function doInteract(s) {
     else if (s.extra.indexOf('it:') === 0) {
       // an inventory item kept in a chest — the booth's spare power cell
       // ...his own cell while he is dark; once he is awake (an older save
-      // woke him with another cell) the drawer holds an ordinary spare
+      // woke him with another cell) the toolbox holds an ordinary spare
       const it = !isHero() && G.save.storyVersion >= 2 && G.roomId === 'A0B' && s.extra === 'it:batt'
         && !G.save.flags['on_A0B|ratchet'] ? 'ratchetCell' : s.extra.slice(3);
       invAdd(it);
@@ -9590,6 +9590,95 @@ function workTablePlate() {
   WORK_TABLE = cv;
   return cv;
 }
+// THE TOOLBOX (owner, 2026-11-15). "The hero is looking in the drawers for the
+// battery when it's actually in the toolbox down" — and then: "improve the art
+// of the toolbox to make it show uniquely on the ground when I enter the room.
+// Make it shiny ... to blend with the ground, but in a unique way to direct the
+// player there." And: "differentiate between a toolbox and working station" —
+// the work table is his station, on his right; THIS is a small red box on the
+// floor on his left, and nothing about it borrows from the table.
+//
+// The box is a Higgsfield plate (structures are not ours to draw). What is
+// ours is the light, and the light is the story: his battery is shut inside
+// with the lid a finger ajar, so the box leaks the battery's own cyan onto the
+// floorboards. That is what "blends with the ground in a unique way" — the
+// only cyan in a room of amber and rust, lying ON the floor rather than
+// floating over it — and it goes out the moment she takes the battery, which
+// is how the room says "done here".
+//   - a pool of cyan on the floor, breathing;
+//   - the seam itself, breathing with it;
+//   - a glint on the brass, the first one half a second after she walks in;
+//   - a mote now and then, rising from the seam.
+// Two plates, one box: they share a width, a right edge and a floor line, so
+// they are drawn BY WIDTH (drawPlateAnchored normalises height, and would grow
+// the box when its lid stands up).
+const DEN_TOOLBOX_W = 60, DEN_TOOLBOX_SEAM = 0.30, DEN_TOOLBOX_GLINT = 3.4;
+function denToolbox(s) {
+  return !!s && s.type === 'chest' && s.extra === 'it:batt' && G.roomId === 'A0B' && !(typeof isHero === 'function' && isHero());
+}
+function denToolboxBase(s) {
+  // on the floor she walks on: the same heightfield the table's legs stand on
+  let base = s.y + s.h;
+  if (typeof groundColumnAt === 'function') { const q = groundColumnAt(s.x + s.w / 2); if (q && q[1] >= base - 1) base = Math.min(base, q[0]); }
+  return base + 1;
+}
+function drawDenToolbox(c, s) {
+  if (!denToolbox(s)) return false;
+  let key = s.opened ? 'denToolboxOpen' : 'denToolbox';
+  // both plates are asked for from the first frame: the open one must already
+  // be decoded when the lid goes up, or the box would blink into the stand-in
+  // chest for the frames it takes to arrive
+  if (typeof mediaFetch === 'function') { mediaFetch('denToolbox'); mediaFetch('denToolboxOpen'); }
+  let im = typeof softArt === 'function' ? softArt(key) : null;
+  // ...and if it still is not here, the shut box with its light out is the
+  // honest picture, not a different chest
+  if ((!im || !im.naturalWidth) && s.opened) { key = 'denToolbox'; im = softArt(key); }
+  if (!im || !im.naturalWidth) return false;
+  const W = DEN_TOOLBOX_W, H = W * im.naturalHeight / im.naturalWidth;
+  const cx = s.x + s.w / 2, base = denToolboxBase(s), x0 = cx - W / 2, y0 = base - H;
+  const lit = !s.opened && !G.artProbe, now = performance.now() / 1000;
+  const pu = 0.5 + 0.5 * Math.sin(now * 2.4);
+  if (typeof contactShadow === 'function') contactShadow(c, cx, base, W * 0.62, 0.5);
+  if (lit) {
+    c.save(); c.globalCompositeOperation = 'lighter';
+    const g = c.createRadialGradient(cx, base, 2, cx, base, W * 1.7);
+    g.addColorStop(0, 'rgba(120,240,255,' + (0.20 + 0.14 * pu).toFixed(3) + ')');
+    g.addColorStop(0.5, 'rgba(120,240,255,' + (0.07 + 0.05 * pu).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(120,240,255,0)');
+    c.fillStyle = g; c.beginPath(); c.ellipse(cx, base, W * 1.7, W * 0.36, 0, 0, 7); c.fill();
+    c.restore();
+  }
+  c.drawImage(im, x0, y0, W, H);
+  G.denToolboxDrawn = { key, x: x0, y: y0, w: W, h: H, base, lit };
+  if (!lit) return true;
+  // the seam: the painted line of light, made to breathe
+  const sy = y0 + H * DEN_TOOLBOX_SEAM;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.translate(cx, sy); c.rotate(-0.045); c.scale(1, 0.16);
+  const sg = c.createRadialGradient(0, 0, 1, 0, 0, W * 0.56);
+  sg.addColorStop(0, 'rgba(150,250,255,' + (0.30 + 0.34 * pu).toFixed(3) + ')');
+  sg.addColorStop(1, 'rgba(150,250,255,0)');
+  c.fillStyle = sg; c.beginPath(); c.arc(0, 0, W * 0.56, 0, 7); c.fill();
+  c.restore();
+  // the glint: brass catching the lamp. The first comes half a second after the
+  // room is first drawn, so walking in is what sets it off; then it alternates
+  // between the lid's ridge and the right-hand latch.
+  if (s._gl0 == null) s._gl0 = now - (DEN_TOOLBOX_GLINT - 0.5);
+  const gt = now - s._gl0, n = Math.floor(gt / DEN_TOOLBOX_GLINT), ph = (gt - n * DEN_TOOLBOX_GLINT) / 0.6;
+  if (n >= 1 && ph < 1) {
+    const k = Math.sin(ph * Math.PI), r = 8.5 * k;
+    const gx = x0 + W * (n % 2 ? 0.20 : 0.86), gy = y0 + H * (n % 2 ? 0.13 : 0.38);
+    c.save(); c.translate(gx, gy); c.rotate(0.3 + ph * 0.8); c.globalCompositeOperation = 'lighter';
+    c.strokeStyle = 'rgba(255,250,224,' + k.toFixed(3) + ')'; c.lineWidth = 1.3; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-r, 0); c.lineTo(r, 0); c.moveTo(0, -r); c.lineTo(0, r); c.stroke();
+    c.lineWidth = 0.8; c.beginPath(); c.moveTo(-r * 0.45, -r * 0.45); c.lineTo(r * 0.45, r * 0.45); c.moveTo(r * 0.45, -r * 0.45); c.lineTo(-r * 0.45, r * 0.45); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,' + k.toFixed(3) + ')'; c.beginPath(); c.arc(0, 0, 1.7 * k, 0, 7); c.fill();
+    c.restore();
+  }
+  if (G.state === 'PLAY' && typeof addPart === 'function' && chance(0.035))
+    addPart(cx + rnd(-W * 0.36, W * 0.36), sy + rnd(-1, 2), rnd(-5, 5), rnd(-24, -12), 0.9, '#8ff6ff', 1.6, -8, true);
+  return true;
+}
 // the per-zone mapping the §2f wiring note asks for: which fired doorway
 // stands at a depth door in each kingdom. W is absent on purpose — the CITY
 // gate is the procedural monument and gate_city.jpg, the one epic gate.
@@ -12495,6 +12584,8 @@ function drawStatics(P) {
       c.beginPath(); c.arc(s.x + 2, s.y + s.h - 18, 4, 0, 7); c.stroke();
       c.beginPath(); c.arc(s.x + s.w - 2, s.y + s.h - 18, 4, 0, 7); c.stroke();
       if (chance(charging ? 0.4 : 0.04)) addPart(mx + rnd(-15, 15), s.y + rnd(6, 34), rnd(-20, 20), rnd(-35, 5), 0.25, '#8ff6ff', 2, 0, true);
+    } else if (s.type === 'chest' && typeof drawDenToolbox === 'function' && drawDenToolbox(c, s)) {
+      // the den's toolbox: its own plate and its own light (drawDenToolbox)
     } else if (s.type === 'chest') {
       c.fillStyle = '#4a3b22'; rr(c, s.x, s.y + 8, s.w, s.h - 8, 4); c.fill();
       c.fillStyle = s.opened ? '#2c2417' : '#6b5630';
@@ -14452,7 +14543,11 @@ function drawLights(P) {
     if (s.type === 'pillar') lightAt(s.x + s.w / 2, s.y + s.h * 0.4, 210, '#cfe8ff', 0.5);
     if (s.type === 'bench') lightAt(s.x + s.w / 2, s.y, 80, '#aef7d8', 0.22);
     else if (s.type === 'mod') lightAt(s.x + 12, s.y + 12, 90, P.glow, 0.4);
-    else if (s.type === 'chest' && !s.opened) lightAt(s.x + s.w / 2, s.y + 10, 55, '#ffd76a', 0.28);
+    else if (s.type === 'chest' && !s.opened) {
+      // his toolbox lights the floor with the battery's cyan, and further than a chest's latch does
+      if (typeof denToolbox === 'function' && denToolbox(s)) lightAt(s.x + s.w / 2, s.y + 12, 100, '#8ff6ff', 0.42);
+      else lightAt(s.x + s.w / 2, s.y + 10, 55, '#ffd76a', 0.28);
+    }
   }
   if (G.boss && !G.boss.dead) lightAt(G.boss.cx(), G.boss.cy(), 180, P.glow, 0.16);
   for (const p of G.pickups) if (p instanceof Scrap) lightAt(p.x + 5, p.y + 5, 26, '#ffd76a', 0.3);
