@@ -9,12 +9,16 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['ios/**', 'capacitor.config.json', 'package*.json', 'tools/pack-www.cjs', '.github/workflows/ios.yml']
+    # (the game's own files too, since 2026-11-15: the public .ipa below is only
+    # "the newest build" if it is rebuilt when the game is)
+    paths: ['index.html', 'js/**', 'assets/**', 'ios/**', 'capacitor.config.json', 'package*.json', 'tools/pack-www.cjs', '.github/workflows/ios.yml']
 
 jobs:
   ios:
     runs-on: macos-15
     timeout-minutes: 45
+    permissions:
+      contents: write          # the release below; nothing else is written
     steps:
       - uses: actions/checkout@v4
 
@@ -90,3 +94,24 @@ jobs:
           name: clawbyte-ios-unsigned
           path: CLAWBYTE-unsigned.ipa
           retention-days: 14
+
+      # A DOWNLOAD THAT NEEDS NO SIGN-IN (owner, 2026-11-15: the artifact link
+      # answered 404 in a browser that was not signed in to GitHub). The owner
+      # installs with Sideloadly, which signs an unsigned .ipa with his own Apple
+      # ID, so the file is useful as it is. Like the APK, the build of what is on
+      # main is attached to ONE rolling release whose address never changes:
+      #   https://github.com/zaferdajani/HZD-99/releases/download/ios-latest/CLAWBYTE-unsigned.ipa
+      - name: Publish the unsigned .ipa at a link that needs no GitHub account
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(git rev-parse --short=8 HEAD)
+          notes="CLAWBYTE for iOS, unsigned, built from ${sha} on $(date -u '+%Y-%m-%d %H:%M') UTC. It cannot be installed as it is: give CLAWBYTE-unsigned.ipa to Sideloadly (or sign it in Xcode), which signs it with your own Apple ID. This file is replaced every time this build runs, so the same link is always the newest one."
+          if gh release view ios-latest >/dev/null 2>&1; then
+            gh release upload ios-latest CLAWBYTE-unsigned.ipa --clobber
+            gh release edit ios-latest --notes "$notes"
+          else
+            gh release create ios-latest CLAWBYTE-unsigned.ipa --target "$GITHUB_SHA" --latest=false \
+              --title "CLAWBYTE for iOS, unsigned (for Sideloadly)" --notes "$notes"
+          fi
