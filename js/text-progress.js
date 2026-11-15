@@ -38,7 +38,7 @@ TEXT_LAYERS.push({
     pg_hub_wakes: "Behind you, at the west end of the meadow, pale dust is rising through the floor.",
     pg_goal_quarry: 'Follow the chalk arrows to the marble at the end of the cave, and free it with a Volt Burst.',
     pg_goal_return: 'Bring the marble back to Ratchet\'s workshop.',
-    pg_goal_sage: 'Free the Sage\'s keeper: the maintenance passage beside the marble quarry.',
+    pg_goal_sage: 'Free the Meadow Keeper: the maintenance passage beside the marble quarry.',
     pg_goal_chime: 'Silence CHIME: take the climb above the meadow hub.',
     pg_goal_east: 'Go east past Ratchet\'s camp, to the guardian\'s enclosure.',
     pg_goal_lion: 'Face NULLFANG, the Meadow Sage, in his enclosure east of Ratchet\'s camp, and cleanse him.',

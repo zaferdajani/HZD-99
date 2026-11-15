@@ -14,8 +14,9 @@ finds), strings: `js/text-progress.js`.
 
 ## The required road
 
-Find raw marble → return to Ratchet → forge the Purifier → cleanse the first
-Sage → learn about CHIME → silence CHIME → face and cleanse NULLFANG. Alpha is
+Find raw marble → return to Ratchet → forge the Purifier → cleanse the Meadow
+Keeper → learn about CHIME → silence CHIME → face and cleanse NULLFANG, the
+first Sage. Alpha is
 optional and outside it.
 
 | Hold | Where | How it is held (physically) | Opens on |
@@ -39,9 +40,9 @@ No vertical link anywhere leads into A4; its only exit is L.
   stone — the Deaf quarrymen's own road to the marble (terminal 20 says they
   drew them). White before the forge, pointing at the pillar; sage-blue after,
   the CV3 marks re-aimed at the maintenance passage. Hidden while she carries
-  the marble home, and after the Sage is free.
+  the marble home, and after the Keeper is free.
 - **The ward itself** is the objective made visible: three violet sheets at the
-  enclosure before the forge, two before the Sage, one before the bell, none
+  enclosure before the forge, two before the Keeper, one before the bell, none
   after.
 - `progressGoal()` returns the current chapter-one goal as an i18n key
   (`pg_goal_*`) for the objective-line HUD (OPENING workstream).
@@ -55,14 +56,14 @@ No vertical link anywhere leads into A4; its only exit is L.
 | **CV1** entry hall | A5's mouth (rubble) | one bound crawler, a second buried mouth, a chest in the climb-only pocket | **useful upgrade**: a spare core (`coresMax + 1`, refilled) | `ch_CV1_1`, `rubbleCV1B` | bound bodies left here ask to be freed after the forge |
 | **CV1B** the Seam | CV1's buried side mouth | a rest pod, a mouth onward to CV2 | **restored facility**: resting wakes the quarrymen's survey pod and charts CV1–CV3 on the map; **shortcut** past CV1's corridor | `pgSurvey`, `charted.*` | a rest point on the quarry road |
 | **CV2** the long dark | CV1 R, or CV1B's mouth | the Deaf System's founding log (terminal 5) — the sound she has followed since the meadow | **story evidence**; the lure settles | `beacon` | — |
-| **CV3** the quarry | CV2 R | the marble, shining at the end of the dark; claws glance, the Volt Burst frees it | **the sword material** (`cshard`) | `pl_cshard` | **after the forge:** the pillar is a dark cut stump with a glowing cut line; the maintenance passage beside it is built and breathes cold blue light; the marks point at it; a line says so, once (`pgCv3Back`) |
-| **GA1T** maintenance tunnel | CV3's passage (needs the forged blade) | the meadow refuge's own log (terminal 6): how the counting sage was carried under | **story evidence**; the junction (grotto west, chamber east) | — | wakes freed after the Sage |
-| **GA1** grotto | GA1T west | a rest pod and scrap | **rest before the Sage**; after NULLFANG, the **shortcut** door into his enclosure | `bossGlitch` builds the door | — |
-| **GA1D** deep chamber | GA1T east | the Meadow Sage, kneeling in the song-lock | **rescue** (cleansing, never a kill) + **revelation** (CHIME; lines adapt if the bell or lion is already done) + **visible change** (the chamber's people freed on the spot with the cure's circle; GA1–GA1T wake freed on every load) + a cell and the Sage's card; the bell's ward falls | `sageTame_GA1D`, `chimeRevealed`, `sageGift_GA1D` | calm, freed network |
-| **A11** behind CHIME's wall | A9's hollow west wall (now after the Sage) | a hidden pocket | **coin relic** | `sr_coin` | — |
+| **CV3** the quarry | CV2 R | Gravehorn owns the marble seam; the pillar stays visible but cannot reward while he stands, and only his legitimate retreat releases it; then claws glance and the Volt Burst frees the marble | **boss encounter** + **the sword material** (`cshard`) | `bossHorn`, then `pl_cshard` | **after the forge:** the pillar is a dark cut stump with a glowing cut line; the maintenance passage beside it is built and breathes cold blue light; the marks point at it; a line says so, once (`pgCv3Back`) |
+| **GA1T** maintenance tunnel | CV3's passage (needs the forged blade) | the meadow refuge's own log (terminal 6): how the counting Keeper was carried under | **story evidence**; the junction (grotto west, chamber east) | — | wakes freed after the Keeper |
+| **GA1** grotto | GA1T west | a rest pod and scrap | **rest before the Keeper**; after NULLFANG, the **shortcut** door into his enclosure | `bossGlitch` builds the door | — |
+| **GA1D** deep chamber | GA1T east | the Meadow Keeper, kneeling in the song-lock | **rescue** (cleansing, never a kill) + **revelation** (CHIME; lines adapt if the bell or lion is already done) + **visible change** (the chamber's people freed on the spot with the cure's circle; GA1–GA1T wake freed on every load) + a cell and the Keeper's card; the bell's ward falls | `sageTame_GA1D`, `chimeRevealed`, `sageGift_GA1D` | calm, freed network |
+| **A11** behind CHIME's wall | A9's hollow west wall (now after the Keeper) | a hidden pocket | **coin relic** | `sr_coin` | — |
 | **A12** cellar under the camp | A3's brittle floor | a spike pit only the dash crosses (NULLFANG's gift) | **star relic** | `sr_star` | the reason to come back with the dash |
 | **A13** under the vent climb | A6's west hollow wall | the Deaf watch log (terminal 21): they watched Servo on the gantries; his receiver was already unplugged, his cell ran dry | **story evidence** (points at Servo's cell) + coin | `sr_coin` | — |
-| **A10 / GA2 / GA2T / GA2D** the Alpha's den (optional) | A2's depth door at 0.84 (needs the blade); Ratchet's offer at the forge | the Alpha; behind it the wardens' cache: a rest pod, the wardens' route ledger (terminal 22), the Pack Sage | **the pack becomes friendly** (every wolf, everywhere) + cell + 60 scrap; the Pack Sage's mending kit + 80 scrap | `alpha`, `bossAlpha`, `sageTame_GA2D` | never required; the road A2 → A3 → A4 does not pass it |
+| **A10 / GA2 / GA2T / GA2D** the Alpha's den (optional) | A2's depth door at 0.84 (needs the blade); Ratchet's offer at the forge | the Alpha; behind it the wardens' cache: a rest pod, the wardens' route ledger (terminal 22), the Pack Keeper | **the pack becomes friendly** (every wolf, everywhere) + cell + 60 scrap; the Pack Keeper's mending kit + 80 scrap | `alpha`, `bossAlpha`, `sageTame_GA2D` | never required; the road A2 → A3 → A4 does not pass it |
 
 ### Errands remember early finds
 
@@ -77,7 +78,9 @@ not the thing anybody asked for.
 
 ### The return to the quarry is different
 
-After the forge the same road reads differently: the marks turn sage-blue and
+The first quarry visit is not a loose pickup: Gravehorn owns CV3, the marble
+pillar remains readable throughout the encounter, and the reward cannot settle
+until his authored retreat sets `bossHorn`. After the forge the same road reads differently: the marks turn sage-blue and
 lead past the stump to the lit passage, every machine she knocked down on the
 way in is still lying there bound and the room says so once
 (`pg_bound_wait`) — the blade can free them now, each with the rescue's light
@@ -85,8 +88,8 @@ and the word FREED.
 
 ## Cleansing reads as a rescue
 
-`cleanseBegin` (js/progress.js) is the one picture of a rescue, used by the
-Sage, by every freed guardian that has no film (the Alpha; any guardian whose
+`cleanseBegin` (js/progress.js) is the one picture of a rescue, used by each
+Keeper, by every freed guardian that has no film (the Alpha; any guardian whose
 film cannot play), after the purification film ends, and by every bound
 machine she cleanses: a column of clean light, three slow white rings, dark
 violet motes rising off the body and thinning out (nothing falls; there is no

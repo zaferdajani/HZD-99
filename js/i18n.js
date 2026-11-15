@@ -1456,7 +1456,7 @@ const STORY_DRAFT2_TEXT = {
   en: {
     tut_kill: 'Stop the winch', tut_kill_h: 'Dodge the arm, then strike during recovery',
     story_pack_first: 'Buy the volt pack first. It powers repair and the quarry burst.',
-    sl_ratchet_forged: 'The maintenance passage beside the marble quarry leads to the first Sage. Clear their binding before you face the guardian.',
+    sl_ratchet_forged: 'The maintenance passage beside the marble quarry leads to the Meadow Keeper. Clear their binding before you face NULLFANG, the Meadow Sage.',
 
     story_cleanse: 'Cleanse binding', story_binding: 'Recoverable — blade needed',
     story_need_blade: 'Still alive. Return with the cleansing sword.', story_rescued: 'Binding cleared. A neighbour is free.',
@@ -1478,7 +1478,7 @@ const STORY_DRAFT2_TEXT = {
   ar: {
     tut_kill: 'أوقف الرافعة', tut_kill_h: 'تفادَ الذراع واضرب أثناء توقفها',
     story_pack_first: 'اشترِ حزمة الطاقة أولاً. إنها تشغّل الإصلاح ودفعة المحجر.',
-    sl_ratchet_forged: 'ممرّ الصيانة بجانب محجر الرخام يقود إلى الحكيم الأول. حرّره من القيد قبل مواجهة الحارس.',
+    sl_ratchet_forged: 'ممرّ الصيانة بجانب محجر الرخام يقود إلى حارس المروج. حرّره من القيد قبل مواجهة نَلفانغ، حكيم المروج.',
 
     story_cleanse: 'طهّر القيد', story_binding: 'يمكن إنقاذه — تحتاج إلى السيف',
     story_need_blade: 'ما زال حيّاً. عُد بسيف التطهير.', story_rescued: 'انكسر القيد. صار الجار حرّاً.',
