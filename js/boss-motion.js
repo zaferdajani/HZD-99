@@ -12,17 +12,41 @@ function bossOwnsGroundMotion(b){return ['glitch','alpha','atlas','prism','horn'
 // step is collision-aware and will not walk it off the ledge it stands on:
 // 21 px for a claw, 30 for a finisher, 43 for a charged blow (speed / 7), half
 // that for the two that weigh most.
+// EVERY GUARDIAN, AND EVERY ONE OF THE EYE'S THINGS (owner, 2026-11-15: "apply
+// the same ... hit feel to all bosses"). Measured across all thirteen fights
+// (45 s each on seeded dice, a blow every 40 frames): the flash and the scrap
+// already answered every blow on every boss, but the STEP did not — never on
+// the three that fly, and not in the openings that carry a name of their own:
+// GRAVEHORN hornless and stunned (his two longest openings), THE ALPHA turning
+// round after a leap. So:
+//   - a state is steppable if it is one of the shared standing names OR one of
+//     that boss's own openings, listed here beside the fight it belongs to;
+//   - a flier recoils in the AIR — the same shove, no feet and no ledge to mind,
+//     and its own hover brings it back;
+//   - MOTHER-V is the room's core: she shudders 40% of a step and no more.
+// A wind-up or a strike is still never moved, on any of them.
+const BOSS_OPEN_STATES=/^(idle|stalk|run|rest|recover|daze|walk)$/;
+const BOSS_OPEN_OWN={
+  alpha:/^(turn)$/,
+  horn:/^(hornless|stunned|tossrecover|kickrecover)$/,
+  brood:/^(restlow)$/,
+};
+const BOSS_KICK_WEIGHT={horn:.5,atlas:.5,mother:.4};
+// (the Eye's chime hangs from a cable, its carrier is a drone, its moth flies and
+// its lens floats: with nothing under them the ledge rule refused three steps
+// in four. Only the lattice grows on the floor.)
+function bossFlies(b){return b.kind==='brood'||b.kind==='zero'||b.kind==='mother'||b.kind==='chime'||b.kind==='carrier'||b.kind==='moth'||b.kind==='lens';}
 function bossKickable(b){
   if(!b||b.dead||b.purified||b.meet||(b.stagT||0)>0&&b.st!=='daze')return false;
-  if(['brood','zero','mother'].includes(b.kind))return false;        // flyers and the core have no feet to step with
   // (the state is the test for "on its feet": gravity leaves a standing body's
   // vy anywhere from 0 to a frame's worth of fall, so a speed test flickers)
-  return /^(idle|stalk|run|rest|recover|daze|walk)$/.test(String(b.st||''));
+  const st=String(b.st||''),own=BOSS_OPEN_OWN[b.kind];
+  return BOSS_OPEN_STATES.test(st)||!!(own&&own.test(st));
 }
 function bossHitKick(b,away,speed){
   if(typeof isHero==='function'&&isHero())return;
   if(!bossKickable(b)||!away||!(speed>0))return;
-  b._kickV=away*speed*(b.kind==='horn'||b.kind==='atlas'?.5:1);
+  b._kickV=away*speed*(BOSS_KICK_WEIGHT[b.kind]||1);
 }
 function bossKickStep(b,dt){
   let v=b._kickV||0;if(!v)return;
@@ -30,11 +54,13 @@ function bossKickStep(b,dt){
   // It steps back the way it walks: through the real resolver, so the meadow's
   // rises and the room's walls treat a recoil exactly as they treat a prowl.
   // (A hand-rolled tile test stopped it dead at the first rise in the ground.)
-  const nx=b.x+v*dt,lead=v>0?nx+b.w:nx,tx=Math.floor(lead/TILE);
-  // ...but not off the ledge it is standing on: there must be ground somewhere
-  // from a tile above its feet to two below, where it is stepping to
-  const fr=Math.floor((b.y+b.h+2)/TILE),ground=(c2)=>c2==='#'||c2==='B'||c2==='=';
-  if(!ground(tileAt(tx,fr-1))&&!ground(tileAt(tx,fr))&&!ground(tileAt(tx,fr+1))&&!ground(tileAt(tx,fr+2))){b._kickV=0;return;}
+  if(!bossFlies(b)){
+    const nx=b.x+v*dt,lead=v>0?nx+b.w:nx,tx=Math.floor(lead/TILE);
+    // ...but not off the ledge it is standing on: there must be ground somewhere
+    // from a tile above its feet to two below, where it is stepping to
+    const fr=Math.floor((b.y+b.h+2)/TILE),ground=(c2)=>c2==='#'||c2==='B'||c2==='=';
+    if(!ground(tileAt(tx,fr-1))&&!ground(tileAt(tx,fr))&&!ground(tileAt(tx,fr+1))&&!ground(tileAt(tx,fr+2))){b._kickV=0;return;}
+  }
   const vx0=b.vx,vy0=b.vy;
   b.vx=v;b.vy=0;
   const col=moveEnt(b,dt);

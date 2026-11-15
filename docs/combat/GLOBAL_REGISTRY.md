@@ -383,3 +383,20 @@ Consequences for anyone building a room or a fight:
 - **A corridor too low to jump a machine in is a corridor she must fight through.** Do not put a body she cannot bind in one.
 - **A new kind or re-authored art needs its row**: `node tools/bodybox.cjs && node build.cjs`. The harness fails when a body no longer measures as its row.
 - **A new staging state** in which a guardian must be walked through or stood inside belongs in `bodySolid`'s list, or the scene will shove her.
+
+## Changelog — 2026-11-15 (owner: "apply the same … hit feel to all bosses")
+
+**The step back reaches every boss.** Measured across all thirteen fights (45 s each on seeded dice, a blow every 40 frames) the flash, the scrap and the clash already answered every blow, and her freeze, flash and throw already came from every boss. The STEP did not: no flier ever recoiled, GRAVEHORN did not step in his two longest openings, THE ALPHA did not step while turning after a leap, and four of the Eye's five constructs lost three steps in four to a rule about ledges they do not stand on.
+
+| | was | is |
+|---|---|---|
+| TALONHOST, GLACIERE | never stepped ("no feet") | recoil in the air; their own hover brings them back |
+| MOTHER-V | never | shudders 40% of a step |
+| GRAVEHORN | stepped in `idle`, `daze` | also `hornless`, `stunned`, `tossrecover`, `kickrecover` |
+| THE ALPHA | `rest`, `idle` | also `turn` (the opening after its leap) |
+| chime, carrier, moth, lens | refused by the ledge rule (they hang or hover) | recoil in the air |
+| any wind-up or strike, any boss | never moved | never moved |
+
+`js/boss-motion.js`: `BOSS_OPEN_STATES` (the shared standing names), `BOSS_OPEN_OWN` (each fight's own openings), `BOSS_KICK_WEIGHT`, `bossFlies`. **A new boss, or a new opening state on an old one, goes in `BOSS_OPEN_OWN`** — `tests/boss-hitfeel.cjs` fails a boss that is caught open and does not step.
+
+**Who is a sage** (asked by the owner the same day, on seeing five of these bodies together). The six guardians are the sages and are the ones purified: NULLFANG (lion), TALONHOST (eagle), FURNACE CHOIR (dragon), GLACIERE (unicorn), the Prism Prowler (crystal cat), MOTHER-V. THE ALPHA (wolf), GRAVEHORN (rhino) and the Eye's five constructs are bosses on the way, are not sages anywhere in the code (`PURIFICATION_KINDS`, `onBossDead`), and have no ending film.
