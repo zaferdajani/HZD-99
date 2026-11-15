@@ -630,6 +630,11 @@ const ALPHA_STRIP = {
   rend:{key:'alClaw',cells:12,ch:237,from:6,to:11},
   furywarn:{key:'alHowl',cells:12,ch:259,from:0,to:5},
   fury:{key:'alHowl',cells:12,ch:259,from:6,to:11},
+  // ...and what it does when it is crowded (ALPHA_WIT): the spring is its
+  // leap's own air, and the skybite is the howl's thrown-back head, snapped
+  spring:{key:'alAir',cells:6,ch:258,float:1},
+  skywarn:{key:'alHowl',cells:12,ch:259,from:0,to:5},
+  sky:{key:'alHowl',cells:12,ch:259,from:6,to:9},
 };
 const ALPHA_STRIPS = [...new Set(Object.values(ALPHA_STRIP).map(s=>s.key))];
 // Simulation owns time and resolved distance. Drawing is a pure lookup.
@@ -736,6 +741,9 @@ function alphaStep(b, dt, px, py) {
   // its waves run on whatever it is doing by now; and at half health, from
   // open time only, the fight changes (js/alphakit.js)
   if (typeof alphaRendStep === 'function') { alphaRendStep(b, dt); alphaFuryAura(b, dt); if (alphaFuryDue(b)) alphaFuryBegin(b); }
+  // ...and it answers being crowded: the spring out of a mash, the snap at the
+  // air above it (js/alphakit.js, THE KING DOES NOT STAND AND TAKE IT)
+  if (typeof alphaWitStep === 'function' && alphaWitStep(b, dt, px, py)) return alphaMove(b, dt, adist);
   const airborne = b.st === 'leap';
   if (b.st === 'rest' || b.st === 'idle') b.face = Math.sign(dist) || b.face;
 
@@ -759,6 +767,11 @@ function alphaStep(b, dt, px, py) {
       // what a predator circling something actually does.
       b.band = ((b.band == null ? -1 : b.band) + 1) % 3;
       b.fired = false; b._tellDur = 0;
+      // IT OPENS BY CALLING THEM. The first thing the king does in its own den
+      // is put its head back — the fight used to open on a claw from wherever
+      // the rotation happened to start, and a player who ended it quickly
+      // never heard the howl at all.
+      if (!b.called) { b.called = 1; b.band = 2; b.st = 'broodcall'; b.t = TELL_HEAVY; return alphaMove(b, dt, adist); }
       const packRoom = G.enemies.filter(e => !e.dead && isWolf(e)).length < ALPHA_KIT.packMax;
       // It walks to the band first — but only for so long. She moves faster
       // than it does, so "wait until you are in range" is a condition she can
@@ -905,6 +918,9 @@ function alphaStep(b, dt, px, py) {
       cam.shake = Math.max(cam.shake, 5); sfx('boom');
       burst(b.cx(), b.y + b.h, 14, '#c8925c', 200, 0.5, 320, 3);
       if (typeof alphaLeapLanded === 'function') alphaLeapLanded(b);
+      // IN FURY IT COMES AGAIN (alphaChain): the spin — the opening — is after
+      // the last pounce of three, not the first
+      if (typeof alphaChain === 'function') alphaChain(b, px);
     } else if (b.t <= 0) { b.st = 'turn'; b.t = 0.42; }
   } else if (b.st === 'recoil') {
     if (b.on && b.vy >= 0) { b.vx *= Math.pow(0.02, dt); if (b.t > 0.3) b.t = 0.3; }
@@ -971,8 +987,8 @@ function alphaMove(b, dt, adist) {
               || b.st === 'roarwarn' || b.st === 'roar' || b.st === 'turn'
               || b.st === 'clinch' || b.st === 'shake'
               || /warn$/.test(b.st) || b.st === 'claw' || b.st === 'bite'
-              || b.st === 'rend' || b.st === 'fury';
-  if (b.st !== 'leap' && b.st !== 'recoil' && !rooted) {
+              || b.st === 'rend' || b.st === 'fury' || b.st === 'sky';
+  if (b.st !== 'leap' && b.st !== 'recoil' && b.st !== 'spring' && !rooted) {
     const tgt = b.band === 0 ? ALPHA_KIT.close * 0.55
               : b.band === 1 ? (ALPHA_KIT.close + ALPHA_KIT.near) * 0.5
               : ALPHA_KIT.near * 1.25;

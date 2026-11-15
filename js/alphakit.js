@@ -96,6 +96,8 @@ function alphaFuryFire(b, px, py) {
     }
   }
   burst(cx, b.cy(), 26, ALPHA_RED, 360, 0.7, -60, 3, true);
+  // ...and the pack answers it: whoever is left comes in on the roar
+  if (typeof alphaSummon === 'function') alphaSummon(b);
 }
 // what the fury looks like for the rest of the fight: embers off its back,
 // and the ghosts of where it has just been whenever it moves fast
@@ -165,9 +167,148 @@ function alphaRendStep(b, dt) {
   }
 }
 
+// ---- THE KING DOES NOT STAND AND TAKE IT -------------------------------------
+// (owner, 2026-11-15, having beaten it: "defeating them while the alpha was
+// super easy. There was no challenge... no attacks, super attacks, special
+// attacks, movements, jumping around, howling... there was no skill testing at
+// all.")
+//
+// Measured before any of this (tests/boss-skill.cjs keeps the bots): a player
+// who walked up and pressed ATTACK twelve times a second, never once moving out
+// of the way, killed it in 8.5 SECONDS and lost three cores — it got one claw,
+// one leap and its fury out and was dead, so the rend, the howl and the roar
+// were never seen at all. And a player who jumped on its back and struck DOWN
+// over and over took 20 seconds and was never touched: nothing it owned
+// reached the air above it. Everything he said was true.
+//
+// The kit was not the problem; being allowed to finish it was. So:
+//
+//   HIDE     a blow thrown INTO its wind-up or its strike turns on its hide
+//            and lands at two fifths. The rests, the missed leap's spin and the
+//            stagger are untouched — that is where the damage is, which is the
+//            whole of "skill testing": hit it THEN.
+//   SPRING   it will not be stood next to and mashed. The fourth blow of one
+//            opening (the third, in fury) and it is gone — a spring back out of
+//            reach, or a VAULT clean over her when its back is to a wall — and
+//            what it lands into is a counter: the rend or the leap, announced.
+//   SKYBITE  the answer to the air above it. Bounce off its back, or hang over
+//            it, and it throws its muzzle up (0.3 s, named *warn*, so it wears
+//            the amber and the warning) and snaps the air over its spine.
+//            Strike down ONCE and drift off it: that is a hit she earned.
+//   CHAIN    in fury a missed leap is not the end of it: it lands, coils short
+//            and comes again — three pounces, each landing painted on the
+//            floor before it leaves. The opening is after the LAST.
+//   PACK     it opens the fight by calling them, and calls again as it burns.
+//
+// Nothing here is unannounced, and every one of them ends in a rest.
+const ALPHA_WIT = {
+  hide: 0.4,
+  evadeAt: 4, evadeAtFury: 3, evadeCD: 1.5,
+  springV: 470, springUp: 270, vaultV: 440, vaultUp: 540, springGrace: 0.24,
+  skyTell: 0.30, skyLive: 0.24, skyReach: 150, skyDwell: 0.30, skyPlunged: 0.7,
+  chain: 2, chainTell: 0.32,
+};
+function alphaOpen(b) { return b.st === 'rest' || b.st === 'idle' || b.st === 'turn' || (b.stagT || 0) > 0; }
+// asked once a step, before the machine: keeps the hide current, and takes the
+// state when the spring or the skybite is due. True when it took it.
+function alphaWitStep(b, dt, px, py) {
+  if (!b.onStruck) b.onStruck = () => { b.struckN = ((b.struckT || 0) > 0 ? (b.struckN || 0) : 0) + 1; b.struckT = 1.1; };
+  if ((b.struckT || 0) > 0) b.struckT -= dt;
+  if ((b.evadeCD || 0) > 0) b.evadeCD -= dt;
+  if ((b.evadeT || 0) > 0) b.evadeT -= dt;
+  if ((b.plungedT || 0) > 0) b.plungedT -= dt;
+  const open = alphaOpen(b);
+  // held in its jaws she cannot swing; a kick-off it has landed from is a rest
+  b.hideK = (b.evadeT || 0) > 0 ? 0 : (open || b.st === 'recoil') ? 1 : ALPHA_WIT.hide;
+  if (!alphaLive(b) || !player || player.dead || !open || (b.stagT || 0) > 0 || b.on === false) { b.overT = 0; return false; }
+  // ---- the air above it ----
+  const over = !player.on && Math.abs(px - b.cx()) < b.w * 0.55 && player.y + player.h < b.y + 10;
+  b.overT = over ? (b.overT || 0) + dt : 0;
+  if ((b.plungedT || 0) > 0 || b.overT >= ALPHA_WIT.skyDwell) {
+    b.plungedT = 0; b.overT = 0;
+    b.st = 'skywarn'; b.t = ALPHA_WIT.skyTell; b.windT = ALPHA_WIT.skyTell; b.fired = false; b.skyHit = false; b.vx = 0;
+    if (typeof sfx === 'function') sfx('alpha_rendwarn');
+    return true;
+  }
+  // ---- being mashed ----
+  if ((b.struckN || 0) >= (b.fury ? ALPHA_WIT.evadeAtFury : ALPHA_WIT.evadeAt) && (b.evadeCD || 0) <= 0) {
+    const away = -(Math.sign(px - b.cx()) || b.face || 1), W = G.roomDef.w * TILE;
+    const cornered = away < 0 ? b.x < TILE * 5 : b.x + b.w > W - TILE * 5;
+    b.struckN = 0; b.evadeCD = ALPHA_WIT.evadeCD; b.evadeT = ALPHA_WIT.springGrace;
+    b.st = 'spring'; b.t = 0.9; b.springAir = 0;
+    if (cornered) { b.vx = -away * ALPHA_WIT.vaultV; b.vy = -ALPHA_WIT.vaultUp; b.face = -away; }
+    else { b.vx = away * ALPHA_WIT.springV; b.vy = -ALPHA_WIT.springUp; }
+    b.on = false;
+    if (typeof sfx === 'function') sfx('alpha_leap');
+    if (!G.artProbe) burst(b.cx(), alphaFloorY(b) - 4, 10, '#c8925c', 220, 0.4, 300, 2.4);
+    return true;
+  }
+  return false;
+}
+// its states, one branch of alphaSpecialStep's chain
+function alphaWitStates(b, dt, px, py) {
+  if (b.st === 'spring') {
+    b.springAir = (b.springAir || 0) + dt;
+    if ((b.on && b.vy >= 0 && b.springAir > 0.12) || b.t <= 0) {
+      // IT LANDS INTO A COUNTER, and the counter is announced like any other:
+      // along the floor or through the air, turn about
+      b.vx = 0; b.face = Math.sign(px - b.cx()) || b.face;
+      b.midAlt = !b.midAlt; b.fired = false; b._tellDur = 0;
+      if (!b.midAlt) alphaRendBegin(b);
+      else {
+        b.st = 'coil'; b.t = TELL_SWIPE;
+        if (b.fury) { b.quakeX = alphaLeapMark(b); const qy = typeof fxSurfaceY === 'function' ? fxSurfaceY(b.quakeX, b.y + b.h, 60) : NaN; b.quakeY = qy === qy ? qy : b.y + b.h; } else b.quakeX = null;
+      }
+    }
+    return true;
+  }
+  if (b.st === 'skywarn') {
+    b.windT = ALPHA_WIT.skyTell; b.vx *= Math.pow(0.02, dt);
+    if (b.t <= 0) { b.st = 'sky'; b.t = ALPHA_WIT.skyLive + 0.12; b.fired = false; b.skyHit = false; }
+    return true;
+  }
+  if (b.st === 'sky') {
+    b.vx = 0;
+    const cx = b.cx();
+    if (!b.fired) {
+      b.fired = true;
+      if (typeof sfx === 'function') sfx('slash');
+      cam.shake = Math.max(cam.shake, 5);
+      if (typeof fx === 'function') {
+        fx('pillar', cx, b.y + 8, { rx: 64, ry: ALPHA_WIT.skyReach + 30, dur: 0.3, col: b.fury ? ALPHA_RED : '#ff8a4a', hot: ALPHA_HOT, power: 1.25 });
+        fx('flash', cx, b.y - 40, { rx: 110, ry: 110, dur: 0.18, col: b.fury ? ALPHA_RED : '#ff8a4a', hot: '#ffffff' });
+      }
+      burst(cx, b.y - 20, 12, '#ffb15a', 260, 0.4, -200, 2.4, true);
+    }
+    // live for the whole snap: the air over its spine, a body and a half up
+    if (b.t > 0.12 && !b.skyHit && !player.dead && player.iT <= 0
+        && aabb({ x: cx - b.w * 0.7, y: b.y - ALPHA_WIT.skyReach, w: b.w * 1.4, h: ALPHA_WIT.skyReach + 12 }, player)) {
+      b.skyHit = true;
+      player.hurt(DF().edmg, cx, 'alpha.sky', b);
+      player.vx = (Math.sign(px - cx) || -b.face) * 320; player.vy = -240;
+      b.denied = (b.denied || 0) + 1; b.hitSince = true;
+    }
+    if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.6); }
+    return true;
+  }
+  return false;
+}
+// a fury leap that missed: does it come again? True when it has coiled again.
+function alphaChain(b, px) {
+  if (!b.fury || (b.chainN || 0) >= ALPHA_WIT.chain) { b.chainN = 0; return false; }
+  b.chainN = (b.chainN || 0) + 1;
+  b.face = Math.sign(px - b.cx()) || b.face;
+  b.st = 'coil'; b.t = ALPHA_WIT.chainTell; b.vx = 0; b.fired = false; b._tellDur = 0;
+  b.quakeX = alphaLeapMark(b);
+  const qy = typeof fxSurfaceY === 'function' ? fxSurfaceY(b.quakeX, b.y + b.h, 60) : NaN;
+  b.quakeY = qy === qy ? qy : b.y + b.h;
+  return true;
+}
+
 // ---- THE NEW STATES --------------------------------------------------------
 // One branch of alphaStep's chain. True when the state was one of these.
 function alphaSpecialStep(b, dt, px, py) {
+  if (alphaWitStates(b, dt, px, py)) return true;
   if (b.st === 'rendwarn') {
     b.windT = TELL_SWIPE;
     b.vx *= Math.pow(0.02, dt);

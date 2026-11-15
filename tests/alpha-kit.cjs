@@ -27,6 +27,10 @@ const { chromium } = require('playwright');
       const sv = newSave(1); sv.time = 99; sv.flags.tut = sv.flags.woke = 1; startGame(sv); loadRoom('A10');
       G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.gateWalk = G.bossEntry = null; G.toasts = [];
       const b = G.boss; b.meet = null; b.st = 'rest'; b.t = 0.4; b.dark = 0; b.fade = 0; G.enemies = G.enemies.filter(e => e === b);
+      // (the fight OPENS on the howl now, and it springs clear of a mash and snaps at the air above it —
+      // tests/boss-skill.cjs holds those. Here each move is asked for by name, so the opening call is
+      // marked as made and the crowd-answers are kept quiet.)
+      b.called = 1;
       const heard = [], fxs = [], rips = []; const sfxWas = sfx, fxWas = fx, srWas = shockRipple;
       sfx = (n) => { heard.push(n); }; fx = (k, x, y, o) => { fxs.push(k); return fxWas(k, x, y, o); };
       shockRipple = (x, y, o) => { rips.push(Object.assign({}, o)); return srWas(x, y, o); };
@@ -37,7 +41,7 @@ const { chromium } = require('playwright');
       const put = (dx) => { const side = (b.cx() > G.roomDef.w * TILE / 2) ? -1 : 1; player.x = b.cx() + side * dx - player.w / 2; player.y = floorY - player.h; player.vx = player.vy = 0; return side; };
       const run = (n, each) => { for (let i = 0; i < n; i++) { if (each && each(i) === false) return i; update(1 / 60); G.hitStop = 0; } return n; };
       // ask for the next move from a band: the selection itself is left to choose
-      const ask = (band, mid) => { b.st = 'rest'; b.t = 0; b.band = (band + 2) % 3; b.reposN = 0; b.denied = 0; b.midAlt = mid; b.vx = 0; };
+      const ask = (band, mid) => { b.st = 'rest'; b.t = 0; b.band = (band + 2) % 3; b.reposN = 0; b.denied = 0; b.midAlt = mid; b.vx = 0; b.struckN = 0; b.plungedT = 0; b.overT = 0; b.chainN = 9; };
     `;
 
     // ---- A. THE REND -----------------------------------------------------------

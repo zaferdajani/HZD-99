@@ -234,6 +234,17 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty, move) {
       return 0;
     }
   }
+  // A GUARDIAN'S HIDE (opt-in: the boss's own step keeps `hideK` current).
+  // 1 in its openings, a fraction while it is winding up or striking — a blow
+  // thrown INTO an attack lands, but turned — and 0 for the instant it is
+  // springing clear. It says so: pale grit off the plate instead of the hit's
+  // own gold, so a player can see which of her blows were worth throwing.
+  if (e.hideK != null && e.hideK < 1 && e.st !== 'daze' && !e.dead) {
+    if (e.hideK <= 0) { burst(x, y, 4, '#cfe0f0', 150, 0.2, 0, 2, true); return 0; }
+    dm = Math.max(1, Math.round(dm * e.hideK));
+    burst(x, y, 7, '#cfe0f0', 210, 0.26, 120, 2.2, true);
+    e.turnedT = 0.25;
+  }
   // ARC OVERLOAD: hiding inside the lightning — nothing lands until it ends
   if ((e.stormT || 0) > 0) {
     burst(x, y, 6, '#8ff6ff', 200, 0.3, 0, 2.5, true);

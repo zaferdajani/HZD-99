@@ -2729,6 +2729,7 @@ class Player {
         burst(this.x + this.w / 2, this.y + this.h, wasFalling > 700 ? 14 : 6, '#9fb8c8', wasFalling > 700 ? 150 : 90, 0.35, 500, 2);
       }
       this.on = true; this.coyote = 0.1;
+      this.pogoN = 0;                       // the floor: the next down-strike is whole again
       this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
     } else { this.on = false; this.coyote -= dt; }
     const contact = Math.floor((this.stridePh || 0) / 2);
@@ -2821,8 +2822,19 @@ class Player {
           const aid = this.swing.combo === 2 ? 'finisher' : 'slash';
           let dm = this.attackDmg(aid, { clawT: this.clawT, wield: this.swing.wield, pure: this.swing.pure,
                                          target: e, x: hb.x + hb.w / 2, y: hb.y + hb.h / 2 });
+          // BOUNCING ON A GUARDIAN IS NOT A PLAN (owner, 2026-11-15: "hitting
+          // the rhino downward with a hit constantly is an easy hack to beat it,
+          // which should not happen"). Measured on the Alpha: twenty-odd
+          // down-strikes off its back, never touched, dead. The first one is
+          // the move and lands whole. Each one after it without her feet
+          // finding the floor is worth less (POGO_FADE) — and the guardian is
+          // told it was struck from above (plungedT), which is what its own
+          // answer to the air reads.
+          const bounce = this.swing.ay > 0.5 && e instanceof Boss;
+          if (bounce) dm = Math.max(1, Math.round(dm * POGO_FADE[Math.min(this.pogoN || 0, POGO_FADE.length - 1)]));
           dm = dealDmg(e, dm, armEl(), hb.x + hb.w / 2, hb.y + hb.h / 2, true, aid);
           if (dm <= 0) continue;
+          if (bounce) { this.pogoN = (this.pogoN || 0) + 1; e.plungedT = 0.7; }
           if (attackKnock(e, aid, kx, ky)) {
             // RISECUT: the up-slash becomes a LAUNCHER (Lost Crown's juggle
             // grammar). The enemy goes up far enough to meet an air chain,
@@ -11394,7 +11406,7 @@ const BSTAT = Object.assign({
   // it is a quadruped that fights along the floor, and its reach is the length
   // of it. 300 HP puts it just above the first guardian's 220 while she still
   // has no dash, which is where the fight wants to sit — losable, not long.
-  alpha: { w: 104, h: 58, hp: 300, zone: 'A' },
+  alpha: { w: 104, h: 58, hp: 440, zone: 'A' },      // (300 until 2026-11-15: measured dead in 8.5 s to a player who never moved)
   // GRAVEHORN (js/gravehorn.js), the Eye's rhino on the raw marble. The box is
   // the barrel and the legs under it; his head and horns are measured off the
   // rig (ghBoxes), because a 243 px animal is not a rectangle. 220 per phase
@@ -12132,6 +12144,9 @@ function drawBossHold(c, b) {
 // for the player this game is built for. Hornet, in Hollow Knight, telegraphs
 // between 0.5 and 0.66 s — these are the same numbers arrived at twice.
 const TELL_SWIPE = 0.5, TELL_FAST = 0.35, TELL_HEAVY = 0.7;
+// what each successive down-strike off a guardian's back is worth, until her
+// feet find the floor again (Player.update, the swing)
+const POGO_FADE = [1, 0.55, 0.3];
 // Every state whose whole job is to say "this is coming". The cue fires when
 // the state is ENTERED, centrally, so a new attack cannot be written without
 // one — which is exactly how the old swipe ended up with its sound on the hit
