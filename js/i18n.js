@@ -1458,7 +1458,7 @@ const STORY_DRAFT2_TEXT = {
     story_pack_first: 'Buy the volt pack first. It powers repair and the quarry burst.',
     sl_ratchet_forged: 'The maintenance passage beside the marble quarry leads to the first Sage. Clear their binding before you face the guardian.',
 
-    story_cleanse: 'Cleanse binding', story_binding: 'Recoverable — blade needed',
+    story_cleanse: '{INT} — Cleanse binding', story_binding: 'Recoverable — blade needed',
     story_need_blade: 'Still alive. Return with the cleansing sword.', story_rescued: 'Binding cleared. A neighbour is free.',
     story_winch_clean: 'Control cleared. The yard winch is safe.',
     i_ratchetCell: "Ratchet's battery", i_ratchetCelld: 'His own battery, hidden in the workshop toolbox. Return it to his empty socket.',
@@ -1480,7 +1480,7 @@ const STORY_DRAFT2_TEXT = {
     story_pack_first: 'اشترِ حزمة الطاقة أولاً. إنها تشغّل الإصلاح ودفعة المحجر.',
     sl_ratchet_forged: 'ممرّ الصيانة بجانب محجر الرخام يقود إلى الحكيم الأول. حرّره من القيد قبل مواجهة الحارس.',
 
-    story_cleanse: 'طهّر القيد', story_binding: 'يمكن إنقاذه — تحتاج إلى السيف',
+    story_cleanse: '{INT} — طهّر القيد', story_binding: 'يمكن إنقاذه — تحتاج إلى السيف',
     story_need_blade: 'ما زال حيّاً. عُد بسيف التطهير.', story_rescued: 'انكسر القيد. صار الجار حرّاً.',
     story_winch_clean: 'تم تطهير وحدة التحكم. رافعة الساحة آمنة.',
     i_ratchetCell: 'بطارية راتشيت', i_ratchetCelld: 'بطاريته التي أخفاها في صندوق عُدّة الورشة. أعدها إلى موضعها الفارغ.',

@@ -2412,7 +2412,7 @@ function findNear() {
     const dx = player.x + player.w / 2 - e.x - e.w / 2;
     const dy = player.y + player.h / 2 - e.y - e.h / 2;
     const d = dx * dx + dy * dy;
-    if (Math.abs(dx) < 46 && Math.abs(dy) < 60 && d < bestD) {
+    if (Math.abs(dx) < rescueReach(e) && Math.abs(dy) < 60 && d < bestD) {
       bestD = d; best = { type: 'rescue', target: e, x: e.x, y: e.y, w: e.w, h: e.h };
     }
   }
@@ -9406,8 +9406,8 @@ const GATE_ROOM = {
   V1B: { at: 0.12, to: 'V1',  ax: 0.75, style: 'kerf' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.23, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
-  A2: { at: 0.84, to: 'A10', ax: 0.12 },
-  A10: [{ at: 0.12, to: 'A2', ax: 0.84 }, { at: 0.23, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' }],
+  A2: { at: 0.84, to: 'A10', ax: 0.12, style: 'den' },      // the Wolf King's den: a mouth in rock (drawGateDoor)
+  A10: [{ at: 0.12, to: 'A2', ax: 0.84, style: 'den' }, { at: 0.23, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' }],
   B4:  { at: 0.62, to: 'GB1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossBrood' },
   C3:  { at: 0.31, to: 'GC1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossAtlas' },
   D3:  { at: 0.62, to: 'GD1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossZero' },
@@ -11279,6 +11279,55 @@ function gateDoorNear(def) {
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
   return !!((G.roomDef && G.roomDef.cave) || (dest && dest.cave));   // and cave mouths
 }
+// A DOOR SAYS IT IS A DOOR (owner, 2026-11-15: "the doors that open in the
+// background... it's faded in the background, does not show as a unique
+// characteristics, unique object. So it's hard to find and hard to recognize in
+// the beginning as a new player that this is a door I need to go through").
+//
+// A depth door is a painting of an opening standing in a painting of a wall.
+// What it never had is the one thing every other interactable in the game has:
+// a mark that is the same on all of them. So every door that exists right now
+// wears the same three things, in light, in the cast's own plane:
+//   - its OUTLINE — two jambs and an arch — drawn round the opening;
+//   - a pool of that light on the floor in front of it;
+//   - two chevrons over it, pointing up, because UP is what walks her in.
+// Pale blue for a door; amber for one still buried; and GOLD for the door the
+// errand she was given goes through (pgRouteDoor, js/progress.js). Light only —
+// the structure itself stays the fired plate's job.
+function drawDoorSigns() {
+  if (!player || G.state !== 'PLAY' || G.artProbe || G.structProbe || G.gateWalk || G.cut || G.dialog || G.trans) return;
+  let list = [];
+  try { list = gateDoors(); } catch (e) { return; }
+  if (!list.length) return;
+  const route = typeof pgRouteDoor === 'function' ? pgRouteDoor() : null;
+  const now = performance.now();
+  let drawn = 0;
+  for (const d of list) {
+    const wx = gateWorldX(d);
+    if (Math.abs(wx - (cam.x + 480)) > 760) continue;
+    const gc = typeof groundColumnAt === 'function' ? groundColumnAt(wx) : null;
+    const wy = gc && gc.length ? Math.min.apply(null, gc) : (G.roomDef.h - 2) * TILE;
+    const buried = !!(typeof rubbleFor === 'function' && rubbleFor(d));
+    const goal = !!route && route.to === d.to;       // (a door table row is rebuilt on every read: the destination is its name)
+    const pu = 0.5 + 0.5 * Math.sin(now / 420 + wx * 0.011);
+    const col = goal ? '255,215,106' : buried ? '255,186,116' : '176,236,255';
+    const HW = 44, HT = 116, k0 = buried ? 0.55 : 1;
+    c.save();
+    c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
+    const tg = c.createRadialGradient(wx, wy, 2, wx, wy, 78);
+    tg.addColorStop(0, 'rgba(' + col + ',' + ((0.30 + 0.16 * pu) * k0).toFixed(3) + ')'); tg.addColorStop(1, 'rgba(' + col + ',0)');
+    c.fillStyle = tg; c.beginPath(); c.ellipse(wx, wy, 78, 9, 0, 0, 7); c.fill();
+    const arch = () => { c.beginPath(); c.moveTo(wx - HW, wy - 3); c.lineTo(wx - HW, wy - HT + HW); c.arc(wx, wy - HT + HW, HW, Math.PI, 0); c.lineTo(wx + HW, wy - 3); };
+    c.strokeStyle = 'rgba(' + col + ',' + ((0.10 + 0.08 * pu) * k0).toFixed(3) + ')'; c.lineWidth = 10; arch(); c.stroke();
+    c.strokeStyle = 'rgba(' + col + ',' + ((0.42 + 0.26 * pu) * k0).toFixed(3) + ')'; c.lineWidth = 2.6; arch(); c.stroke();
+    const my = wy - HT - 20 - pu * 7;
+    c.strokeStyle = 'rgba(' + col + ',' + ((0.7 + 0.3 * pu) * k0).toFixed(3) + ')'; c.lineWidth = goal ? 4 : 3.2;
+    for (const o of [0, 11]) { c.beginPath(); c.moveTo(wx - 10, my + o + 8); c.lineTo(wx, my + o); c.lineTo(wx + 10, my + o + 8); c.stroke(); }
+    c.restore();
+    drawn++;
+  }
+  G.doorSigns = { n: drawn, goal: !!route };
+}
 function drawGateDoors(P, near) {
   // the measurement hook, the same shape as G.artProbe: with it set, the near
   // pass draws nothing, so a harness can photograph the room with and without
@@ -11358,6 +11407,13 @@ function drawGateDoor(P, def, nearPlane) {
     drawCaveMouth(ds, gy, P, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)));
     structBeacon(ds, gy, 200, 272, k, 1); return;
   }
+  // THE WOLF KING'S DOOR IS A DEN MOUTH (owner, 2026-11-15: "even the door that
+  // opens to the alpha was blended with the cave, so I did not see it clearly
+  // until I looked for it"). It was nothing at all: the meadow has no gate
+  // plate, so it fell through to the city monument's bones drawn at a third
+  // strength in the far plane and graded to the wall behind them. A den is a
+  // hole in rock — the kingdom's own fired mouth, in the near plane.
+  if (def.style === 'den') { drawCaveMouth(ds, gy, P, k, false); structBeacon(ds, gy, 200, 272, k, 1); return; }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
   // ...and the Oracle's shrine is HERS: same depth-door mechanics, its own
@@ -14766,6 +14822,7 @@ function drawWorldFrame() {
   // colors are still in dull faded three d instead of drawings like the
   // characters... the player might actually miss it." See gateDoorNear.
   if (typeof drawGateDoors === 'function') drawGateDoors(P, 1);
+  if (typeof drawDoorSigns === 'function') drawDoorSigns();
   drawStatics(P);
   drawSpikeMenace();
   drawBreakHint();
@@ -16726,6 +16783,7 @@ function draw(tms) {
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
   if (typeof pgHatchPointer === 'function') pgHatchPointer(c);   // the way down to the marble (js/progress.js)
+  if (typeof pgRoutePointer === 'function') pgRoutePointer(c);   // ...and the way to whatever she was asked to do
   if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
   drawHUD();

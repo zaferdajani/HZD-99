@@ -68,7 +68,7 @@
     "state": "PLAY",
     "hp": 13
   },
-  "filmFrames": 114,
+  "filmFrames": 120,
   "recovery": {
     "fallback": true,
     "done": true,

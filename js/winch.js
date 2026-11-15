@@ -150,7 +150,7 @@ class YardWinch extends Enemy {
         }
       }
       if(this.cleanseT>0) {
-        const near=player&&!player.dead&&Math.abs(player.x+player.w/2-this.x-this.w/2)<46
+        const near=player&&!player.dead&&Math.abs(player.x+player.w/2-this.x-this.w/2)<rescueReach(this)
           &&Math.abs(player.y+player.h/2-this.y-this.h/2)<60;
         if(!near||player.cores!==this.cleanseHP||G.state!=='PLAY')this.cleanseT=0;
         else {this.cleanseT-=dt;if(this.cleanseT<=0)this.finishCleanse();}

@@ -227,6 +227,119 @@ function pgHatchPointer(c) {
   G.hatchPointer = (G.hatchPointer | 0) + 1;      // counted, for the harness
 }
 
+// ---- THE WAY TO WHAT SHE WAS ASKED TO DO ------------------------------------
+// (owner, 2026-11-15: "the door for the keeper that I should go to is unclear.
+// I have no idea where that is.") The goal line names a place — "the door
+// beside the marble quarry" — to a player who is standing in the meadow three
+// rooms and a hatch away from it and has no way to know that. The hatch got a
+// pointer of its own the same morning; this is that pointer for every errand
+// of the chapter: from wherever she is, the shortest way through the rooms to
+// the goal is worked out, and the door, edge or drop she should take NEXT is
+// pointed at — a gold chevron with the distance at the edge of the frame while
+// it is out of view, a gold arrow on it once it is in view. It reads the same
+// room graph she walks (side exits, ways up and down, and every depth door
+// that has been built), so it cannot point at a door that is not there.
+function pgGoalRoom(key, f) {
+  const ratchet = () => ['A3', 'A0B'].find(id => typeof npcPlaced !== 'function' || npcPlaced(id, 'ratchet')) || 'A3';
+  switch (key) {
+    case 'pg_goal_pack': case 'pg_goal_return': return ratchet();
+    case 'pg_goal_marble': return 'A5';                    // through the hatch (pgHatchPointer marks the hatch itself)
+    case 'pg_goal_quarry': case 'pg_goal_gravehorn': return 'CV3';
+    case 'pg_goal_sage': return 'GA1D';
+    case 'pg_goal_chime': return 'A9';
+    case 'pg_goal_lion': case 'pg_goal_east': return 'A4';
+    case 'pg_goal_up': return 'B1';
+  }
+  return null;
+}
+const PG_ROUTE = { key: '', step: null };
+function pgRouteEdges(id) {
+  const out = [], def = ROOMS[id];
+  if (!def) return out;
+  const ex = def.exits || {};
+  for (const side in ex) { const v = ex[side], to = typeof v === 'object' ? v.to : v; if (to && ROOMS[to]) out.push({ to, side }); }
+  const f = (G.save && G.save.flags) || {};
+  for (const d of (typeof gateDoorsAll === 'function' ? gateDoorsAll(id) : [])) if (d && d.to && ROOMS[d.to] && (!d.need || f[d.need])) out.push({ to: d.to, gate: d });
+  return out;
+}
+// the next thing to walk through from this room, toward the goal's room
+function pgRouteStep() {
+  if (!G.save || !G.roomId || !pgRobo()) return null;
+  const goal = typeof progressGoal === 'function' ? progressGoal() : null;
+  const want = goal && pgGoalRoom(goal, G.save.flags || {});
+  const key = G.roomId + '|' + goal + '|' + want + '|' + (G.save.flags && G.save.flags.crystal ? 1 : 0) + (pgHubBroken() ? 1 : 0);
+  if (PG_ROUTE.key === key) return PG_ROUTE.step;
+  PG_ROUTE.key = key; PG_ROUTE.step = null;
+  if (!want || want === G.roomId || !ROOMS[want]) return null;
+  const first = { [G.roomId]: null }, q = [G.roomId];
+  while (q.length) {
+    const id = q.shift();
+    if (id === want) break;
+    for (const e of pgRouteEdges(id)) {
+      if (first[e.to] !== undefined) continue;
+      first[e.to] = id === G.roomId ? e : first[id];
+      q.push(e.to);
+    }
+  }
+  PG_ROUTE.step = first[want] || null;
+  if (PG_ROUTE.step) PG_ROUTE.step.goal = goal;
+  return PG_ROUTE.step;
+}
+// the depth door the route goes through, if it goes through one (drawDoorSigns)
+function pgRouteDoor() { const s = pgRouteStep(); return s && s.gate ? s.gate : null; }
+// where that step IS in this room, in world pixels: [x, y, direction]
+function pgRouteSpot(step) {
+  const W = G.roomDef.w * TILE, H = G.grid.length * TILE;
+  const floorAt = (x) => { const g = typeof groundColumnAt === 'function' ? groundColumnAt(x) : null; return g && g.length ? Math.min.apply(null, g) : (G.roomDef.h - 2) * TILE; };
+  if (step.gate) { const x = gateWorldX(step.gate); return [x, floorAt(x) - 150, 'down']; }
+  if (step.side === 'L') return [10, floorAt(40) - 40, 'left'];
+  if (step.side === 'R') return [W - 10, floorAt(W - 40) - 40, 'right'];
+  // a way up or down keeps her column: it is where the OTHER room's opening is
+  let x = W / 2;
+  try {
+    const g2 = buildRoom(step.to), row = g2[step.side === 'T' ? g2.length - 1 : 0], open = [];
+    for (let i = 0; i < row.length; i++) if (row[i] !== '#') open.push(i);
+    if (open.length && open.length < row.length - 4) x = (open[0] + open[open.length - 1] + 1) / 2 * TILE;
+  } catch (e) {}
+  return step.side === 'T' ? [x, cam.y + 30, 'up'] : [x, floorAt(x) - 8, 'down'];
+}
+function pgRoutePointer(c) {
+  if (!G.save || G.state !== 'PLAY' || !player || player.dead) return;
+  if (G.artProbe || G.dialog || G.cut || G.wake || G.bossEntry || G.gateWalk || G.meet || G.trans) return;
+  if (typeof isHero === 'function' && isHero()) return;
+  const f = G.save.flags || {};
+  if (G.tut && !f.tut) return;
+  if (typeof bossActive === 'function' && bossActive()) return;
+  const step = pgRouteStep();
+  if (!step) return;
+  // the hatch has its own marker while it is still shut (pgHatchPointer)
+  if (step.side === 'B' && G.roomId === PG_HUB.room && !pgHubBroken() && !pgHubSealed(f)) return;
+  if (step.side === 'B' && G.roomId === PG_HUB.room && pgHubSealed(f)) return;
+  let spot; try { spot = pgRouteSpot(step); } catch (e) { return; }
+  const sx = typeof worldScreenX === 'function' ? worldScreenX(spot[0]) : spot[0] - cam.x;
+  const sy = typeof worldScreenY === 'function' ? worldScreenY(spot[1]) : spot[1] - cam.y;
+  const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5, col = '#ffd76a';
+  c.save();
+  if (sx < 30 || sx > 930 || sy < 96 || sy > 516) {
+    const M = 26, ex = Math.max(M, Math.min(960 - M, sx)), ey = Math.max(M + 76, Math.min(540 - M - 60, sy));
+    const ang = Math.atan2(sy - ey, sx - ex);
+    c.globalAlpha = 0.6 + pu * 0.4; c.translate(ex, ey); c.rotate(ang);
+    c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 8;
+    c.beginPath(); c.moveTo(14 + pu * 4, 0); c.lineTo(-8, -11); c.lineTo(-3, 0); c.lineTo(-8, 11); c.closePath(); c.fill();
+    c.rotate(-ang); c.shadowBlur = 0;
+    c.font = '700 11px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'top';
+    c.fillText(Math.max(1, Math.round(Math.hypot(sx - ex, sy - ey) / TILE)) + 'm', 0, 16);
+  } else {
+    // in view: an arrow on it, pointing the way she goes through it
+    const a = spot[2] === 'left' ? Math.PI : spot[2] === 'right' ? 0 : spot[2] === 'up' ? -Math.PI / 2 : Math.PI / 2;
+    c.translate(sx, sy); c.rotate(a); c.translate(-pu * 8, 0);
+    c.globalAlpha = 0.65 + pu * 0.35; c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 10;
+    c.beginPath(); c.moveTo(16, 0); c.lineTo(-4, -12); c.lineTo(-4, -4); c.lineTo(-18, -4); c.lineTo(-18, 4); c.lineTo(-4, 4); c.lineTo(-4, 12); c.closePath(); c.fill();
+  }
+  c.restore();
+  G.routePointer = { to: step.to, gate: !!step.gate, side: step.side || null, x: Math.round(spot[0]), y: Math.round(spot[1]), n: ((G.routePointer && G.routePointer.n) | 0) + 1 };
+}
+
 // ---- WARDS ------------------------------------------------------------------
 // The song, wound tight across a way through. Drawn as layered membranes whose
 // edges are never straight (NO RIGHT ANGLES), with sound-rings crawling along

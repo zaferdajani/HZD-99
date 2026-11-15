@@ -131,6 +131,22 @@ function elemMul(atk, def) {
 // hurtbox. Movement and contact damage keep the tight box — the fight gets
 // fairer for the player, never harsher.
 // ---------------------------------------------------------------------------
+// HOW CLOSE SHE MUST STAND TO FREE A BOUND MACHINE (owner, 2026-11-15: "it's
+// unclear to me how to free the crawlers. It should be by pressing E, I think,
+// but it did not prompt it"). It was 46 px from the centre of the collision
+// box, whatever the machine — and the pack is drawn nearly twice the width of
+// its box, so a player who walked up to a bound wolf and stopped at the body
+// she could SEE was outside it, with no prompt and a key that did nothing.
+// The reach is the drawn body's half-width and a step more.
+// (the body as MEASURED off its art — assets/bodybox.json, the same table the
+// solid wall round a live one is built from — and the hurt box where a kind
+// has no measurement)
+function rescueReach(e) {
+  const hb = hurtBoxOf(e);
+  const T = (typeof window !== 'undefined' && window.BODY_BOX && !(typeof isHero === 'function' && isHero())) ? window.BODY_BOX[e.kind] : null;
+  const drawn = T && T.w === e.w ? Math.max(T.l || 0, T.r || 0) : 0;
+  return Math.min(120, Math.max(46, hb.w / 2 + 30, drawn + 22));
+}
 function hurtBoxOf(e) {
   const cx2 = e.x + e.w / 2;
   if (e.kind === 'glitch') {            // NULLFANG: long low body, bottom-anchored

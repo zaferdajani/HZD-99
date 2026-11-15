@@ -7949,7 +7949,7 @@ class Enemy {
     if (this.disabled) {
       this.vx = 0; this.vy += 900 * dt; moveEnt(this, dt);
       if (this.cleanseT > 0) {
-        const near = player && Math.abs(player.x + player.w / 2 - this.x - this.w / 2) < 46
+        const near = player && Math.abs(player.x + player.w / 2 - this.x - this.w / 2) < rescueReach(this)
           && Math.abs(player.y + player.h / 2 - this.y - this.h / 2) < 60;
         if (!near || player.dead || player.cores !== this.cleanseHP || G.state !== 'PLAY') this.cleanseT = 0;
         else {
@@ -9308,6 +9308,30 @@ class Enemy {
       if (this.rescued) c.arc(cx, this.y - 12, 5, 0, Math.PI * 2);
       else { c.moveTo(cx - 5, this.y - 9); c.lineTo(cx - 5, this.y - 17); c.lineTo(cx + 5, this.y - 17); c.lineTo(cx + 5, this.y - 9); }
       c.stroke();
+      // ONE SHE CAN FREE SAYS SO, FROM ACROSS THE ROOM. The bracket above is
+      // ten pixels of amber, and it was the only sign there was: with the
+      // blade in her paw a bound machine looked exactly as it had without it.
+      // Now it wears the blade's own light — a ring breathing on the ground
+      // round it, and a marker over it that bobs — and that is what tells her
+      // which bodies are waiting and where to stand. Light only; the words
+      // ("{INT} — Cleanse binding") come when she is in reach.
+      if (this.disabled && !(this.cleanseT > 0) && G.save && G.save.flags && G.save.flags.crystal && !(typeof isHero === 'function' && isHero())) {
+        const hb = typeof hurtBoxOf === 'function' ? hurtBoxOf(this) : this;
+        const pu = 0.5 + 0.5 * Math.sin(performance.now() / 320 + this.x * 0.013);
+        c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
+        if (!G.artProbe) {
+          c.strokeStyle = 'rgba(140,228,255,' + (0.3 + 0.4 * pu).toFixed(3) + ')'; c.lineWidth = 2.2;
+          c.beginPath(); c.ellipse(cx, this.y + this.h + 1, hb.w / 2 + 8 + pu * 5, 5 + pu * 1.5, 0, 0, 7); c.stroke();
+        }
+        const my = hb.y - 26 - pu * 6;
+        c.fillStyle = 'rgba(120,215,255,' + (0.28 + 0.2 * pu).toFixed(3) + ')';
+        c.beginPath(); c.moveTo(cx, my - 13); c.lineTo(cx + 11, my); c.lineTo(cx, my + 13); c.lineTo(cx - 11, my); c.closePath(); c.fill();
+        c.fillStyle = 'rgba(235,250,255,' + (0.75 + 0.25 * pu).toFixed(3) + ')';
+        c.beginPath(); c.moveTo(cx, my - 7); c.lineTo(cx + 6, my); c.lineTo(cx, my + 7); c.lineTo(cx - 6, my); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(200,242,255,' + (0.6 + 0.4 * pu).toFixed(3) + ')'; c.lineWidth = 2.4;
+        c.beginPath(); c.moveTo(cx - 6, my + 17); c.lineTo(cx, my + 23); c.lineTo(cx + 6, my + 17); c.stroke();
+        G.boundCue = (G.boundCue | 0) + 1;       // counted, for tests/bound-cue.cjs
+      }
       if (this.cleanseT > 0) { c.fillStyle = '#b9f3ff'; c.fillRect(cx - 12, this.y - 24, 24 * (1 - this.cleanseT / 0.65), 3); }
       c.restore();
     }
