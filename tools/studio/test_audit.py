@@ -63,6 +63,21 @@ class AuditBudgets(unittest.TestCase):
             self.assertIn('missing', audit.browser_block_reason('visual', env, root))
             self.assertIsNone(audit.browser_block_reason('contract', env, root))
 
+    def test_browser_preflight_follows_local_helper_requires(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'tests').mkdir()
+            (root / 'tools').mkdir()
+            (root / 'tests' / 'indirect.cjs').write_text(
+                "const run = require('../tools/browser-helper.cjs');\n")
+            (root / 'tools' / 'browser-helper.cjs').write_text(
+                "const { chromium } = require('playwright');\n")
+            (root / 'tests' / 'source.cjs').write_text(
+                "const run = require('../tools/source-helper.cjs');\n")
+            (root / 'tools' / 'source-helper.cjs').write_text("module.exports = 1;\n")
+            self.assertTrue(audit.browser_test('indirect', root))
+            self.assertFalse(audit.browser_test('source', root))
+
     def test_runner_never_labels_playwright_harness_browser_free(self):
         source = (audit.ROOT / 'tests/run.cjs').read_text()
         suite = source.split('const SUITE = [', 1)[1].split('\n];', 1)[0]

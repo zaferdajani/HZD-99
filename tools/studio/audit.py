@@ -98,13 +98,48 @@ def suite_budgets(source):
     return budgets
 
 def browser_test(name, root=ROOT):
-    """Return whether a harness directly requires Playwright's browser API."""
-    path = pathlib.Path(root) / 'tests' / (name + '.cjs')
+    """Return whether a harness or one of its local helpers requires Playwright.
+
+    Several harnesses intentionally keep browser setup in tools/*.cjs. Looking
+    only at the test file let those transitive browser lanes bypass preflight
+    and turn a known host restriction into a false gameplay failure.
+    """
+    root = pathlib.Path(root)
+    # A noBrowser suite declaration is an explicit contract: some source-only
+    # tests import a browser harness solely to exercise its pure certificate
+    # helpers. They must remain runnable when the renderer is unavailable.
     try:
-        source = path.read_text()
+        runner = (root / 'tests' / 'run.cjs').read_text()
+        declared = re.search(r"\['" + re.escape(name) + r"'[^\n]*\{[^\n}]*\bnoBrowser\s*:\s*true\b", runner)
+        if declared:
+            return False
     except OSError:
+        pass
+    path = root / 'tests' / (name + '.cjs')
+    seen = set()
+    def uses_browser(candidate):
+        try:
+            candidate = candidate.resolve()
+            if candidate in seen or not candidate.is_file():
+                return False
+            seen.add(candidate)
+            source = candidate.read_text()
+        except OSError:
+            return False
+        if re.search(r"require\(\s*(['\"])playwright\1\s*\)", source):
+            return True
+        for match in re.finditer(r"require\(\s*(['\"])(\.{1,2}/[^'\"]+)\1\s*\)", source):
+            dependency = candidate.parent / match.group(2)
+            choices = [dependency] if dependency.suffix else [
+                pathlib.Path(str(dependency) + '.cjs'),
+                pathlib.Path(str(dependency) + '.js'),
+                dependency / 'index.cjs',
+                dependency / 'index.js',
+            ]
+            if any(uses_browser(choice) for choice in choices):
+                return True
         return False
-    return bool(re.search(r"require\(\s*(['\"])playwright\1\s*\)", source))
+    return uses_browser(path)
 
 def browser_block_reason(name, env=None, root=ROOT, socket_factory=socket.socket):
     """Fail closed before launch when Chromium cannot start in this environment."""
