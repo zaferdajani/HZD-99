@@ -1,0 +1,6 @@
+
+── scene-caption-contract  — a fourth story caption waits without evicting unread text
+PASS scene captions retain unread lines, display three, and promote queued text in FIFO order
+   (scene-caption-contract: 0.1 s)
+
+all 1 harnesses ran
