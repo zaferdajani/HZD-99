@@ -2132,6 +2132,7 @@ function vlinkHandover(side, dest) {
   const ox = L.ox, oy = L.oy;
   const px = player.x, py = player.y, cx = cam.x, cy = cam.y, look = cam.look || 0, lead = cam.lead || 0;
   const zoom = cam.zoom, ld = cam.lookDir, lh = cam.lookHold;
+  vlinkFadeArm(ox, oy);                             // the last frame of this room, kept to ease out of
   loadRoom(dest);
   player.x = px - ox; player.y = py - oy;
   player.lastSafe = { x: player.x, y: Math.max(0, Math.min(player.y, G.roomDef.h * TILE - player.h - 4)) };
@@ -2144,7 +2145,7 @@ function vlinkHandover(side, dest) {
   cam.extUp = Math.max(0, -oyz - cam.y);
   cam.extDn = Math.max(0, cam.y - (H - 540 + oyz));
   cam.soft = 0.4;
-  G.vlinkLast = { side, from: L, at: G.time || 0 };
+  G.vlinkLast = { side, from: L, at: G.time || 0, clk: simNow() };
   // A SEAMLESS SHAFT IS ONE PLACE, SO SHE LANDS WHERE SHE CHOOSES (owner,
   // 2026-10-13: "when I jump up and I'm not changing the screen or the rooms
   // ... the system should not push me to the left or right of the opening ...
@@ -2184,6 +2185,99 @@ function vlinkCam(dt) {
 }
 // The neighbour's baked floor, drawn where it really is. Only the slice the
 // camera can see is copied, so a tall room above costs a strip, not a room.
+// ...AND SO DOES THE BACKDROP. The floor crossed the seam and what was behind
+// it did not: the whole frame wore the CURRENT room's background, so the
+// instant her centre crossed the line the meadow's skyline was replaced, in one
+// frame, by the room below's wall — and where the camera looked past a room's
+// own edge its backdrop showed whatever it had never been asked to paint (a
+// pale block, in the first room under the meadow). Filmed, that is the glitch
+// he was seeing. Each side of the line keeps its OWN room's background now:
+// beyond the seam the neighbour's is drawn, in the neighbour's clothes (the
+// swap tileJobSlice and vlinkFringe make), from her position and the camera's
+// as that room would see them — so which room is "current" changes nothing
+// about the picture, and the handover has nothing left to show.
+function drawVLinkBG() {
+  const V = G.vlink;
+  if (!V || (typeof isHero === 'function' && isHero())) return;
+  const z = cam.zoom || 1, ozy = 270 * (1 - 1 / z), H = G.roomDef.h * TILE;
+  const vy0 = camSY() + ozy, vy1 = camSY() + 540 - ozy;
+  for (const side of ['T', 'B']) {
+    const L = V[side];
+    if (!L || !ROOMS[L.id] || !vlinkSeamless(side)) continue;
+    if (side === 'T' ? vy0 >= 0 : vy1 <= H) continue;
+    const e = tileStore.get(L.id);
+    if (!e || !e.ready) continue;
+    const seam = Math.round((side === 'T' ? 0 : H) - camSY());
+    const sv = { id: G.roomId, def: G.roomDef, grid: G.grid, vr: G._vistaRoom, px: player.x, py: player.y };
+    c.save();
+    c.beginPath();
+    if (side === 'T') c.rect(0, 0, 960, seam); else c.rect(0, seam, 960, 540 - seam);
+    c.clip();
+    G.roomId = L.id; G.roomDef = ROOMS[L.id]; G.grid = L.grid; player.x = sv.px - L.ox; player.y = sv.py - L.oy;
+    try {
+      drawBG(PAL[G.roomDef.zone], cam.x - L.ox, cam.y - L.oy);
+      bgPlanePass();
+    } catch (err) {
+    } finally {
+      G.roomId = sv.id; G.roomDef = sv.def; G.grid = sv.grid; G._vistaRoom = sv.vr; player.x = sv.px; player.y = sv.py;
+      c.restore();
+    }
+    G.vlinkBG = (G.vlinkBG | 0) + 1;
+  }
+}
+// ...AND WHAT WAS THE OLD ROOM'S ALONE EASES OUT. The floor and the backdrop
+// are the same on both sides of the handover now; what is not is everything
+// that belongs to a room and is only drawn while she is in it — the light
+// falling through the hatch, its props and machines, the way the room is lit.
+// Those still ended on one frame. So the last frame of the room she left (the
+// presentation buffer still holds it, unzoomed, without the HUD) is kept, she
+// is cut out of it — and so is the column she is about to travel, so the new
+// frame is never dimmed where SHE is — and for a third of a second it is laid
+// over the new room's finished frame, world-locked, and let go. Finished frame
+// over finished frame: laid in under the lighting instead, it was lit twice
+// (measured: 44% of the picture changed on the crossing frame, worse than the
+// cut it replaced).
+const VFADE = { cv: null, t: 0, T: 0.3, cx: 0, cy: 0, at: 0 };
+function simNow() { return (G.save && G.save.time) || 0; }
+function vlinkFadeArm(ox, oy) {
+  VFADE.t = 0;
+  const b = typeof PRESENTATION !== 'undefined' && PRESENTATION.buffer;
+  if (!b || !b.width || (cam.zoom || 1) <= 1.001 || (G.save && G.save.opts && G.save.opts.reduceMotion)) return;
+  try {
+    if (!VFADE.cv) VFADE.cv = document.createElement('canvas');
+    if (VFADE.cv.width !== b.width || VFADE.cv.height !== b.height) { VFADE.cv.width = b.width; VFADE.cv.height = b.height; }
+    const x = VFADE.cv.getContext('2d'), k = b.width / 960;
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.globalCompositeOperation = 'copy'; x.drawImage(b, 0, 0);
+    // she is not in the picture that fades: a ghost of her falling behind herself
+    const sx = (player.x + player.w / 2 - camSX()) * k, sy = (player.y + player.h / 2 - camSY()) * k, r = 84 * k;
+    const tx = clamp(player.vx || 0, -500, 500) * VFADE.T * k, ty = clamp(player.vy || 0, -900, 900) * VFADE.T * k;
+    x.globalCompositeOperation = 'destination-out';
+    for (let i = 0; i <= 6; i++) {
+      const hx = sx + tx * i / 6, hy = sy + ty * i / 6;
+      const g = x.createRadialGradient(hx, hy, r * 0.5, hx, hy, r);
+      g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      x.fillStyle = g; x.fillRect(hx - r, hy - r, r * 2, r * 2);
+    }
+    x.globalCompositeOperation = 'source-over';
+    VFADE.cx = camSX() - ox; VFADE.cy = camSY() - oy; VFADE.t = VFADE.T; VFADE.at = simNow();
+  } catch (e) { VFADE.t = 0; }
+}
+function drawVLinkFade() {
+  if (VFADE.t <= 0 || !VFADE.cv) return;
+  // on the GAME's clock (simNow: the save's play time, which only update() advances), not the wall's: a fade that kept going while the
+  // simulation was stepped or paused would be a picture of a room she left
+  // some time ago, laid over wherever the camera has got to since
+  const left = VFADE.T - (simNow() - VFADE.at);
+  if (!(left > 0) || left > VFADE.T + 0.001) { VFADE.t = 0; return; }
+  const a = left / VFADE.T, k = c.canvas.width / 960;
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.globalAlpha = a * a * (3 - 2 * a);
+  c.drawImage(VFADE.cv, Math.round((VFADE.cx - camSX()) * k), Math.round((VFADE.cy - camSY()) * k));
+  c.restore();
+  G.vlinkFades = (G.vlinkFades | 0) + 1;
+}
 function drawVLinkArt() {
   const V = G.vlink;
   if (!V) return;
@@ -3309,7 +3403,21 @@ const LIFT_LIT = 72, LIFT_SPAN = 48;   // raw mean >= 72: no lift; <= 24: full
 // The number it produces is the same mean it always was.
 function liftProbe() {
   const now = performance.now();
-  if (G.roomId !== LIFT_ROOM) { LIFT_ROOM = G.roomId; LIFT_N = 0; LIFT_NEXT = Math.min(LIFT_NEXT, now + 120); }
+  // NOT WHILE THE CAMERA IS STILL ARRIVING (owner, 2026-11-15: "the screen
+  // still glitches when I transition from one room to another... when the
+  // camera moves, it glitches a little bit"). The first look at a new room was
+  // 120 ms in — the fourth to eighth frame of the crossing, with the camera
+  // mid-travel — and a look is a readback: measured 17 ms on a desk, several
+  // times that on a phone's GPU, in exactly the frames the eye is following
+  // the picture. It waits 0.7 s now, until the frame has come to rest; the
+  // lift it carries in from the last room holds for that long, eased.
+  // ...and a SEAMLESS shaft is one place: crossing its line starts no new
+  // settling at all — the cadence it was on simply continues.
+  if (G.roomId !== LIFT_ROOM) {
+    const seamless = !!(G.vlinkLast && G.vlinkLast.clk != null && simNow() - G.vlinkLast.clk < 0.5 && simNow() >= G.vlinkLast.clk);
+    LIFT_ROOM = G.roomId;
+    if (!seamless) { LIFT_N = 0; LIFT_NEXT = now + 700; } else LIFT_NEXT = Math.max(LIFT_NEXT, now + 700);
+  }
   if (now < LIFT_NEXT) return;
   const settling = LIFT_N < 3;
   LIFT_NEXT = now + (settling ? 500 : 3000); LIFT_N++;
@@ -5036,6 +5144,10 @@ function fringeMark() { fringeDirty = true; }
 function buildFringe() {
   const g = G.grid; if (!g || !g[0]) return;
   const W = g[0].length * TILE, H = g.length * TILE;
+  // (NOT borrowed from the canvas the room was drawn with across a seam
+  // (vlinkFringe), though it is the same plan: painted from next door it has
+  // no LID — the room above is not "there" to it — and blades grow inside the
+  // slab between the two rooms. tests/seam-look.cjs caught that in an hour.)
   if (!fringeCv || fringeCv.width !== W || fringeCv.height !== H) {
     fringeCv = document.createElement('canvas'); fringeCv.width = W; fringeCv.height = H;
   }
@@ -7549,7 +7661,7 @@ function* tileBakeSteps(P) {
 const tileStore = new Map();            // roomId -> { cv, sig, ready, bytes, used, curve }
 const TILE_STATS = { bakes: 0, live: 0, pre: 0, hits: 0, misses: 0, evicted: 0, sliceMax: 0, lastMs: 0,
   stepMax: 0, stepPass: '', pass: '' };
-let tileUseTick = 0, tileJob = null, tilePickT = 0, tilePickId = null;
+let tileUseTick = 0, tileJob = null, tilePickT = 0, tilePickId = null, tileSelfRoom = null, tileSelfAt = 0;
 // What the device can hold. Count AND bytes: four of the widest rooms is 24 MB,
 // four ordinary ones under 9.
 function tileCap() {
@@ -7793,6 +7905,22 @@ function tilePrebakeTick() {
       // the neighbour's clothes, so its very first reads are the neighbour's
       tileJob = { id, cv: ent.cv, ctx: ent.cv.getContext('2d'), grid: buildRoom(id), curve: null,
         sig: tileSig(id), it: tileBakeSteps(PAL[def.zone]), born: now };
+    }
+  }
+  // THE ROOM SHE IS IN WILL BE THE ROOM BEHIND HER. Across a seamless shaft the
+  // room she leaves is drawn on as the neighbour, WITH its grass — and that
+  // fringe canvas did not exist until the frame she crossed, because a live
+  // room draws its own over her feet and never needed one. So the crossing
+  // frame allocated a room-sized canvas and painted every blade on it: measured
+  // 9 ms here, and on a phone the one frame of the shaft the eye is watching.
+  // It is grown a second after she arrives instead, in a frame nobody is
+  // looking at, and is simply there when the line is crossed.
+  if (!tileJob && G.vlink && (G.vlink.T || G.vlink.B)) {
+    if (tileSelfRoom !== G.roomId) { tileSelfRoom = G.roomId; tileSelfAt = now + 1100; }
+    else if (tileSelfAt && now >= tileSelfAt) {
+      tileSelfAt = 0;
+      const e = tileStore.get(G.roomId);
+      if (e && e.ready && !(e.fringe && e.fringeSig === e.sig)) { vlinkFringe({ id: G.roomId, grid: G.grid }, e); TILE_STATS.selfFringe = (TILE_STATS.selfFringe | 0) + 1; }
     }
   }
   // ...and when no floor needs baking, the art of the creatures behind the
@@ -14883,6 +15011,7 @@ function drawWorldFrame() {
   // Pushing the background down and the chroma out of it is what buys the
   // depth the single end-of-frame wash never could.
   bgPlanePass();
+  drawVLinkBG();                    // beyond a seamless seam, the neighbour's own backdrop
   // THE PLANE PROBE — the measurement hook for ART_BIBLE §9.1/§9.4, and the
   // reason it exists is that the obvious test is wrong. Sampling the top third
   // of the frame as "far" only works if height correlates with depth; here the
@@ -15422,6 +15551,7 @@ function drawWorldFrame() {
     c.fillRect(0, 0, 960, 540);
   }
   scanOverlay();
+  drawVLinkFade();                  // just crossed a seamless seam: the room she left, easing out (finished frame over finished frame)
   if (typeof presentWorld === 'function') presentWorld();
 }
 // ===========================================================================
