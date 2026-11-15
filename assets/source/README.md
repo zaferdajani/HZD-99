@@ -493,6 +493,29 @@ no filter gives a figure a second colour. Brief: `docs/ART_QUEUE.md` §2r-ii.
 - Sheets: `_sheets/ratchet_metal_before_after.jpg`, and in the game
   `_sheets/metal_and_impatient_ingame.jpg`.
 
+## `den/toolbox/` — the box his battery is in (2026-11-15)
+
+The owner, the same day: *"the hero is looking in the drawers for the battery when
+it's actually in the toolbox down"*, then *"improve the art of the toolbox to make
+it show uniquely on the ground when I enter the room"*, then *"differentiate between
+a toolbox and working station ... this is the working table station, not the
+toolbox."* Three orders, one object: a small oxblood-red steel toolbox on the den
+floor at Ratchet's LEFT (the work table is his station, on his right, and lent this
+plate nothing but its drawing style).
+
+- `closed_asfired.jpg` — shut, the lid a finger ajar, the battery's cyan under it
+  (take B, shipped as `assets/backgrounds/toolbox.webp`); `closed_takeA_refused.jpg`
+  is the take with a hard line and no light on the metal.
+- `open_asfired.jpg` — the same box from the same camera with the lid up and
+  nothing in it (`assets/backgrounds/toolbox_open.webp`).
+- `prompts.json` — both prompts, the job ids, and how the two were cut onto one
+  scale with one right edge and one floor line.
+
+The two comic panels drawn FROM this plate are indexed with the game's panels:
+`manhua/ch1/game/toolbox_asfired.jpg` (she takes the battery out of it — replaces
+the drawer panel), `manhua/ch1/game/l_cell_toolbox_asfired.jpg` (he puts it in),
+their refused takes, and `manhua/ch1/game/toolbox-2026-11-15.json`.
+
 ## `hero/impatient/` — arms crossed, foot tapping (2026-11-15)
 
 The owner: *"Look for how Sonic used to stamp with his feet and cross his hand when

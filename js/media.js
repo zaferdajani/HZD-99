@@ -211,6 +211,12 @@ const MEDIA_SRC = {
     jetpack: 'assets/characters/gear/jetpack.webp',
     // §2r the Tinker's bench — an object, not a vista.
     forgeTable: 'assets/backgrounds/forge_table.webp',
+    // THE TOOLBOX on the den floor (owner, 2026-11-15): the box his battery is
+    // in, shut with its light leaking out, and open and empty once she has it.
+    // Two plates of ONE box, cut on one scale with one floor line and one right
+    // edge (game.js drawDenToolbox draws them by width, not by height).
+    denToolbox: 'assets/backgrounds/toolbox.webp',
+    denToolboxOpen: 'assets/backgrounds/toolbox_open.webp',
     // THE MIND NODE as a monument (owner 2026-08-16: "it should be like a
     // monument, not a small object"). The plate only pays off once the node
     // itself moves out of the NPC's room.

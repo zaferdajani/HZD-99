@@ -1,0 +1,16 @@
+{
+ "date": "2026-11-15",
+ "why": "owner: \"one of the shots ... the hero is looking in the drawers for the battery when it's actually in the toolbox down. You need to change it.\" The room keeps his battery in a box on the floor at his left; the `drawer` panel had her at a waist-high drawer and `l_cell` had him lowering it into a floor drawer. Both are redrawn round the den's new toolbox plate, so the box in the comic is the box in the room.",
+ "model": "nano_banana_pro 2k, 16:9, two takes each; keyed to 1600x893 webp",
+ "elements": { "hero": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)", "ratchet": "795a5cd6-b404-4623-bcc9-2b32351d71ab", "workshop": "44ecbf7f-0326-418f-9cc9-122391cad46f" },
+ "method": "three references with three stated jobs: IMAGE 1 the toolbox plate (job b039228b-2942-4836-8ae6-57fe5a70a6bf), IMAGE 2 the battery (media 0fe9c831-9050-4359-b53b-cb9cddee6c33, the repair board's), IMAGE 3 the OLD panel, handed back as \"keep its style, lighting and characters — but it is WRONG about where the battery is; there is NO drawer\". Naming the wrong picture as wrong and saying what replaces it worked first time on both; the CAST and STYLE paragraphs are the ones in prompts.json's `drawer` entry.",
+ "panels": [
+  { "file": "assets/manhua/ch1/game/toolbox.webp", "replaces": "assets/manhua/ch1/game/drawer.webp (removed; its as-fired is drawer_asfired.jpg)", "sequence": "drawer (the id is a save key and is kept)",
+    "jobs": { "A (refused: heavier line and a lantern the den does not have; Ratchet drawn as a different machine)": "e8051f84-839a-40f2-b0c7-b3715ad32e49", "B (shipped)": "7a08eab6-57c6-4b18-82a6-afd0f09d3886" },
+    "scene": "SCENE: the same workshop, a LOW shot close to the floor. The small cat crouches on the workshop floorboards beside the foot of Ratchet's chair, in front of the red steel toolbox of IMAGE 1, which STANDS ON THE FLOOR. She has swung its lid open, and inside, on the steel tray, lies Ratchet's own brass battery, exactly like IMAGE 2, glowing cyan and lighting her visor and her paws from below. Both her white mitten paws reach down into the toolbox for it. Ratchet's slumped, dark, switched-off bulk sits in his chair right behind her, filling the right edge of the frame, his heavy boots on the floor at her level. Shelves and the workbench are only dim background far behind. The battery is IN THE TOOLBOX ON THE FLOOR: nobody opens a drawer, there is no open drawer anywhere, and nothing is on a table in the foreground." },
+  { "file": "assets/manhua/ch1/game/l_cell.webp", "replaces": "itself (the previous as-fired is redraw-2026-10-11/l_cell.jpg)", "sequence": "letter, panel 4",
+    "jobs": { "A (shipped)": "95691dc4-0dec-46d3-b7a5-f5abc9c6bf24", "B (refused: the box reads as a trunk seen from above, its lid lost)": "6569cbf2-8a35-4a4a-b67f-e43e329ab619" },
+    "scene": "THE CORRECTION: where the open drawer was, the red steel toolbox of IMAGE 1 STANDS ON THE FLOOR right beside his chair, its lid swung open. His hand lowers his own glowing cyan brass battery (IMAGE 2) into that open toolbox. The cyan light of the battery shines on the inside of the toolbox lid and on his fingers. Remove the drawer completely: plain floorboards and the toolbox, nothing else there." }
+ ],
+ "credits": "2 credits per image at 2k; four images"
+}

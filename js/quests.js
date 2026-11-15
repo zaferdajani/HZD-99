@@ -24,7 +24,7 @@ const QUESTS = [
   {
     // THE GAME'S FIRST QUEST — the sword is EARNED, not handed over.
     // Ratchet's inherited marble slowed the infection but could not stop it.
-    // He removed his own battery; the hero retrieves it from his drawer and
+    // He removed his own battery; the hero retrieves it from his toolbox and
     // restores him. Rounded raw marble from the early cave lets him forge
     // the Purifier before the first Sage. Claws can stop machines, but only
     // the earned sword cleanses them. See docs/STORY_CANON.md.

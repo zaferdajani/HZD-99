@@ -108,7 +108,7 @@ player's input rules.
 
 ### letter — Ratchet's letter
 
-- **Event / trigger:** Ratchet's letter read on his dark body (opNote), before the drawer and the repair. Played by its own moment (see the trigger).
+- **Event / trigger:** Ratchet's letter read on his dark body (opNote), before the toolbox and the repair. Played by its own moment (see the trigger).
 - **Completion flag:** `G.save.panels.seen.letter` (set when it starts; `past.letter` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
@@ -116,17 +116,17 @@ player's input rules.
 | 1 | `assets/manhua/ch1/game/letter.webp` (game: letter) | [0, 0, 1600, 893] | `pc_l_tag` | A tag on his chest, in his own hand. |
 | 2 | `assets/manhua/ch1/game/l_song.webp` (game: l_song) | [0, 0, 1600, 893] | `pc_l_song` | “Mother’s song has been infected.” |
 | 3 | `assets/manhua/ch1/game/l_marble.webp` (game: l_marble) | [0, 0, 1600, 893] | `pc_l_marble` | “My marble slowed the virus, but it cannot stop it.” |
-| 4 | `assets/manhua/ch1/game/l_cell.webp` (game: l_cell) | [0, 0, 1600, 893] | `pc_l_cell` | “I took my battery out before it could take me. It is in the drawer beside this chair.” |
+| 4 | `assets/manhua/ch1/game/l_cell.webp` (game: l_cell) | [0, 0, 1600, 893] | `pc_l_cell` | “I took my battery out before it could take me. It is in the toolbox beside this chair.” |
 | 5 | `assets/manhua/ch1/game/letter.webp` (game: letter) | [0, 0, 1600, 893] | `pc_l_hope` | “If you are reading this, there may still be hope. — R.” |
 
-### drawer — Ratchet's battery
+### drawer — Ratchet's battery, in the toolbox on the floor (the id is a save key; the picture is `toolbox.webp` since 2026-11-15)
 
-- **Event / trigger:** his battery taken from the drawer (ratchetCell in hand), before the repair. Plays over the crossing into `A0B` if it is already due when she arrives; otherwise in `A0B` the moment its event is over.
+- **Event / trigger:** his battery taken from the toolbox on the den floor (ratchetCell in hand), before the repair. Plays over the crossing into `A0B` if it is already due when she arrives; otherwise in `A0B` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.drawer` (set when it starts; `past.drawer` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/game/drawer.webp` (game: drawer) | [0, 0, 1600, 893] | `pc_drawer` | His own battery, exactly where he had left it. |
+| 1 | `assets/manhua/ch1/game/toolbox.webp` (game: toolbox) | [0, 0, 1600, 893] | `pc_drawer` | His own battery, exactly where he had left it. |
 
 ### ratchet — Ratchet's battery
 

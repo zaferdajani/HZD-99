@@ -22,7 +22,7 @@ The rest of Ratchet's explanation is said only to a player who comes back and as
 The hub's hatch (§2.7–§2.8) does not exist — no crack, no light — until NULLFANG
 has been met on the crest.
 
-**Opening re-synced 2026-10-09 with the rebuilt opening** (§2.2–§2.6: booth first, letter → drawer → repair → explanation → pod → Volt Pack → heal → winch → monument → meadow; comic pages p06–p12 predate it). **Re-synced 2026-10-08 with the story-order pass.** Every save now plays this story
+**Opening re-synced 2026-10-09 with the rebuilt opening** (§2.2–§2.6: booth first, letter → toolbox → repair → explanation → pod → Volt Pack → heal → winch → monument → meadow; comic pages p06–p12 predate it). **Re-synced 2026-10-08 with the story-order pass.** Every save now plays this story
 (old saves are migrated on load — `migrateStory`, js/story-opening.js); the order of
 chapter one is enforced by the game and walked by `tests/story-order.cjs` against
 `docs/STORY_SHEET.md`, which lists every beat with its room, required flags, speaker,
@@ -156,17 +156,19 @@ booth*; it follows the story for the rest of the chapter.
 banner* — with warm light behind its curtain; past it, a rusted winch with its arm
 hanging over the road, and a dark obelisk with a cyan sigil.
 
-### 2.4 Ratchet's den — A0B (the letter, the drawer, the repair, the explanation, the pod)
+### 2.4 Ratchet's den — A0B (the letter, the toolbox, the repair, the explanation, the pod)
 
 **Where.** Behind the booth door: a den, a crafting bench of a room, a pod built into
-the wall, a drawer, and a big round unit sitting dark at the bench. This is his one
+the wall, a red steel toolbox on the floor at his left with a line of cyan light under
+its lid (2026-11-15: it is a TOOLBOX, on the FLOOR — never a drawer, and never the work
+table, which is his station on his right), and a big round unit sitting dark at the bench. This is his one
 home; he stands here, and only here, until he has forged her blade (§2.10).
 **What happens, one step at a time.**
 1. **Read the letter** — *A switched-off robot with a letter on him — press E.*
    One page (2026-11-14):
-   > *“Mother’s song is infected. I pulled my own battery before it could take me. It is in the drawer beside this chair — wire it back in, and there may still be hope. — R.”*
-2. **Open the drawer** — the card: **Ratchet's battery** (the repair board's own battery
-   art) — *His own battery, hidden in his drawer. Wire it back into the empty socket in
+   > *“Mother’s song is infected. I pulled my own battery before it could take me. It is in the toolbox beside this chair — wire it back in, and there may still be hope. — R.”*
+2. **Open the toolbox** — the card: **Ratchet's battery** (the repair board's own battery
+   art) — *His own battery, hidden in his toolbox. Wire it back into the empty socket in
    his chest to wake him.*
 3. **Restore his battery** — *His chest socket is empty. Wire his battery back in.* The
    repair board: seat the battery, the amber positive wire, the blue ground, the bridge
@@ -195,7 +197,7 @@ home; he stands here, and only here, until he has forged her blade (§2.10).
 **Story.** The founding of the plot in one room. He nearly fell; the inherited marble
 slowed the song long enough for him to choose; he switched himself off. She was asleep,
 not immune. There is one Ratchet and one revival.
-**Panels.** The letter at the empty socket; the drawer and the battery; the wires and
+**Panels.** The letter at the empty socket; the toolbox on the floor and the battery in it; the wires and
 the bridge; his eyes coming up; the marble on its cord; the spare cell in her paw; the
 pod in the wall and the word SAVED.
 
@@ -798,7 +800,7 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
 - **IQ ◈** is bought with thought — Mind Nodes, the Cognition Trials, errands — and
   spent on the Neural Tree.
 - **Power Cells** wake machines. She starts with none: Ratchet's own battery is in his
-  drawer, and waking him earns the spare he keeps for Servo;
+  toolbox, and waking him earns the spare he keeps for Servo;
   every guardian and every construct is built around one; two sages keep one. The
   supply is exactly the demand. *Wakes one machine. There are never spare ones.*
 - **Crests** are ceramic seals over the chest port: *Before the song, every unit left
