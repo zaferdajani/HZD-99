@@ -58,6 +58,14 @@ async function run(browser, mode) {
     startGame(sv);
     if (isPhone && typeof TOUCH !== 'undefined') TOUCH.enabled = true;
     G.wake = null; G.zoneToast = null; G.toasts = [];
+    // THE WINDING HOUSE, WITHOUT THE PACK. This room's crawlers are wolves, and
+    // since 2026-11-15 a wolf that sees her comes for her (js/wolfhunt.js) —
+    // from three hundred pixels, where it used to wait for her to walk into
+    // it. About one run in four, one reached her in the second she stands
+    // waiting between two talks and knocked her out of his reach, and the next
+    // press spoke to nobody. That is the game working, and it is not what is
+    // measured here: this is where she stands when she talks to HIM.
+    G.enemies = [];
     window.requestAnimationFrame = () => 0;
     window.__sv = () => G.statics.find(q => q.type === 'npc' && q.extra === 'servo');
     // one loop frame, exactly as mainLoop runs it

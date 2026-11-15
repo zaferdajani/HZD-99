@@ -113,7 +113,13 @@ const check = (name, ok, detail) => {
       // exactly as long. The first contiguous charge is the honest number.
       let warn = 0, run = 0, hadPool = 0;
       for (let i = 0; i < (opts.frames || 700); i++) {
-        player.x = opts.at != null ? e.x + opts.at : clamp(e.x + (e.dir || 1) * 90, 40, (G.roomDef.w - 2) * TILE);
+        // (a meadow crawler is a pack wolf now, and a wolf springs from the
+        // distance its lunge covers — js/wolfhunt.js. Held 90 px ahead of it
+        // for ever she is a step outside that, and it only stalks: whether it
+        // lunged at all was down to the random snap. She stands inside its
+        // reach, as tests/cachemoves.cjs does.)
+        const gap = (typeof isWolf === 'function' && isWolf(e) && typeof wolfReach === 'function') ? Math.min(90, wolfReach(e) - 16) : 90;
+        player.x = opts.at != null ? e.x + opts.at : clamp(e.x + (e.dir || 1) * gap, 40, (G.roomDef.w - 2) * TILE);
         player.y = fy - player.h; player.vx = 0; player.vy = 0;
         player.on = true; player.iT = 0; player.dead = false;
         e.update(1 / 60);

@@ -202,8 +202,15 @@ const check = (name, ok, detail) => {
     for (let i = 0; i < 20; i++) { await frames(1); if (player.grap && player.grap.foe === foe) { cureLatch = true; break; } }
     const cureVolts = player.volts;
     foe.rescued = true; foe.calm = true;
-    await frames(3);
-    out.curedMidReel = { latched: cureLatch, released: !player.grap || !player.grap.foe, voltsBefore: cureVolts, voltsAfter: player.volts };
+    // (not "three frames later": the bite that latched froze the game for a
+    // beat, and the reel cannot let go while nothing is being simulated. Three
+    // real frames were sometimes inside that freeze — the check failed or
+    // passed on how fast the machine was drawing. It waits for the release
+    // itself, well inside the time the reel would take to arrive; an arrival
+    // strike would still show as charge awarded or the creature hurt.)
+    const cureHp = foe.hp;
+    for (let i = 0; i < 30 && player.grap && player.grap.foe; i++) await frames(1);
+    out.curedMidReel = { latched: cureLatch, released: (!player.grap || !player.grap.foe) && foe.hp === cureHp, voltsBefore: cureVolts, voltsAfter: player.volts };
     player.grap = null; G.enemies = []; await frames(20);
 
     // ---- 8. aim assist: she is in the air a tile and a half up, the crawler is on
