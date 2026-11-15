@@ -160,7 +160,7 @@ const SUITE = [
   ['cadence', 'chapter one never goes flat: every room on the critical path gives her something she has not met, and a breath has to be earned'],
   ['glimpse', 'NULLFANG is seen before he is met: a head at the edge of the frame past the gates, one roar, gone east — once, and it takes nothing from her'],
   ['prize', 'the first room shows a prize she cannot reach: every real jump misses it, the double jump lands on it, and it is in the frame'],
-  ['bossbench', 'a save point one door from every boss, and every pod standing clear on something'],
+  ['bossbench', 'a save point near every boss — one door away or a short walk through one more — and nowhere else: every pod is near a boss, the den\'s, in a Sage\'s cave or at the bottom of a one-way drop, no two a short walk apart, and each standing clear on something'],
   ['grounded', 'every cannon is bolted to something and every trap has ground under it, room by room'],
   ['dighub', 'the hub hatch: nothing shown before the lion (no light, no crack, no prompt), and after him the lit floor breaks into the first cave'],
   ['camjump', 'a jump does not move the frame; landing, falling and the top edge do'],

@@ -115,10 +115,13 @@ const check = (name, ok, detail) => {
     out.cv1 = { chest: !!core, cores: (G.save.coresMax || 4) - c0, full: player.cores === player.maxCores() };
     // ---- CV1B: the survey pod charts the quarry ------------------------
     fresh({ rubbleA5: 1, rubbleCV1B: 1 }); loadRoom('CV1B'); quiet();
-    const bench = G.statics.find(s => s.type === 'bench');
-    doInteract(bench); drain(); G.recharge = null;
+    // (the survey is a terminal she READS since 2026-11-15; it was a save pod,
+    // and save points now stand only near critical places)
+    const survey = G.statics.find(s => s.type === 'term' && s.extra === 'survey');
+    const cv1bPod = !!G.statics.find(s => s.type === 'bench');
+    if (survey) doInteract(survey); drain(); G.recharge = null;
     progressTick(1 / 60);
-    out.cv1b = { charted: Object.keys(G.save.charted || {}).sort().join(','), said: toasts().indexOf(t('pg_survey')) >= 0 };
+    out.cv1b = { charted: Object.keys(G.save.charted || {}).sort().join(','), said: toasts().indexOf(t('pg_survey')) >= 0, term: !!survey, pod: cv1bPod };
     try { G.state = 'MAP'; drawMap(); out.cv1b.map = true; } catch (e) { out.cv1b.map = String(e); }
     G.state = 'PLAY';
     // ---- CV2: the beacon's log ------------------------------------------
@@ -225,8 +228,8 @@ const check = (name, ok, detail) => {
   check('...even one who stood at the bottom of the shaft without reading the survey',
     r.a7.visitActive && r.a7.visitAsk.indexOf(r.a7.earlyLine) < 0, r.a7.visitAsk.slice(0, 90));
   check('CV1: the pocket chest is a spare core, not scrap', r.cv1.chest && r.cv1.cores === 1 && r.cv1.full, JSON.stringify(r.cv1));
-  check('CV1B: resting at the survey pod charts the quarry onto the map',
-    r.cv1b.charted === 'CV1,CV1B,CV2,CV3' && r.cv1b.said && r.cv1b.map === true, JSON.stringify(r.cv1b));
+  check('CV1B: reading the quarrymen\'s survey charts the quarry onto the map — and it is not a save point',
+    r.cv1b.term && !r.cv1b.pod && r.cv1b.charted === 'CV1,CV1B,CV2,CV3' && r.cv1b.said && r.cv1b.map === true, JSON.stringify(r.cv1b));
   check('CV2: the beacon\'s log answers the call', r.cv2.beacon);
   check('CV3: the marble is there to quarry, and the passage is not yet built', r.cv3.pillar && r.cv3.doorBefore.indexOf('GA1T') < 0, JSON.stringify(r.cv3));
   check('...after the forge the pillar is a cut stump, the passage is open, the marks lead to it, and she is told — once',

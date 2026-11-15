@@ -169,7 +169,7 @@ const SHOP = [
   { id: 'sprint', type: 'crest', cost: 180 },
   { id: 'slot', type: 'slot', cost: 400 }, { id: 'core', type: 'core', cost: 500 },
 ];
-const BENCH_ROOMS = ['A3', 'B3', 'D1', 'E2'];
+const BENCH_ROOMS = ['A3', 'B3', 'D2', 'E2'];   // (D2: the archive's pod is at ZERO's door now — world.js, SAVE POINTS ARE FOR CRITICAL PLACES)
 
 const G = {
   state: 'MENU', save: null, grid: null, roomId: '', roomDef: null,
@@ -1215,6 +1215,9 @@ function loadRoom(id) {
   if (typeof ghMigrate === 'function') ghMigrate(G.save);
   def.ents.forEach((d, i) => {
     let [kind, tx, ty, extra, cond] = d;
+    // a retired entity: its slot is kept because the ORDER of a room's entities
+    // is a save key (world.js, SAVE POINTS ARE FOR CRITICAL PLACES)
+    if (kind === 'gone') return;
     // The first target is an automatic scrap-yard defence, not a person.
     if (!isHero() && G.save.storyVersion >= 2 && id === 'A0' && kind === 'crawler') kind = 'turret';
     if (cond && !G.save.flags[cond]) return;
@@ -2743,6 +2746,8 @@ function doInteract(s) {
     G.state = 'DIALOG'; sfx('ui');
     // a read is remembered per terminal; an errand may be waiting on it (questRead)
     if (typeof questRead === 'function') questRead(G.roomId, s.extra);
+    // ...and a few terminals DO something when read (the quarry survey, js/progress.js)
+    if (typeof pgTermRead === 'function') pgTermRead(G.roomId, s.extra);
     // THE CALL IS ANSWERED. This is the thing that has been sounding through
     // the rock since the meadow (CAVE_BEACON), and reading it is the first
     // time anything in the world has spoken to her rather than at her. The

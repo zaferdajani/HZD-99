@@ -63,6 +63,22 @@ function progressBenchGuard(save) {
   return true;
 }
 
+// reading a terminal that does something (game.js, the terminal's use)
+function pgSurveyChart() {
+  const f = G.save.flags = G.save.flags || {};
+  if (f.pgSurvey) return false;
+  f.pgSurvey = 1;
+  const ch = G.save.charted = G.save.charted || {};
+  for (const id of ['CV1', 'CV1B', 'CV2', 'CV3']) ch[id] = 1;
+  if (typeof persistSoon === 'function') persistSoon();
+  G.toast(t('pg_survey'));
+  if (typeof sfx === 'function') sfx('chargeReady');
+  return true;
+}
+function pgTermRead(room, which) {
+  if (which === 'survey' && pgRobo()) pgSurveyChart();
+}
+
 // ---- WHAT TO DO NOW --------------------------------------------------------
 // One answer for "what is the current goal of chapter one", from the save
 // alone, so a HUD objective line (the OPENING workstream's) and the cave
@@ -275,17 +291,12 @@ function progressTick(dt) {
     (f.pgBound = f.pgBound || {})[G.roomId] = 1; f.pgBoundN = (f.pgBoundN | 0) + 1; persistSoon();
     G.toast(t('pg_bound_wait'));
   }
-  // THE SURVEY POD (CV1B). Resting at the Deaf quarrymen's own pod restores it,
-  // and it charts the quarry's tunnels onto her map — a facility brought back,
-  // not a heap of scrap.
-  if (G.roomId === 'CV1B' && G.save.bench && G.save.bench.room === 'CV1B' && !f.pgSurvey) {
-    f.pgSurvey = 1;
-    const ch = G.save.charted = G.save.charted || {};
-    for (const id of ['CV1', 'CV1B', 'CV2', 'CV3']) ch[id] = 1;
-    persistSoon();
-    G.toast(t('pg_survey'));
-    if (typeof sfx === 'function') sfx('chargeReady');
-  }
+  // THE SURVEY (CV1B). The Deaf quarrymen's station in the seam hall charts the
+  // quarry's tunnels onto her map when she reads it — a facility brought back,
+  // not a heap of scrap. It was a save pod until 2026-11-15 (the owner: save
+  // points "only near critical areas, not everywhere"); a run that rested at
+  // it then keeps its chart, and one parked there is charted on waking.
+  if (G.roomId === 'CV1B' && G.save.bench && G.save.bench.room === 'CV1B' && !f.pgSurvey) pgSurveyChart();
   // THE FIRST MARK SPEAKS ONCE: what the arrows are and who drew them.
   if (pgTrailPhase(f) === 'marble' && !f.pgMarks && G.roomId === 'A5') {
     const mk = pgTrailMarks('A5', 'marble');

@@ -247,7 +247,7 @@ const check = (name, ok, detail) => {
   const badBench = r.benches.filter(b => [b.cont, b.resp, b.load].some(x => x === 'A4' || x === 'A9'));
   check('Continue, respawn and a stored save never start her inside the lair or the bell\'s chamber',
     !badBench.length, r.benches.map(b => b.room + '->' + b.cont + '/' + b.resp + '/' + b.load).join(' '));
-  check('...a real bench keeps its own room (A3, CV1B, GA1 …)',
+  check('...a real bench keeps its own room (A3, CV2, GA1 …)',
     r.benches.filter(b => b.room !== 'A4' && b.room !== 'A9').every(b => b.cont === b.room && b.resp === b.room && b.load === b.room));
   check('...and once the lair is open a save parked there is left alone', r.openBench === 'A4', r.openBench);
   check('the bell\'s climb (A8 -> A9) is shut until the Sage is free', !r.bell.shutA9);

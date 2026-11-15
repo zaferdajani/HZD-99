@@ -16,7 +16,13 @@ const onward = doors('CV1B').find(d => d.to === 'CV2');
 const back = doors('CV2').find(d => d.to === 'CV1B');
 assert(onward && back, 'Seam and beacon hall have reciprocal onward doors');
 assert(doors('CV1B').some(d => d.to === 'CV1'), 'original return preserved');
-assert(state.rooms.CV1B.ents.some(e => e[0] === 'bench' && e[1] === 20), 'save point preserved');
+// (the seam hall's own pod was retired on 2026-11-15 — save points stand only
+// near critical places. Its slot holds the quarrymen's survey terminal now,
+// which charts the quarry when read; the cave's pod is the one at the far end
+// of CV2, at GRAVEHORN's door)
+assert(state.rooms.CV1B.ents[0][0] === 'term' && state.rooms.CV1B.ents[0][3] === 'survey' && state.rooms.CV1B.ents[0][1] === 20, 'the seam hall keeps the slot its pod held, as the survey terminal');
+assert(!state.rooms.CV1B.ents.some(e => e[0] === 'bench'), 'the seam hall is not a save point');
+assert(state.rooms.CV2.ents.some(e => e[0] === 'bench'), "the cave's save point stands in the beacon hall, before the quarry");
 assert.equal(onward.at, back.ax, 'return lands at onward mouth');
 assert.equal(back.at, onward.ax, 'onward lands at return mouth');
 assert(!onward.need && !back.need && !onward.rubble && !back.rubble, 'no new lock');

@@ -779,8 +779,10 @@ const ROOMS = {
     // question the guard beside it asks — can you wait for the right moment —
     // instead of asking the player to be in two places at once.
     ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['hopper', 52, 15], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12],
-           ['scrap', 65, 10, 15], ['scrap', 80, 15, 20],
-           ['bench', 55, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
+           ['scrap', 65, 10, 15], ['scrap', 80, 15, 20]
+           // (the hub's own pod stood here, at 55, for one day. Ratchet's camp is
+           // the next room and its pod is twenty-two tiles from the Wolf King's
+           // door — see SAVE POINTS ARE FOR CRITICAL PLACES, below ROOMS)
           ],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -1171,7 +1173,7 @@ const ROOMS = {
   //            screen. The bench is the rest beat, in the room, as CV2 has it.
   V2: { zone: 'X', w: 32, h: 17, exits: { T: { to: 'B2', at: 44 } },
     ents: [['chest', 11, 15, 'nine'], ['scrap', 4, 15, 80], ['scrap', 17, 15, 80],
-           ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4],
+           ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4],   // (stays: the vault is a pit she drops into — see SAVE POINTS ARE FOR CRITICAL PLACES)
            ['hopper', 26, 15], ['crawler', 22, 15]],
     build(g) {
       frame(g);
@@ -1264,7 +1266,7 @@ const ROOMS = {
   // her a kingdom back in B3. The forge pod is the retry loop's fix, placed
   // where the story already built shelter.
   C5B: { zone: 'C', indoor: 1, w: 30, h: 17, exits: {},
-    ents: [['npc', 16, 15, 'patch'], ['bench', 21, 15], ['scrap', 6, 11, 25]],
+    ents: [['npc', 16, 15, 'patch'], ['gone', 21, 15], ['scrap', 6, 11, 25]],
     build(g) {
       frame(g);
       hline(g, 3, 9, 12, '=');            // the slag-crusted tool loft
@@ -1320,7 +1322,7 @@ const ROOMS = {
     // depth door at mid-room (GATE_ROOM D1, the A0/A0B booth pattern): walk UP
     // into the leaning shelf-stacks and the sage is inside, in a place of
     // their own — the same promotion Ratchet, the Oracle and the Tinker got.
-    ents: [['bench', 6, 15], ['term', 24, 15, 3]],
+    ents: [['gone', 6, 15], ['term', 24, 15, 3]],
     build(g) { frame(g); openR(g); rect(g, 18, 0, 20, 0, '.'); hline(g, 15, 18, 11, '='); } },
   // THE SAGE'S CARREL (kingdom 4's own interior, the D-side of A0B/B3B/C5B):
   // a one-room reading den dug into the frozen card-index behind the leaning
@@ -1689,7 +1691,7 @@ const ROOMS = {
   // 32 wide, not 28: a room narrower than the 960x540 window shows void at its
   // edge, and tests/deadend.cjs measures exactly that (it caught this one).
   CV1B: { zone: 'X', cave: 1, w: 40, h: 17, exits: {},
-    ents: [['bench', 20, 15], ['bat', 27, 6],
+    ents: [['term', 20, 15, 'survey'], ['bat', 27, 6],   // the quarrymen's survey: it charts the quarry when read (it was a save pod)
            ['scrap', 30, 15, 35], ['scrap', 9, 7, 25], ['scrap', 24, 15, 20]],
     build(g) {
       caveCarve(g, 'CV1B', {
@@ -2055,6 +2057,37 @@ function sageQuietHere(roomId) {
 // she kneels in front of it, so the chamber is an arrival rather than a
 // surprise. The other networks keep t5 until their kingdoms' own sessions
 // write their pages.
+// ===========================================================================
+// SAVE POINTS ARE FOR CRITICAL PLACES (owner, 2026-11-15: "there are so many
+// save points. It shouldn't be this way. Only near critical areas, not
+// everywhere").
+//
+// The day before, a pod was put one door from every boss, because the walk
+// back after a death is where a player puts the controller down. That stands —
+// it is what "near a critical area" means — and it is the only reason a pod is
+// in the world at all now. A pod stands:
+//   - in Ratchet's den, where the game begins and resting is taught;
+//   - within a short walk of every boss's door (one door away, or under forty
+//     tiles through one more);
+//   - in a Sage's cave, at the end of its kingdom;
+//   - at the bottom of a drop she cannot climb back out of (the vault, V2:
+//     tests/benchloop.cjs — a one-way route must let her out somewhere she can
+//     still rest).
+// Four that stood for none of those are gone, and the slot each held is kept
+// as ['gone', x, y] — entity ORDER is a save key (scrap, chests and terminals
+// are remembered by index), so a pod is retired in place, never spliced out:
+//   A2   the meadow hub — the camp next door is 22 tiles from the Wolf King's
+//        gate, 41 tiles from where this one stood
+//   CV1B the seam hall — CV2's pod is at the far end of the next cave, at
+//        GRAVEHORN's door. What made this one worth finding was that it charts
+//        the quarry on her map; it still does, as the quarrymen's survey
+//        TERMINAL in the same slot — read, not rested at
+//   D1   the archive's first room, and C5B, Patch's shelter — no boss within
+//        reach of either, and a pod in the hub one door away
+// A save that was parked on one of them still wakes where it stood.
+// tests/bossbench.cjs holds both halves: no boss without one near, and none
+// that is near nothing.
+// ===========================================================================
 ROOMS.GA1T.ents = ROOMS.GA1T.ents.map(e => (e[0] === 'term' ? ['term', e[1], e[2], 6] : e));
 // ...and the Alpha's network (chapter one's optional den) tells ITS story, not
 // a third copy of the founding log: terminal 22, the wardens' route ledger —

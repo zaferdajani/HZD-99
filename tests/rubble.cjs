@@ -143,6 +143,9 @@ const check = (name, ok, detail) => {
     let n3 = 0;
     while (G.gateWalk && n3++ < 300) update(1 / 30);
     out.inSeam = G.roomId === 'CV1B';
+    // (the Seam's own pod became the quarrymen's survey terminal on 2026-11-15:
+    // save points stand only near critical places — world.js)
+    out.seamPays = !!(G.statics || []).find(q => q.type === 'term' && q.extra === 'survey');
     out.seamRests = !!(G.statics || []).find(q => q.type === 'bench');
     // ...and the way back out
     const back = gateDoors('CV1B')[0];
@@ -215,7 +218,7 @@ const check = (name, ok, detail) => {
   check('...and standing at one gives you THAT one', r.nearestDoor === 'CV1B', String(r.nearestDoor));
   check('the branch is buried too', r.seamRefuses);
   check('the blade opens the branch', r.seamOpens && r.inSeam, 'in ' + (r.inSeam ? 'CV1B' : 'nowhere'));
-  check('the Seam is the tunnel\'s rest', r.seamRests);
+  check('the Seam pays for being found: the quarrymen\'s survey is in it — and it is not a save point', r.seamPays && !r.seamRests);
   check('...and it walks back out', r.seamReturns && r.backInTunnel);
 
   // THE LURE LEADS TO SOMETHING — the other half of "a sound from within that

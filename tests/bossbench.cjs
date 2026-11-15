@@ -10,6 +10,22 @@
 //     door away — not counting a guardian's own lair, which only opens after
 //     the fight it belongs to is over;
 //   - and every pod in the game stands on something, clear of a hazard rail.
+//
+// ...AND NOWHERE ELSE (owner, 2026-11-15: "there are so many save points. It
+// shouldn't be this way. Only near critical areas, not everywhere"). The first
+// rule alone had no ceiling: a pod could stand anywhere, and five stood near
+// nothing — and the meadow hub's stood 41 tiles from the one in Ratchet's camp
+// next door. So both halves are held now (world.js, SAVE POINTS ARE FOR
+// CRITICAL PLACES):
+//   - "near" is one door away, OR under forty tiles' walk through one more
+//     door (the camp's pod is 22 tiles from the Wolf King's gate, and that is
+//     nearer than most pods that share a wall with their boss);
+//   - every pod has a reason: it is near a boss, or it is the den's (where the
+//     game begins and resting is taught), or it is in a Sage's cave, or it is
+//     at the bottom of a drop she cannot climb back out of (the vault, V2 —
+//     tests/benchloop.cjs is what demands that one);
+//   - and no two pods stand within sixty tiles' walk of each other through one
+//     door.
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
@@ -31,13 +47,50 @@ const { chromium } = require('playwright');
       return [...out]; };
     const into = {}; for (const id of ids) for (const n of nb(id)) (into[n] = into[n] || new Set()).add(id);
     const hasBench = id => (ROOMS[id].ents || []).some(e => e[0] === 'bench');
-    const bosses = [], far = [];
+    const bosses = [], far = [], short = [], served = {};
+    // where in room `a` the way to room `b` is, in tiles along the floor: a
+    // depth door stands where it is drawn, a side exit is that edge, and a
+    // way up or down is the middle of its opening
+    const grids = {}; const grid = id => grids[id] || (grids[id] = buildRoom(id));
+    const doorX = (a, b2) => { const W = ROOMS[a].w;
+      for (const d of [].concat((typeof GATE_ROOM !== 'undefined' && GATE_ROOM[a]) || [])) if (d && d.to === b2) return Math.round(d.at * W);
+      const ex = ROOMS[a].exits || {};
+      for (const k in ex) { const v = ex[k], to = typeof v === 'object' ? v.to : v; if (to !== b2) continue;
+        if (k === 'L') return 0; if (k === 'R') return W;
+        const g = grid(a), row = g[k === 'T' ? 0 : g.length - 1]; const open = []; for (let x = 0; x < row.length; x++) if (row[x] !== '#') open.push(x);
+        return open.length && open.length < W - 4 ? Math.round((open[0] + open[open.length - 1]) / 2) : Math.round(W / 2); }
+      return Math.round(W / 2); };
+    // a way up or down is also that room's height to cross
+    const climb = (a, b2) => { const ex = ROOMS[a].exits || {}; for (const k in ex) { const v = ex[k], to = typeof v === 'object' ? v.to : v; if (to === b2 && (k === 'T' || k === 'B')) return ROOMS[a].h; } return 0; };
     for (const id of ids) for (const e of ROOMS[id].ents || []) {
       if (e[0] !== 'boss') continue;
       const ways = [...new Set([...(into[id] || []), ...nb(id)])].filter(q => !lair(q));
       const rest = hasBench(id) ? [id] : ways.filter(hasBench);
       bosses.push(id + ':' + e[3]);
-      if (!rest.length) far.push(id + ' (' + e[3] + ') — approached from ' + ways.join(', ') + ', none with a pod');
+      // ...or a short walk through one more door
+      let walk = null;
+      if (!rest.length) for (const n of ways) for (const m of nb(n)) {
+        if (m === id || lair(m) || !hasBench(m)) continue;
+        for (const be of ROOMS[m].ents.filter(q => q[0] === 'bench')) {
+          const d = Math.abs(be[1] - doorX(m, n)) + Math.abs(doorX(n, m) - doorX(n, id)) + climb(m, n) + climb(n, m) + climb(n, id);
+          if (!walk || d < walk.d) walk = { d, m, n };
+        }
+      }
+      if (rest.length) for (const q of rest) served[q] = 1;
+      else if (walk && walk.d <= 40) { served[walk.m] = 1; short.push(id + ' (' + e[3] + '): ' + walk.d + ' tiles from the pod in ' + walk.m + ', through ' + walk.n); }
+      else far.push(id + ' (' + e[3] + ') — approached from ' + ways.join(', ') + ', none with a pod' + (walk ? '; the nearest is ' + walk.d + ' tiles off in ' + walk.m : ''));
+    }
+    // a pod with no reason to be there; and two pods a short walk apart
+    const idle = [], close = [];
+    const benchRooms = ids.filter(hasBench);
+    const PIT = { V2: 1 };      // one-way drops that must hold a rest (tests/benchloop.cjs)
+    for (const id of benchRooms) if (!served[id] && id !== 'A0B' && !lair(id) && !PIT[id]) idle.push(id);
+    for (const a of benchRooms) for (const c2 of nb(a)) {
+      if (c2 <= a || !hasBench(c2) || lair(a) || lair(c2)) continue;
+      for (const pa of ROOMS[a].ents.filter(q => q[0] === 'bench')) for (const pc of ROOMS[c2].ents.filter(q => q[0] === 'bench')) {
+        const d = Math.abs(pa[1] - doorX(a, c2)) + Math.abs(pc[1] - doorX(c2, a)) + climb(a, c2) + climb(c2, a);
+        if (d < 60) close.push(a + ' and ' + c2 + ' (' + d + ' tiles)');
+      }
     }
     // every pod, in its live room
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1; sv.storyVersion = 2; startGame(sv);
@@ -62,9 +115,11 @@ const { chromium } = require('playwright');
         if (why) bad.push(id + ' pod at ' + tx + ',' + row + why);
       }
     }
-    return { bosses, far, pods: pods.length, bad };
+    return { bosses, far, short, idle, close, pods: pods.length, bad, rooms: benchRooms };
   });
-  check('every boss room has a save point one door away (' + r.bosses.length + ' bosses)', r.bosses.length >= 12 && r.far.length === 0, r.far.join(' | '));
+  check('every boss room has a save point one door away, or a short walk through one more (' + r.bosses.length + ' bosses)', r.bosses.length >= 12 && r.far.length === 0, r.far.join(' | ') || r.short.join(' | '));
+  check('...and a pod stands nowhere else: each one is near a boss, or is the den\'s, or is in a Sage\'s cave, or is at the bottom of a one-way drop', r.idle.length === 0, r.idle.length ? 'near nothing: ' + r.idle.join(', ') : r.rooms.join(' '));
+  check('...and no two pods are a short walk apart', r.close.length === 0, r.close.join(' | '));
   check('every pod stands on something, clear of a hazard (' + r.pods + ' pods)', r.pods >= 15 && r.bad.length === 0, r.bad.join(' | '));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
