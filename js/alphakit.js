@@ -81,9 +81,13 @@ function alphaFuryFire(b, px, py) {
   }
   if (typeof sfx === 'function') sfx('alpha_fury');
   cam.shake = Math.max(cam.shake, 13);
-  if (typeof roarWave === 'function') roarWave(cx, b.cy() - b.h * 0.3, ALPHA_RED);
+  // the roar itself: the room bends as it goes out, twice — the blast, and
+  // the note still ringing after it (js/ripple.js). Its own throw moved her;
+  // the wave only passes.
+  alphaWave(b, { R: 600, dur: 1.05, amp: 34, width: 70, col: ALPHA_RED, fronts: 3, gap: 0.12, nudge: 8, shimmer: 3.4, pulse: 0.26 });
+  alphaWave(b, { R: 680, dur: 1.5, amp: 12, width: 96, col: '#b06aff', fronts: 2, gap: 0.24, nudge: 0, delay: 0.6, dust: false, light: 0.5, pulse: 0, shimmer: 1.2 });
+  b.rumbleT = 0.7;
   if (typeof fx === 'function') {
-    fx('shock', cx, b.cy(), { rx: 330, ry: 330, dur: 0.6, col: ALPHA_RED, hot: ALPHA_HOT, power: 1.4 });
     fx('pillar', cx, fy, { rx: 120, ry: 420, dur: 0.8, col: ALPHA_RED, hot: ALPHA_HOT, power: 1.3 });
     fx('flash', cx, b.cy(), { rx: 240, ry: 240, dur: 0.3, col: ALPHA_RED, hot: '#ffffff', power: 1.3 });
     if (!G.artProbe) {
@@ -96,6 +100,14 @@ function alphaFuryFire(b, px, py) {
 // what the fury looks like for the rest of the fight: embers off its back,
 // and the ghosts of where it has just been whenever it moves fast
 function alphaFuryAura(b, dt) {
+  if ((b.auraT || 0) > 0) b.auraT -= dt;
+  // the note is HELD: the screen trembles under it for as long as it lasts
+  if ((b.rumbleT || 0) > 0) { b.rumbleT -= dt; cam.shake = Math.max(cam.shake, 3.2); }
+  // breath going IN before a howl: motes drawn to the muzzle from all round it
+  if ((b.st === 'broodcall' || b.st === 'furywarn') && alphaLive(b) && !G.artProbe && chance(dt * 40)) {
+    const a = rnd(0, 6.28), d = rnd(70, 150), mx = b.cx() + (b.face || -1) * b.w * 0.3, my = b.y + b.h * 0.25;
+    addPart(mx + Math.cos(a) * d, my + Math.sin(a) * d * 0.7, -Math.cos(a) * d * 2.4, -Math.sin(a) * d * 1.7, 0.36, b.st === 'furywarn' ? ALPHA_RED : '#ff8fb0', rnd(1.4, 2.4), 0, true);
+  }
   if (!b.fury || !alphaLive(b) || G.artProbe) return;
   if (chance(dt * 22))
     addPart(b.cx() + rnd(-b.w * 0.5, b.w * 0.5), b.y + rnd(0, b.h * 0.6), rnd(-24, 24) - (b.vx || 0) * 0.08, rnd(-90, -30),
@@ -233,7 +245,14 @@ function alphaHowlFx(b) {
   if (typeof fx !== 'function') return;
   const cx = b.cx(), fy = alphaFloorY(b);
   fx('pillar', cx, fy, { rx: 84, ry: 380, dur: 0.9, col: '#ff5f6d', hot: ALPHA_HOT, power: 1.1 });
-  fx('shock', cx, b.y + b.h * 0.2, { rx: 300, ry: 300, dur: 0.7, col: '#ff8a4a', hot: ALPHA_HOT, power: 0.9 });
+  // THE HOWL GOES THROUGH THE ROOM. Not rings drawn on it: the picture bends
+  // as each front of the note passes, the frame is nudged when it reaches
+  // her, and it moves her back a step. Then the note rings on, wider and
+  // fainter, after the wolf has closed its mouth.
+  alphaWave(b, { R: 500, dur: 1.0, amp: 28, width: 62, col: '#ff5f8a', fronts: 3, gap: 0.14, push: 190, nudge: 6, shimmer: 2.8, pulse: 0.2 });
+  alphaWave(b, { R: 600, dur: 1.4, amp: 10, width: 90, col: '#b06aff', fronts: 2, gap: 0.24, nudge: 0, delay: 0.55, dust: false, light: 0.5, pulse: 0, shimmer: 1.0 });
+  b.auraT = 1.3; b.rumbleT = 0.55;
+  fx('flash', cx + (b.face || -1) * b.w * 0.3, b.y + b.h * 0.25, { rx: 150, ry: 150, dur: 0.3, col: '#ff5f8a', hot: '#ffffff', power: 1.3 });
   if (!G.artProbe) for (let i = 0; i < 14; i++)
     addPart(cx + rnd(-60, 60), fy - rnd(0, 20), rnd(-30, 30), rnd(-220, -90), rnd(0.5, 0.9), chance(0.4) ? '#ffb38a' : '#ff5f6d', rnd(1.6, 2.6), -60, true);
 }
@@ -246,17 +265,50 @@ function alphaPackArrive(w) {
 function alphaRoarFx(b) {
   if (typeof fx !== 'function') return;
   const cx = b.cx(), fy = alphaFloorY(b);
-  fx('shock', cx, b.cy(), { rx: 260, ry: 260, dur: 0.5, col: TELL_COL, hot: '#fffbe8', power: 1.2 });
+  // out to the edge of the stun and no further: the bend ends where the
+  // roar's reach does, so what the eye sees is what the blow covers
+  alphaWave(b, { R: 262, dur: 0.5, amp: 24, width: 46, col: TELL_COL, fronts: 2, gap: 0.1, nudge: 6, shimmer: 2.2, pulse: 0.14 });
+  b.rumbleT = 0.3;
   if (!G.artProbe) {
     fx('ground', cx, fy - 2, { rx: 270, ry: 34, dur: 0.55, col: TELL_COL, hot: '#fff6df', power: 1.2 });
     fx('cracks', cx, fy + 3, { rx: 150, ry: 22, dur: 1.4, col: '#b06a1e', hot: '#fff6df', power: 1.0 });
   }
 }
 
+// a wave from its throat (js/ripple.js); the dust it drags runs on its floor
+function alphaWave(b, o) {
+  if (typeof shockRipple !== 'function') return null;
+  const w = shockRipple(b.cx() + (b.face || -1) * b.w * 0.3, b.y + b.h * 0.25, o);
+  if (w) w.gy = alphaFloorY(b);
+  return w;
+}
+// THE AURA. While it is drawing breath for a howl, howling, or burning, the
+// king stands in its own light: a soft body of colour that breathes, wider
+// with the note — a glow with no edge, never a ring.
+function alphaAura(c, b, cx) {
+  let k = 0, col = '255,95,138';
+  if (b.st === 'broodcall') k = 0.35 + 0.65 * Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62);
+  else if (b.st === 'howl') k = 1;
+  else if (b.st === 'furywarn') { k = 0.4 + 0.6 * Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62); col = '255,59,79'; }
+  else if (b.st === 'fury') { k = 1.2; col = '255,59,79'; }
+  else if ((b.auraT || 0) > 0) k = clamp(b.auraT / 1.3, 0, 1) * 0.8;
+  else if (b.fury) { k = 0.3; col = '255,59,79'; }
+  if (k <= 0.01) return;
+  const t = b.anim || 0, pulse = 1 + Math.sin(t * 9) * 0.06 + Math.sin(t * 23) * 0.025;
+  const R = (b.h * 1.5 + 70 * k) * pulse, ay = b.y + b.h * 0.45;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const g = c.createRadialGradient(cx, ay, 6, cx, ay, R);
+  g.addColorStop(0, 'rgba(' + col + ',' + Math.min(0.7, 0.52 * k).toFixed(3) + ')');
+  g.addColorStop(0.45, 'rgba(' + col + ',' + Math.min(0.4, 0.24 * k).toFixed(3) + ')');
+  g.addColorStop(1, 'rgba(' + col + ',0)');
+  c.fillStyle = g; c.beginPath(); c.ellipse(cx, ay, R * 1.15, R, 0, 0, 7); c.fill();
+  c.restore();
+}
 // ---- DRAWING -----------------------------------------------------------------
 // Behind the body: the floor it is about to tear or land on, and its ghosts.
 function alphaDrawUnder(c, b, cx) {
   if (G.artProbe || !alphaLive(b)) return;
+  alphaAura(c, b, cx);
   const fy = alphaFloorY(b);
   if (typeof tellFloorLight === 'function') {
     if (b.st === 'rendwarn') {

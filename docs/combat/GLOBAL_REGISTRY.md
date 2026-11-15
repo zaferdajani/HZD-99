@@ -452,3 +452,18 @@ No timing, damage, tell or opening changed. Measured over 45 s of each fight on 
 
 Also the leaping pack wolf (the hopper in the wolves' kingdoms) wears the threat display when she first comes into its ground and the low snarl between leaps; its machine is untouched.
 
+## Changelog — 2026-11-15 (owner, of the Alpha's howl: "looking like lines instead of aura ... should vibrate the screen a little bit, nudge it. Maybe push me backward one step ... blended with the screen in a wave-like shock effect")
+
+**A shock that bends the screen** (`js/ripple.js`, measured in `tests/alpha-kit.cjs` §E). The howl, the roar and the fury were stroked rings laid over the picture. They are now waves THROUGH it:
+
+| | before | after |
+|---|---|---|
+| the wave | three stroked circles and a flash (`roarWave`), a shader ring | no line anywhere: the finished frame redrawn through ring-shaped windows, enlarged by a half-sine across each band, so the room's own lines bow as each front passes — three fronts for a howl, the note ringing on in a second, wider, fainter train |
+| light | the ring's stroke | a wide soft band of the wave's colour on the crest, a shade of dark in the trough, and a breath of that colour over the whole frame on the instant it fires |
+| the air | — | the picture shimmers inside the first front while the note is strong |
+| the king | — | stands in an aura that grows through the wind-up and breathes with the note; motes are drawn to its muzzle as it draws breath |
+| the screen | shake 7 at the howl | the same, then a held tremble for the length of the note, and a nudge of the frame (5-8 px, the way the wave is travelling) when the front reaches her |
+| her | nothing (howl); stun inside 260 px (roar); thrown (fury) | the howl pushes her back one step (~20 px) when it reaches her, no damage; roar and fury unchanged — the roar's wave ends at 262 px, where its stun does |
+
+Reduced motion keeps the wave, its light and the step back, and drops the bend, the shimmer and the nudge. The low quality tier bends one front with half the sub-rings. Nothing is drawn under the art probe. The interface never bends: the wave is laid before the HUD.
+

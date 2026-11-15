@@ -847,6 +847,7 @@ function updateParts(dt) {
   // the shader effects ride the particles' clock: wherever the simulation
   // advances its sparks (and slows them, through a hit-stop), it advances these
   if (typeof fxglUpdate === 'function') fxglUpdate(dt);
+  if (typeof rippleUpdate === 'function') rippleUpdate(dt);
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i];
     p.life -= dt;

@@ -16569,6 +16569,9 @@ function draw(tms) {
   // before the interface goes on, and only in the moments a crossing could
   // actually start: a full-backbuffer blit every frame of the game to serve a
   // third of a second at a doorway is not a trade worth making.
+  // a shock wave bends the finished picture as it passes — the world and its
+  // grade, never the interface, which goes on after this (js/ripple.js)
+  if (typeof rippleDraw === 'function') rippleDraw(c);
   holdFrameNearExit();
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();

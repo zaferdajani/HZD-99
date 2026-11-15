@@ -923,7 +923,7 @@ function alphaStep(b, dt, px, py) {
       if (typeof alphaHowlFx === 'function') alphaHowlFx(b);
       sfx('alpha_howl'); cam.shake = Math.max(cam.shake, 7);
       if (typeof padRumble === 'function') padRumble(0.7, 0.5, 380);
-      if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ff8a4a');
+      // (no stroked rings: the howl is a wave through the picture — js/alphakit.js)
     }
     if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.6); }
   } else if (b.st === 'roarwarn') {
@@ -945,7 +945,7 @@ function alphaStep(b, dt, px, py) {
       }
       sfx('alpha_bark'); cam.shake = Math.max(cam.shake, 11);
       if (typeof alphaRoarFx === 'function') alphaRoarFx(b);
-      if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ffc24a');
+      // (the roar's wave is alphaRoarFx's too: bent light, not a drawn ring)
       burst(b.cx(), b.cy(), 18, '#ffe6b8', 300, 0.6, 0, 3, true);
     }
     // THE ONE GIFT IS THE MISSED LEAP, not this: standing outside the ring is

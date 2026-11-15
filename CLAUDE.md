@@ -424,6 +424,7 @@ the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
 | `wolfhunt.js` | the pack hunts: a wolf notices her, shows its teeth, charges, stalks, bites from the distance its lunge covers, thrashes a bite that lands, and rolls under her finisher (`tests/wolf-hunt.cjs`) |
 | `alphakit.js` | the Wolf King's own moves — the REND, the FURY, the fury leap's QUAKE — and the effect every Alpha move wears (`tests/alpha-kit.cjs`) |
 | `boss-fx.js` | the guardians' shared effect beats — a wind-up gathers light, the strike that follows fires one at the body, a hard landing goes through the ground — for every sage and micro-boss but NULLFANG and the Alpha, which place their own (`tests/boss-fx.cjs`) |
+| `ripple.js` | a shock that bends the screen: the finished frame redrawn through ring-shaped windows so the picture itself bows as a wave passes, with a soft wash, a shimmer behind the front, a frame nudge and an optional step back — the Alpha's howl, roar and fury (`shockRipple`) |
 | `warp.js` | `?room=<id>` — the owner's jump into any room, behind the Forge's own passphrase. Inert without the query string; its own save slot |
 
 **State.** One global `G` holds the run (`G.state`, `G.enemies`, `G.save`,

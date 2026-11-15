@@ -27,8 +27,9 @@ const { chromium } = require('playwright');
       const sv = newSave(1); sv.time = 99; sv.flags.tut = sv.flags.woke = 1; startGame(sv); loadRoom('A10');
       G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.gateWalk = G.bossEntry = null; G.toasts = [];
       const b = G.boss; b.meet = null; b.st = 'rest'; b.t = 0.4; b.dark = 0; b.fade = 0; G.enemies = G.enemies.filter(e => e === b);
-      const heard = [], fxs = []; const sfxWas = sfx, fxWas = fx;
+      const heard = [], fxs = [], rips = []; const sfxWas = sfx, fxWas = fx, srWas = shockRipple;
       sfx = (n) => { heard.push(n); }; fx = (k, x, y, o) => { fxs.push(k); return fxWas(k, x, y, o); };
+      shockRipple = (x, y, o) => { rips.push(Object.assign({}, o)); return srWas(x, y, o); };
       // settle it on its floor, with her far away and untouchable
       for (let i = 0; i < 30; i++) { player.iT = 9; b.st = 'rest'; b.t = 0.4; update(1 / 60); }
       const floorY = b.y + b.h;
@@ -94,7 +95,8 @@ const { chromium } = require('playwright');
       run(300, (i) => { if (b.st === 'furywarn') { warn++; put(150); } if (b.fury && fired < 0) fired = i;
         if (fired >= 0) { far = Math.max(far, (player.x - x0) * side); if (++n > 50) return false; } });
       out.warn = warn / 60; out.TELL_HEAVY = TELL_HEAVY; out.thrown = far; out.cores = c0 - player.cores; out.fury = !!b.fury;
-      out.heard = ['alpha_furywarn', 'alpha_fury'].filter(n => heard.includes(n)); out.fx = ['shock', 'pillar', 'gather'].filter(k => fxs.includes(k));
+      out.heard = ['alpha_furywarn', 'alpha_fury'].filter(n => heard.includes(n)); out.fx = ['pillar', 'gather'].filter(k => fxs.includes(k));
+      out.waves = rips.length; out.rings = ROARFX.length;
       // it rests after it, and it never happens twice
       let rest = 0, again = 0; run(400, () => { player.iT = 9; if (b.st === 'rest') rest = Math.max(rest, b.t); if (b.st === 'furywarn') again++; });
       out.rest = rest; out.again = again;
@@ -107,7 +109,7 @@ const { chromium } = require('playwright');
     check('   at half the midpoint stagger is still hers, and the blow in progress is finished first', !B.cut && B.sawRoar && B.stag >= 1.3, 'staggered ' + B.stag.toFixed(2) + ' s, then ' + (B.sawRoar ? 'the roar, then ' : '') + B.st);
     check('   it is warned for TELL_HEAVY, in its own voice', Math.abs(B.warn - B.TELL_HEAVY) <= 0.05 && B.heard.length === 2, B.warn.toFixed(3) + ' s (' + B.TELL_HEAVY + '); heard ' + B.heard.join(','));
     check('   the roar THROWS her and does not hurt her', B.thrown >= 60 && B.cores === 0, 'thrown ' + B.thrown.toFixed(0) + ' px, cores lost ' + B.cores);
-    check('   ...with the light of it', B.fx.length === 3, B.fx.join(','));
+    check('   ...with the light of it, and a wave through the room instead of drawn rings', B.fx.length === 2 && B.waves >= 2 && B.rings === 0, B.fx.join(',') + '; ' + B.waves + ' waves, ' + B.rings + ' stroked rings');
     check('   it rests afterwards, and it happens once', B.rest >= 0.5 && B.again === 0, 'rest ' + B.rest.toFixed(2) + ' s, again ' + B.again);
     check('   from then on it leaves its ghosts behind it when it moves fast', B.ghosts >= 2, B.ghosts + ' ghosts in a leap');
 
@@ -143,7 +145,8 @@ const { chromium } = require('playwright');
     const D = await page.evaluate(new Function(`return (async () => { ${stage}
       const move = (band, alt, dx, done) => { fxs.length = 0; heard.length = 0; put(dx); b.alphaAlt = alt; ask(band, false);
         let st = []; run(260, () => { player.iT = 9; put(dx); if (st[st.length - 1] !== b.st) st.push(b.st); if (st.length > 2 && b.st === 'rest') return false; });
-        return { st: st.join('>'), fx: fxs.filter((k, i) => fxs.indexOf(k) === i).sort().join(','), heard: heard.filter((k, i) => heard.indexOf(k) === i).join(',') }; };
+        return { st: st.join('>'), fx: fxs.filter((k, i) => fxs.indexOf(k) === i).sort().join(','), heard: heard.filter((k, i) => heard.indexOf(k) === i).join(','),
+          waves: rips.splice(0).map(r => ({ R: r.R, push: r.push || 0 })), rings: ROARFX.length }; };
       const out = {};
       out.claw = move(0, false, 60);     // alphaAlt flips to true: the claw
       out.bite = move(0, true, 60);      // ...to false: the bite
@@ -155,8 +158,38 @@ const { chromium } = require('playwright');
     })()`));
     check('D. the claw draws its arc and has its own sound', /claw/.test(D.claw.st) && /slash/.test(D.claw.fx) && /alpha_claw/.test(D.claw.heard), D.claw.st + ' | fx ' + D.claw.fx + ' | ' + D.claw.heard);
     check('   the bite flashes at the jaw and snaps', /bite/.test(D.bite.st) && /flash/.test(D.bite.fx) && /alpha_snap/.test(D.bite.heard), D.bite.st + ' | fx ' + D.bite.fx + ' | ' + D.bite.heard);
-    check('   the roar goes through the ground it stands on', /roar/.test(D.roar.st) && /shock/.test(D.roar.fx) && /ground/.test(D.roar.fx) && /alpha_bark/.test(D.roar.heard), D.roar.st + ' | fx ' + D.roar.fx);
+    check('   the roar goes through the ground it stands on, and its wave ends where its stun does', /roar/.test(D.roar.st) && /ground/.test(D.roar.fx) && /alpha_bark/.test(D.roar.heard)
+      && D.roar.waves.length >= 1 && D.roar.waves.every(w => w.R <= 262) && D.roar.rings === 0, D.roar.st + ' | fx ' + D.roar.fx + ' | waves ' + D.roar.waves.map(w => w.R).join(','));
     check('   the howl raises its pillar, and the pack it calls arrives hunting', /howl/.test(D.howl.st) && /pillar/.test(D.howl.fx) && D.pack.length >= 1 && D.pack.every(p => p.hunt), D.howl.st + ' | fx ' + D.howl.fx + ' | ' + D.pack.length + ' wolves');
+    check('   ...and the howl is a wave through the room, not rings drawn on it', D.howl.waves.length >= 2 && D.howl.waves.some(w => w.push > 0) && D.howl.rings === 0, D.howl.waves.length + ' waves, ' + D.howl.rings + ' stroked rings');
+
+    // ---- E. THE HOWL'S WAVE -------------------------------------------------------
+    // (owner, 2026-11-15: "the circles coming from it when it howls ... looking like
+    // lines instead of aura ... should vibrate the screen a little bit, nudge it.
+    // Maybe push me backward one step ... blended with the screen in a wave-like
+    // shock effect")
+    const E = await page.evaluate(new Function(`return (async () => { ${stage}
+      G.enemies = G.enemies.filter(e => e === b);
+      const howl = (opts) => { RIPPLES.length = 0; RIPPLE.nudgeT = 0; const side = put(200); player.iT = 0; b.face = side; b.vx = 0;
+        b.st = 'broodcall'; b.t = TELL_HEAVY; b.windT = TELL_HEAVY; b.fired = false; G.save.opts = G.save.opts || {}; G.save.opts.reduceMotion = !!opts.calm; G.artProbe = opts.probe ? 1 : 0;
+        const c0 = player.cores, x0 = player.x; let fired = -1, bent = 0, bentMax = 0, nudged = 0, shook = 0, far = 0, live = 0, aura = 0;
+        for (let i = 0; i < 200; i++) { update(1 / 60); G.hitStop = 0; G.enemies = G.enemies.filter(e => e === b);
+          if (b.st === 'howl' && fired < 0) fired = i;
+          if (fired >= 0) { if (b.st !== 'howl' && b.st !== 'rest') { b.st = 'rest'; b.t = 2; }
+            draw(performance.now()); if (RIPPLE.bent > 0) bent++; bentMax = Math.max(bentMax, RIPPLE.bent); if (RIPPLE.nudgeT > 0) nudged++; if (RIPPLES.length) live++;
+            if (cam.shake >= 2) shook++; far = Math.max(far, (player.x - x0) * side); }
+        }
+        G.artProbe = 0; G.save.opts.reduceMotion = false;
+        return { fired, bent, bentMax, nudged, shook, live, pushed: far, lost: c0 - player.cores, left: RIPPLES.length }; };
+      const out = { plain: howl({}), calm: howl({ calm: 1 }), probe: howl({ probe: 1 }) };
+      sfx = sfxWas; fx = fxWas; shockRipple = srWas; return out;
+    })()`));
+    check('E. the howl bends the picture as it passes, for most of a second and a half', E.plain.fired >= 0 && E.plain.bent >= 60 && E.plain.bentMax >= 16, E.plain.bent + ' frames bent, up to ' + E.plain.bentMax + ' sub-rings in one frame');
+    check('   it pushes her back one step and costs her nothing', E.plain.pushed >= 12 && E.plain.pushed <= 60 && E.plain.lost === 0, 'pushed ' + E.plain.pushed.toFixed(0) + ' px, cores lost ' + E.plain.lost);
+    check('   the frame is nudged when it reaches her, and the screen trembles under the note', E.plain.nudged >= 6 && E.plain.shook >= 20, E.plain.nudged + ' frames nudged, ' + E.plain.shook + ' frames trembling');
+    check('   ...and it ends: nothing is left bending the room afterwards', E.plain.left === 0, E.plain.left + ' waves left after 3 s');
+    check('   reduced motion keeps the wave and the step back, and drops the bend and the nudge', E.calm.live >= 60 && E.calm.bent === 0 && E.calm.nudged === 0 && E.calm.pushed >= 12, E.calm.live + ' frames alive, ' + E.calm.bent + ' bent, ' + E.calm.nudged + ' nudged, pushed ' + E.calm.pushed.toFixed(0));
+    check('   and the art probe sees none of it', E.probe.bent === 0, E.probe.bent + ' frames bent');
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await browser.close(); }
   console.log(fails.length ? '\nFAILED ' + fails.length + ': ' + fails.join('; ') : '\nalpha-kit: all checks passed');

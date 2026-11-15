@@ -134,6 +134,10 @@ const check = (name, ok, detail) => {
       setRun(stage);
       const e = spawn('crawler', zone, 240);
       const holdX = e.x;
+      // a pack wolf (the control, in the wolves' kingdoms) bites from the
+      // distance its lunge covers and no further (js/wolfhunt.js): pinned in
+      // place it can never close the gap, so she stands inside its reach
+      const stand = (typeof isWolf === 'function' && isWolf(e)) ? Math.min(100, wolfReach(e) - 16) : 100;
       let warnFrames = 0, warnHits = 0, liveFrames = 0, liveHits = 0;
       let lanceSeen = false, told = null, fired = null, windedFrames = 0, lungeSeen = false;
       let windedSeen = false;
@@ -147,7 +151,7 @@ const check = (name, ok, detail) => {
         } else if ((e.lanceT || 0) > 0) {
           park(e.lanceX + FACET_REACH / 2 - player.w / 2, floorY - player.h);
         } else {
-          park(holdX + 100, floorY - player.h);
+          park(holdX + stand, floorY - player.h);
         }
         hits = [];
         e.update(DT);
@@ -183,10 +187,11 @@ const check = (name, ok, detail) => {
       setRun(stage);
       const e = spawn('crawler', zone, 240);
       const holdX = e.x;
+      const stand = (typeof isWolf === 'function' && isWolf(e)) ? Math.min(120, wolfReach(e) - 16) : 120;
       let coil = 0, facetF = 0, sawCoil = false;
       for (let i = 0; i < 900; i++) {
         e.x = holdX; e.vx = 0;
-        park(holdX + 120, floorY - player.h);
+        park(holdX + stand, floorY - player.h);
         e.update(DT);
         if ((e.coilT || 0) > 0) { coil++; sawCoil = true; }
         if (e.facetT > 0) facetF++;

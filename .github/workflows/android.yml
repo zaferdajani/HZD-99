@@ -9,6 +9,9 @@ on:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    # the last step replaces one file on the rolling `android-latest` release
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -53,3 +56,25 @@ jobs:
         with:
           name: clawbyte-android-debug
           path: android/app/build/outputs/apk/debug/*.apk
+
+      # A FIXED LINK FOR A PHONE (owner, 2026-11-15: "a way to download it
+      # directly to an Android mobile"). An Actions artifact is a zip behind a
+      # GitHub sign-in, which is a poor thing to hand a phone's browser. Every
+      # build of main also replaces one file on one rolling pre-release, so
+      #   https://github.com/<owner>/<repo>/releases/download/android-latest/CLAWBYTE.apk
+      # is always the newest APK, as an .apk: open it on the phone, download,
+      # tap, allow the install. A debug-signed build — for the owner's own
+      # devices, not a store submission.
+      - name: Publish the APK at a fixed link
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk CLAWBYTE.apk
+          NOTES="The newest Android build of CLAWBYTE, replaced on every update of main. Built from ${GITHUB_SHA} on $(date -u +%Y-%m-%d). Debug-signed: install it by opening CLAWBYTE.apk on the phone and allowing the install."
+          if gh release view android-latest --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit android-latest --repo "$GITHUB_REPOSITORY" --notes "$NOTES"
+          else
+            gh release create android-latest --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" --title "CLAWBYTE for Android — latest build" --notes "$NOTES"
+          fi
+          gh release upload android-latest CLAWBYTE.apk --repo "$GITHUB_REPOSITORY" --clobber

@@ -15,6 +15,30 @@ npm run app:apk            # needs the Android SDK; emits app-debug.apk
 `npm run app:pack` alone just assembles `www/` (2 pages + 70.5 MB of assets,
 ~72.6 MB total) so you can inspect exactly what would ship.
 
+## Get it onto an Android phone
+
+Android needs no Mac and no signing account: the build CI makes on every update
+of `main` (`.github/workflows/android.yml`) is a debug-signed APK that installs
+as it is.
+
+- **Straight onto the phone.** The newest APK is always at one fixed link —
+  `https://github.com/zaferdajani/HZD-99/releases/download/android-latest/CLAWBYTE.apk`
+  (the rolling `android-latest` pre-release, replaced by every build). Open it
+  in the phone's browser, download, tap the file, and allow the browser to
+  install apps when Android asks (once).
+- **By USB cable, as a file.** Plug the phone in, choose *File transfer* on the
+  phone, copy `CLAWBYTE.apk` into its Downloads folder, then tap it in the
+  phone's Files app.
+- **By USB cable, with adb.** On the phone: Settings → About phone → tap *Build
+  number* seven times, then Developer options → *USB debugging*. On the
+  computer, with Android platform-tools: `adb install -r CLAWBYTE.apk`.
+
+Each Actions run also keeps the same APK as the `clawbyte-android-debug`
+artifact (a zip, behind a GitHub sign-in, 90 days).
+
+iOS is not the same road: the `clawbyte-ios-unsigned` artifact cannot be
+installed until Xcode has signed it on a Mac — see `docs/IOS_APP_STORE.md`.
+
 ## What the shell changes, and why
 
 **The score starts with the picture.** On the web no browser will play audio
