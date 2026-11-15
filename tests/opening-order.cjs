@@ -173,7 +173,15 @@ async function play(browser, mode) {
       // the pages are part of the story's order: the letter is READ in pages
       const pk = s.pan ? s.pan.id + '|' + s.pan.i : '';
       if (s.pan && pk !== lastDialog) { lastDialog = pk; R.dialogs.push({ step: s.step, room: s.room, panels: s.pan.id, cap: s.pan.cap, line: '' }); }
-      await steer(null); await page.keyboard.press('Enter'); await page.waitForTimeout(350); continue;
+      // A PRESS A PERSON COULD MAKE. The pages count a confirm on RELEASE and tell
+      // a tap from a hold by how long the key was down (js/panels.js), so the key
+      // has to be down across at least one frame. A zero-length press — down and
+      // up in the same millisecond — lands between two frames nine times in ten
+      // and is never seen: measured 2026-11-15, one captioned page then took
+      // anything from 3 to 26 seconds of such presses, the run's 240 s were spent
+      // on luck, and the harness failed in a different place each time (the
+      // monument, the road east, the den door). 70 ms is a quick human tap.
+      await steer(null); await page.keyboard.press('Enter', { delay: 70 }); await page.waitForTimeout(280); continue;
     }
     // ---- the repair board, by its own buttons ----
     if (s.state === 'REPAIR') {
