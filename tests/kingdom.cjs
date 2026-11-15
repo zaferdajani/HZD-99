@@ -264,7 +264,12 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           const dest = ROOMS[def.to];
           const guard = dest && dest.cave && !G.roomDef.cave && def.to[0] === 'G';
           const integrated = def.gx != null && ROOM_VISTA[id] && !INTERIOR_FIT[ROOM_VISTA[id]] && (G.roomDef.cave || (dest && dest.cave));
-          const key = integrated ? ROOM_VISTA[id] : guard ? GATE_PLATE_BY_ZONE[G.roomDef.zone] : (dest && dest.cave && !def.style) ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone] : null;
+          // A RING, wherever one stands (owner, 2026-11-15; ringGateFor in
+          // js/game.js): the machine ring is the door's plate now, in front of
+          // a painted opening as much as in a bare wall. The mouth and vista
+          // families keep the job only where no ring does.
+          const ring = typeof ringGateFor === 'function' ? ringGateFor(def) : null;
+          const key = ring || (integrated ? ROOM_VISTA[id] : guard ? GATE_PLATE_BY_ZONE[G.roomDef.zone] : (dest && dest.cave && !def.style) ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone] : null);
           // Meadow guardian doors use the cave-mouth fallback; named NPC
           // structures have their own plates. They need the same load barrier
           // as the other guardian plates before their visibility is measured.

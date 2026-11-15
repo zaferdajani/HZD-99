@@ -168,6 +168,13 @@ const MEDIA_SRC = {
     gateConduits: 'assets/backgrounds/gate_conduits.jpg',
     gateNest: 'assets/backgrounds/gate_nest.jpg',
     gateDeep: 'assets/backgrounds/gate_deep.jpg',
+    // THE RING GATES — the machine ring every walk-in passage wears (drawRingGate,
+    // js/game.js): a fired plate with a real hole in it, the live field drawn
+    // behind it by the engine. Cut and measured by tools/ringgate.cjs.
+    ringCave: 'assets/backgrounds/ring_cave.webp',
+    ringDen: 'assets/backgrounds/ring_den.webp',
+    ringMeadow: 'assets/backgrounds/ring_meadow.webp',
+    ringQuarry: 'assets/backgrounds/ring_quarry.webp',
     // CAVE MOUTHS (§2f) — irregular rock openings, never doors, one material
     // family per grotto network, all sharing one composition so one anchor
     // rule covers the family.

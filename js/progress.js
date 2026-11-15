@@ -285,7 +285,7 @@ function pgRouteStep() {
   if (PG_ROUTE.step) PG_ROUTE.step.goal = goal;
   return PG_ROUTE.step;
 }
-// the depth door the route goes through, if it goes through one (drawDoorSigns)
+// the depth door the route goes through, if it goes through one (drawRingGate turns that ring gold)
 function pgRouteDoor() { const s = pgRouteStep(); return s && s.gate ? s.gate : null; }
 // where that step IS in this room, in world pixels: [x, y, direction]
 function pgRouteSpot(step) {
@@ -579,14 +579,12 @@ function drawProgressGround(c) {
   // CV3 after the forge: the cut stump where the marble came free, and the
   // maintenance passage lit from inside
   if (G.roomId === 'CV3' && f.pl_cshard) pgDrawStump(c, f);
+  // (THE PASSAGE'S OWN LIGHT IS ITS RING NOW. This used to lay a 190 px haze of
+  // blue over the door to say "lit from inside" — the only sign the keeper's
+  // door had — and over the ring gate it was a fog standing in front of the
+  // best thing in the room. The ring's field says it; only the motes stay.)
   if (G.roomId === 'CV3' && f.crystal && !f.sageTame_GA1D) {
-    const dx = W_CV3_DOOR() , fy = pgFloorY(dx), pu = 0.6 + Math.sin(now * 2.1) * 0.4;
-    c.save(); c.globalCompositeOperation = 'lighter';
-    const g = c.createRadialGradient(dx, fy - 70, 6, dx, fy - 70, 190);
-    g.addColorStop(0, 'rgba(120,200,255,' + (0.28 + pu * 0.14).toFixed(3) + ')');
-    g.addColorStop(1, 'rgba(120,200,255,0)');
-    c.fillStyle = g; c.beginPath(); c.ellipse(dx, fy - 70, 190, 150, 0, 0, 7); c.fill();
-    c.restore();
+    const dx = W_CV3_DOOR(), fy = pgFloorY(dx);
     if (chance(0.3)) addPart(dx + rnd(-40, 40), fy - rnd(20, 120), rnd(-14, 14), rnd(-30, 6), 1.2, '#9fdcff', 2, -8, true);
   }
 }

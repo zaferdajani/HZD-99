@@ -223,6 +223,16 @@ it global. Consequences:
   openings — never rectangular doors; built gates vary in shape per zone
   (see ART_QUEUE briefs). Only the CITY gate is the huge epic multilayer
   monument.
+- **A walk-in passage is a MACHINE RING** (owner, 2026-11-15, refusing outline
+  arches drawn in light: "you end up with neon doors?... We are in a universe
+  full of robots... something that looks like a Stargate"). Every depth door
+  that is not a shop front, the city monument or a kingdom's guardian gate
+  stands a fired ring plate with a real hole in it (`RING_GATE`,
+  `drawRingGate` in js/game.js; ART_QUEUE §2bp). A cave's ring is braced INTO a
+  rock mouth, so the line above still holds. The field in the ring is the
+  engine's light and carries the state — live, gold for the errand's door,
+  dead while buried. **Never mark a door with a drawn outline, arrow-arch or
+  sign again**: a door is recognised by being an object. `tests/ring-gate.cjs`.
 - **Elevations, steps and obstacles MIMIC OBJECTS FROM THE ROOM'S
   BACKGROUND** (owner, 2026-08-15): a ledge in the city is a vent housing, a
   crate stack, a fallen sign — the same furniture the backdrop paints — so

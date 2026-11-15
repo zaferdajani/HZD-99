@@ -56,7 +56,18 @@
 // Only CLAWBYTE's machine world is rimmed. NOSTOS draws its own creatures and
 // has not been measured by tests/contrast.cjs; a change it was not measured
 // against is not one this file makes for it.
-const FOE_READ = { on: true, sil: false, alpha: 0.62, width: 1.5, q: 1, feather: 1.8 };
+// AN EDGE, NOT AN AURA (owner, 2026-11-15, having met the pack and its King:
+// "what is the alpha and the other enemies having light aura around them? It
+// breaks the blending with the surrounding"). The rim was laid at 0.62 alpha,
+// a pixel and a half wide and feathered by nearly two more: against a dark
+// room that is a pale glowing outline round every body, and on a body as large
+// and as light as the Wolf King it read as a halo stuck on a cut-out. It is
+// the same rim at well under half the strength, thinner, and barely feathered
+// — the edge light a painter leaves on a figure, which lifts it off the ground
+// without drawing a line round it. Photographed with it at 0.62, off, and
+// here: at this level the body sits in its room, and its silhouette edge is
+// still lighter than the room behind it.
+const FOE_READ = { on: true, sil: false, alpha: 0.24, width: 1.1, q: 1, feather: 0.9 };
 const FOE_RIM = Object.freeze({
   A: '#ffe6d6',   // teal yard → warm peach-white       (ΔE 59 to its glow/edge)
   B: '#fff0dc',   // blue conduits → ivory              (ΔE 61)

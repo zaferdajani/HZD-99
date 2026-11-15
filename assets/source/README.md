@@ -119,6 +119,14 @@ was refused, the six-cell strip they replace, a size check against her jab's
 standing cell and the dive photographed in the game. `prompts.json` has the
 prompts, the job ids and the exact cut.
 
+`gates/ring_*` are THE RING GATES (2026-11-15, owner: "we are in a universe
+full of robots... something that looks like a Stargate"). Four machine rings as
+fired — quarry, meadow, the Wolf King's fanged den, and one braced into a cave
+mouth — each with a true hole in it; the field in the hole is the engine's
+light. `ring_prompts.json` has the brief, the job ids and what is not done;
+`ring_ingame.jpg` is the four standing in the game; `tools/ringgate.cjs` cuts
+the shipped copies and measures the openings.
+
 `beasts/wolf3/` is THE PACK'S AGGRESSIVE SET (2026-11-15, owner: "find wolves,
 see how they move, how they attack, how they roll, and replicate it with the
 wolves that we have as robots ... concentrate on the aggressive attacking moods

@@ -21,6 +21,38 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bp. THE RING GATES — every walk-in passage is a machine ring ✔ FIRED AND WIRED 2026-11-15 (owner's order, this thread)
+
+The owner on the outline arches that first answered "the doors fade into the
+background": *"You have all the tools to build up awesome doors, and you end up
+with neon doors?... We are in a universe full of robots... something that looks
+like a Stargate."* The outline pass (`drawDoorSigns`) is deleted. In its place:
+
+| plate | job | stands at |
+|---|---|---|
+| `backgrounds/ring_quarry.webp` | `94c0203a` | the keeper's maintenance passage, CV3 ↔ GA1T |
+| `backgrounds/ring_meadow.webp` | `36e2377d` | every passage out of the meadow's open rooms (A5 → CV1, A4 → GA1) |
+| `backgrounds/ring_den.webp` | `0a219dfd` | the Wolf King's den, A2 ↔ A10, and the grotto door inside it |
+| `backgrounds/ring_cave.webp` | `378bae95` | every passage inside a cave or grotto, all kingdoms |
+
+GPT Image 2.6, 1:1, transparent, `gate_conduits.jpg` as style reference. True
+alpha and a closed ring on all four; `tools/ringgate.cjs` cuts the shipped copies
+and measures each opening into `RING_GATE` (js/game.js). The field in the ring is
+the engine's light — live in its place's colour, GOLD on the door the errand goes
+through, DEAD while the passage is buried — so one plate carries all three states.
+`tests/ring-gate.cjs` holds it. Archive: `assets/source/gates/ring_*`.
+
+**Still owed, in firing order:**
+1. **The five guardian gates' openings.** `gate_{conduits,foundry,archives,nest,deep}.jpg`
+   are opaque rectangles with a painted interior, so they cannot take the live
+   field. Re-fire each on a transparent ground with an EMPTY opening (same brief
+   shape as above, its own kingdom's monument as the shape reference), run
+   `tools/ringgate.cjs`, add the row.
+2. **The shop fronts are not rings and should not be** — a stall is a building.
+3. **STORY session:** the comic page `passage` (js/panels.js) still draws the
+   quarry door as a riveted steel slab. Re-fire it with `ring_quarry.webp` as the
+   door's reference.
+
 ## 2bo. THE SEALS' CUTS — six crest arcs over her swing ✱ QUEUED 2026-10-12 (code session, handoff Part 2 C1)
 
 A seal of two or more sockets now changes how she fights (`CREST_ATTACK` in

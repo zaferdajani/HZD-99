@@ -1400,6 +1400,7 @@ function loadRoom(id) {
   G.save.visited[id] = 1;
   if (typeof questVisit === 'function') questVisit(id);
   rubbleInit();          // the buried mouth, if this room has one
+  ringGateWant();        // ...and the ring at every door this room has, built yet or not
   // THE BAKED FLOOR COMES FROM THE ROOM'S OWN CACHE. Rebuilding it on every
   // crossing — even into the room she just left — was most of the hitch at a
   // doorway (see TILE CACHE below); a room baked ahead of her arrives baked.
@@ -11276,57 +11277,174 @@ function structBeacon(cx2, gy, w, h, k, cold) {
 }
 function gateDoorNear(def) {
   if (def.style) return true;                       // booth, shrine, forge, carrel, hollow
+  if (ringGateFor(def)) return true;                // a ring is an object she walks up to
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
   return !!((G.roomDef && G.roomDef.cave) || (dest && dest.cave));   // and cave mouths
 }
-// A DOOR SAYS IT IS A DOOR (owner, 2026-11-15: "the doors that open in the
-// background... it's faded in the background, does not show as a unique
-// characteristics, unique object. So it's hard to find and hard to recognize in
-// the beginning as a new player that this is a door I need to go through").
+// EVERY DOOR IS A MACHINE RING (owner, 2026-11-15, on the outline arches this
+// replaces: "You have all the tools to build up awesome doors, and you end up
+// with neon doors?... We are in a universe full of robots. Why would you put a
+// neon door instead of something more awesome, something that looks like a
+// Stargate").
 //
-// A depth door is a painting of an opening standing in a painting of a wall.
-// What it never had is the one thing every other interactable in the game has:
-// a mark that is the same on all of them. So every door that exists right now
-// wears the same three things, in light, in the cast's own plane:
-//   - its OUTLINE — two jambs and an arch — drawn round the opening;
-//   - a pool of that light on the floor in front of it;
-//   - two chevrons over it, pointing up, because UP is what walks her in.
-// Pale blue for a door; amber for one still buried; and GOLD for the door the
-// errand she was given goes through (pgRouteDoor, js/progress.js). Light only —
-// the structure itself stays the fired plate's job.
-function drawDoorSigns() {
-  if (!player || G.state !== 'PLAY' || G.artProbe || G.structProbe || G.gateWalk || G.cut || G.dialog || G.trans) return;
-  let list = [];
-  try { list = gateDoors(); } catch (e) { return; }
-  if (!list.length) return;
-  const route = typeof pgRouteDoor === 'function' ? pgRouteDoor() : null;
-  const now = performance.now();
-  let drawn = 0;
-  for (const d of list) {
-    const wx = gateWorldX(d);
-    if (Math.abs(wx - (cam.x + 480)) > 760) continue;
-    const gc = typeof groundColumnAt === 'function' ? groundColumnAt(wx) : null;
-    const wy = gc && gc.length ? Math.min.apply(null, gc) : (G.roomDef.h - 2) * TILE;
-    const buried = !!(typeof rubbleFor === 'function' && rubbleFor(d));
-    const goal = !!route && route.to === d.to;       // (a door table row is rebuilt on every read: the destination is its name)
-    const pu = 0.5 + 0.5 * Math.sin(now / 420 + wx * 0.011);
-    const col = goal ? '255,215,106' : buried ? '255,186,116' : '176,236,255';
-    const HW = 44, HT = 116, k0 = buried ? 0.55 : 1;
-    c.save();
-    c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
-    const tg = c.createRadialGradient(wx, wy, 2, wx, wy, 78);
-    tg.addColorStop(0, 'rgba(' + col + ',' + ((0.30 + 0.16 * pu) * k0).toFixed(3) + ')'); tg.addColorStop(1, 'rgba(' + col + ',0)');
-    c.fillStyle = tg; c.beginPath(); c.ellipse(wx, wy, 78, 9, 0, 0, 7); c.fill();
-    const arch = () => { c.beginPath(); c.moveTo(wx - HW, wy - 3); c.lineTo(wx - HW, wy - HT + HW); c.arc(wx, wy - HT + HW, HW, Math.PI, 0); c.lineTo(wx + HW, wy - 3); };
-    c.strokeStyle = 'rgba(' + col + ',' + ((0.10 + 0.08 * pu) * k0).toFixed(3) + ')'; c.lineWidth = 10; arch(); c.stroke();
-    c.strokeStyle = 'rgba(' + col + ',' + ((0.42 + 0.26 * pu) * k0).toFixed(3) + ')'; c.lineWidth = 2.6; arch(); c.stroke();
-    const my = wy - HT - 20 - pu * 7;
-    c.strokeStyle = 'rgba(' + col + ',' + ((0.7 + 0.3 * pu) * k0).toFixed(3) + ')'; c.lineWidth = goal ? 4 : 3.2;
-    for (const o of [0, 11]) { c.beginPath(); c.moveTo(wx - 10, my + o + 8); c.lineTo(wx, my + o); c.lineTo(wx + 10, my + o + 8); c.stroke(); }
-    c.restore();
-    drawn++;
+// He had asked for doors that stop fading into the wall, and the answer given
+// was a line drawn round the opening — a diagram of a door laid over a painting
+// of one. A sign is not an object. What makes a door unmistakable in this world
+// is that it is a THING the machines built: one thick ring of armoured segments
+// with its locks clamped round it, standing on the floor in the cast's own
+// plane, with a live field in it. One shape for every passage she walks INTO,
+// so the first one teaches all the rest; a different build per place — braced
+// into a rock mouth in the caves, overgrown in the meadow, set in cut marble at
+// the quarry, fanged and crowned with the pack's skull at the Wolf King's den.
+//
+// THE RING IS A FIRED PLATE (ART IS HIGGSFIELD'S; assets/source/gates/ring_*),
+// with a real hole in it. THE FIELD IS LIGHT, and is the engine's: drawn BEHIND
+// the plate so the plate's own inner edge is what cuts it. Where the hole is
+// comes off the plate itself — tools/ringgate.cjs measures it and prints these
+// rows; tests/ring-gate.cjs re-measures and holds them to it.
+//
+// Three states, all of them the field's: LIVE (its place's own colour), GOLD
+// when the errand she was given goes through this door (pgRouteDoor), and DEAD
+// — a black ring with nothing in it — while the passage is still buried, so
+// that breaking the rubble is what switches the gate on.
+const RING_GATE = {
+  ringCave:   { cx: 0.4984, top: 0.2406, bot: 0.8594, rx: 0.2969, mid: 0.5281, floor: 0.9844, col: [112, 200, 255] },
+  ringDen:    { cx: 0.4969, top: 0.2328, bot: 0.8469, rx: 0.2984, mid: 0.5344, floor: 0.9875, col: [255, 116, 66] },
+  ringMeadow: { cx: 0.4977, top: 0.1688, bot: 0.8750, rx: 0.2945, mid: 0.4547, floor: 0.9766, col: [118, 236, 214] },
+  ringQuarry: { cx: 0.4977, top: 0.1719, bot: 0.8469, rx: 0.2930, mid: 0.4500, floor: 0.9766, col: [150, 214, 255] },
+};
+const RING_H = 236;              // world px, sill to crown: the opening is about three of her tall
+const RING_GOLD = [255, 206, 96];
+// which ring stands at this door — or null where the door is its own building
+// (the shop fronts), the city's monument, or a kingdom's fired guardian gate
+function ringGateFor(def) {
+  if (!def || !G.roomDef || G.roomId === 'W2') return null;
+  if (def.style === 'den' || G.roomId === 'A10') return 'ringDen';
+  if (def.style) return null;
+  if ((G.roomId === 'CV3' && def.to === 'GA1T') || (G.roomId === 'GA1T' && def.to === 'CV3')) return 'ringQuarry';
+  if (G.roomDef.cave) return 'ringCave';
+  const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
+  if (!(dest && dest.cave)) return null;
+  if (def.to[0] === 'G' && GATE_PLATE_BY_ZONE[G.roomDef.zone]) return null;
+  return G.roomDef.zone === 'A' ? 'ringMeadow' : 'ringCave';
+}
+// one sheet of soft light blots, made once: the field's moving surface
+let RING_SHEET = null;
+function ringSheet() {
+  if (RING_SHEET) return RING_SHEET;
+  const N = 192, cv = document.createElement('canvas'); cv.width = cv.height = N;
+  const x = cv.getContext('2d');
+  let h = 0x9e3779b9;
+  const rnd = () => ((h = Math.imul(h ^ (h >>> 15), 2246822519) + 0x7f4a7c15 >>> 0) % 10000) / 10000;
+  x.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 90; i++) {
+    const a = rnd() * 6.283, d = Math.sqrt(rnd()) * N * 0.46, bx = N / 2 + Math.cos(a) * d, by = N / 2 + Math.sin(a) * d;
+    const r = 5 + rnd() * 20, al = 0.05 + rnd() * 0.22;
+    const g = x.createRadialGradient(bx, by, 0, bx, by, r);
+    g.addColorStop(0, 'rgba(255,255,255,' + al.toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g;
+    // drawn as short streaks lying along the turn, not as dots
+    x.save(); x.translate(bx, by); x.rotate(a + 1.57); x.scale(2.4, 0.7); x.beginPath(); x.arc(0, 0, r, 0, 7); x.fillStyle = (() => { const g2 = x.createRadialGradient(0, 0, 0, 0, 0, r); g2.addColorStop(0, 'rgba(255,255,255,' + al.toFixed(3) + ')'); g2.addColorStop(1, 'rgba(255,255,255,0)'); return g2; })(); x.fill(); x.restore();
   }
-  G.doorSigns = { n: drawn, goal: !!route };
+  return (RING_SHEET = cv);
+}
+// ASKED FOR ON ARRIVAL, not on the first frame it is drawn — and for the doors
+// that do not exist yet as well (a passage that opens when she comes back with
+// the crystal must not open as a stand-in and then change). Asking here is also
+// what lets tools/roomassets.cjs bill each ring to its own room, which is what
+// the prefetcher reads to have it a door ahead of her.
+function ringGateWant() {
+  if (typeof mediaFetch !== 'function' || typeof gateDoorsAll !== 'function') return;
+  let ds = [];
+  try { ds = gateDoorsAll(); } catch (e) { return; }
+  for (const d of ds) { const k = ringGateFor(d); if (k) mediaFetch(k); }
+}
+function ringRGBA(v, m, a) {
+  return 'rgba(' + Math.min(255, v[0] * m | 0) + ',' + Math.min(255, v[1] * m | 0) + ',' + Math.min(255, v[2] * m | 0) + ',' + a.toFixed(3) + ')';
+}
+function drawRingGate(cx2, gy, key, def, k, buried) {
+  const R = RING_GATE[key];
+  if (typeof mediaFetch === 'function') mediaFetch(key);
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[key];
+  if (!R || !im || !im.naturalWidth) return false;
+  const RH = RING_H, RW = RH * (im.naturalWidth / im.naturalHeight);
+  const x0 = cx2 - RW * R.cx, y0 = gy - RH * R.floor + 4;
+  const hx = cx2, hrx = RW * R.rx, hmid = y0 + RH * R.mid;
+  const fcy = y0 + RH * (R.top + R.bot) / 2;
+  const frx = hrx + RW * 0.03, fry = RH * (R.bot - R.top) / 2 + RH * 0.026;
+  const route = typeof pgRouteDoor === 'function' ? pgRouteDoor() : null;
+  const goal = !!route && route.to === def.to;
+  const col = goal ? RING_GOLD : R.col;
+  const t = G.simClock || 0;
+  const walking = !!(G.gateWalk && G.gateWalk.def === def);
+  const lvl = Math.min(1, 0.66 + k * 2.4) * (0.94 + 0.06 * Math.sin(t * 1.7 + cx2 * 0.01));
+  // ---- the field, behind the plate ----
+  c.save();
+  c.translate(hx, fcy); c.scale(1, fry / frx);
+  c.beginPath(); c.arc(0, 0, frx, 0, 7); c.clip();
+  if (buried) {
+    // DEAD: a choked passage has no interior, and its gate has no power
+    c.fillStyle = 'rgba(3,5,9,0.93)'; c.fillRect(-frx, -frx, frx * 2, frx * 2);
+  } else {
+    // a surface, not a lamp: deep in the middle (it is a way THROUGH), bright
+    // at the lip where it meets the metal
+    const g = c.createRadialGradient(0, frx * 0.08, frx * 0.04, 0, 0, frx);
+    g.addColorStop(0, ringRGBA(col, 0.09 * lvl, 0.97));
+    g.addColorStop(0.5, ringRGBA(col, 0.26 * lvl, 0.97));
+    g.addColorStop(0.86, ringRGBA(col, 0.58 * lvl, 0.98));
+    g.addColorStop(1, ringRGBA(col, 0.92 * lvl, 1));
+    c.fillStyle = g; c.fillRect(-frx, -frx, frx * 2, frx * 2);
+    c.globalCompositeOperation = 'lighter';
+    // the surface MOVES: two sheets of soft light turning against each other
+    // (one cached sheet, drawn twice), which is what reads as water standing
+    // on edge rather than as a lit disc
+    const sh = ringSheet();
+    c.globalAlpha = 0.34 * lvl;
+    c.save(); c.rotate(t * 0.13); c.drawImage(sh, -frx * 1.3, -frx * 1.3, frx * 2.6, frx * 2.6); c.restore();
+    c.save(); c.rotate(-t * 0.09 + 2); c.scale(-1, 1); c.drawImage(sh, -frx * 1.5, -frx * 1.5, frx * 3, frx * 3); c.restore();
+    c.globalAlpha = 1;
+    // ...a swell running outward from the middle, never quite round
+    for (let i = 0; i < 3; i++) {
+      const p = (t * 0.17 + i / 3) % 1, rr = frx * (0.08 + p * 0.92), wob = 0.05 * Math.sin(t * 0.9 + i * 2.1);
+      c.strokeStyle = ringRGBA(col, 1.1, (1 - p) * p * 0.6 * lvl);
+      c.lineWidth = 2 + p * 7;
+      c.beginPath(); c.ellipse(0, 0, rr * (1 + wob), rr * (1 - wob), t * 0.2 + i, 0, 7); c.stroke();
+    }
+    const core = c.createRadialGradient(0, 0, 1, 0, 0, frx * 0.5);
+    core.addColorStop(0, ringRGBA(col, 1.2, (0.07 + 0.05 * Math.sin(t * 2.3)) * lvl + (walking ? k * 0.7 : 0)));
+    core.addColorStop(1, ringRGBA(col, 1, 0));
+    c.fillStyle = core; c.fillRect(-frx, -frx, frx * 2, frx * 2);
+    // she is taken: the whole surface goes to white as she steps through
+    if (walking) { c.fillStyle = 'rgba(255,255,255,' + Math.min(0.75, k * 0.8).toFixed(3) + ')'; c.fillRect(-frx, -frx, frx * 2, frx * 2); }
+  }
+  c.restore();
+  // ---- the ring itself ----
+  c.drawImage(im, x0, y0, RW, RH);
+  if (G.ringGates) { G.ringGates.n++; if (goal) G.ringGates.goal = true; (G.ringGates.at || (G.ringGates.at = [])).push({ to: def.to, key, x: x0, y: y0, w: RW, h: RH, buried: !!buried, goal }); }
+  if (buried) return true;
+  // ---- its light on its own metal, and on the floor in front of it ----
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  const lip = c.createRadialGradient(hx, hmid, hrx * 0.84, hx, hmid, hrx * 1.24);
+  lip.addColorStop(0, ringRGBA(col, 1, 0));
+  lip.addColorStop(0.42, ringRGBA(col, 1, 0.20 * lvl));
+  lip.addColorStop(1, ringRGBA(col, 1, 0));
+  c.fillStyle = lip; c.beginPath(); c.arc(hx, hmid, hrx * 1.24, 0, 7); c.fill();
+  // the ring is powered: three lamps run round the band, the way a dial turns
+  for (let i = 0; i < 3; i++) {
+    const a = t * 0.55 + i * 2.0944, lx = hx + Math.cos(a) * hrx * 1.16, ly = hmid + Math.sin(a) * hrx * 1.16;
+    if (ly > y0 + RH * R.bot - 6) continue;                  // not across the sill
+    const lg = c.createRadialGradient(lx, ly, 0.5, lx, ly, 9);
+    lg.addColorStop(0, ringRGBA(col, 1.3, 0.85 * lvl)); lg.addColorStop(0.35, ringRGBA(col, 1, 0.34 * lvl)); lg.addColorStop(1, ringRGBA(col, 1, 0));
+    c.fillStyle = lg; c.beginPath(); c.arc(lx, ly, 9, 0, 7); c.fill();
+  }
+  if (!G.artProbe) {
+    const pool = c.createRadialGradient(hx, gy + 2, 2, hx, gy + 2, RW * 0.5);
+    pool.addColorStop(0, ringRGBA(col, 1, 0.20 * lvl)); pool.addColorStop(1, ringRGBA(col, 1, 0));
+    c.fillStyle = pool; c.beginPath(); c.ellipse(hx, gy + 2, RW * 0.5, 9, 0, 0, 7); c.fill();
+  }
+  c.restore();
+  return true;
 }
 function drawGateDoors(P, near) {
   // the measurement hook, the same shape as G.artProbe: with it set, the near
@@ -11335,6 +11453,7 @@ function drawGateDoors(P, near) {
   // guess at "where the booth is" measures the empty sky above it as well.
   if (near && G.structProbe) return;
   const list = player ? gateDoors() : [];
+  if (near) G.ringGates = { n: 0, goal: false };
   if (!list.length) { G._doorK = 0; return; }
   for (const d of list) if (gateDoorNear(d) === !!near) drawGateDoor(P, d, near);
 }
@@ -11368,6 +11487,27 @@ function drawGateDoor(P, def, nearPlane) {
   // door into a guardian grotto, the kingdom's own gate stands; from inside
   // the grotto, and at every plain cave, the mouth family keeps the job.
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
+  // THE RING, wherever one stands (ringGateFor). Until its plate has arrived
+  // the door draws what it drew before — a mouth, a den — never nothing.
+  const ringKey = nearPlane && ringGateFor(def);
+  if (ringKey) {
+    // IT STANDS ON THE GROUND SHE STANDS ON — the same correction the rubble
+    // pile needed (rubbleFoot): the door's table anchor is the tile row, and
+    // the heightfield lifts the walkable surface above it wherever the curve
+    // rises, so a ring seated on the tile row is sunk to its axle in a hill.
+    // The lowest ground under the sill's middle third, so it never floats.
+    let ry = gy;
+    if (typeof groundColumnAt === 'function') {
+      let low = -Infinity;
+      for (const ox of [-34, 0, 34]) { const col = groundColumnAt(wx + ox); if (col && col.length) low = Math.max(low, Math.min.apply(null, col)); }
+      if (low > -Infinity) ry = low;
+    }
+    if (drawRingGate(ds, ry, ringKey, def, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)))) return;
+    // (the measurement hook, as for the guardian gates below: under G.artProbe
+    // a ring whose plate is missing draws NOTHING, so tests/kingdom.cjs measures
+    // the ring itself and not the ring against the mouth standing in for it)
+    if (G.artProbe) return;
+  }
   const guardDoor = dest && dest.cave && !(G.roomDef && G.roomDef.cave)
     && def.to && def.to[0] === 'G';
   const gzp = guardDoor && GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
@@ -14822,7 +14962,6 @@ function drawWorldFrame() {
   // colors are still in dull faded three d instead of drawings like the
   // characters... the player might actually miss it." See gateDoorNear.
   if (typeof drawGateDoors === 'function') drawGateDoors(P, 1);
-  if (typeof drawDoorSigns === 'function') drawDoorSigns();
   drawStatics(P);
   drawSpikeMenace();
   drawBreakHint();
@@ -15813,7 +15952,11 @@ function caveLightList() {
       if (typeof rubbleFor === 'function' && rubbleFor(d)) continue;
       const gx = gateWorldX(d);
       if (gx == null || isNaN(gx)) continue;
-      add(gx, (G.roomDef.h - 3) * TILE, 268, 0.9, '206,232,214', 0.85);
+      // (a RING is its own lamp: the dark is cleared round it just the same,
+      // but daylight is not poured over a field that is already light — that
+      // pushed every cave gate to white)
+      if (typeof ringGateFor === 'function' && ringGateFor(d)) add(gx, (G.roomDef.h - 3) * TILE, 268, 0.9, '206,232,214', 0.22);
+      else add(gx, (G.roomDef.h - 3) * TILE, 268, 0.9, '206,232,214', 0.85);
     }
   }
   const ex = G.roomDef.exits || {}, W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;

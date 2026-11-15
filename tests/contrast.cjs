@@ -318,11 +318,30 @@ const dEhex = (a, b) => { const A = labOfHex(a), B = labOfHex(b); return Math.hy
   check('...with its art landed, not its stand-in', !measured.some(r => r.waiting),
     measured.filter(r => r.waiting).map(r => r.id + ':' + r.k).join(', ') || null);
   const low = measured.filter(r => r.share < SHARE);
-  check('every body reads off its room: >= ' + SHARE * 100 + '% of its silhouette edge at CR >= ' + PAIR_CR + ' or ΔE >= ' + PAIR_DE,
-    !low.length, low.map(r => r.id + ':' + r.k + ' ' + Math.round(r.share * 100) + '%').join(', ') || 'worst '
-      + (measured.length ? Math.round(Math.min(...measured.map(r => r.share)) * 100) + '%' : '—'));
+  // THE BAR WAS THE RIM'S STRENGTH, AND THE OWNER TOOK THE RIM BACK DOWN.
+  // 2026-10-12: "you should always keep a contrast between the background and
+  // the enemy" — met with a pale rim at 0.62 alpha, feathered, and held here
+  // at "half of every silhouette edge reads".
+  // 2026-11-15, having played against it: "what is the alpha and the other
+  // enemies having light aura around them? It breaks the blending with the
+  // surrounding." At that strength the rim IS an aura, and half of every edge
+  // cannot be bought with less. The later word stands: the rim is an edge now
+  // (js/foeread.js), and what this harness HOLDS is that it stays one. The
+  // share each body reads at is still measured and printed, as the record of
+  // what the rim no longer does — the bodies that sit low on it are a job for
+  // their own art and their rooms' light, not for a line drawn round them.
+  const shares = measured.map(r => r.share).sort((a, b) => a - b);
+  console.log('\n  silhouette edge that reads (CR >= ' + PAIR_CR + ' or ΔE >= ' + PAIR_DE + '): median '
+    + (shares.length ? Math.round(shares[shares.length >> 1] * 100) : 0) + '%, lowest ' + (shares.length ? Math.round(shares[0] * 100) : 0) + '%; '
+    + low.length + ' of ' + measured.length + ' bodies under ' + SHARE * 100 + '% — '
+    + (low.slice(0, 12).map(r => r.id + ':' + r.k + ' ' + Math.round(r.share * 100) + '%').join(', ') || 'none') + (low.length > 12 ? ', …' : ''));
+  const rim = await (async () => { const b2 = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' }); const p2 = await b2.newPage();
+    await p2.goto('http://127.0.0.1:8220/index.html'); await p2.waitForFunction(() => typeof FOE_READ !== 'undefined');
+    const v = await p2.evaluate(() => ({ on: FOE_READ.on, alpha: FOE_READ.alpha, width: FOE_READ.width, feather: FOE_READ.feather })); await b2.close(); return v; })();
+  check('the rim is an EDGE, not an aura: on, at no more than 0.30 alpha, 1.2 px wide and 1 px of feather',
+    rim.on && rim.alpha > 0.1 && rim.alpha <= 0.30 && rim.width <= 1.2 && rim.feather <= 1.0, JSON.stringify(rim));
   check('no page errors', !errs.length, errs.slice(0, 3).join(' | ') || null);
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
-  console.log('\nOK — every machine and every guardian stands off the room it is in');
+  console.log('\nOK — the rim is an edge, and the share of every silhouette that reads is on record above');
 })().catch(e => { console.error(e); process.exit(1); });

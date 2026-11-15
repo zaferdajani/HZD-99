@@ -1,0 +1,31 @@
+{
+ "provider": "Higgsfield",
+ "model": "gpt_image_2_6",
+ "quality": "high",
+ "resolution": "1k",
+ "aspect_ratio": "1:1",
+ "background": "transparent",
+ "fired": "2026-11-15",
+ "why": [
+  "Owner, 2026-11-15: 'The doors that open in the background, they need a better blending with the background, or better actually unblending, because it's faded in the background, does not show as a unique characteristics, unique object... Even the door that opens to the alpha was blended with the cave.'",
+  "Owner, 2026-11-15, on the outline arches and chevrons that were the first answer: 'You have all the tools to build up awesome doors, and you end up with neon doors? Are you crazy? We are in a universe full of robots. Why would you put a neon door instead of something more awesome, something that looks like a Stargate or something?'"
+ ],
+ "reference": "assets/backgrounds/gate_conduits.jpg (the Conduits' cable-iris gate, §2f) as a STYLE reference only — finish, ink line, painterly metal. Nothing of its composition.",
+ "shared_brief": "ONE free-standing structure on a fully transparent background. A colossal ancient machine RING GATE of a lost robot civilisation, seen exactly from the front, symmetrical: one thick circular ring of interlocking armoured segments (band about a sixth of the diameter), nine heavy chevron locks clamped evenly round it, an inner track of engraved glyph notches, hydraulic clamps, bolted plates, cable bundles; standing on a low stepped base, the bottom of the ring sunk into it so the opening reaches the floor. THE INSIDE OF THE RING IS COMPLETELY EMPTY — a clean hole of pure transparency, no glow, no energy, no surface. RENDERING: the reference image is a STYLE reference only - copy its hand-painted comic illustration finish, confident dark ink outlines, painterly metal, light from the upper left; take nothing of its composition or colours. All lamps and chevrons are DARK and unlit (light is added later in the game engine). The whole structure is inside the frame with a small margin. No text, no letters, no logo, no characters, no creatures, no ground beyond the base, no cast shadow, no sky, no background.",
+ "jobs": {
+  "ring_quarry.webp": "94c0203a-c501-4a05-99d9-39b9600c9ce4 — weathered pale gunmetal and worn brass set into broken blocks of pale quarried marble, small violet crystal growths. The keeper's maintenance passage (CV3 <-> GA1T).",
+  "ring_meadow.webp": "36e2377d-f2dd-4d51-892c-a40091af7930 — grey-teal steel streaked with rust, moss, vines and wildflowers. Every passage out of the meadow's open rooms (A5 -> CV1, A4 -> GA1).",
+  "ring_den.webp": "0a219dfd-1917-4643-8150-fc4ae44718ae — dark scarred iron, the locks shaped as steel wolf fangs pointing inward, a riveted mechanical wolf-skull crest at the crown, claw gouges, wrecked machine parts at the base. The Wolf King's den, both ends (A2 <-> A10) and the grotto door inside it.",
+  "ring_cave.webp": "378bae95-6d5b-41ed-b6d3-b29dc31b07ea — dark blue-grey gunmetal jacked into an irregular mouth of slate-grey cave rock with short stalactites: the standing order that a cave entrance is a rock mouth and never a rectangle, kept, with the machines' ring braced inside it. Every passage inside a cave or grotto."
+ },
+ "delivery": [
+  "node tools/ringgate.cjs — cuts assets/backgrounds/ring_*.webp (640 px, the generator's soft halo cut by level) and prints each ring's measured opening, which is pasted into RING_GATE in js/game.js. All four came back with true alpha and a closed ring; no keying was needed.",
+  "The live field inside the ring, the lamps running round the band and the light on the floor are the engine's (drawRingGate) — additive light drawn behind and over the plate. They are not in the plates and must never be generated into them: three states (live, gold for the errand's door, dead while buried) are one plate.",
+  "tests/ring-gate.cjs re-measures every shipped plate's hole against the table and checks none of the field lands where there is neither hole nor metal."
+ ],
+ "sheets": [
+  "assets/source/_sheets/ring_gates.jpg — the four as fired, on a flat mid-tone",
+  "ring_ingame.jpg — in the game: dead under its rubble (A5), live in the caves, the meadow's at the lair, gold at the quarry"
+ ],
+ "not_done": "The five kingdom guardian gates (gate_*.jpg, B-E and the Deep) keep their own fired monuments and have no measured opening, so they do not carry the live field yet. The comic page for the maintenance passage (panels.js 'passage') still draws the door as a riveted steel slab — it predates the ring and wants re-firing by the STORY session."
+}
