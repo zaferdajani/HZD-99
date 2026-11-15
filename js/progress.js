@@ -170,6 +170,47 @@ function pgHubSealedTile(tx, ty) {
 // is the landmark lit? the one question the drawing asks
 function pgHubLit(f) { return !!pgTrailPhase(f) && !pgHubSealed(f); }
 
+// THE WAY DOWN IS POINTED AT (owner, 2026-11-15: "it is asking me to bring the
+// sword, but ... I cannot access it because it's not easy to find"). The hatch
+// has its light and its caption, and both are two screens west of where the
+// meeting with NULLFANG leaves her. So while the marble is still the errand and
+// the hatch is still shut, the room points at it the way the opening points at
+// everything it teaches: a gold chevron pinned to the edge of the frame with
+// the distance under it while the hatch is out of view, and a gold arrow
+// bobbing over the hatch itself once it is in view. It goes the moment the
+// floor is cut. Screen space; nothing under the art probe.
+function pgHatchPointer(c) {
+  if (!G.save || G.roomId !== PG_HUB.room || G.state !== 'PLAY' || !player || player.dead) return;
+  if (G.artProbe || G.dialog || G.cut || G.wake || G.bossEntry || G.gateWalk || G.meet) return;
+  if (typeof isHero === 'function' && isHero()) return;
+  const f = G.save.flags || {}, bag = G.save.bag || {};
+  if (G.tut && !f.tut) return;
+  if (f.crystal || bag.cshard || f.pl_cshard || pgHubSealed(f) || pgHubBroken()) return;
+  const wx = (PG_HUB.tx0 + PG_HUB.tx1 + 1) / 2 * TILE, wy = PG_HUB.ty * TILE;
+  const sx = typeof worldScreenX === 'function' ? worldScreenX(wx) : wx - cam.x;
+  const sy = typeof worldScreenY === 'function' ? worldScreenY(wy) : wy - cam.y;
+  const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5, col = '#ffd76a';
+  c.save();
+  if (sx < 26 || sx > 934 || sy < 90 || sy > 520) {
+    const M = 26, ex = Math.max(M, Math.min(960 - M, sx)), ey = Math.max(M + 40, Math.min(540 - M - 60, sy));
+    const ang = Math.atan2(sy - ey, sx - ex);
+    c.globalAlpha = 0.55 + pu * 0.45; c.translate(ex, ey); c.rotate(ang);
+    c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 8;
+    c.beginPath(); c.moveTo(14 + pu * 4, 0); c.lineTo(-8, -11); c.lineTo(-3, 0); c.lineTo(-8, 11); c.closePath(); c.fill();
+    c.rotate(-ang); c.shadowBlur = 0;
+    c.font = '700 11px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'top';
+    c.fillText(Math.round(Math.hypot(sx - ex, sy - ey) / TILE) + 'm', 0, 16);
+  } else if (Math.abs(player.x + player.w / 2 - wx) > 56) {
+    // in view and she is not on it yet: an arrow over the hatch, pointing down at it
+    const y = sy - 58 - pu * 8;
+    c.globalAlpha = 0.6 + pu * 0.4; c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 10;
+    c.beginPath(); c.moveTo(sx, y + 16); c.lineTo(sx - 12, y - 4); c.lineTo(sx - 4, y - 4); c.lineTo(sx - 4, y - 18);
+    c.lineTo(sx + 4, y - 18); c.lineTo(sx + 4, y - 4); c.lineTo(sx + 12, y - 4); c.closePath(); c.fill();
+  }
+  c.restore();
+  G.hatchPointer = (G.hatchPointer | 0) + 1;      // counted, for the harness
+}
+
 // ---- WARDS ------------------------------------------------------------------
 // The song, wound tight across a way through. Drawn as layered membranes whose
 // edges are never straight (NO RIGHT ANGLES), with sound-rings crawling along

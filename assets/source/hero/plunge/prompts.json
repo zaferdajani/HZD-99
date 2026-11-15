@@ -1,0 +1,35 @@
+{
+ "provider": "Higgsfield",
+ "model": "gpt_image_2_6",
+ "quality": "high",
+ "resolution": "1k",
+ "aspect_ratio": "16:9",
+ "background": "transparent",
+ "fired": "2026-11-15",
+ "why": [
+  "Owner, 2026-11-15: 'The down hit should have its own graphics of the cat hitting down. How about you make it like the cat is giving the Superman pose where she hits the floor with her fist instead of scratching?'",
+  "Owner, 2026-11-15, on seeing the fist: 'Going down should be with a claw, not just a fist. The motion is correct, but it needs to show the cat's claw with an after effect of the same blue... radiating blue going upward... just like a meteor coming down, but blue with a claw. Also create the same motion or different motion for swords, but the same concept.'"
+ ],
+ "subject": "HZD-99, canon element <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> embedded in every prompt. References: the approved fist dive (job 3e105a13, MOTION only), her previous claw down strip (the claws' design), the impatient sheet g1 (proportion) and, for each blade, that blade's own swing strip (single.webp / dual.webp / joined.webp — the weapon's design).",
+ "sheet": "4 columns x 2 rows: 1 tuck, weapon cocked · 2 the dive, point leading · 3-4 near-vertical dive, point straight down, cape streaming up (the two cells the fall holds on) · 5 landed, point driven into the floor · 6 the landing held · 7 rising, drawing it free · 8 standing",
+ "negatives": "no glow, fire, energy trail, speed lines, sparks, ground, cracks, dust, shadows, text, numbers, grid lines, borders, second character. The blue is the game's own light (drawPlungeMeteor / drawPlungeImpact in js/entities.js), drawn over these bodies — it is not in the plates.",
+ "jobs": {
+  "claw_asfired.webp": "8802e849-b39b-40fb-9f7d-bdc6068d20e0 — in the game as hero/swing/down.webp",
+  "single_asfired.webp": "164cedb5-7cfb-486a-a031-a3762f6d24fc — in the game as hero/swing/down_single.webp",
+  "dual_asfired.webp": "ffa759b8-5d52-4b15-8d3c-f7504ab600a5 — in the game as hero/swing/down_dual.webp",
+  "joined_asfired.webp": "66d896f6-3243-4f28-92f2-b3adcd67fff0 — in the game as hero/swing/down_joined.webp",
+  "fist_asfired_superseded.webp": "3e105a13-3c6a-44c3-b6bb-e5e3a1b5c3dc — the Superman fist. Never shipped: the owner kept its motion and asked for claws. It is the motion reference of the four above.",
+  "b_refused.jpg": "e33cec94-fa08-4e1f-9775-d059edd70d82 — a second fist take: a soft halo behind every figure, and the dive's trailing arm reads as a third limb"
+ },
+ "delivery": [
+  "The landed cells of the three blade sheets show the planted blade BELOW the sole line; those pixels are cleared first (a blade in the ground is not visible under the ground), so the cutter's bottom-align puts her feet on the floor and not a blade tip.",
+  "node tools/gridstrip.cjs claw.png   hero/swing/down.webp        --per --h=259",
+  "node tools/gridstrip.cjs dual.png   hero/swing/down_dual.webp   --per --h=293",
+  "node tools/gridstrip.cjs single.png hero/swing/down_single.webp --per --h=315 --cell=384 --floor=376",
+  "node tools/gridstrip.cjs joined.png hero/swing/down_joined.webp --per --h=332 --cell=384 --floor=376",
+  "--h is chosen per sheet so the STANDING cell is 205 px ear-tips to soles, the height she stands in claw_jab.webp (strips_vs_stand.jpg: her jab's standing cell beside all four strips at equal scale). The single and joined blades are 384-px cells because a blade held straight down under a cape streaming straight up is taller than a 320 cell; they are drawn at k x 1.2, as joined.webp always has been.",
+  "tools/gridstrip.cjs was fixed for these: its window is as tall as the tallest figure, and for a bottom-row cell that window reached up into the row above and carried in the blade tips of the dive drawn there. Each cell is now lifted onto its own canvas first."
+ ],
+ "replaces": "down_claw_replaced.webp — the six-cell claw plunge hero/swing/down.webp was until today",
+ "review": "Assistant-reviewed: against her jab strip at equal scale, and in the running game in all four weapon forms (in_game.jpg). Awaiting the owner's eye — not approved simply because it exists."
+}

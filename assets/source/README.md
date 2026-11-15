@@ -111,6 +111,14 @@ visible projectile, so the flinch is the recoil take's rear-back; the winded
 pant is the recoil take's head-down tail (0.5 s period). Cycles measured
 distinct: prowl ≥ 0.239, gallop ≥ 0.432 (silhouette XOR / union).
 
+`hero/plunge/` is THE DIVE (2026-11-15, owner: "going down should be with a
+claw, not just a fist... also create the same motion or different motion for
+swords, but the same concept"). Four sheets as fired — claws, single blade,
+twin blades, joined blade — the fist take whose motion they copy, the take that
+was refused, the six-cell strip they replace, a size check against her jab's
+standing cell and the dive photographed in the game. `prompts.json` has the
+prompts, the job ids and the exact cut.
+
 `beasts/wolf3/` is THE PACK'S AGGRESSIVE SET (2026-11-15, owner: "find wolves,
 see how they move, how they attack, how they roll, and replicate it with the
 wolves that we have as robots ... concentrate on the aggressive attacking moods

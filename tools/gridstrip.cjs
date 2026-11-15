@@ -76,7 +76,15 @@ const fs = require('fs');
     const oc = o.getContext('2d'); oc.imageSmoothingQuality = 'high';
     boxes.forEach((q, n) => {
       const C0 = (n % 4) * cw, R0 = ((n / 4) | 0) * ch, w = per ? wPer : wMax, dw = w * k;
-      oc.drawImage(c, C0 + (per ? q[0] : rx0) - 2, R0 + q[3] - hMax - 2, w + 4, hMax + 4,
+      // FROM THE CELL ALONE. The window is as tall as the tallest figure and as
+      // wide as the widest, so for a short figure it reaches past its own cell
+      // — and a bottom-row cell then carried the blade tips of the dive drawn
+      // above it. Each cell is lifted onto its own canvas first; a source
+      // rectangle that leaves it is clipped by drawImage, and the destination
+      // with it, so what is outside the cell is simply not there.
+      const one = document.createElement('canvas'); one.width = cw; one.height = ch;
+      one.getContext('2d').drawImage(c, C0, R0, cw, ch, 0, 0, cw, ch);
+      oc.drawImage(one, (per ? q[0] : rx0) - 2, q[3] - hMax - 2, w + 4, hMax + 4,
         n * CELL + (CELL - dw) / 2 - 2 * k, FLOOR - HT - 2 * k, dw + 4 * k, HT + 4 * k);
     });
     return { sheet: W + 'x' + H, cell: cw + 'x' + ch, left: boxes.map(q => q[0]), width: boxes.map(q => q[2] - q[0]), height: boxes.map(q => q[3] - q[1]),

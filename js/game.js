@@ -16698,6 +16698,7 @@ function draw(tms) {
   holdFrameNearExit();
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
+  if (typeof pgHatchPointer === 'function') pgHatchPointer(c);   // the way down to the marble (js/progress.js)
   if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
   drawHUD();

@@ -4,7 +4,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
  await page.addInitScript(()=>window.requestAnimationFrame=()=>0);
  await page.goto(process.env.GAME_URL||'http://127.0.0.1:8220/index.html');
  const result=await page.evaluate(async()=>{
-  const keys=['heroStates','gaitWalk','gaitRun','hzdIdle','heroFidget','heroImpatient','hzdGuard','hzdHurt','hzdHeal','hzdDeath','transAir','transLand','transDash','transSkid','transWall','transTakeoff','swingAir','swingDown','heroRecharge','heroDeparture','heroGateRun'];
+  const keys=['heroStates','gaitWalk','gaitRun','hzdIdle','heroFidget','heroImpatient','hzdGuard','hzdHurt','hzdHeal','hzdDeath','transAir','transLand','transDash','transSkid','transWall','transTakeoff','swingAir','swingDown','swingDownSingle','swingDownDual','swingDownJoined','heroRecharge','heroDeparture','heroGateRun'];
   keys.forEach(k=>mediaFetch(k,1));for(let i=0;i<100&&!keys.every(k=>MEDIA_RAW[k]?.naturalWidth);i++)await new Promise(r=>setTimeout(r,100));
   if(!keys.every(k=>MEDIA_RAW[k]?.naturalWidth))throw Error('Unloaded move art');
   const sv=newSave(1);sv.flags.tut=1;sv.flags.woke=1;startGame(sv);G.wake=null;G.artProbe=true;
@@ -14,6 +14,10 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
    ['guard','hzdGuard',{guardT:1}],['hurt','hzdHurt',{hurtPoseT:.15}],['heal','hzdHeal',{healT:.4}],['idle variation','heroFidget',{idleT:heroIdleTimeFor(5,true)}],['impatient','heroImpatient',{idleT:heroIdleTimeFor(1,true,true)}],
    ['air attack','swingAir',{on:false,swingVis:{t:.12,t0:.24,combo:0,air:true,ay:0,weaponMode:'claws'}}],
    ['plunge','swingDown',{on:false,swingVis:{t:.06,t0:.24,combo:0,air:true,ay:1,weaponMode:'claws'}}],
+   // the same dive with a blade in her paws (HERO_PLUNGE)
+   ['plunge single','swingDownSingle',{on:false,swingVis:{t:.06,t0:.24,age:.2,combo:0,air:true,ay:1,wield:1,weaponMode:'single'}}],
+   ['plunge dual','swingDownDual',{on:false,swingVis:{t:.06,t0:.24,age:.2,combo:0,air:true,ay:1,wield:1,twin:true,weaponMode:'dual'}}],
+   ['plunge joined','swingDownJoined',{on:false,swingVis:{t:.06,t0:.24,age:.2,combo:0,air:true,ay:1,wield:1,weaponMode:'joined'}}],
    ['death','hzdDeath',{dead:true}],['recharge','heroRecharge',{}]];
   const cv=document.createElement('canvas');cv.width=1200;cv.height=1250;const c=cv.getContext('2d');c.fillStyle='#253440';c.fillRect(0,0,1200,1250);const rows=[];
   for(let i=0;i<cases.length;i++){const [name,key,props]=cases[i],p=new Player(0,0);p.on=true;p.face=p.faceVis=1;Object.assign(p,props);G.recharge=name==='recharge'?{phase:'charge',t:.6,dur:1}:null;

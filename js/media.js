@@ -347,6 +347,10 @@ const MEDIA_SRC = {
     swingClawJab: 'assets/characters/hero/swing/claw_jab.webp',
     swingAir: 'assets/characters/hero/swing/air.webp',
     swingDown: 'assets/characters/hero/swing/down.webp',
+    // the same dive with a blade in her paws (HERO_PLUNGE)
+    swingDownSingle: 'assets/characters/hero/swing/down_single.webp',
+    swingDownDual: 'assets/characters/hero/swing/down_dual.webp',
+    swingDownJoined: 'assets/characters/hero/swing/down_joined.webp',
     swingClawChargeAlt: 'assets/characters/hero/swing/claw_charge_alt.webp',
     swingClawCharge: 'assets/characters/hero/swing/claw_charge.webp',
     // THE SUPERCHARGE'S ENERGY, as 19 drawn plates over the 12-cell body strip.

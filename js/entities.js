@@ -102,6 +102,214 @@ function solidAt(tx, ty) { const c = tileAt(tx, ty); return c === '#' || c === '
 // FRACTURE worlds: a deterministic scatter of ordinary wall is secretly loose.
 // Same tiles every visit, and only ever wall that already has open air behind
 // it, so it can never seal a route or open one that leads nowhere.
+// THE PLUNGE (Player.update): how long a down-strike is kept live once its own
+// window has run out and she is still in the air, the tail it is held at, and
+// the hop a grounded DOWN + ATTACK takes over a floor that can be cut.
+const PLUNGE_HOLD = 1.4, PLUNGE_TAIL = 0.06, PLUNGE_HOP = 330;
+// THE DIVE LANDS. The down-strike that reached the floor ends with her claws —
+// or the blade she is carrying — driven into it, for PLUNGE_PUNCH seconds, and
+// the blue she fell in goes out through what she hit: a column of it straight
+// back up, a wave along the terrain, embers, and the thud. A picture and its
+// effects only: what the strike HIT was decided on the way down, by the same
+// box it always had.
+const PLUNGE_PUNCH = 0.34;
+// the blue of the dive (drawPlungeMeteor): its body, its hot core, its embers
+const PLUNGE_BLUE = '#2f8dff', PLUNGE_HOT = '#eaf6ff', PLUNGE_EMBER = ['#7fd4ff', '#3f8cff', '#e8f6ff'];
+function plungeLand(p) {
+  const sw = p.swing || {};
+  p.swingVis = { t: PLUNGE_PUNCH, t0: PLUNGE_PUNCH, ang: Math.PI / 2, combo: 0, wield: sw.wield || 0, twin: !!sw.twin,
+    weaponMode: sw.weaponMode || 'claws', ay: 1, air: true, punch: true, crest: sw.crest };
+  p._rake = null;
+  const cx = p.x + p.w / 2, fy = p.y + p.h;
+  if (typeof sfx === 'function') sfx('plunge_land');
+  cam.shake = Math.max(cam.shake, 4);
+  if (typeof padRumble === 'function') padRumble(0.5, 0.4, 110);
+  G.plungeLands = (G.plungeLands || 0) + 1;
+  if (typeof G !== 'undefined' && G.artProbe) return;
+  if (typeof fx === 'function') {
+    // what she was falling in keeps going: up, out of the place she struck
+    fx('pillar', cx, fy, { rx: 46, ry: 190, dur: 0.42, col: PLUNGE_BLUE, hot: PLUNGE_HOT, power: 1.0 });
+    fx('ground', cx, fy - 2, { rx: 104, ry: 26, dur: 0.42, col: PLUNGE_BLUE, hot: PLUNGE_HOT, power: 1.15 });
+    fx('flash', cx, fy - 6, { rx: 58, ry: 58, dur: 0.16, col: '#7fd4ff', hot: '#ffffff', power: 0.95 });
+  }
+  for (let i = 0; i < 12; i++) addPart(cx + rnd(-14, 14), fy - 2, rnd(-150, 150), rnd(-260, -60), rnd(0.28, 0.6), PLUNGE_EMBER[i % 3], rnd(1.4, 2.8), 260, true);
+  for (let i = 0; i < 5; i++) addPart(cx + rnd(-16, 16), fy - 1, rnd(-110, 110), rnd(-110, -30), rnd(0.25, 0.45), '#c8b89a', rnd(1.4, 2.4), 520);
+}
+// WHERE IT LANDS, THE BLUE COMES BACK UP. Canvas light in her own frame, for
+// the first part of the landing: tongues of the fire she fell in standing up
+// out of the point she drove in, and a flat ring of it running out along the
+// floor. The shader layer adds its column and its wave through the terrain on
+// top where there is one (plungeLand) — this is the part every device draws.
+function drawPlungeImpact(c, pl, sv, pass, tipX, floor) {
+  if (!sv || !sv.punch || (typeof G !== 'undefined' && G.artProbe)) return false;
+  if (typeof isHero === 'function' && isHero()) return false;
+  const p = clamp(1 - sv.t / sv.t0, 0, 1);
+  if (p > 0.7) return false;
+  const q = p / 0.7, a = Math.pow(1 - q, 1.6), out = 1 - Math.pow(1 - q, 3);
+  const slot = Math.floor(p * 16);
+  if (typeof G !== 'undefined') G.plungeImpact = { pass, a: +a.toFixed(3) };
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  if (pass === 'back') {
+    for (let i = 0; i < 5; i++) {
+      const h1 = hash2(slot + i * 3.3, i + 1.5), len = (48 + 70 * h1) * (0.7 + out * 0.6), w = 13 + 8 * h1;
+      const x0 = tipX + (i - 2) * 9 * (0.6 + out), sway = (i - 2) * 7 * out + (h1 - 0.5) * 8;
+      const g = c.createLinearGradient(0, floor, 0, floor - len);
+      const at = Math.pow(1 - q, 0.9);       // the tongues outlast the ring
+      g.addColorStop(0, 'rgba(225,244,255,' + (0.95 * at).toFixed(3) + ')');
+      g.addColorStop(0.35, 'rgba(80,165,255,' + (0.7 * at).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(30,80,255,0)');
+      c.fillStyle = g;
+      c.beginPath(); c.moveTo(x0 - w / 2, floor);
+      c.quadraticCurveTo(x0 - w * 0.4, floor - len * 0.5, x0 + sway, floor - len);
+      c.quadraticCurveTo(x0 + w * 0.4, floor - len * 0.5, x0 + w / 2, floor);
+      c.fill();
+    }
+  } else {
+    const rx = 12 + 58 * out, ry = 2.5 + 5 * out;
+    c.strokeStyle = 'rgba(47,141,255,' + (0.5 * a).toFixed(3) + ')'; c.lineWidth = 5 * (1 - q * 0.6);
+    c.beginPath(); c.ellipse(tipX, floor - 1, rx, ry, 0, 0, 7); c.stroke();
+    c.strokeStyle = 'rgba(235,248,255,' + (0.9 * a).toFixed(3) + ')'; c.lineWidth = 1.8;
+    c.beginPath(); c.ellipse(tipX, floor - 1, rx, ry, 0, 0, 7); c.stroke();
+  }
+  c.restore();
+  return true;
+}
+// SHE FALLS LIKE A METEOR, AND IT IS BLUE (owner, 2026-11-15: "it needs to show
+// the cat's claw with an after effect of the same blue... as if it's fire
+// coming down from it... radiating blue going upward, as if you're actually
+// hitting the air on your way down, just like a meteor coming down, but blue
+// with a claw"; and of the three crescents the claw rake drew under her: "the
+// 3 lines you created is working with a slash, not with going down. The going
+// down should be different. Create its own VFX").
+//
+// So the dive wears no cut at all. It wears the air it is going through:
+//   BEHIND HER  a body of blue fire that starts at the claw — or the point of
+//               the blade — and streams UP past her, against the fall: one
+//               long tail and a handful of tongues that flicker on a 40 ms
+//               slot, with a white-hot core up the middle;
+//   IN FRONT    the head of the meteor: a bright bow of compressed air cupped
+//               under the point, two streams peeling off its ends and up her
+//               flanks, and thin streaks of light tearing upward beside her.
+// How much of it there is follows how fast she is FALLING, so the hop that
+// begins a strike from the ground shows a glint at the claws and the fire
+// arrives as she turns over and comes down. Additive light only — the channel
+// the art rules leave procedural. Drawn in the strip's own frame (x 0 her
+// centre, +x the way she faces, `floor` the sole line the point rests on), so
+// it cannot part from the picture it belongs to. No clock is read: the flicker
+// is hash2 of the strike's own age (tests/drawclock.cjs). G.artProbe draws
+// none of it, because it hangs below and around her and would be measured as
+// anatomy.
+function plungeMeteorPower(pl, sv) {
+  if (!sv || !(sv.ay > 0.5) || sv.punch || pl.on) return 0;
+  if (typeof isHero === 'function' && isHero()) return 0;
+  if (typeof G !== 'undefined' && G.artProbe) return 0;
+  const grow = clamp(((sv.age || 0) - 0.03) / 0.1, 0, 1);
+  return grow * clamp(((pl.vy || 0) + 150) / 520, 0.14, 1);
+}
+function drawPlungeMeteor(c, pl, sv, pass, tipX, floor, tall) {
+  const k = plungeMeteorPower(pl, sv);
+  if (k <= 0) return false;
+  const age = sv.age || 0, slot = Math.floor(age * 25);
+  const rich = typeof QUAL === 'undefined' || QUAL.glow;
+  const L = tall * (0.75 + 0.7 * k), ty = floor - 3;
+  if (typeof G !== 'undefined') G.plungeMeteor = { pass, k: +k.toFixed(3), tipX: +tipX.toFixed(1), len: +L.toFixed(1) };
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  if (pass === 'back') {
+    // the tail: one long body of fire from the point to well above her head
+    const tongue = (dx, w, len, sway, a, hot) => {
+      const g = c.createLinearGradient(0, ty + 6, 0, ty - len);
+      if (hot) { g.addColorStop(0, 'rgba(255,255,255,' + (0.85 * a).toFixed(3) + ')'); g.addColorStop(0.3, 'rgba(170,225,255,' + (0.5 * a).toFixed(3) + ')'); }
+      else { g.addColorStop(0, 'rgba(120,205,255,' + (0.72 * a).toFixed(3) + ')'); g.addColorStop(0.35, 'rgba(47,141,255,' + (0.42 * a).toFixed(3) + ')'); }
+      g.addColorStop(1, 'rgba(30,80,255,0)');
+      c.fillStyle = g;
+      const x0 = tipX + dx;
+      c.beginPath();
+      c.moveTo(x0, ty + 6);
+      c.bezierCurveTo(x0 - w * 0.62, ty + 2, x0 - w * 0.5, ty - len * 0.42, x0 + sway, ty - len);
+      c.bezierCurveTo(x0 + w * 0.5, ty - len * 0.42, x0 + w * 0.62, ty + 2, x0, ty + 6);
+      c.fill();
+    };
+    tongue(0, 40, L, (hash2(slot, 3.1) - 0.5) * 12, 0.75 * k, false);
+    const n = rich ? 5 : 2;
+    for (let i = 0; i < n; i++) {
+      const h1 = hash2(slot + i * 13.7, i + 0.5), h2 = hash2(slot * 1.3 + i * 5.1, i + 7.9);
+      tongue((i - (n - 1) / 2) * (rich ? 8.5 : 13), 15 + h1 * 9, L * (0.42 + 0.5 * h2), (h1 - 0.5) * 16, (0.4 + 0.3 * h2) * k, false);
+    }
+    tongue(0, 13, L * 0.62, (hash2(slot, 9.7) - 0.5) * 6, 0.8 * k, true);
+    // ...and the light gathered at the point, under the claws
+    const r = 15 + 7 * k, g = c.createRadialGradient(tipX, ty, 0, tipX, ty, r);
+    g.addColorStop(0, 'rgba(255,255,255,' + (0.85 * k).toFixed(3) + ')');
+    g.addColorStop(0.35, 'rgba(140,215,255,' + (0.5 * k).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(47,141,255,0)');
+    c.fillStyle = g; c.beginPath(); c.arc(tipX, ty, r, 0, 7); c.fill();
+  } else {
+    // the head of it: the bow of air she is pushing, cupped under the point
+    // (the light gathered there is in the pass BEHIND her, so the claws and the
+    // blade are drawn over it and stay what the eye lands on)...
+    c.lineCap = 'round';
+    const br = 10 + 5 * k, by = ty - 3;
+    c.strokeStyle = 'rgba(47,141,255,' + (0.42 * k).toFixed(3) + ')'; c.lineWidth = 5;
+    c.beginPath(); c.arc(tipX, by, br, 0.12 * Math.PI, 0.88 * Math.PI); c.stroke();
+    c.strokeStyle = 'rgba(235,248,255,' + (0.92 * k).toFixed(3) + ')'; c.lineWidth = 2;
+    c.beginPath(); c.arc(tipX, by, br, 0.16 * Math.PI, 0.84 * Math.PI); c.stroke();
+    // ...and the two streams that peel off its ends and go up her flanks
+    for (const sd of [-1, 1]) {
+      const x0 = tipX + sd * br * 0.93, x1 = tipX + sd * (br + 15 + hash2(slot, sd * 2.3) * 8), y1 = ty - L * (0.46 + 0.14 * hash2(slot + 3, sd * 1.7));
+      const gs = c.createLinearGradient(0, by, 0, y1);
+      gs.addColorStop(0, 'rgba(200,238,255,' + (0.8 * k).toFixed(3) + ')'); gs.addColorStop(1, 'rgba(47,141,255,0)');
+      c.strokeStyle = gs; c.lineWidth = 2.2;
+      c.beginPath(); c.moveTo(x0, by + 3); c.quadraticCurveTo(x0 + sd * 7, ty - L * 0.16, x1, y1); c.stroke();
+    }
+    // streaks of it tearing upward beside her — the air going by
+    const m = rich ? 6 : 3;
+    c.lineWidth = 1.4;
+    for (let i = 0; i < m; i++) {
+      const ph = (age * (2.6 + (i % 3) * 0.7) + hash2(i, 4.4)) % 1, sx = tipX + (hash2(i + 0.3, Math.floor(age * (2.6 + (i % 3) * 0.7) + hash2(i, 4.4))) - 0.5) * 46;
+      const y0 = ty - 8 - ph * L, ln = 9 + 12 * k;
+      c.strokeStyle = 'rgba(190,232,255,' + ((1 - ph) * 0.7 * k).toFixed(3) + ')';
+      c.beginPath(); c.moveTo(sx, y0); c.lineTo(sx, y0 - ln); c.stroke();
+    }
+  }
+  c.restore();
+  return true;
+}
+// is the floor directly under her one a strike from above will cut?
+// (two depths: the ground she stands on is a heightfield that can lift her a
+// few pixels clear of the tile under it — on the meadow's hatch, thirteen —
+// and the tile is still the floor she is standing on)
+function plungeFloorUnder(p) {
+  const fracture = typeof brHas === 'function' && brHas('fracture');
+  for (const dy of [4, 22]) {
+    const ty = Math.floor((p.y + p.h + dy) / TILE);
+    for (const wx of [p.x + 3, p.x + p.w / 2, p.x + p.w - 3]) {
+      const tx = Math.floor(wx / TILE), q = tileAt(tx, ty);
+      if (q === 'B' || (fracture && q === '#' && brLoose(tx, ty))) return true;
+    }
+  }
+  return false;
+}
+// A BRITTLE FLOOR OVER A WAY DOWN GIVES ALL THE WAY (owner, 2026-11-15: "the
+// sword should be below the meadow. But I cannot access it because... it's not
+// actually accessing beneath"). The meadow's hatch is two tiles thick. A
+// down-strike cut the top course, bounced her off it — and she came down on the
+// second course, in a pit one tile deep, with the light and the caption already
+// gone because the hatch counted as open the moment its first tile broke. It
+// took a second strike nobody was asked for.
+//   - the hatch is ONE object: cutting any tile of it takes all of it;
+//   - anywhere else, a brittle tile cut from above takes the brittle tile
+//     under it too when that one is the room's own bottom edge — a floor over
+//     an exit is a floor she is meant to go through, not a puzzle of courses.
+function plungeThrough(tx, ty) {
+  const g = G.grid; if (!g) return;
+  if (typeof PG_HUB !== 'undefined' && G.roomId === PG_HUB.room && tx >= PG_HUB.tx0 && tx <= PG_HUB.tx1 && ty >= PG_HUB.ty && ty <= PG_HUB.ty + 1) {
+    for (let y = PG_HUB.ty; y <= PG_HUB.ty + 1; y++) for (let x = PG_HUB.tx0; x <= PG_HUB.tx1; x++)
+      if ((x !== tx || y !== ty) && tileAt(x, y) === 'B') G.breakTile(x, y);
+    return;
+  }
+  if (ty + 1 === g.length - 1 && tileAt(tx, ty + 1) === 'B') G.breakTile(tx, ty + 1);
+}
 function brLoose(tx, ty) {
   if (typeof brHas !== 'function' || !brHas('fracture')) return false;
   if (tileAt(tx, ty) !== '#') return false;
@@ -1424,7 +1632,19 @@ function heroIdleClip(t) {
 // 273 -> 0.956.
 const SWING_STRIP = {
   air:{key:'swingAir',cells:6,k:HERO_DELIVERY_K},
-  down:{key:'swingDown',cells:6,k:HERO_DELIVERY_K,order:[0,1,2,3]},
+  // THE DOWN-STRIKE IS A DIVE, CLAWS FIRST (owner, 2026-11-15: first "the
+  // Superman pose where she hits the floor", then "going down should be with a
+  // claw, not just a fist. The motion is correct, but it needs to show the
+  // cat's claw"). Eight cells: 0 tuck, the clawed arm cocked · 1 the dive,
+  // claws leading · 2-3 the near-vertical dive (the two cells the fall holds
+  // on, for as long as the plunge is held) · 4 landed, claws in the floor ·
+  // 5 held · 6 rising · 7 standing. The cells are chosen in drawRoboSwing: in
+  // the air by how long the strike has been falling, on the ground by the
+  // landing's own clock (plungeLand). `tip` is where the point of the strike
+  // is in each of the four flying cells and the two landed ones, in sheet
+  // pixels right of the cell's centre (it rests on the sole line) — the head
+  // of the meteor sits on it, and the landing's blue comes up out of it.
+  down:{key:'swingDown',cells:8,k:HERO_DELIVERY_K,plunge:1,tip:[-26,76,10,-2,35,48]},
   // Poster order: short jab, two sweeping scratches, rising uppercut.
   claw_1: {key:'swingClawJab',cells:5,k:HERO_DELIVERY_K},
   claw_2: {key:'swingClaw1',cells:6,k:HERO_DELIVERY_K},
@@ -1463,7 +1683,20 @@ const HERO_DUAL_FX={key:'swingDualFx',cells:8,release:{from:0,to:7},dx:35,dy:0,s
 const HERO_DUAL_FX_POSES=[null,null,[1,38,-5,58],[2,38,2,58],[3,5,-5,70],[5,48,2,54],[6,38,8,48],null];
 const HERO_SINGLE_NORMAL_FX_POSES=[null,null,[3,35,10,60],[2,10,-12,64],[1,10,-24,62],[4,40,2,68],[5,35,9,48],null];
 SWING_STRIP.air.fx={...HERO_SINGLE_FX,release:{from:1,to:2},dx:22,dy:0,size:62};
-SWING_STRIP.down.fx={...HERO_SINGLE_FX,release:{from:1,to:2},dx:0,dy:16,size:60,rotation:Math.PI/2};
+// (the down-strike wears no scratch light: it wears the blue it falls through —
+// drawPlungeMeteor — and leaves a column of it where it lands — plungeLand)
+// THE SAME DIVE WITH A BLADE IN HER HANDS (owner, 2026-11-15: "also create the
+// same motion or different motion for swords, but the same concept"): point
+// down, both paws on it, and driven into the floor where she lands. Same eight
+// beats and the same cell choice as the claws' (plunge:1). The single blade
+// and the joined one are 384-px cells — a blade held straight down under a
+// cape streaming straight up is taller than a 320 cell — hence k × 1.2, as
+// joined.webp has always been.
+const HERO_PLUNGE = {
+  single:{key:'swingDownSingle',cells:8,k:HERO_DELIVERY_K*1.2,plunge:1,tip:[-30,92,-36,-31,-20,-8]},
+  dual:{key:'swingDownDual',cells:8,k:HERO_DELIVERY_K,plunge:1,tip:[-34,66,-19,-20,-6,-4]},
+  joined:{key:'swingDownJoined',cells:8,k:HERO_DELIVERY_K*1.2,plunge:1,tip:[-25,107,-22,-27,-43,-34]},
+};
 const HERO_WEAPON_CHARGES={single:{key:'swingSingleCharge',cells:10,k:HERO_DELIVERY_K,order:[3,4,5,6,7,8,9],fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_FX_POSES},dual:{key:'swingDualCharge',cells:10,k:HERO_DELIVERY_K,order:[3,4,5,6,7,8,9],fx:HERO_DUAL_FX,
   fxPoses:[null,[0,0,0,50],[3,0,0,64],[3,0,-5,74],[3,0,-5,78],[3,0,-5,82],[4,12,-5,80],[5,12,0,84],[7,15,5,60],null]}};
 const HERO_JOINED_FX_POSES=[null,[3,0,-4,62],[2,34,10,62],[1,33,-12,65],[3,0,-34,65],[5,49,0,58],[6,40,5,50],null];
@@ -1487,14 +1720,15 @@ const HERO_WEAPON_SWINGS = {
 function heroWeaponSwing(sv) {
   if (!sv) return null;
   if (sv.charged) return HERO_WEAPON_CHARGES[sv.weaponMode] || null;
-  if (sv.air) return null;
+  // in the air a weapon has one move of its own: the dive
+  if (sv.air) return sv.ay > 0.5 ? HERO_PLUNGE[sv.weaponMode] || null : null;
   const strips=HERO_WEAPON_SWINGS[sv.weaponMode];
   return strips && strips[Math.max(0,Math.min(2,sv.combo|0))];
 }
 function warmHeroWeaponArt(mode) {
   if(typeof mediaFetch!=='function')return;
   const strips=mode==='claws'?Object.values(SWING_STRIP):
-    [...(HERO_WEAPON_SWINGS[mode]||[]),HERO_WEAPON_CHARGES[mode]].filter(Boolean);
+    [...(HERO_WEAPON_SWINGS[mode]||[]),HERO_WEAPON_CHARGES[mode],HERO_PLUNGE[mode]].filter(Boolean);
   const keys=new Set();for(const s of strips){keys.add(s.key);if(s.fx)keys.add(s.fx.key);}
   if(mode==='claws')keys.add('swingSingleFx');
   if(mode==='joined'){keys.add('heroJoinedThrow');keys.add('heroJoinedProjectile');}
@@ -2201,6 +2435,17 @@ class Player {
       const nextC = this.comboT > 0 ? (blk && blk.chain === 2 ? (this.combo === 0 ? 2 : 0) : (this.combo + 1) % 3) : 0;
       this.atkCD = (typeof COMBAT_HERO_CD !== 'undefined' ? COMBAT_HERO_CD[nextC] : [0.26, 0.23, 0.33][nextC]) * (hasCrest('over') ? 0.7 : 1) * (blk ? blk.cd : 1);
       let ax = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
+      // STANDING ON A FLOOR SHE CAN CUT, DOWN + ATTACK IS THE WHOLE MOVE
+      // (owner, 2026-11-15: "improve the down hitting mechanism. It's not
+      // easy"). The down-strike only existed in the air, so opening a hatch
+      // took three inputs in the right order inside half a second — jump, then
+      // down, then strike — on the one floor the chapter cannot go on without.
+      // On a floor that will give, holding down and striking is enough: she
+      // hops and drives the strike into it herself. Only there: everywhere
+      // else down-and-strike on the ground is the swing it always was.
+      if (this.on && inD('DOWN') && !inD('UP') && plungeFloorUnder(this)) {
+        this.vy = -PLUNGE_HOP; this.on = false; this.coyote = 0; this.downBuf = 0.16;
+      }
       let ay = (inD('UP') ? -1 : 0) + (this.downBuf > 0 && !this.on ? 1 : 0);
       // a down-attack goes straight down. Diagonal aim used to push the hitbox
       // forward of whatever you were standing over, which is why it kept missing.
@@ -2407,7 +2652,7 @@ class Player {
       this.scratchWake.t -= dt;
       if (this.scratchWake.t <= 0 || this.dead) this.scratchWake = null;
     }
-    if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._rake = null; } }
+    if (this.swingVis) { this.swingVis.t -= dt; this.swingVis.age = (this.swingVis.age || 0) + dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._rake = null; } }
     // heal
     if (inD('HEAL') && this.on && this.dashT <= 0 && this.volts >= this.healCost() && this.cores < this.maxCores()
         && (typeof healUnlocked !== 'function' || healUnlocked())) {
@@ -2525,6 +2770,33 @@ class Player {
         }
       }
       this.swing.t -= dt;
+      // THE PLUNGE HOLDS UNTIL IT LANDS (owner, 2026-11-15: "the hit is actually
+      // super fast that sometimes it does not allow me to hit the floor. It
+      // finishes before actually reaching the floor"). Measured on the meadow's
+      // hatch: a strike is live for 0.15 s and reaches 60 px under her feet, and
+      // a jump is 184 px high — so a down-strike thrown anywhere in the first
+      // two thirds of a jump was over while she was still in the air, and the
+      // floor never felt it. A strike aimed DOWN now stays live for as long as
+      // she is in the air: it ends when she lands, when it bounces her off
+      // something (the pogo, unchanged), or after PLUNGE_HOLD at the outside.
+      if (this.swing.ay > 0.5 && !this.on && !this.swing.pogoed && this.swing.t < PLUNGE_TAIL) {
+        this.swing.heldT = (this.swing.heldT || 0) + dt;
+        if (this.swing.heldT < PLUNGE_HOLD) {
+          this.swing.t = PLUNGE_TAIL;
+          // ...and so does its picture: she is still diving
+          if (this.swingVis && this.swingVis.ay > 0 && !this.swingVis.punch) this.swingVis.t = Math.max(this.swingVis.t, 0.1);
+        }
+      }
+      // IT LANDS: the claws go into the floor (plungeLand) — once per strike,
+      // and not when it has already bounced her off something
+      if (this.swing.ay > 0.5 && this.on && !this.swing.punched && !this.swing.pogoed && this.swing.wasAir) {
+        this.swing.punched = 1; plungeLand(this);
+      }
+      if (!this.on && this.swing.ay > 0.5) this.swing.wasAir = 1;
+      // embers shed into the air she is falling through: they hang where they
+      // were let go, so against her they go UP
+      if (!this.on && this.swing.ay > 0.5 && this.vy > 90 && !G.artProbe && !(typeof isHero === 'function' && isHero()) && chance(dt * 46))
+        addPart(this.x + this.w / 2 + rnd(-9, 9), this.y + this.h - rnd(0, 16), rnd(-26, 26), rnd(-70, 10), rnd(0.22, 0.5), PLUNGE_EMBER[(Math.random() * 3) | 0], rnd(1.2, 2.4), -90, true);
       const hb = this.hitbox();
       let pogo = false;
       // A freed guardian is never a target. Swinging at the beast you saved is
@@ -2638,12 +2910,13 @@ class Player {
           const key = tx + ty * 4096;
           if (struck.has(key)) continue;
           struck.add(key);
-          if (this.swing.ay > 0) { G.breakTile(tx, ty); pogo = true; }
+          if (this.swing.ay > 0) { G.breakTile(tx, ty); pogo = true; plungeThrough(tx, ty); }
           else if (!floorBlock) { if (G.knockTile(tx, ty, true) >= 2) G.breakTile(tx, ty); }
           else G.knockTile(tx, ty, false);
         } else if (c === '^' && this.swing.ay > 0) pogo = true;
       }
       if (pogo && this.swing.ay > 0) {
+        this.swing.pogoed = 1;                 // it has landed its blow: the hold is over
         // PLUNGE: with the skill, the down-slash's rebound frame also slams a
         // ring into the floor — everything grounded nearby takes a smaller,
         // second bite. Priced as a tier-2 node because it turns the pogo from
@@ -3309,9 +3582,28 @@ class Player {
     let cell = S.order ? S.order[Math.min(S.order.length-1,Math.floor(p*S.order.length))] : S.pingpong
       ? (p < 0.5 ? Math.floor(p * 2 * S.cells) : Math.floor((1 - p) * 2 * S.cells))
       : Math.floor(p * S.cells);
-    if(S===SWING_STRIP.down && this.on)cell=4+Math.min(1,Math.floor(p*2));
+    if (S.plunge) {
+      // on the ground: the claws (or the blade) in the floor, held, rising,
+      // standing — on the landing's own clock. In the air: tuck, the dive, then
+      // the two dive cells turn about for as long as she is still falling.
+      if (sv.punch) cell = 4 + Math.min(3, Math.floor(p * 4));
+      else if (this.on) cell = 4 + Math.min(1, Math.floor(p * 2));
+      else { const a = sv.age || 0; cell = a < 0.05 ? 0 : a < 0.11 ? 1 : 2 + (Math.floor(a * 11) & 1); }
+    }
+    // the dive's fire: its body goes down BEHIND her, its head over the top
+    const im0 = S.plunge && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[S.key];
+    const meteor = im0 && im0.naturalWidth && cell < 4 && plungeMeteorPower(this, sv) > 0;
+    // sheet pixels to her frame: the cell is h tall on screen whatever its size
+    const mTip = meteor ? (S.tip ? S.tip[cell] : 0) * h / im0.naturalHeight : 0;
+    if (meteor) drawPlungeMeteor(c, this, sv, 'back', mTip, HERO_FLOOR, HERO_DH * HERO_DELIVERY_K);
+    // ...and where it lands, the blue comes back up out of the point
+    const hit = S.plunge && sv.punch && im0 && im0.naturalWidth && S.tip;
+    const hTip = hit ? (S.tip[Math.min(5, Math.max(4, cell))] || 0) * h / im0.naturalHeight : 0;
+    if (hit) drawPlungeImpact(c, this, sv, 'back', hTip, HERO_FLOOR);
     const drew = drawStripCell(c, S.key, Math.min(S.cells - 1, cell), S.cells,
                                0, HERO_FLOOR, h, false);
+    if (meteor && drew) drawPlungeMeteor(c, this, sv, 'front', mTip, HERO_FLOOR, HERO_DH * HERO_DELIVERY_K);
+    if (hit && drew) drawPlungeImpact(c, this, sv, 'front', hTip, HERO_FLOOR);
     // ...and the energy over the top of it, on the same clock. Only if the BODY
     // drew: an effect hanging in the air beside the procedural fallback pose is
     // worse than no effect, and this is the one strip whose art is optional.
@@ -5015,8 +5307,12 @@ class Player {
     // only decides whether the procedural fallback below is needed
     const scratchDrawn = this.scratchWakeReady();
     this._slashScratch = scratchDrawn;
-    if (this.swingVis && !scratchDrawn && this._authoredSwingFx !== this.swingVis) {
+    // (and never on the dive: three talon crescents under her feet are a
+    // slash's mark — the owner: "the 3 lines you created is working with a
+    // slash, not with going down" — the dive wears drawPlungeMeteor instead)
+    if (this.swingVis && !scratchDrawn && this._authoredSwingFx !== this.swingVis && !(this.swingVis.ay > 0.5 && !hero)) {
       const sv = this.swingVis;
+      if (typeof G !== 'undefined') G.rakeFallback = (G.rakeFallback | 0) + 1;   // counted, for tests/plunge.cjs
       const p = 1 - sv.t / sv.t0;
       // ---- THE SWIRL draws its own thing and nothing else ------------------
       // The rake arcs follow her PAWS, and through a pirouette the paws go
@@ -11160,6 +11456,14 @@ function rakePlace(c, mk, aim) {
 const SLASH_GLOW = { scale: 1.18, alpha: 0.45, blur: 2.5 };
 function drawSlashLayer(c, pl) {
   if (!pl) return;
+  // A DOWN-STRIKE IS A DIVE, NOT A CUT (owner, 2026-11-15: "the 3 lines you
+  // created is working with a slash, not with going down. The going down
+  // should be different"): it draws no rake, no scratch light, no edge. It
+  // wears the blue it falls through (drawPlungeMeteor) and leaves a column of
+  // it where it lands (plungeLand). The hero's world keeps its blade.
+  if (pl.swingVis && pl.swingVis.ay > 0.5 && !(typeof isHero === 'function' && isHero())) {
+    pl._slashScratch = false; pl._slashMarks = null; return;
+  }
   const glow = typeof QUAL === 'undefined' || QUAL.glow;
   // the passes this frame drew (tests/slashlayer.cjs reads it); only kept on
   // frames that cut, so the loop allocates nothing otherwise

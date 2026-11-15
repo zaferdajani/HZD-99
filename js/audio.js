@@ -1834,6 +1834,9 @@ function sfx(n) {
     // THE PACK'S VOICE (js/wolfhunt.js). Four sounds, one per thing it does:
     // the snarl that opens a hunt, the bark on the lunge, jaws shut and shaken
     // when the bite lands, and the yelp of one thrown off its feet.
+    // her claws in the floor (the down-strike's landing, plungeLand): a dull
+    // body of a thud with a short crack of plating on top
+    case 'plunge_land': tone(84, .18, 'sine', .13, 38); tone(150, .07, 'square', .04, 70); hiss(.09, .07); chink(.03, .01); tone(1250, .16, 'sine', .022, 520, .01); break;
     case 'wolf_snarl': growl(92, .46, .055, 31, 70); hiss(.3, .018, .04); break;
     case 'wolf_lunge': growl(150, .16, .05, 44, 84); whoosh(.14, 500, 1700, .035); break;
     case 'wolf_bite': chink(.03); tone(230, .05, 'square', .05, 80); growl(104, .38, .05, 17, 76, .05); break;

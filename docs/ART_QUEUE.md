@@ -6327,6 +6327,31 @@ spec: `assets/source/beasts/wolf3/`. Behaviour: `js/wolfhunt.js`; measured by
 patrol prowl, the coil (its amber is in the art), the hopper's crouch / leap /
 landing, the pant, the recoil.
 
+
+### 2cc-0c. THE DIVE — FIRED AND WIRED 2026-11-15, AWAITING OWNER REVIEW (code session, owner's order)
+
+Owner, 2026-11-15, in three messages: the down-strike "should have its own
+graphics... the Superman pose where she hits the floor"; then, on seeing the
+fist, "going down should be with a claw, not just a fist. The motion is correct,
+but it needs to show the cat's claw with an after effect of the same blue...
+radiating blue going upward... just like a meteor coming down, but blue with a
+claw. Also create the same motion or different motion for swords, but the same
+concept"; and "the 3 lines you created is working with a slash, not with going
+down... Create its own VFX."
+
+- **Fired (Higgsfield, GPT Image 2.6, canon element embedded):** four 4x2
+  sheets — claws, single blade, twin blades, joined blade — on the fist take's
+  motion, each blade copied from her own swing strip. Jobs, prompts and the cut:
+  `assets/source/hero/plunge/prompts.json`.
+- **Wired:** `hero/swing/down.webp` (claws) and `hero/swing/down_{single,dual,
+  joined}.webp` (`HERO_PLUNGE`, js/entities.js); eight cells each — tuck, dive,
+  two falling cells held for as long as she falls, landed, held, rising, standing.
+- **The blue is code** (additive light, the channel the art rules leave to us):
+  `drawPlungeMeteor` on the way down, `drawPlungeImpact` and `plungeLand` where
+  she lands. The claw rake's three crescents are no longer drawn on a dive.
+- **Measured:** `tests/plunge.cjs`.
+- **Owner's eye still owed** on all four strips and on the effect.
+
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 
 **FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the rest plate is the fallback while a strip loads (the two-plate walk pair was deleted 2026-10-09). Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.
