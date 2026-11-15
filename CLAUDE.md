@@ -382,6 +382,18 @@ ceiling tier). `js/preload.js` uses it to fetch ahead over the room graph.
 `node tools/roomassets.cjs && node build.cjs`. It is not fatal if it is stale or
 missing: prefetch simply does less, and the lazy map behaves as it always did.
 
+**A loaded sheet is not a decoded sheet** (measured 2026-11-15, after the owner
+reported the APK lagging "to point of a second"). The first canvas draw of a
+sheet decodes it on the main thread, in that frame: 50–190 ms each on a desktop
+CPU, several times that on a phone. `img.decode()` does NOT help a canvas, and
+`createImageBitmap(<img>)` blocks for the whole decode; only
+`createImageBitmap(Blob)` is both off the main thread and cheap to draw.
+`js/media.js` (DECODED BEFORE IT IS DRAWN) does that for every sheet that is
+wanted or within a door of her, under a per-device memory ceiling, and one
+patched `drawImage` uses the bitmap. `docs/DELIVERY.md` §5.2 has the table;
+`tests/decode-ahead.cjs` measures it. Do not read a canvas back (`getImageData`
+on the frame) in the play loop either: on a phone's GPU that stalls the frame.
+
 **The package is two different problems and the numbers decide everything**
 (measured 2026-08-15): 132 MB total, of which **100 MB is music and video that
 is STREAMED and must never be preloaded**, and 32 MB is art — 11.6 MB of shared

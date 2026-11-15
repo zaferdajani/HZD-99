@@ -726,6 +726,163 @@ function mediaDirty(k) {
     try { tileDirty = true; } catch (e) {}
   }
 }
+// ===========================================================================
+// DECODED BEFORE IT IS DRAWN (owner, 2026-11-15, playing the APK: "the screen
+// was not very smooth when it moved. Some frames felt like it's not glitching
+// but lagging to point of a second").
+//
+// A sheet that has "loaded" is a file in memory. Its PIXELS do not exist until
+// something draws it, and the canvas decodes them there and then, on the main
+// thread, inside the frame that asked. Measured on a desktop CPU, per first
+// draw: the roster sheet (2496x2508) 184 ms, the people 126 ms, a guardian's
+// film strip (13440x256) 64 ms, her own states sheet 46 ms — and a phone is
+// several times slower than that. Every new machine, every new backdrop, every
+// first use of one of her moves was one of those frames. The web page softens
+// it with the quarter-size copies; the packaged app does not use them ("no
+// race to win locally"), so there every sheet's first frame was the full one.
+//
+// Three things were measured before anything was changed (the numbers are for
+// the 13440x256 strip; the others scale the same way):
+//   img.decode()               returns at once, resolves in 61 ms — and the
+//                              first canvas draw STILL takes 64 ms. It warms
+//                              the page compositor's cache, which a canvas
+//                              does not draw from. (js/atlas.js asked for it
+//                              and got nothing for it.)
+//   createImageBitmap(<img>)   the first draw is then 3 ms — and the call
+//                              itself blocks the main thread for 68 ms. The
+//                              same hitch, moved.
+//   createImageBitmap(Blob)    returns in 0.2 ms, the main thread never
+//                              stalls more than 4 ms, and the first draw is
+//                              3 ms. The decode happens on another thread.
+//
+// So once a sheet has loaded, its bytes are read a second time as a Blob — from
+// the HTTP cache, the service worker's cache or the package, never the network
+// twice — made into an ImageBitmap off the main thread, and hung on the <img>
+// as `__bm`. (Loading the <img> itself FROM the blob, to save that second
+// read, was tried: it is one request, and it delivers the sheet late enough
+// that the quarter-size stand-in starts winning races it used to lose.)
+// The <img> stays the object every renderer holds, tests and guards exactly as
+// before; ONE patched drawImage swaps in the bitmap when there is one. A sheet
+// with no bitmap draws as it always did, so nothing here can make a picture
+// wrong — only late, and then no later than it used to be.
+//
+// WHEN: a sheet is published the moment it loads, as it always was, and its
+// bitmap follows a few tens of milliseconds behind it. What makes that enough
+// is that nearly nothing is drawn the instant it loads: the prefetcher brings
+// a room's art in while she is still a room away, preloadRoom names the art
+// within a door of her (artBmNear) and it is decoded three at a time, and her
+// own body's sheets are always in that set. A sheet drawn in the gap before
+// its bitmap lands is decoded on the frame, the way every sheet used to be.
+// A sheet the prefetcher brought in for a FAR room is not decoded at all until
+// she comes within a door of it.
+//
+// MEMORY: every sheet in the game decoded is 861 MB, so the bitmaps live under
+// a ceiling — the device's, not the game's — and the least recently drawn one
+// that is not within a door of her is closed to make room. Its <img> remains
+// and draws the old way if it is ever needed before it is warmed again.
+// ===========================================================================
+const ART_BM = { t: 0, bytes: 0, n: 0, made: 0, evict: 0, failed: 0, cap: 0, items: [], near: {}, q: [], busy: 0,
+  off: typeof createImageBitmap !== 'function' || typeof fetch !== 'function'
+    || (typeof location !== 'undefined' && /[?&]nobm=1/.test(location.search || '')) };
+function artBmCap() {
+  if (ART_BM.cap) return ART_BM.cap;
+  const nav = typeof navigator !== 'undefined' ? navigator : {};
+  const mem = nav.deviceMemory || 0, touch = (nav.maxTouchPoints || 0) > 0;
+  // (a touch device that will not say how much memory it has is an iPhone:
+  // the tightest of them, so it gets the careful number)
+  ART_BM.cap = (mem && mem <= 2 ? 112 : touch ? (mem >= 8 ? 288 : mem >= 4 ? 208 : 160) : 512) * 1048576;
+  return ART_BM.cap;
+}
+function artBmDrop(im) {
+  const bm = im.__bm;
+  if (!bm) return;
+  im.__bm = null; ART_BM.bytes -= im.__bmB || 0; ART_BM.n--; ART_BM.evict++;
+  try { bm.close(); } catch (e) {}
+}
+// make room for `need` bytes: the least recently drawn first. Never one drawn
+// in the last few seconds. One within a door of her goes only if nothing else
+// will do AND it has not been drawn for twenty seconds — which is what a raw
+// sheet looks like once its cleaned or graded copy has taken over the drawing
+// (the roster and the people are 47 MB of exactly that).
+function artBmEvict(need) {
+  const cap = artBmCap();
+  if (ART_BM.bytes + need <= cap) return true;
+  const L = ART_BM.items.filter(im => im.__bm);
+  L.sort((a, b) => (a.__use || 0) - (b.__use || 0));
+  for (const pass of [0, 1]) for (const im of L) {
+    if (ART_BM.bytes + need <= cap) break;
+    if (!im.__bm) continue;
+    const idle = ART_BM.t - (im.__use || 0);
+    if (idle < 240 || (ART_BM.near[im.__k] && (!pass || idle < 1200))) continue;
+    artBmDrop(im);
+  }
+  ART_BM.items = L.filter(im => im.__bm);
+  return ART_BM.bytes + need <= cap;
+}
+// `then` is called exactly once: when the bitmap is on the image, when it
+// cannot be made, or after 2.5 s — a promise a parked tab never settles must
+// not keep a sheet off the screen. A bitmap that arrives after that is kept.
+function artBmMake(im, then) {
+  let told = false;
+  const tell = () => { if (!told) { told = true; if (then) then(); } };
+  if (ART_BM.off || !im || im.__bm) return tell();
+  if (im.__bmP) { im.__bmP.push(tell); return; }
+  const bytes = (im.naturalWidth | 0) * (im.naturalHeight | 0) * 4, src = im.__url || im.currentSrc || im.src;
+  if (!bytes || !(im.__blob || src) || !artBmEvict(bytes)) return tell();
+  im.__bmP = [tell];
+  const fin = (bm) => {
+    const w = im.__bmP; im.__bmP = null;
+    if (bm && !im.__bm && artBmEvict(bytes)) {
+      im.__bm = bm; im.__bmB = bytes; im.__use = ART_BM.t;
+      ART_BM.bytes += bytes; ART_BM.n++; ART_BM.made++; ART_BM.items.push(im);
+    } else if (bm) { try { bm.close(); } catch (e) {} }
+    else ART_BM.failed++;
+    if (w) for (const f of w) f();
+  };
+  try {
+    (im.__blob ? Promise.resolve(im.__blob)
+               : fetch(src).then(r => { if (!r.ok) throw new Error('art'); return r.blob(); }).then(b => (im.__blob = b)))
+      .then(b => createImageBitmap(b)).then(fin, () => fin(null));
+  } catch (e) { fin(null); }
+  setTimeout(tell, 2500);
+}
+// The art within a door of her (and her own body's). Called when a room loads:
+// what is already here and has no pixels yet is given them, nearest first.
+function artBmNear(keys) {
+  const near = {};
+  for (const k of keys) near[k] = 1;
+  ART_BM.near = near;
+  // (a sheet whose cleaned copy already exists is not drawn raw again)
+  ART_BM.q = keys.filter(k => { const im = MEDIA_RAW[k]; return im && im.tagName === 'IMG' && !im.__bm && !im.__bmP && MEDIA_LOW[k] !== 2
+    && !(typeof ATLAS_PROC !== 'undefined' && ATLAS_PROC[k]); });
+}
+// once a frame (js/preload.js preloadTick): the clock the "recently drawn"
+// reading runs on, and at most three decodes in flight (they are on other
+// threads; three is what a phone has to spare beside the game)
+function artBmTick() {
+  ART_BM.t++;
+  while (ART_BM.q.length && ART_BM.busy < 3) {
+    const im = MEDIA_RAW[ART_BM.q.shift()];
+    if (!im || im.tagName !== 'IMG' || im.__bm || im.__bmP) continue;
+    ART_BM.busy++;
+    artBmMake(im, () => { ART_BM.busy = Math.max(0, ART_BM.busy - 1); });
+  }
+}
+// THE ONE PLACE A BITMAP IS USED. Every draw in the game goes through
+// c.drawImage(im, ...) with the <img>; where that <img> has its pixels ready
+// they are what is drawn. Same size, same pixels, no decode.
+(function () {
+  if (typeof CanvasRenderingContext2D === 'undefined') return;
+  const P = CanvasRenderingContext2D.prototype, raw = P.drawImage;
+  if (raw.__artBm) return;
+  P.drawImage = function (im, a, b, c2, d, e, f, g, h) {
+    const bm = im && im.__bm;
+    if (bm) { im.__use = ART_BM.t; im = bm; }
+    const n = arguments.length;
+    return n >= 9 ? raw.call(this, im, a, b, c2, d, e, f, g, h) : n >= 5 ? raw.call(this, im, a, b, c2, d) : raw.call(this, im, a, b);
+  };
+  P.drawImage.__artBm = 1;
+})();
 function mediaLow(k) {
   const L = (typeof window !== 'undefined') && window.LOWRES;
   if (!L || !L[k] || MEDIA_RAW[k] || MEDIA_LOW[k]) return;
@@ -757,18 +914,34 @@ function mediaLow(k) {
 // "it has been stuck for 12 seconds, try again" path uses this — the quiet
 // per-second poll while still within the normal window must not spam fresh
 // cache entries for a merely-slow connection.
-function mediaFetch(k, urgent, bust) {
+// `far` is the prefetcher saying "nobody is near this yet" (js/preload.js): the
+// sheet is fetched and published as it always was, and its pixels are decoded
+// later, when she comes within a door of it — see DECODED BEFORE IT IS DRAWN.
+function mediaFetch(k, urgent, bust, far) {
   if (urgent) mediaLow(k);
   if (MEDIA_RAW[k] && MEDIA_LOW[k] !== 2) return;   // a stand-in still wants the real one
-  if (MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
-  MEDIA_PEND[k] = 1;
+  if (MEDIA_PEND[k]) { if (!far) MEDIA_PEND[k] = 2; return; }   // somebody nearer wants it: decode it on arrival
+  if (!MEDIA_SRC.images[k]) return;
+  MEDIA_PEND[k] = far ? 1 : 2;
   const im = new Image();
+  im.__k = k;
   im.onload = () => {
     if (!heroSheetCompatible(k, im)) {
       delete MEDIA_PEND[k];
       if (!bust) mediaFetch(k, urgent, true);
       return;
     }
+    // PUBLISHED THE MOMENT IT LOADS, exactly as it always was — and its pixels
+    // are made alongside, off the frame, unless the prefetcher fetched it for
+    // a room she is nowhere near. (Holding it back until the bitmap was ready
+    // was tried first: it moved when art appears, and the floor's bake, the
+    // stand-ins and a dozen harnesses are all timed to the old moment.)
+    const want = MEDIA_PEND[k] === 2 || ART_BM.near[k];
+    land();
+    if (want) artBmMake(im);
+  };
+  const land = () => {
+    if (MEDIA_RAW[k] === im) return;
     const wasLow = MEDIA_LOW[k] === 2;
     MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
     // PENDING ENDS WHEN IT LANDS. Kept, the key stayed "pending" forever, and
@@ -794,8 +967,9 @@ function mediaFetch(k, urgent, bust) {
     // A failed request must not permanently lock a visible image out.
     setTimeout(() => { delete MEDIA_PEND[k]; }, 3000);
   };
-  im.src = bust ? MEDIA_SRC.images[k] + (MEDIA_SRC.images[k].indexOf('?') < 0 ? '?' : '&') + 'r=' + Date.now()
-                : MEDIA_SRC.images[k];
+  im.__url = bust ? MEDIA_SRC.images[k] + (MEDIA_SRC.images[k].indexOf('?') < 0 ? '?' : '&') + 'r=' + Date.now()
+                   : MEDIA_SRC.images[k];
+  im.src = im.__url;
 }
 const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
   get(t, k) {

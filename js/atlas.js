@@ -343,7 +343,12 @@ function artWarmReady(k) {
   if (ART_DECODE[k] !== 'pending') {
     ART_DECODE[k] = 'pending';
     const mark = () => { ART_DECODE[k] = im; };
-    try { (im.decode ? im.decode() : Promise.resolve()).then(mark, mark); } catch (e) { mark(); }
+    // (it asked for im.decode() here, and that does nothing for a canvas — the
+    // first step's drawImage decoded the sheet all over again, on the frame.
+    // Measured, media.js DECODED BEFORE IT IS DRAWN: the bitmap is what the
+    // steps draw from now.)
+    if (typeof artBmMake === 'function') artBmMake(im, mark);
+    else { try { (im.decode ? im.decode() : Promise.resolve()).then(mark, mark); } catch (e) { mark(); } }
   }
   return false;
 }

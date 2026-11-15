@@ -262,6 +262,53 @@ below where it really is (`tests/vlink.cjs`).
 
 ---
 
+### 5.2 Art is decoded before it is drawn, and never on the frame
+
+A sheet that has loaded is a file in memory. Its pixels are made the first time
+a canvas draws it — on the main thread, inside the frame that asked. On a
+desktop CPU that is 184 ms for the roster sheet, 126 ms for the people, 64 ms
+for a guardian's 13440-px strip; a phone is several times slower, and the
+packaged app does not use the quarter-size copies (§3.5) that soften it on the
+web. The owner, playing the APK on 2026-11-15: "some frames felt like it's not
+glitching but lagging to point of a second."
+
+Three ways of getting the pixels made early were measured (`media.js` has the
+numbers) and only one does the job:
+
+| route | first canvas draw | main thread while it is made |
+|---|---|---|
+| `img.decode()` | still the full decode | free — but it warms the wrong cache |
+| `createImageBitmap(<img>)` | ~3 ms | blocked for the whole decode |
+| `createImageBitmap(Blob)` | ~3 ms | never more than a few ms |
+
+So: once a sheet has loaded, its bytes are read a second time as a Blob (from
+the HTTP cache, the service worker's cache or the package — never the network
+twice), an `ImageBitmap` is made from that off the main thread and hung on the
+`<img>`; one patched `drawImage` draws the bitmap when there is one. (Loading
+the `<img>` itself from the Blob saves the second read and delivers the sheet
+late enough that the stand-in starts winning races it used to lose.) The `<img>` remains the object every renderer holds,
+so nothing else changed, and a sheet without a bitmap draws exactly as before.
+
+- A sheet is published the moment it loads, exactly as before, and its bitmap
+  follows a few tens of milliseconds behind. (Holding it back until the bitmap
+  was ready was tried first: it moved when art appears, and the floor's bake
+  and the stand-ins are timed to the old moment.) A sheet drawn in that gap is
+  decoded on the frame, as every sheet used to be.
+- A sheet prefetched for a room two doors away or more is not decoded at all;
+  `preloadRoom` names the art within a door of her — and her own body's, always
+  — and those are decoded three at a time, this room's first.
+- All of the art decoded is 861 MB. The bitmaps live under a ceiling set by the
+  device (112–288 MB on a phone or tablet, 512 MB on a desktop); the least recently drawn
+  sheet that is not near her is closed to make room, and its `<img>` still draws.
+- **Never add `img.decode()` to warm art for a canvas.** It does nothing there.
+
+The other thing a phone's GPU cannot do in passing is a readback. The
+brightness probe (`liftProbe`) read the whole frame back twice a second for as
+long as the game ran; it now looks three times as a room settles and once every
+three seconds after, from a copy shrunk on the GPU first.
+
+`tests/decode-ahead.cjs` measures all of it.
+
 ## 6. Changelog
 
 | Change | Before | After | Why |

@@ -25,12 +25,21 @@ const MB = (n) => (n / 1048576).toFixed(2) + ' MB';
 async function boot(withSave) {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
-  const req = [];
+  const req = [], seenArt = new Set();
   const requestOrder=new WeakMap();let nextRequest=0;
   page.on('request',r=>requestOrder.set(r,nextRequest++));
   page.on('response', async (r) => {
     const u = r.url();
     if (!/\/assets\//.test(u)) return;
+    // THE SECOND READ OF A SHEET IS NOT A SECOND PURCHASE. Once a sheet has
+    // loaded, js/media.js reads its bytes again as a Blob to decode it off the
+    // main thread (DECODED BEFORE IT IS DRAWN). In the field that read is the
+    // HTTP cache, the service worker's cache or the package; this harness's
+    // server sends no cache headers, so here it reaches the server, and would
+    // count every near sheet twice and scatter the ordering with repeats. What
+    // a cold open SPENDS is the first request for each file.
+    if (r.request().resourceType() === 'fetch' && seenArt.has(u)) return;
+    seenArt.add(u);
     let size = 0;
     try { size = Number((await r.headerValue('content-length')) || 0); } catch (e) {}
     req.push({ url: u.replace(/^.*\/assets\//, ''), status: r.status(), size, order:requestOrder.get(r.request()) });

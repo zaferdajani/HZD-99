@@ -3264,22 +3264,44 @@ let BRIGHT_SET = 3;
 // setting still scales the ceiling. Measured every half second off a 24x14
 // downsample of the world — one small readback, not one per frame — and
 // eased so a room change never pops.
-let LIFT_K = 1, LIFT_NEXT = 0, LIFT_CV = null;
+let LIFT_K = 1, LIFT_NEXT = 0, LIFT_CV = null, LIFT_MID = null, LIFT_ROOM = null, LIFT_N = 0;
 const LIFT_LIT = 72, LIFT_SPAN = 48;   // raw mean >= 72: no lift; <= 24: full
+// THE LOOK IS RARE, AND IT IS SMALL (owner, 2026-11-15, on the APK: "the
+// screen was not very smooth when it moved"). Reading a canvas back is the one
+// thing in this file a phone's GPU cannot do in passing: everything it has been
+// asked to draw must be finished first, and then the pixels are copied out to
+// the CPU, with the frame waiting. This did that twice a second for as long as
+// the game ran — and it did it to the WHOLE frame, because drawing a GPU canvas
+// into a CPU one copies all of it out before the 24x14 is made.
+//   - how dark a room is changes when the room does. So: three looks in the
+//     first second and a half of a room, as before, then one every three
+//     seconds — a sixth of the readbacks while she is simply playing;
+//   - the frame is shrunk on the GPU first, into a canvas large enough to stay
+//     on it (a small canvas is a CPU canvas), and only that is copied out:
+//     a twelfth of the bytes or less.
+// The number it produces is the same mean it always was.
 function liftProbe() {
   const now = performance.now();
+  if (G.roomId !== LIFT_ROOM) { LIFT_ROOM = G.roomId; LIFT_N = 0; LIFT_NEXT = Math.min(LIFT_NEXT, now + 120); }
   if (now < LIFT_NEXT) return;
-  LIFT_NEXT = now + 500;
+  const settling = LIFT_N < 3;
+  LIFT_NEXT = now + (settling ? 500 : 3000); LIFT_N++;
   try {
     if (!LIFT_CV) { LIFT_CV = document.createElement('canvas'); LIFT_CV.width = 24; LIFT_CV.height = 14; }
+    if (!LIFT_MID) { LIFT_MID = document.createElement('canvas'); LIFT_MID.width = 288; LIFT_MID.height = 168; }
+    const m = LIFT_MID.getContext('2d');
+    m.drawImage(c.canvas, 0, 0, 288, 168);
     const x = LIFT_CV.getContext('2d', { willReadFrequently: true });
-    x.drawImage(c.canvas, 0, 0, 24, 14);
+    x.drawImage(LIFT_MID, 0, 0, 24, 14);
     const d = x.getImageData(0, 0, 24, 14).data;
     let L = 0;
     for (let i = 0; i < d.length; i += 4) L += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
     L /= 24 * 14;
     const want = clamp((LIFT_LIT - L) / LIFT_SPAN, 0, 1);
-    LIFT_K += (want - LIFT_K) * 0.35;
+    // the sparse looks carry more each, so the lift follows her out of a lit
+    // corner in about the time it used to
+    LIFT_K += (want - LIFT_K) * (settling ? 0.35 : 0.7);
+    G.liftLooks = (G.liftLooks | 0) + 1;
   } catch (e) { LIFT_K = 1; }             // a tainted canvas keeps the old behaviour
 }
 function drawScreenLift() {

@@ -139,11 +139,18 @@ function preloadRoom(roomId) {
   if (PRE.lowAll) for (const id in M.rooms) for (const k of M.rooms[id].keys) preloadPushLow(k);
   // a re-sort rather than a reset: anything already queued keeps its place in
   // `seen`, so walking back and forth between two rooms does not re-enqueue
+  // ...and the art within a door of her is what gets its pixels decoded ahead
+  // (media.js DECODED BEFORE IT IS DRAWN): this room's first, then each
+  // neighbour's, and her own body's always
+  const nearKeys = [], nearSeen = {};
+  const nearAdd = (k) => { if (!nearSeen[k]) { nearSeen[k] = 1; nearKeys.push(k); } };
   for (const [id, d] of preloadNear(roomId, PRE.depth)) {
     const r = M.rooms[id];
     if (!r) continue;
-    for (const k of r.keys) { preloadPushLow(k); preloadPush(k, d); }
+    for (const k of r.keys) { preloadPushLow(k); preloadPush(k, d); if (d <= 1) nearAdd(k); }
   }
+  for (const k of BODY_KEYS) nearAdd(k);
+  if (typeof artBmNear === 'function') { try { artBmNear(nearKeys); } catch (e) {} }
   if (PRE.far) {
     for (const id in M.rooms) for (const k of M.rooms[id].keys) preloadPush(k, 9);
   }
@@ -217,6 +224,7 @@ function preloadIdle() {
 }
 
 function preloadTick() {
+  if (typeof artBmTick === 'function') { try { artBmTick(); } catch (e) {} }
   if (!PRE.on || !PRE.q.length) return;
   if (!preloadIdle()) return;
   // half rate while a film is on screen: it is playing cleanly (preloadIdle
@@ -227,7 +235,7 @@ function preloadTick() {
   const src = (typeof MEDIA_SRC !== 'undefined') && MEDIA_SRC.images;
   if (!src) return;
   while (PRE.q.length && PRE.inflight < max) {
-    const [key, , low] = PRE.q.shift();
+    const [key, pri, low] = PRE.q.shift();
     const url = src[key];
     if (!url) continue;
     if (low) {
@@ -245,7 +253,8 @@ function preloadTick() {
     // Going through the lazy map rather than around it: mediaFetch() is what
     // owns the pending set, the onload bookkeeping and the tile-repaint hook,
     // and a second loader racing it would fetch some sheets twice.
-    try { mediaFetch(key); } catch (e) {}
+    // (two doors away or more: fetched and published, decoded when she is near)
+    try { mediaFetch(key, 0, 0, pri >= 2); } catch (e) {}
     // mediaFetch has no completion callback, so the slot is freed on a short
     // timer. This is a THROTTLE, not a tracker: its only job is to stop the
     // queue emptying itself into the network in one frame.
