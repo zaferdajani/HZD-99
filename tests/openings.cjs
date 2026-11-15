@@ -32,8 +32,10 @@ const FIGHTS = [
     runs: [{ dist: 70, phase: 1, secs: 70 }, { dist: 320, phase: 1, secs: 90, move: 3.5 },
            { dist: 70, phase: 2, secs: 70 }, { dist: 320, phase: 2, secs: 90, move: 3.5 }] },
   { name: 'THE ALPHA', room: 'A10', boss: () => G.boss,
-    hurt: ['claw', 'bite', 'leap', 'roar'],   // shake only follows a landed bite
-    tell: ['clawwarn', 'bitewarn', 'coil', 'broodcall', 'roarwarn', 'howl', 'clinch'],
+    // the rend (js/alphakit.js, 2026-11-15) is a damaging move with its own
+    // wind-up; the fury is a wind-up too, though the roar it ends in hurts no one
+    hurt: ['claw', 'bite', 'leap', 'roar', 'rend'],   // shake only follows a landed bite
+    tell: ['clawwarn', 'bitewarn', 'coil', 'broodcall', 'roarwarn', 'howl', 'clinch', 'rendwarn', 'furywarn', 'fury'],
     gift: ['leap>turn'],
     runs: [{ dist: 60, phase: 1, secs: 70 }, { dist: 200, phase: 1, secs: 70 },
            { dist: 420, phase: 1, secs: 70 }] },

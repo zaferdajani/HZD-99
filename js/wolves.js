@@ -155,7 +155,7 @@ const WOLF_ART = {
   walkStrip: wolfStrip('wolfProwl8', 8, 125),
   runStrip: wolfStrip('wolfGallop6', 6, 129),
   coil: wolfStrip('wolfCoil6', 6, 122, { once: 'coilT' }),
-  lunge: wolfStrip('wolfBite6', 6, 116, { once: 'lungeT' }),
+  lunge: wolfStrip('wolfLunge6', 6, 119, { once: 'lungeT' }),
   crouch: wolfStrip('wolfCrouch4', 4, 97, { once: 'crouchT' }),
   leap: wolfStrip('wolfLeap6', 6, 152, { air: 1 }),
   windedStrip: wolfStrip('wolfPant6', 6, 108),
@@ -173,6 +173,27 @@ const WOLF_ART = {
   // still by BEAST_RECOVER.down — chest on the ground, head sunk, breathing.
   // A lying-down take of its own is on THE FIRING LIST (ART_QUEUE §2cc-ix).
   down: wolfStrip('wolfCrouch4', 4, 97, { hold: 0 }),
+  // THE AGGRESSIVE SET (owner, 2026-11-15: "find wolves, see how they move,
+  // how they attack, how they roll ... concentrate on the aggressive
+  // attacking moods"). Filmed over real-wolf motion references and cut at
+  // the same scale and floor as everything above (assets/source/beasts/wolf3):
+  //   snarl  — the threat display that opens a hunt: head down, plates up,
+  //            teeth out, the weight going back onto the haunches
+  //   bay    — what it holds while it waits on her: low, wide, jaw open
+  //   thrash — a bite that LANDED, held and worried, head whipping
+  //   roll   — thrown off its feet: over its own back and up again, low
+  //   stalkStrip / chargeStrip — the hunting walk and the rush (js/wolfhunt.js)
+  // and the lunge is the take's real spring, jaws open, in place of the small
+  // standing snap the first set had.
+  //   snap   — at bay it SNAPS at the air between bites: the first set's
+  //            standing bite, which is exactly that and nothing bigger
+  snap: wolfStrip('wolfBite6', 6, 116, { once: 'snapT' }),
+  snarl: wolfStrip('wolfSnarl8', 8, 125, { once: 'snarlT' }),
+  bay: wolfStrip('wolfBay6', 6, 91, { loop: 0.9 }),
+  thrash: wolfStrip('wolfThrash8', 8, 151, { once: 'thrashT' }),
+  roll: wolfStrip('wolfRoll12', 12, 161, { once: 'rollT' }),
+  stalkStrip: wolfStrip('wolfStalk10', 10, 115),
+  chargeStrip: wolfStrip('wolfCharge8', 8, 136),
 };
 // a pose the cheetah has no drawing for borrows the nearest one it has
 const BEAST_POSE_FALLBACK = { leap: 'lunge', crouch: 'coil', down: 'coil' };
@@ -287,6 +308,8 @@ function wolfPose(e, ART, tame) {
   if (e.disabled) return 'down';
   // the purify plays through whatever it was doing when the pack turned
   if (tame && e._pur0 != null && (e.anim || 0) - e._pur0 < WOLF_PURIFY_T && ART && ART.purify) return 'purify';
+  // thrown off its feet by her heavy blow: over its back and up (wolfFrame)
+  if (!tame && (e.rollT || 0) > 0 && ART && ART.roll) return 'roll';
   if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0) return 'lunge';
   // a body in the air is LEAPING — the hopper's pounce, a wolf off a ledge —
   // and only an animal with a leap drawing of its own says so
@@ -299,6 +322,8 @@ function wolfPose(e, ART, tame) {
   // the hopper's landing leaves it ABSORBING the drop (legs folded, chest
   // low). Both are the rest plate re-posed (BEAST_RECOVER) until their own
   // plates come off THE FIRING LIST (ART_QUEUE §2cc).
+  // the bite landed: it has not let go yet — the head of the winded window
+  if (!tame && (e.thrashT || 0) > 0 && ART && ART.thrash) return 'thrash';
   if ((e.windedT || 0) > 0) return 'winded';
   if ((e.landT || 0) > 0) return 'land';
   // KNOCKED BACK, it staggers; HIT where it stands, it flinches. Both after
@@ -306,7 +331,11 @@ function wolfPose(e, ART, tame) {
   // the wind-up, which is the one picture the player is reading.
   if (ART && ART.recoil && (e.kbT || 0) > 0) return 'recoil';
   if (ART && ART.hurt && (e.hurtT || 0) > 0) return 'hurt';
-  if (Math.abs(e.vx || 0) < 6) return tame && ART && ART.sit ? 'sit' : 'rest';   // standing still stands still
+  // IT HAS SEEN HER: the display first, and after it a wolf that is standing
+  // still on a hunt is standing AT BAY — low, teeth out — not at rest
+  if (!tame && ART && ART.snarl && (e.snarlT || 0) > 0) return 'snarl';
+  if (!tame && ART && ART.snap && (e.snapT || 0) > 0 && Math.abs(e.vx || 0) < 6) return 'snap';
+  if (Math.abs(e.vx || 0) < 6) return tame && ART && ART.sit ? 'sit' : (!tame && e.hunt && ART && ART.bay) ? 'bay' : 'rest';   // standing still stands still
   // the half-step the stride is on. The names are phases, not plates: the
   // filmed strips (walkStrip / runStrip) are what draw them, and the old
   // two-plate pairs that used to alternate here are retired (ART_QUEUE §2q).
@@ -354,7 +383,11 @@ function drawBeastPlate(c, e, ART, tame) {
   // flanks keep heaving however long the window is held. The landing is ONCE,
   // clocked by the landing timer itself: strike, fold, lowest, half-risen,
   // and it ends on the half-risen cell exactly as the window closes.
-  const SA = isRun ? ART.runStrip : isWalk ? ART.walkStrip
+  // ...and a wolf on a hunt walks and runs like one: the stalk and the charge
+  // (its own strips, once they are here; the patrol's until then)
+  const huntArt = (K) => (!tame && e.hunt && ART[K] && typeof mediaHas === 'function'
+    && (mediaHas(ART[K].img) || (typeof mediaFetch === 'function' && mediaFetch(ART[K].img), false))) ? ART[K] : null;
+  const SA = isRun ? (huntArt('chargeStrip') || ART.runStrip) : isWalk ? (huntArt('stalkStrip') || ART.walkStrip)
     : pose === 'winded' ? ART.windedStrip : pose === 'land' ? ART.landStrip : null;
   let cell = -1;
   if (SA && typeof mediaHas === 'function') {
@@ -590,6 +623,13 @@ const ALPHA_STRIP = {
   clinch:{key:'alClinch',cells:12,ch:234,from:0,to:3},
   shake:{key:'alClinch',cells:12,ch:234,from:4,to:8,loop:6},
   free:{key:'alYield',cells:12,ch:248,once:10},
+  // THE KING'S OWN MOVES (js/alphakit.js) are performed with takes it already
+  // has: the REND rears and rakes with the claw's own wind-up and swipe, and
+  // the FURY throws its head back with the howl's.
+  rendwarn:{key:'alClaw',cells:12,ch:237,from:0,to:5},
+  rend:{key:'alClaw',cells:12,ch:237,from:6,to:11},
+  furywarn:{key:'alHowl',cells:12,ch:259,from:0,to:5},
+  fury:{key:'alHowl',cells:12,ch:259,from:6,to:11},
 };
 const ALPHA_STRIPS = [...new Set(Object.values(ALPHA_STRIP).map(s=>s.key))];
 // Simulation owns time and resolved distance. Drawing is a pure lookup.
@@ -675,6 +715,7 @@ function alphaSummon(b) {
     const w = new Enemy('crawler', x, b.y + b.h - 26);
     w.dir = Math.sign(b.cx() - x) || 1;
     G.enemies.push(w);
+    if (typeof alphaPackArrive === 'function') alphaPackArrive(w);
     burst(x + 14, b.y + b.h - 12, 12, '#ff5f6d', 220, 0.5, 220, 3, true);
   }
   if (want > 0) sfx('cast');
@@ -692,6 +733,9 @@ function alphaSummon(b) {
 function alphaStep(b, dt, px, py) {
   const dist = px - b.cx(), adist = Math.abs(dist);
   b.t -= dt;
+  // its waves run on whatever it is doing by now; and at half health, from
+  // open time only, the fight changes (js/alphakit.js)
+  if (typeof alphaRendStep === 'function') { alphaRendStep(b, dt); alphaFuryAura(b, dt); if (alphaFuryDue(b)) alphaFuryBegin(b); }
   const airborne = b.st === 'leap';
   if (b.st === 'rest' || b.st === 'idle') b.face = Math.sign(dist) || b.face;
 
@@ -743,7 +787,23 @@ function alphaStep(b, dt, px, py) {
       if ((b.denied || 0) >= 3) { b.denied = 0; b.band = 0; b.t = 0.7; return alphaMove(b, dt, adist); }
       b.alphaAlt = !b.alphaAlt;
       if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = Math.max(.42,TELL_FAST); }
-      else if (b.band === 1) { b.st = 'coil'; b.t = TELL_SWIPE; }
+      else if (b.band === 1) {
+        // THE MIDDLE DISTANCE HAS TWO ANSWERS NOW: the leap, and the REND —
+        // turn about, the leap first. One comes at her through the air and
+        // the other along the floor, so the read is which, not whether.
+        b.midAlt = !b.midAlt;
+        if (!b.midAlt && typeof alphaRendBegin === 'function') alphaRendBegin(b);
+        else {
+          b.st = 'coil'; b.t = TELL_SWIPE;
+          // a fury leap shakes the ground it lands on: the spot is painted
+          // from the first frame of the coil (alphaDrawUnder)
+          if (b.fury && typeof alphaLeapMark === 'function') {
+            b.quakeX = alphaLeapMark(b);
+            const qy = typeof fxSurfaceY === 'function' ? fxSurfaceY(b.quakeX, b.y + b.h, 60) : NaN;
+            b.quakeY = qy === qy ? qy : b.y + b.h;
+          } else b.quakeX = null;
+        }
+      }
       else if (b.alphaAlt && packRoom) { b.st = 'broodcall'; b.t = TELL_HEAVY; }
       else { b.st = 'roarwarn'; b.t = TELL_HEAVY; }
     }
@@ -767,6 +827,7 @@ function alphaStep(b, dt, px, py) {
       const hit = !player.dead && player.iT <= 0 && aabb(hb, player);
       if (hit) { player.hurt(DF().edmg, b.cx(), 'alpha.' + b.st); b.denied = (b.denied || 0) + 1; b.hitSince = true; }
       sfx(b.st === 'claw' ? 'slash' : 'hit');
+      if (typeof alphaStrikeFx === 'function') alphaStrikeFx(b, b.st, reach, hit);
       cam.shake = Math.max(cam.shake, 3);
       burst(b.cx() + b.face * reach * 0.7, b.cy(), 8, '#ffb15a', 190, 0.4, 120, 2, true);
       // A BITE THAT LANDS DOES NOT LET GO. A wolf does not close its jaws and
@@ -803,6 +864,7 @@ function alphaStep(b, dt, px, py) {
       b.shakeN = want;
       if (!player.dead) player.hurt(DF().edmg, b.cx(), 'alpha.shake');
       sfx('hit'); cam.shake = Math.max(cam.shake, 6);
+      if (typeof alphaShakeFx === 'function') alphaShakeFx(b, b.shakeN);
       if (typeof padRumble === 'function') padRumble(0.8, 0.6, 140);
       burst(b.cx() + b.face * b.w * 0.5, b.cy(), 7, '#ff9a5a', 220, 0.4, 60, 2, true);
     }
@@ -842,6 +904,7 @@ function alphaStep(b, dt, px, py) {
       b.st = 'turn'; b.t = 0.5; b.vx = 0;
       cam.shake = Math.max(cam.shake, 5); sfx('boom');
       burst(b.cx(), b.y + b.h, 14, '#c8925c', 200, 0.5, 320, 3);
+      if (typeof alphaLeapLanded === 'function') alphaLeapLanded(b);
     } else if (b.t <= 0) { b.st = 'turn'; b.t = 0.42; }
   } else if (b.st === 'recoil') {
     if (b.on && b.vy >= 0) { b.vx *= Math.pow(0.02, dt); if (b.t > 0.3) b.t = 0.3; }
@@ -857,6 +920,7 @@ function alphaStep(b, dt, px, py) {
     if (!b.fired) {
       b.fired = true;
       alphaSummon(b);
+      if (typeof alphaHowlFx === 'function') alphaHowlFx(b);
       sfx('alpha_howl'); cam.shake = Math.max(cam.shake, 7);
       if (typeof padRumble === 'function') padRumble(0.7, 0.5, 380);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ff8a4a');
@@ -880,12 +944,15 @@ function alphaStep(b, dt, px, py) {
         if (typeof padRumble === 'function') padRumble(0.9, 0.8, 700);
       }
       sfx('alpha_bark'); cam.shake = Math.max(cam.shake, 11);
+      if (typeof alphaRoarFx === 'function') alphaRoarFx(b);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ffc24a');
       burst(b.cx(), b.cy(), 18, '#ffe6b8', 300, 0.6, 0, 3, true);
     }
     // THE ONE GIFT IS THE MISSED LEAP, not this: standing outside the ring is
     // the read, and it pays one clean combo — measured 1.5 s before, 0.9 now
     if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.6); }
+  } else if (typeof alphaSpecialStep === 'function' && alphaSpecialStep(b, dt, px, py)) {
+    // the REND and the FURY (js/alphakit.js)
   } else {
     b.st = 'rest'; if (b.t <= 0) b.t = bossRest(b, 1);
   }
@@ -903,7 +970,8 @@ function alphaMove(b, dt, adist) {
   const rooted = b.st === 'coil' || b.st === 'broodcall' || b.st === 'howl'
               || b.st === 'roarwarn' || b.st === 'roar' || b.st === 'turn'
               || b.st === 'clinch' || b.st === 'shake'
-              || /warn$/.test(b.st) || b.st === 'claw' || b.st === 'bite';
+              || /warn$/.test(b.st) || b.st === 'claw' || b.st === 'bite'
+              || b.st === 'rend' || b.st === 'fury';
   if (b.st !== 'leap' && b.st !== 'recoil' && !rooted) {
     const tgt = b.band === 0 ? ALPHA_KIT.close * 0.55
               : b.band === 1 ? (ALPHA_KIT.close + ALPHA_KIT.near) * 0.5
@@ -913,7 +981,7 @@ function alphaMove(b, dt, adist) {
     // boundary the way an unclamped seek does
     const err = adist - tgt;
     const drive = Math.abs(err) < 24 ? 0 : Math.sign(err);
-    const want = b.face * ALPHA_KIT.spd * drive;
+    const want = b.face * ALPHA_KIT.spd * drive * (b.fury && typeof ALPHA_FX !== 'undefined' ? ALPHA_FX.furySpd : 1);
     b.vx += (want - b.vx) * Math.min(1, dt * 4);
   }
   const col = moveEnt(b, dt);
@@ -956,6 +1024,8 @@ function drawAlpha(c, b, cx, cy) {
   const base = S.float ? H / 2 - b.h * 0.55 : ALPHA_PAD * H / S.ch;
   // a freed Alpha (tamed or purified) wears the cure's teal, not the violet
   const pure = !!(b.purified || b.tamed);
+  // behind the body: the floor it is about to tear or land on, and its ghosts
+  if (typeof alphaDrawUnder === 'function') alphaDrawUnder(c, b, cx);
   c.save();
   c.translate(cx, b.y + b.h);
   c.scale((b.face || -1) > 0 ? -1 : 1, 1);
@@ -986,6 +1056,8 @@ function drawAlpha(c, b, cx, cy) {
   // moment it lands. Suppressed for the art probe like every other
   // ground-anchored effect (§3.4), since it is lit pixels below the foot line.
   if (!G.artProbe && (b.st === 'roarwarn' || b.st === 'roar')) alphaRoarRing(c, b, cx);
+  // in front of it: the rend's waves
+  if (typeof alphaDrawOver === 'function') alphaDrawOver(c, b);
 }
 function alphaRoarRing(c, b, cx) {
   const grow = b.st === 'roarwarn'

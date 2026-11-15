@@ -1,0 +1,65 @@
+{
+ "provider": "Higgsfield",
+ "model": "seedance_2_5",
+ "resolution": "720p",
+ "aspect_ratio": "4:3",
+ "duration": 4,
+ "audio": false,
+ "fired": "2026-11-15",
+ "credits_each": 28,
+ "why": "Owner, 2026-11-15: 'do the same thing as you did for the lion, where you found an actual lion's frames and converted it ... find wolves, see how they move, how they attack, how they roll, and replicate it with the wolves that we have as robots ... concentrate on the aggressive attacking moods of the wolf.'",
+ "references": {
+  "note": "A web search found no freely licensed side-view footage of a wolf's threat display, lunge-bite or roll (stock libraries: licensed clips; the free ones are resting and walking shots). As for the lion's turn, the motion references were generated: a realistic wolf performing each motion. They are MOTION REFERENCES ONLY and are never shipped; their contact sheets are kept here (reference_wolf_*_sheet.jpg).",
+  "attack": {
+   "job_id": "4193cd78-27c5-4111-aab2-d5585b6e813a",
+   "mode": "t2v",
+   "what": "threat display, then a lunge of one body length and a snap, the bite thrashed, the spring back"
+  },
+  "stalk": {
+   "job_id": "aebfcfec-9ad5-4728-8812-4e71946351fe",
+   "mode": "t2v",
+   "what": "the low hunting stalk (2.3 s) breaking into a charge, tracked so the animal stays centred"
+  },
+  "roll": {
+   "job_id": "70f5993a-6b8d-4787-b5b2-280f6f2e0e96",
+   "mode": "t2v",
+   "what": "knocked off its feet from the front, a full roll over the back, the scramble up into a low snarling crouch"
+  }
+ },
+ "takes": {
+  "attack.mp4": {
+   "job_id": "c06f371f-02c2-4749-b5d9-326e3143c961",
+   "mode": "omni_reference",
+   "start_image": "green_start_lunge.jpg (wolf2/green_start.jpg shrunk to 0.66 and pushed right: room in front for the lunge)",
+   "video_references": "the attack reference",
+   "strips": [
+    "wolf_snarl8",
+    "wolf_lunge6",
+    "wolf_thrash8"
+   ]
+  },
+  "stalk.mp4": {
+   "job_id": "f87a5ff6-0f46-488e-a680-75fec5292f44",
+   "mode": "omni_reference",
+   "start_image": "wolf2/green_start.jpg",
+   "video_references": "the stalk reference",
+   "strips": [
+    "wolf_stalk10",
+    "wolf_charge8"
+   ]
+  },
+  "roll.mp4": {
+   "job_id": "f0e730f2-006d-4080-b1c3-df7c28bc99a1",
+   "mode": "omni_reference",
+   "start_image": "green_start_roll.jpg (the same plate shrunk to 0.66, centred) — the model re-framed it at full size, which is why the tail tip leaves the right edge for part of the roll",
+   "video_references": "the roll reference",
+   "strips": [
+    "wolf_roll12",
+    "wolf_bay6"
+   ]
+  }
+ },
+ "prompt_shape": "'The mechanical robot wolf from the first frame performs exactly the motion of the real wolf in the reference video — the same body motion and the same timing — on its own articulated metal body ...' then the motion beat by beat, then the plate rules: flat uniform chroma green, no floor, no shadow, no smoke/particles/sparks/dust/trails/glow/text, design and size exactly as the first frame, whole wolf in frame.",
+ "delivery": "python3 -I tools/fixcut.py cut_spec.json (run from assets/source/beasts with the mp4s beside it) — the lunge and the roll are cut with anchor:cx (each cell follows the body; the game's physics does the travelling). Strips to assets/characters/beasts/wolf_*.webp (q90), eyes by tools/eyemap.cjs, low tier by tools/lowres.cjs.",
+ "review": "Assistant-reviewed on contact sheets and in the running game (ingame_hunt.jpg). Awaiting the owner's eye."
+}

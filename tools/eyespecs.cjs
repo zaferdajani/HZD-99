@@ -23,6 +23,19 @@ module.exports = [
   // strips are the TAMED wolf, which has no infection and so no anchor.
   ...strips(['wolfIdle6', 'wolfProwl8', 'wolfGallop6', 'wolfCoil6', 'wolfBite6', 'wolfCrouch4',
              'wolfLeap6', 'wolfLanding4', 'wolfRecoil6', 'wolfPant6'], { region: [0, 0, 0.45, 0.6] }),
+  // the aggressive set (2026-11-15). The roll has no entry on purpose: the
+  // head goes right round the cell and the eye is hidden for half of it, so
+  // an anchor there would hang smoke on a paw.
+  ...strips(['wolfSnarl8', 'wolfBay6', 'wolfStalk10', 'wolfCharge8'], { region: [0, 0, 0.5, 0.7] }),
+  // the lunge and the thrash turn the face away for a cell or two (the head
+  // is whipping): those cells take the eye from their neighbours rather than
+  // a red seam further down the body
+  ...strips(['wolfLunge6'], { region: [0, 0, 0.4, 0.6], fill: true }),
+  // ...and the thrash is mostly motion blur: its lit eye is found in two cells
+  // and placed from a grid render in the rest (the head is whipping, the eye
+  // is where the muzzle says it is)
+  ...strips(['wolfThrash8'], { region: [0, 0, 0.42, 0.85],
+    at: { 0: [0.13, 0.43], 1: [0.14, 0.36], 2: [0.10, 0.26], 3: [0.10, 0.30], 5: [0.15, 0.27], 6: [0.14, 0.27] } }),
   // cheetahWarn: crouched so low the forepaw sits nearer the snout tip than
   // the eye does — placed from a grid render; cheetahRun (silver, unused by
   // the drawing code) has no lit eye and is placed the same way

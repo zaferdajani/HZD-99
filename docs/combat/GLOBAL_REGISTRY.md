@@ -400,3 +400,41 @@ Consequences for anyone building a room or a fight:
 `js/boss-motion.js`: `BOSS_OPEN_STATES` (the shared standing names), `BOSS_OPEN_OWN` (each fight's own openings), `BOSS_KICK_WEIGHT`, `bossFlies`. **A new boss, or a new opening state on an old one, goes in `BOSS_OPEN_OWN`** — `tests/boss-hitfeel.cjs` fails a boss that is caught open and does not step.
 
 **Who is a sage** (asked by the owner the same day, on seeing five of these bodies together). The six guardians are the sages and are the ones purified: NULLFANG (lion), TALONHOST (eagle), FURNACE CHOIR (dragon), GLACIERE (unicorn), the Prism Prowler (crystal cat), MOTHER-V. THE ALPHA (wolf), GRAVEHORN (rhino) and the Eye's five constructs are bosses on the way, are not sages anywhere in the code (`PURIFICATION_KINDS`, `onBossDead`), and have no ending film.
+
+## Changelog — 2026-11-15 (owner: "the micro enemies need to attack in a better way, move in a better way, especially the wolves")
+
+**The pack hunts** (`js/wolfhunt.js`, `tests/wolf-hunt.cjs`). A pack wolf — a
+crawler in the wolves' kingdoms — no longer walks its beat past her and bites
+from wherever its timer runs out.
+
+| | before | after |
+|---|---|---|
+| notice | none: the patrol never reacted to her | inside 300 px on its own level: 0.5 s threat display (`wolf_snarl`), nothing arms through it |
+| approach | none: patrol speed, patrol direction | charge at 1.75-2.65 × patrol speed beyond 196 px; stalk at 1.12 × inside it |
+| bite distance | coiled anywhere inside 160 px; the lunge covers ~76 px | coils inside its own lunge distance + 12 px (88 px at iq 0) — a bite on a standing target lands |
+| tell | TELL_FAST 0.35 s | **unchanged** |
+| lunge | spd × 4.2 for 0.22-0.28 s, carried on through her | the same, but it STOPS on the bite; she is thrown clear in front of it |
+| a landed bite | one contact hit | the same one hit, then held and thrashed for 0.42 s (picture and sound, inside the winded window) |
+| opening | winded max(0.5, 0.75 − 0.22·iq) | **unchanged** |
+| between bites | walked its beat through her | holds her at bay ~68 px off, snapping at the air; cooldown unchanged |
+| at a ledge | turned round | holds at the edge, nose on her; never walks off after her |
+| loses her | — | 2.2 s out of sight (430 px / 150 px up) and it goes back to its beat |
+| her finisher (throw ≥ 380 px/s) | knock-back 0.30 s | **rolls it**: 0.66 s over its back and up, facing the blow; a wind-up in progress is cancelled. Not through its lunge or its winded window |
+
+A tamed pack never hunts; a crawler outside the wolves' kingdoms is untouched.
+
+## Changelog — 2026-11-15 (owner: "the Wolf King, the Alpha ... special effects, special moves, special attacks, with sound effects and visual effects")
+
+**The king's own moves** (`js/alphakit.js`, `tests/alpha-kit.cjs`; `tests/openings.cjs` knows the rend).
+
+| move | tell | what it does | the way out | what follows |
+|---|---|---|---|---|
+| **REND** (new attack; the middle distance now alternates leap / rend) | `rendwarn`, TELL_SWIPE 0.5 s, the floor lit along the whole 300 px it will run, its own growl under the tell blip | three claw-waves along the terrain at 440 px/s, 40 px tall; one core; in fury a second set 0.17 s behind | be in the air when it arrives, be behind it, or be past 300 px | rest ×0.7 — measured 750-917 ms |
+| **FURY** (new move, once) | after the midpoint stagger (which is unchanged and still hers): `furywarn`, TELL_HEAVY 0.7 s | a roar that hurts no one and throws her back from inside 250 px; from then on the king burns, prowls ×1.15, rends twice, and its leaps quake | — | rest ×0.95 |
+| **QUAKE** (fury leaps only) | the landing spot is lit on the floor from the first frame of the coil (TELL_SWIPE) through the flight | a leap that LANDS shocks the floor 120 px each way; one core, only if she is standing on it | be in the air, or outside the lit patch | the turn — the fight's one gift, unchanged |
+
+Unchanged: every existing tell and rest (claw 350-667 ms, bite 383-667 ms, leap>turn 1600-1867 ms, roar 683-800 ms).
+
+**What the old moves wear now** — claw: a slash arc and its own whoosh; bite: a flash at the jaw and a snap; each whip of the clinch: an arc and the worry growl; howl: a pillar, a shock ring, embers, and the wolves it calls arrive already hunting (red flash, teeth out); roar: a shock ring, a wave through the ground it stands on and cracks under it, a growl under the bark.
+New sounds: `alpha_rendwarn`, `alpha_rend`, `alpha_claw`, `alpha_snap`, `alpha_furywarn`, `alpha_fury`, `alpha_quake` (and the pack's `wolf_snarl`, `wolf_lunge`, `wolf_bite`, `wolf_snap`, `wolf_yelp`), on a new `growl()` synth voice.
+

@@ -101,6 +101,18 @@ const MEDIA_SRC = {
     wolfPant6: 'assets/characters/beasts/wolf_pant6.webp',
     wolfPurify6: 'assets/characters/beasts/wolf_purify6.webp',
     wolfSit6: 'assets/characters/beasts/wolf_sit6.webp',
+    // THE AGGRESSIVE SET (2026-11-15, assets/source/beasts/wolf3/): the same
+    // wolf re-filmed over real-wolf motion references — the threat display,
+    // the lunge, the bite held and thrashed, the low snarl it holds at bay,
+    // the roll when it is thrown, and the hunting stalk and charge. Same cell
+    // scale and floor line as the set above (tools/fixcut.py).
+    wolfSnarl8: 'assets/characters/beasts/wolf_snarl8.webp',
+    wolfLunge6: 'assets/characters/beasts/wolf_lunge6.webp',
+    wolfThrash8: 'assets/characters/beasts/wolf_thrash8.webp',
+    wolfBay6: 'assets/characters/beasts/wolf_bay6.webp',
+    wolfRoll12: 'assets/characters/beasts/wolf_roll12.webp',
+    wolfStalk10: 'assets/characters/beasts/wolf_stalk10.webp',
+    wolfCharge8: 'assets/characters/beasts/wolf_charge8.webp',
     cheetahWalk8: 'assets/characters/beasts/cheetah_walk8.webp',
     cheetahRun6: 'assets/characters/beasts/cheetah_run6.webp',
     cheetahWinded6: 'assets/characters/beasts/cheetah_winded6.webp',

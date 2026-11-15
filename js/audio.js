@@ -456,6 +456,33 @@ function hiss(dur, vol, delay) {
   src.connect(g).connect(AC.destination);
   src.start(t0);
 }
+// A GROWL is not a tone: it is a low reed with a FLUTTER on it — the roughness
+// is the animal. A sawtooth under a low-pass, its level beaten by a slow
+// oscillator (`rate` Hz: ~30 reads as a snarl, ~18 as jaws being shaken), and
+// the pitch sagging as the breath runs out. Used by the pack and its king.
+function growl(freq, dur, vol, rate, slideTo, delay) {
+  if (!AC || MUTED) return;
+  const t0 = AC.currentTime + (delay || 0);
+  const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter();
+  const l = AC.createOscillator(), lg = AC.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(freq, t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(28, slideTo || freq * 0.8), t0 + dur);
+  f.type = 'lowpass'; f.frequency.value = Math.max(300, freq * 7); f.Q.value = 0.8;
+  // a gain holds 1.0 until its first event: both the level and the flutter
+  // depth are written as values as well as scheduled
+  const v = vol || 0.05;
+  g.gain.value = 0.0001;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(v, t0 + Math.min(0.05, dur * 0.25));
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  l.type = 'sine'; l.frequency.value = rate || 30;
+  lg.gain.value = v * 0.55; lg.gain.setValueAtTime(v * 0.55, t0);
+  lg.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  l.connect(lg).connect(g.gain);
+  o.connect(f).connect(g).connect(AC.destination);
+  o.start(t0); o.stop(t0 + dur + 0.03); l.start(t0); l.stop(t0 + dur + 0.03);
+}
 function whoosh(dur, f0, f1, vol, delay) {
   if (!AC || MUTED) return;
   const t0 = AC.currentTime + (delay || 0);
@@ -1804,10 +1831,28 @@ function sfx(n) {
       tone(46, 1.2, 'sawtooth', 0.17, 26); tone(92, 0.9, 'square', 0.07, 38);
       tone(23, 1.2, 'sine', 0.1, 20); hiss(0.9, 0.09); break;
     case 'short': hiss(.12,.04); tone(82,.09,'sawtooth',.025,29); break;
+    // THE PACK'S VOICE (js/wolfhunt.js). Four sounds, one per thing it does:
+    // the snarl that opens a hunt, the bark on the lunge, jaws shut and shaken
+    // when the bite lands, and the yelp of one thrown off its feet.
+    case 'wolf_snarl': growl(92, .46, .055, 31, 70); hiss(.3, .018, .04); break;
+    case 'wolf_lunge': growl(150, .16, .05, 44, 84); whoosh(.14, 500, 1700, .035); break;
+    case 'wolf_bite': chink(.03); tone(230, .05, 'square', .05, 80); growl(104, .38, .05, 17, 76, .05); break;
+    case 'wolf_snap': chink(.02); tone(260, .04, 'square', .03, 110); growl(120, .14, .026, 36, 96, .03); break;
+    case 'wolf_yelp': tone(640, .13, 'triangle', .05, 300); tone(900, .09, 'sine', .028, 430, .02); break;
+    // THE KING'S OWN MOVES (js/alphakit.js): what each one sounds like, and —
+    // for the two wind-ups — a second voice under the shared tell blip, so the
+    // rend and the fury are told apart from a claw or a roar by ear.
+    case 'alpha_rendwarn': growl(70, .46, .06, 26, 96); chink(.02, .1); chink(.02, .24); break;
+    case 'alpha_rend': whoosh(.3, 420, 2600, .09); tone(190, .22, 'sawtooth', .05, 60); [0, .05, .1].forEach((d, i) => { chink(.035, d); tone(900 + i * 240, .07, 'square', .022, 320, d); }); hiss(.2, .05, .04); break;
+    case 'alpha_claw': whoosh(.16, 700, 3000, .06); chink(.03, .03); break;
+    case 'alpha_snap': chink(.04); tone(250, .05, 'square', .05, 80); growl(110, .16, .04, 30, 84, .03); break;
+    case 'alpha_furywarn': growl(52, .7, .08, 14, 92); tone(40, .7, 'sine', .07, 62); break;
+    case 'alpha_fury': growl(120, 1.1, .1, 22, 60); tone(190, .9, 'sawtooth', .05, 420); tone(380, 1.0, 'sine', .06, 520, .1); tone(34, .9, 'sine', .12, 24); hiss(.8, .09); break;
+    case 'alpha_quake': tone(60, .5, 'sine', .14, 26); hiss(.4, .12); tone(120, .3, 'sawtooth', .06, 40); break;
     case 'alpha_step': tone(72,.07,'sine',.025,38); chink(.012,.012); break;
     case 'alpha_leap': whoosh(.23,800,2600,.06); tone(110,.18,'sawtooth',.035,58); break;
-    case 'alpha_bark': tone(170,.18,'sawtooth',.06,70); hiss(.12,.04); tone(260,.12,'triangle',.035,90,.12); break;
-    case 'alpha_howl': tone(185,.65,'sawtooth',.035,360); tone(370,.85,'sine',.055,410,.16); tone(555,.75,'triangle',.025,615,.2); tone(410,.5,'sine',.035,165,.72); break;
+    case 'alpha_bark': tone(170,.18,'sawtooth',.06,70); hiss(.12,.04); tone(260,.12,'triangle',.035,90,.12); growl(96,.42,.07,34,58); tone(46,.4,'sine',.09,30); break;
+    case 'alpha_howl': tone(185,.65,'sawtooth',.035,360); tone(370,.85,'sine',.055,410,.16); tone(555,.75,'triangle',.025,615,.2); tone(410,.5,'sine',.035,165,.72); growl(88,.5,.04,20,120); break;
     case 'roar_eagle':   // TALONHOST: a metal screech climbing off the cable
       tone(950, 0.55, 'square', 0.07, 2300); tone(1900, 0.45, 'sawtooth', 0.05, 700, 0.1);
       tone(140, 0.5, 'square', 0.05, 90, 0.05); hiss(0.5, 0.07); break;

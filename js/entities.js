@@ -7665,6 +7665,8 @@ class Enemy {
     }
     this.anim += dt; this.hurtT -= dt;
     if(typeof sageDuelTick==='function')sageDuelTick(this,dt);
+    // a pack wolf's own clocks, and the blow that rolls it (js/wolfhunt.js)
+    if (typeof wolfFrame === 'function') wolfFrame(this, dt);
     if (this.landT > 0) this.landT -= dt;
     const attackDt = dt * (this.attackSpeed || 1);
     if (this.kickT > 0) this.kickT -= dt;
@@ -7689,7 +7691,9 @@ class Enemy {
       if (Math.abs(this.vx) > 14) this.faceT = Math.sign(this.vx);
       wantF = this.faceT || this.dir || 1;
     } else wantF = this.dir || 1;
-    this.faceVis += clamp(wantF - this.faceVis, -dt * FACE_RATE, dt * FACE_RATE);
+    // (a wolf going over its back keeps the side it was thrown facing: it
+    // comes up nose-on to the blow, and easing round mid-roll would turn it)
+    if (!((this.rollT || 0) > 0)) this.faceVis += clamp(wantF - this.faceVis, -dt * FACE_RATE, dt * FACE_RATE);
     // CURED. On ground the player's mercy has bought back, machines wake up as
     // what they were built to be. They potter about, they will not touch her,
     // and their sensor burns cyan instead of red. This is the whole reward for
@@ -7742,6 +7746,9 @@ class Enemy {
         player.hurt(DF().edmg, this.x + this.w / 2, this.kind + '.knockback');
       return;
     }
+    // ...and a wolf thrown hard enough goes over its back: the scramble up is
+    // the second half of that, on the ground, before its brain resumes
+    if (typeof wolfRollStep === 'function' && wolfRollStep(this, dt)) return;
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     switch (this.kind) {
@@ -7885,16 +7892,22 @@ class Enemy {
               sfx('crack');
             }
             sfx('dash');
+            if (typeof wolfHunter === 'function' && wolfHunter(this)) sfx('wolf_lunge');
           }
         } else {
-          // the patrol walks: up to speed, and down from it before a turn
-          enemyGait(this, this.dir * this.spd, dt);
+          // A PACK WOLF HUNTS (js/wolfhunt.js): it notices her, shows its
+          // teeth, charges, stalks in to the distance its lunge really covers
+          // and bites from THERE. Anything else walks its beat as it always did:
+          // up to speed, and down from it before a turn.
+          const hunting = typeof wolfHunt === 'function' ? wolfHunt(this, dt, px, py, cx, cy) : 0;
+          if (!hunting) enemyGait(this, this.dir * this.spd, dt);
           // IT NOTICES HER. Requiring it to already be facing the right way
           // meant it ignored anyone who walked up behind it — which is most of
           // the time, since she moves five times faster than it patrols. It
           // TURNS to face her first and lunges on the following pass, so the
           // turn itself becomes part of the warning.
-          if (!player.dead && Math.abs(px - cx) < 160 && Math.abs(py - cy) < 70
+          if (!player.dead && hunting !== 2
+              && Math.abs(px - cx) < (hunting ? wolfReach(this) : 160) && Math.abs(py - cy) < 70
               && (this.atkCD -= attackDt) <= 0) {
             const want = Math.sign(px - cx) || this.dir;
             if (want !== this.dir) { this.dir = want; this.atkCD = 0.28 - this.iq * 0.14; }
@@ -7933,7 +7946,9 @@ class Enemy {
         }
         const col = moveEnt(this, dt);
         if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
-        else if (col.d && this.lungeT <= 0 && ledgeTurn(this, this.dir)) this.dir *= -1;
+        // (a wolf on a hunt keeps its own watch on the edge and holds there, nose
+        // on her: the patrol's turn-round is for a machine with nowhere to be)
+        else if (col.d && this.lungeT <= 0 && !this.hunt && ledgeTurn(this, this.dir)) this.dir *= -1;
         // a plate driven into a wall is a plate no longer: running it into the
         // scenery disarms the lunge, which makes the room part of the answer
         if (this.plate && (col.l || col.r)) this.shear();
@@ -8879,8 +8894,12 @@ class Enemy {
       && (this.lungeT > 0 || (this.coilT > 0 && this.coilT <= PARRY_LEAD));
     // touch damage
     const sageContact=typeof sageDuelActive==='function'&&sageDuelActive(this);
-    if (!player.dead && aabb(this, player) && (!sageContact||sageDuelContact(this)))
+    if (!player.dead && aabb(this, player) && (!sageContact||sageDuelContact(this))) {
+      const cores0 = player.cores;
       player.hurt(DF().edmg,cx,sageContact?'sage.lunge':undefined,this);
+      // a wolf's bite that LANDED is held and worried (js/wolfhunt.js)
+      if (player.cores < cores0 && typeof wolfBit === 'function') wolfBit(this);
+    }
   }
   // VOLATILE: it takes the room with it. Telegraphed by its own colour on the
   // body and by a beat of warning light, so it is a thing you step away from

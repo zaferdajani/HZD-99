@@ -8,6 +8,10 @@ spec: {"scale": s, "pad": px, "floor": y_src | null, "out": dir,
 A strip may carry its own "floor" and a "mul" on the scale: a take filmed from a
 start plate shrunk by k (room for a lunge) is cut with mul = 1/k so the animal
 comes out the same size as every other strip.
+A strip with "anchor": "cx" is cut with every cell centred on THAT frame's own
+body (a fixed-width window that follows the bbox centre): for a take in which
+the animal travels across the frame — a lunge, a roll — where the game's own
+physics moves the body and the take's travel on top of it would move it twice.
 Every strip shares the source->cell scale. Grounded strips are cropped so the
 cell's bottom edge sits `pad` px (cell space) below the shared floor line;
 floating strips are cropped tight around their own union bbox. Width is the
@@ -76,6 +80,12 @@ for st in spec['strips']:
         sy0 = min(y0 - m, sy1 - (st.get('minh', 0) / S))
     # horizontal: centred on the union, so the body does not swim inside the cell
     sx0, sx1 = x0 - m, x1 + m
+    follow = st.get('anchor') == 'cx'
+    if follow:
+        # ...or, for a take that travels, a window as wide as the widest frame
+        # that follows each frame's own centre
+        half = max(b[2] - b[0] for b in bbs) / 2 + m
+        sx0, sx1 = -half, half
     cw = int(round((sx1 - sx0) * S)); ch = int(round((sy1 - sy0) * S))
     strip = Image.new('RGBA', (cw * len(frames), ch), (0, 0, 0, 0))
     for i, (F, a) in enumerate(frames):
@@ -84,7 +94,8 @@ for st in spec['strips']:
         # premultiply-safe resize: resize in premultiplied space
         pm = np.dstack([F * a[..., None], a * 255])
         pim = Image.fromarray(pm.clip(0, 255).astype(np.uint8), 'RGBA')
-        box = (sx0, sy0, sx1, sy1)
+        mid = (bbs[i][0] + bbs[i][2]) / 2 if follow else 0
+        box = (sx0 + mid, sy0, sx1 + mid, sy1)
         crop = pim.transform((cw, ch), Image.EXTENT, box, Image.BICUBIC)
         c = np.asarray(crop).astype(np.float32)
         al = c[..., 3:4] / 255

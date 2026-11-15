@@ -6304,6 +6304,29 @@ rest, prowl, roar, howl, leap, air, claw, bite, clinch and yield strips replace
 the old animal across its authored states. Preserve these strips and their
 purple runtime infection treatment; this paragraph is not a regeneration brief.
 
+### 2cc-0b. THE PACK'S AGGRESSIVE SET — FIRED AND WIRED 2026-11-15, AWAITING OWNER REVIEW (code session, owner's order)
+
+Owner: "do the same thing as you did for the lion ... find wolves, see how they
+move, how they attack, how they roll, and replicate it with the wolves that we
+have as robots ... concentrate on the aggressive attacking moods of the wolf."
+
+| strip | cells | from | what it is |
+|---|---|---|---|
+| `wolfSnarl8` | 8 | attack take c06f371f | the threat display that opens a hunt |
+| `wolfLunge6` | 6 | attack take | the lunge, jaws open — replaces the standing snap as the bite |
+| `wolfThrash8` | 8 | attack take | a bite that landed, held and worried |
+| `wolfBay6` | 6 | roll take f0e730f2 | the low snarl it holds while it waits on her |
+| `wolfRoll12` | 12 | roll take | thrown off its feet: over its back and up |
+| `wolfStalk10` | 10 | stalk take f87a5ff6 | the hunting walk |
+| `wolfCharge8` | 8 | stalk take | the rush |
+
+Motion references (realistic wolf, generated, never shipped): attack 4193cd78,
+stalk aebfcfec, roll 70f5993a. Six jobs, 168 credits. Archive, prompts and cut
+spec: `assets/source/beasts/wolf3/`. Behaviour: `js/wolfhunt.js`; measured by
+`tests/wolf-hunt.cjs`. Not yet re-filmed and still the first set: the idle, the
+patrol prowl, the coil (its amber is in the art), the hopper's crouch / leap /
+landing, the pant, the recoil.
+
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 
 **FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the rest plate is the fallback while a strip loads (the two-plate walk pair was deleted 2026-10-09). Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.

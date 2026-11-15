@@ -1,0 +1,123 @@
+{
+ "scale": 0.2644,
+ "pad": 4,
+ "floor": 690,
+ "out": "wolf3/strips",
+ "note": "wolf3 \u2014 the aggressive set (2026-11-15). One standing wolf = 124 cell px, the size of the wolf2 strips. roll.mp4 is the scale reference (standing body 469 px); attack.mp4 was filmed from the shrunk lunge plate (standing 261 px, mul 1.797); stalk.mp4 is 1.5% larger (mul 0.985). Floors are per strip: the takes' ground line moves a few px as the body travels.",
+ "strips": [
+  {
+   "name": "wolf_snarl8",
+   "clip": "attack.mp4",
+   "times": [
+    0.21,
+    0.38,
+    0.54,
+    0.71,
+    0.88,
+    1.04,
+    1.21,
+    1.38
+   ],
+   "mul": 1.797,
+   "floor": 625
+  },
+  {
+   "name": "wolf_lunge6",
+   "clip": "attack.mp4",
+   "times": [
+    1.875,
+    1.9583,
+    2.0417,
+    2.125,
+    2.2083,
+    2.2917
+   ],
+   "mul": 1.797,
+   "floor": 633,
+   "anchor": "cx"
+  },
+  {
+   "name": "wolf_thrash8",
+   "clip": "attack.mp4",
+   "times": [
+    2.42,
+    2.52,
+    2.62,
+    2.73,
+    2.83,
+    2.94,
+    3.04,
+    3.15
+   ],
+   "mul": 1.797,
+   "floor": 647
+  },
+  {
+   "name": "wolf_bay6",
+   "clip": "roll.mp4",
+   "times": [
+    3.3,
+    3.42,
+    3.54,
+    3.67,
+    3.79,
+    3.92
+   ],
+   "floor": 689
+  },
+  {
+   "name": "wolf_roll12",
+   "clip": "roll.mp4",
+   "times": [
+    0.2083,
+    0.375,
+    0.5417,
+    0.7083,
+    0.875,
+    1.0833,
+    1.2917,
+    1.5,
+    1.7083,
+    1.9583,
+    2.25,
+    2.5833
+   ],
+   "floor": 692,
+   "anchor": "cx"
+  },
+  {
+   "name": "wolf_stalk10",
+   "clip": "stalk.mp4",
+   "times": [
+    0.1667,
+    0.3375,
+    0.5083,
+    0.6792,
+    0.85,
+    1.0208,
+    1.1917,
+    1.3625,
+    1.5333,
+    1.7042
+   ],
+   "mul": 0.985,
+   "floor": 651
+  },
+  {
+   "name": "wolf_charge8",
+   "clip": "stalk.mp4",
+   "times": [
+    2.8333,
+    2.901,
+    2.9688,
+    3.0365,
+    3.1042,
+    3.1719,
+    3.2396,
+    3.3073
+   ],
+   "mul": 0.985,
+   "floor": 647
+  }
+ ]
+}

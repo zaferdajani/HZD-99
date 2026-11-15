@@ -111,6 +111,22 @@ visible projectile, so the flinch is the recoil take's rear-back; the winded
 pant is the recoil take's head-down tail (0.5 s period). Cycles measured
 distinct: prowl ≥ 0.239, gallop ≥ 0.432 (silhouette XOR / union).
 
+`beasts/wolf3/` is THE PACK'S AGGRESSIVE SET (2026-11-15, owner: "find wolves,
+see how they move, how they attack, how they roll, and replicate it with the
+wolves that we have as robots ... concentrate on the aggressive attacking moods
+of the wolf"). Three Seedance 2.5 takes of the same wolf (`attack.mp4`,
+`stalk.mp4`, `roll.mp4` — the masters are archived this time), each performed
+over a generated motion reference of a REAL wolf doing the same thing
+(`reference_wolf_*_sheet.jpg`; the references are never shipped). `jobs.json`
+has every job id and the prompt shape; `cut_spec.json` cuts seven strips with
+`tools/fixcut.py` at the wolf2 size (one standing wolf = 124 cell px) — the
+lunge and the roll with `anchor: cx`, so each cell follows the body and the
+game's own physics does the travelling. `strips_sheet.jpg` is what shipped,
+`ingame_hunt.jpg` a hunt photographed in A1. What the takes got wrong and the
+cut lives with: the roll take was re-framed at full size, so the tail tip
+leaves the right edge for part of the roll; the thrash is mostly motion blur
+(the head is whipping), so its eye anchors are placed by hand.
+
 The rest of §2cc followed the same day, the same way, and the same test: no strip
 ships with two cells that are the same picture. The pack's OPENINGS — winded (6, a
 loop) and land (4, once) — needed second takes: the first pants were so gentle the
