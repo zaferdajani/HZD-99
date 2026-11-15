@@ -1137,6 +1137,25 @@ function showItem(name, desc, art, demo) {
 }
 
 // ---------- room loading ----------
+// THE MARBLE STANDS ON THE GROUND SHE STANDS ON (owner, 2026-11-15: "I just
+// found a marble. It's located above the ground. The ground is tilted down
+// beneath it, so I can't actually stand on top of it or next to it. I'm
+// standing underneath it, which is a glitch"). Measured in the quarry: the
+// pillar was spawned on tile row 15 and the cave is carved a row deeper there,
+// a bowl whose surface runs 498-503 — so the stone hung 18 to 23 px in the air
+// over the hollow she walks into. The same correction the rubble pile and the
+// ring gates needed: a thing that stands on the floor is seated on the
+// heightfield, at the LOWEST ground under its base, sunk a little so it is in
+// the ground rather than on it.
+function seatPillars() {
+  if (typeof groundColumnAt !== 'function' || !G.statics) return;
+  for (const s of G.statics) {
+    if (s.type !== 'pillar') continue;
+    let low = -Infinity;
+    for (const ox of [0.15, 0.5, 0.85]) { const col = groundColumnAt(s.x + s.w * ox); if (col && col.length) low = Math.max(low, Math.min.apply(null, col)); }
+    if (low > -Infinity && Math.abs(low - (s.y + s.h)) < 90) { s.seat0 = s.y + s.h; s.y = low - s.h + 5; }
+  }
+}
 function spawnStatic(type, tx, ty, extra, flagKey) {
   // npc was 32x40 — a head shorter than the player's own 60px plate, and the
   // owner's read of the first one he ever met was "very small, easy to miss".
@@ -1183,7 +1202,7 @@ function loadRoom(id) {
   surfCurve = null; surfRoom = null;   // the surface curve belongs to the room
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
-  G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
+  G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   // An attack belongs to the room where it began. Do not carry a damaging
   // hurricane, buffered strike or half-charged release through a doorway.
@@ -1401,6 +1420,7 @@ function loadRoom(id) {
   if (typeof questVisit === 'function') questVisit(id);
   rubbleInit();          // the buried mouth, if this room has one
   ringGateWant();        // ...and the ring at every door this room has, built yet or not
+  seatPillars();         // ...and the marble on the ground under it, not on its tile row
   // THE BAKED FLOOR COMES FROM THE ROOM'S OWN CACHE. Rebuilding it on every
   // crossing — even into the room she just left — was most of the hitch at a
   // doorway (see TILE CACHE below); a room baked ahead of her arrives baked.
@@ -3057,6 +3077,7 @@ function update(dt) {
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
       G.projs = G.projs.filter(p => !p.dead);
+      if (typeof crescentStep === 'function') crescentStep(dt);
       for (const w of G.wrecks) if (!w.dead) w.update(dt);
       G.wrecks = G.wrecks.filter(w => !w.dead);
       // recharge-pod sequence: robot slides in, cables hook on, cores refill
@@ -15014,6 +15035,7 @@ function drawWorldFrame() {
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   for (const p of G.projs) p.draw(c);
+  if (typeof drawCrescents === 'function') drawCrescents(c);      // the single blade's charged cut (js/entities.js)
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
   if (typeof drawGatePrompt === 'function') drawGatePrompt();
   if (typeof drawProgress === 'function') drawProgress(c);              // wards and the cleansing light
@@ -15936,7 +15958,10 @@ function caveLightList() {
   // the reason: warm is somebody's machine, cold is the cave's own crystal.
   for (const s2 of G.statics) {
     const cx = s2.x + s2.w / 2, cy = s2.y + s2.h / 2;
-    if (s2.type === 'pillar') add(cx, cy, 372, 1, '196,238,255', 1.5);
+    // (0.6, not 1.5: at one and a half the light the marble gives off was laid
+    // over the marble itself, and the stone she came all this way for was a
+    // pale ghost inside its own glare. The dark is still cleared as widely.)
+    if (s2.type === 'pillar') add(cx, cy, 372, 1, '196,238,255', 0.6);
     else if (s2.type === 'term') add(cx, cy - 6, s2.opened ? 168 : 236, 0.94, '255,178,86', s2.opened ? 0.8 : 1.25);
     else if (s2.type === 'bench') add(cx, cy, 190, 0.88, '255,206,120', 1.0);
     else if (s2.type === 'npc') add(cx, cy, 198, 0.86, '255,214,150', 0.8);

@@ -1674,6 +1674,10 @@ const SWING_STRIP = {
 // and the strip renderer on that same numbering: treating it as 1, 2, 3
 // repeated the jab and made the authored uppercut unreachable from input.
 // Weapon bodies use the same attack clock and retain the unarmed fallback until loaded.
+// how far a blade out-reaches a paw (Player.hitbox), and how much further out
+// and larger its cut is DRAWN so the picture admits to it (fxK, drawRoboSwing).
+// Jab far edge: claws 86 px, single 114, joined 126. Finisher (measured level): 100, 121, 134.
+const SWORD_REACH = { single: 1.54, joined: 1.7, fxSingle: 1.36, fxJoined: 1.3 };
 const HERO_SINGLE_FX = {key:'swingSingleFx',cells:6,release:{from:0,to:5},dx:42,dy:0,size:64,alpha:.68};
 // [effect cell, x, y offset from torso centre, size] for each body pose.
 const HERO_SINGLE_FX_POSES = [null,[0,30,-8,48],[1,0,-28,58],
@@ -1702,9 +1706,9 @@ const HERO_WEAPON_CHARGES={single:{key:'swingSingleCharge',cells:10,k:HERO_DELIV
 const HERO_JOINED_FX_POSES=[null,[3,0,-4,62],[2,34,10,62],[1,33,-12,65],[3,0,-34,65],[5,49,0,58],[6,40,5,50],null];
 const HERO_WEAPON_SWINGS = {
   joined:[
-    {key:'swingJoined',cells:8,k:HERO_DELIVERY_K*1.2,fx:HERO_DUAL_FX,fxPoses:HERO_JOINED_FX_POSES,order:[0,1,2,6,7]},
-    {key:'swingJoined',cells:8,k:HERO_DELIVERY_K*1.2,fx:HERO_DUAL_FX,fxPoses:HERO_JOINED_FX_POSES,order:[0,2,3,6,7]},
-    {key:'swingJoined',cells:8,k:HERO_DELIVERY_K*1.2,fx:HERO_DUAL_FX,fxPoses:HERO_JOINED_FX_POSES,order:[0,3,4,5,6,7]},
+    {key:'swingJoined',cells:8,k:HERO_DELIVERY_K*1.2,fxK:SWORD_REACH.fxJoined,fx:HERO_DUAL_FX,fxPoses:HERO_JOINED_FX_POSES,order:[0,1,2,6,7]},
+    {key:'swingJoined',cells:8,k:HERO_DELIVERY_K*1.2,fxK:SWORD_REACH.fxJoined,fx:HERO_DUAL_FX,fxPoses:HERO_JOINED_FX_POSES,order:[0,2,3,6,7]},
+    {key:'swingJoined',cells:8,k:HERO_DELIVERY_K*1.2,fxK:SWORD_REACH.fxJoined,fx:HERO_DUAL_FX,fxPoses:HERO_JOINED_FX_POSES,order:[0,3,4,5,6,7]},
   ],
   dual:[
     {key:'swingDual',cells:8,k:HERO_DELIVERY_K,fx:HERO_DUAL_FX,fxPoses:HERO_DUAL_FX_POSES,order:[0,1,2,3,6,7]},
@@ -1712,9 +1716,9 @@ const HERO_WEAPON_SWINGS = {
     {key:'swingDual',cells:8,k:HERO_DELIVERY_K,fx:HERO_DUAL_FX,fxPoses:HERO_DUAL_FX_POSES,order:[0,1,4,5,6,7]},
   ],
   single: [
-    {key:'swingSingle',cells:8,k:HERO_DELIVERY_K,fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_NORMAL_FX_POSES,order:[0,1,2,6,7]},
-    {key:'swingSingle',cells:8,k:HERO_DELIVERY_K,fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_NORMAL_FX_POSES,order:[0,2,3,5,6,7]},
-    {key:'swingSingle',cells:8,k:HERO_DELIVERY_K,fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_NORMAL_FX_POSES,order:[0,1,3,4,5,6,7]},
+    {key:'swingSingle',cells:8,k:HERO_DELIVERY_K,fxK:SWORD_REACH.fxSingle,fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_NORMAL_FX_POSES,order:[0,1,2,6,7]},
+    {key:'swingSingle',cells:8,k:HERO_DELIVERY_K,fxK:SWORD_REACH.fxSingle,fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_NORMAL_FX_POSES,order:[0,2,3,5,6,7]},
+    {key:'swingSingle',cells:8,k:HERO_DELIVERY_K,fxK:SWORD_REACH.fxSingle,fx:HERO_SINGLE_FX,fxPoses:HERO_SINGLE_NORMAL_FX_POSES,order:[0,1,3,4,5,6,7]},
   ],
 };
 function heroWeaponSwing(sv) {
@@ -3108,6 +3112,37 @@ class Player {
     if (typeof padRumble === 'function') padRumble(0.3, 0.4, 90);
     return true;
   }
+  // THE CRESCENT — the single blade's OWN charged cut (owner, 2026-11-15: "the
+  // supercharge attack did not change. The attack itself did not change in
+  // motion and characteristics and VFX. You need to give it a unique
+  // perspective"). He was right, and by one line: the twin blades had their
+  // swirl and the joined blade its throw, and the single blade fell through to
+  // the claws' radial burst wearing a different body strip — same rings, same
+  // 165 px round her, same roar-wave.
+  //
+  // A blade is not a burst. Charged, it is ONE cut thrown forward: she steps
+  // into it and a standing crescent of the crystal's light leaves the edge and
+  // RUNS — CRESCENT.reach along the floor, taller than she is, through
+  // everything in the line (each thing once), stopped only by a wall. Where
+  // the claws answer a crowd round her, the blade answers a corridor: more
+  // than twice the burst's distance, and nothing at all behind her back.
+  crescent() {
+    this.chargeT = 0;
+    const f = this.face || 1, cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+    this.burstImpactDone = false;
+    sfx('chargedHit'); sfx('wave');
+    cam.shake = Math.max(cam.shake, 3);
+    G.flash = Math.max(G.flash, 0.3);
+    this.swingVis = { t: 0.36, t0: 0.36, ang: 0, combo: 3, charged: true, weaponMode: 'single', wield: 1 };
+    this.startScratchWake(this.swingVis);
+    this.vx += f * CRESCENT.step;                         // the step into it
+    burst(cx + f * 30, cy, 24, '#ffffff', 420, 0.45, 40, 4, true);
+    burst(cx + f * 30, cy, 16, CRESCENT.col, 300, 0.6, 20, 4, true);
+    (G.crescents || (G.crescents = [])).push({ x: cx + f * 30, y: cy - 4, dir: f, left: CRESCENT.reach * (hasSkill('wave') ? 1.3 : 1), t: 0,
+      hit: new Set(), dm: this.attackDmg('burst'), h: CRESCENT.h, el: armEl(), by: this });
+    if (typeof padRumble === 'function') padRumble(0.5, 0.7, 160);
+    return true;
+  }
   releaseCharged() {
     if (G.boomer || this.swirlT > 0) { this.chargeT = 0; return false; }
     // the tutorial's burst lesson (TUT_STEPS 'burst') completes on a real
@@ -3118,6 +3153,7 @@ class Player {
     const mode = weaponMode(G.save);
     if (mode === 'dual') return this.swirl();
     if (mode === 'joined') return this.throwJoined();
+    if (mode === 'single') return this.crescent();
     this.chargeT = 0;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     this.burstImpactDone = false;
@@ -3219,7 +3255,14 @@ class Player {
     // and the joined blade a little more. The DRAWN arc grows the same way
     // (drawRake), because a hitbox the picture does not admit to is the exact
     // lie the long-rake fix above was about.
-    const wm = s.wield === 2 ? 1.35 : s.wield ? 1.2 : 1;
+    // (2026-11-15, the owner holding the blade: "getting the sword means I need
+    // to have longer attacks, longer reach". The comment above had been true
+    // of the factors and false of the result: the claws were retuned to clear
+    // her body by 86 px and the sword's x1.2 sat on a SMALLER base, so its jab
+    // reached 89 px to the claws' 86 and its finisher 95 to their 100 — the
+    // sword was the shorter weapon on the third hit. SWORD_REACH puts the
+    // blade a third past the paw, and the joined blade past that.)
+    const wm = s.wield === 2 ? SWORD_REACH.joined : s.wield ? SWORD_REACH.single : 1;
     // TWIN widens, it does not lengthen. The second blade covers the ground
     // either side of the first, so `half` grows and `R` does not — she is not
     // reaching further, she is filling more of what she can already reach.
@@ -3626,8 +3669,8 @@ class Player {
     const worldScratch = !sv.wield && !sv.air && !sv.swirl &&
       typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW.swingSingleFx?.naturalWidth;
     if (drew && S.fx && !worldScratch) {
-      const cue = S.fxPoses ? S.fxPoses[cell] : undefined;
-      if (cue) this.drawSwingFx(c,S.fx,{from:cue[0],to:cue[0]},0,cue[1],HERO_FLOOR-HERO_DH/2+cue[2],cue[3]);
+      const cue = S.fxPoses ? S.fxPoses[cell] : undefined, fk = S.fxK || 1;   // a blade's cut is drawn as far out as it reaches
+      if (cue) this.drawSwingFx(c,S.fx,{from:cue[0],to:cue[0]},0,cue[1]*fk,HERO_FLOOR-HERO_DH/2+cue[2],cue[3]*fk);
       else if (cue !== null) this.drawSwingFx(c, S.fx, S.fx.release, p,
                       S.fx.dx, HERO_FLOOR - HERO_DH / 2 + S.fx.dy, S.fx.size);
       if (typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[S.fx.key]?.naturalWidth) this._authoredSwingFx = sv;
@@ -12148,6 +12191,74 @@ function drawBossHold(c, b) {
 // for the player this game is built for. Hornet, in Hollow Knight, telegraphs
 // between 0.5 and 0.66 s — these are the same numbers arrived at twice.
 const TELL_SWIPE = 0.5, TELL_FAST = 0.35, TELL_HEAVY = 0.7;
+// THE CRESCENT (Player.crescent): px, px/s. Stepped and drawn here because it
+// outlives the swing that threw it.
+const CRESCENT = { reach: 380, v: 940, h: 96, w: 46, step: 230, col: '#8fe6ff', hot: '#ffffff' };
+function crescentStep(dt) {
+  const L = G.crescents; if (!L || !L.length) return;
+  for (let i = L.length - 1; i >= 0; i--) {
+    const w = L[i]; w.t += dt;
+    const adv = CRESCENT.v * dt; w.x += w.dir * adv; w.left -= adv;
+    const hb = { x: w.x - CRESCENT.w / 2, y: w.y - w.h / 2, w: CRESCENT.w, h: w.h };
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    for (const e of targets) {
+      if (e.dead || e.disabled || e.rescued || w.hit.has(e) || (typeof isPet === 'function' && isPet(e))) continue;
+      if (!aabb(hb, hurtBoxOf(e))) continue;
+      w.hit.add(e);
+      if (dealDmg(e, w.dm, w.el, e.x + e.w / 2, e.y + e.h / 2, true, 'burst') <= 0) continue;
+      e.hurtT = 0.2;
+      attackKnock(e, 'burst', w.dir, -0.25);
+      if (w.by && w.by.gainVolts) w.by.gainVolts(11);
+      G.hitStop = Math.max(G.hitStop, e instanceof Boss ? 0.09 : 0.06);
+      cam.shake = Math.max(cam.shake, 6);
+      burst(e.x + e.w / 2, e.y + e.h / 2, 18, CRESCENT.hot, 360, 0.4, 60, 4, true);
+      sfx(e instanceof Boss ? 'bosshit' : 'hit');
+      if (e.hp <= 0) e.die(w.dir, -0.3);
+    }
+    // what a blade's light cuts on its way: brittle rock, the pile, hostile shots
+    const tx = Math.floor(w.x / TILE);
+    for (let ty = Math.floor(hb.y / TILE); ty <= Math.floor((hb.y + hb.h - 1) / TILE); ty++) if (tileAt(tx, ty) === 'B') G.breakTile(tx, ty);
+    if (typeof rubbleHit === 'function' && !w.rub && rubbleHit(hb, true)) w.rub = 1;
+    for (const pr of G.projs) if (!pr.friendly && !pr.dead && aabb(hb, pr.box())) { pr.dead = true; burst(pr.x, pr.y, 6, pr.color, 150, 0.25, 300, 2, true); }
+    if (!G.artProbe && chance(dt * 70)) addPart(w.x - w.dir * rnd(4, 26), w.y + rnd(-w.h * 0.45, w.h * 0.45), -w.dir * rnd(30, 140), rnd(-40, 40), rnd(0.18, 0.4), chance(0.4) ? CRESCENT.hot : CRESCENT.col, rnd(1.4, 2.6), 0, true);
+    // it ends at its reach, or against the rock
+    const wtx = Math.floor((w.x + w.dir * 10) / TILE);
+    const wall = solidAt(wtx, Math.floor(w.y / TILE)) && solidAt(wtx, Math.floor((w.y - w.h * 0.3) / TILE));
+    if (w.left <= 0 || wall || w.x < 4 || w.x > G.roomDef.w * TILE - 4) {
+      if (!G.artProbe) burst(w.x, w.y, wall ? 20 : 10, CRESCENT.col, wall ? 320 : 200, 0.4, 40, 3, true);
+      if (wall) { cam.shake = Math.max(cam.shake, 4); sfx('hit'); }
+      L.splice(i, 1);
+    }
+  }
+}
+// the cut itself: light, drawn where it is — a tall crescent, its hot edge
+// leading, the last of it thinning as it runs out of reach
+function drawCrescents(c) {
+  const L = G.crescents; if (!L || !L.length) return;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (const w of L) {
+    const fade = Math.min(1, w.left / 90) * Math.min(1, w.t / 0.04 + 0.4), H = w.h / 2;
+    for (let g = 4; g >= 0; g--) {
+      const bx = w.x - w.dir * g * 15, a = fade * (g ? 0.26 / g : 1), k = 1 - g * 0.07;
+      c.save(); c.translate(bx, w.y); c.scale(w.dir, 1);
+      const gr = c.createLinearGradient(-10, 0, 26, 0);
+      gr.addColorStop(0, 'rgba(143,230,255,0)'); gr.addColorStop(0.55, 'rgba(143,230,255,' + (0.55 * a).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(255,255,255,' + (0.95 * a).toFixed(3) + ')');
+      c.fillStyle = gr;
+      c.beginPath();
+      c.moveTo(-6, -H * k); c.quadraticCurveTo(34 * k, -H * 0.42 * k, 26 * k, 0); c.quadraticCurveTo(34 * k, H * 0.42 * k, -6, H * k);
+      c.quadraticCurveTo(12 * k, H * 0.3 * k, 10 * k, 0); c.quadraticCurveTo(12 * k, -H * 0.3 * k, -6, -H * k);
+      c.fill();
+      if (!g) {
+        const gl = c.createRadialGradient(14, 0, 2, 14, 0, H * 1.25);
+        gl.addColorStop(0, 'rgba(143,230,255,' + (0.30 * fade).toFixed(3) + ')'); gl.addColorStop(1, 'rgba(143,230,255,0)');
+        c.fillStyle = gl; c.beginPath(); c.ellipse(14, 0, H * 0.8, H * 1.25, 0, 0, 7); c.fill();
+      }
+      c.restore();
+    }
+  }
+  c.restore();
+}
 // what each successive down-strike off a guardian's back is worth, until her
 // feet find the floor again (Player.update, the swing)
 const POGO_FADE = [1, 0.55, 0.3];

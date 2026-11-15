@@ -616,7 +616,8 @@ function pgDrawMark(c, x, y, ink, ph) {
   c.restore();
 }
 function pgDrawStump(c, f) {
-  const x = 50 * TILE + TILE / 2, base = 15 * TILE;
+  // (seated where the pillar was: on the bowl's floor, not on its tile row — seatPillars, js/game.js)
+  const x = 50 * TILE + TILE / 2, base = (typeof pgFloorY === 'function' ? pgFloorY(x) + 5 : 15 * TILE);
   const h = 96 * 1.18, cutY = base - h * 0.38;
   c.save();
   // keep only what is below an uneven cut line — the pillar's own plate,
