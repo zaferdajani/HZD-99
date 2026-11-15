@@ -221,13 +221,13 @@ const { chromium } = require('playwright');
         G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; const c = other.c; G.enemies = [c];
         out.other = other.id; out.isWolf = isWolf(c); out.hunter = wolfHunter(c);
         player.x = c.x - 250; player.y = c.y + c.h - player.h; let h2 = 0;
-        for (let i = 0; i < 120; i++) { player.vx = 0; player.iT = 9; update(1 / 60); if (c.hunt || c.snarlT > 0) h2++; }
+        for (let i = 0; i < 120; i++) { player.vx = 0; player.iT = 9; update(1 / 60); if (c.snarlT > 0 || c.thrashT > 0 || (c.rollT || 0) > 0) h2++; }
         out.otherHunt = h2;
       }
       return out;
     });
     check('I. a tamed pack does not hunt, and does not hurt her', N.tamed && N.tameHunt === 0 && N.tameHurt === 0, 'frames hunting ' + N.tameHunt + ', cores lost ' + N.tameHurt);
-    check('   ...and a crawler that is not a wolf is the crawler it always was', !N.other || (!N.hunter && N.otherHunt === 0), N.other ? N.other + ': hunter ' + N.hunter + ', frames hunting ' + N.otherHunt : 'no crawler outside the pack\'s kingdoms');
+    check('   ...and a crawler that is not a wolf wears none of the pack\'s hunt (the cats have their own: cheetah-hunt)', !N.other || (!N.hunter && N.otherHunt === 0), N.other ? N.other + ': pack hunter ' + N.hunter + ', frames in a pack display ' + N.otherHunt : 'no crawler outside the pack\'s kingdoms');
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await browser.close(); }
   console.log(fails.length ? '\nFAILED ' + fails.length + ': ' + fails.join('; ') : '\nwolf-hunt: all checks passed');

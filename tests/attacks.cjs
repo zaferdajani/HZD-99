@@ -161,7 +161,14 @@ const check = (name, ok, note) => { console.log('  ' + (ok ? 'ok  ' : 'FAIL') + 
     const burstAt = (c) => {
       reset(c);
       const e = dummy(pcx() + 70, feet(), c);
-      const hits = watch(e, 1, DT, () => { player.chargeT = 1; player.releaseCharged(); });
+      // with one sword the held release is THE CRESCENT (2026-11-15): the same
+      // row, the same damage, but it leaves her and travels — so it is flown
+      // to the dummy rather than read on the frame of the release
+      let fired = false;
+      const hits = watch(e, c.mode === 'single' ? 30 : 1, DT, () => {
+        if (!fired) { fired = true; player.chargeT = 1; player.releaseCharged(); }
+        if (typeof crescentStep === 'function') crescentStep(DT);
+      });
       return { hits, expect: OLD.burst(c) };
     };
     // NOSTOS's feral finisher calls a bolt; staged above her so only the bolt lands

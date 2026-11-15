@@ -1677,7 +1677,7 @@ const SWING_STRIP = {
 // how far a blade out-reaches a paw (Player.hitbox), and how much further out
 // and larger its cut is DRAWN so the picture admits to it (fxK, drawRoboSwing).
 // Jab far edge: claws 86 px, single 114, joined 126. Finisher (measured level): 100, 121, 134.
-const SWORD_REACH = { single: 1.54, joined: 1.7, fxSingle: 1.36, fxJoined: 1.3 };
+const SWORD_REACH = { single: 1.54, joined: 1.7, fxSingle: 1.36, fxJoined: 1.3, plungeSingle: 1.2, plungeJoined: 1.35 };
 const HERO_SINGLE_FX = {key:'swingSingleFx',cells:6,release:{from:0,to:5},dx:42,dy:0,size:64,alpha:.68};
 // [effect cell, x, y offset from torso centre, size] for each body pose.
 const HERO_SINGLE_FX_POSES = [null,[0,30,-8,48],[1,0,-28,58],
@@ -3262,7 +3262,15 @@ class Player {
     // reached 89 px to the claws' 86 and its finisher 95 to their 100 — the
     // sword was the shorter weapon on the third hit. SWORD_REACH puts the
     // blade a third past the paw, and the joined blade past that.)
-    const wm = s.wield === 2 ? SWORD_REACH.joined : s.wield ? SWORD_REACH.single : 1;
+    // ...ON THE CUTS SHE AIMS. The down-strike keeps the blade's older factors
+    // (SWORD_REACH.plunge*): "longer reach" was said of her attacks out in
+    // front, and a plunge box grown by the same half again stopped being a
+    // strike under her feet — the twin's straight-down hit a thing 60 px ahead
+    // of her, which is the plate seal's diagonal and nobody else's
+    // (tests/crestfight).
+    const dn = s.ay > 0.5;
+    const wm = s.wield === 2 ? (dn ? SWORD_REACH.plungeJoined : SWORD_REACH.joined)
+      : s.wield ? (dn ? SWORD_REACH.plungeSingle : SWORD_REACH.single) : 1;
     // TWIN widens, it does not lengthen. The second blade covers the ground
     // either side of the first, so `half` grows and `R` does not — she is not
     // reaching further, she is filling more of what she can already reach.
@@ -3317,6 +3325,14 @@ class Player {
       const bx = this.x, bw = this.w;
       if (s.ax > 0 && box.x > bx + bw) { box.w += box.x - (bx + bw); box.x = bx + bw; }
       else if (s.ax < 0 && box.x + box.w < bx) { box.w += bx - (box.x + box.w); }
+      // ...AND A RISING CUT STILL COVERS WHAT STANDS IN FRONT OF HER. The same
+      // dead ring, turned on its side: a cut aimed up-and-out carries its box
+      // up with its reach, and a long blade under a reaching seal carried it
+      // clean over a small thing pressed against her chest (measured: the
+      // joined blade's finisher under the claws seal missed a body touching
+      // her). The lower edge comes back down to her own middle; the far edge
+      // and the top are the move's reach and do not change.
+      if (s.ax && s.ay < 0) { const low = this.y + this.h / 2 + 12; if (box.y + box.h < low) box.h = low - box.y; }
     }
     return box;
   }
@@ -8254,7 +8270,14 @@ class Enemy {
           // teeth, charges, stalks in to the distance its lunge really covers
           // and bites from THERE. Anything else walks its beat as it always did:
           // up to speed, and down from it before a turn.
-          const hunting = typeof wolfHunt === 'function' ? wolfHunt(this, dt, px, py, cx, cy) : 0;
+          // ...and a CHEETAH hunts like a cheetah (js/cheetahhunt.js): the long
+          // creep that freezes when she looks, the sprint, the skid when it
+          // overshoots. Asked FIRST and instead: wolfHunt clears `hunt` on
+          // anything that is not a wolf, every frame, and a cat whose hunt is
+          // cleared every frame never runs out of patience and never remembers her.
+          const cat = typeof catHunt === 'function' && catHunter(this);
+          let hunting = cat ? catHunt(this, dt, px, py, cx, cy)
+            : typeof wolfHunt === 'function' ? wolfHunt(this, dt, px, py, cx, cy) : 0;
           if (!hunting) enemyGait(this, this.dir * this.spd, dt);
           // IT NOTICES HER. Requiring it to already be facing the right way
           // meant it ignored anyone who walked up behind it — which is most of
@@ -8262,7 +8285,7 @@ class Enemy {
           // TURNS to face her first and lunges on the following pass, so the
           // turn itself becomes part of the warning.
           if (!player.dead && hunting !== 2
-              && Math.abs(px - cx) < (hunting ? wolfReach(this) : 160) && Math.abs(py - cy) < 70
+              && Math.abs(px - cx) < (hunting ? (cat ? catReach(this) : wolfReach(this)) : 160) && Math.abs(py - cy) < 70
               && (this.atkCD -= attackDt) <= 0) {
             const want = Math.sign(px - cx) || this.dir;
             if (want !== this.dir) { this.dir = want; this.atkCD = 0.28 - this.iq * 0.14; }
@@ -8821,6 +8844,23 @@ class Enemy {
           this.t -= dt;
           // it faces its prey while gathering — so the leap goes nose-first
           this.dir = Math.sign(px - cx) || this.dir || 1;
+          // ...and a CAT does not stand like furniture until then: it paces its
+          // ground with its eyes on her, and comes in if she hangs back
+          // (js/cheetahhunt.js). The walk is over a beat before it gathers, so
+          // the crouch and the leap start from the stand they always did.
+          //
+          // THROUGH THE GAIT, like everything else on feet (tests/enemygait):
+          // writing the speed straight in slid it backwards for the third of
+          // a second its picture takes to come round. This state zeroes vx
+          // every frame, so the pace keeps its own running speed (paceVx);
+          // enemyGait stands it while it turns and brakes it before a reverse.
+          if (typeof catPace === 'function' && typeof isCheetah === 'function' && isCheetah(this)) {
+            const pv = catPace(this, dt, px, cx);
+            this.vx = this.paceVx || 0;
+            if (pv) this.dir = Math.sign(pv);
+            enemyGait(this, pv, dt);
+            this.paceVx = this.vx;
+          }
           if (this.t <= 0 && !player.dead && Math.abs(px - cx) < 380) {
             // THE CROUCH. It used to launch on the frame a random timer hit
             // zero — it faced you first, but facing is not a warning. Now it
@@ -8842,6 +8882,7 @@ class Enemy {
               // under it the mark is not taken and the leap is the plain leap.
               const bendm = this.hasMove('refract');
               this.crouchT = (rake || bendm) ? TELL_SWIPE : TELL_FAST;
+              this.paceVx = 0;                    // the gather starts from a stand (js/cheetahhunt.js)
               this.rakeT = rake ? TELL_SWIPE : 0; this.rake0 = 0;
               this.bendT = 0; this.bend0 = 0; this.markX = null; this.markY = null;
               if (bendm) {
@@ -11588,7 +11629,7 @@ function drawCrestEdge(c, pl, pass) {
   if (a <= 0.02) return false;
   if (G.slashPasses) G.slashPasses.push({ layer: 'crest', pass: pass || 'base', crest: sv.crest });
   const reach = sv.reach, half = sv.half;
-  const lw = clamp(half * 0.17, 2.5, 11);      // the cut's weight is its width
+  const lw = clamp(half * 0.17, 2.5, 16);      // the cut's weight is its width (16: the twin blades' slam is wider than 11 could say)
   const rad = Math.max(8, reach - lw / 2);     // the outer rim lands on the reach
   const span = Math.min(1.25, Math.atan2(half, Math.max(1, reach - half)));
   // the arc opens across the cut as the swing travels, then holds

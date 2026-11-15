@@ -21,6 +21,33 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bq. THE CHEETAH'S STALK, SKID AND BREAK — three filmed takes ✱ QUEUED 2026-11-15 (owner's order, this thread; VIDEO binding, waiting on credits)
+
+The owner: *"Inside the caves, those cheetahs are actually not moving in a good
+manner... look for how cheetahs move and then convert it into real movement."*
+The MOVEMENT is done in code and shipped (`js/cheetahhunt.js`,
+`tests/cheetah-hunt.cjs`): the creep that freezes under her eye, the sprint, the
+skid on an overshoot, the withdrawal after a bite, the pacing. Every one of
+those wears a picture the cat already had — the filmed walk for the creep, the
+gallop for the sprint, the landing strip for the skid. Three of them deserve
+bodies of their own, and all three are continuous-motion takes for
+`tools/vidstrip.cjs`, same recipe and same canon plate as `cheetahWalk8` /
+`cheetahRun6` (side-on, facing LEFT, flat key-colour field, locked camera, feet
+on one floor line, no ground, no shadow):
+
+| key | the take | reference to hold it to |
+|---|---|---|
+| `cheetahStalk8` | the STALK: belly low, shoulders above the spine, head level and dead still, one forepaw placed at a time — 8 frames, loops | a real cheetah's stalk: the body sinks, the head does not bob |
+| `cheetahSkid6` | the SKID: hindquarters dropped, forelegs braced straight ahead, claws out, tail thrown up and across as the counterweight — 6 frames, plays once | a real cheetah braking out of a turn; the tail is the whole picture |
+| `cheetahBreak5` | the BREAK: from the stalk crouch into the first gallop stride, spine uncoiling — 5 frames, plays once before `cheetahRun6` | the launch out of cover: hind legs drive first |
+
+Wiring when they land: `CHEETAH_ART` rows in `js/wolves.js`; the stalk replaces
+the walk strip while `e.hunt && !e.running`, the skid replaces the landing
+strip while `e.skidT > 0`, the break plays on the frame `e.running` turns on.
+Nothing in `cheetahhunt.js` changes. Until they land the cat is correct in
+motion and borrowed in pose; it is not a stand-in drawing, so nothing
+procedural is waiting to be replaced.
+
 ## 2bp. THE RING GATES — every walk-in passage is a machine ring ✔ FIRED AND WIRED 2026-11-15 (owner's order, this thread)
 
 The owner on the outline arches that first answered "the doors fade into the

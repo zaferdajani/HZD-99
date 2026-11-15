@@ -24,8 +24,11 @@ const ctx = vm.createContext({ console, Math, Set, Boss: class Boss {},
   burst: noop, sfx: noop, persist: noop, hasSkill: () => false, tileAt: () => '.',
   isPet: e => !!e.pet, isWolf: e => e.kind === 'wolf', packTamed: () => true,
   invAdd: () => giftCount++, t: s => s, cam: { shake: 0 },
-  G: { boomer: null, hitStop: 0, flash: 0, roomId: 'GA1D', roomDef: { zone: 'A' },
-    save: { flags: {}, scrap: 0, iq: 0 }, statics: [], enemies: [], boss: null, addRing: noop, toast: noop },
+  G: { boomer: null, hitStop: 0, flash: 0, roomId: 'GA1D', roomDef: { zone: 'A', w: 60 },
+    save: { flags: {}, scrap: 0, iq: 0 }, statics: [], enemies: [], boss: null, addRing: noop, toast: noop,
+    crescents: [], projs: [], breakTile: noop },
+  aabb: (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y,
+  hurtBoxOf: e => e, solidAt: () => false, addPart: noop, chance: () => false, rnd: () => 0,
 });
 const run = s => vm.runInContext(s, ctx);
 run(fn(types, 'dealDmg'));
@@ -41,10 +44,18 @@ assert(table >= 0, 'ATTACKS table exists');
 run(entities.slice(table, entities.indexOf('\n}', entities.indexOf('function attackFreeze(', table)) + 2));
 const atkDmg = entities.indexOf('  attackDmg(id, ctx) {');
 assert(atkDmg >= 0, 'attackDmg exists');
-run('class SpecialPlayer { ' + ['swirlPass', 'releaseCharged'].map(method).join('\n')
+// THE CRESCENT (2026-11-15): with one sword the held release is no longer a
+// burst round her — it is a cut that LEAVES her and travels (crescent() arms
+// it, crescentStep() lands it). The rules this file guards are the same rules,
+// so the travelling cut is run here from the source and flown to its end.
+const cres = entities.indexOf('const CRESCENT = {');
+assert(cres >= 0, 'CRESCENT exists');
+run(entities.slice(cres, entities.indexOf('\n', cres) + 1).replace('const CRESCENT', 'this.CRESCENT'));
+run(fn(entities, 'crescentStep'));
+run('class SpecialPlayer { ' + ['swirlPass', 'releaseCharged', 'crescent'].map(method).join('\n')
   + '\n' + entities.slice(atkDmg, entities.indexOf('\n  }', atkDmg) + 4) + ' }\nthis.SpecialPlayer = SpecialPlayer;');
 const p = new ctx.SpecialPlayer();
-Object.assign(p, { x: 0, y: 0, w: 28, h: 36, swirlT: 0, swirlHits: 0,
+Object.assign(p, { x: 0, y: 0, w: 28, h: 36, vx: 0, face: 1, swirlT: 0, swirlHits: 0,
   startScratchWake: noop, // Visual effect; real-player coverage lives in scratch-reach.cjs.
   volts: 0, dmg: () => 10, gainVolts(n) { this.volts += n; } });
 function enemy(overrides = {}) {
@@ -52,7 +63,9 @@ function enemy(overrides = {}) {
     pureM: 0, kind: 'sage', dead: false, die() { this.dead = true; }, ...overrides };
 }
 function hit(e, special, chosenMode) {
-  mode = chosenMode; ctx.G.enemies = [e]; p[special]();
+  mode = chosenMode; ctx.G.enemies = [e]; ctx.G.crescents = []; p.vx = 0; p[special]();
+  for (let i = 0; i < 240 && ctx.G.crescents.length; i++) ctx.crescentStep(1 / 60);
+  assert.equal(ctx.G.crescents.length, 0, 'a crescent always ends');
 }
 for (const [special, chosenMode] of [['releaseCharged', 'single'], ['swirlPass', 'dual']]) {
   const e = enemy();
