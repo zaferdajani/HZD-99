@@ -12816,7 +12816,8 @@ function drawStatics(P) {
         && typeof c.filter === 'string' && typeof NPC_LOOK === 'string';
       const filter0 = metal ? c.filter : null;
       if (metal) {
-        c.filter = NPC_LOOK;
+        c.filter = typeof npcLook === 'function' ? npcLook(s.extra) : NPC_LOOK;
+        NPC_SHEEN.k = NPC_LOOK_PAINTED[s.extra] ? NPC_SHEEN_K_PAINTED : NPC_SHEEN_K;
         NPC_SHEEN.on = (typeof richK === 'number' ? richK : 1) > 0.3;
         NPC_SHEEN.t = performance.now() / 1000 + (s.x % 97) * 0.031;
       }

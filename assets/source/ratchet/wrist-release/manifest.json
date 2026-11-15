@@ -57,5 +57,15 @@
     "stale callback guard",
     "pause/focus recovery",
     "pending restart recovery"
-  ]
+  ],
+  "repaint_2026_11_15": {
+    "what": "Repainted as metal (docs/ART_QUEUE.md 2r-ii): the same cells, the same boxes, new paint. The owner-supplied strip is kept byte for byte beside this file as supplied.webp and still matches sha256 above.",
+    "runtime": "assets/characters/npc/ratchet/wrist_release.webp",
+    "runtime_sha256": "1a808e0235706d717e02720632bd26e0e1e0189c9582a5aa2cbf4aaf0161b09c",
+    "generator": "Higgsfield, Nano Banana Pro, 2k; job faadea7f-9f90-4c68-ac4a-50ec8370198e",
+    "as_fired": "assets/source/ratchet/metal/wrist_release_asfired.jpg",
+    "cut": "tools/reframe.cjs --grid",
+    "lowres_sha256": "none: the repainted strip is under the size at which tools/lowres.cjs makes a quarter copy",
+    "revert": "copy supplied.webp back over the runtime file, then node tools/lowres.cjs && node build.cjs"
+  }
 }

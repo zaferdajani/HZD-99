@@ -379,6 +379,11 @@ const MEDIA_SRC = {
     heroYawBare: 'assets/characters/hzd_8yaw_bare.webp',
     // THE IMPATIENT WAIT — 16 cells: 0-6 cross the arms, 7-15 bounce and tap.
     heroFidget: 'assets/characters/hero/fidget.webp',
+    // SHE CROSSES HER ARMS AND TAPS HER FOOT (owner, 2026-11-14) — 8 cells, a
+    // three-quarter view facing right: 0 settle · 1/3/5 toe up · 2/4 toe down ·
+    // 6 toe down, eyes open at the player · 7 the same with an ear flicked.
+    // The bout "yalla" is said over (HERO_IMPATIENT, js/entities.js).
+    heroImpatient: 'assets/characters/hero/impatient.webp',
     // THE TRANSITION STRIPS (ART_QUEUE §2x, census order) — the in-betweens
     // the body was missing: the jump arc, the landing, the skid turn, the
     // wall slide, the dash. Each is a content-cut strip from a 5s take.
@@ -1233,7 +1238,17 @@ function drawSetPlate(c, key, cx, base, frameH, flip, refKey) {
 // Skipped where canvas has no filter (older Safari) and below the quality dial's
 // glow floor, so a struggling phone pays nothing for it.
 const NPC_LOOK = 'brightness(1.16) saturate(1.35) contrast(1.14)';
-const NPC_SHEEN = { on: false, t: 0, k: 0.42, cv: null };
+// ONCE THE PAINT IS RICH, THE FILTER STEPS BACK (2026-11-15). Ratchet's plates
+// were repainted as metal — a second and third material, rust, real speculars
+// (ART_QUEUE §2r-ii) — and the look that rescued one flat copper overcooks that:
+// measured in his den, the belly plate clipped to a single orange and the steel
+// pack went warm. A repainted machine keeps a touch of lift against the room's
+// dark and a quieter travelling shine; the others keep the full look until their
+// own repaint lands, and move into this table when it does.
+const NPC_LOOK_PAINTED = { ratchet: 'brightness(1.06) saturate(1.05) contrast(1.05)' };
+const NPC_SHEEN_K = 0.42, NPC_SHEEN_K_PAINTED = 0.26;
+function npcLook(kind) { return NPC_LOOK_PAINTED[kind] || NPC_LOOK; }
+const NPC_SHEEN = { on: false, t: 0, k: NPC_SHEEN_K, cv: null };
 function npcSheen(c, im, sx, sy, sw, sh, dx, dy, dw, dh) {
   if (typeof c.filter !== 'string') return;
   const W = Math.ceil(Math.abs(dw)), H = Math.ceil(Math.abs(dh));

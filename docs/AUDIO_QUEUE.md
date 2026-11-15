@@ -33,6 +33,30 @@ the fleet split ART/AUDIO/VIDEO into separate owner-opened sessions. The
 project manager (code session) queues a brief here whenever a decomposed
 request needs one; the AUDIO session fires top to bottom, same as ART_QUEUE.)*
 
+## A-TAP. Her foot, running out of patience ✱ QUEUED 2026-11-14 (code session, owner's order)
+
+Owner: *"Look for how Sonic used to stamp with his feet and cross his hand when
+he's idle and waiting, and give the character the same move when it says yalla."*
+The pose is ART_QUEUE 1-imp; the clock that plays it is wired
+(`HERO_IMPATIENT_BEATS`, js/entities.js). This is the sound of the toe coming down.
+
+- **Function.** The player has put the controller down and she is letting him
+  know. It must read as a small ceramic boot on whatever she is standing on —
+  dry, close, a little comic — and it must be ignorable: it plays under "yalla"
+  and under the room, and nobody should reach for the volume.
+- **Contract.** One-shot, 60–90 ms, no tail to speak of; three variants so eight
+  taps in a bout are not one sample eight times. Mono. Peak around −14 dBFS
+  against the claw swing's −6: it is furniture, not an event. Fired on the
+  toe-DOWN cells only (2, 4, 6 of the strip — 0.28 s apart, 3.5 a second), so
+  the three must sit together as a rhythm at that spacing without flamming.
+- **Not this.** No reverb, no pitch sweep, no metallic clank (she is ceramic and
+  light), nothing below ~150 Hz — the 74–110 Hz band is the bosses'.
+- **Wiring (audio session):** `sfx_toe_tick_{1,2,3}` in the manifest; the call
+  site is where `heroIdleClip` enters a down cell while `clip.imp` is true — ask
+  the code session for the hook rather than adding logic. Silent while
+  `heroOccupied()` is true (it already resets the idle clock) and while a line
+  of narration holds the voice arbiter.
+
 ---
 
 ## A-GLIDE. The hover jets ✱ QUEUED 2026-10-12 (code session, handoff Part 2 B3)

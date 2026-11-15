@@ -98,6 +98,28 @@ compared to it in review, and a page whose lettering drifted is refired.
 | p26 | **STALE — now §2.12, ahead of p20.** Add the revelation the game fires on standing up: *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.* That line is what sends her to p20. | ed.2 `8555295e` (take 4) | box by box against the text list — passes | `assets/manhua/ch1/p26.webp` | ed.2 |
 | p27 | §2.17 End of the free chapter | ed.2 `e698aefd` (take 2) | box by box against the text list — passes | `assets/manhua/ch1/p27.webp` | ed.2 |
 
+### THE OPENING RULING (2026-11-14) — the first ten minutes changed; p05–p10 are out of step
+
+`docs/STORY_SCRIPT.md` §2.2–§2.5 were rewritten this day with the game (the owner's
+"do all of them, 1 to 7" after the hook analysis). The script is what is drawn from,
+so the pages below no longer tell what the player plays. **Nothing is to be refired
+until the owner says which pages he wants redrawn** — the credits and the review are
+his (docs/MANHUA_SESSION.md); this is the list he decides from, written by the code
+session whose script it is.
+
+| page | what it shows today | what §2 says now |
+|---|---|---|
+| p05 (§2.2, the road) | an empty road to the gates | **her first fight is on this road**: a slag mite comes at her out of the grass, two swipes break it, it leaves scrap — before the gates, before anyone has spoken to her |
+| p06 (§2.3, the waking floor) | "the first machine she ever broke was calm" — a crawler in the street; scrap explained as money | nothing fights her on this street. **NULLFANG is glimpsed** beyond the jammed winch — head and shoulders, eyes lit, one roar, gone east (a question, not a meeting). A **lit chest on a high walkway** she cannot reach. The scrap-is-money line now belongs to Ratchet's counter (p10) |
+| p07 (§2.4, the note) | the two-page tag | **one page**: *"Mother's song is infected. I pulled my own battery before it could take me. It is in the drawer beside this chair — wire it back in, and there may still be hope. — R."* — and the cell is HIS battery from the drawer, not one she carried |
+| p08 (§2.4, the kit, the cradle, the pack) | Ratchet explains the cradle and pitches the volt pack on waking | he wakes with **two lines** and hands her the spare cell for Old Servo. No cradle speech. **No pack pitch here** — she has not yet met the thing the pack answers |
+| p09 (§2.4, the errand) | five balloons of history and instructions | the errand is one line inside the two above. The history (the necklace stone, her sleeping through the broadcast) is **two lines for whoever comes back and asks** |
+| p10 (§2.5, the volt pack) | the shop, then the two verbs | **need before teach**: she strikes the jammed winch, on the third blow **it bites back** and takes a core, and only then does Ratchet sell the pack — *"It bit you? Claws only scratch that winch."* She mends the core the winch cost her, then bursts the winch still |
+| p12 (§2.6, Old Servo) | captioned "the first fight" | it is no longer her first; the caption is the only thing wrong |
+
+p11 and p13 onward are untouched by this ruling (p20–p24 remain stale under THE ROUTE
+RULING below).
+
 ### THE ROUTE RULING (2026-09-30) — the sage comes before the bell
 
 `docs/STORY_SCRIPT.md` §2.12–§2.16 were rewritten this day because they did not

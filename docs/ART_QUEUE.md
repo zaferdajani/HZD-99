@@ -6446,7 +6446,7 @@ machine slumps via `foeDrawDown` in js/foeread.js. A take of its own replaces it
   `BEAST_RECOVER.down` flattening; `tests/artbible.cjs` feet rule applies.
 - **Cheetah:** the same brief for `cheetahDown4` once the wolf take is approved.
 
-### 2r-ii. RATCHET, REPAINTED AS METAL — the seven plates + `ratchetLoop` ✱ NEW 2026-11-14 (code session, owner's den screenshot)
+### 2r-ii. RATCHET, REPAINTED AS METAL — the seven plates + `ratchetLoop` ✔ LANDED 2026-11-15 (fired and wired by the code session on the owner's "finish it all properly"; brief 2026-11-14)
 
 Owner, on the A0B screenshot: *"The NPC is not well defined. The characters'
 features are not showing correctly, just like the others. It looks like scrap of
@@ -6481,8 +6481,45 @@ and that is the half only a repaint fixes.
   paint itself is rich.
 - **The others:** the owner said "just like the others" — once Ratchet's take is
   approved, the same palette brief runs for `servoLoop`, `patchLoop`, `lumenLoop`.
+- **FIRED 2026-11-14, AWAITING THE OWNER'S PICK (code session, on his "finish it
+  all properly").** The style anchor only — `talk_1`, Nano Banana Pro, 2k, 1:1,
+  the current plate as the shape reference, the palette above in words. Two takes,
+  Higgsfield jobs `0f440ce1-02d6-4a00-a7e9-0e64bad2810b` (A) and
+  `368b40e6-3ce8-437f-8229-f3a8c3e65736` (B), 4 credits. Both held his outline
+  (aspect 0.698 against the plate's 0.700), both carry the steel pack, verdigris
+  seams, rust on belly/shoulder/boots and lit amber lenses. Shown to him in the
+  den at game scale with and without `NPC_LOOK`. NOT keyed, NOT archived, NOT in
+  the game: the other six plates and the loop fire from whichever he approves.
+  Keying note for whoever lands it: the plate has two ENCLOSED pockets of the
+  black field (hand-to-helmet, arm-to-hip) that `tools/blackkey.cjs`'s border
+  flood leaves in — they need a second pass.
+- **LANDED 2026-11-15 — ELEVEN IMAGES, NOT SEVEN.** The owner was shown the
+  A/B board and answered twice with "finish it all properly"; take A is the
+  anchor on the code session's pick, said to him plainly in the report, and every
+  replaced file is kept so his refusal costs one file copy. The brief above
+  counted seven plates and the loop; the den actually draws eleven pictures of
+  him, and one left unpainted would have changed his metal mid-scene: the seven
+  plates, `ratchet_resting` (eyes DARK — he is switched off), the dialogue bust,
+  `work_loop_six` and `wrist_release` (both the owner's own 2026-09-24 strips,
+  repainted in place; originals kept byte for byte as `supplied.webp` beside
+  their manifests). Ten fired in one batch against the old plate (shape) and
+  anchor A (finish): jobs e25d0e70 · 2d15ecaf · 2df214e0 · 5ca29ddb · 54689366 ·
+  55e8a46b · d652f7cb · d4c154da · 5e03604a, and `wrist_release` twice (36c98f32
+  came back on white; faadea7f is the one in the game). 24 credits with the two
+  anchor takes. Cut by `tools/reframe.cjs` (new): every plate and every strip
+  cell held its aspect within 1%. Archive `assets/source/ratchet/metal/`,
+  previous plates `assets/source/ratchet/pre-metal/`.
+- **`NPC_LOOK` re-judged, as the wiring note asked:** it overcooked the repaint
+  (the belly clipped to one orange). `NPC_LOOK_PAINTED.ratchet` in js/media.js is
+  the gentler look a repainted NPC wears, with a quieter sheen; the other three
+  keep the full one until their own repaint lands and then move into that table.
+- **Still open under this brief:** `servoLoop`, `patchLoop`, `lumenLoop` — the
+  same palette brief, the same two-reference method, `talk_1` of each first.
+  And the repair board's own picture of him (`assets/source/repair-parts`) is
+  the old copper; it is a close-up of an open chest and reads as the same
+  machine, but it is the next place a sharp eye will find the old paint.
 
-### 1-imp. SHE RUNS OUT OF PATIENCE — `heroImpatient` (8, loop) ✱ NEW 2026-11-14 (code session, owner's order)
+### 1-imp. SHE RUNS OUT OF PATIENCE — `heroImpatient` (8, loop) ✔ LANDED 2026-11-15 (bare costume; code session, owner's order)
 
 Owner: *"Look for how Sonic used to stamp with his feet and cross his hand when
 he's idle and waiting, and give the character the same move when it says yalla."*
@@ -6509,10 +6546,62 @@ The crossed arms and the tapping foot are a new strip.
 - **Negatives:** no arms at her sides, no walking, no smile, no speech bubble,
   no text, no ground, no cast shadow, no outline, pure black background, whole
   figure in frame facing three-quarter RIGHT.
-- **Wiring (code session, on delivery):** `heroImpatient` in js/media.js; in
-  js/entities.js the bout that starts at `FIDGET_AFTER` plays this strip instead
-  of `HERO_FIDGET_BEATS` — settle (0) as `hzdSay('yalla')` fires, then the tap
-  1-2-3-4-5-6 at ~7 taps a second for the length of the line, hold on 7; the
-  procedural scarf, glow and ear twitch stay on top. A soft toe-tick SFX on the
-  down cells (audio session cue, AUDIO_QUEUE). `tests/hero-move-coverage.cjs`
-  gains the row; `tests/gait.cjs` feet rule applies.
+- **Wiring — DONE 2026-11-14, inert until the sheet lands.** js/entities.js:
+  `HERO_IMPATIENT`, `HERO_IMPATIENT_BEATS`, `heroImpatientReady()`; `heroIdleClip`
+  gives bouts 0, 2, 4… to this strip and leaves the fidget the bouts between, so
+  the bout "yalla" is said over opens on the settle cell (0), taps 1-2-3-4-5-…
+  at **3.5 taps a second** (0.14 s a cell — the "~7 a second" first written here
+  was a flicker, and the 2026-09-27 ruling is against flicker), looks at the
+  player on 6, flicks an ear on 7. Its flip is NOT cancelled the way the front-on fidget's
+  is: a three-quarter view turns with her. With no `heroImpatient` in the manifest none
+  of it is reachable and nothing is fetched. `tests/impatient.cjs` holds both
+  sides of that. **To land the approved sheet:** `node tools/gridstrip.cjs
+  <sheet.png> <strip.png> [--per] [--h=…]` cuts the 4×2 sheet to one row of eight
+  320-px cells, soles at y=312 (fidget.webp's frame), dropping the glow and any
+  mark that is not her; save as
+  `assets/characters/hero/impatient.webp`; add `heroImpatient` to js/media.js,
+  `HERO_MOTION_KEYS` (js/mobility_fix.js) and `BODY_KEYS` (js/preload.js); a row
+  in `tests/hero-move-coverage.cjs`; `node tools/lowres.cjs && node build.cjs`.
+  A soft toe-tick SFX on the down cells is the audio session's (AUDIO_QUEUE).
+- **FIRED 2026-11-14, AWAITING THE OWNER'S PICK.** GPT Image 2.6 through
+  Higgsfield, canon element embedded, the fidget strip as the design reference,
+  one 16:9 sheet of 4×2 cells. Two takes, jobs
+  `3e374119-6966-4c4c-883c-04255736a59b` (A) and
+  `dc66b53a-49b3-4211-a7c5-75af1354624c` (B), 0.5 credit. Both hold her size
+  to a pixel or two across all eight cells; B's toe lift reads more clearly; both
+  draw her slimmer than her sprites and WITHOUT their dark outline — the fidget
+  strip is a front view and was the wrong thing to hand a three-quarter pose.
+  **Round two, same day:** `assets/source/hero/delivered/b5_interact.png` (her own
+  three-quarter cells, first and last figure) as the lead reference, the fidget
+  second, the outline and the head-wider-than-the-body said in words. Jobs
+  `203a1e3f-554a-47e4-b74a-45ea29cd7087` (C) and
+  `1185263c-b8d9-4e44-85b5-77c980551dd1` (D), 0.5 credit. Both carry the outline
+  and her proportions. **C is the code session's pick**: its eight cells sit on a
+  regular grid (left edge 55–57 px, height 319–320 of a 376 cell — nothing to
+  re-register), the toe lifts clearly, cell 7 opens her eyes at the player. It
+  drew a "!!" spark beside the ear in cell 8, which the cut drops (largest
+  connected body per cell). D's cells drift 45 px across a row and need
+  per-cell anchoring. Scale at landing: match her HEAD to the idle's, not the
+  cell height — a three-quarter head is narrower than a front one and height
+  alone lands her a size small. Shown to him as strips against the fidget and
+  on the meadow.
+- **LANDED 2026-11-15 — and C was NOT the one.** Measured against her idle and
+  walk cells at equal height, C's head is about 42% of her where the game draws
+  about half: at any scale either her head or her body was the wrong size beside
+  the frame before it. Round three ("her head is half her height") overshot to
+  a bobblehead. **Round four handed both failures back as references — "this one
+  too small, this one too big, draw halfway between", her model sheet as the
+  tiebreak — and all four takes landed on the game's proportion.** Jobs a7a99c47
+  (G1) · e44345f1 · 3b5710b0 · 42e3c6ac, 1 credit; 2 credits across the four
+  rounds. **G1 is in the game**: left edge 63 px and height 283 px in all eight
+  cells, so the cut needed no re-registration and no `--h` — the default 203
+  puts her ear-tips, chin and soles on her idle's own lines
+  (`assets/source/_sheets/impatient_round4_vs_game.jpg`). Cell order as
+  briefed: 0 settle · 1/3/5 toe up · 2/4 toe down · 6 toe down, eyes open at the
+  player · 7 eyes open, ear flicked. `assets/characters/hero/impatient.webp`;
+  as-fired sheet and the refused C and E in `assets/source/hero/impatient/`.
+  Wired: `heroImpatient` in js/media.js, `HERO_MOTION_KEYS`, `BODY_KEYS`;
+  tests/impatient.cjs now measures the shipped sheet; hero-move-coverage has the
+  row. **Still open:** one strip per weapon tier with the blade on her back
+  (today the armed costume crosses her arms without it), and the toe-tick cue
+  (AUDIO_QUEUE A-TAP).

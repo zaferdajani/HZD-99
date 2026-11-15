@@ -458,3 +458,65 @@ is the photograph.
 
 - `beast/studio-2026-11-13/` — NULLFANG's turn and standing idle: two Seedance 2.5 masters (`turn.mp4`, `idle.mp4`), their start frame (`start_left.png`, frame 0.02 s of `studio-2026-10-04/pounce.mp4`), prompts and job ids in `jobs.json`. Cut to `characters/beast/studio-{turn,idle}.webp` by `tools/lion-studio.py`. Since 2026-11-14 the shipped turn is cut from `turn2.mp4` — the mechanical lion performing the turn of `turn2-reference-lion.mp4`, a generated realistic lion used as a motion reference only; `turn.mp4` is the rejected turntable take. `beast/studio-2026-10-04/grade.json` is the one tone curve every lion strip is matched to. All nine strips were re-keyed 2026-11-14 from these same masters (same sample times) so the body keeps its own dark interior — the first key cut a window through the chest wherever a shadowed socket touched a dark seam.
 - `brand/` — the app icon master (`appicon.png`, 1024 square, opaque), the alternate take, and `jobs.json`. `tools/appicon.cjs` derives every store and launcher size from it.
+
+## `ratchet/metal/` — the same Ratchet, repainted as metal (2026-11-15)
+
+The owner, looking at the den: *"It looks like scrap of metal blended with the
+background... The colors are very dull, needs to be brighter, richer in color, and
+give it the metallic, nice metallic tint color with a little bit of rust, a little
+bit of shine here and there."* His plates were one copper from helmet to boot, and
+no filter gives a figure a second colour. Brief: `docs/ART_QUEUE.md` §2r-ii.
+
+- `talk_1_asfired.jpg` is the STYLE ANCHOR (take A; `talk_1_takeB_asfired.jpg` is
+  the one not chosen). Fired alone first, from the old `talk_1` as the shape
+  reference with the palette in words.
+- The other ten were then fired with TWO references and two stated jobs
+  (art-prompts §2): image 1 the old plate — geometry only — and image 2 the
+  anchor — materials, lighting and finish only. All of them held their shape:
+  `tools/reframe.cjs` printed an aspect drift under 1% for every plate and every
+  strip cell, which is why none had to be stretched or refired for shape.
+- `work_loop_six` and `wrist_release` are STRIPS. No frame is wide enough to
+  generate one, so each was restacked 3×2 / 2×2 on black for the generator and
+  cut back cell by cell onto its own cell of the original row.
+- `wrist_release` came back on WHITE the first time (the one in ten). It was
+  refired with the field colour said three ways rather than keyed off white — a
+  white key frays a polished highlight at the silhouette.
+- `bust` fills its frame, so it wears the old bust's alpha (`--mask`).
+- **What was replaced is kept.** `ratchet/pre-metal/` holds the seven plates, the
+  resting plate and the bust exactly as they shipped until this commit;
+  `ratchet/work-loop-six/supplied.webp` and `ratchet/wrist-release/supplied.webp`
+  are the owner's own two strips, byte for byte (their manifests' sha256 still
+  match). Reverting any of it is a file copy, then
+  `node tools/lowres.cjs && node build.cjs`.
+- Render side: `NPC_LOOK_PAINTED` in js/media.js. The lift that rescued the flat
+  copper overcooked the repaint, so a repainted NPC wears a gentler one.
+- Sheets: `_sheets/ratchet_metal_before_after.jpg`, and in the game
+  `_sheets/metal_and_impatient_ingame.jpg`.
+
+## `hero/impatient/` — arms crossed, foot tapping (2026-11-15)
+
+The owner: *"Look for how Sonic used to stamp with his feet and cross his hand when
+he's idle and waiting, and give the character the same move when it says yalla."*
+Brief: `docs/ART_QUEUE.md` §1-imp. `g1_asfired.png` is the sheet in the game
+(`assets/characters/hero/impatient.webp`, cut by `tools/gridstrip.cjs`). It took
+four rounds, and the three that failed are the useful part:
+
+1. **A front-view reference for a three-quarter pose** (the fidget strip). She came
+   back slimmer than her sprites and with no dark outline. Sheets:
+   `_sheets/impatient_rounds_1_2.jpg`.
+2. **Her own three-quarter cells as the lead reference**
+   (`hero/delivered/b5_interact.png`). Outline and style right; HEAD TOO SMALL
+   (`c_refused.jpg`) — about 42% of her height where the game draws about half.
+3. **"Her head is half her height."** It overshot to a bobblehead, about 60%
+   (`e_refused.jpg`). A proportion said as a number is not obeyed in either
+   direction.
+4. **Both failures handed back as references — "this one too small, this one too
+   big, draw halfway between" — with the model sheet as the tiebreak.** All four
+   takes landed on the game's proportion (`_sheets/impatient_round4_vs_game.jpg`,
+   the dashed lines are her idle's ear-tip, chin and sole). G1 was taken because
+   its eight cells sit on a perfectly regular grid (left edge 63 px in all eight,
+   height 283 in all eight), so nothing had to be re-registered.
+
+The lesson for the next pose: bracket a proportion with two wrong pictures; do not
+describe it.
+

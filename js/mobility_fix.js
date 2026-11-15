@@ -3,7 +3,7 @@
 const HERO_MOTION_REVISION = 'hero-motion-2026-09-18-sprites';
 const HERO_MOTION_KEYS = Object.freeze([
   'heroStates', 'hzdIdle', 'gaitWalk', 'gaitRun', 'transAir', 'transLand',
-  'transDash', 'transSkid', 'transWall', 'heroFidget', 'hzdHurt'
+  'transDash', 'transSkid', 'transWall', 'heroFidget', 'heroImpatient', 'hzdHurt'
 ]);
 // `done` is SAMPLED IN UPDATE, never recomputed in draw — see the loading screen
 // below for why that distinction is load-bearing.
