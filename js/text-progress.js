@@ -8,7 +8,7 @@ TEXT_LAYERS.push({
     pg_marble_here: 'Pale marble dust seeps up through the cracked floor. The seam runs below.',
     pg_marks: "Chalk arrows — the old quarrymen marked their road to the marble.",
     pg_cv3_back: "The cut face still glows. Beside it, the maintenance passage breathes cold blue light.",
-    pg_bound_wait: "The ones you stopped are still bound — stand over one and cleanse it.",
+    pg_bound_wait: "The ones you stopped are still bound — stand over one and purify it.",
     pg_survey: "The quarrymen's survey wakes: the quarry is charted on your map.",
     tsurvey: ['QUARRY SURVEY — station of the Deaf quarrymen. Chalk marks are ours; follow them.', 'Seam hall. Beacon hall. The raw marble stands at the end of the third gallery.', 'Chart restored. Sending it to the unit reading this.'],
     pg_freed: 'PURIFIED',
@@ -42,7 +42,7 @@ TEXT_LAYERS.push({
     pg_goal_sage: 'Purify the Eye\'s agent: the maintenance passage beside the marble quarry.',
     pg_goal_chime: 'Silence CHIME: take the climb above the meadow hub.',
     pg_goal_east: 'Go east past Ratchet\'s camp, to the guardian\'s enclosure.',
-    pg_goal_lion: 'Face NULLFANG, the Meadow Sage, in his enclosure east of Ratchet\'s camp, and cleanse him.',
+    pg_goal_lion: 'Face NULLFANG, the Meadow Sage, in his enclosure east of Ratchet\'s camp, and purify him.',
     pg_goal_up: 'Climb above Ratchet\'s camp into the Data Conduits.',
   },
   ar: {

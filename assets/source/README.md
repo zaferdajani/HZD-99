@@ -592,3 +592,6 @@ four rounds, and the three that failed are the useful part:
 The lesson for the next pose: bracket a proportion with two wrong pictures; do not
 describe it.
 
+## npc/mono/
+
+- `work_loop_keyed.webp` — the Oracle's filmed work loop exactly as it was keyed (16 cells, 320 px): the dark inside of the cable shroud went with the plate, so the lower body is loose strands. `tools/shroudback.cjs` derives the shipped `assets/characters/npc/mono/work_loop.webp` from it by filling the robe behind the art (2026-11-16). A take keyed with its interior intact is queued (ART_QUEUE §2bv).

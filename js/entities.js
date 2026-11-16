@@ -8087,6 +8087,14 @@ class Enemy {
   constructor(kind, x, y) {
     const k = EKIND[kind];
     this.kind = kind; this.x = x; this.y = y; this.w = k.w; this.h = k.h;
+    // a cave cat is half as big again as the kind it is built on (wolves.js
+    // CAT_SIZE) — about its own middle and its own feet, so it stands where
+    // the room put it
+    if (typeof isCheetah === 'function' && typeof CAT_SIZE === 'number' && isCheetah(this)) {
+      this.sizeK = CAT_SIZE;
+      this.w = Math.round(k.w * CAT_SIZE); this.h = Math.round(k.h * CAT_SIZE);
+      this.x -= (this.w - k.w) / 2; this.y -= this.h - k.h;
+    }
     this.hypnoT = 0; this.stagT = 0; this.faceVis = 1;
     // a walker climbs what the terrain scatters in front of it; a flier has no
     // feet to put on it and would 'step up' out of its own flight path

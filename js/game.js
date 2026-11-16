@@ -729,7 +729,18 @@ const NPC_LOOP = {
 // padding them to 24 put the same drawing on screen twice in a row nineteen
 // times and twelve times. Those two takes need re-firing — they are on THE
 // FIRING LIST — and until then they carry their real frames and nothing else.
-const NPC_LOOP_CELLS = { servo: 16, mono: 16, patch: 13, sage: 11, lumen: 10, kerf: 8, ratchet: 6 };
+// THE ORACLE STANDS LIKE SOMEBODY (owner, 2026-11-16, standing beside it: "the
+// npc needs a lot of improvement to be like [Ratchet]"). It had two pictures:
+// its filmed body — a CRT head over a shroud of cable, reading a tape — which
+// drew only on a work beat while she was far away, and its row on the old
+// turntable atlas, a pale wisp half her height, which drew whenever she was
+// near enough to see it. So the one she met was always the wisp. Ratchet's
+// answer (drawTinker) is this one's: the filmed body, everywhere it is awake,
+// at a merchant's stature. `h` is the cell's drawn height in px; `read` the
+// cells where the tape is in its hands; `fps` near her, and speaking.
+// `sink` seats the frayed hem on the floor (the strands thin out before the cell's foot).
+const NPC_TALL = { mono: { h: 188, read: [8, 14], fps: [4, 7], sink: 9 } };
+const NPC_LOOP_CELLS = { servo: 16, mono: 15, patch: 13, sage: 11, lumen: 10, kerf: 8, ratchet: 6 };
 function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
 // ...and the tempo doubles with the cell count, or the same job plays at half
 // speed: fps is COLUMNS a second and run is a burst measured in COLUMNS, so
@@ -9687,18 +9698,14 @@ const GATE_ROOM = {
     { at: 0.10, to: 'A5',  gx: 0.516, gy: 0.563, ax: 0.72 },
     { at: 0.62, to: 'CV1B', ax: 0.12, rubble: 'rubbleCV1B' },
   ],
-  CV1B: [
-    { at: 0.12, to: 'CV1', ax: 0.62 },
-    // THE HAUL RING (owner, 2026-11-16: the east ring "just pushes me a little
-    // bit further... There is no logical reason for it. Create a reason"). It
-    // used to rejoin CV2 a few steps along the tunnel she could have walked.
-    // It is the line the stone was hauled along: its far end stands beside the
-    // marble in CV3, and both ends are DARK (`lock`) until GRAVEHORN is driven
-    // off the stone — a ring that goes somewhere she cannot go yet on the way
-    // in, and the short road home with the marble on the way out.
-    { at: 0.875, to: 'CV3', ax: 45 / 56, lock: 'bossHorn', lockLine: 'grv_ring_dark' },
-  ],
-  CV3: { at: 45 / 56, to: 'CV1B', ax: 0.875, lock: 'bossHorn', lockLine: 'grv_ring_dark' },
+  // ONE WAY IN, AND NO RING AT ITS FAR END (owner, 2026-11-16, standing between
+  // two rings beside the marble: "why two portals"). For a day the Seam's east
+  // ring was the HAUL RING, out beside the stone in CV3 — which stood it nine
+  // tiles from the ring to the Sage's tunnel (GATE_STORY), two lit doors in one
+  // frame and nothing to say which was the road. The chamber keeps ONE ring,
+  // the one that goes on. The Seam is what a buried side room should be: the
+  // way she came in, the quarrymen's survey, and the cache on the shelf.
+  CV1B: { at: 0.12, to: 'CV1', ax: 0.62 },
   // the Oracle's parlor off B3 — the booth pattern again, but its OWN style:
   // Ratchet's fired kiosk plate must never stand in the Conduits, so the
   // Oracle's shrine draws its own stand-in (drawOracleBooth) until its plate
@@ -9754,7 +9761,7 @@ const GATE_ROOM = {
   // (owner, 2026-11-16). It stands in the middle of the den floor now.)
   // the Run: the den's mouth in the meadow at one end, the inner mouth at the other
   A10R: [{ at: 0.07, to: 'A2', ax: 0.84, style: 'den' }, { at: 0.93, to: 'A10', ax: 0.12, style: 'den' }],
-  A10: [{ at: 0.12, to: 'A10R', ax: 0.93, style: 'den' }, { at: 0.52, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, lock: 'alpha', lockLine: 'ring_dormant' }],
+  A10: [{ at: 0.12, to: 'A10R', ax: 0.93, style: 'den' }, { at: 40 / 46, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, lock: 'alpha', lockLine: 'ring_dormant' }],   // at the FAR end of his floor, never in a frame with the mouth she came in by ("why two portals")
   B4:  { at: 0.62, to: 'GB1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossBrood' },
   C3:  { at: 0.31, to: 'GC1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossAtlas' },
   D3:  { at: 0.62, to: 'GD1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossZero' },
@@ -9767,7 +9774,7 @@ const GATE_ROOM = {
   // same flag that builds A4's door into it — no door, no chevron, no walk —
   // so the only way into the fight is the camp's east seam, past its ward.
   GA1: { at: 0.06, to: 'A4',  gx: 0.50, gy: 0.86, ax: 0.23, need: 'bossGlitch' },
-  GA2: { at: 0.06, to: 'A10', gx: 0.50, gy: 0.86, ax: 0.52 },
+  GA2: { at: 0.06, to: 'A10', gx: 0.50, gy: 0.86, ax: 40 / 46 },
   GB1: { at: 0.06, to: 'B4',  gx: 0.50, gy: 0.86, ax: 0.62 },
   GC1: { at: 0.06, to: 'C3',  gx: 0.50, gy: 0.86, ax: 0.31 },
   GD1: { at: 0.06, to: 'D3',  gx: 0.50, gy: 0.86, ax: 0.62 },
@@ -12661,9 +12668,33 @@ function updateGateWalk(dt) {
       player.x = clamp(ax, TILE + 4, rw - TILE - 4 - player.w);
       player.vx = 0; player.vy = 0;
       player.face = player.faceVis = 1;
+      if (g.def && g.def.ax != null) gateSetDown();   // a door with no declared arrival keeps the drop it always had
       player.lastSafe = { x: player.x, y: player.y };
     }
   }
+}
+// SHE COMES OUT STANDING ON THE RING'S PAD (owner, 2026-11-16: "came out of
+// door glitched and trapped sub terrain"). The walk through a ring set her x
+// in the far room and kept the y she had in the one she left — right only
+// while every floor in the game sat on the same row. A guardian's chamber and
+// the quarry's caves stand a tile lower than the meadow outside them, so
+// stepping out of any of them left her a tile deep in the ground, held there
+// by the rock she was inside (measured on ten rings). She is set down on the
+// surface under the far ring — the same ground line the ring itself is seated
+// on — and, should that ever be rock for any reason, lifted clear of it.
+function gateSetDown() {
+  if (!player) return;
+  const cx = player.x + player.w / 2;
+  const gc = (typeof groundColumnAt === 'function') ? groundColumnAt(cx) : null;
+  if (gc) player.y = Math.min(gc[0], gc[1]) - player.h;
+  const inRock = () => {
+    for (let y = player.y + 2; y < player.y + player.h - 1; y += 6)
+      for (const x of [player.x + 2, player.x + player.w - 2])
+        if (solidAt(Math.floor(x / TILE), Math.floor(y / TILE))) return true;
+    return false;
+  };
+  for (let i = 0; i < 4 * TILE && inRock(); i += 4) player.y -= 4;
+  player.on = true;
 }
 // Her back plates, and the one question the walk-away shot asks of them: is
 // there anything here that can be DRAWN this frame? MEDIA_IMG's accessor
@@ -13576,9 +13607,9 @@ function drawStatics(P) {
       // are lit by the same rule. The Oracle hangs from its cables and has no
       // feet to stand on, so it gets none — the same exception `grounded`
       // already makes for it two lines down.
-      if (s.extra !== 'mono' && typeof contactShadow === 'function'
+      if ((s.extra !== 'mono' || (NPC_TALL.mono && !(typeof isHero === 'function' && isHero()))) && typeof contactShadow === 'function'
           && !(typeof G !== 'undefined' && G.artProbe)) {
-        contactShadow(c, s.x + s.w / 2, s.y + s.h, s.w * 0.72, 0.34);
+        contactShadow(c, s.x + s.w / 2, s.y + s.h, s.w * (NPC_TALL[s.extra] ? 1.5 : 0.72), 0.34);
       }
       // the woken tinker is AT WORK (owner: "start working on the table") —
       // in his den he faces his bench on the right, and only turns from it
@@ -13613,15 +13644,28 @@ function drawStatics(P) {
         NPC_SHEEN.t = performance.now() / 1000 + (s.x % 97) * 0.031;
       }
       let stripDrew = false;
+      const tall = NPC_TALL[s.extra] && !(typeof isHero === 'function' && isHero()) ? NPC_TALL[s.extra] : null;
       if (npcBusy && s._job && s._job.work && !(typeof isHero === 'function' && isHero())) {
         const A = typeof atlasOf === 'function' && atlasOf(s.extra);
         const kk = (A && A.sub[s.extra] && A.sub[s.extra].k) || 1.4;
         const nc = npcLoopCells(s.extra);
         stripDrew = drawStripCell(c, NPC_LOOP[s.extra],
                                   Math.floor(s._job.ph || 0), nc,
-                                  s.x + s.w / 2, s.y + s.h + bob2 * 0.4, s.h * kk,
+                                  s.x + s.w / 2, s.y + s.h + bob2 * 0.4 + (tall ? tall.sink : 0), tall ? tall.h : s.h * kk,
                                   fdir < 0);
         if (stripDrew) G.npcFrame = s.extra + ':' + (((Math.floor(s._job.ph || 0) % nc) + nc) % nc);
+      }
+      // ...and one whose filmed body is the ONLY good picture of it wears that
+      // body the rest of the time too (NPC_TALL): reading, while she stands by
+      // or speaks to it, from the half of the take where the work is in hand.
+      // Unpowered, it is the take's first cell: hands down, the screen a flat line.
+      if (!stripDrew && tall) {
+        const nc = npcLoopCells(s.extra), span = tall.read[1] - tall.read[0];
+        const u = Math.floor(performance.now() / 1000 * (talking ? tall.fps[1] : tall.fps[0])) % (span * 2);
+        const cell = live ? tall.read[0] + (u <= span ? u : span * 2 - u) : 0;
+        stripDrew = drawStripCell(c, NPC_LOOP[s.extra], cell, nc,
+                                  s.x + s.w / 2, s.y + s.h + bob2 * 0.4 + tall.sink, tall.h, fdir < 0);
+        if (stripDrew) G.npcFrame = s.extra + ':' + cell;
       }
       const sheetDrew = plateDrew || stripDrew ||
         (live && s.extra === 'ratchet' && drawTinker(c, s, talking)) ||
@@ -13812,6 +13856,8 @@ function drawStatics(P) {
     if (s.type === 'npc' && typeof atlasOf === 'function') {
       const A = atlasOf(s.extra), kk = A && A.sub[s.extra] ? A.sub[s.extra].k : 1;
       ly = Math.min(ly, s.y + s.h - s.h * kk - 10);
+      // (...and over the head of a body drawn taller than its atlas row — NPC_TALL)
+      if (NPC_TALL[s.extra] && !(typeof isHero === 'function' && isHero())) ly = Math.min(ly, s.y + s.h - NPC_TALL[s.extra].h - 8);
     }
     const lt = ol || label;
     ftxt(typeof ctlFill === 'function' ? ctlFill(lt) : lt, s.x + s.w / 2, ly, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');

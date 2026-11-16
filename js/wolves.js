@@ -146,7 +146,23 @@ const CHEETAH_ART = {
   runStrip: { img: 'cheetahRun6', cells: 6, k: 3.64 },
   windedStrip: { img: 'cheetahWinded6', cells: 6, k: 3.55 },
   landStrip: { img: 'cheetahLand4', cells: 4, k: 3.57 },
+  // BOUND, WAITING FOR THE BLADE (owner, 2026-11-16, of a downed cat with the
+  // marker over it: "its standing still !!!"). It had no low pose of its own,
+  // so it fell back to the WARNING plate — a cat standing and snarling —
+  // pressed a little flatter. This is the lowest cell of its own filmed
+  // landing, held: chest on the floor, forelegs folded under it, head sunk.
+  // `recover` lays it a little lower and gives it a slow breath (the wolves'
+  // BEAST_RECOVER.down is tuned to a taller cell and crushes this one).
+  // A lying-down take of its own is on THE FIRING LIST (ART_QUEUE §2bv).
+  down: { img: 'cheetahLand4', cells: 4, k: 3.57, hold: 1,
+          recover: { rot: -0.05, kx: 1.05, ky: 0.86, dx: 0.02, heave: 1.4, always: 1 } },
 };
+// THE CATS ARE HALF AS BIG AGAIN (owner, 2026-11-16: "sizewize should be bigger
+// 50%"). The whole animal — the box a claw has to find, the wall she cannot
+// walk through, and the drawing, which is cut from the box (dh = e.h * k).
+// Set once, where the body is made (Enemy's constructor); `sizeK` says so to
+// whatever reads a table measured on the unscaled kind (js/solid.js).
+const CAT_SIZE = 1.5;
 // how each animal carries its run (drawBeastPlate): a wolf bounds, a cheetah
 // runs a rotary gallop — longer reach, deeper back flexion, harder suspension
 const WOLF_GAIT = { strideMul: 1.0, pitch: 0.065, runAmp: 2.6, susp: 1.4 };
@@ -521,7 +537,10 @@ function drawBeastPlate(c, e, ART, tame) {
   if (wT > 0 && !G.artProbe && !tame) {
     const k = clamp(1 - wT / TELL_FAST, 0, 1);
     const g2 = Math.pow(k, 0.62);                        // §3.6 — lit from frame one
-    const R = Math.max(72, dh * 0.9);
+    // (the wash grows with the body: at a floor of 72 px it covered a wolf and
+    // only the middle of a cat half as big again — artbible measured the tell
+    // thinning from 87% of the body to 75%)
+    const R = Math.max(72 * (e.sizeK || 1), dh * 0.9);
     c.save(); c.globalCompositeOperation = 'lighter';
     const gg = c.createRadialGradient(0, 0, 3, 0, 0, R);
     const al = 0.14 + g2 * 0.30;
@@ -543,7 +562,8 @@ function drawBeastPlate(c, e, ART, tame) {
   // THE RECOVERY POSES, in plate space and pivoted on the FEET so the paws
   // stay on the floor (ART_BIBLE §3.4) whatever the body does above them.
   // ...the transform stand-in only while the filmed opening is still in flight
-  const R = (cell < 0 || (BEAST_RECOVER[pose] && BEAST_RECOVER[pose].always)) ? BEAST_RECOVER[pose] : null;
+  const R0 = (A && A.recover) || BEAST_RECOVER[pose];
+  const R = (cell < 0 || (R0 && R0.always)) ? R0 : null;
   if (R) {
     const heave = R.heave ? Math.sin((e.anim || 0) * R.heave) * 0.025 : 0;
     c.translate(0, dh / 2);

@@ -17,18 +17,16 @@ vm.runInContext(game.slice(start, end), ctx);
 const state = vm.runInContext(`({rooms: ROOMS, gates: GATE_ROOM,
   seam: buildRoom('CV1B'), hall: buildRoom('CV2'), quarry: buildRoom('CV3')})`, ctx);
 const doors = id => Array.isArray(state.gates[id]) ? state.gates[id] : [state.gates[id]];
-const haul = doors('CV1B').find(d => d.to === 'CV3');
-const back = doors('CV3').find(d => d.to === 'CV1B');
-assert(haul && back, 'the Seam and the quarry have reciprocal haul rings');
-assert(doors('CV1B').some(d => d.to === 'CV1'), 'original return preserved');
+// ONE RING (owner, 2026-11-16, between two rings beside the marble: "why two
+// portals"). The Seam's east ring ran for a day to the stone's side in CV3,
+// nine tiles from the ring to the Sage's tunnel. It is withdrawn at both ends:
+// the Seam is a side room with the way she came in and nothing else to walk into.
+const home = doors('CV1B').find(d => d.to === 'CV1');
+assert(home, 'original return preserved');
+assert.equal(doors('CV1B').length, 1, 'the Seam has ONE ring: the way she came in');
+assert(!state.gates.CV3 || !doors('CV3').some(d => d.to === 'CV1B'), 'no second ring stands beside the marble');
 assert(!doors('CV1B').some(d => d.to === 'CV2'), 'the Seam no longer bypasses to the beacon hall');
 assert(!state.gates.CV2 || !doors('CV2').some(d => d.to === 'CV1B'), 'the beacon hall has no ring to the Seam');
-assert.equal(haul.lock, 'bossHorn', 'the haul ring is dark while the rhino holds the quarry');
-assert.equal(back.lock, 'bossHorn', '...from the quarry side too');
-assert(haul.lockLine && back.lockLine, 'a dark ring says why when she tries it');
-assert(!haul.need && !back.need, 'the ring STANDS there dark — it is not hidden until the flag');
-assert.equal(haul.at, back.ax, 'return lands at the haul mouth');
-assert.equal(back.at, haul.ax, 'the haul lands at the return mouth');
 assert(state.rooms.CV1B.ents[0][0] === 'term' && state.rooms.CV1B.ents[0][3] === 'survey' && state.rooms.CV1B.ents[0][1] === 20, 'the seam hall keeps the slot its pod held, as the survey terminal');
 assert(!state.rooms.CV1B.ents.some(e => e[0] === 'bench'), 'the seam hall is not a save point');
 assert(state.rooms.CV2.ents.some(e => e[0] === 'bench'), "the cave's save point stands in the beacon hall, before the quarry");
@@ -48,7 +46,7 @@ let best = floor; for (let x = cx - 9; x <= cx + 9; x++) for (let y = shelf + 1;
 const rise = (best - shelf) * TILE;
 assert(rise > 208 + 12, 'no standing place near the shelf puts it inside one jump (' + rise + ' px to climb)');
 assert(rise < 321 - 16, 'a double jump reaches it (' + rise + ' px to climb)');
-for (const [id, grid, gate] of [['CV1B', state.seam, haul], ['CV3', state.quarry, back]]) {
+for (const [id, grid, gate] of [['CV1B', state.seam, home]]) {
   const tx = Math.round(gate.at * state.rooms[id].w);
   // the floor: the lowest rock with air on it
   const floorAt = (x) => { for (let y = grid.length - 1; y > 5; y--) if (grid[y][x] === '#' && grid[y - 1][x] === '.') return y; return -1; };
@@ -62,4 +60,4 @@ for (const [id, grid, gate] of [['CV1B', state.seam, haul], ['CV3', state.quarry
   assert(!state.rooms[id].ents.some(e => ['bench', 'term', 'pillar', 'scrap'].includes(e[0])
     && Math.abs(e[1] - tx) < 3), `${id}: no static prop or collectible in the mouth`);
 }
-console.log('PASS: the Seam is the haul road — dark ring to the quarry, level pads, and a cache only a double jump reaches');
+console.log('PASS: the Seam is a side room — one ring, a level pad, and a cache only a double jump reaches');

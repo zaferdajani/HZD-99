@@ -89,7 +89,10 @@ const { chromium } = require('playwright');
             else { run = 0;
               if (side !== toHer) turned++;                       // on its feet, moving, and its back to her
               if (Math.sign(e.vx) !== toHer) backs++;
-              if (Math.sign(e.vx) !== side && Math.abs(e.x - lx) > 0.2 && !((e._ph || 0) < ph)) slid++; } }
+              // (on the ground: a body dropping off a step as it backs away has no feet down to slide —
+              // the stride holds in the air by the engine's own rule, and J below already sets the air aside.
+              // The cat half as big again backs far enough to come off the shelf behind it.)
+              if (e.on !== false && Math.sign(e.vx) !== side && Math.abs(e.x - lx) > 0.2 && !((e._ph || 0) < ph)) slid++; } }
           else run = 0;
           ph = e._ph || 0; lx = e.x; }
         out.whole = { lunges, standing: Math.round(stood / Math.max(1, free) * 100), longest: +(longest / 60).toFixed(2), gaveGround: +(backs / 60).toFixed(2), turned, slid }; }
@@ -114,6 +117,13 @@ const { chromium } = require('playwright');
       // ---- H: a wolf is not a cat ----
       loadRoom('A2'); const w = G.enemies.find(q => q.kind === 'crawler');
       out.wolf = w ? { cat: catHunter(w), wolf: wolfHunter(w) } : null;
+      // ---- K: the cats are half as big again (owner, 2026-11-16) — body, wall and picture
+      { const kc = EKIND.crawler, sz = (q) => q ? [q.w, q.h] : null;
+        const cat = (G.roomDef.zone, loadRoom('CV2'), new Enemy('crawler', 600, 300)), catH = new Enemy('hopper', 600, 300);
+        const sb = solidBox(cat), wallCat = Math.round(sb.x1 - sb.x0);
+        // a bound cat lies low: the picture of it is drawn from its own landing strip, not the warning plate
+        out.size = { cat: sz(cat), hop: sz(catH), kind: [kc.w, kc.h], hopKind: [EKIND.hopper.w, EKIND.hopper.h], k: cat.sizeK, wolf: w ? [w.w, w.h, w.sizeK || 1] : null,
+          wallCat, downArt: CHEETAH_ART.down && CHEETAH_ART.down.img, warnArt: CHEETAH_ART.coil.img }; }
       out.T = CAT_HUNT;
       return out;
     });
@@ -134,6 +144,12 @@ const { chromium } = require('playwright');
     check('G  the leaping cat paces between leaps (it stood for all of it before)', R.hopper.leaps >= 2 && R.hopper.standing <= 70, 'standing still ' + R.hopper.standing + '% of its time on the ground, ' + R.hopper.leaps + ' leaps in 10 s');
     check('G  ...its leap still starts from the full crouch, and it never leaves its floor', R.hopper.minCrouch >= R.tell.want - 0.04 && !R.hopper.fell, 'shortest crouch ' + R.hopper.minCrouch + ' s');
     check('H  none of it touches the wolves', !!R.wolf && !R.wolf.cat && R.wolf.wolf, JSON.stringify(R.wolf));
+    { const S2 = R.size || {};
+      check('K  a cave cat is half as big again as the kind it is built on — and a wolf is not', !!S2.cat && S2.k === 1.5
+        && S2.cat[0] === Math.round(S2.kind[0] * 1.5) && S2.cat[1] === Math.round(S2.kind[1] * 1.5) && S2.hop[1] === Math.round(S2.hopKind[1] * 1.5)
+        && S2.wolf && S2.wolf[0] === S2.kind[0] && S2.wolf[2] === 1, JSON.stringify(S2));
+      check('K  ...the wall round it grew with it (wider than its own hurt box)', S2.wallCat > S2.cat[0] + 20, S2.wallCat + ' px against a ' + (S2.cat || [])[0] + ' px box');
+      check('K  ...and bound, it lies low on its own landing, not standing on the warning plate', !!S2.downArt && S2.downArt !== S2.warnArt, S2.downArt + ' / ' + S2.warnArt); }
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await browser.close(); }
   console.log(fails.length ? '\nFAILED ' + fails.length + ': ' + fails.join('; ') : '\ncheetah-hunt: all checks passed');

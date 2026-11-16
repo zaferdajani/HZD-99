@@ -21,6 +21,37 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bv. THE CATS LIE DOWN, AND THE ORACLE STANDS ✱ QUEUED 2026-11-16 (owner's order, this thread; waiting on credits)
+
+Three things the owner pointed at on one evening, each of which the code has
+taken as far as existing art goes:
+
+- **A cheetah, BOUND** — *"its standing still !!!"* (a downed cat with the
+  marker over it). It had no low pose and wore the WARNING plate. It now holds
+  the lowest cell of its own filmed landing (`CHEETAH_ART.down`, wolves.js),
+  which is a crouch, not a body on its side. Fire: one continuous side-on take
+  of the cat folding down onto its chest and flank and lying there breathing —
+  8 cells, the last four a loop — facing LEFT, transparent ground, the same
+  gold-plated machine cheetah as `cheetah_walk8` (shape reference: that strip).
+  Key `cheetahDown8`; wire as `CHEETAH_ART.down` (`once` for the fold, `loop`
+  for the breath). The wolves' own lying take is §2cc-ix.
+- **The Oracle (mono), as a merchant** — *"the npc needs a lot of improvement to
+  be like [Ratchet]"*. It now wears its filmed body everywhere at 188 px
+  (`NPC_TALL`), and `tools/shroudback.cjs` puts back the inside of the robe the
+  key cut away. What it lacks that Ratchet has: a RESTING plate (powered down —
+  screen dead, shroud slack, one standby lamp), a TALK pair (screen showing a
+  face of scan-lines, a hand raised), a NOTICE turn, and a work take keyed with
+  its dark interior intact so no backing is needed. Same figure as
+  `assets/source/npc/mono/work_loop_keyed.webp`, 2k, transparent, facing RIGHT.
+- **The chapter-two teaser, `ch2_b`** — *"is this story correct timewise? didnt
+  i defeat it?"* The outline in the cable ring reads as the first agent, whom
+  she has purified by then. The caption now names UNDERTOW (`pt_keeper`).
+  Re-fire the panel with UNDERTOW's own outline (§2bu: a drowned, dripping
+  robe, cable-weed hanging from it, water to the knees in a flooded canal) so
+  the picture cannot be mistaken for TALLYMAN. Same crop, 1600 x 893.
+
+---
+
 ## 2bu. THE EYE'S AGENTS — seven bodies, not one ✱ QUEUED 2026-11-16 (owner's order, this thread; waiting on credits)
 
 The owner, on the second robed duelist: *"it looks exactly like the first one I

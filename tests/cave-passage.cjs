@@ -30,37 +30,19 @@ const { chromium } = require('playwright');
           out.passes.push({id,centre,dir,x:player.x,end,ok:dir*(player.x-end)>=0});
         }
       }
-      // THE HAUL RING (2026-11-16): the Seam's far ring runs to the quarry's
-      // loading floor and back, and stands dark while the rhino holds the
-      // quarry. Dark, it refuses her and she stays; lit, it is a real crossing.
-      const stand = (door) => { const wx=gateWorldX(door); player.x=wx-player.w/2;
-        const col=groundColumnAt(wx); player.y=Math.min(col[0],col[1])-player.h; player.vx=player.vy=0; player.on=true; };
-      out.dark=[];
-      for(const [from,to] of [['CV1B','CV3'],['CV3','CV1B']]) {
-        delete G.save.flags.bossHorn; enter(from); const door=gateDoors().find(d=>d.to===to);
-        if(!door){ out.dark.push({from,to,missing:true}); continue; }
-        stand(door); const accepted=gateEnter();
-        for(let i=0;i<200 && G.gateWalk;i++) updateGateWalk(1/60);
-        out.dark.push({from,to,accepted:!!accepted,room:G.roomId,locked:gateLocked(door)}); G.dialog=null;
-      }
-      for(const [from,to] of [['CV1B','CV3'],['CV3','CV1B']]) {
-        G.save.flags.bossHorn=1; G.save.flags.ghWon=1; enter(from); const door=gateDoors().find(d=>d.to===to);
-        stand(door);
-        // (a ring whose lock has just opened is WOKEN in front of her first)
-        let woke=0; for(;woke<420 && typeof ringAsleep==='function' && (ringAsleep(door) || G.ringWake);woke++){ if(typeof ringWakeStep==='function') ringWakeStep(1/60); }
-        stand(door); player.stunT=0; const accepted=gateEnter();
-        for(let i=0;i<400 && G.gateWalk;i++) updateGateWalk(1/60);
-        out.doors.push({from,to,accepted,arrived:G.roomId,x:player.x,woke});
-      }
+      // ONE RING BY THE MARBLE (owner, 2026-11-16: "why two portals"). The
+      // Seam's far ring to the quarry is withdrawn at both ends.
+      enter('CV1B'); out.seamDoors=gateDoorsAll('CV1B').map(d=>d.to);
+      G.save.flags.bossHorn=1; G.save.flags.ghWon=1; G.save.flags.crystal=1; enter('CV3'); out.quarryDoors=gateDoorsAll('CV3').map(d=>d.to);
       enter('CV2'); out.cv2=gateDoors().filter(d=>d.to==='CV1B').length;
       return out;
     });
     console.log(JSON.stringify(results));
     assert(results.passes.every(p=>p.ok),'every overhead pocket passable in both directions with basic jump');
-    assert(results.dark.every(d=>!d.missing && d.locked && !d.accepted && d.room===d.from),'the haul ring stands dark, and refuses her, while the rhino holds the quarry');
-    assert(results.doors.every(d=>d.accepted && d.arrived===d.to),'with the quarry freed the haul ring is a real crossing, both ways');
+    assert.deepEqual(results.seamDoors,['CV1'],'the Seam has one ring: the way she came in');
+    assert.deepEqual(results.quarryDoors,['GA1T'],'one ring stands beside the marble, and it goes on');
     assert.equal(results.cv2,0,'the beacon hall has no ring to the Seam: the bypass is gone');
     assert.deepEqual(errors,[]);
-    console.log('PASS: real player crosses cave pockets both ways; the haul ring is dark until the quarry is freed, then carries her both ways');
+    console.log('PASS: real player crosses cave pockets both ways; the Seam has one ring and the marble has one');
   } finally { await browser.close(); }
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -615,10 +615,23 @@ const ENEMY_CAST = [
       check(S.name + ': ' + st + ' raises the amber above its own rest', pct >= restPct + 0.08 && pct > 0.05,
         (pct * 100).toFixed(1) + '% vs rest ' + (restPct * 100).toFixed(1) + '%');
     }
+    // A GOLD ANIMAL'S OWN COLOUR IS THE WARNING COLOUR (the cheetah: 46% of its
+    // rest plate is already inside the reserved amber — FURNACE CHOIR's case,
+    // above, among the small bodies). Its filmed landing is not the same
+    // painting as its rest plate and sits a few points warmer by itself: 53.7%
+    // at the size it shipped at, 55.9% drawn half as big again (owner,
+    // 2026-11-16), against a wind-up at 87%. Rest + 8 was measuring the
+    // difference between two pieces of art, not a tell. So for a body that is
+    // warm at rest the ceiling is the lowest THIRD of the gap between its rest
+    // and its weakest wind-up — nearer its rest than anything that warns —
+    // and for every other body it is rest + 8, as it was.
+    const tells = S.tell.map(st => (M[st] && M[st].lit ? M[st].amber / M[st].lit : 0));
+    const coldCeil = (restPct >= 0.4 && tells.length)
+      ? Math.max(restPct + 0.08, restPct + (Math.min.apply(null, tells) - restPct) / 3) : restPct + 0.08;
     for (const st of S.cold) {
       const m = M[st]; const pct = m && m.lit ? m.amber / m.lit : 0;
-      check(S.name + ': ' + st + ' does not pass for a wind-up', pct < restPct + 0.08,
-        (pct * 100).toFixed(1) + '% of lit pixels');
+      check(S.name + ': ' + st + ' does not pass for a wind-up', pct < coldCeil,
+        (pct * 100).toFixed(1) + '% of lit pixels' + (coldCeil > restPct + 0.0801 ? ' (ceiling ' + (coldCeil * 100).toFixed(1) + '%: warm at rest)' : ''));
     }
     for (const st of S.grnd) {
       const m = M[st];

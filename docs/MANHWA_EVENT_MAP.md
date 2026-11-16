@@ -210,7 +210,7 @@ player's input rules.
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/game/s_ring.webp` (game: s_ring) | [0, 0, 1600, 679] | `pc_knelt` | The sage knelt. The song held its body together. Broken, but not CLEAN. |
-| 2 | `assets/manhua/ch1/clean/p26.webp` (p26 panel 1) | [52, 42, 1096, 310] | `pc_cuts` | Claws could not cleanse the song. The PURIFIER could. |
+| 2 | `assets/manhua/ch1/clean/p26.webp` (p26 panel 1) | [52, 42, 1096, 310] | `pc_cuts` | Claws could not purify the song. The PURIFIER could. |
 | 3 | `assets/manhua/ch1/game/s_cleanse.webp` (game: s_cleanse) | [0, 0, 1600, 893] | `pc_letgo` | The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light. |
 | 4 | `assets/manhua/ch1/game/s_cell.webp` (game: s_cell) | [0, 0, 1600, 679] | `pc_cell` | It had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light. |
 | 5 | `assets/manhua/ch1/game/sage_rev.webp` (game: sage_rev) | [0, 0, 1600, 893] | `pc_s_point` | It pointed up, toward the climb above the meadow. |
@@ -248,7 +248,7 @@ player's input rules.
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/game/hatch.webp` (game: hatch) | [0, 0, 1600, 1073] | `pt_hatch` | The hatch above the camp stood open. Ratchet stayed. NULLFANG watched her go. |
 | 2 | `assets/manhua/ch1/game/ch2_a.webp` (game: ch2_a) | [0, 0, 1600, 893] | `pt_behind` | The Scrap Meadows are behind her. The Data Conduits are not. |
-| 3 | `assets/manhua/ch1/game/ch2_b.webp` (game: ch2_b) | [0, 0, 1600, 893] | `pt_keeper` | Somewhere in the cables, a keeper of routes is waiting for one clean message. |
+| 3 | `assets/manhua/ch1/game/ch2_b.webp` (game: ch2_b) | [0, 0, 1600, 893] | `pt_keeper` | Somewhere in the cables ANOTHER of the Eye's agents is waiting — UNDERTOW, who drowned the canals so that no one else could read them. |
 | 4 | `assets/manhua/ch1/game/ch2_c.webp` (game: ch2_c) | [0, 0, 1600, 893] | `pt_talons` | And above the dark lines, iron talons are waiting too. |
 | 5 | title card | — | `pt_title` | CHAPTER TWO — THE DATA CONDUITS |
 
@@ -287,7 +287,7 @@ The audit's list, each now a sequence or part of one, played at its game event:
 | 5 | The quarry maintenance door and tunnel | `passage` | `game/passage_a`, `passage_b` | first arrival in GA1T with the blade |
 | 6 | The on-model lion encounter and fight | `free` | `game/fight_a`, `fight_b` (+ clean p24 ×2); the corridor meeting is p14, on model | `bossGlitch` |
 | 7 | The camp-hatch departure | `ch2` | `game/hatch` | the climb above the camp |
-| 8 | Chapter two | `ch2` | `game/ch2_a` (the Conduits), `ch2_b` (the keeper of routes — outline only), `ch2_c` (the talons — nothing else shown), then the title card | as above |
+| 8 | Chapter two | `ch2` | `game/ch2_a` (the Conduits), `ch2_b` (UNDERTOW, the Conduits' agent — outline only; re-fire queued, ART_QUEUE §2bs: the outline must not be the first agent's), `ch2_c` (the talons — nothing else shown), then the title card | as above |
 
 Old saves: a save made before these sequences existed is judged by what it has
 already done (`panelsState`, the `k` record) — it is not handed the marble or

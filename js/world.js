@@ -877,7 +877,10 @@ const ROOMS = {
       // here before it shows her. The grotto door opens at 0.12 of the room
       // (tile 5) and the ground under it stays flat for it.
       hull(g, 9, 15, 2, 71);
-      hull(g, 39, 45, 2, 73);
+      // (the far heap is three tiles against the wall: the ring his purifying
+      // wakes stands on the flat in front of it, at the far end of his floor —
+      // it stood mid-arena, in one frame with the mouth she came in by)
+      hull(g, 43, 45, 2, 73);
     } },
   // THE RUN — the road to the Wolf King (owner, 2026-11-16: "As for the alpha, I
   // should be led to him with obstacles, with more wolves, with something
@@ -1755,15 +1758,12 @@ const ROOMS = {
   // sense... Create a reason for it" — and, of what a side room should be:
   // "a room that maybe needs a double jump or a wall cling... that I have to
   // go back to when I get these skills... But you have to show hints in the
-  // room that suggest there is something hidden up"). Its east ring used to
-  // drop her a few steps down the same tunnel she could have walked. It is now
-  // two things, and both are the quarrymen's:
-  //   - THE HAUL RING. The east ring is the far end of the line the stone was
-  //     hauled along: it comes out beside the marble in CV3 (GATE_ROOM), and it
-  //     is DARK until GRAVEHORN is driven off the stone. So on the way in it
-  //     is a ring that goes somewhere she cannot go yet, and on the way home
-  //     with the marble it is the short road back.
-  //   - THE CACHE. A spare core on a shelf over that ring, 272 px above the
+  // room that suggest there is something hidden up"). It has ONE ring, the one
+  // she came in by. (Its east ring ran, for a day, to the marble's side in
+  // CV3; that put two rings in one frame there — "why two portals" — and is
+  // withdrawn.) What the room holds is the quarrymen's:
+  //   - THE SURVEY. Their station charts the quarry onto her map.
+  //   - THE CACHE. A spare core on a shelf at the room's far end, 272 px above the
   //     floor: her jump rises 208 and the double jump 321 (measured), so she
   //     can see it from her first visit and cannot have it until she comes back
   //     with the skill. Nothing stands between the floor and the shelf. It glints, and dust

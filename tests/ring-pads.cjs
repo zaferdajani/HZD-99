@@ -56,6 +56,22 @@ const BASE = "{ tut: 1, woke: 1, \x27on_A0B|ratchet\x27: 1, ratchetRepaired: 1, 
       D.caught = D.frames.findIndex(f => f.r); D.held = D.frames.filter(f => f.r).length; D.jumpAt = D.frames.findIndex((f, i) => i > 0 && Math.hypot(f.x - D.frames[i - 1].x, f.y - D.frames[i - 1].y) > 60);
       D.end = { set: D.set, safe: { x: Math.round(safe.x), y: Math.round(safe.y) }, dSafe: D.set ? Math.round(Math.hypot(D.set.x - safe.x, D.set.y - safe.y)) : 999, onGround: player.on }; D.sameRoom = D.room.every(r => r === room0); D.hurt = player.hp < hp0 || true; delete D.frames; delete D.room; }
     out.D = D;
+    // F: she steps out of every ring STANDING on its pad (owner, 2026-11-16:
+    // "came out of door glitched and trapped sub terrain"). The real walk, for
+    // every ring in the game, from the ground its own ring stands on.
+    const inRock = () => { let n = 0; for (let y = player.y + 2; y < player.y + player.h - 1; y += 6) for (const x of [player.x + 2, player.x + player.w - 2]) if (solidAt(Math.floor(x / TILE), Math.floor(y / TILE))) n++; return n; };
+    const lands = [];
+    for (const id of Object.keys(ROOMS)) { let doors; try { doors = gateDoorsAll(id); } catch (e) { continue; }
+      for (const d of doors || []) { if (!ROOMS[d.to] || d.ax == null) continue;
+        loadRoom(id); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = null; G.enemies = [];
+        const gx = gateWorldX(d); player.x = gx - player.w / 2; const gc = groundColumnAt(gx); player.y = Math.min.apply(null, gc) - player.h - 1; player.vx = player.vy = 0;
+        for (let i = 0; i < 20; i++) { G.enemies = []; quiet(); update(1 / 60); }
+        G.gateWalk = { t: 99, to: d.to, x0: player.x, y0: player.y + player.h, def: d, ax0: player.x, axTo: player.x, align: 1, alignT: 0, alignDur: 0, turn: 1, hold: 9 };
+        updateGateWalk(1 / 60); G.wake = G.dialog = G.cut = G.trans = null; G.enemies = [];
+        const cx = player.x + player.w / 2, surf = Math.min.apply(null, groundColumnAt(cx)), in0 = inRock(), feet0 = player.y + player.h;
+        for (let i = 0; i < 60; i++) { G.enemies = []; quiet(); update(1 / 60); }
+        lands.push({ way: id + '>' + d.to, room: G.roomId, in0, in1: inRock(), drop0: Math.round(feet0 - surf), off: Math.round(player.y + player.h - surf), dx: Math.round(player.x + player.w / 2 - cx) }); } }
+    out.lands = lands;
     // E: who can climb
     loadRoom('A10'); G.state = 'PLAY'; const al = G.boss || G.enemies.find(e => e.kind === 'alpha'); out.alphaStep = al ? al.stepUp : null; out.enemyStep = ENEMY_STEP_UP;
     return out; });
@@ -65,13 +81,17 @@ const BASE = "{ tut: 1, woke: 1, \x27on_A0B|ratchet\x27: 1, ratchetRepaired: 1, 
   check('A  every ring stands on level ground', ringRows.length > 6 && ringRows.every(r => r.span <= 26 && !r.holes), ringRows.length + ' rings, worst ' + JSON.stringify(worst) + ' off: ' + JSON.stringify(ringRows.filter(r => !(r.span <= 26) || r.holes).slice(0, 4)));
   const near = pairs.slice().sort((a, b) => a.pair - b.pair)[0];
   check('B  no two rings in a room stand within a ring of each other', pairs.every(r => r.pair >= R.ringW + 40), 'nearest ' + JSON.stringify(near) + ', ring ' + R.ringW + ' px');
+  // ("why two portals", owner, 2026-11-16: two lit rings nine tiles apart beside the marble)
+  check('   ...nor side by side in one frame: two thirds of a screen between any two', pairs.every(r => r.pair >= 640), 'nearest ' + JSON.stringify(near));
   check('C  no deck hangs over ground that rose under it', R.decks.length === 0, R.decks.slice(0, 6));
   check('   ...the first-jump step stays', R.step === true);
   check("   ...and so does the top of Ratchet's table", R.table === true);
   check('D  the teeth catch her and hold the picture before she moves', R.spike && R.D.caught >= 0 && R.D.jumpAt > R.D.caught + 6, R.D);
   check('   ...she is set down where she last stood, in the same room', R.D.sameRoom && R.D.end.dSafe < 40, R.D.end);
   check('   ...and never comes back in from the top', R.D.top === false);
+  const badLand = R.lands.filter(l => l.in0 || l.in1 || Math.abs(l.off) > 6 || Math.abs(l.drop0) > 6 || Math.abs(l.dx) > 4 || l.room !== l.way.split('>')[1]);
+  check('F  she steps out of every ring standing on its pad', R.lands.length >= 30 && badLand.length === 0, R.lands.length + ' rings walked; wrong: ' + JSON.stringify(badLand.slice(0, 4)));
   check('E  the Alpha climbs a step in its own arena', R.alphaStep === R.enemyStep && R.enemyStep > 24, { alpha: R.alphaStep, step: R.enemyStep });
   check('no page errors', errs.length === 0, errs.slice(0, 2));
-  await browser.close(); console.log(bad ? '\nFAILED: ' + bad : '\nOK — rings are seated and apart, decks make sense, and falling is not a loop'); process.exit(bad ? 1 : 0);
+  await browser.close(); console.log(bad ? '\nFAILED: ' + bad : '\nOK — rings are seated and apart, she steps out of each one onto its pad, decks make sense, and falling is not a loop'); process.exit(bad ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

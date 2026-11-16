@@ -17,7 +17,9 @@ function drawMonoWorldAccent(ctx, s) {
   // presentWorld will project this once together with Mono and the floor.
   const atlas = typeof atlasOf === 'function' && atlasOf(s.extra);
   const k = atlas && atlas.sub[s.extra] ? atlas.sub[s.extra].k : 2;
-  const height = s.h * k, cx = s.x + s.w/2, feet = s.y+s.h;
+  // (the body it lights is the filmed one, at its own stature — game.js NPC_TALL)
+  const tall = typeof NPC_TALL !== 'undefined' && NPC_TALL[s.extra] && !(typeof isHero === 'function' && isHero());
+  const height = tall ? NPC_TALL[s.extra].h + 14 : s.h * k, cx = s.x + s.w/2, feet = s.y+s.h;
   ctx.save();
   try {
     ctx.globalCompositeOperation = 'lighter';

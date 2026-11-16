@@ -45,7 +45,7 @@ TEXT_LAYERS.push({
     pc_blade: 'Ratchet forged a glowing white sword from the cave marble. It frees infected robots — and its handle can later connect to another weapon.',
     // p25 / p26 lettering (p26's two are also the game's sg_tamedd / sg_t_GA1Dd)
     pc_knelt: 'The sage knelt. The song held its body together. Broken, but not CLEAN.',
-    pc_cuts: 'Claws could not cleanse the song. The PURIFIER could.',
+    pc_cuts: 'Claws could not purify the song. The PURIFIER could.',
     pc_letgo: 'The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light.',
     pc_cell: 'It had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.',
     // p20 lettering
@@ -58,7 +58,9 @@ TEXT_LAYERS.push({
     pc_oath: 'The virus was destroyed. NULLFANG was free. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead.',
     // the chapter-two teaser
     pt_behind: 'The Scrap Meadows are behind her. The Data Conduits are not.',
-    pt_keeper: 'Somewhere in the cables, a keeper of routes is waiting for one clean message.',
+    // (owner, 2026-11-16, shown this panel: "is this story correct timewise? didnt i defeat it?" —
+    // it said only "a keeper", over an outline like the agent she had already purified. It is the NEXT one, and says so.)
+    pt_keeper: 'Somewhere in the cables ANOTHER of the Eye\'s agents is waiting — UNDERTOW, who drowned the canals so that no one else could read them.',
     pt_talons: 'And above the dark lines, iron talons are waiting too.',
     // the panels made for the game's own chapter one (2026-10-10)
     pn_s_marble: 'The raw marble', pn_s_passage: 'The maintenance door', pn_s_break: 'NULLFANG resists',
@@ -116,7 +118,7 @@ TEXT_LAYERS.push({
     pc_bored: 'لم تكن شيئًا في نظره. ملَّ منها.',
     pc_oath: 'تحطّم الفيروس. صار ناب العدم حرًّا. بدا أنه أحبّها، وفي كل غرفة مرّة، كانت الضربة التي كانت ستكسرها تُقابَل بزئير يخرج من الظلام ويطرد مهاجميها.',
     pt_behind: 'مروج الخردة خلفها الآن. أما قنوات البيانات فلا.',
-    pt_keeper: 'في مكانٍ ما بين الكوابل، حارسُ طرقٍ ينتظر رسالةً نظيفة واحدة.',
+    pt_keeper: 'في مكانٍ ما بين الكوابل ينتظر عميلٌ آخر من عملاء العين — التيار السفلي، الذي أغرق القنوات كي لا يقرأها أحدٌ سواه.',
     pt_talons: 'وفوق الخطوط المظلمة، مخالب من حديد تنتظر هي أيضًا.',
     pn_s_marble: 'الرخام الخام', pn_s_passage: 'باب الصيانة', pn_s_break: 'ناب العدم يقاوم',
     pc_letter: 'بطاقة على صدره، بخط يده: بطاريته في صندوق العُدّة.',
@@ -173,7 +175,7 @@ TEXT_LAYERS.push({
     pc_bored: 'Onun için hiçbir şeydi. Ondan sıkıldı.',
     pc_oath: 'Virüs yok edildi. NULLFANG özgürdü. Ondan hoşlanmış gibiydi; her odada bir kez, onu kıracak darbe karanlıktan çıkan bir kükremeyle savuşturuldu.',
     pt_behind: 'Hurda Çayırları artık arkasında. Veri Kanalları değil.',
-    pt_keeper: 'Kabloların bir yerinde, yolların bekçisi tek bir temiz mesajı bekliyor.',
+    pt_keeper: 'Kabloların bir yerinde Göz’ün BAŞKA bir ajanı bekliyor — UNDERTOW; kanalları, başka kimse okuyamasın diye boğan.',
     pt_talons: 'Ve karanlık hatların üstünde, demir pençeler de bekliyor.',
     pn_s_marble: 'Ham mermer', pn_s_passage: 'Bakım kapısı', pn_s_break: 'NULLFANG direniyor',
     pc_letter: 'Göğsünde kendi el yazısıyla bir etiket: pili alet kutusundaydı.',
@@ -230,7 +232,7 @@ TEXT_LAYERS.push({
     pc_bored: '她对它来说什么都不是。它对她失去了兴趣。',
     pc_oath: '病毒被摧毁了。NULLFANG 自由了。他似乎喜欢她：每个房间里有一次，那本会击垮她的一击，会被黑暗中冲出的咆哮挡开。',
     pt_behind: '废料原野已在身后。数据回廊还在前方。',
-    pt_keeper: '在电缆深处的某个地方，一位守路人正在等待一条干净的讯息。',
+    pt_keeper: '在电缆深处的某个地方，“眼”的另一个代理在等着——UNDERTOW，它淹没了运河，好让别人谁也读不到。',
     pt_talons: '而在黑暗的线路之上，铁爪也在等待。',
     pn_s_marble: '原石大理石', pn_s_passage: '检修门', pn_s_break: 'NULLFANG的抗拒',
     pc_letter: '他胸前挂着一张亲笔写的标签：电池在工具箱里。',
@@ -287,7 +289,7 @@ TEXT_LAYERS.push({
     pc_bored: 'Она была для него ничем. Ему стало скучно.',
     pc_oath: 'Вирус уничтожен. NULLFANG был свободен. Похоже, она ему понравилась: раз в каждой комнате удар, который сломал бы её, встречал рёв из темноты и отбрасывал врагов.',
     pt_behind: 'Луга Лома позади. Каналы Данных — ещё нет.',
-    pt_keeper: 'Где-то в кабелях хранитель маршрутов ждёт одного чистого сообщения.',
+    pt_keeper: 'Где-то в кабелях ждёт ДРУГОЙ агент Ока — UNDERTOW, утопивший каналы, чтобы никто больше не мог их прочесть.',
     pt_talons: 'А над тёмными линиями ждут и железные когти.',
     pn_s_marble: 'Сырой мрамор', pn_s_passage: 'Служебная дверь', pn_s_break: 'NULLFANG сопротивляется',
     pc_letter: 'На груди — бирка, написанная его рукой: батарея в ящике с инструментами.',
