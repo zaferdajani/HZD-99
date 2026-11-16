@@ -21,6 +21,37 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bu. THE EYE'S AGENTS — seven bodies, not one ✱ QUEUED 2026-11-16 (owner's order, this thread; waiting on credits)
+
+The owner, on the second robed duelist: *"it looks exactly like the first one I
+fought, which means there is no story behind it... Each one has a fragment that
+we need."* And on the first: *"its movement needs a lot of improvement. The
+frames need to be better, more. It looks glitchy and fake."*
+
+The code side is done: they are AGENTS now, named (TALLYMAN, LEASH, UNDERTOW,
+SLAGFATHER, REDACTOR, LAPIDARY, PUPIL — docs/STORY_CANON.md), and the body
+stands one and a half times her height (`EKIND.sage` 58 x 124). All seven still
+wear ONE set of plates (`sageStand`, `sageWalk8`, `sageExhale`) at three times
+the size they were drawn for, and one eight-cell walk.
+
+Per agent, against the approved stand plate as the SHAPE reference and with its
+own silhouette change named in the brief (TALLYMAN: an abacus-frame of counting
+beads across the chest and a surveyor's staff; LEASH: chains gathered in one
+hand, a collar ring at the hip; UNDERTOW: a drowned, dripping robe, cable-weed;
+SLAGFATHER: a crusted iron apron and a ladle; REDACTOR: a blackout-bar visor and
+a stylus; LAPIDARY: faceted glass pauldrons and a cutter's wheel; PUPIL: one
+great lens where the hood opens):
+
+- a STAND plate and a 12-cell side-on WALK filmed as one continuous take
+  (`vidstrip`), not eight separate drawings;
+- a 10-cell LUNGE (coil, commit, recover) and a 6-cell EXHALE (the opening);
+- 2k, transparent ground, lit from above, facing LEFT.
+
+Archive under `assets/source/agents/<name>/`; wire through `js/sage-motion.js`
+(`SAGE_DUEL_PROFILE` is per room already).
+
+---
+
 ## 2bs. COMIC PANELS OFF MODEL — re-fire with the canon elements ✱ QUEUED 2026-11-16 (owner's order, this thread; one fired, the rest waiting on credits)
 
 The owner, on the passage panel: *"please, you need to review all the images we

@@ -97,7 +97,15 @@ const FLOOR = 0.5, CEIL = 1.0;
   const ratios = {};
   for (const kind of Object.keys(r.drawn)) ratios[kind] = +(r.drawn[kind] / r.hero).toFixed(2);
   const small = Object.entries(ratios).filter(([, v]) => v < FLOOR);
-  const big = Object.entries(ratios).filter(([, v]) => v >= CEIL);
+  // THE EYE'S AGENTS ARE THE EXCEPTION, BY ORDER (owner, 2026-11-16: "This enemy
+  // is so small... It should be much larger, at least double my size, or at
+  // least 1.5 my size"). The robed duelists are not rank and file: they stand
+  // over her, between one and a half and two of her height. Everything else
+  // still reads smaller than she does.
+  const AGENTS = { sage: 1 };
+  const big = Object.entries(ratios).filter(([k, v]) => v >= CEIL && !AGENTS[k]);
+  const agents = Object.entries(ratios).filter(([k]) => AGENTS[k]);
+  check('the Eye\'s agents stand over her: between 1.5 and 2 of her height', agents.length > 0 && agents.every(([, v]) => v >= 1.5 && v <= 2.0), agents.map(([k, v]) => k + ' ' + v + 'x').join(', '));
   check('no machine reads as scenery beside her (>= ' + FLOOR + ' of her height)',
     small.length === 0, small.map(([k, v]) => k + ' ' + v + 'x').join(', ') || Object.keys(ratios).length + ' kinds');
   check('...and none of them reads as big as her — the SCALE LAW holds',

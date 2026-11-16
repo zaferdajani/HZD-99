@@ -1105,7 +1105,7 @@ const NPC_DARK_FILTER = 'grayscale(0.8) brightness(0.8) contrast(1.25)';
 function grantMod(id) {
   G.save.abil[id] = 1;
   if (MOD_ART[id] && typeof mediaFetch === 'function') mediaFetch(MOD_ART[id], 1);
-  showItem(t('m_' + id), t('m_' + id + 'd'), MOD_ART[id], id);
+  showItem(t('m_' + id), t('m_' + id + 'd') + '  ' + t('gear_seeit').replace('%k', howToOpen('CREST', t('crest_title'))), MOD_ART[id], id);
   lessonStart(id);                                  // and then teach it
 }
 // THE FIRST CREST EXPLAINS ITSELF. The owner, on the crest button: "I have no
@@ -3852,7 +3852,12 @@ function bagList() {
 }
 function updateBag() {
   const list = bagList();
-  if (inP('BACK') || inP('CREST')) { G.state = 'PLAY'; sfx('ui'); return; }
+  // (her blades, her powers and the keys that use them are the GEAR screen:
+  // from the bag the same key that opens it anywhere opens it here, and with
+  // nothing in the bag OK goes there too — the bag used to answer "what do I
+  // have?" with "nothing but scrap and nerve" while she carried a sword)
+  if (inP('CREST') || (!list.length && inP('OK'))) { G.state = 'CREST'; G.crestIdx = 0; sfx('ui'); return; }
+  if (inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
   if (!list.length) return;
   G.bagIdx = Math.min(G.bagIdx || 0, list.length - 1);
   if (inP('DOWN')) { G.bagIdx = (G.bagIdx + 1) % list.length; sfx('ui'); }
@@ -3872,7 +3877,9 @@ function drawBag() {
   ftxt(t('bag_title'), 480, 50, 28, '#eef3fa', 'center', '#ffd76a');
   ftxt(t('bag_sub'), 480, 82, 13, '#8aa2b5');
   const list = bagList();
-  if (!list.length) { ftxt(t('bag_none'), 480, 280, 17, '#7d93a8'); ftxt(t('rl_close'), 480, 516, 12, '#7d93a8'); return; }
+  const toGear = t('bag_gear').replace('%k', howToOpen('CREST', t('crest_title')));
+  if (!list.length) { ftxt(t('bag_none'), 480, 250, 17, '#7d93a8'); ftxt(toGear, 480, 300, 15, '#ffd76a'); ftxt(t('rl_close'), 480, 516, 12, '#7d93a8'); return; }
+  ftxt(toGear, 480, 106, 13, '#ffd76a');
   const rtl = LANG === 'ar';
   list.forEach((it, i) => {
     const sel = i === (G.bagIdx || 0);

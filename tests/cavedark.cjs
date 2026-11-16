@@ -231,14 +231,18 @@ const check = (name, ok, detail) => {
       // moves where a cheetah has wandered by now — and one standing in the
       // box in one half and not the other measured the cheetah, not the
       // fixture: x1.14 against x1.33 with the same terminal and no animal.
-      const pack = G.enemies; G.enemies = [];
+      // ...AND SO IS THE ROOM'S GUARDIAN (2026-11-16). The quarry's rhino was
+      // left on stage: he wakes, walks at her, and crosses the far box at a
+      // different moment in each half — the same stone and the same room read
+      // x1.20, x1.19, x1.11 and x1.06 on four runs. He is a creature too.
+      const pack = G.enemies, lord = G.boss; G.enemies = []; G.boss = null;
       await hold(20);
       const on = sample();
       const i = G.statics.indexOf(s2);
       G.statics.splice(i, 1); await hold(20);
       const off = sample();
       G.statics.splice(i, 0, s2); await hold(8);
-      G.enemies = pack;
+      G.enemies = pack; G.boss = lord;
       return { on, off, at: [Math.round(b[0]), Math.round(b[1])] };
     };
     // THE BEACON. She stands thirteen tiles short of it — well outside her own
@@ -288,9 +292,20 @@ const check = (name, ok, detail) => {
       pl => [pl.x - 190 - camSX(), pl.y - camSY() - 30, 130, 130]);
     // ...and for the pillar she stands on its FAR side, at the end of the
     // room, so the 300 px sample falls back down the tunnel she came up.
-    await enter('CV3', 54);
+    // (THERE IS NO FAR SIDE ANY MORE: since 2026-11-16 the stone is set into
+    // the back wall — js/world.js, GRAVEHORN's room has no ground he cannot
+    // reach — and tile 54 is rock. Placed there she was thrown out wherever the
+    // resolver put her, usually between the stone and the box, and the "far"
+    // box flipped into the wall: x1.06 of nothing. She stands well down the
+    // tunnel instead, six hundred pixels from the box and far outside her own
+    // lamp's reach of it; and the quarry's haul ring, which now stands in that
+    // very stretch of rock, is out of the frame for both halves, as the
+    // creatures are — what is read is the stone's light on the rock.)
+    await enter('CV3', 22);
     await pin(1);
-    out.pillarFar = await away(s2 => s2.type === 'pillar', pl => farBox(pl, 120));
+    { const doors0 = gateDoorsAll; gateDoorsAll = () => [];
+      try { out.pillarFar = await away(s2 => s2.type === 'pillar', pl => [pl.x + pl.w / 2 - camSX() - 300 - 60, pl.y - camSY() - 60, 120, 120]); }
+      finally { gateDoorsAll = doors0; } }
 
     // ---- the buried door leaks nothing ---------------------------------------
     // A5's mouth into the cave is buried under rubble, and the light through

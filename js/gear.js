@@ -187,7 +187,29 @@ function gearRows(save) {
     const name = mode === 'single' ? 'gear_sword' : 'gear_' + mode;
     rows.push(row('weapon:' + mode, name, name + 'd', weaponOwned(mode, save), false, weaponMode(save) === mode, 'gear_handslot'));
   }
+  // THE SUITS A GUARDIAN LEAVES HER (owner, 2026-11-16: "when I beat the alpha,
+  // it says I got something freezing ability... I have no idea how to use them.
+  // There is no guidance, and there is no way to tell what I have"). They were
+  // on a wheel she could only turn blind. Each one she owns is a row here: what
+  // it is, the key that fires it, and Enter wears it.
+  if (typeof ownedArms === 'function') {
+    const worn = typeof activeArm === 'function' ? activeArm() : null;
+    for (const arm of ownedArms()) rows.push(row('arm:' + arm.id, 'arm_' + arm.id, 'arm_' + arm.id + 'd', true, false, !!(worn && worn.id === arm.id), 'gear_coreslot'));
+  }
   return rows;
+}
+// THE KEY THAT USES IT, said on the part itself — in the words of whatever she
+// is holding (a key, a pad button, or the touch control's name)
+function gearHow(r) {
+  if (!r || !r.acquired || typeof howToOpen !== 'function') return '';
+  const id = r.id, act = id === 'boots' || id === 'djump' ? (G.save.abil && G.save.abil.djump ? 'JUMP' : '')
+    : id === 'dash' || id === 'phantom' || id === 'sprint' ? 'DASH' : id === 'emp' ? 'CAST' : id === 'key' ? 'INT'
+    : id.startsWith('weapon:') ? 'ATK' : id.startsWith('arm:') ? 'CAST' : '';
+  if (id === 'wall') return t('gear_how_wall');
+  if (!act) return '';
+  let line = t('gear_how').replace('%k', howToOpen(act));
+  if (id.startsWith('arm:')) line += '   ' + t('gear_how_arm').replace('%k', howToOpen('ARM'));
+  return line;
 }
 function gearLayout() {
   const rows = gearRows(G.save), index = Math.max(0, Math.min(G.crestIdx || 0, rows.length - 1));
@@ -202,6 +224,12 @@ function gearActivate() {
       G.toast(t('gear_weaponbusy')); sfx('no'); return;
     }
     if (equipWeapon(r.id.slice(7))) { persist(); sfx('ok'); }
+    return;
+  }
+  if (r.id.startsWith('arm:')) {
+    // wear it — or, worn already, take it off (slot 0 is the plain bolt)
+    const sl = armSlots(), at = sl.findIndex(q => q && q.id === r.id.slice(4));
+    G.save.armIdx = r.installed ? 0 : Math.max(0, at); persist(); sfx('ok');
     return;
   }
   if (r.fixed) { G.toast(t('gear_fixed')); sfx('ui'); return; }
@@ -294,8 +322,10 @@ function drawGear() {
   const fight = typeof crestFightText === 'function' && Object.prototype.hasOwnProperty.call(CRESTS, selected.id) ? crestFightText(selected.id) : '';
   const wrap = typeof wrapCrest === 'function' ? wrapCrest : wrapText;
   const lines = wrap(t(selected.desc), 850, 14).slice(0, fight ? 1 : 2).concat(fight ? wrap(fight, 850, 14).slice(0, 2) : []);
-  lines.forEach((line, i) => ftxt(line, 480, 462 + i * 19, 14, i && fight ? '#e2edf5' : '#b2c6d4'));
-  ftxt(t('crest_hint'), 480, 516, 12, '#8aa2b5');
+  lines.forEach((line, i) => ftxt(line, 480, 458 + i * 18, 14, i && fight ? '#e2edf5' : '#b2c6d4'));
+  const how = gearHow(selected);
+  if (how && lines.length < 3) ftxt(how, 480, 458 + lines.length * 18 + 2, 13, '#ffd76a');
+  ftxt(t('crest_hint'), 480, 522, 12, '#8aa2b5');
 }
 // CREST NAMES AND THEIR PASSIVES in tr / zh / ru. The tables in js/i18n.js carry
 // only English and Arabic, so in three of the five languages a crest's name

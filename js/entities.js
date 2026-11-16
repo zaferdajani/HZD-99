@@ -7921,7 +7921,14 @@ const EKIND = {
   // THE NEST SNARE — the Virus Nest's own machine (kingdom 5). spd is the
   // REEL's base pull, not the body's: the polyp is rooted where it grew.
   snare: { w: 28, h: 26, hp: 46, spd: 720 },
-  sage: { w: 26, h: 42, hp: 150, spd: 170 },
+  // THE EYE'S AGENTS STAND OVER HER (owner, 2026-11-16, three times in one
+  // sitting: "This enemy is so small, the character is very out of scale. It
+  // should be much larger, at least double my size, or at least 1.5 my size";
+  // "the proportion of the character is so small"). The body was 26 x 42 — a
+  // figure that measured two thirds of her height. It is 48 x 102 now: one and
+  // three quarters of her on the same plates (tests/foescale.cjs holds the band:
+  // an agent reads between 1.5 and 2 of her; nothing else is as big as she is).
+  sage: { w: 48, h: 102, hp: 150, spd: 170 },
 };
 // Authored roles, never inferred from the sprite colour. Sages keep their
 // dedicated rescue encounter; industrial hazards contain no captive person.

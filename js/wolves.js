@@ -383,6 +383,7 @@ function drawWolf(c, e) { return drawBeastPlate(c, e, WOLF_ART, packTamed()); }
 // The cheetah rides the same renderer, and can never be tamed — the `tame`
 // argument is the only difference between the two animals in this file.
 function drawCheetah(c, e) { return drawBeastPlate(c, e, CHEETAH_ART, false); }
+const BEAST_TILT_MAX = 0.42;   // ~24 degrees: the steepest ground the curve draws
 function drawBeastPlate(c, e, ART, tame) {
   const GAIT = ART === CHEETAH_ART ? CAT_GAIT : WOLF_GAIT;
   e._strideMul = GAIT.strideMul;
@@ -488,6 +489,26 @@ function drawBeastPlate(c, e, ART, tame) {
 
   c.save();
   c.translate(cx, yc);
+  // THE BODY LIES ALONG THE GROUND IT STANDS ON (owner, 2026-11-16: "Walking on
+  // an elevated terrain should make their legs actually walk on it, just like
+  // as if an animal is climbing on a hill or going down a hill... It's not a
+  // linear walk. It should follow the terrain"). The collider has stood on the
+  // curve since August; the picture stayed level, so on a rise the front paws
+  // hung in the air and the hind ones sank. The slope under it is read at its
+  // fore and hind feet and the whole plate pitches to it about the paws —
+  // eased, so a crest is rolled over rather than snapped across.
+  {
+    let tilt = 0;
+    if (!A.air && e.on !== false && typeof groundColumnAt === 'function') {
+      const span = Math.max(16, dw * 0.28);
+      const near = (x) => { const g = groundColumnAt(x); if (!g || !g.length) return null; let best = null;
+        for (const y of g) if (Math.abs(y - footY) <= 34 && (best == null || Math.abs(y - footY) < Math.abs(best - footY))) best = y; return best; };
+      const yl = near(cx - span), yr = near(cx + span);
+      if (yl != null && yr != null) tilt = clamp(Math.atan2(yr - yl, span * 2), -BEAST_TILT_MAX, BEAST_TILT_MAX);
+    }
+    e._tilt = (e._tilt || 0) + (tilt - (e._tilt || 0)) * 0.2;
+    if (Math.abs(e._tilt) > 0.004) { const piv = footY - yc; c.translate(0, piv); c.rotate(e._tilt); c.translate(0, -piv); }
+  }
   // THE TELL IS THE PLATE, AND THE PLATE IS NOT ENOUGH ON ITS OWN. The coil
   // drawing already burns amber where the rest drawing burns red — but a wolf
   // is twenty-six pixels tall in a busy room, so the wind-up also gets the
