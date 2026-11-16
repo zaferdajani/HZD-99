@@ -43,18 +43,15 @@
 //     mostly lost reads as a stain on the wall. Asking for all of it would
 //     punish every body for the one patch of bright terrain behind its foot.
 //
-// THE FIX IS IN THE GAME, NOT HERE: js/foeread.js lays a thin pale rim
-// behind every body, outside its silhouette, in a tint chosen per kingdom
-// (FOE_RIM). Measured with it switched off (CONTRAST_RIM=0) on 2026-10-12, 55
-// of 106 pairs failed; with it, none. The tints are held here too: never a
-// reserved hue of docs/combat/GLOBAL_REGISTRY.md §2 (ΔE > 30, as
-// tests/loadout.cjs holds the UI hues), never the kingdom's own glow or edge
-// (ΔE > 30). G.artProbe switches the rim off so tests/artbible.cjs still
-// measures anatomy, and it never blurs (tests/glowcost.cjs).
+// THERE IS NO RIM ANY MORE. From 2026-10-12 js/foeread.js laid a thin pale
+// line behind every body to buy the pass rule above (55 of 106 pairs failed
+// without it). The owner refused the line three times and on 2026-11-16 it was
+// removed. So the pass rule is no longer a pass rule: the share is measured and
+// PRINTED for every pair, as the record for the art and the rooms, and what
+// this harness fails on is a line coming back.
 //
 //   node tests/contrast.cjs            (needs the repo served on :8220)
 //   CONTRAST_ONLY=A1,B3 node tests/contrast.cjs     just those rooms
-//   CONTRAST_RIM=0 ...                 measure with the rim switched off (the 'before')
 //   CONTRAST_DUMP=A1:guard CONTRAST_OUT=<dir>   write that frame and its mask as PNGs
 const { chromium } = require('playwright');
 
@@ -87,28 +84,14 @@ const dEhex = (a, b) => { const A = labOfHex(a), B = labOfHex(b); return Math.hy
   };
   console.log('── contrast — every hostile body and every guardian reads off the room it stands in\n');
 
-  // ---- the rim's tints: read from the source, measured against the registry
+  // ---- NO RIM (owner, 2026-11-16: "Why still framed with light ?!!!") -------
+  // The pale line round every body is gone, and so is its table of tints. The
+  // source is held to that here; the frame is held to it at the end of this
+  // file, where a body drawn through the game's own call is compared with the
+  // same body drawn bare.
   {
-    const reg = fs.readFileSync(path.join(ROOT, 'docs/combat/GLOBAL_REGISTRY.md'), 'utf8');
-    const s2 = reg.slice(reg.indexOf('## 2.'), reg.indexOf('### UI loadout'));
-    const reserved = {};
-    for (const m of s2.matchAll(/^\|\s*([^|]+?)\s*\|\s*`(#[0-9a-fA-F]{6})`\s*\|/gm)) reserved[m[1]] = m[2].toLowerCase();
     const fsrc = fs.readFileSync(path.join(ROOT, 'js/foeread.js'), 'utf8');
-    const rims = {};
-    const blk = fsrc.slice(fsrc.indexOf('const FOE_RIM ='), fsrc.indexOf('});', fsrc.indexOf('const FOE_RIM =')));
-    for (const m of blk.matchAll(/^\s*([A-Z]):\s*'(#[0-9a-fA-F]{6})'/gm)) rims[m[1]] = m[2].toLowerCase();
-    const wsrc = fs.readFileSync(path.join(ROOT, 'js/world.js'), 'utf8');
-    const palSrc = wsrc.slice(wsrc.indexOf('const PAL_ROBO'), wsrc.indexOf('};', wsrc.indexOf('const PAL_ROBO')));
-    const pal = {};
-    for (const m of palSrc.matchAll(/^\s*([A-Z]):\s*\{([^}]*)\}/gm))
-      pal[m[1]] = ['glow', 'edge'].map(k => (m[2].match(new RegExp(k + ":\\s*'(#[0-9a-fA-F]{6})'")) || [])[1]).filter(Boolean);
-    check('every kingdom has a rim tint (' + Object.keys(rims).join('') + ')', Object.keys(pal).length >= 6 && Object.keys(pal).every(z => rims[z]));
-    for (const [z, h] of Object.entries(rims)) {
-      let wr = null; for (const [n, x] of Object.entries(reserved)) { const d = dEhex(h, x); if (!wr || d < wr.d) wr = { n, d }; }
-      const own = Math.min(...(pal[z] || []).map(x => dEhex(h, x)));
-      check('rim ' + z + ' ' + h + ' is no reserved hue (ΔE > 30) and not its kingdom\'s own light (ΔE > 30)',
-        wr && wr.d > 30 && own > 30, 'nearest reserved ' + (wr && wr.n) + ' ΔE ' + (wr ? wr.d.toFixed(0) : '?') + ', own glow/edge ΔE ' + own.toFixed(0));
-    }
+    check('the engine has no rim to draw: no tint table, no rim canvas', !/const FOE_RIM\b|FR_R\b|foeRimCol/.test(fsrc));
   }
 
   const R = await page.evaluate(async ({ dump, only, rim, PAIR_CR, PAIR_DE }) => {
@@ -206,7 +189,7 @@ const dEhex = (a, b) => { const A = labOfHex(a), B = labOfHex(b); return Math.hy
         parts.length = 0; if (G.projs) G.projs.length = 0;
         aim(body);
         player.draw = function () {};
-        // THE BODY AS THE GAME DRAWS IT: through foeDraw, rim and all
+        // THE BODY AS THE GAME DRAWS IT: through foeDraw
         foeDraw = function (c2, e) { if (e === body) { tf = c2.getTransform(); reseed(); } return fd(c2, e); };
         qFrame(c); c.clearRect(0, 0, 960, 540);
         drawWorldFrame();
@@ -294,7 +277,7 @@ const dEhex = (a, b) => { const A = labOfHex(a), B = labOfHex(b); return Math.hy
     }
     mediaFetch = realFetch;
     return { out, dumped };
-  }, { dump: process.env.CONTRAST_DUMP || null, only: process.env.CONTRAST_ONLY ? process.env.CONTRAST_ONLY.split(',') : null, rim: process.env.CONTRAST_RIM || '1', PAIR_CR, PAIR_DE });
+  }, { dump: process.env.CONTRAST_DUMP || null, only: process.env.CONTRAST_ONLY ? process.env.CONTRAST_ONLY.split(',') : null, rim: '1', PAIR_CR, PAIR_DE });
 
   const rows = R.out;
   // CONTRAST_DUMP=<room>:<key> writes the frame and the mask beside the test
@@ -318,30 +301,60 @@ const dEhex = (a, b) => { const A = labOfHex(a), B = labOfHex(b); return Math.hy
   check('...with its art landed, not its stand-in', !measured.some(r => r.waiting),
     measured.filter(r => r.waiting).map(r => r.id + ':' + r.k).join(', ') || null);
   const low = measured.filter(r => r.share < SHARE);
-  // THE BAR WAS THE RIM'S STRENGTH, AND THE OWNER TOOK THE RIM BACK DOWN.
+  // THE BAR WAS THE RIM'S STRENGTH, AND THE OWNER TOOK THE RIM AWAY.
   // 2026-10-12: "you should always keep a contrast between the background and
-  // the enemy" — met with a pale rim at 0.62 alpha, feathered, and held here
-  // at "half of every silhouette edge reads".
-  // 2026-11-15, having played against it: "what is the alpha and the other
-  // enemies having light aura around them? It breaks the blending with the
-  // surrounding." At that strength the rim IS an aura, and half of every edge
-  // cannot be bought with less. The later word stands: the rim is an edge now
-  // (js/foeread.js), and what this harness HOLDS is that it stays one. The
+  // the enemy" — met with a pale rim at 0.62 alpha, and held here at "half of
+  // every silhouette edge reads".
+  // 2026-10-16: the wolf "is framed by a white frame, which is weird".
+  // 2026-11-15: "what is the alpha and the other enemies having light aura
+  // around them? It breaks the blending with the surrounding." Thinned to 0.24.
+  // 2026-11-16, at 0.24: "Why still framed with light ?!!!"
+  // The later word stands, and it is the line he refuses, not its strength:
+  // there is no rim. What this harness HOLDS is that none comes back. The
   // share each body reads at is still measured and printed, as the record of
-  // what the rim no longer does — the bodies that sit low on it are a job for
-  // their own art and their rooms' light, not for a line drawn round them.
+  // what the bodies and their rooms do on their own — the ones that sit low
+  // are a job for their art and their rooms' light, never for a line.
   const shares = measured.map(r => r.share).sort((a, b) => a - b);
   console.log('\n  silhouette edge that reads (CR >= ' + PAIR_CR + ' or ΔE >= ' + PAIR_DE + '): median '
     + (shares.length ? Math.round(shares[shares.length >> 1] * 100) : 0) + '%, lowest ' + (shares.length ? Math.round(shares[0] * 100) : 0) + '%; '
     + low.length + ' of ' + measured.length + ' bodies under ' + SHARE * 100 + '% — '
     + (low.slice(0, 12).map(r => r.id + ':' + r.k + ' ' + Math.round(r.share * 100) + '%').join(', ') || 'none') + (low.length > 12 ? ', …' : ''));
-  const rim = await (async () => { const b2 = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' }); const p2 = await b2.newPage();
-    await p2.goto('http://127.0.0.1:8220/index.html'); await p2.waitForFunction(() => typeof FOE_READ !== 'undefined');
-    const v = await p2.evaluate(() => ({ on: FOE_READ.on, alpha: FOE_READ.alpha, width: FOE_READ.width, feather: FOE_READ.feather })); await b2.close(); return v; })();
-  check('the rim is an EDGE, not an aura: on, at no more than 0.30 alpha, 1.2 px wide and 1 px of feather',
-    rim.on && rim.alpha > 0.1 && rim.alpha <= 0.30 && rim.width <= 1.2 && rim.feather <= 1.0, JSON.stringify(rim));
+  // NOTHING IS LAID OUTSIDE A BODY. One body from each of three kingdoms is
+  // drawn twice onto clear canvases under the same transform, clock and dice:
+  // through foeDraw (the call the frame makes) and bare (e.draw). A rim, a
+  // halo, a keyline — anything the engine adds round a silhouette — is a pixel
+  // the first has and the second has not.
+  const bare = await page.evaluate(async () => {
+    const out = [];
+    for (const id of ['A2', 'CV2', 'C2', 'E1']) {
+      if (!ROOMS[id]) continue;
+      loadRoom(id); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null;
+      const e = G.enemies.find(q => !q.dead && !q.disabled); if (!e) continue;
+      e.impactUntil = 0;
+      const mk = () => { const cv = Object.assign(document.createElement('canvas'), { width: 480, height: 360 }); const x = cv.getContext('2d');
+        x.setTransform(2, 0, 0, 2, 240 - (e.x + e.w / 2) * 2, 250 - (e.y + e.h) * 2); return x; };
+      const now = performance.now(), rr = Math.random, pn = performance.now.bind(performance);
+      // the dice are held CONSTANT, not seeded: foeDraw draws the body twice
+      // (its stencil, then the body), so a seeded sequence reaches the real
+      // draw two throws further on than it reaches the bare one, and a kiln's
+      // flicker then differs by a few hundred pixels that are not a rim
+      const frozen = () => { Math.random = () => 0.5; performance.now = () => now; };
+      const A = mk(), B = mk(); const probe = G.artProbe;
+      frozen(); G.artProbe = false; foeDraw(A, e);
+      frozen(); e.draw(B);
+      Math.random = rr; performance.now = pn; G.artProbe = probe;
+      const a = A.getImageData(0, 0, 480, 360).data, b = B.getImageData(0, 0, 480, 360).data;
+      let extra = 0, body = 0;
+      for (let i = 3; i < a.length; i += 4) { if (b[i] > 40) body++; if (a[i] > b[i] + 24) extra++; }
+      out.push({ id, kind: e.kind, body, extra });
+    }
+    return out;
+  });
+  check('nothing is drawn round a body: through the frame\'s own call it has no pixel the bare body lacks',
+    bare.length >= 3 && bare.every(r => r.body > 200 && r.extra === 0),
+    bare.map(r => r.id + ':' + r.kind + ' ' + r.extra + ' px outside ' + r.body).join(', '));
   check('no page errors', !errs.length, errs.slice(0, 3).join(' | ') || null);
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
-  console.log('\nOK — the rim is an edge, and the share of every silhouette that reads is on record above');
+  console.log('\nOK — nothing is drawn round a body, and the share of every silhouette that reads is on record above');
 })().catch(e => { console.error(e); process.exit(1); });

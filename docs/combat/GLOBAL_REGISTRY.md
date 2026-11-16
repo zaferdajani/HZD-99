@@ -99,26 +99,19 @@ this table and the hard-rule table above, re-measures every distance, and checks
 the frames on the canvas. The authored frame plates are queued in
 `docs/ART_QUEUE.md` §2bm.
 
-### Readability rim — the pale edge round every hostile body (2026-10-12)
+### Readability rim — REMOVED 2026-11-16
 
-Not a combat hue either: it MEANS nothing, on purpose. Owner, 2026-10-12: "you
-should always keep a contrast between the background and the enemy." Every
-enemy and guardian in CLAWBYTE is drawn with a thin pale rim outside its
-silhouette (`js/foeread.js`, `FOE_RIM`), one tint per kingdom, the same in
-every state — so it can never be read as a tell, a lock, a cure or a parry
-window. Pale because every room is dark; warm where the kingdom is cool and
-neutral where it is warm, so it is not the room's own light.
+There is no rim. From 2026-10-12 every hostile body carried a thin pale line
+outside its silhouette, one tint per kingdom. The owner refused it three times
+— "framed by a white frame, which is weird" (2026-10-16), "light aura... it
+breaks the blending with the surrounding" (2026-11-15), "why still framed with
+light" (2026-11-16) — and it is gone from the engine, with its tint table.
+**Do not draw a line, halo or keyline round a body again.** A body that sinks
+into its room is a job for its art and that room's light.
 
-| Kingdom | Rim | Nearest reserved hue | Its own glow/edge |
-|---|---|---|---|
-| A | `#ffe6d6` | repair ΔE 35 | ΔE 59 |
-| B, E, X | `#fff0dc` | repair ΔE 31 | ΔE 61 / 106 / 72 |
-| C | `#fff0f0` | frost ΔE 31 | ΔE 64 |
-| D | `#ffd9c4` | repair ΔE 40 | ΔE 36 |
-
-`tests/contrast.cjs` reads this table's source (`FOE_RIM`), holds each tint
-ΔE > 30 from every hue above and from its kingdom's glow and edge, and measures
-every room × creature pair's silhouette edge against the room it stands in.
+`tests/contrast.cjs` holds it: a body drawn through the frame's own call has no
+pixel the bare body lacks. It still measures and prints how much of every
+silhouette edge reads off its room, as the record for the art.
 
 ### Crest cuts — the seals' fighting styles (2026-10-12, handoff Part 2 C1)
 

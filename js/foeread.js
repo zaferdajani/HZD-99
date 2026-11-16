@@ -1,4 +1,12 @@
-// CLAWBYTE — EVERY MACHINE STANDS OFF ITS ROOM (owner, 2026-10-12).
+// CLAWBYTE — THE BODY'S STENCIL: its pigment and its hit flash.
+//
+// READ THIS FIRST: NOTHING IS DRAWN ROUND A BODY. This file began as a pale
+// rim outside every hostile silhouette; the owner refused it three times and
+// on 2026-11-16 it was removed outright (see NO RIM AT ALL, below). What
+// follows down to that heading is the history of why it existed, kept because
+// the measurement (tests/contrast.cjs) and the stencil it built are still here.
+//
+// ---- history: EVERY MACHINE STANDS OFF ITS ROOM (owner, 2026-10-12) ----
 //
 //   "Check all the other enemies and bosses. You should always keep a
 //    contrast between the background and the enemy."
@@ -67,18 +75,24 @@
 // without drawing a line round it. Photographed with it at 0.62, off, and
 // here: at this level the body sits in its room, and its silhouette edge is
 // still lighter than the room behind it.
-const FOE_READ = { on: true, sil: false, alpha: 0.24, width: 1.1, q: 1, feather: 0.9 };
-const FOE_RIM = Object.freeze({
-  A: '#ffe6d6',   // teal yard → warm peach-white       (ΔE 59 to its glow/edge)
-  B: '#fff0dc',   // blue conduits → ivory              (ΔE 61)
-  C: '#fff0f0',   // orange foundry → neutral white     (ΔE 64; ivory sat 35 from its gold acc)
-  D: '#ffd9c4',   // ice archives → warmest peach       (ΔE 36; a near-white would be 20)
-  E: '#fff0dc',   // violet nest → ivory                (ΔE 106)
-  X: '#fff0dc',   // pink rift → ivory                  (ΔE 72)
-});
-const FOE_RIM_DEFAULT = '#fff0dc';
+// NO RIM AT ALL (owner, 2026-11-16, looking at a cave cheetah at that level:
+// "Why still framed with light ?!!!"). Three refusals of the same line — "framed
+// by a white frame, which is weird" (2026-10-16), "light aura... it breaks the
+// blending with the surrounding" (2026-11-15), and this one. A thinner line is
+// still a line round a body, and it is the line he is refusing, not its
+// strength. Nothing is drawn outside a silhouette any more: the dilate, the
+// tint and the blit are gone from foeDraw, and so is the kingdoms' tint table.
+// A body stands off its room by its own art and its room's light, or not at
+// all — tests/contrast.cjs still measures and prints how much of each edge
+// reads, as the record for the art and the rooms, and HOLDS that no pixel is
+// laid outside a body.
+//
+// What stays is the stencil. The body is still drawn once alone, as anatomy,
+// because two other things are cut from it and neither is a frame: its
+// pigment (FOE_PIG, below) and the white flash of a blow that lands.
+const FOE_READ = { on: true, sil: false, q: 1 };
 
-let FR_S = null, FR_T = null, FR_R = null;          // silhouette, threshold, rim
+let FR_S = null, FR_T = null;                       // silhouette, threshold
 
 // A BODY KEEPS ITS PIGMENT (owner, 2026-11-14: "why isn't it opaque enough?
 // feels like Nullfang is translucent").
@@ -175,7 +189,7 @@ function frCanvas(w, h) {
 }
 function frEnsure(w, h) {
   if (!FR_S) {
-    FR_S = frCanvas(w, h); FR_T = frCanvas(w, h); FR_R = frCanvas(w, h);
+    FR_S = frCanvas(w, h); FR_T = frCanvas(w, h);
     // the stencil has no use for a glow, and a blurred draw is the most
     // expensive thing a 2D context does: this context simply cannot blur
     const sx = FR_S.getContext('2d');
@@ -185,20 +199,19 @@ function frEnsure(w, h) {
   // grow only: a body-sized rectangle, reused for every body every frame
   if (FR_S.width < w || FR_S.height < h) {
     const W = Math.max(FR_S.width, w), H = Math.max(FR_S.height, h);
-    for (const cv of [FR_S, FR_T, FR_R]) { cv.width = W; cv.height = H; }
+    for (const cv of [FR_S, FR_T]) { cv.width = W; cv.height = H; }
   }
 }
 
 // is this body rimmed? (the rest are drawn exactly as they always were)
 function foeReadOn(e) {
   if (!FOE_READ.on || !e || e.dead) return false;
-  // a bound or freed body is not a threat to find in the room: no rim
+  // a bound or freed body gets no stencil pass: it is drawn as it lies
   if (e.disabled || e.rescued) return false;
   if (typeof G === 'undefined' || G.artProbe || !G.roomDef) return false;
   if (typeof isHero === 'function' && isHero()) return false;
   return true;
 }
-function foeRimCol(zone) { return FOE_RIM[zone] || FOE_RIM_DEFAULT; }
 
 // THE ONE CALL SITE: drawWorldFrame draws every enemy and the guardian through
 // this, in place of e.draw(c).
@@ -230,14 +243,12 @@ function foeDraw(c, e) {
   const ox = Math.max(0, Math.floor(Math.min(ax, bx))), oy = Math.max(0, Math.floor(Math.min(ay, by)));
   const W = Math.min(cvW, Math.ceil(Math.max(ax, bx))) - ox, H = Math.min(cvH, Math.ceil(Math.max(ay, by))) - oy;
   if (W < 4 || H < 4) { e.draw(c); return; }          // off screen: nothing to lift
-  // THE STENCIL RUNS AT FULL SIZE. FOE_READ.q can shrink it (every blit then
-  // touches q² of the pixels), and at 0.5 it was tried and measured: the rim
-  // came back up soft, its solid core under one device pixel, and 70 of 106
-  // bodies sank back into their rooms. A rim is an edge; it has to be crisp.
+  // the stencil runs at full size (q = 1): the pigment mask is cut from it
+  // pixel for pixel, and a soft mask is a soft-edged body
   const q = FOE_READ.q;
   const w = Math.max(2, Math.ceil(W * q)), h = Math.max(2, Math.ceil(H * q));
   frEnsure(w, h);
-  const S = FR_S.getContext('2d'), T = FR_T.getContext('2d'), R = FR_R.getContext('2d');
+  const S = FR_S.getContext('2d'), T = FR_T.getContext('2d');
   // 1. the stencil: the body alone, anatomy only (see the header)
   S.setTransform(1, 0, 0, 1, 0, 0); S.globalAlpha = 1; S.globalCompositeOperation = 'source-over';
   S.clearRect(0, 0, w, h);
@@ -246,7 +257,7 @@ function foeDraw(c, e) {
   const keepEye = typeof INF_S2W !== 'undefined' ? INF_S2W : null;
   G.artProbe = true; FOE_READ.sil = true;
   if (typeof INF_S2W !== 'undefined') INF_S2W = null;
-  try { e.draw(S); } catch (er) { /* a stencil that fails draws no rim */ }
+  try { e.draw(S); } catch (er) { /* a stencil that fails keeps no pigment and flashes nothing */ }
   finally {
     G.artProbe = keepProbe; FOE_READ.sil = false;
     if (typeof INF_S2W !== 'undefined') INF_S2W = keepEye;
@@ -260,37 +271,7 @@ function foeDraw(c, e) {
   T.drawImage(FR_S, 0, 0, w, h, 0, 0, w, h);
   T.globalCompositeOperation = 'source-over';
   if (q === 1) foePigMark(c, ox, oy, w, h);           // the same stencil keeps the body's pigment (FOE_PIG)
-  // 3. dilate by the rim's width, cut the body back out, tint what is left
-  const sc = Math.hypot(m.a, m.b) || 1;
-  const r = Math.max(1, Math.max(2, Math.round(FOE_READ.width * sc)) * q), d = r * 0.7071;
-  R.setTransform(1, 0, 0, 1, 0, 0); R.globalCompositeOperation = 'source-over';
-  R.clearRect(0, 0, w, h);
-  // AN EDGE LIGHT, NOT A FRAME (owner, 2026-10-16: the wolf "is framed by a
-  // white frame, which is weird"). One crisp ring at a single alpha is a
-  // keyline — a sticker's cut edge. Two rings, the outer one fainter, make the
-  // light fall off away from the body the way light off a surface does.
-  const ring = (rr, a) => {
-    const dd = rr * 0.7071;
-    R.globalAlpha = a;
-    R.drawImage(FR_T, 0, 0, w, h, rr, 0, w, h); R.drawImage(FR_T, 0, 0, w, h, -rr, 0, w, h);
-    R.drawImage(FR_T, 0, 0, w, h, 0, rr, w, h); R.drawImage(FR_T, 0, 0, w, h, 0, -rr, w, h);
-    R.drawImage(FR_T, 0, 0, w, h, dd, dd, w, h); R.drawImage(FR_T, 0, 0, w, h, -dd, dd, w, h);
-    R.drawImage(FR_T, 0, 0, w, h, dd, -dd, w, h); R.drawImage(FR_T, 0, 0, w, h, -dd, -dd, w, h);
-  };
-  ring(r * FOE_READ.feather, 0.35);
-  ring(r, 1);
-  R.globalAlpha = 1;
-  R.globalCompositeOperation = 'destination-out'; R.drawImage(FR_T, 0, 0, w, h, 0, 0, w, h);
-  R.globalCompositeOperation = 'source-in';
-  R.fillStyle = foeRimCol(G.roomDef.zone); R.fillRect(0, 0, w, h);
-  R.globalCompositeOperation = 'source-over';
-  // 4. the rim behind, then the body exactly as it has always been drawn
-  c.save();
-  c.setTransform(1, 0, 0, 1, 0, 0);
-  c.globalAlpha = FOE_READ.alpha;
-  c.imageSmoothingEnabled = true;
-  c.drawImage(FR_R, 0, 0, w, h, ox, oy, w / q, h / q);
-  c.restore();
+  // 3. the body, exactly as it has always been drawn — and nothing round it
   e.draw(c);
   // Reuse the anatomy stencil, not a white rectangle or brightness filter.
   // This covers every drawn enemy/guardian without changing sprite pixels,

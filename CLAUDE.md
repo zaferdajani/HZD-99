@@ -194,6 +194,23 @@ procedural drawings. Every procedural structure currently in the game
 its fired plate on THE FIRING LIST (§2f, §2g), and no new structure may
 be added without its brief going on that list in the same commit.
 
+## NO LIGHT ROUND A BODY (owner's standing order, 2026-11-16)
+
+**"Why still framed with light ?!!!"** — the third refusal of the same thing
+("framed by a white frame, which is weird", 2026-10-16; "light aura... it
+breaks the blending with the surrounding", 2026-11-15). From 2026-10-12 every
+hostile body carried a pale rim outside its silhouette to lift it off dark
+rooms. It was thinned twice and refused each time, because it is the LINE he
+refuses, not its strength. It is removed from the engine (`js/foeread.js` keeps
+only the stencil, for a body's pigment and its hit flash).
+
+- **Never draw a rim, halo, keyline, outline or glow round an enemy, a guardian
+  or an NPC to make it read.** A body that sinks into its room is a job for its
+  own art and that room's light.
+- `tests/contrast.cjs` holds it: a body drawn through the frame's own call has
+  no pixel the bare body lacks. It still prints how much of each silhouette
+  reads off its room — a record for the art, not a bar to buy with a line.
+
 ## NO RIGHT ANGLES (owner's standing order, 2026-08-15)
 
 **"No 90-degree elevation or walls in all game."** Nothing the player reads
