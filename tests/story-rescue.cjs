@@ -23,9 +23,10 @@ const {chromium}=require('playwright');
  G.save.flags.crystal=1;player.x=e.x;player.y=e.y;doInteract(findNear());check('forged sword starts short interaction',e.cleanseT===0.65);
  player.x+=200;e.update(0.1);check('moving away interrupts without harming person',e.cleanseT===0&&e.disabled);
  player.x=e.x;player.y=e.y;doInteract(findNear());player.cores-=1;e.update(0.1);check('damage interrupts',e.cleanseT===0&&e.disabled);
- player.x=e.x;player.y=e.y;doInteract(findNear());const scrap=G.save.scrap;for(let i=0;i<45;i++)e.update(1/60);
+ player.x=e.x;player.y=e.y;doInteract(findNear());const scrap=G.save.scrap,cores0=G.save.coresMax;for(let i=0;i<45;i++)e.update(1/60);
  check('cleanse changes body behaviour and save state',e.rescued&&e.calm&&!e.disabled&&!e.dead&&G.save.rescues[key]==='rescued');
- check('cure pays once',G.save.scrap===scrap+8);e.finishCleanse();e.die(1,0);check('repeated actions cannot duplicate reward or destroy friend',G.save.scrap===scrap+8&&!e.dead);
+ // (2026-11-16: a purification pays 14 scrap, and the FIRST one she ever does gives a core she keeps — js/entities.js pureGift, tests/pure-gift.cjs)
+ check('cure pays once',G.save.scrap===scrap+14&&G.save.coresMax===cores0+1);G.dialog=null;G.state='PLAY';e.finishCleanse();e.die(1,0);check('repeated actions cannot duplicate reward or destroy friend',G.save.scrap===scrap+14&&G.save.coresMax===cores0+1&&!e.dead);
  persist();saved=JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme)));startGame(saved);stage('A1');e=G.enemies.find(e=>e.storyKey===key);
  check('rescued person persists in room after reload',e&&e.rescued&&e.calm&&!e.dead);
  const before=player.cores;player.x=e.x;player.y=e.y;e.update(0.016);check('rescued contact is safe',player.cores===before);

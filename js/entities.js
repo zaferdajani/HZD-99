@@ -28,6 +28,35 @@ function crestSwingMul(k) {
 // after I defeat them"). Thirty for every one of them, freed or broken, was a
 // crawler's purse on a kingdom's guardian. A Sage pays 140, the Wolf King and
 // the micro-bosses 90 — the same whether she purifies it or not.
+// A PURIFIED MACHINE GIVES SOMETHING BACK (owner, 2026-11-16: "freeing the
+// robots should grant me something in return, maybe a hidden object... find one
+// NPC that when I free will give me something that makes me want to free the
+// others" — and: "it should be purifying, not freeing"). A purification paid
+// eight scrap and a line of text, the same as leaving the thing lying there.
+// It is a LADDER now, and she is told where she stands on it every time:
+//   the FIRST one she purifies remembers who it was and where it hid its spare
+//   — a CORE, kept: one more life for good, on the first press;
+//   and then the ones after it pool what they kept — at 3, 6, 10 and 15.
+// Each purification says the count and how many more to the next gift, which
+// is the whole point: the reason to do the next one is on the screen.
+const PURE_GIFTS = [[1, 'core'], [3, 'scrap', 120], [6, 'core'], [10, 'scrap', 260], [15, 'core']];
+function pureNext(n) { for (const g of PURE_GIFTS) if (g[0] > n) return g[0]; return 0; }
+function pureGift(n) {
+  const g = PURE_GIFTS.find(q => q[0] === n);
+  if (g) {
+    if (g[1] === 'core') { G.save.coresMax = (G.save.coresMax || 4) + 1; if (player) player.cores = player.maxCores(); }
+    else { G.save.scrap += g[2]; }
+    G.save.iq = (G.save.iq || 0) + 4;
+    const nx = pureNext(n);
+    const body = (g[1] === 'core' ? t(n === 1 ? 'pure_firstd' : 'pure_cored') : t('pure_scrapd').replace('%s', String(g[2])))
+      + '  ' + (nx ? t('pure_next').replace('%n', String(n)).replace('%m', String(nx)) : t('pure_all').replace('%n', String(n)));
+    if (typeof showItem === 'function') showItem(t(n === 1 ? 'pure_first' : g[1] === 'core' ? 'pure_core' : 'pure_scrap'), body);
+    sfx('chargeReady');
+    return;
+  }
+  const nx = pureNext(n);
+  G.toast(nx ? t('pure_next').replace('%n', String(n)).replace('%m', String(nx)) : t('pure_all').replace('%n', String(n)));
+}
 // WHAT A BLOW SOUNDS LIKE DEPENDS ON WHAT IT LANDED ON (owner, 2026-11-16:
 // "create different sounds for hitting different enemies... I do not like it
 // that all of them have the same metallic hitting sound"). Her blade rang the
@@ -9502,11 +9531,12 @@ class Enemy {
     this.disabled = false; this.rescued = true; this.calm = true;
     this.hp = EKIND[this.kind].hp; this.hypnoT = 1e9; this.cleanseT = 0;
     if (typeof questKill === 'function') questKill(this.kind);
-    bankScrap(8); player.gainVolts(12);
+    bankScrap(14); player.gainVolts(12);
     burst(this.x + this.w / 2, this.y, 8, '#9fefff', 70, 0.5, -15, 2, true);
     if (typeof cleanseBegin === 'function') cleanseBegin(this.x, this.y, this.w, this.h, 'pg_freed', null, true);
     else sfx('pick');
-    G.toast(t('story_rescued')); persist();
+    pureGift(Object.keys(states).filter(k => states[k] === 'rescued').length);
+    persist();
   }
   _die0(kx, ky) {
     if (this.dead) return;

@@ -637,8 +637,20 @@ const NPC_JOB = {
   sage:  [{ col: 2, t: [6.0, 10.0], work: 1 }, { col: 3, t: [5.0, 9.0] }, { col: 1, t: [4.0, 7.5] }],
   // Ratchet AT THE BOOTH — not in the den, where drawTinker owns him. A
   // shopkeeper turns to his stock and back to the road.
-  ratchet: [{ col: 0, t: [2.0, 3.6] }, { col: 5, t: [2.4, 4.2] },
-            { col: 1, t: [1.6, 3.0] }],
+  // (owner, 2026-11-16: "his movement is looking more like a tick, like
+  // someone who has ADHD. It should look more natural, standing, being elegant,
+  // or being a robot or something, doing something meaningful with his stand."
+  // He turned to a new angle every two or three seconds and did nothing at any
+  // of them. He WORKS now — the hammer loop he was filmed with, a few strokes
+  // at a time and a long stillness after (NPC_LOOP / NPC_WORK below) — and when
+  // he does look round he takes his time over it.)
+  // (...and between NEIGHBOURING angles only. His old beats went 0 -> 5 -> 1,
+  // and on a six-angle turntable the way from 0 to 5 is through 1, 2, 3 and 4:
+  // every "glance" was a whole pirouette.)
+  // (...three neighbouring angles, there and back: a body that only ever shows
+  // two reads as a picture being flipped — tests/folk.cjs wants every one of
+  // them to actually turn — and each step is still one angle, taken slowly.)
+  ratchet: [{ col: 0, t: [8.0, 13.0], work: 1 }, { col: 1, t: [4.5, 7.0] }, { col: 2, t: [4.0, 6.0] }, { col: 1, t: [4.5, 7.0] }],
   // THE CUTTER BARELY LOOKS UP. Every other body here has beats that alternate
   // work and attention; hers are almost all work, because the story is that she
   // sat down at the bottom of the world and has not moved since. The one
@@ -688,6 +700,8 @@ const NPC_LOOP = {
   // clips' twenty-four: THE CUT is a push and a wait, and a held pause does not
   // want in-between frames — it wants to be held.
   kerf: 'kerfLoop',
+  // RATCHET, wherever he stands outside his den: the six cells of him at work
+  ratchet: 'ratchetLoop',
 };
 // how long a work beat plays for and how fast, per body — the same shape as
 // the tinker's TINKER_JOB, and per-character for the same reason: the warden
@@ -715,7 +729,7 @@ const NPC_LOOP = {
 // padding them to 24 put the same drawing on screen twice in a row nineteen
 // times and twelve times. Those two takes need re-firing — they are on THE
 // FIRING LIST — and until then they carry their real frames and nothing else.
-const NPC_LOOP_CELLS = { servo: 16, mono: 16, patch: 13, sage: 11, lumen: 10, kerf: 8 };
+const NPC_LOOP_CELLS = { servo: 16, mono: 16, patch: 13, sage: 11, lumen: 10, kerf: 8, ratchet: 6 };
 function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
 // ...and the tempo doubles with the cell count, or the same job plays at half
 // speed: fps is COLUMNS a second and run is a burst measured in COLUMNS, so
@@ -738,6 +752,8 @@ const NPC_WORK = {
   // are the pause, so the clip is played slowly and then held for longer
   // than anyone else's. She has sat in that room a very long time.
   kerf:  { fps: [4, 7],   run: [8, 22],  hold: [1.40, 3.20] },
+  // a smith's hand: two or three unhurried strokes, then he looks at the piece
+  ratchet: { fps: [4.5, 6.5], run: [6, 18], hold: [1.60, 3.60] },
 };
 // how fast a body turns, in authored columns per second. Slow enough to be a
 // turn and not a cut; the cross-fade in drawAtlas does the rest.
