@@ -29,17 +29,23 @@
 //   4. IT IS SPENT. The winded window after the lunge is the crawler's own,
 //      untouched — and for this animal it is the truest picture it has: a
 //      cheetah that has run is a cheetah lying there panting.
-//   5. IT GIVES GROUND. With no bite in it — just spent, or only just arrived
-//      — it does not stand at biting distance waiting for one. It turns, trots
-//      out to where a run can start from, comes round, and runs again. Sprint,
-//      bite, pant, withdraw, sprint: the rhythm of the real hunt, and each
-//      withdrawal shows her its back.
+//   5. IT STAYS ON GUARD. (Owner, 2026-11-16, of the first version of this
+//      point, which had it turn and trot away to make room for another run:
+//      "if a predator sees someone approaching, the predator will be actually
+//      on guard, not turning its back to the prey.") Once it has seen her it
+//      never shows her its back by choice. With no bite in it — just spent, or
+//      only just arrived — it BACKS UP, face to her, a step at a time, to
+//      where a run can start from, and holds there low, shifting its feet
+//      toward her and back. Its stride runs backwards when its feet do
+//      (wolves.js), so a back-step is a back-step and not a slide. The only
+//      back she ever sees is the one momentum shows her: the skid.
 //
 // The LEAPING cat (a hopper in the cats' kingdoms) keeps its own machine — the
 // gather and the leap are exactly what they were — but it no longer stands
-// like furniture between leaps: it PACES, back and forth across its ground
-// with its eyes on her, the way a big cat waits, and comes in to leaping
-// distance if she hangs back.
+// like furniture between leaps. It is on guard too: face to her always,
+// coming in if she hangs back, backing off if she crowds it, and in between
+// shifting a step toward her and a step back, the way a big cat measures a
+// jump.
 //
 // Every picture here is one it already had: the filmed walk (the creep and
 // the pacing), the filmed gallop (the sprint), the landing strip (the skid),
@@ -58,14 +64,25 @@ const CAT_HUNT = {
   skid: 0.36,              // s braking with its back to her when it overshoots
   skidFrom: 150,           // px/s: slower than this it simply turns
   ready: 0.3,              // s of cooldown left at which it comes in again
-  standoff: 265, backV: 0.9,    // px it gives ground to with no bite in it, and x patrol speed
-  beat: [0.45, 0.8], beatSpan: 60, beatV: 0.62,   // the pacing out there: s a leg, px of line, x patrol speed
-  trotMax: 90,             // px/s: giving ground and pacing stay on the WALK strip (the gallop starts at 95)
+  standoff: 265, backV: 0.62,   // px it backs up to with no bite in it, and x patrol speed (a back-step is slower than a walk)
+  beat: [0.45, 0.8], beatSpan: 60, beatV: 0.5,    // the shifting out there: s a leg, px of line, x patrol speed
+  trotMax: 80,             // px/s: backing up and shifting stay on the WALK strip (the gallop starts at 95)
+  guard: 0.12,             // s the guard holds its face to her after the hunt last named it
   // the leaping cat's pacing, in px and px/s (its `spd` is its leap, not its legs)
   paceV: 78, paceSpan: [0.8, 1.5], closeV: 90, closeFrom: 210, tooNear: 96,
   settle: 0.18,            // s before the gather in which it stops walking: the crouch starts from a stand
 };
 function catHunter(e) { return !!e && e.kind === 'crawler' && typeof isCheetah === 'function' && isCheetah(e); }
+// feet that may go AGAINST the face: enemyGait stops any speed that runs
+// against the picture (that is its no-moonwalk rule, and it is right for a
+// walk). A guard's back-step is the one honest exception, so it has its own
+// ease — and the stride it drives is counted backwards (wolves.js).
+function catStep(e, want, dt) {
+  const a = Math.max(24, e.spd || 24) / 0.14 * dt, d = want - (e.vx || 0);
+  e.vx = Math.abs(d) <= a ? want : (e.vx || 0) + Math.sign(d) * a;
+}
+function catGuard(e, side) { e.guardFace = side; e.guardT = CAT_HUNT.guard; }
+function catFloor(e, dir) { return groundAhead(e, dir) && groundAhead({ x: e.x + dir * 14, y: e.y, w: e.w, h: e.h }, dir); }
 // how far its lunge really goes: the crawler's numbers, and a cheetah's half-again commit
 function catReach(e) { return e.spd * 4.2 * (0.22 + (e.iq || 0) * 0.06) * 1.5 + CAT_HUNT.reachPad; }
 // is she looking at it? Facing its side of her, and near enough her own level to see it
@@ -100,11 +117,12 @@ function catHunt(e, dt, px, py, cx, cy) {
   const want = Math.sign(dx) || e.dir || 1;
   // IT OVERSHOT: flat out one way, and she is the other. Claws out.
   if (Math.abs(e.vx || 0) >= H.skidFrom && Math.sign(e.vx) !== want && ad > 26) {
-    e.skidT = H.skid; e.running = 0; e.frozeT = 0;
+    e.skidT = H.skid; e.running = 0; e.frozeT = 0; e.guardT = 0;      // momentum has its back now, not the guard
     if (typeof sfx === 'function') sfx('grind');
     return 2;
   }
   e.dir = want;
+  catGuard(e, want);                                          // its face is hers from here on
   const ahead = { x: e.x + want * Math.abs(e.vx || 0) * 0.14, y: e.y, w: e.w, h: e.h };
   const edge = !groundAhead(e, want) || !groundAhead(ahead, want);
   e.huntHold = edge;
@@ -119,35 +137,29 @@ function catHunt(e, dt, px, py, cx, cy) {
     e.running = 1;
     if ((e.atkCD || 0) > H.ready) {
       // NO BITE IN IT YET (it has just lunged, or only just seen her). It does
-      // not stand at biting distance waiting for one, which is the statue this
-      // file exists to remove: it GIVES GROUND — turns and trots out to where a
-      // run can start from — and waits there, turned back to her. Its back is
-      // to her on the way out, and she is five times faster than it trots.
+      // not stand at biting distance waiting for one, and it does not turn
+      // away: it BACKS UP, face to her, to where a run can start from.
       const away = -want;
-      if (ad < H.standoff && groundAhead(e, away) && groundAhead({ x: e.x + away * 14, y: e.y, w: e.w, h: e.h }, away)) {
-        e.dir = away; e.huntHold = false;
-        enemyGait(e, away * Math.min(e.spd * H.backV, H.trotMax), dt);
-        return 1;
+      // ...once it has COME ROUND. Carried past her by its own lunge it is
+      // facing the wrong way; it turns on the spot first, and only then steps
+      if (faceSide(e) !== want) { catStep(e, 0, dt); return 1; }
+      if (ad < H.standoff) {
+        if (catFloor(e, away)) { e.huntHold = false; catStep(e, away * Math.min(e.spd * H.backV, H.trotMax), dt); return 1; }
+        // CORNERED: nothing behind it to give. A cornered cat does not wait
+        // long — its bite comes back at twice the rate. The coil that follows
+        // is the full one; only the standing is shorter.
+        e.atkCD -= dt; catStep(e, 0, dt); return 1;
       }
-      // ...and out there it does not stand either: it PACES a short beat
-      // across the line it will run down, the way the leaping cat does.
+      // ...and out there it holds her, low, shifting: a step in, a step back
       e.paceT = (e.paceT || 0) - dt;
-      if (e.paceT <= 0 || !e.paceDir) { e.paceDir = e.paceDir ? -e.paceDir : want; e.paceT = rnd(H.beat[0], H.beat[1]); }
-      if (ad > H.standoff + H.beatSpan && e.paceDir === away) { e.paceDir = want; e.paceT = rnd(H.beat[0], H.beat[1]); }
-      if (ad < H.standoff + 6 && e.paceDir === want) { e.paceDir = away; e.paceT = rnd(H.beat[0], H.beat[1]); }
+      if (e.paceT <= 0 || !e.paceDir) { e.paceDir = e.paceDir === want ? away : want; e.paceT = rnd(H.beat[0], H.beat[1]); }
+      if (ad > H.standoff + H.beatSpan) e.paceDir = want;
+      if (ad < H.standoff + 6) e.paceDir = away;
       const pd = e.paceDir;
-      if (groundAhead(e, pd) && groundAhead({ x: e.x + pd * 14, y: e.y, w: e.w, h: e.h }, pd)) {
-        e.dir = pd; e.huntHold = false;
-        enemyGait(e, pd * Math.min(e.spd * H.beatV, H.trotMax), dt);
-        return 1;
-      }
-      // CORNERED: nothing behind it to give. It turns on her, and a cornered
-      // cat does not wait long — its bite comes back at twice the rate. The
-      // coil that follows is the full one; only the standing is shorter.
-      e.paceDir = -pd; e.paceT = rnd(H.beat[0], H.beat[1]);
-      e.atkCD -= dt;
-      v = 0;
-    } else if (ad > reach - 16) v = e.spd * (H.sprint + (e.iq || 0) * H.sprintIq);
+      if (catFloor(e, pd)) { e.huntHold = false; catStep(e, pd * Math.min(e.spd * H.beatV, H.trotMax), dt); return 1; }
+      e.paceDir = -pd; catStep(e, 0, dt); return 1;
+    }
+    if (ad > reach - 16) v = e.spd * (H.sprint + (e.iq || 0) * H.sprintIq);
   } else if (catWatched(e, px, py, cx, cy) && (e.frozeT = (e.frozeT || 0) + dt) < H.patience) {
     v = 0;                                                    // seen: it stops dead
   } else {
@@ -156,34 +168,43 @@ function catHunt(e, dt, px, py, cx, cy) {
     if ((e.frozeT || 0) >= H.patience) e.running = 1;
     v = e.spd * H.creep;
   }
+  // forward, toward her: the ordinary gait (a back-step still in its legs is
+  // braked first, by the gait's own rule)
   enemyGait(e, want * v, dt);
   if (ad > H.sprintFrom + 120 && !e.huntHold && (e.frozeT || 0) < H.patience) e.running = 0;   // she got clear: it stalks again
   return 1;
 }
-// THE LEAPING CAT BETWEEN LEAPS: the horizontal speed it wants this frame, or 0
-// to stand. Asked from the hopper's own ground state, after its landing has
-// been absorbed and before it gathers — never during the crouch.
+// THE LEAPING CAT BETWEEN LEAPS: on guard. Asked from the hopper's own ground
+// state every frame it is not gathering; it drives the feet itself (that state
+// zeroes vx every frame, so the pace keeps its own running speed in paceVx)
+// and names the guard, so the face stays hers while the feet go either way.
+// The walk is over a beat before the gather, so the crouch starts from a stand.
 function catPace(e, dt, px, cx) {
-  if (typeof isCheetah !== 'function' || !isCheetah(e) || e.kind !== 'hopper' || !player || player.dead) return 0;
-  if ((e.landT || 0) > 0 || (e.crouchT || 0) > 0 || (e.t || 0) < CAT_HUNT.settle || e.disabled) return 0;
-  const H = CAT_HUNT, dx = px - cx, ad = Math.abs(dx);
-  if (ad > H.lose) return 0;
-  let v;
-  if (ad > H.closeFrom) v = (Math.sign(dx) || 1) * H.closeV;            // she hangs back: it comes in
+  if (typeof isCheetah !== 'function' || !isCheetah(e) || e.kind !== 'hopper') return;
+  const H = CAT_HUNT, dx = px - cx, ad = Math.abs(dx), want = Math.sign(dx) || e.dir || 1;
+  e.vx = e.paceVx || 0;
+  let v = 0;
+  if (!player || player.dead || e.disabled || ad > H.lose) v = 0;
   else {
-    // ...at leaping distance it paces across its own ground, eyes on her
-    e.paceT = (e.paceT == null ? rnd(0.3, 0.8) : e.paceT) - dt;
-    if (e.paceT <= 0 || !e.paceDir) { e.paceDir = e.paceDir ? -e.paceDir : (chance(0.5) ? 1 : -1); e.paceT = rnd(H.paceSpan[0], H.paceSpan[1]); }
-    // never INTO her, and never off its ledge
-    if (ad < H.tooNear && Math.sign(dx) === e.paceDir) { e.paceDir = -e.paceDir; e.paceT = rnd(H.paceSpan[0], H.paceSpan[1]); }
-    v = e.paceDir * H.paceV;
+    e.dir = want; catGuard(e, want);
+    if ((e.landT || 0) > 0 || (e.t || 0) < H.settle || faceSide(e) !== want) v = 0;   // settling, or still coming round
+    else {
+      // a step in, a step back, measuring the jump. Each leg is held for its
+      // time (no dithering on a boundary): she crowds it and it commits to
+      // backing off; she hangs back and it commits to coming in.
+      e.paceT = (e.paceT == null ? rnd(0.3, 0.8) : e.paceT) - dt;
+      if (ad < H.tooNear && e.paceDir !== -1) { e.paceDir = -1; e.paceT = 0.55; }
+      else if (ad > H.closeFrom && e.paceDir !== 1) { e.paceDir = 1; e.paceT = 0.55; }
+      else if (e.paceT <= 0 || !e.paceDir) { e.paceDir = e.paceDir === 1 ? -1 : 1; e.paceT = rnd(H.paceSpan[0], H.paceSpan[1]) * 0.6; }
+      v = e.paceDir > 0 ? want * (ad > H.closeFrom ? H.closeV : H.paceV * 0.9) : -want * H.paceV * 0.7;   // +1 toward her, -1 back
+    }
+    if (v && !catFloor(e, Math.sign(v))) {
+      // CORNERED — her on one side, the drop on the other. It does not wait
+      // there long: the gather comes at twice the rate. The crouch is the full one.
+      if (ad < H.tooNear) e.t -= dt;
+      e.paceDir = -(e.paceDir || 1); v = 0;
+    }
   }
-  if (!groundAhead(e, Math.sign(v)) || !groundAhead({ x: e.x + Math.sign(v) * 14, y: e.y, w: e.w, h: e.h }, Math.sign(v))) {
-    e.paceDir = -Math.sign(v); e.paceT = rnd(H.paceSpan[0], H.paceSpan[1]);
-    // CORNERED — her on one side, the drop on the other. It does not wait
-    // there long: the gather comes at twice the rate. The crouch is the full one.
-    if (ad < H.tooNear) e.t -= dt;
-    return 0;
-  }
-  return v;
+  if (v && Math.sign(v) === want) enemyGait(e, v, dt); else catStep(e, v, dt);
+  e.paceVx = e.vx;
 }

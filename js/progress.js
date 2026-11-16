@@ -615,9 +615,16 @@ function pgDrawMark(c, x, y, ink, ph) {
   c.beginPath(); c.ellipse(x - 27, y - 9, 6, 4.5, -0.3, 0, 7); c.stroke();
   c.restore();
 }
+// where the stone stands: read from the room's own entity list, so the stump
+// is under the stone wherever the room puts it (it moved to the back wall on
+// 2026-11-16) — and never over open floor (the wall's own column has none)
+function PG_STONE_X() {
+  const d = ROOMS.CV3 && ROOMS.CV3.ents.find(e => e[0] === 'pillar');
+  return ((d ? d[1] : 50) + 0.5) * TILE - 12;
+}
 function pgDrawStump(c, f) {
   // (seated where the pillar was: on the bowl's floor, not on its tile row — seatPillars, js/game.js)
-  const x = 50 * TILE + TILE / 2, base = (typeof pgFloorY === 'function' ? pgFloorY(x) + 5 : 15 * TILE);
+  const x = PG_STONE_X(), base = (typeof pgFloorY === 'function' ? pgFloorY(x) + 5 : 15 * TILE);
   const h = 96 * 1.18, cutY = base - h * 0.38;
   c.save();
   // keep only what is below an uneven cut line — the pillar's own plate,

@@ -575,9 +575,42 @@ function ghGround(b, x) {
 // became) met a quarry he had already left — those saves get the flag, so the
 // cave's own machines come back and nothing in the story runs twice.
 function ghMigrate(sv) {
-  if (!sv || !sv.flags || sv.flags.bossHorn) return;
+  if (!sv || !sv.flags) return;
+  const f = sv.flags;
   const hero = typeof isHero === 'function' && isHero();
-  if (hero || sv.flags.pl_cshard || sv.flags.crystal || (sv.bag && sv.bag.cshard)) sv.flags.bossHorn = 1;
+  // THE STONE TAKEN WITHOUT THE FIGHT (owner, 2026-11-16: "I was defeated at
+  // the last moment in phase 2. But nonetheless, when I returned, it showed me
+  // as if I defeated the Rhino, got the marble, and I have it now without
+  // actually having it"). Reproduced: a charged burst thrown beside the stone
+  // DURING the fight cracked it — the marble went into the bag with him still
+  // standing — and the line below this block then read that save as "she
+  // holds the marble, so she met a quarry he had already left" and wrote him
+  // out. The stone no longer breaks while he lives (ghHoldsStone). This puts
+  // right the saves it already happened to: she has met him, nothing ever
+  // recorded driving him off (ghWon, written only by ghGone), and the marble
+  // is not yet forged into anything — so the marble goes back into its rock
+  // and he goes back onto it. A save that really did win before ghWon existed
+  // and is on its way back to Ratchet with the marble cannot be told apart
+  // from one that did not, and is asked to win again; that is the cost of not
+  // leaving an unearned marble in a bag.
+  if (!hero && f.ghMet && !f.ghWon && f.pl_cshard && !f.crystal && !f.crystal2) {
+    delete f.pl_cshard; delete f.bossHorn;
+    if (sv.bag) delete sv.bag.cshard;
+    f.ghUndone = 1;
+    if (typeof persist === 'function' && typeof G !== 'undefined' && G.save === sv) persist();
+    return;
+  }
+  // he was driven off before ghWon was written, and the stone still stands:
+  // bossHorn alone can only have come from ghGone here (the migration below
+  // sets it only for a save that already holds the marble) — so it is a win
+  if (f.bossHorn) { if (f.ghMet && !f.ghWon && !f.pl_cshard) f.ghWon = 1; return; }
+  if (hero || f.pl_cshard || f.crystal || (sv.bag && sv.bag.cshard)) f.bossHorn = 1;
+}
+// DOES HE STILL HOLD THE STONE? While he lives it does not break, whatever is
+// thrown beside it: the marble is what the fight is FOR.
+function ghHoldsStone() {
+  const b = typeof G !== 'undefined' ? G.boss : null;
+  return !!(b && b.kind === 'horn' && !b.dead && !(G.save && G.save.flags && G.save.flags.bossHorn));
 }
 function ghInit(b) {
   b.hornBig = true; b.hornSmall = true;
@@ -1341,6 +1374,7 @@ function ghGone(b) {
   G.ghHold = null;
   if (G.save) {
     G.save.flags.bossHorn = 1;
+    G.save.flags.ghWon = 1;            // the one record that he was DRIVEN off (ghMigrate)
     if (typeof persist === 'function') persist();
   }
   if (typeof setMusic === 'function') setMusic(G.roomDef.zone);
@@ -1708,6 +1742,8 @@ TEXT_LAYERS.push({
     grv_phase2: ['Enough. The Eye built me for war. Now you see all of it.'],
     grv_down: ["This isn't over.", 'The Eye sees you, cleaner. Next time it comes itself.'],
     grv_gone: 'GRAVEHORN backs into the rock and is gone. The raw marble is unguarded.',
+    grv_stone_held: 'GRAVEHORN holds the stone. It will not break while he stands.',
+    grv_stone_back: 'The marble is back in its rock. GRAVEHORN was never driven off it.',
     grv_parry_hint: 'Strike his horn as it comes up — a clean hit turns the toss.',
     grv_head: 'His horn is gone — the head is open. Hit it!',
     op_o_gravehorn: 'GRAVEHORN stands on the raw marble at the end of the cave. Drive him off.',
@@ -1725,6 +1761,8 @@ TEXT_LAYERS.push({
     grv_phase2: ['كفى. صنعتني العين للحرب. الآن ترين كلّ ما فيّ.'],
     grv_down: ['لم ينتهِ الأمر.', 'العين تراكِ يا منظِّفة. في المرّة القادمة تأتي بنفسها.'],
     grv_gone: 'تراجع قَرنُ القبر إلى الصخر واختفى. الرخام الخام بلا من يقف عليه.',
+    grv_stone_held: 'قَرنُ القبر يمسك بالحجر. لن ينكسر ما دام واقفًا.',
+    grv_stone_back: 'عاد الرخام إلى صخرته. لم يُطرَد قَرنُ القبر عنه قطّ.',
     grv_parry_hint: 'اضربي قرنه وهو يرتفع — ضربة نظيفة تردّ النطحة.',
     grv_head: 'قرنه غائب — رأسه مكشوف. اضربيه!',
     op_o_gravehorn: 'يقف قَرنُ القبر على الرخام الخام في آخر الكهف. اطرديه.',
@@ -1742,6 +1780,8 @@ TEXT_LAYERS.push({
     grv_phase2: ['Yeter. Göz beni savaş için yaptı. Şimdi hepsini göreceksin.'],
     grv_down: ['Bu iş bitmedi.', 'Göz seni görüyor, temizlikçi. Bir dahakine kendisi gelir.'],
     grv_gone: 'MEZARBOYNUZ kayanın içine geri çekilip kayboldu. Ham mermerin başında kimse yok.',
+    grv_stone_held: 'Taş MEZARBOYNUZ’un elinde. O ayaktayken kırılmaz.',
+    grv_stone_back: 'Mermer yeniden kayasında. MEZARBOYNUZ onun başından hiç kovulmadı.',
     grv_parry_hint: 'Boynuzu kalkarken ona vur — temiz bir vuruş savurmayı geri çevirir.',
     grv_head: 'Boynuzu yok — kafası açıkta. Vur!',
     op_o_gravehorn: 'MEZARBOYNUZ mağaranın sonunda ham mermerin başında duruyor. Onu kovala.',
@@ -1756,6 +1796,8 @@ TEXT_LAYERS.push({
     grv_phase2: ['够了。天眼为战争造了我。现在让你看个全。'],
     grv_down: ['这事没完。', '天眼看着你，清洁工。下一次，它亲自来。'],
     grv_gone: '墓角退进岩石里，消失了。原生大理石没人看着了。',
+    grv_stone_held: '墓角守着这块石头。只要它还站着，石头就不会碎。',
+    grv_stone_back: '大理石回到了岩石里。墓角从未被赶走。',
     grv_parry_hint: '在它的角往上挑时打它的角——打得干净就能弹开这一挑。',
     grv_head: '它的角飞走了——头露出来了，快打！',
     op_o_gravehorn: '墓角站在洞穴尽头的原生大理石上。把它赶走。',
@@ -1773,6 +1815,8 @@ TEXT_LAYERS.push({
     grv_phase2: ['Хватит. Око сделало меня для войны. Теперь смотри на всё.'],
     grv_down: ['Это ещё не конец.', 'Око видит тебя, уборщица. В следующий раз оно придёт само.'],
     grv_gone: 'МОГИЛЬНЫЙ РОГ пятится в скалу и исчезает. Сырой мрамор никто не держит.',
+    grv_stone_held: 'МОГИЛЬНЫЙ РОГ держит камень. Пока он стоит, камень не расколется.',
+    grv_stone_back: 'Мрамор снова в своей скале. МОГИЛЬНЫЙ РОГ с него не уходил.',
     grv_parry_hint: 'Бей по рогу, когда он идёт вверх, — чистый удар сбивает бросок.',
     grv_head: 'Рога нет — голова открыта. Бей!',
     op_o_gravehorn: 'МОГИЛЬНЫЙ РОГ стоит на сыром мраморе в конце пещеры. Прогони его.',

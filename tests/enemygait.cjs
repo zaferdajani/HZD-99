@@ -57,9 +57,9 @@ const { chromium } = require('playwright');
       if (!ROOMS[id]) continue;
       loadRoom(id); G.boss = null;
       const ws = G.enemies.filter(e => !e.dead && WALK[e.kind] && !e.calm);
-      const R = { room: id, n: ws.length, frames: 0, moon: 0, moonAt: null, turns: 0, brakes: 0,
+      const R = { room: id, n: ws.length, frames: 0, moon: 0, moonAt: null, turns: 0, brakes: 0, backsteps: 0, slides: 0,
                   skips: 0, groundFrames: 0, onBool: true };
-      const st = ws.map(e => ({ v: e.vx, side: e.faceVis >= 0 ? 1 : -1, onHist: [] }));
+      const st = ws.map(e => ({ v: e.vx, side: e.faceVis >= 0 ? 1 : -1, onHist: [], ph: e._ph || 0, x: e.x }));
       for (let f = 0; f < 1500; f++) {
         // her: far away for the first 10 s, then pacing beside the first walker
         const near = f >= 600;
@@ -73,6 +73,8 @@ const { chromium } = require('playwright');
           const S = st[i];
           e.update(DT);
           if (e.dead) return;
+          // the stride's phase is advanced by the pose pick the frame makes when it draws
+          if (typeof isCheetah === 'function' && isCheetah(e) && typeof wolfPose === 'function') wolfPose(e, CHEETAH_ART, false);
           if (typeof e.on !== 'boolean') R.onBool = false;
           const side = e.faceVis >= 0 ? 1 : -1;
           if (side !== S.side) R.turns++;
@@ -80,10 +82,21 @@ const { chromium } = require('playwright');
           // the moonwalk: moving one way while the picture shows the other —
           // allowed ONLY while braking (speed strictly falling toward zero),
           // and never through knockback, which is a push and not a walk
-          if (vs && vs !== side && !(e.kbT > 0)) {
+          // ...and ONE more thing is not a moonwalk: a predator ON GUARD backing
+          // up with its face to her (js/cheetahhunt.js, owner 2026-11-16: "the
+          // predator will be actually on guard, not turning its back to the
+          // prey"). It is only honest if the stride runs BACKWARDS while the
+          // feet do — the same frames forwards would be the slide this check
+          // exists to forbid — so that is what is counted, frame by frame.
+          const guard = (e.guardT || 0) > 0 && e.guardFace === side;
+          if (vs && vs !== side && !(e.kbT > 0) && guard) {
+            R.backsteps++;
+            if (e.on !== false && Math.abs(e.vx) > 8 && Math.abs(e.x - S.x) > 0.2 && !((e._ph || 0) < S.ph)) R.slides++;   // it MOVED, and the stride did not run back
+          } else if (vs && vs !== side && !(e.kbT > 0)) {
             if (Math.abs(e.vx) < Math.abs(S.v) - 1e-6 && Math.sign(S.v) === vs) R.brakes++;
             else { R.moon++; if (!R.moonAt) R.moonAt = e.kind + ' f' + f + ' vx ' + e.vx.toFixed(1) + ' face ' + e.faceVis.toFixed(2); }
           }
+          S.ph = e._ph || 0; S.x = e.x;
           // the skip: a walker on its rounds, on the floor, off it for one or
           // two frames and back on — ground that was there, lost. Its own
           // leaps, lunges and knockbacks are not skips.
@@ -173,6 +186,9 @@ const { chromium } = require('playwright');
   const moon = rooms.reduce((a, r) => a + r.moon, 0);
   check('NO MOONWALK: outside a brake, vx never runs against the facing', moon === 0,
     moon ? moon + ' frames, first ' + rooms.filter(r => r.moonAt).map(r => r.room + ' ' + r.moonAt)[0] : '0 frames');
+  const backs = rooms.reduce((a, r) => a + (r.backsteps || 0), 0), slides = rooms.reduce((a, r) => a + (r.slides || 0), 0);
+  check('a guard\'s back-step is a back-step: face to her, and its stride running backwards', backs > 0 && slides <= 2,
+    backs + ' back-step frames, ' + slides + ' of them a slide');
   check('the TAMED pack mills about without moonwalking', walk.tame.n > 0 && walk.tame.frames > 500 && walk.tame.moon === 0 && walk.tame.turns > 0,
     walk.tame.n + ' wolves, ' + walk.tame.turns + ' turns, ' + walk.tame.moon + ' frames against the facing');
   const H = walk.hop;

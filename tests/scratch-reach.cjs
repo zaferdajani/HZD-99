@@ -70,7 +70,16 @@ for(const face of [-1,1]){
  assert.equal(player.scratchWake.reach,165);assert.equal(Math.sign(Math.cos(player.scratchWake.ang)),face,'charged fan faces target');
 }
 const wake=player.scratchWake;
-for(const props of [{wield:1,weaponMode:'single'},{wield:0,air:true},{swirl:true}]){
+// (2026-11-16: an airborne swing that is not the dive DOES take the aimed cut
+// now — "when I jump and hit, the direction of the head does not apply" — so
+// the families that keep their own effects are the grounded blade, the swirl
+// and the dive.)
+for(const props of [{wield:1,weaponMode:'single'},{wield:0,air:true,ay:1},{swirl:true}]){
  player.startScratchWake({t0:.24,...props});assert.equal(player.scratchWake,wake,'other attack families keep their own effects');
+}
+for(const [ang,name] of [[-Math.PI/2,'up'],[-Math.PI/4,'up-right'],[-3*Math.PI/4,'up-left'],[0,'level']]){
+ player.startScratchWake({t0:.24,wield:0,air:true,ay:Math.sin(ang),ang,combo:0,weaponMode:'claws'});
+ assert.notEqual(player.scratchWake,wake,'an airborne '+name+' swing wears the aimed cut');
+ assert.ok(Math.abs(player.scratchWake.ang-ang)<1e-9,'...aimed '+name);assert.ok(player.scratchWake.reach>40,'...as long as its box');
 }
 console.log('PASS scratch contact boundaries, both facings, charge direction, no repeated damage, 180ms recovery wake:',JSON.stringify(samples));

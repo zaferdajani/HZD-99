@@ -186,7 +186,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // the missile, from range
     moves.missile = await runMove(() => { T.arena(1000, 520); player.iT = 99; T.go('hornprep', GH.hornPrep); }, ['idle'], 7000);
     // the charge into the shelf's face: she stands with the wall at her back
-    moves.charge = await runMove(() => { T.arena(560, 1080); player.iT = 99; player.y -= 160; G.boss.chainLeg = 0; T.go('chargewarn', GH.chargeTell); }, ['idle'], 7000);
+    // (the charge that ends in rock: staged at the back wall since 2026-11-16 — the shelf
+    // that used to stand mid-room at 1216 is gone, and his floor runs to the wall)
+    moves.charge = await runMove(() => { T.arena(1040, 1560); player.iT = 99; player.y -= 160; G.boss.chainLeg = 0; T.go('chargewarn', GH.chargeTell); }, ['idle'], 7000);
     // the charge that misses and runs out: she is past him, nothing ahead but floor
     moves.chargeSkid = await runMove(() => { T.arena(1100, 880); player.iT = 99; player.y -= 170; G.boss.chainLeg = 0; G.boss.face = -1; G.boss.faceVis = -1; T.go('chargewarn', GH.chargeTell); }, ['idle'], 7000);
     moves.toss = await runMove(() => { T.arena(700, 700 - 150 - 30); player.iT = 99; T.go('tossprep', GH.tossTell); }, ['idle'], 4000);

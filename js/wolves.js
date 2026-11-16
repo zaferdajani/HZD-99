@@ -302,7 +302,11 @@ function wolfPose(e, ART, tame) {
   const run = Math.abs(e.vx || 0) > 95;
   e._runG = run;
   const stride = run ? STRIDE_RUN * (e._strideMul || 1) : STRIDE;
-  if (e.on !== false) e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
+  // ...and a body BACKING UP on guard (js/cheetahhunt.js: facing her, feet
+  // going the other way) runs its stride backwards — the same frames in
+  // reverse are a backward walk; played forwards they would be a moonwalk
+  const back = (e.guardT || 0) > 0 && e.guardFace && (e.x - px) * (typeof faceSide === 'function' ? faceSide(e) : e.guardFace) < 0;   // against the PICTURE, which is what the eye compares the feet to
+  if (e.on !== false) e._ph = (e._ph || 0) + (back ? -1 : 1) * Math.abs(e.x - px) / stride;
   e._lastX = e.x;
   // bound by her blow and waiting for the blade: it lies where it is
   if (e.disabled) return 'down';
@@ -339,7 +343,7 @@ function wolfPose(e, ART, tame) {
   // the half-step the stride is on. The names are phases, not plates: the
   // filmed strips (walkStrip / runStrip) are what draw them, and the old
   // two-plate pairs that used to alternate here are retired (ART_QUEUE §2q).
-  const b2 = (Math.floor(e._ph) % 4) & 1;
+  const b2 = (((Math.floor(e._ph) % 4) + 4) % 4) & 1;
   if (run) return b2 ? 'runB' : 'runA';
   return b2 ? 'walkB' : 'walkA';
 }
@@ -436,7 +440,7 @@ function drawBeastPlate(c, e, ART, tame) {
   // the frames, so nothing can drift.
   const moving = pose === 'walkA' || pose === 'walkB' || pose === 'runA' || pose === 'runB';
   const run = !!e._runG && moving;
-  const p = (e._ph || 0) % 1;
+  const p = (((e._ph || 0) % 1) + 1) % 1;
   let gait = 0, pitch = 0;
   // a filmed stride already carries its rise, its suspension and its back:
   // the transform stand-in would add the same motion a second time

@@ -23,8 +23,11 @@
 //      leap still starts from a crouch of the full length, and it never walks
 //      off its floor;
 //   H  none of it touches the wolves;
-//   I  over a whole hunt it bites, gives ground, and comes again — and is on
-//      the move for most of the time it is free to be.
+//   I  over a whole hunt it bites, backs up FACING HER, and comes again: on
+//      its feet it never has its back to her (owner, 2026-11-16: "the predator
+//      will be actually on guard, not turning its back to the prey"), and a
+//      back-step runs its stride backwards;
+//   J  the leaping cat keeps the same guard between leaps.
 //
 //   node tests/cheetah-hunt.cjs      (needs the repo served on :8220)
 const { chromium } = require('playwright');
@@ -43,7 +46,10 @@ const { chromium } = require('playwright');
       const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, rubbleCV1B: 1 }); startGame(sv);
       const stage = (kind) => { loadRoom('CV2'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; const e = G.enemies.find(q => q.kind === kind); G.enemies = [e]; return e; };
       const put = (e, dx, face) => { player.x = e.x + dx; const g = groundColumnAt(player.x + 12); if (g) player.y = Math.min.apply(null, g) - player.h; player.vx = player.vy = 0; player.face = face; };
-      const step = (each) => { if (each) each(); player.iT = 9; update(1 / 60); G.dialog = null; G.state = 'PLAY'; G.panels = null; G.toasts = []; };
+      // (the stride's phase is advanced by the pose pick, which the frame
+      // makes when it draws: stepped without drawing, it is made here)
+      const step = (each) => { if (each) each(); player.iT = 9; update(1 / 60); G.dialog = null; G.state = 'PLAY'; G.panels = null; G.toasts = [];
+        for (const q of G.enemies) if (isCheetah(q)) wolfPose(q, CHEETAH_ART, false); };
       const out = {};
       // ---- A, C: watched ----
       let e = stage('crawler'); put(e, -420, 1);
@@ -73,12 +79,28 @@ const { chromium } = require('playwright');
       out.skid = { moved, secs: +(skid / 60).toFixed(2), backTo: +(backTo / 60).toFixed(2), facesHerAfter: after };
       // ---- I: a whole hunt, twelve seconds, her back to it ----
       e = stage('crawler'); put(e, -380, -1);
-      { let free = 0, stood = 0, lunges = 0, wasL = false, backs = 0, longest = 0, run = 0;
+      { let free = 0, stood = 0, lunges = 0, wasL = false, backs = 0, longest = 0, run = 0, turned = 0, slid = 0, ph = e._ph || 0, lx = e.x;
         for (let i = 0; i < 720; i++) { step(() => { player.face = -1; });
           const busy = e.coilT > 0 || e.lungeT > 0 || e.windedT > 0 || (e.skidT || 0) > 0;
+          const toHer = Math.sign(player.x + player.w / 2 - e.x - e.w / 2) || 1, side = faceSide(e);
           if (e.lungeT > 0 && !wasL) lunges++; wasL = e.lungeT > 0;
-          if (!busy) { free++; if (Math.abs(e.vx) < 6) { stood++; run++; longest = Math.max(longest, run); } else { run = 0; if (Math.sign(e.vx) !== Math.sign(player.x - e.x)) backs++; } } else run = 0; }
-        out.whole = { lunges, standing: Math.round(stood / Math.max(1, free) * 100), longest: +(longest / 60).toFixed(2), gaveGround: +(backs / 60).toFixed(2) }; }
+          if (!busy) { free++;
+            if (Math.abs(e.vx) < 6) { stood++; run++; longest = Math.max(longest, run); }
+            else { run = 0;
+              if (side !== toHer) turned++;                       // on its feet, moving, and its back to her
+              if (Math.sign(e.vx) !== toHer) backs++;
+              if (Math.sign(e.vx) !== side && Math.abs(e.x - lx) > 0.2 && !((e._ph || 0) < ph)) slid++; } }
+          else run = 0;
+          ph = e._ph || 0; lx = e.x; }
+        out.whole = { lunges, standing: Math.round(stood / Math.max(1, free) * 100), longest: +(longest / 60).toFixed(2), gaveGround: +(backs / 60).toFixed(2), turned, slid }; }
+      // ---- J: the leaping cat's guard ----
+      e = stage('hopper'); put(e, -300, 1);
+      { let moving = 0, away = 0, slid = 0, ph = e._ph || 0, lx = e.x;
+        for (let i = 0; i < 600; i++) { step();
+          const air = e.on === false || Math.abs(e.vy) > 60, toHer = Math.sign(player.x + player.w / 2 - e.x - e.w / 2) || 1;
+          if (!air && !(e.crouchT > 0) && Math.abs(e.vx) > 6) { moving++; if (faceSide(e) !== toHer) away++; if (Math.sign(e.vx) !== faceSide(e) && Math.abs(e.x - lx) > 0.2 && !((e._ph || 0) < ph)) slid++; }
+          ph = e._ph || 0; lx = e.x; }
+        out.guard = { moving, away, slid }; }
       // ---- G: the leaping cat ----
       e = stage('hopper'); put(e, -300, 1);
       let ground = 0, still = 0, crouch = 0, leaps = 0, wasAir = false, minCrouch = 9, cr = 0, fell = false;
@@ -104,9 +126,12 @@ const { chromium } = require('playwright');
     check('E  ...with its back to her the whole time, and comes round after', R.skid.backTo >= R.skid.secs - 0.05 && R.skid.facesHerAfter === true, 'back to her for ' + R.skid.backTo + ' s');
     check('F  the coil is the crawler\'s own length — no warning is shortened', R.tell.lunged && R.tell.coil >= R.tell.want - 0.04, R.tell.coil + ' s (TELL_FAST ' + R.tell.want + ')');
     check('F  ...and the winded window after the lunge is still at least half a second', R.tell.winded >= 0.48, R.tell.winded + ' s');
-    check('I  over a whole hunt it bites again and again, and gives ground between bites', R.whole.lunges >= 2 && R.whole.gaveGround >= 0.5, R.whole.lunges + ' lunges in 12 s, ' + R.whole.gaveGround + ' s spent trotting out');
-    check('I  ...and it is not a statue: on its feet and free, it is moving most of the time', R.whole.standing <= 40 && R.whole.longest <= 1.7, 'standing ' + R.whole.standing + '% of its free time, never longer than ' + R.whole.longest + ' s at a stretch');
-    check('G  the leaping cat paces between leaps (it stood for all of it before)', R.hopper.leaps >= 2 && R.hopper.standing <= 55, 'standing still ' + R.hopper.standing + '% of its time on the ground, ' + R.hopper.leaps + ' leaps in 10 s');
+    check('I  over a whole hunt it bites again and again, and backs up between bites', R.whole.lunges >= 2 && R.whole.gaveGround >= 0.5, R.whole.lunges + ' lunges in 12 s, ' + R.whole.gaveGround + ' s spent backing up');
+    check('I  ...ON GUARD: on its feet and moving, it never has its back to her', R.whole.turned === 0, R.whole.turned + ' frames walking with its back to her');
+    check('I  ...and a back-step is a back-step: its stride runs backwards, never a slide', R.whole.slid <= 2, R.whole.slid + ' sliding frames (a frame at a turn is not a slide)');
+    check('I  ...and it is not a statue: free, it is moving more than it stands', R.whole.standing <= 55 && R.whole.longest <= 1.7, 'standing ' + R.whole.standing + '% of its free time, never longer than ' + R.whole.longest + ' s at a stretch');
+    check('J  the leaping cat is on guard too: moving between leaps, face to her, no slide', R.guard.moving >= 30 && R.guard.away === 0 && R.guard.slid <= 2, R.guard.moving + ' moving frames, ' + R.guard.away + ' with its back to her, ' + R.guard.slid + ' sliding');
+    check('G  the leaping cat paces between leaps (it stood for all of it before)', R.hopper.leaps >= 2 && R.hopper.standing <= 70, 'standing still ' + R.hopper.standing + '% of its time on the ground, ' + R.hopper.leaps + ' leaps in 10 s');
     check('G  ...its leap still starts from the full crouch, and it never leaves its floor', R.hopper.minCrouch >= R.tell.want - 0.04 && !R.hopper.fell, 'shortest crouch ' + R.hopper.minCrouch + ' s');
     check('H  none of it touches the wolves', !!R.wolf && !R.wolf.cat && R.wolf.wolf, JSON.stringify(R.wolf));
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));

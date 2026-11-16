@@ -2884,7 +2884,7 @@ class Player {
         this.swing.pilHit = true;                       // one clink per swing
         burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 6, '#bfe9ff', 180, 0.22, 220, 2, true);
         sfx('no');
-        if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t('pl_hint')); }
+        if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t(typeof ghHoldsStone === 'function' && ghHoldsStone() ? 'grv_stone_held' : 'pl_hint')); }
       }
       // WHIFF. A miss used to be silent, which made a missed swing feel like a
       // dropped input rather than a mistake. The blade now cuts air on the frame
@@ -3220,6 +3220,14 @@ class Player {
       if (s.type !== 'pillar') continue;
       const sx = s.x + s.w / 2, sy = s.y + s.h / 2;
       if (Math.hypot(sx - cx, sy - cy) > R + 60) continue;
+      // ...BUT NOT WHILE ITS SOLDIER STANDS (js/gravehorn.js ghHoldsStone): a
+      // burst thrown beside the stone mid-fight used to crack it and put the
+      // marble in her bag with him still alive. It rings, it says why, it holds.
+      if (typeof ghHoldsStone === 'function' && ghHoldsStone()) {
+        burst(sx, sy, 10, '#bfe9ff', 220, 0.3, 200, 2, true); sfx('no');
+        if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t('grv_stone_held')); }
+        continue;
+      }
       G.statics.splice(i, 1);
       G.save.flags['pl_' + (s.extra || 'cshard')] = 1;
       sfx('glass');
@@ -3682,7 +3690,17 @@ class Player {
     // ...and the energy over the top of it, on the same clock. Only if the BODY
     // drew: an effect hanging in the air beside the procedural fallback pose is
     // worse than no effect, and this is the one strip whose art is optional.
-    const worldScratch = !sv.wield && !sv.air && !sv.swirl &&
+    // IN THE AIR THE CUT GOES WHERE SHE AIMS IT (owner, 2026-11-16: "when I
+    // jump and hit, the direction of the head does not apply. So it hits only
+    // in its place. There is no up, there is no up left or up right hit").
+    // The box has always followed the held direction — up, and both
+    // diagonals — but the airborne strip carried one fixed flourish at her
+    // side, so an up-cut in the air LOOKED like a level one that missed. An
+    // airborne swing that is not the dive now wears the aimed cut the ground
+    // claws wear (the scratch wake: rotated to the swing, as long as the box),
+    // whatever she is holding.
+    const airCut = sv.air && !(sv.ay > 0.5);
+    const worldScratch = (airCut || (!sv.wield && !sv.air)) && !sv.swirl &&
       typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW.swingSingleFx?.naturalWidth;
     if (drew && S.fx && !worldScratch) {
       const cue = S.fxPoses ? S.fxPoses[cell] : undefined, fk = S.fxK || 1;   // a blade's cut is drawn as far out as it reaches
@@ -3696,15 +3714,18 @@ class Player {
   // A scratch leaves light in the air after her paw has returned. This is
   // visual only; damage remains in the existing swing/contact code.
   startScratchWake(sv) {
-    if ((typeof isHero==='function' && isHero()) || !sv || sv.wield || sv.air || sv.swirl ||
-        (sv.weaponMode && sv.weaponMode !== 'claws')) return;
+    // (on the ground it is the claws' own cut; in the air it is every
+    // weapon's, because no weapon has an aimed airborne strip — see airCut)
+    const airCut = sv && sv.air && !(sv.ay > 0.5) && !sv.charged;
+    if ((typeof isHero==='function' && isHero()) || !sv || sv.swirl) return;
+    if (!airCut && (sv.wield || sv.air || (sv.weaponMode && sv.weaponMode !== 'claws'))) return;
     const angle=sv.charged?(this.face<0?Math.PI:0):(sv.ang||0);
     const ax=Math.cos(angle), ay=Math.sin(angle);
     let reach=165;
     if (!sv.charged) {
       const old=this.swing;
       // the seal's reach too (C1): the wake's tip is where the claws really reach
-      this.swing={ax,ay,combo:sv.combo,wield:0,crest:sv.crest};
+      this.swing={ax,ay,combo:sv.combo,wield:airCut?(sv.wield||0):0,twin:airCut&&sv.twin,crest:sv.crest};
       const box=this.hitbox();this.swing=old;
       // Rectangular contact geometry projected onto the direction of the cut.
       const cx=this.x+this.w/2,cy=this.y+this.h/2;
@@ -3734,7 +3755,10 @@ class Player {
     if(age<w.attackT*.7){w.x=this.x+this.w/2;w.y=this.y+this.h/2;}
     c.save();c.translate(w.x,w.y);
     // Mirroring leaves the rising crescent rising for either facing.
-    const left=Math.cos(w.ang)<0;c.rotate(left?Math.PI-w.ang:w.ang);c.scale(left?-1:1,1);
+    // (ang - PI, not PI - ang: the two agree only for a LEVEL cut. On a
+    // diagonal the old form sent an up-left cut DOWN-left — which is why
+    // there was "no up left" hit to see.)
+    const left=Math.cos(w.ang)<-1e-6;c.rotate(left?w.ang-Math.PI:w.ang);c.scale(left?-1:1,1);
     if (pass === 'glow') { c.scale(SLASH_GLOW.scale, SLASH_GLOW.scale); c.filter = 'blur(' + SLASH_GLOW.blur + 'px)'; }
     const cw=im.naturalWidth/6;
     c.globalCompositeOperation='lighter';
@@ -8057,7 +8081,11 @@ class Enemy {
     // way it is TRAVELLING, held through a near-hover by a dead band so a body
     // hanging over her does not flip its picture on every wobble.
     let wantF;
-    if (WALKERS[this.kind]) wantF = walkerFaceTarget(this);
+    // ON GUARD (js/cheetahhunt.js): a predator that has seen her keeps its
+    // face to her whatever its feet are doing — it backs up, it does not turn
+    // its back. The hunt names the side each frame it holds the guard.
+    if ((this.guardT || 0) > 0 && this.guardFace) { wantF = this.guardFace; this.guardT -= dt; }
+    else if (WALKERS[this.kind]) wantF = walkerFaceTarget(this);
     else if (this.kind === 'flier') {
       if (Math.abs(this.vx) > 14) this.faceT = Math.sign(this.vx);
       wantF = this.faceT || this.dir || 1;
@@ -8849,18 +8877,10 @@ class Enemy {
           // (js/cheetahhunt.js). The walk is over a beat before it gathers, so
           // the crouch and the leap start from the stand they always did.
           //
-          // THROUGH THE GAIT, like everything else on feet (tests/enemygait):
-          // writing the speed straight in slid it backwards for the third of
-          // a second its picture takes to come round. This state zeroes vx
-          // every frame, so the pace keeps its own running speed (paceVx);
-          // enemyGait stands it while it turns and brakes it before a reverse.
-          if (typeof catPace === 'function' && typeof isCheetah === 'function' && isCheetah(this)) {
-            const pv = catPace(this, dt, px, cx);
-            this.vx = this.paceVx || 0;
-            if (pv) this.dir = Math.sign(pv);
-            enemyGait(this, pv, dt);
-            this.paceVx = this.vx;
-          }
+          // It stays ON GUARD: face to her, feet going either way — forward
+          // through the gait, backward as a back-step whose stride runs in
+          // reverse (no slide: tests/enemygait, tests/cheetah-hunt).
+          if (typeof catPace === 'function' && typeof isCheetah === 'function' && isCheetah(this)) catPace(this, dt, px, cx);
           if (this.t <= 0 && !player.dead && Math.abs(px - cx) < 380) {
             // THE CROUCH. It used to launch on the frame a random timer hit
             // zero — it faced you first, but facing is not a warning. Now it

@@ -30,7 +30,9 @@ const { chromium } = require('playwright');
       const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, rubbleCV1B: 1, beacon: 1, bossHorn: 1, ghMet: 1, burstDone: 1 }); startGame(sv);
       loadRoom('CV3'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; G.enemies = [];
       const s = G.statics.find(q => q.type === 'pillar'); if (!s) return { none: 1 };
-      const under = [0.15, 0.5, 0.85].map(o => Math.min.apply(null, groundColumnAt(s.x + s.w * o)));
+      // (a column of the stone that is set INTO the back wall has no floor under
+      // it to compare with — 2026-11-16, the stone stands against the wall)
+      const under = [0.15, 0.5, 0.85].map(o => groundColumnAt(s.x + s.w * o)).filter(g => g && g.length).map(g => Math.min.apply(null, g));
       const out = { base: +(s.y + s.h).toFixed(1), under: under.map(v => +v.toFixed(1)), was: s.seat0 };
       // beside it, on the floor
       player.x = s.x - 40; const g = groundColumnAt(player.x + player.w / 2); player.y = Math.min.apply(null, g) - player.h; player.vx = player.vy = 0;
@@ -41,7 +43,7 @@ const { chromium } = require('playwright');
       for (let i = 0; i < 120 && player.chargeT < 0.62; i++) { player.iT = 9; update(1 / 60); G.hitStop = 0; }
       keys.KeyX = 0; for (let i = 0; i < 20; i++) { update(1 / 60); G.hitStop = 0; G.dialog = null; G.state = 'PLAY'; }
       out.taken = !G.statics.some(q => q.type === 'pillar') && !!G.save.flags.pl_cshard;
-      out.stump = +(pgFloorY(50 * TILE + TILE / 2) + 5).toFixed(1);
+      out.stump = +(pgFloorY(PG_STONE_X()) + 5).toFixed(1);
       return out;
     });
     if (R.none) check('the pillar is in the quarry', false);

@@ -1755,20 +1755,33 @@ const ROOMS = {
     // His fight pays the volts the crawlers used to.
     ents: [['crawler', 16, 15, null, 'bossHorn'], ['crawler', 36, 15, null, 'bossHorn'],
            ['bat', 24, 6, null, 'bossHorn'], ['bat', 44, 6, null, 'bossHorn'],
-           ['scrap', 10, 7, 20], ['pillar', 50, 15], ['boss', 33, 16, 'horn']],
+           ['scrap', 10, 7, 20], ['pillar', 52, 15], ['boss', 33, 16, 'horn']],
     build(g) {
       caveCarve(g, 'CV3', {
         mouth: 1, open: ['L'],
-        // THE ARENA: one long rolling floor from the mouth to the rock shelf in
-        // front of the stone (tiles 2-37), so a charge has a line to run and
-        // the shelf's face to end in. The knobs and the half-height plateau
-        // that used to break it up were a staircase under a 243 px animal —
-        // every stride a step. The surface curve still rolls it (no right
-        // angles); the shelf at 38-47 is where his charge meets rock.
+        // THE ARENA: one long rolling floor from the mouth to the back wall
+        // (tiles 2-52), so a charge has a line to run and rock to end in. The
+        // knobs and the half-height plateau that used to break it up were a
+        // staircase under a 243 px animal — every stride a step. The surface
+        // curve still rolls it (no right angles).
+        //
+        // THE STONE STANDS AT THE END OF HIS GROUND (owner, 2026-11-16: "since
+        // there's a hill in front of him, he cannot reach beyond it. So I can
+        // just simply hide where the crystal is, which I shouldn't be able to
+        // reach until I defeat Rhino"). A rock shelf stood at 38-47 between
+        // his floor and the stone's hollow: three tiles of wall to a body that
+        // cannot climb, and behind it a bowl narrower than he is — the whole
+        // fight could be sat out beside the thing he is posted to guard. The
+        // shelf is carved away, the hollow is part of his floor, the stone
+        // stands against the back wall with no room behind it, and the ledge
+        // the carve left over that wall is rock again. There is no ground in
+        // this room he cannot stand on.
         anchor: [{ x: 12, y: 15, w2: 10, h2: 5 }, { x: 30, y: 15, w2: 7, h2: 5 },
-                 { x: 16, y: 15 }, { x: 36, y: 15 }, { x: 50, y: 15, w2: 2, h2: 4 }],
+                 { x: 16, y: 15 }, { x: 36, y: 15 }, { x: 43, y: 15, w2: 5, h2: 6 },
+                 { x: 50, y: 15, w2: 2, h2: 6 }],
         pocket: [{ x: 10, y: 6 }],
       });
+      for (let y = 2; y <= 15; y++) { g[y][53] = '#'; g[y][54] = '#'; }
     } },
 
   // ---- ZONE B: the Carrier, still running its route ------------------------
