@@ -892,20 +892,42 @@ mission('first-meeting', s => s.flags.includes('nfMeet'), async s => {
 // 3. THE RAW MARBLE — under the meadow, through the hub's loose floor, the
 // quarry's buried mouths, to the white pillar in CV3; claws glance, the burst frees it
 mission('marble', s => s.bag.includes('cshard') || s.flags.includes('crystal'), async s => {
-  // the quarry's own road: CV1 -> the pod chamber CV1B (it saves, recharges
-  // and charts the quarry) -> CV2 -> CV3. A burst needs charge; the pod gives it.
-  if (!s.flags.includes('pgSurvey') || (R.needCharge && s.p && s.p.volts < s.burstVolts)) {
+  // the quarry's own road: CV1 -> the Seam, CV1B, where the quarrymen's survey
+  // charts the quarry -> the pod in the beacon hall, CV2 -> CV3. (The Seam's
+  // pod became that survey terminal when the save points were thinned, and the
+  // cave's one pod stands in CV2: this road used to rest in CV1B and stood
+  // there for fifty minutes looking for a pod that is not there any more.)
+  if (!s.flags.includes('pgSurvey')) {
     if (s.room !== 'CV1B') { await travel(s, 'CV1B'); return; }
+    await readSurvey(s); return;
+  }
+  // a burst needs charge; the pod gives it
+  if (R.needCharge && s.p && s.p.volts < s.burstVolts) {
+    if (s.room !== 'CV2') { await travel(s, 'CV2'); return; }
     await restAt(s); if (s.p.volts >= s.burstVolts) R.needCharge = 0; return;
   }
   // GRAVEHORN stands on the stone (js/gravehorn.js): rested and charged at the
   // quarry's pod first, then the fight, then the pillar
-  if (!s.flags.includes('bossHorn') && s.room !== 'CV3' && !(await readyFor(s, 'CV1B', 'CV3'))) return;
+  if (!s.flags.includes('bossHorn') && s.room !== 'CV3' && !(await readyFor(s, 'CV2', 'CV3'))) return;
   if (s.room === 'CV3' && s.boss && s.boss.k === 'horn' && !s.boss.dead) { await bossFight(s); return; }
   if (s.room === 'CV3') { await quarryPillar(s); return; }
   await travel(s, 'CV3');
 });
 // the pod/bench in this room: walk in, press E, wait out the rest
+// the quarrymen's survey in the Seam: walk to the terminal and read it
+async function readSurvey(s) {
+  await ensureModel();
+  const tm = info.statics.find(q => q.type === 'term');
+  if (!tm) { log('no survey terminal in ' + s.room); await sleep(400); return; }
+  if (s.near && s.near.type === 'term') {
+    if (Date.now() - (R.readT || 0) < 3000) { await hold([]); await sleep(200); return; }
+    R.readT = Date.now();
+    await hold([]); log('READ the survey in ' + s.room);
+    R.interactions.push(s.room + ':survey'); await tap('KeyE', 60); await sleep(600); return;
+  }
+  const r = await walkTo(s, { x: tm.x + tm.w / 2, tol: 14, y: tm.y + tm.h, ytol: 50 });
+  if (r === 'stuck') await unstick(s, 'the survey in ' + s.room);
+}
 async function restAt(s) {
   await ensureModel();
   const b = info.statics.find(q => q.type === 'bench');
@@ -940,7 +962,7 @@ async function readyFor(s, pod, bossRoom) {
   return false;
 }
 mission('sage', s => s.flags.includes('sageTame_GA1D'), async s => {
-  if (!(await readyFor(s, 'CV1B', 'GA1D'))) return;
+  if (!(await readyFor(s, 'CV2', 'GA1D'))) return;
   if (s.room !== 'GA1D') { await travel(s, 'GA1D'); return; }
   await bossFight(s);
 });
