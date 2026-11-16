@@ -86,6 +86,44 @@ guardians where the existing implementation uses both" — now reads: preserve
 the two FIGHTS; the keeper's duel and the guardian's are different encounters.
 The guardian is the sage.
 
+## THE ROBED ONES ARE THE EYE'S AGENTS (owner's ruling, 2026-11-16)
+
+This supersedes the word "keeper" in the section above. Shown *"ACQUIRED — THE
+PACK KEEPER"*, the owner: **"How is this the pack keeper? He should be an agent...
+the second agent from the corrupted mother, or the alien that corrupted mother,
+actually. He was created to manipulate the wolf pack."** And, shown the panel
+captioned "The sage knelt...": **"this is not a sage... The sage is the
+protector of the kingdom, which is Nilfang, and the others that come afterward.
+This one is an agent. Give it a name, dark name."**
+
+- **SAGES** are the kingdoms' PROTECTORS — NULLFANG the lion and the guardians
+  after him. Nothing else is called a sage.
+- **The robed machines in the deep chambers are AGENTS of the Eye** (the thing
+  that stole Mother's song). Each was made to work on one part of a kingdom —
+  the second one to turn the wolf pack. Each has its own DARK NAME and must not
+  look or read like the one before it: *"it looks exactly like the first one I
+  fought, which means there is no story behind it... give a limited number of
+  agents. Each one has a fragment that we need."*
+- **Each agent holds a FRAGMENT.** The first one's is THE MAP — "He has the
+  records of the area... defeating him will start showing a map" — so the map
+  screen opens with him, and not before. The others' fragments are something
+  else each.
+- **The order of the first kingdom:** GRAVEHORN the rhino (the first of the Eye's
+  constructs) → NULLFANG → the Wolf King, whose fall reveals that the pack was
+  being worked by an agent → that agent.
+- **They are still PURIFIED, not killed.** The owner first ruled that an agent
+  "should be killed, not freed", then took it back the same day: *"We do not
+  have to kill it since we already have a background story for it as being
+  freed."* The duel, the song-lock and the purification stand as they play.
+- **The word is PURIFY.** *"It should be purifying, not freeing."* In every
+  language the verb for what her blade does to a corrupted machine is the
+  purification, never "free".
+- **Their size:** an agent stands one and a half to two times her height, and
+  moves like a body (ART_QUEUE carries the frames).
+
+Internal names are still unchanged and still not story (`sage`, `sageTame_*`,
+`sg_*`): they mean the agents.
+
 ## World, song and infection
 
 This is a world of robots divided into kingdoms. Each kingdom has its own

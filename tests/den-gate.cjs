@@ -187,7 +187,14 @@ const check = (name, ok, detail) => {
       // and the grotto's door is built only once he is free
       G.save.flags.bossGlitch = 1;
       loadRoom('GA1');
+      // (2026-11-16: with the agent's chamber already finished this ring leads
+      // nowhere new and is withdrawn, both sides — tests/ring-wake.cjs D. It is
+      // BUILT for a save that freed the lion with the chamber still to do.)
+      const doneCh = G.save.flags.sageTame_GA1D;
+      out.grottoGone = !doneCh || !gateDoors().some(x => x.to === 'A4');
+      delete G.save.flags.sageTame_GA1D; loadRoom('GA1');
       out.grottoAfter = gateDoors().some(x => x.to === 'A4');
+      if (doneCh) G.save.flags.sageTame_GA1D = doneCh;
     }
     // ---- 8. THE END OF CHAPTER ONE: the climb above the camp, once the lion
     // is free, closes the chapter — and queues NO comic on the ledges (owner,
@@ -242,6 +249,7 @@ const check = (name, ok, detail) => {
     r.grotto.doors.indexOf('A4') < 0 && !r.grottoPrompt && !r.grotto.walked && !r.grotto.inA4 && r.grotto.room === 'GA1',
     'doors: ' + r.grotto.doors.join(',') + ' / room ' + r.grotto.room);
   check('...and it is built once he is', r.grottoAfter);
+  check('...but not once the chamber behind it is finished: a ring leads somewhere new or is not there', r.grottoGone);
   check('no vertical link anywhere leads into the lair, and the lair has one way in',
     !r.vlinksIntoA4.length && r.a4Exits.join(',') === 'L', 'vlinks ' + r.vlinksIntoA4.join(',') + ' exits ' + r.a4Exits.join(','));
   const badBench = r.benches.filter(b => [b.cont, b.resp, b.load].some(x => x === 'A4' || x === 'A9'));

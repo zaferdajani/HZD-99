@@ -56,6 +56,9 @@ const { chromium } = require('playwright');
 
     // ---- the quarry: the pillar ignores claws, shatters for the burst --
     G.save.flags.crystal = 0; equipWeapon('claws'); delete G.save.bag;   // back to a pre-forge save
+    // (the stone does not break while GRAVEHORN stands over it — js/gravehorn.js
+    // ghHoldsStone, tests/gravehorn-ground.cjs. This is the quarry AFTER him.)
+    G.save.flags.bossHorn = 1; G.save.flags.ghWon = 1; G.save.flags.ghMet = 1;
     loadRoom('CV3');
     await new Promise(r => setTimeout(r, 400));
     G.wake = null; G.state = 'PLAY'; G.hitStop = 0;
@@ -128,11 +131,21 @@ const { chromium } = require('playwright');
     loadRoom('A4');
     await new Promise(r => setTimeout(r, 300));
     G.wake = null; G.state = 'PLAY'; G.hitStop = 0; G.bossEntry = null;
-    const dA4 = GATE_ROOM.A4;
+    const dA4 = [].concat(GATE_ROOM.A4).find(d => d.to === 'GA1');
     player.x = G.roomDef.w * TILE * dA4.at - player.w / 2; player.on = true; player.vy = 0;
-    out.lairClosed = !gateHere();
+    // (2026-11-16: a ring a fight opens STANDS there from the start, dark, and
+    // refuses her — it is not hidden until the flag. tests/ring-wake.cjs holds
+    // the ceremony; here it is the same rule read as "closed, then open".)
+    const lairDoor = () => gateDoors().find(d => d.to === dA4to);
+    const dA4to = [].concat(dA4)[0].to;
+    { const d0 = lairDoor(); out.lairClosed = !d0 || (gateLocked(d0) && !gateEnter() && !G.gateWalk); G.dialog = null; G.state = 'PLAY'; }
     G.save.flags.bossGlitch = 1;
-    out.lairOpen = !!gateHere();
+    out.lairOpen = !!lairDoor() && !gateLocked(lairDoor());
+    // ...and is woken in front of her before it will carry her (the flag was set
+    // by hand: in play the lion is no longer fighting when this happens)
+    G.boss = null; G.meet = null;
+    for (let w = 0; w < 400 && (ringAsleep(lairDoor()) || G.ringWake); w++) ringWakeStep(1 / 60);
+    player.stunT = 0;
     // THE EVOLUTION CARD IS SPENT BEFORE SHE WALKS, THE WAY PLAY SPENDS IT.
     // Setting bossGlitch by hand is a shortcut past a whole guardian fight,
     // and it raises the evolution tier 0 -> 1 as a side effect. In play that
@@ -159,7 +172,7 @@ const { chromium } = require('playwright');
         // and the den): find THE door to the grotto, the same lookup gateDoors does
         const door = (id, to) => [].concat(GATE_ROOM[id] || []).find(d => d && d.to === to);
         const lair = door(a, g2), back = door(g2, a);
-        return !!(lair && lair.need === f && back && ROOMS[g2] && ROOMS[g2].cave && MAPPOS[g2]);
+        return !!(lair && (lair.need === f || lair.lock === f) && back && ROOMS[g2] && ROOMS[g2].cave && MAPPOS[g2]);
       });
 
     // ---- the aura sense ------------------------------------------------

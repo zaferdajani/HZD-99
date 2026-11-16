@@ -30,6 +30,8 @@ for (const name of ['world', 'weapons', 'quests']) run(read(name));
 for (const name of ['invCount', 'invAdd', 'invTake', 'npcKey', 'npcCellItem', 'npcLive', 'npcCharge', 'forgeCrystal', 'doInteract', 'checkTransitions', 'gateDoorsAll', 'gateDoors']) run(fn(name));
 run(game.slice(game.indexOf('const NPC_GIFT ='), game.indexOf('\n};', game.indexOf('const NPC_GIFT =')) + 3));
 run(game.slice(game.indexOf('const GATE_ROOM ='), game.indexOf('\n};', game.indexOf('const GATE_ROOM =')) + 3));
+// (the shop is opened through one function since 2026-11-16 — as a question first; its own harness is tests/shop-ask.cjs)
+ctx.shopOpen = (ask) => { ctx.G.state = 'SHOP'; ctx.G.shopAsk = !!ask; };
 ctx.showItem = (name, desc) => { ctx.G.state = 'DIALOG'; ctx.G.dialog = { name, lines: [desc], onEnd: null }; };
 const rooms = run('ROOMS');
 // Graph reachability uses production depth-door visibility and exit flags.

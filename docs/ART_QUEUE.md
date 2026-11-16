@@ -21,6 +21,69 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bs. COMIC PANELS OFF MODEL — re-fire with the canon elements ✱ QUEUED 2026-11-16 (owner's order, this thread; one fired, the rest waiting on credits)
+
+The owner, on the passage panel: *"please, you need to review all the images we
+have, analyze them, and see if there's anything like just this one. This one is
+for the hero that does not look like our hero from behind. He looks more like a
+ninja, not like my hero, like my robot hero."* And on the meeting: *"in the
+comics that comes afterwards, he's looking white and does not look like the
+actual Nilfang."* And: *"this is not a sage, so you should change this image.
+The sage is the protector of the kingdom, which is Nilfang... This one is an
+agent."*
+
+Every panel under `assets/manhua/ch1/game/` was looked at, one by one, against
+the canon hero element and NULLFANG's studio plates. What is wrong, by panel:
+
+| panel | what is off | status |
+|---|---|---|
+| `passage_b` | the hero from behind as a tan hooded cat | **RE-FIRED 2026-11-16** (job `d903567c…`), installed |
+| `passage_a` | still shows the steel-slab door the ring gates replaced | queued |
+| `cv_mouth`, `cv_walk` | the hero as a tan cat, no helmet, no blade | queued |
+| `d_door`, `d_walk` | the same tan cat | queued |
+| `f_blade`, `f_strike` | the same; the blade is not her sword | queued |
+| `fight_a` | the hero off model; NULLFANG lilac | queued |
+| `break_a` | NULLFANG drawn WHITE | queued |
+| `f_walk` | NULLFANG ice-blue | queued |
+| `m_down` | NULLFANG lilac | queued |
+| the keeper's kneeling panel | captioned and drawn as "the sage": he is the Eye's AGENT (see STORY_CANON) | queued, with his new name |
+
+Brief for each: the panel's own composition kept (use the existing panel as the
+SHAPE reference), the hero embedded as `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`,
+NULLFANG from `assets/source/beast/` studio plates as the STYLE reference —
+gunmetal and violet, never white. 1600 px, 16:9, unlettered. Archive each as
+`assets/source/manhua/refire-2026-11/<panel>.webp` with the refused panel
+beside it as `<panel>_before.jpg`.
+
+---
+
+## 2br. GRAVEHORN'S TURN at full quality, and his phase-two plates ✱ QUEUED 2026-11-16 (waiting on credits)
+
+The turn plate in the game was fired at 1k MEDIUM on the last half-credit and
+keyed hard to lose a haze. Fire it again at 2k HIGH against the same design
+plate (job `0e24ded2-51c3-4033-b84b-ca8b19818195`): the same two views —
+three-quarter and head-on, standing, facing LEFT — plus a REAR three-quarter so
+a turn away from the camera has its own picture. Cut with `tools/ghturn.cjs`;
+`GH_TURN` in `js/gravehorn.js` holds the anchors, and `tests/turn-roar.cjs`
+measures the result.
+
+---
+
+## 2bt. PLATFORMS AS OBJECTS — one plate set per zone ✱ QUEUED 2026-11-16 (owner's order; waiting on credits)
+
+The owner: *"the platforms are so translucent, it does not actually indicate a
+platform or something that I have to walk on. It should have its own objective
+structure drawn and showing."* Every one-way deck is still the engine's
+stand-in bar. Per the standing order (structures are Higgsfield's), each zone
+needs a deck plate that is an OBJECT from that room's own backdrop: a gantry
+grating and a cable tray for the city, a rock shelf with a root for the caves,
+a slag crust for the Foundry. Three lengths per zone (2, 4 and 6 tiles), side
+on, opaque, transparent ground, lit from above. The code side already removed
+the decks that had no reason to exist (`platformHeadroom`, and the cave
+shelves); what is left is where a deck is the way up.
+
+---
+
 ## 2bq. THE CHEETAH'S STALK, SKID AND BREAK — three filmed takes ✱ QUEUED 2026-11-15 (owner's order, this thread; VIDEO binding, waiting on credits)
 
 The owner: *"Inside the caves, those cheetahs are actually not moving in a good

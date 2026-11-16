@@ -52,6 +52,32 @@ function isWolf(e) {
   if (e.kind !== 'crawler' && e.kind !== 'hopper') return false;
   return !!(G.roomDef && WOLF_ZONES[G.roomDef.zone]);
 }
+// THE DEN CALLS HER IN (owner, 2026-11-16: "the howling should start the moment
+// I go inside this portal to the alpha area, to make me anticipate and tease
+// the player to be wanting to go there and reach the alpha"). While the Wolf
+// King still leads the pack: at the den's mouth in the meadow she hears him
+// from behind the rock, and the moment she is through, he howls — and keeps
+// calling until the fight has begun.
+const ALPHA_CALL = { first: 0.45, every: [6.5, 10], mouth: 640 };
+function alphaCall(dt) {
+  if ((typeof isHero === 'function' && isHero()) || !G.save || !G.save.flags || G.save.flags.alpha || !player || player.dead) { G.alphaCallT = null; return; }
+  if (G.state !== 'PLAY' || G.dialog || G.cut || G.trans) return;
+  const id = G.roomId; let far;
+  if (id === 'A10') { const b = G.boss; if (!b || b.dead || b.kind !== 'alpha') { G.alphaCallT = null; return; } far = false; }
+  else if (id === 'A2') {
+    const d = typeof gateDoors === 'function' ? gateDoors().find(q => q.to === 'A10') : null;
+    if (!d || Math.abs(player.x + player.w / 2 - gateWorldX(d)) > ALPHA_CALL.mouth) { G.alphaCallT = null; return; }
+    far = true;
+  } else { G.alphaCallT = null; return; }
+  if (G.alphaCallRoom !== id || G.alphaCallT == null) { G.alphaCallRoom = id; G.alphaCallT = far ? 1.1 : ALPHA_CALL.first; G.alphaCallN = 0; }
+  // (once the fight is on, his howl is a MOVE with its own tell — the den's call stops)
+  if (!far && G.alphaCallN > 0 && typeof bossActive === 'function' && bossActive()) return;
+  G.alphaCallT -= dt;
+  if (G.alphaCallT > 0) return;
+  sfx(far ? 'alpha_howl_far' : 'alpha_howl'); G.alphaCallN++;
+  if (!far) { cam.shake = Math.max(cam.shake, 2.5); if (typeof padRumble === 'function') padRumble(0.3, 0.25, 420); }
+  G.alphaCallT = rnd(ALPHA_CALL.every[0], ALPHA_CALL.every[1]);
+}
 // ...and whether the pack has changed sides. One flag, set by the Alpha's
 // yield, read everywhere — including on a save loaded a week later, which is
 // the whole point of it living in G.save.flags rather than on the room.

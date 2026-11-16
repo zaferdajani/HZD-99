@@ -80,7 +80,12 @@ const { chromium } = require('playwright');
   check('it happens on the crest of A2', r.phases.length > 0 && r.room === 'A2', r.phases.join(' '));
   check('every beat plays: fall, land, wind, swipe, watch, coil, leave',
     ['fall', 'land', 'wind', 'swipe', 'watch', 'coil', 'leave'].every(p => r.phases.some(q => q.startsWith(p + '@'))));
-  check('...and it is over inside ten seconds', r.endF && r.endF < 60 * 10, r.endF ? (r.endF / 60).toFixed(1) + ' s' : 'never ended');
+  // (the budget was ten seconds. On 2026-11-16 the owner ordered a beat INTO this
+  // scene — "he should actually roar and stun me with it" — which is a second and
+  // a quarter that was not there; the settle and the walk-up around it were cut
+  // to pay for part of it, and the budget is eleven and a half.)
+  check('...the roar is in it, between the landing and the walk-up', r.phases.some(q => q.startsWith('roar@')), r.phases.join(' '));
+  check('...and it is over inside eleven and a half seconds', r.endF && r.endF < 60 * 11.5, r.endF ? (r.endF / 60).toFixed(1) + ' s' : 'never ended');
   check('the music drops out for it and comes back', r.music[0] === 'stop' && r.music.some(m => m.startsWith('set:')), r.music.join(','));
   check('arrival, tell, creature swipe, impact and departure each have a cue', ['nf_arrive', 'tellbig', 'nf_swipe', 'hit', 'nf_leap'].every(k => r.sounds.includes(k)), r.sounds.filter(k => /nf_|tellbig|hit/.test(k)).join(','));
   check('it costs her exactly one core', r.cores === 4 && !r.dead, r.cores + (r.dead ? ' dead' : ''));

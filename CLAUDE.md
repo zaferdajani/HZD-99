@@ -250,6 +250,29 @@ it global. Consequences:
   engine's light and carries the state — live, gold for the errand's door,
   dead while buried. **Never mark a door with a drawn outline, arrow-arch or
   sign again**: a door is recognised by being an object. `tests/ring-gate.cjs`.
+- **A ring stands on a LEVELLED PAD, apart from any other ring, and a ring a
+  fight opens is WOKEN, not popped in** (owner, 2026-11-16: "two doors next to
+  each other, superimposing"; "if the ground is elevated, it shows out of
+  space"; "make it like a dormant door... the sage will activate it for me
+  after I defeat it"). `levelDoorPads` (world.js) flattens the tiles under every
+  ring and `buildSurfaceCurve` lays the curve flat across its foot on an S; a
+  door row with `lock: <flag>` STANDS there dark and refuses her with its
+  `lockLine` (use `lock`, never `need`, for a door a fight opens); when the flag
+  is set `ringWakeStep` holds her controls, brings the freed guardian to the
+  ring to roar at it, and raises the field (`RING_WAKE`, flag `rw_<room>><to>`).
+  A ring must lead somewhere NEW: the A4↔GA1 ring is withdrawn once that
+  chamber is finished. `tests/ring-pads.cjs`, `tests/ring-wake.cjs`.
+- **A deck exists only where it is the way up** (owner, 2026-11-16: "platforms
+  that do not make any sense... the floor is elevated there"). `platformHeadroom`
+  (world.js) removes any `=` with one tile of air under it, or two where the
+  floor rose under part of the same deck; a level two-tile step is authored and
+  stays, and a room whose low deck is furniture says `decks: 1` (the den's
+  table). Caves carry no carved shelves (`caveCarve`, `o.shelves`). A new room
+  that adds a deck over raised ground fails `tests/ring-pads.cjs`.
+- **The teeth do not teleport her** (owner, 2026-11-16: "When I dropped down, I
+  actually went up... like a loop"). Spikes and the room's floor used to set her
+  at `lastSafe` on the same frame; `hazardRescue` (game.js) closes the picture
+  for a quarter of a second, sets her down, and opens it again.
 - **Elevations, steps and obstacles MIMIC OBJECTS FROM THE ROOM'S
   BACKGROUND** (owner, 2026-08-15): a ledge in the city is a vent housing, a
   crate stack, a fallen sign — the same furniture the backdrop paints — so
@@ -464,9 +487,13 @@ the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
 | `wolfhunt.js` | the pack hunts: a wolf notices her, shows its teeth, charges, stalks, bites from the distance its lunge covers, thrashes a bite that lands, and rolls under her finisher (`tests/wolf-hunt.cjs`) |
 | `cheetahhunt.js` | the cats hunt like cats: the long creep that freezes when she looks at it (and a patience that runs out), the sprint from far enough out to reach full speed, the skid when it overshoots, and ON GUARD between bites — it backs up FACING her (its stride run backwards, `wolves.js`) and never walks with its back to her (owner, 2026-11-16); a cornered cat comes sooner; the leaping cat keeps the same guard. No warning is shortened anywhere (`tests/cheetah-hunt.cjs`) |
 | `alphakit.js` | the Wolf King's own moves — the REND, the FURY, the fury leap's QUAKE — the effect every Alpha move wears (`tests/alpha-kit.cjs`), and what makes it a test of skill: the HIDE (a blow thrown into its attack lands at two fifths), the SPRING out of a mash, the SKYBITE at anyone bouncing on its back, the fury's chained pounces (`tests/boss-skill.cjs`: a masher and a pogo bot must LOSE, a bot that reads it must WIN) |
-| `gravehorn.js` | GRAVEHORN, the Eye's rhino (CV3): a parts rig wearing fired plates cut and anchored by `tools/ghparts.cjs`; the charge, the toss and its one-clean-strike parry, the horn missiles, the rear kick, the BUCK that answers anyone on his back (`tests/gravehorn.cjs`, `tests/boss-skill.cjs`, `docs/combat/BOSS_GRAVEHORN.md`). His floor runs to the back wall and the stone stands at the end of it (no ground he cannot reach); the stone does not break while he lives (`ghHoldsStone`), a win is recorded as `ghWon`, and `ghMigrate` puts right a save where the marble was taken mid-fight (`tests/gravehorn-ground.cjs`) |
+| `gravehorn.js` | GRAVEHORN, the Eye's rhino (CV3): a parts rig wearing fired plates cut and anchored by `tools/ghparts.cjs`; the charge, the toss and its one-clean-strike parry, the horn missiles, the rear kick, the BUCK that answers anyone on his back (`tests/gravehorn.cjs`, `tests/boss-skill.cjs`, `docs/combat/BOSS_GRAVEHORN.md`). His floor runs to the back wall and the stone stands at the end of it (no ground he cannot reach); the stone does not break while he lives (`ghHoldsStone`), a win is recorded as `ghWon`, and `ghMigrate` puts right a save where the marble was taken mid-fight (`tests/gravehorn-ground.cjs`). He TURNS through fired three-quarter and head-on plates (`GH_TURN`, `ghTurnView`, cut by `tools/ghturn.cjs`) — never a mirrored squash (`tests/turn-roar.cjs`) |
+| *(entities.js)* NULLFANG'S STAGES | three, each SAID: at half the midpoint stagger then a break ROAR that bends the frame (`breakRoar`, `roarBig`, `nf_break1`), at a quarter the `fury` (no ledge, `nfPace` 240/330, `nf_break2`). No tell is shortened in any stage. On the perch a blow, or her standing under it, ends the wait and he dives with the full warning. `tests/turn-roar.cjs`, `docs/combat/BOSS_NULLFANG.md` |
 | `boss-fx.js` | the guardians' shared effect beats — a wind-up gathers light, the strike that follows fires one at the body, a hard landing goes through the ground — for every sage and micro-boss but NULLFANG and the Alpha, which place their own (`tests/boss-fx.cjs`) |
 | `ripple.js` | a shock that bends the screen: the finished frame redrawn through ring-shaped windows so the picture itself bows as a wave passes, with a soft wash, a shimmer behind the front, a frame nudge and an optional step back — the Alpha's howl, roar and fury (`shockRipple`) |
+| *(game.js)* THE MAP | each room is charted from its AIR — the cavity, six pixels a tile, softened and cut back to a clean wandering line (`roomMini`, `MINI_S`); no frames; YOU ARE HERE is her helmet in a beating ring at one screen size at any zoom; the errand's room wears a gold mark (`pgGoalRoom`). `tests/map-read.cjs` |
+| *(game.js)* THE SHOP | `shopOpen(ask)` opens as a QUESTION when a conversation leads into it, nothing can be bought for half a second or by a key that was already down (`shopGuard`, `shopArmed`), and one row is Ratchet's pick with a reason (`shopPick`, `SHOP_PICK_ORDER`). Guardians pay `bossScrap` however they go. `tests/shop-ask.cjs` |
+| *(entities.js)* THE DASH | every echo is HER — the cell she was drawn with that frame (`HERO_ECHO`, recorded in `drawStripCell` while her body is drawn), as light cooling white→cyan→violet — behind a launch ring (`shockRipple`) and a wake of ribbons (`dashFx`). Never a stand-in silhouette |
 | `warp.js` | `?room=<id>` — the owner's jump into any room, behind the Forge's own passphrase. Inert without the query string; its own save slot |
 
 **State.** One global `G` holds the run (`G.state`, `G.enemies`, `G.save`,

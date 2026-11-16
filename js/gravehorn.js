@@ -101,7 +101,7 @@ const GH_CINE = { ghwake: 1, ghspeak: 1, ghbellow: 1, kneel: 1, rage: 1, beaten:
 
 // ---- the plates: registered only when they are on disk --------------------
 const GH_PART_KEYS = ['body', 'head', 'head_roar', 'horn_big', 'horn_small', 'fleg_up', 'fleg_low',
-  'hleg_up', 'hleg_low', 'hoof', 'tail', 'body2', 'head2', 'horn_big2', 'horn_small2'];
+  'hleg_up', 'hleg_low', 'hoof', 'tail', 'body2', 'head2', 'horn_big2', 'horn_small2', 'turn34', 'turn_front'];
 (function ghRegister() {
   const on = (typeof window !== 'undefined' && window.GH_FILES) || [];
   if (typeof MEDIA_SRC === 'undefined') return;
@@ -133,6 +133,33 @@ const GH_BOX = {
 };
 GH_BOX.body2 = GH_BOX.body; GH_BOX.head2 = GH_BOX.head;
 GH_BOX.horn_big2 = GH_BOX.horn_big; GH_BOX.horn_small2 = GH_BOX.horn_small;
+// HE TURNS LIKE AN ANIMAL (owner, 2026-11-16: "I did ask you to check out how
+// this animal moves and rotates. Because now it's just rotating as a simple
+// paper leaf instead of actually rotating like a normal animal"). The turn was
+// the whole rig squashed flat and mirrored — c.scale through zero — which is
+// what a card does. A heavy quadruped comes round with its head and shoulders
+// leading and its hindquarters following (the shoulder girdle leads the pelvic
+// girdle in yaw; in a rhinoceros the forelimb is the stronger limb and carries
+// it), and from the side that is three pictures, not one squashed: the
+// three-quarter view, head-on, the three-quarter view the other way. Those two
+// views are a fired plate of the same machine (tools/ghturn.cjs cuts them and
+// MEASURES these rows: size, the hooves' axis, the floor, the lit eye).
+//   q / f : how far round (|faceVis|, 1 = profile) each picture takes over
+//   H     : drawn height in world px — the rig's own standing height, measured
+const GH_TURN = {
+  q: 0.62, f: 0.2, H: 152,
+  turn34: { w: 580, h: 496, ax: 0.4267, ay: 0.9919, eyes: [[0.2834, 0.3537]] },
+  turn_front: { w: 377, h: 492, ax: 0.4987, ay: 0.9919, eyes: [[0.3392, 0.3547], [0.6608, 0.3547]] },
+};
+// the picture his turn is showing right now: null (the rig, in profile), or
+// the plate, which way it is mirrored, and its row
+function ghTurnView(b) {
+  const fv = b.faceVis == null ? (b.face || -1) : b.faceVis, k = Math.abs(fv);
+  if (k >= GH_TURN.q) return null;
+  const key = k < GH_TURN.f ? 'turn_front' : 'turn34', im = ghPlate(key);
+  if (!im || !ghPlate('turn34') || !ghPlate('turn_front')) return null;
+  return { key, im, row: GH_TURN[key], flip: fv > 0, k };   // the art faces LEFT, as the rig does
+}
 function ghPlate(part) {
   const k = 'gh_' + part;
   if (typeof MEDIA_SRC === 'undefined' || !MEDIA_SRC.images[k]) return null;
@@ -1378,7 +1405,7 @@ function ghGone(b) {
     if (typeof persist === 'function') persist();
   }
   if (typeof setMusic === 'function') setMusic(G.roomDef.zone);
-  if (typeof G.dropScrap === 'function') G.dropScrap(b.cx(), b.y + b.h - 30, 30);
+  if (typeof G.dropScrap === 'function') G.dropScrap(b.cx(), b.y + b.h - 30, typeof bossScrap === 'function' ? bossScrap(b) : 30);
   sfx('collapse'); cam.shake = Math.max(cam.shake, 6);
   G.toast(t('grv_gone'));
 }
@@ -1487,13 +1514,43 @@ function drawGravehorn(c, b) {
   const legs = ghLegs(b, P);
   const cx = b.cx(), fy = b.y + b.h;
   const fv = b.faceVis == null ? (b.face || -1) : b.faceVis;
-  const sx = -(Math.sign(fv) || -1) * Math.max(0.16, Math.abs(fv));
+  // no squash: in profile he is the rig at full width, and between the two
+  // profiles he is the turn's own pictures (ghTurnView). Without those plates
+  // on disk the rig simply changes side at the half-way mark.
+  const sx = -(Math.sign(fv) || -1);
+  const tv = ghTurnView(b);
   const p2 = b.phase === 2;
   // the dark belongs to the entrance and the fade to the exit; any other
   // state (an art harness posing one by name) is drawn in full light
   const dark = (b.st === 'dorm' || b.st === 'ghwake') ? clamp(b.dark == null ? 1 : b.dark, 0, 1) : 0;
   const fade = (b.st === 'retreat' || b.dead) ? clamp(b.fade || 0, 0, 1) : 0;
-  if (!G.artProbe && fade < 1) contactShadow(c, cx, fy, 150 * Math.abs(sx), 0.45 * (1 - fade));
+  if (!G.artProbe && fade < 1) contactShadow(c, cx, fy, tv ? 110 : 150, 0.45 * (1 - fade));
+  if (tv) {
+    // THE TURN: one whole-figure plate, hooves on his floor line, the weight
+    // going down through the forehand as he comes round
+    const R = tv.row, dh = GH_TURN.H, dw = dh * R.w / R.h, sink = 1 - 0.035 * (1 - tv.k / GH_TURN.q);
+    c.save();
+    c.globalAlpha *= 1 - fade * 0.96;
+    c.translate(cx, fy); c.scale(tv.flip ? -1 : 1, sink);
+    c.drawImage(tv.im, -R.ax * dw, -R.ay * dh, dw, dh);
+    // the eye: the infection looks out of the near one, and both are lit
+    const tk0 = ghPose(b).tell || 0, col0 = tk0 > 0 ? ghMix('#ff3b2a', TELL_COL, tk0) : '#ff3b2a';
+    R.eyes.forEach((e, i) => {
+      const ex = (e[0] - R.ax) * dw, ey = (e[1] - R.ay) * dh;
+      if (i === 0 && typeof infEyeMark === 'function') infEyeMark(c, ex, ey);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const g0 = c.createRadialGradient(ex, ey, 0.5, ex, ey, 15);
+      g0.addColorStop(0, '#ffffff'); g0.addColorStop(0.25, col0); g0.addColorStop(1, 'rgba(255,40,30,0)');
+      c.fillStyle = g0; c.beginPath(); c.arc(ex, ey, 15, 0, 6.2832); c.fill(); c.restore();
+    });
+    if (p2) {
+      // phase two is light on him here too: the plate laid over itself, hot
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha *= 0.16 + 0.05 * Math.sin((b.anim || 0) * 6);
+      c.drawImage(tv.im, -R.ax * dw, -R.ay * dh, dw, dh);
+    }
+    c.restore();
+    return;
+  }
   c.save();
   c.globalAlpha *= 1 - fade * 0.96;
   c.translate(cx, fy); c.scale(sx, 1);
@@ -1744,6 +1801,7 @@ TEXT_LAYERS.push({
     grv_gone: 'GRAVEHORN backs into the rock and is gone. The raw marble is unguarded.',
     grv_stone_held: 'GRAVEHORN holds the stone. It will not break while he stands.',
     grv_stone_back: 'The marble is back in its rock. GRAVEHORN was never driven off it.',
+    grv_ring_dark: 'The haul ring is dark. Its far end stands beside the stone GRAVEHORN holds.',
     grv_parry_hint: 'Strike his horn as it comes up — a clean hit turns the toss.',
     grv_head: 'His horn is gone — the head is open. Hit it!',
     op_o_gravehorn: 'GRAVEHORN stands on the raw marble at the end of the cave. Drive him off.',
@@ -1763,6 +1821,7 @@ TEXT_LAYERS.push({
     grv_gone: 'تراجع قَرنُ القبر إلى الصخر واختفى. الرخام الخام بلا من يقف عليه.',
     grv_stone_held: 'قَرنُ القبر يمسك بالحجر. لن ينكسر ما دام واقفًا.',
     grv_stone_back: 'عاد الرخام إلى صخرته. لم يُطرَد قَرنُ القبر عنه قطّ.',
+    grv_ring_dark: 'حلقة النقل مظلمة. طرفها الآخر عند الحجر الذي يمسك به قَرنُ القبر.',
     grv_parry_hint: 'اضربي قرنه وهو يرتفع — ضربة نظيفة تردّ النطحة.',
     grv_head: 'قرنه غائب — رأسه مكشوف. اضربيه!',
     op_o_gravehorn: 'يقف قَرنُ القبر على الرخام الخام في آخر الكهف. اطرديه.',
@@ -1782,6 +1841,7 @@ TEXT_LAYERS.push({
     grv_gone: 'MEZARBOYNUZ kayanın içine geri çekilip kayboldu. Ham mermerin başında kimse yok.',
     grv_stone_held: 'Taş MEZARBOYNUZ’un elinde. O ayaktayken kırılmaz.',
     grv_stone_back: 'Mermer yeniden kayasında. MEZARBOYNUZ onun başından hiç kovulmadı.',
+    grv_ring_dark: 'Taşıma halkası karanlık. Öbür ucu MEZARBOYNUZ’un tuttuğu taşın yanında.',
     grv_parry_hint: 'Boynuzu kalkarken ona vur — temiz bir vuruş savurmayı geri çevirir.',
     grv_head: 'Boynuzu yok — kafası açıkta. Vur!',
     op_o_gravehorn: 'MEZARBOYNUZ mağaranın sonunda ham mermerin başında duruyor. Onu kovala.',
@@ -1798,6 +1858,7 @@ TEXT_LAYERS.push({
     grv_gone: '墓角退进岩石里，消失了。原生大理石没人看着了。',
     grv_stone_held: '墓角守着这块石头。只要它还站着，石头就不会碎。',
     grv_stone_back: '大理石回到了岩石里。墓角从未被赶走。',
+    grv_ring_dark: '运石环是暗的。它的另一头就在墓角守着的石头旁边。',
     grv_parry_hint: '在它的角往上挑时打它的角——打得干净就能弹开这一挑。',
     grv_head: '它的角飞走了——头露出来了，快打！',
     op_o_gravehorn: '墓角站在洞穴尽头的原生大理石上。把它赶走。',
@@ -1817,6 +1878,7 @@ TEXT_LAYERS.push({
     grv_gone: 'МОГИЛЬНЫЙ РОГ пятится в скалу и исчезает. Сырой мрамор никто не держит.',
     grv_stone_held: 'МОГИЛЬНЫЙ РОГ держит камень. Пока он стоит, камень не расколется.',
     grv_stone_back: 'Мрамор снова в своей скале. МОГИЛЬНЫЙ РОГ с него не уходил.',
+    grv_ring_dark: 'Грузовое кольцо темно. Другой его конец стоит у камня, который держит МОГИЛЬНЫЙ РОГ.',
     grv_parry_hint: 'Бей по рогу, когда он идёт вверх, — чистый удар сбивает бросок.',
     grv_head: 'Рога нет — голова открыта. Бей!',
     op_o_gravehorn: 'МОГИЛЬНЫЙ РОГ стоит на сыром мраморе в конце пещеры. Прогони его.',

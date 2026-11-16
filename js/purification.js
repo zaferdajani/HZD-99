@@ -48,7 +48,22 @@ function purificationBegin(b) {
  player.swingVis = null; player.atkBuf = 0; player.chargeT = 0;
  player.face = player.faceVis = Math.sign(b.cx() - player.x - player.w/2) || 1;
  G.projs = []; G.boomer = null; G.hitStop = 0;
- G.purification = { b, room:G.roomId, phase:'hold', hold:0, t:0, clock:0, armed:false, committed:false, motes:[] };
+ // SHE IS WALKED TO HIM, AND HE IS ON THE GROUND, BEFORE SHE IS ASKED (owner,
+ // 2026-11-16: "when I freed it, you asked me to press. You should have at
+ // least adjusted my stand to make it logical, where I stand and where I
+ // purify it... take over the controller and walk it to the direction to the
+ // lion... Make the lion at least down"). The prompt used to open over
+ // wherever the last blow happened to leave the two of them — her mid-jump,
+ // him on his ledge or halfway through a leap, sometimes hanging in the rock.
+ // The `stage` phase comes first now: he comes down to the floor under him and
+ // is still; she is walked, on her own feet, to a blade's length from his head
+ // and turned to him; only then does the hold open.
+ const side = Math.sign(player.x + player.w/2 - b.cx()) || -1;
+ const Wpx = G.roomDef.w * TILE, clampX = (x) => Math.max(TILE + 6, Math.min(Wpx - TILE - player.w - 6, x));
+ let tx = clampX(b.cx() + side * (b.w/2 + 74) - player.w/2);
+ // (no room on her side of him — a wall: the other side, then)
+ if (Math.abs(tx + player.w/2 - b.cx()) < b.w/2 + 40) tx = clampX(b.cx() - side * (b.w/2 + 74) - player.w/2);
+ G.purification = { b, room:G.roomId, phase:'stage', hold:0, t:0, clock:0, armed:false, committed:false, motes:[], stage:{ tx, T:0, walked:0 } };
  const span=Math.abs(b.cx()-player.x)+b.w+180;
  cam.zoom=Math.min(worldZoom(),760/span);
  cam.x=(b.cx()+player.x+player.w/2)/2-480;cam.y=(b.cy()+player.y)/2-270;
@@ -61,7 +76,7 @@ function purificationRestoreStage() {
 }
 function purificationFinish(p) {
  if (p.committed) return; p.committed = true;
- const b=p.b; b.purificationDone=true; b.restoredGold=true;
+ const b=p.b; b.purificationDone=true; b.restoredGold=true; b.stagT=0;
  b.skipPurifyFilm = !PURIFICATION_MOVIES[b.kind];
  if (!b.skipPurifyFilm) PURIFY_VID[b.kind]=PURIFICATION_MOVIES[b.kind];
  G.purification=null; purificationButtonHide(); player.chargeT=0; G.hitStop=0; releaseInput();
@@ -85,6 +100,35 @@ function updatePurification(dt) {
  // Hidden tabs cannot complete a hold or leap through the choreography.
  if(document.hidden || purificationPortrait()){p.hold=0;p.armed=false;purificationPointer=false;player.chargeT=0;return;}
  p.clock+=dt;p.t+=dt;infEyeUpdate(dt);
+ if(p.phase==='stage'){
+  const b=p.b,s=p.stage; s.T+=dt;
+  // (the hold is armed by a key that has been LET GO since the last blow — here as in the hold itself)
+  if(!(purificationPointer || inD('INT'))) p.armed=true;
+  // the floor under a body: the first surface at or below its feet
+  const floorUnder=(cx,feet)=>{const g=typeof groundColumnAt==='function'?groundColumnAt(cx):null; if(!g||!g.length) return null;
+   const below=g.filter(y=>y>=feet-10); return below.length?Math.min.apply(null,below):Math.max.apply(null,g);};
+  // HE COMES DOWN and lies still
+  const gb=floorUnder(b.cx(),b.y+b.h); let bDown=true;
+  if(gb!=null){ if(b.y+b.h<gb-1){ b.y=Math.min(gb-b.h,b.y+760*dt); bDown=b.y+b.h>=gb-1; } else b.y=gb-b.h; }
+  b.vx=b.vy=0; b.st='winded'; b.stagT=Math.max(b.stagT||0,0.6);   // (stagT > 0 is his cowering-low plate: beast.js)
+  // SHE WALKS to him — falls first, if the last blow was struck in the air
+  const gp=floorUnder(player.x+player.w/2,player.y+player.h); let pDown=true;
+  if(gp!=null){ if(player.y+player.h<gp-1){ player.y=Math.min(gp-player.h,player.y+760*dt); pDown=player.y+player.h>=gp-1; } else player.y=gp-player.h; }
+  player.on=pDown; player.vy=0;
+  const dx=s.tx-player.x;
+  if(pDown && Math.abs(dx)>3 && s.T<3.4){
+   const dir=Math.sign(dx), step=Math.min(Math.abs(dx),150*dt);
+   player.x+=dir*step; s.walked+=step; player.vx=dir*150; player.face=player.faceVis=dir;
+   if(typeof heroStepLen==='function') player.stridePh=(player.stridePh||0)+dt*clamp(150/heroStepLen(150),0,11);
+  }else if(pDown){
+   player.vx=0; player.face=player.faceVis=Math.sign(b.cx()-player.x-player.w/2)||1;
+   if(bDown && s.T>0.45){ p.phase='hold'; p.t=0; p.hold=0; }
+  }
+  // the frame follows the two of them in
+  const span=Math.abs(b.cx()-player.x)+b.w+180, z=Math.min(worldZoom(),760/span), k=Math.min(1,dt*5);
+  cam.zoom+=(z-cam.zoom)*k; cam.x+=((b.cx()+player.x+player.w/2)/2-480-cam.x)*k; cam.y+=((b.cy()+player.y)/2-270-cam.y)*k;
+  return;
+ }
  if(p.phase==='hold'){
   const down=purificationPointer || inD('INT');
   if(!down){p.armed=true;p.hold=0;player.chargeT=0;}

@@ -23,6 +23,60 @@ function crestSwingMul(k) {
   const b = typeof player !== 'undefined' && player ? swingCrest(player.swing) : null;
   return b && b[k] != null ? b[k] : 1;
 }
+// WHAT A GUARDIAN PAYS (owner, 2026-11-16: "bosses will drop more scraps if
+// they die, but I'm mostly purifying them. But still, I should get a scrap
+// after I defeat them"). Thirty for every one of them, freed or broken, was a
+// crawler's purse on a kingdom's guardian. A Sage pays 140, the Wolf King and
+// the micro-bosses 90 — the same whether she purifies it or not.
+// WHAT A BLOW SOUNDS LIKE DEPENDS ON WHAT IT LANDED ON (owner, 2026-11-16:
+// "create different sounds for hitting different enemies... I do not like it
+// that all of them have the same metallic hitting sound"). Her blade rang the
+// same steel off a wolf's flank, a bat's wing and a turret's housing. The voice
+// of a hit is the BODY's now (audio.js `hit_*`): a wolf's plate thuds and the
+// animal yelps, a cat's is quick and thin with a spit, a wing slaps, a robe
+// takes the edge dull, a housing rings, a blob squelches. The steel ring stays
+// for what is plainly steel — a guard, a crawler drone — and guardians keep
+// their own clang.
+// NULLFANG's prowl and run, by gear (p1 prowl 165 -> 180, run 285 -> 300 on
+// 2026-11-14; the fury's own gear 2026-11-16)
+function nfPace(b, running) { return running ? (b.fury ? 330 : 300) : (b.fury ? 240 : b.phase === 2 ? 210 : 180); }
+function foeHitSound(e, big) {
+  if (big) return 'bosshit';
+  if (!e) return 'hit';
+  if (typeof isCheetah === 'function' && isCheetah(e)) return 'hit_cat';
+  if (typeof isWolf === 'function' && isWolf(e)) return 'hit_wolf';
+  switch (e.kind) {
+    case 'bat': case 'flier': return 'hit_wing';
+    case 'sage': return 'hit_robe';
+    case 'turret': case 'kiln': return 'hit_housing';
+    case 'blob': case 'snare': return 'hit_soft';
+    case 'rime': return 'hit_ice';
+    case 'surge': return 'hit_spark';
+  }
+  return 'hit';
+}
+// her drawn cell as one flat colour, on a scratch canvas: the dash's afterimage
+// (and nothing else — one canvas, redrawn per echo, never kept)
+const HERO_ECHO = { cv: null, x: null, ox: 170, oy: 250, w: 340, h: 320, rec: false, last: null };
+function heroEchoCell(pose, col) {
+  if (typeof drawStripCell !== 'function') return null;
+  let o = HERO_ECHO.cv;
+  if (!o) { o = HERO_ECHO.cv = document.createElement('canvas'); o.width = HERO_ECHO.w; o.height = HERO_ECHO.h; HERO_ECHO.x = o.getContext('2d'); }
+  const x = HERO_ECHO.x, keep = typeof G !== 'undefined' ? G.lastStrip : null, rec0 = HERO_ECHO.rec; HERO_ECHO.rec = false;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.clearRect(0, 0, o.width, o.height);
+  x.translate(HERO_ECHO.ox, HERO_ECHO.oy);
+  const drew = drawStripCell(x, pose.key, pose.f, pose.cells, pose.cx, pose.base, pose.height, pose.flip);
+  if (typeof G !== 'undefined') G.lastStrip = keep;                // (the diag reads what drew HER, not her echo)
+  HERO_ECHO.rec = rec0;
+  if (!drew) return null;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = col; x.fillRect(0, 0, o.width, o.height);
+  x.globalCompositeOperation = 'source-over';
+  return o;
+}
+function bossScrap(b) {
+  const k = b && b.kind;
+  return (k === 'alpha' || k === 'horn' || k === 'carrier' || k === 'chime') ? 90 : 140;
+}
 function hasMod(id) { return !!G.save.abil[id]; }
 function hasSkill(id) { return G.save.skills && G.save.skills.indexOf(id) >= 0; }
 // evolution: power milestones make the character visibly bigger and better-geared
@@ -2230,14 +2284,25 @@ class Player {
     } else if (this.dashT > 0) {
       this.dashT -= dt;
       this.vx = this.dashVX; this.vy = this.dashVY;
-      if (this.dashT <= 0) { if (this.dashVY < 0) this.vy = -240; else this.vy = Math.min(this.vy, 320); }
-      // afterimages: 2-3 DISCRETE echoes along the dash line (not a per-frame
-      // smear) — each one a readable copy that fades where she was
+      if (this.dashT <= 0) {
+        if (this.dashVY < 0) this.vy = -240; else this.vy = Math.min(this.vy, 320);
+        // the dash LANDS: a snap of light where she stops, and the wake closes on her
+        const cx = this.x + this.w / 2, cy = this.y + this.h * 0.45;
+        burst(cx, cy, 9, '#bff6ff', 210, 0.3, 0, 2.5, true);
+        if (this.dashFx) this.dashFx.end = true;
+      }
+      // AFTERIMAGES OF HER (owner, 2026-11-16: "I should be seeing a ghost of my
+      // shape behind me, not the old cat"). Each echo keeps the very cell she
+      // was drawn with at that instant, so what is left hanging in the air is
+      // her own outline — helmet, shoulders, blade — not a stand-in blob.
       this.dashTrailT -= dt;
       if (this.dashTrailT <= 0) {
-        this.dashTrailT = 0.055;
-        this.trail.push({ x: this.x, y: this.y, face: this.face, t: 0.24, t0: 0.24 });
+        this.dashTrailT = 0.034;
+        const mp = this._echoPose;
+        this.trail.push({ x: this.x, y: this.y, face: this.face, t: 0.36, t0: 0.36,
+          pose: mp || null });
       }
+      if (this.dashFx) { this.dashFx.x1 = this.x + this.w / 2; this.dashFx.y1 = this.y + this.h * 0.5; }
     } else {
       // horizontal — crisp starts and stops
       // ...and the first meeting's swat carries her the length of the mound:
@@ -2360,7 +2425,17 @@ class Player {
         this.dashVY = ddy / dn * 880;
         this.dashT = 0.16 * (hasCrest('sprint') ? 1.2 : 1); this.dash0 = this.dashT;
         this.dashCD = 0.45; this.vx = this.dashVX; this.vy = this.dashVY;
-        this.dashTrailT = 0.03;   // first afterimage drops just behind her
+        this.dashTrailT = 0.012;  // first afterimage drops just behind her
+        // THE LAUNCH: the air is punched where she left — a ring that bows the
+        // picture for a blink, sparks thrown back along the line, and the wake
+        // (drawn in draw(): ribbons of light from where she was to where she is)
+        {
+          const cx = this.x + this.w / 2, cy = this.y + this.h * 0.5;
+          this.dashFx = { x0: cx, y0: cy, x1: cx, y1: cy, t: 0, T: 0.42, end: false, ux: ddx / dn, uy: ddy / dn };
+          if (typeof shockRipple === 'function') shockRipple(cx, cy, { R: 150, dur: 0.34, amp: 9, width: 26, col: '#8ff6ff', fronts: 1, nudge: 0 });
+          for (let i = 0; i < 12; i++) addPart(cx + rnd(-8, 8), cy + rnd(-20, 20), -ddx / dn * rnd(120, 420) + rnd(-40, 40), -ddy / dn * rnd(120, 420) + rnd(-40, 40), rnd(0.18, 0.4), i % 3 ? '#8ff6ff' : '#ffffff', rnd(1.5, 3), 0, true);
+          cam.shake = Math.max(cam.shake, 2.5);
+        }
         this.healT = 0; sfx('dash');
         if (typeof padRumble === 'function') padRumble(0.10, 0.22, 45);
       }
@@ -2754,8 +2829,8 @@ class Player {
         rnd(-40, 40), rnd(-70, -20), 0.3, chance(0.5) ? '#9fe8ff' : '#ffffff', 2, 90, true);
       this.groundedOn = true;
     } else if (onSpike(this)) {
-      this.hurt(1, this.x - this.vx);
-      if (!this.dead) { this.x = this.lastSafe.x; this.y = this.lastSafe.y; this.vx = 0; this.vy = 0; }
+      if (!(typeof G !== 'undefined' && G.rescue)) this.hurt(1, this.x - this.vx);
+      if (!this.dead) hazardRescue(this);
     } else if (this.on && this.vy === 0) {
       // remember a safe spot (solid, non-hazard footing)
       const bx = Math.floor((this.x + this.w / 2) / TILE), by = Math.floor((this.y + this.h + 4) / TILE);
@@ -2857,7 +2932,7 @@ class Player {
           // like a jab. Hit-stop, shake and rumble now all scale with what the
           // blow actually was, so the third hit of a combo reads as the third hit.
           const heavy = this.swing.combo === 2, big = e instanceof Boss;
-          sfx(big ? 'bosshit' : 'hit');
+          sfx(foeHitSound(e, big));
           cam.shake = Math.max(cam.shake, heavy ? 5 : big ? 3.4 : 2.5);
           attackFreeze(aid, big);
           // RECOIL. Contact has to push back on HER too, or the enemy is made of
@@ -2975,6 +3050,7 @@ class Player {
       }
     }
     for (let i = this.trail.length - 1; i >= 0; i--) { this.trail[i].t -= dt; if (this.trail[i].t <= 0) this.trail.splice(i, 1); }
+    if (this.dashFx) { this.dashFx.t += dt; if (this.dashFx.t >= this.dashFx.T) this.dashFx = null; }
     this.updateBoomer(dt);
   }
   // ---- THE THROWN BLADE ---------------------------------------------------
@@ -4294,23 +4370,44 @@ class Player {
     //  draw block in game.js. It used to `return` here, which is why she
     //  vanished outright on alternate frames instead of blinking.)
     const P = PAL[G.roomDef.zone];
+    // THE WAKE: ribbons of light from where the dash began to where she is,
+    // hot at her end and gone at the other; they thin and die after she stops
+    if (this.dashFx) {
+      const d = this.dashFx, k = 1 - d.t / d.T, len = Math.hypot(d.x1 - d.x0, d.y1 - d.y0);
+      if (len > 8 && k > 0) {
+        const nx = -d.uy, ny = d.ux;
+        c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+        for (let i = 0; i < 6; i++) {
+          const off = (i - 2.5) * 9 + Math.sin(i * 12.9898) * 4, tail = 0.15 + ((i * 37) % 10) / 22;
+          const ax = d.x0 + (d.x1 - d.x0) * tail * (1 - k) + nx * off, ay = d.y0 + (d.y1 - d.y0) * tail * (1 - k) + ny * off;
+          const bx = d.x1 + nx * off * 0.7, by = d.y1 + ny * off * 0.7;
+          const g = c.createLinearGradient(ax, ay, bx, by);
+          g.addColorStop(0, 'rgba(120,150,255,0)'); g.addColorStop(0.55, 'rgba(110,235,255,' + (0.34 * k).toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,255,255,' + (0.75 * k).toFixed(3) + ')');
+          c.strokeStyle = g; c.lineWidth = (i % 2 ? 2.2 : 4) * (0.4 + 0.6 * k);
+          c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
+        }
+        c.restore();
+      }
+    }
     for (const tr of this.trail) {
-      // dash echoes: each one a whole readable copy of her silhouette that
-      // cools from white-hot (freshest) to zone-glow and shrinks as it dies
+      // dash echoes: HER OWN OUTLINE, the cell she wore at that instant, as
+      // light — white-hot when it is fresh, cooling through cyan to violet and
+      // drifting back along the line as it dies
       const k = tr.t / (tr.t0 || 0.25);
+      const col = k > 0.7 ? '#f2feff' : k > 0.38 ? '#62e6ff' : '#8f7dff';
+      const o = tr.pose ? heroEchoCell(tr.pose, col) : null;
       c.save(); c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = 0.24 + k * 0.36;
-      c.translate(tr.x + this.w / 2, tr.y + this.h / 2);
-      c.scale(tr.face * (0.86 + k * 0.14), 0.86 + k * 0.14);
-      c.fillStyle = P.glow;
-      rr(c, -14, -7, 28, 19, 9); c.fill();
-      c.beginPath(); c.arc(2, -15, 11, 0, 7); c.fill();
-      c.beginPath(); c.moveTo(-8, -21); c.lineTo(-4, -32); c.lineTo(1, -22); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(4, -22); c.lineTo(9, -32); c.lineTo(13, -21); c.closePath(); c.fill();
-      // white-hot core on the freshest echo — the visor band still burning
-      c.globalAlpha = k * k * 0.7;
-      c.fillStyle = '#ffffff';
-      rr(c, -5, -19, 15, 6, 3); c.fill();
+      if (o) {
+        c.globalAlpha = 0.1 + k * 0.55;
+        c.translate(tr.x + this.w / 2, tr.y + this.h);
+        c.scale(tr.face || 1, 1);
+        c.drawImage(o, -HERO_ECHO.ox, -HERO_ECHO.oy);
+        if (k > 0.7) { c.globalAlpha = (k - 0.7) * 1.6; c.drawImage(o, -HERO_ECHO.ox, -HERO_ECHO.oy); }   // the freshest one burns
+      } else {
+        // (her sheet is not here yet: a plain mote of light, never a stand-in body)
+        c.globalAlpha = 0.2 + k * 0.3; c.fillStyle = P.glow;
+        c.beginPath(); c.ellipse(tr.x + this.w / 2, tr.y + this.h * 0.45, 10, 22, 0, 0, 7); c.fill();
+      }
       c.restore(); c.globalAlpha = 1;
     }
     // contact shadow — tightens and darkens as the hero nears the ground,
@@ -4586,7 +4683,12 @@ class Player {
     // fired from the body rather than part of it (§0.0), they respond to state
     // the art cannot know, and they are the same in both paths, so they sit
     // OUTSIDE the guard and draw either way.
-    if (!this.drawRoboPlate(c, run)) {
+    // (the cell that draws her this frame is remembered — whichever drawer it
+    // came through, a stride or a swing — so a dash can leave HER behind it)
+    HERO_ECHO.rec = true; HERO_ECHO.last = null;
+    const _plate = this.drawRoboPlate(c, run);
+    HERO_ECHO.rec = false; this._echoPose = HERO_ECHO.last;
+    if (!_plate) {
     if (hero && evo >= 2) {
       // crimson war-cloak flowing behind
       const cwv = Math.sin(this.anim * 5) * (2 + spdK * 4);
@@ -8940,7 +9042,13 @@ class Enemy {
             // and the clock that will bend it starts now
             this.bendAt = this.markX != null ? REFRACT_APEX : 0;
             this.bendT = 0;
-            sfx('jump');
+            // ITS OWN VOICE, NOT HERS (owner, 2026-11-16: "when it jumps, it's
+            // producing my jumping sound... It should have its own animalistic
+            // sound"). 'jump' is the sound of HER legs. A beast leaves the
+            // ground with its throat: the pack's lunge for a wolf, the cat's
+            // own for a cat; a machine that is neither keeps a plain servo kick.
+            sfx(typeof isCheetah === 'function' && isCheetah(this) ? 'cat_leap'
+              : typeof isWolf === 'function' && isWolf(this) ? 'wolf_lunge' : 'hop');
           } else if (this.markX != null && !this.wasAir) {
             // A MARK IS A PROMISE ABOUT A JUMP. If the crouch finished and the
             // leap never came — she walked out of the 380 band while it
@@ -11941,7 +12049,7 @@ function sageTame(e) {
   // needs only a GATE_ROOM row gated on 'sageTame_<its room>' and this
   // fires the reveal the moment it is purified.
   for (const rid in (typeof GATE_ROOM !== 'undefined' ? GATE_ROOM : {})) {
-    if (!gateDoorsAll(rid).some(d => d.need === key)) continue;
+    if (!gateDoorsAll(rid).some(d => d.need === key || d.lock === key)) continue;
     G.toast(t('cave_open'));
     sfx('chargeReady');
     break;
@@ -12683,6 +12791,14 @@ class Boss {
     this.hpMax = Math.round(s.hp * FOE_HP * (ZONE_ATK[s.zone] || 1.6) * DF().ehp); this.hp = this.hpMax;
     if (typeof combatInit === 'function') combatInit(this);
     this.vx = 0; this.vy = 0; this.st = 'dorm'; this.t = 1.4; this.phase = 1;
+    // THE WOLF KING WALKS HIS OWN DEN (owner, 2026-11-16: "there's an elevation
+    // in the terrain when I fought the alpha that prevented him from walking
+    // all the way, so I can just hide behind it... just like the rhino, bad
+    // for playing"). The hulks at both ends of A10 rise a tile a column — a
+    // ramp to anything that can take a step — and a boss had no step at all:
+    // a tile was a wall to him, and the door she came in by was a place to
+    // sit the fight out. He steps up what a pack wolf steps up.
+    if (kind === 'alpha') this.stepUp = ENEMY_STEP_UP;
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
@@ -13018,7 +13134,25 @@ class Boss {
     // For NULLFANG it is also, by the Braid's own arithmetic, the single most
     // consequential press in a run: as the FIRST entry on the ledger it carries
     // roughly nine times the weight of the choice you will make an hour later.
+    // NULLFANG BREAKS TWICE (owner, 2026-11-16: "the Guardian was super easy. It
+    // had one phase where Rhino had two. This Guardian should have at least two
+    // and maybe three. With each phase, it gets harder"). He always had a second
+    // gear, entered through the stagger below — and nothing in the picture said
+    // so, so the fight read as one. The half is now answered with a ROAR that
+    // bends the frame the moment he is back on his feet; and at a quarter the
+    // last binding goes the same way and he stops resting altogether (`fury`:
+    // no ledge, a faster prowl, every pounce doubled). No warning is shorter in
+    // any of them — it is the WAITING that goes, never the telling.
+    if (this.kind === 'glitch' && this.phase === 2 && !this.fury && this.hp < this.hpMax / 4 && this.st !== 'daze') {
+      this.fury = true; this.breakRoar = 2; this.ambushCD = 1e9;
+      this.stagT = Math.max(this.stagT || 0, 1.2); this.t = 1.0; this.vx = 0; this.vy = 0;
+      burst(this.cx(), this.cy(), 34, '#ffffff', 340, 0.7, 200, 4, true);
+      burst(this.cx(), this.cy(), 26, '#b06aff', 260, 0.9, 60, 3, true);
+      cam.shake = 13; sfx('phase'); G.flash = Math.max(G.flash, 0.38); G.hitStop = Math.max(G.hitStop, 0.12);
+      if (typeof padRumble === 'function') padRumble(0.9, 0.9, 420);
+    }
     if (this.phase === 1 && this.hp < this.hpMax / 2) {
+      if (this.kind === 'glitch') this.breakRoar = 1;
       // THE MIDPOINT — the beat every one of these fights was missing. A boss
       // is a dramatic structure, and the published shape puts a turning point
       // at the middle: a moment of relief immediately before the hardest part.
@@ -13084,6 +13218,13 @@ class Boss {
         // it plays, nothing begins until it has landed — and a leap leaves the
         // ground pointing where it is going.
         let turning = Math.abs((this.faceVis == null ? (this.face || 1) : this.faceVis) - (this.face || 1)) > 0.02;
+        // a binding has just broken: the first thing he does on his feet is ROAR
+        if (this.breakRoar && !(this.stagT > 0) && (this.st === 'idle' || this.st === 'stalk' || this.st === 'run' || this.st === 'recover')) {
+          this.roarBig = this.breakRoar; this.breakRoar = 0;
+          this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); this.lastMove = 'roar'; this.turnStreak = 0;
+          this.face = Math.sign(dist) || this.face;
+          if (typeof G.toast === 'function') G.toast(t(this.roarBig === 2 ? 'nf_break2' : 'nf_break1'));
+        }
         const lookAt = (side) => {
           if (turning || !side || side === this.face) return;
           this.face = side; this.turnStreak = (this.turnStreak || 0) + 1;
@@ -13203,7 +13344,7 @@ class Boss {
           } else {
           if (adist > 520) this.st = 'run';
           else if (adist < 370) this.st = 'stalk';
-          const pace = this.st === 'run' ? 300 : (this.phase === 2 ? 210 : 180);   // p1 prowl 165 -> 180, run 285 -> 300 (2026-11-14)
+          const pace = nfPace(this, this.st === 'run');   // p1 prowl 165 -> 180, run 285 -> 300 (2026-11-14)
           const desired = this.face * pace * spd;
           this.vx += clamp(desired - this.vx, -1050 * dt, 1050 * dt);
           this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
@@ -13307,7 +13448,7 @@ class Boss {
             // random: the same choice always gets the same lion.
             const stays = adist < 150 && (Math.sign(dist) || this.face) === this.face;
             if (!this.swiped2 && (this.phase === 2 || stays)) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
-            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52); }
+            else { this.swiped2 = false; this.st = 'idle'; this.t = this.fury ? rnd(0.3, 0.45) : this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52); }
           }
         } else if (this.st === 'crouch') {
           // flat to the ground, trembling with intent — then the pounce
@@ -13432,9 +13573,20 @@ class Boss {
             if (typeof fx === 'function') for (const sd of [1, -1])
               fx('cone', this.cx() + sd * 30, this.cy() - 12, { rx: 300, ry: 220, dur: 0.75, flip: sd < 0, col: '#b48cff', hot: '#ffffff', power: sd === this.face ? 1.2 : 0.8 });
             if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
+            // ("The roaring was not intimidating." It shook the camera and drew
+            // two cones. The picture itself bows to it now — ripple.js — and the
+            // roar that answers a broken binding is the big one: wider, longer,
+            // and it throws her from further off.)
+            const big = this.roarBig || 0; this.roarBig = 0;
+            if (typeof shockRipple === 'function')
+              shockRipple(this.cx() + this.face * 30, this.cy() - 10, big
+                ? { R: 820, dur: 1.2, amp: 32 + big * 4, width: 74, col: '#b06aff', fronts: 4, gap: 0.12, nudge: 8, pulse: 0.24 }
+                : { R: 520, dur: 0.8, amp: 18, width: 54, col: '#b06aff', fronts: 2, gap: 0.14, nudge: 4 });
+            if (big) { cam.shake = Math.max(cam.shake, 20); G.flash = Math.max(G.flash, 0.3); G.hitStop = Math.max(G.hitStop, 0.1);
+              for (let i = 0; i < 18; i++) addPart(this.cx() + rnd(-this.w * 0.8, this.w * 0.8), this.y + this.h - 3, rnd(-140, 140), rnd(-90, -20), rnd(0.3, 0.55), '#8a8a96', rnd(2, 3.5), 160, false); }
             // the roar itself shoves you off your feet
-            if (adist < 250 && !player.dead) {
-              player.vx = (Math.sign(dist) || 1) * 520;
+            if (adist < (big ? 430 : 250) && !player.dead) {
+              player.vx = (Math.sign(dist) || 1) * (big ? 640 : 520);
               player.vy = Math.min(player.vy, -170);
             }
             // and the pack answers
@@ -13482,6 +13634,17 @@ class Boss {
           // in the last half second — that is the dive coming
           this.vx = 0; this.vy = 0; this.t -= dt;
           lookAt(Math.sign(dist) || 1);
+          // NO SITTING UP THERE WHILE SHE CUTS AT HIS FEET (owner, 2026-11-16:
+          // "The Guardian stood still for so long on top of the platform that
+          // made it so much easier to just stand underneath it and hit it and
+          // kill it"). The second he spent tracking her was a second she spent
+          // under the ledge with her blade up. A blow taken on the perch, or
+          // her standing beneath it, ends the wait: he goes straight to the
+          // flatten — the dive's own 450 ms tell, never shortened — and the
+          // dive lands where she is standing.
+          if (this.t > 0.45 && ((this.hurtT || 0) > 0 || (Math.abs(dist) < 96 && player.y > this.y + this.h - 8))) {
+            this.t = 0.45; this.perchCut = (this.perchCut || 0) + 1;
+          }
           // The dive's telegraph is the LAST 450 ms of the perch, not the whole
           // of it — it sits up there tracking you for a second first, and a cue
           // on entry would be a warning that arrives before there is anything
@@ -15125,7 +15288,7 @@ class Boss {
       this.purified = true; this.pureT = 0; this.rewardPend = true;
       this.vx = 0; this.vy = 0;
       if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
-      G.dropScrap(this.cx(), this.cy(), 30);
+      G.dropScrap(this.cx(), this.cy(), bossScrap(this));
       // the film path owes the same sentence the cleanse path says: the
       // campaign run freed NULLFANG through his film and never read that he
       // was cleansed, not killed. It waits under the film (toasts hold while
@@ -15150,7 +15313,7 @@ class Boss {
       this.purified = true; this.pureT = 0.7; this.vx = 0; this.vy = 0;
       this.rewardPend = true;
       setMusic(G.roomDef.zone);
-      G.dropScrap(this.cx(), this.cy(), 30);
+      G.dropScrap(this.cx(), this.cy(), bossScrap(this));
       const pk = { glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
                    zero: 'pure_zero', prism: 'pure_prism' }[this.kind];
       if (pk) G.toast(t(pk));
@@ -15169,7 +15332,7 @@ class Boss {
     G.addRing(this.cx(), this.cy()); G.addRing(this.cx(), this.cy(), 60);
     G.impact = { t: 0.24, t0: 0.24, x: this.cx(), y: this.cy() };
     if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
-    G.dropScrap(this.cx(), this.cy(), 30);
+    G.dropScrap(this.cx(), this.cy(), bossScrap(this));
     // the reward dialog used to open HERE — freezing the collapse mid-fall
     // so the wreck stood still. Now the death scene plays to its finale
     // first; the spoils wait their turn (update fires them, loadRoom is

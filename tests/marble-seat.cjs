@@ -27,7 +27,9 @@ const { chromium } = require('playwright');
     await page.waitForFunction(() => typeof startGame === 'function');
     const R = await page.evaluate(async () => {
       window.requestAnimationFrame = () => 0;
-      const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, rubbleCV1B: 1, beacon: 1, bossHorn: 1, ghMet: 1, burstDone: 1 }); startGame(sv);
+      const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, rubbleCV1B: 1, beacon: 1, bossHorn: 1, ghMet: 1, burstDone: 1,
+        // (the quarry's haul ring has already been woken: its ceremony holds her controls, and is tests/ring-wake.cjs' business)
+        'rw_CV3>CV1B': 1 }); startGame(sv);
       loadRoom('CV3'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; G.enemies = [];
       const s = G.statics.find(q => q.type === 'pillar'); if (!s) return { none: 1 };
       // (a column of the stone that is set INTO the back wall has no floor under

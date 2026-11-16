@@ -194,6 +194,9 @@ function opPackTalk(s) {
   });
 }
 function opOpenShop() {
+  // (the lesson's own opening: he has just told her what to buy, so there is no
+  // question to ask — but the press that turned his last page still buys nothing)
+  if (typeof shopOpen === 'function') { shopOpen(false); G.shopIdx = Math.max(0, SHOP.findIndex(q => q.type === 'cell')); return; }
   G.state = 'SHOP';
   G.shopIdx = Math.max(0, SHOP.findIndex(q => q.type === 'cell'));
 }

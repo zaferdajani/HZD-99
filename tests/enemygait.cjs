@@ -91,7 +91,11 @@ const { chromium } = require('playwright');
           const guard = (e.guardT || 0) > 0 && e.guardFace === side;
           if (vs && vs !== side && !(e.kbT > 0) && guard) {
             R.backsteps++;
-            if (e.on !== false && Math.abs(e.vx) > 8 && Math.abs(e.x - S.x) > 0.2 && !((e._ph || 0) < S.ph)) R.slides++;   // it MOVED, and the stride did not run back
+            // (...MOVED the way it was walking, that is. Half a pixel AGAINST its own
+            // velocity in one frame is a body being shouldered aside — js/solid.js
+            // parting two bodies, a step settling — not feet sliding: 2026-11-16,
+            // four such frames in 458 on the re-cut cave floors, each under 0.5 px.)
+            if (e.on !== false && Math.abs(e.vx) > 8 && Math.abs(e.x - S.x) > 0.2 && Math.sign(e.x - S.x) === Math.sign(e.vx) && !((e._ph || 0) < S.ph)) R.slides++;   // it MOVED, and the stride did not run back
           } else if (vs && vs !== side && !(e.kbT > 0)) {
             if (Math.abs(e.vx) < Math.abs(S.v) - 1e-6 && Math.sign(S.v) === vs) R.brakes++;
             else { R.moon++; if (!R.moonAt) R.moonAt = e.kind + ' f' + f + ' vx ' + e.vx.toFixed(1) + ' face ' + e.faceVis.toFixed(2); }
@@ -207,7 +211,11 @@ const { chromium } = require('playwright');
   // The dice are frozen so every run takes identical decisions.
   // =========================================================================
   const fly = await page.evaluate(async () => {
-    const sv = newSave(1); sv.flags.woke = 1; sv.flags.tut = 1; sv.time = 99; startGame(sv); loadRoom('A2');
+    const sv = newSave(1); // (the corridor meeting is PAST in this save: it is staged in this very room,
+    // and since 2026-11-16 it holds the clock for a tenth of a second on the
+    // lion's roar — which moved one run's flier a frame along its path and not
+    // the other's. The flier is what is measured here.)
+    sv.flags.woke = 1; sv.flags.tut = 1; sv.flags.nfMeet = 1; sv.time = 99; startGame(sv); loadRoom('A2');
     window.requestAnimationFrame = () => 0; await new Promise(r => setTimeout(r, 80));
     draw = () => {}; drawTouchUI = () => {}; pollGamepad = () => {}; preloadTick = () => {};
     // the story's overlays are not what is measured here: the corridor meeting

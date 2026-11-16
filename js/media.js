@@ -1435,6 +1435,8 @@ function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   const cw = im.naturalWidth / cells, ch = im.naturalHeight;
   const i = ((cell % cells) + cells) % cells;
   const dw = h * (cw / ch);
+  // (her own cell, remembered while her body is being drawn: the dash's echo)
+  if (typeof HERO_ECHO !== 'undefined' && HERO_ECHO.rec) HERO_ECHO.last = { key, f: i, cells, cx, base, height: h, flip: !!flip };
   c.save();
   c.translate(cx, base);
   if (flip) c.scale(-1, 1);

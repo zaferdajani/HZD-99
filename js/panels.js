@@ -216,8 +216,14 @@ const PANEL_SEQ = [
       { ref: 'p20 panel 4', src: PANEL_CLEAN(20), crop: [425, 1091, 725, 298], cap: 'pc_nobody', move: 'in', focus: [0.45, 0.6] },
       { ref: 'game: c_bell', src: PANEL_GAME('c_bell'), crop: [0, 0, 1600, 679], cap: 'pc_made', move: 'in', focus: [0.45, 0.5] },
     ] },
-  { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'],
-    event: 'NULLFANG purified (bossGlitch), after the purification film and its rewards',
+  // NOT PLAYED IN THE ROOM ANY MORE (owner, 2026-11-16, at its last page:
+  // "there's no need for this comic afterwards. You've already showed the
+  // video with the scene where I purified it. So don't waste the player's
+  // time"). The purification has a film, and these four pages told it again
+  // straight after. `manual` keeps the scene in the library, where it is a
+  // thing to go and read, and takes it off the room.
+  { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'], manual: true,
+    event: 'NULLFANG purified (bossGlitch) — library only; its film is what plays',
     when: f => !!f.bossGlitch,
     past: f => !!f.bossGlitch,
     panels: [

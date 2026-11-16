@@ -404,8 +404,15 @@ function tapMenu(x, y) {
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }
   } else if (st === 'SHOP') {
-    const i = Math.round((y - 130) / 46);
-    if (i >= 0 && i < SHOP.length && Math.abs(y - (130 + i * 46)) <= 23) { G.shopIdx = i; tPress('VOK'); }
+    // the question card first (Browse / Not now); then the shelf, where a tap
+    // SELECTS a row and a second tap on that row buys it — one tap used to do
+    // both, which is how a thumb bought the wrong line
+    if (typeof shopAskTap === 'function' && G.shopAsk) { shopAskTap(x, y); return; }
+    const R = typeof SHOP_ROW !== 'undefined' ? SHOP_ROW : { y0: 130, step: 46 };
+    const i = Math.round((y - R.y0) / R.step);
+    if (i >= 0 && i < SHOP.length && Math.abs(y - (R.y0 + i * R.step)) <= R.step / 2) {
+      if (G.shopIdx === i) tPress('VOK'); else { G.shopIdx = i; if (typeof sfx === 'function') sfx('ui'); }
+    }
   } else if (st === 'SKILLS') {
     // the same geometry the tree is drawn with — see skillLayout(). This used
     // the two-column formula against SKILLS rather than the pool, so with the

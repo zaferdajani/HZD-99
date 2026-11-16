@@ -55,6 +55,8 @@ for(const name of ['weapons','quests','story-opening','story-repair'])run(fs.rea
 for(const name of ['saveKeyFor','persist','invCount','invAdd','invTake','npcKey','npcCellItem','npcLive','npcCharge','doInteract','forgeCrystal','update'])run(fn(name));
 run(game.slice(game.indexOf('const NPC_GIFT ='),game.indexOf('\n};',game.indexOf('const NPC_GIFT ='))+3));
 ctx.showItem=(name,desc)=>{ctx.G.state='DIALOG';ctx.G.dialog={name,lines:[desc],onEnd:null};};
+// (the shop is opened through one function since 2026-11-16 — as a question first; its own harness is tests/shop-ask.cjs)
+ctx.shopOpen=(ask)=>{ctx.G.state='SHOP';ctx.G.shopAsk=!!ask;};
 const npc={type:'npc',room:'A0B',extra:'ratchet',x:0,y:0,w:20,h:20};
 const save=()=>({theme:'robo',storyVersion:2,flags:{},items:{ratchetCell:1},quests:{},bag:{},weaponVersion:1,weaponMode:'claws',scrap:0,iq:0});
 function reset(){ctx.repairClose();ctx.G.save=save();ctx.G.roomId='A0B';ctx.G.state='PLAY';}

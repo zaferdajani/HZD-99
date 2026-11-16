@@ -250,6 +250,9 @@ const check = (name, ok, detail) => {
     // ---- 10. a refusal inside the shop is visible --------------------------
     fresh('en');
     G.state = 'SHOP'; G.shopIdx = SHOP.findIndex(s => s.type === 'cell'); G.save.scrap = 0;
+    // (one frame with the key UP arms the shelf: a key still down from the talk
+    // that led here buys — and refuses — nothing. tests/shop-ask.cjs.)
+    G.shopAsk = false; G.shopGuard = 0; G.shopArmed = false; updateShop();
     keysP.Enter = 1; keys.Enter = 1; updateShop(); keysP.Enter = 0; keys.Enter = 0;
     const said = [];
     const real2 = window.ftxt;

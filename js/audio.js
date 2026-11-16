@@ -1254,6 +1254,33 @@ function sfx(n) {
       break;
     case 'wave': whoosh(0.16, 1200, 3400, 0.06); tone(900, 0.14, 'sine', 0.045, 1800); break;
     case 'hit': hiss(0.06, 0.09); tone(170, 0.08, 'square', 0.06, 90); break;
+    // ---- a blow, by what it landed on (entities.js foeHitSound) ----
+    case 'hit_wolf':  // plate over muscle: a low thud, the edge biting, a yelp bent downward
+      tone(150, 0.1, 'square', 0.07, 70); hiss(0.05, 0.07);
+      tone(620, 0.16, 'sawtooth', 0.035, 330, 0.02); growl(120, 0.16, 0.03, 34, 70, 0.02);
+      break;
+    case 'hit_cat':   // light frame: a quick dry crack and a spit
+      tone(1900, 0.045, 'triangle', 0.05, 900); tone(260, 0.06, 'square', 0.045, 150);
+      hiss(0.09, 0.075, 0.015); tone(980, 0.11, 'sawtooth', 0.022, 1500, 0.03);
+      break;
+    case 'hit_wing':  // membrane: a slap, almost no metal in it
+      hiss(0.045, 0.1); tone(340, 0.07, 'sine', 0.06, 190); tone(2400, 0.05, 'sine', 0.02, 1700, 0.01);
+      break;
+    case 'hit_robe':  // cloth over a frame: the edge lands dull, then something hollow under it
+      hiss(0.08, 0.06); tone(210, 0.12, 'triangle', 0.07, 120); tone(460, 0.2, 'sine', 0.035, 410, 0.03);
+      break;
+    case 'hit_housing': // a bolted box: it RINGS, long, like a struck tank
+      tone(430, 0.34, 'square', 0.05, 400); tone(866, 0.28, 'triangle', 0.035, 840); tone(95, 0.09, 'square', 0.06, 60); hiss(0.04, 0.06);
+      break;
+    case 'hit_soft':  // gel: a wet thump that sags
+      tone(180, 0.16, 'sine', 0.09, 60); tone(90, 0.2, 'triangle', 0.05, 45, 0.02); hiss(0.03, 0.03);
+      break;
+    case 'hit_ice':   // rime: a bright crack and a spill of chips
+      tone(2600, 0.05, 'triangle', 0.05, 1500); tone(3400, 0.04, 'sine', 0.03, 2100, 0.03); tone(4100, 0.04, 'sine', 0.02, 2600, 0.06); tone(300, 0.06, 'square', 0.04, 170);
+      break;
+    case 'hit_spark': // a live body: the cut shorts it
+      tone(120, 0.05, 'sawtooth', 0.06, 900); tone(1700, 0.09, 'square', 0.03, 240, 0.02); hiss(0.07, 0.06, 0.01);
+      break;
     case 'bosshit': hiss(0.09, 0.11); tone(92, 0.13, 'square', 0.1, 44); break;
     // THE CLASH (owner, 2026-11-13): metal on metal, on every blow that lands
     // on a machine. A struck plate rings at pitches that are not multiples of
@@ -1839,6 +1866,11 @@ function sfx(n) {
     case 'plunge_land': tone(84, .18, 'sine', .13, 38); tone(150, .07, 'square', .04, 70); hiss(.09, .07); chink(.03, .01); tone(1250, .16, 'sine', .022, 520, .01); break;
     case 'wolf_snarl': growl(92, .46, .055, 31, 70); hiss(.3, .018, .04); break;
     case 'wolf_lunge': growl(150, .16, .05, 44, 84); whoosh(.14, 500, 1700, .035); break;
+    // the cat leaving the ground: a short high spit over a cut-off growl —
+    // higher and tighter than the wolf's, and nothing like her own jump
+    case 'cat_leap': growl(230, .12, .045, 60, 120); hiss(.16, .026, .02); whoosh(.12, 900, 2600, .03); break;
+    // a machine's legs kicking off: a servo thump, for hoppers that are not beasts
+    case 'hop': whoosh(.1, 260, 720, .04); break;
     case 'wolf_bite': chink(.03); tone(230, .05, 'square', .05, 80); growl(104, .38, .05, 17, 76, .05); break;
     case 'wolf_snap': chink(.02); tone(260, .04, 'square', .03, 110); growl(120, .14, .026, 36, 96, .03); break;
     case 'wolf_yelp': tone(640, .13, 'triangle', .05, 300); tone(900, .09, 'sine', .028, 430, .02); break;
@@ -1855,7 +1887,14 @@ function sfx(n) {
     case 'alpha_step': tone(72,.07,'sine',.025,38); chink(.012,.012); break;
     case 'alpha_leap': whoosh(.23,800,2600,.06); tone(110,.18,'sawtooth',.035,58); break;
     case 'alpha_bark': tone(170,.18,'sawtooth',.06,70); hiss(.12,.04); tone(260,.12,'triangle',.035,90,.12); growl(96,.42,.07,34,58); tone(46,.4,'sine',.09,30); break;
-    case 'alpha_howl': tone(185,.65,'sawtooth',.035,360); tone(370,.85,'sine',.055,410,.16); tone(555,.75,'triangle',.025,615,.2); tone(410,.5,'sine',.035,165,.72); growl(88,.5,.04,20,120); break;
+    // THE HOWL IS HEARD (owner, 2026-11-16: "I should hear his howl. There is no
+    // sound for the howling"). It was there, at a third of the level of a
+    // footstep. It is a voice now: the rise, the long held note with its fifth
+    // over it, the fall — at the level of a guardian's clang.
+    case 'alpha_howl': tone(185,.7,'sawtooth',.095,360); tone(370,1.25,'sine',.15,415,.16); tone(555,1.1,'triangle',.05,622,.2); tone(740,.9,'sine',.028,830,.3); tone(410,.7,'sine',.08,165,1.25); growl(88,.6,.07,20,120); break;
+    // ...and the same call from the far side of rock: the held note and its
+    // fall, no breath, no growl — what reaches her before she reaches him
+    case 'alpha_howl_far': tone(370,1.4,'sine',.045,410,.05); tone(555,1.2,'sine',.016,615,.12); tone(400,.8,'sine',.03,170,1.35); break;
     case 'roar_eagle':   // TALONHOST: a metal screech climbing off the cable
       tone(950, 0.55, 'square', 0.07, 2300); tone(1900, 0.45, 'sawtooth', 0.05, 700, 0.1);
       tone(140, 0.5, 'square', 0.05, 90, 0.05); hiss(0.5, 0.07); break;

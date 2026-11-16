@@ -136,7 +136,12 @@ const FIGHTS = [
           const dy = Math.abs((b.y + b.h) - (player.y + player.h));
           const dx = Math.abs(b.cx() - (player.x + player.w / 2));
           const AIR = b.st === 'pounce' || b.st === 'spring' || b.st === 'dive' || b.st === 'perch' || b.st === 'leap' || b.st === 'recoil';
-          frames.push({ st: b.st, reach: !AIR && dy <= 60, dx: Math.round(dx), moved });
+          // (...or standing on ground a jump above it. The Alpha climbs the den's
+          // hulk now — it used to stop at its foot, which is where she hid — and
+          // a rest taken up there is one jump away, not out of reach.)
+          const gcol = typeof groundColumnAt === 'function' ? groundColumnAt(b.cx()) : null;
+          const stood = !!(gcol && gcol.length) && Math.abs((b.y + b.h) - Math.min.apply(null, gcol)) <= 10;
+          frames.push({ st: b.st, reach: !AIR && (dy <= 60 || (stood && dy <= 200)), dx: Math.round(dx), moved });
         }
         // sort the frames and cut the openings
         const kind = s => HURT.has(s) ? 'H' : TELL.has(s) ? 'T' : 'O';

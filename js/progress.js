@@ -259,7 +259,7 @@ function pgRouteEdges(id) {
   const ex = def.exits || {};
   for (const side in ex) { const v = ex[side], to = typeof v === 'object' ? v.to : v; if (to && ROOMS[to]) out.push({ to, side }); }
   const f = (G.save && G.save.flags) || {};
-  for (const d of (typeof gateDoorsAll === 'function' ? gateDoorsAll(id) : [])) if (d && d.to && ROOMS[d.to] && (!d.need || f[d.need])) out.push({ to: d.to, gate: d });
+  for (const d of (typeof gateDoorsAll === 'function' ? gateDoorsAll(id) : [])) if (d && d.to && ROOMS[d.to] && (!d.need || f[d.need]) && (!d.lock || f[d.lock])) out.push({ to: d.to, gate: d });   // (a dark ring is not a way through)
   return out;
 }
 // the next thing to walk through from this room, toward the goal's room
@@ -355,6 +355,24 @@ const PG_WARD_EAST = 2.2;       // tiles: the lair ward's depth at A3's east sea
 const PG_BELL_COLS = [11, 14];  // A8's way up (world.js: the shaft shared with A2 and A9)
 
 // ---- THE TICK ---------------------------------------------------------------
+// THE HINTS FOR SOMETHING HIDDEN UP (owner, 2026-11-16: "you have to show hints
+// in the room that suggest there is something hidden up"). The cache on the
+// Seam's shelf is out of a jump's reach on purpose. It already glints (a chest
+// is lit); dust comes down off the shelf it stands on, all the time, so the eye
+// is drawn up to it from anywhere in the room; and the first time she stands
+// under it without the legs for it, she is told what she is looking at.
+function pgSeamHints(f, dt) {
+  const ch = (G.statics || []).find(s => s.type === 'chest' && !s.opened);
+  if (!ch || !player || player.dead) return;
+  if (!G.artProbe && chance((dt || 1 / 60) * 14))
+    addPart(ch.x + rnd(-44, 54), ch.y + ch.h + 8, rnd(-6, 6), rnd(18, 44), rnd(1.6, 2.6),
+      chance(0.3) ? '#fff2cf' : '#9fd8ff', rnd(1, 2.1), 26, true);
+  const can = typeof hasMod === 'function' && (hasMod('djump') || hasMod('wall'));
+  if (!f.pgSeamHigh && !can && player.on && Math.abs(player.x + player.w / 2 - (ch.x + ch.w / 2)) < 96
+      && player.y > ch.y + 120) {
+    f.pgSeamHigh = 1; persistSoon(); G.toast(t('pg_seam_high'));
+  }
+}
 function progressTick(dt) {
   // the cleansing light belongs to the room it was cast in (the reward it was
   // holding is settled by loadRoom's own safety net)
@@ -410,6 +428,9 @@ function progressTick(dt) {
   // points "only near critical areas, not everywhere"); a run that rested at
   // it then keeps its chart, and one parked there is charted on waking.
   if (G.roomId === 'CV1B' && G.save.bench && G.save.bench.room === 'CV1B' && !f.pgSurvey) pgSurveyChart();
+  // THE SEAM'S CACHE SAYS IT IS THERE (world.js CV1B): a thing kept for a later
+  // skill has to be SEEN before it can be remembered
+  if (G.roomId === 'CV1B') pgSeamHints(f, dt);
   // THE FIRST MARK SPEAKS ONCE: what the arrows are and who drew them.
   if (pgTrailPhase(f) === 'marble' && !f.pgMarks && G.roomId === 'A5') {
     const mk = pgTrailMarks('A5', 'marble');
@@ -773,3 +794,18 @@ function questEarlyLines(q) {
   if (q.id === 'ratchet_forge' && typeof revisedStory === 'function' && revisedStory()) out.push(t('sl_ratchet_moving'));
   return out;
 }
+
+// ---- the Seam's cache, in five languages ----
+TEXT_LAYERS.push({
+  robo: true,
+  en: { nf_break1: 'NULLFANG — a binding breaks. He is faster now.', nf_break2: 'NULLFANG — the last binding breaks. He will not rest again.', map_locked: 'No chart of this country yet. One of the Eye\'s agents keeps the survey — purify it, and the map is yours.', map_goal: 'Objective', shop_pick: 'RATCHET\'S PICK', shop_browse: 'Browse', shop_later: 'Not now', shop_why_pack: 'You have no pack yet. The Volt Pack is the first thing you need — it is what healing and the burst run on.', shop_why_cell: 'You are running low on volts. A cell fills you up.', shop_why_buy: 'If I were you: {item}. You can afford it, and it will change how you fight.', shop_why_save: 'Nothing here is in reach yet. Save {n} more scrap for {item}.', shop_why_none: 'You have everything on my shelf. Nothing to buy today.',
+    ring_dormant: 'The ring is dormant. What holds this place has not woken it.', hz_back: 'Thrown back to the last safe ground she stood on.', pg_seam_high: 'Something is cached on the shelf above. Too high for one jump — come back when she can climb the air.' },
+  ar: { nf_break1: 'ناب العدم — قيدٌ ينكسر. صار أسرع.', nf_break2: 'ناب العدم — القيد الأخير ينكسر. لن يستريح بعد الآن.', map_locked: 'لا خريطة لهذه البلاد بعد. أحد عملاء العين يحتفظ بالمسح — طهّريه، والخريطة لكِ.', map_goal: 'الهدف', shop_pick: 'اختيار راتشيت', shop_browse: 'تصفّح', shop_later: 'ليس الآن', shop_why_pack: 'لا تملكين حزمة بعد. حزمة الفولت أوّل ما تحتاجينه — عليها يقوم الشفاء والانفجار.', shop_why_cell: 'فولتاتكِ قليلة. خليّة واحدة تملؤكِ.', shop_why_buy: 'لو كنتُ مكانكِ: {item}. تقدرين على ثمنه، وسيغيّر طريقة قتالكِ.', shop_why_save: 'لا شيء هنا في متناولكِ بعد. ادّخري {n} خردة أخرى من أجل {item}.', shop_why_none: 'عندكِ كلّ ما على رفّي. لا شيء يُشترى اليوم.',
+    ring_dormant: 'الحلقة خامدة. من يملك هذا المكان لم يوقظها بعد.', hz_back: 'أُعيدت إلى آخر أرضٍ آمنة وقفت عليها.', pg_seam_high: 'شيء مخبّأ على الرفّ في الأعلى. أعلى من قفزة واحدة — عودي حين تتعلّمين تسلّق الهواء.' },
+  tr: { nf_break1: 'NULLFANG — bir bağ kopuyor. Artık daha hızlı.', nf_break2: 'NULLFANG — son bağ kopuyor. Bir daha dinlenmeyecek.', map_locked: 'Bu toprakların haritası henüz yok. Ölçümü Göz\'ün bir ajanı tutuyor — onu arındır, harita senin olsun.', map_goal: 'Hedef', shop_pick: 'RATCHET\'İN SEÇİMİ', shop_browse: 'Göz at', shop_later: 'Şimdi değil', shop_why_pack: 'Henüz paketin yok. Volt Paketi ilk ihtiyacın — iyileşme de patlama da onunla çalışır.', shop_why_cell: 'Voltun azalıyor. Bir hücre seni doldurur.', shop_why_buy: 'Yerinde olsam: {item}. Paran yetiyor ve dövüşünü değiştirir.', shop_why_save: 'Burada henüz gücünün yettiği bir şey yok. {item} için {n} hurda daha biriktir.', shop_why_none: 'Rafımdaki her şey sende. Bugün alacak bir şey yok.',
+    ring_dormant: 'Halka uykuda. Bu yeri tutan onu henüz uyandırmadı.', hz_back: 'Bastığı son güvenli zemine geri atıldı.', pg_seam_high: 'Yukarıdaki rafta bir şey saklı. Tek zıplayışa fazla yüksek — havayı tırmanabildiğinde geri gel.' },
+  zh: { nf_break1: 'NULLFANG——一道束缚断了。它更快了。', nf_break2: 'NULLFANG——最后一道束缚断了。它不会再歇息。', map_locked: '这片土地还没有地图。测绘记录握在「眼」的一名特工手里——净化它，地图就是你的。', map_goal: '目标', shop_pick: '拉切特推荐', shop_browse: '看看货', shop_later: '以后再说', shop_why_pack: '你还没有电包。伏特电包是你最先需要的——治疗和爆发都靠它。', shop_why_cell: '你的伏特不多了。一块电池就能充满。', shop_why_buy: '换作是我：{item}。你买得起，它会改变你的打法。', shop_why_save: '这里暂时没有你买得起的。再攒 {n} 废料买 {item}。', shop_why_none: '我架上的东西你都有了。今天没什么可买。',
+    ring_dormant: '这道环沉睡着。守着此地的那位还没有唤醒它。', hz_back: '她被抛回了上一次站稳的安全地面。', pg_seam_high: '上面的石架上藏着东西。一跳够不着——等她学会在空中再跳一次时回来。' },
+  ru: { nf_break1: 'NULLFANG — путы рвутся. Теперь он быстрее.', nf_break2: 'NULLFANG — рвутся последние путы. Больше он не отдыхает.', map_locked: 'Карты этих земель пока нет. Съёмку хранит один из агентов Ока — очисти его, и карта твоя.', map_goal: 'Цель', shop_pick: 'ВЫБОР РАТЧЕТА', shop_browse: 'Посмотреть', shop_later: 'Не сейчас', shop_why_pack: 'У тебя ещё нет блока. Вольт-блок нужен первым — на нём работают и лечение, и разряд.', shop_why_cell: 'Вольт осталось мало. Одна ячейка зарядит тебя.', shop_why_buy: 'На твоём месте я бы взял: {item}. Тебе хватает, и это изменит твой бой.', shop_why_save: 'Пока тебе здесь ничего не по карману. Накопи ещё {n} лома на {item}.', shop_why_none: 'У тебя есть всё с моей полки. Сегодня покупать нечего.',
+    ring_dormant: 'Кольцо спит. Тот, кто держит это место, ещё не разбудил его.', hz_back: 'Её отбросило на последнюю безопасную опору.', pg_seam_high: 'На полке наверху что-то припрятано. Одним прыжком не достать — вернись, когда научишься взбираться по воздуху.' },
+});

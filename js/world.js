@@ -341,7 +341,18 @@ function caveCarve(g, seedStr, o) {
       if (g[a.y + 1]) g[a.y + 1][x] = '#';
     }
   }
-  // ledges: short, staggered, never a runway
+  // NO SHELVES HANGING IN THE AIR OF A CAVE (owner, 2026-11-16: "in the cave,
+  // these platforms are not organic, like we discussed. It looks square,
+  // straight lines... do not make them small squares and big rectangles just
+  // standing there in the middle of the air"). The carve used to scatter four
+  // or five short '=' ledges through every cavity — ruled bars floating in a
+  // room whose whole law is that nothing in it is ruled. They are not written
+  // any more. A cave is its floor, its roof and what the rock keeps: what a
+  // ledge used to reach (a pocket's bite, a perch) is now out of a jump's
+  // reach until she comes back able to climb the air, which is what a cave's
+  // high places are for. The dice are still thrown exactly as before, so every
+  // cave keeps the shape it had; `ledges` stays as an option for a room that
+  // asks for them by name and none does.
   const nL = o.ledges == null ? 4 : o.ledges;
   for (let i = 0; i < nL; i++) {
     const lx = 4 + Math.floor(R() * (W - 12));
@@ -349,7 +360,7 @@ function caveCarve(g, seedStr, o) {
     const len = 3 + Math.floor(R() * 3);
     for (let k = 0; k < len; k++) {
       const yy = ly + (k > len / 2 && R() < 0.4 ? 1 : 0);
-      if (g[yy] && g[yy][lx + k] === '.') g[yy][lx + k] = '=';
+      if (o.shelves && g[yy] && g[yy][lx + k] === '.') g[yy][lx + k] = '=';
     }
   }
   // NO PIT DEEPER THAN A JUMP. Anchors dig flat bowls into a rolling floor,
@@ -357,7 +368,16 @@ function caveCarve(g, seedStr, o) {
   // jump clears (tests/climbout.cjs measured it: CV2 trapped three cells this
   // way). Walk the floor profile and shave any step taller than STEP_CAP down
   // to STEP_CAP, on both sides, until it settles. Mounds survive; traps do not.
-  const STEP_CAP = 3;
+  // ...AND NO STEP A WALKING THING CANNOT TAKE (owner, 2026-11-16, of the robed
+  // one stuck in a bowl in its own chamber: "this one is trapped now because of
+  // the terrain you have, while you do not allow the enemies to just walk on
+  // the terrain, climb it... improve the ability for these creatures to escape
+  // the trapping terrain"). The cap was three tiles — what SHE can jump — and
+  // everything else in a cave walks: a crawler, a cat, a robed duelist take one
+  // tile at a stride (ENEMY_STEP_UP) and a bowl two deep was a cell. One tile a
+  // column is a slope once the surface curve has rounded it, and a slope is
+  // ground anything with legs can leave.
+  const STEP_CAP = 1;
   const ground = [];
   const groundAt = (x) => {
     for (let y = H - 2; y >= 1; y--)
@@ -365,7 +385,7 @@ function caveCarve(g, seedStr, o) {
     return H - 2;
   };
   for (let x = 1; x < W - 1; x++) ground[x] = groundAt(x);
-  for (let pass = 0; pass < 4; pass++)
+  for (let pass = 0; pass < 14; pass++)
     for (let x = 2; x < W - 2; x++)
       for (const nx of [x - 1, x + 1])
         if (ground[x] - ground[nx] > STEP_CAP) {
@@ -588,7 +608,7 @@ const ROOMS = {
   // a field, with a spare power cell kept beside him. Wake him with hers or
   // with that one; either way the first light she gives away has a roof
   // over it.
-  A0B: { zone: 'A', indoor: 1, w: 30, h: 17, exits: {},
+  A0B: { zone: 'A', indoor: 1, decks: 1, w: 30, h: 17, exits: {},
     // THE DEN IS THE KINGDOM'S FIRST ROOF, so it is also its first rest.
     // The bench audit (kingdom protocol: every kingdom has at least one save
     // point, PLACED for the arc) found the only touchable bench before the
@@ -1690,16 +1710,37 @@ const ROOMS = {
   // crystal is the longest unbenched stretch in kingdom 1.
   // 32 wide, not 28: a room narrower than the 960x540 window shows void at its
   // edge, and tests/deadend.cjs measures exactly that (it caught this one).
+  // WHAT THE SEAM IS FOR (owner, 2026-11-16: "The second one just pushes me a
+  // little bit further to the third one, which is weird. It does not make any
+  // sense... Create a reason for it" — and, of what a side room should be:
+  // "a room that maybe needs a double jump or a wall cling... that I have to
+  // go back to when I get these skills... But you have to show hints in the
+  // room that suggest there is something hidden up"). Its east ring used to
+  // drop her a few steps down the same tunnel she could have walked. It is now
+  // two things, and both are the quarrymen's:
+  //   - THE HAUL RING. The east ring is the far end of the line the stone was
+  //     hauled along: it comes out beside the marble in CV3 (GATE_ROOM), and it
+  //     is DARK until GRAVEHORN is driven off the stone. So on the way in it
+  //     is a ring that goes somewhere she cannot go yet, and on the way home
+  //     with the marble it is the short road back.
+  //   - THE CACHE. A spare core on a shelf over that ring, 272 px above the
+  //     floor: her jump rises 208 and the double jump 321 (measured), so she
+  //     can see it from her first visit and cannot have it until she comes back
+  //     with the skill. Nothing stands between the floor and the shelf. It glints, and dust
+  //     comes down off it (js/progress.js pgSeamHints).
   CV1B: { zone: 'X', cave: 1, w: 40, h: 17, exits: {},
     ents: [['term', 20, 15, 'survey'], ['bat', 27, 6],   // the quarrymen's survey: it charts the quarry when read (it was a save pod)
-           ['scrap', 30, 15, 35], ['scrap', 9, 7, 25], ['scrap', 24, 15, 20]],
+           ['scrap', 30, 15, 35], ['scrap', 9, 7, 25], ['scrap', 24, 15, 20],
+           ['chest', 36, 6, 'core']   // the cache — LAST: entity order is a save key
+          ],
     build(g) {
       caveCarve(g, 'CV1B', {
-        open: [], ledges: 3,
+        open: [],
         anchor: [{ x: 4, y: 15, w2: 2 }, { x: 20, y: 15, w2: 2 },
-                 { x: 24, y: 15 }, { x: 30, y: 15 }, { x: 35, y: 15, w2: 2, h2: 4 }],
+                 { x: 24, y: 15 }, { x: 30, y: 15 }, { x: 35, y: 15, w2: 3, h2: 9 }],
         pocket: [{ x: 9, y: 6 }],
       });
+      hline(g, 34, 37, 7, '=');                // the shelf: out of a jump's reach, inside a double jump's
     } },
   CV2: { zone: 'X', cave: 1, w: 64, h: 17, exits: { L: 'CV1', R: 'CV3' },
     // the long dark middle: hoppers in the hollows, a crawler on the far
@@ -2147,9 +2188,99 @@ function buildRoom(id) {
       for (let y = 1; y <= air; y++) g[y][x] = wall ? '#' : '.';
     }
   } else def.build(g);
+  levelDoorPads(g, id);
+  // (a room whose low deck is FURNITURE — the top of Ratchet's table, a fired
+  // plate she is meant to hop onto — says so with `decks`, and keeps it)
+  if (!def.decks) platformHeadroom(g);
   // sky rooms lose the lid after everything else is built, so the pass sees
   // the authored ceiling opening before erasing it — pack rooms included
   if (def.sky) { skyLid(g); skyUnder(g, def, id); }
   gridCache[id] = g;
   return g;
+}
+// A RING STANDS ON A LEVELLED PAD (owner, 2026-11-16, of the den ring on its
+// hill: "the gates are inserted into the ground as an image, but not blending
+// perfectly. If the ground is elevated, it shows out of space or out of the
+// frame"). A ring is 236 px wide and a plate cannot bend: measured across the
+// width of every ring's foot, the ground under it varied by up to 87 px (A2's
+// den 73, the Seam 85 and 87, the meadow's cave mouth 58), so one end of the
+// sill hung in the air over the low side or sank into the high one. The rooms
+// had flattened two tiles either side by hand, where they had remembered to.
+// It is a rule now: under every ring the floor is level for DOOR_PAD tiles
+// either side of the door's own column — rock filled in under it, rock cleared
+// over it — and the surface curve lies flat across it (buildSurfaceCurve reads
+// the same columns). Shop fronts and the city monument keep their own ground.
+// A PLATFORM IS A JUMP, NOT A LID (owner, 2026-11-16: "since we added the
+// elevations in the terrain, you kept some of the platforms that I have to
+// jump to, which resulted in... a place I'm standing on... and a platform
+// just on top of me. So the terrain is mixed up"). The mounds came after the
+// platforms and nobody took the platforms off them: a shelf two tiles over a
+// floor that has since risen under it is at her head, not over it. Any
+// platform tile with fewer than three tiles of air between it and the ground
+// straight below is removed, and what is left of its run goes with it when
+// that is a stub. A deck lying ON the ground (no air under it at all) is a
+// floor and stays.
+function platformHeadroom(g) {
+  const H = g.length, W = g[0].length;
+  const solid = (ch) => ch === '#' || ch === 'B' || ch === '=';
+  // (from the floor UP: a deck is judged against what is left under it, so a
+  // shelf over a shelf that goes is measured to the ground, not to the ghost)
+  for (let y = H - 2; y >= 1; y--) {
+    for (let x = 1; x < W - 1; x++) {
+      if (g[y][x] !== '=') continue;
+      let x1 = x; while (x1 + 1 < W - 1 && g[y][x1 + 1] === '=') x1++;
+      const airs = [];
+      for (let i = x; i <= x1; i++) {
+        let air = 0; while (y + 1 + air < H && !solid(g[y + 1 + air][i])) air++;
+        airs.push(air);
+      }
+      // A deck that sits two tiles over a LEVEL floor for its whole length is
+      // an authored step — the first jump she is ever asked for, the top of
+      // Ratchet's table — and stays. What goes is the deck the GROUND came up
+      // under: one tile of air anywhere, or two where the rest of the same deck
+      // has three or more (the floor rose beneath part of it).
+      const roomy = Math.max.apply(null, airs) >= 3;
+      // (a rail of teeth standing on this deck is a trap's own bed, not a shelf)
+      const bad = airs.map((air, k) => (air === 1 || (air === 2 && roomy)) && g[y - 1][x + k] !== '^');
+      if (bad.some(Boolean)) {
+        for (let i = x; i <= x1; i++) if (bad[i - x]) g[y][i] = '.';
+        // stubs: a run of one tile left hanging is not a platform
+        for (let i = x; i <= x1; i++) {
+          if (g[y][i] !== '=') continue;
+          let j = i; while (j + 1 <= x1 && g[y][j + 1] === '=') j++;
+          if (j === i) g[y][i] = '.';
+          i = j;
+        }
+      }
+      x = x1;
+    }
+  }
+}
+const DOOR_PAD = 4;
+function doorPadCols(id) {
+  const def = ROOMS[id];
+  if (!def || typeof GATE_ROOM === 'undefined') return [];
+  const row = GATE_ROOM[id], list = !row ? [] : (Array.isArray(row) ? row : [row]);
+  const ats = list.filter(d => (!d.style || d.style === 'den') && id !== 'W2').map(d => d.at);
+  if (id === 'CV3') ats.push(36 / 56);       // the maintenance landing (gateDoorsAll)
+  if (id === 'GA1T') ats.push(0.5);
+  return ats.map(a => Math.max(1, Math.min(def.w - 2, Math.floor(a * def.w))));
+}
+function levelDoorPads(g, id) {
+  const H = g.length, W = g[0].length;
+  const solid = (ch) => ch === '#' || ch === 'B';
+  for (const c0 of doorPadCols(id)) {
+    // the floor the door stands on: the lowest open cell of its own column
+    let y = H - 2; while (y > 2 && solid(g[y][c0])) y--;
+    if (y <= 2) continue;
+    const top = y + 1;                                   // first solid row under her feet
+    for (let x = Math.max(1, c0 - DOOR_PAD); x <= Math.min(W - 2, c0 + DOOR_PAD); x++) {
+      // (a column open through the bottom of the room is a SHAFT — the way down
+      // to the room below — and a pad is never poured into one: levelling D3's
+      // door shut the Archives' shaft from E1. tests/seam.cjs, vlink, shaftfit.)
+      if (!solid(g[H - 1][x])) continue;
+      for (let yy = top; yy < H; yy++) if (g[yy][x] === '.') g[yy][x] = '#';
+      for (let yy = Math.max(1, top - 8); yy < top; yy++) if (solid(g[yy][x])) g[yy][x] = '.';
+    }
+  }
 }

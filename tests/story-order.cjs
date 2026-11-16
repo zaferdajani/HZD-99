@@ -139,6 +139,11 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       for (const d of gateDoorsAll(id)) {
         G.gateWalk = null;
         player.x = gateWorldX(d) - player.w / 2; player.y = (def.h - 3) * TILE; player.vx = 0;
+        // (a ring whose lock has opened is WOKEN in front of her before it will
+        // carry her — two and a half seconds she does not choose, measured by
+        // tests/ring-wake.cjs. The walker asks what can be REACHED, so it takes
+        // the ceremony as read. A ring that is still locked stays shut.)
+        if (typeof ringAsleep === 'function' && ringAsleep(d)) G.save.flags[ringWakeKey(d)] = 1;
         if (gateEnter() && G.gateWalk && G.gateWalk.to === d.to) out.push(d.to);
         G.gateWalk = null;
       }

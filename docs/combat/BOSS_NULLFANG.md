@@ -33,6 +33,39 @@ it. That is why this fight is wide, slow, and never surprises.
 
 ---
 
+## THREE STAGES, AND NO LEDGE TO CAMP UNDER (owner, 2026-11-16)
+
+*"So the Guardian was super easy. It had one phase where Rhino had two. This
+Guardian should have at least two and maybe three. With each phase, it gets
+harder. The Guardian stood still for so long on top of the platform that made it
+so much easier to just stand underneath it and hit it and kill it... The
+roaring was not intimidating."*
+
+| stage | from | what changes | how she is told |
+|---|---|---|---|
+| one | 100% | the table below, as measured | — |
+| two (`phase = 2`) | under 50% | the existing second gear: prowl 210, shorter rests, the doubled pounce, two wolves to a roar | the midpoint stagger (a free punish), then **a roar the moment he is on his feet** — the big one, which bends the whole picture (`shockRipple`), reaches 430 px and throws her at 640 — and the line `nf_break1` |
+| three (`fury`) | under 25% | prowl 240, run 330, 300–450 ms between swipes, and **he never goes up to the ledge again** (`ambushCD` parked) — the rest he took up there is gone | a second stagger, a second big roar, `nf_break2` |
+
+**The rule that makes it harder without making it unfair:** no tell is shorter
+in any stage. What goes is the WAITING — his rests, his prowl time, his perch —
+never the warning.
+
+**The perch.** Left alone he still watches her from the ledge for a second
+before the 450 ms flatten. A blow taken up there, or her standing under the
+ledge, ends the wait at once: straight to the flatten (the full tell), and the
+dive lands where she is standing. `tests/turn-roar.cjs` E and F hold both.
+
+**Every roar bends the frame** now, not only the first meeting's; the ordinary
+roar is the small ripple, the break roars are the large one.
+
+Still open from the same report, and not done: the purification is not yet
+STAGED (her controls taken, walked to him, the lion lying down before the
+prompt), and "the freed lion is under the terrain" could not be reproduced on
+the levelled lair — he stands on his floor there.
+
+---
+
 ## B1. Move table
 
 `opening_ms = recovery_ms − 33`

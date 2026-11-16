@@ -187,7 +187,11 @@ const check = (name, ok, detail) => {
       setRun(stage);
       const e = spawn('crawler', zone, 240);
       const holdX = e.x;
-      const stand = (typeof isWolf === 'function' && isWolf(e)) ? Math.min(120, wolfReach(e) - 16) : 120;
+      // (a cat on guard does not bite from wherever she happens to stand: it
+      // holds off and comes in to the distance its lunge covers — js/cheetahhunt.js
+      // — so she is parked THERE, as she already was for a wolf)
+      const stand = (typeof isWolf === 'function' && isWolf(e)) ? Math.min(120, wolfReach(e) - 16)
+        : (typeof catHunter === 'function' && catHunter(e) && typeof catReach === 'function') ? catReach(e) - 16 : 120;
       let coil = 0, facetF = 0, sawCoil = false;
       for (let i = 0; i < 900; i++) {
         e.x = holdX; e.vx = 0;

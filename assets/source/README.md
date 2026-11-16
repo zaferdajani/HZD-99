@@ -119,6 +119,15 @@ was refused, the six-cell strip they replace, a size check against her jab's
 standing cell and the dive photographed in the game. `prompts.json` has the
 prompts, the job ids and the exact cut.
 
+`gravehorn/turn.webp` is HIS TURN (2026-11-16): the three-quarter and head-on
+views `tools/ghturn.cjs` cuts into `characters/gravehorn/turn34.webp` and
+`turn_front.webp` — fired at medium quality on the last half-credit, so the
+high-quality re-fire is queued (ART_QUEUE §2br).
+
+`manhua/refire-2026-11/` holds comic panels fired again because a character was
+off model: the new panel under its game name, and the refused one as
+`*_before.jpg` (ART_QUEUE §2bs lists those still to do).
+
 `gravehorn/` is GRAVEHORN'S BODY (2026-11-15, owner: "the rhino looks so fake...
 it's the same box"). He had been drawn in flat stand-ins since October. The
 design plate (real white-rhino anatomy, built as a machine, in the Wolf King's
