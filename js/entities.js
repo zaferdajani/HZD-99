@@ -410,8 +410,9 @@ function contactShadow(c, cx, feetY, w, alpha) {
 // Two numbers answer it, and they are deliberately different.
 //
 // STEP_DOWN is how far below the feet ground still counts as ground — for the
-// ledge probe above. It is half a tile: enough that a rolling surface is one
-// continuous floor, small enough that a real drop is still a drop.
+// ledge probe above. It is one tile and a hair — the same step a walker climbs:
+// enough that a heap is one continuous floor both ways, small enough that a
+// real drop (two tiles) is still a drop.
 //
 // STEP_UP is how high a body climbs without jumping, and it is set PER BODY
 // because the two kinds of body are asking different questions of a step.
@@ -472,7 +473,12 @@ function contactShadow(c, cx, feetY, w, alpha) {
 const JUMP_V = 920;        // apex 201 px = 6.28 tiles, with the float below
 const JUMP_FLOAT = 150;    // |vy| under this and gravity goes soft: the hang
 const JUMP_CUT = 280;      // a released button still leaves a usable hop
-const STEP_DOWN = 16;
+// (16 until 2026-11-16 — half a tile. But a body that climbs a tile (STEP_UP,
+// 34 px) and may only step DOWN half of one is a body that walks up a heap and
+// cannot come off it: it reached the crest of the hulk between it and her and
+// stood there, which the owner met as "this one is trapped now because of the
+// terrain". What it can walk up, it can walk down. Two tiles is still a drop.)
+const STEP_DOWN = 34;
 const PLAYER_STEP_UP = 24;
 const ENEMY_STEP_UP = TILE + 2;
 // The obstruction's top in this column, if the body can climb onto it: returns

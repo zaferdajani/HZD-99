@@ -131,6 +131,17 @@ function wolfRollStep(e, dt) {
 //   0 — not hunting: walk the beat
 //   1 — hunting: this drove the legs; the bite may arm
 //   2 — hunting, and busy with the threat display: nothing arms through it
+function huntGround(e, want, reach) {
+  if (!groundAhead(e, want)) return false;
+  if (!(reach > 6) || typeof groundColumnAt !== 'function') return true;
+  const feet = e.y + e.h, x0 = want > 0 ? e.x + e.w : e.x;
+  for (let d = 8; d <= reach + 3; d += 8) {
+    const gc = groundColumnAt(x0 + want * d);
+    if (!gc || !(gc[0] < gc[1])) return false;                 // nothing holding the surface up: air
+    if (gc[0] - feet > STEP_DOWN + d * 1.15) return false;     // falls away faster than a walkable slope: a ledge
+  }
+  return true;
+}
 function wolfHunt(e, dt, px, py, cx, cy) {
   if (!wolfHunter(e) || player.dead) { e.hunt = 0; e.huntHold = false; return 0; }
   const H = WOLF_HUNT, dx = px - cx, ad = Math.abs(dx), dy = Math.abs(py - cy);
@@ -154,8 +165,16 @@ function wolfHunt(e, dt, px, py, cx, cy) {
   // nose on her, and the crawler's own ledge turn is told not to spin it round
   // (looked for a brake's length ahead as well as at its feet: at a charge it
   // covers more ground stopping than the crawler's own probe looks across)
-  const ahead = { x: e.x + want * Math.abs(e.vx || 0) * 0.12, y: e.y, w: e.w, h: e.h };
-  const edge = !groundAhead(e, want) || !groundAhead(ahead, want);
+  // ...AND A HILL IS NOT A LEDGE (owner, 2026-11-16: "this one is trapped now
+  // because of the terrain... you do not allow the enemies to just walk on the
+  // terrain, climb it"). The brake's-length probe was judged against the height
+  // of its OWN FEET: forty pixels on at a charge, a downhill is forty pixels
+  // lower, which is more than a step — so every hunter that charged over a
+  // crest read the far slope as a drop, stopped dead on top, and stood there
+  // with its teeth out while she waited at the bottom. The ground between its
+  // feet and that point is walked now, eight pixels at a time: it is a ledge
+  // only where the floor falls away faster than a slope a body can walk down.
+  const edge = !huntGround(e, want, Math.abs(e.vx || 0) * 0.12);
   e.huntHold = edge;
   let v = 0;
   if ((e.snarlT || 0) > 0 || edge) v = 0;

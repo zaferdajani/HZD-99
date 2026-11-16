@@ -879,6 +879,46 @@ const ROOMS = {
       hull(g, 9, 15, 2, 71);
       hull(g, 39, 45, 2, 73);
     } },
+  // THE RUN — the road to the Wolf King (owner, 2026-11-16: "As for the alpha, I
+  // should be led to him with obstacles, with more wolves, with something
+  // challenging to reach him. So this level where the alpha is should be more
+  // fun... And the howling should start the moment I go inside this portal to
+  // the alpha area, to make me anticipate... So I should find a lot of wolves
+  // on the way"). The den's mouth in the meadow used to open straight onto his
+  // floor. It opens onto this now: seventy tiles of the pack's own ground —
+  // hulks they dragged in and left, which she climbs and they wait on; a
+  // tooth-pit to clear with a wolf on the far lip; seven of them between her
+  // and the inner mouth — with him calling the whole way (wolves.js alphaCall).
+  // One save point, at the far end, in front of his door. His arena is untouched.
+  A10R: { zone: 'A', sky: 1, w: 72, h: 17, exits: {},
+    ents: [['crawler', 11, 15], ['hopper', 24, 15], ['scrap', 31, 9, 10], ['crawler', 37, 15],
+           ['hopper', 38, 15], ['crawler', 46, 15], ['crawler', 51, 15], ['scrap', 48, 11, 12],
+           // (the Braid thins a room's population in this country — these two keep the road CROWDED after it has)
+           ['crawler', 25, 15], ['crawler', 61, 15],
+           // A POD AT THE END OF THE ROAD, by the inner mouth: the fight beyond it
+           // is the Wolf King's, and nobody should have to earn the Run twice to
+           // try him again (tests/bossbench.cjs — a save point a door from every boss)
+           ['bench', 64, 15]],
+    build(g) {
+      frame(g);
+      // hulks, piled where the pack left them and never square: each is a heap
+      // (one tile a column), so she walks up it and so do they
+      hull(g, 14, 22, 3, 81);
+      hull(g, 27, 35, 4, 83);          // the big one: the scrap on its back is worth the climb
+      hull(g, 39, 45, 3, 85);
+      hull(g, 52, 60, 4, 89);          // (clear of the inner mouth's levelled pad, which begins at 62)
+      // NO STEP TALLER THAN A TILE: a heap's noise can leave a two-tile notch,
+      // and a notch she hops is a wall to a wolf — which is how a hunter ends
+      // up penned on the wrong side of its own ground. What she can walk up,
+      // they can.
+      const topOf = (x) => { let y = g.length - 1; while (y > 1 && g[y - 1][x] === '#') y--; return y; };   // (from the floor up: row 0 is the frame's lid)
+      for (let pass = 0; pass < 8; pass++) for (let x = 2; x < 70; x++) {
+        const a = topOf(x - 1), b2 = topOf(x);
+        if (b2 - a > 1) put(g, x, b2 - 1, '#'); else if (a - b2 > 1) put(g, x - 1, a - 1, '#');
+      }
+      // the tooth-pit: broken ribs between two hulks, a jump wide
+      for (let x = 47; x <= 50; x++) put(g, x, 14, '^');
+    } },
   // THE FIRST KINGDOM'S ONLY WAY OUT is the climb above the camp, and it is
   // the story's gate (plan §4.2): the Conduits open once NULLFANG is free —
   // which needs the forged blade, the Meadow Sage and the silenced bell — so
@@ -1976,7 +2016,7 @@ const MAPPOS = {
   // they keep a route line to the room they hang from, and the harness proves
   // each one still has no free aligned square before it lets it pass.
   W1: [-7.25, 3, 1, 1], W2: [-6.25, 3, 2, 1], A0: [-4.25, 3, 2, 1], A0B: [-4.25, 2, 1, 1], A1: [-2.25, 3, 2, 1],
-  A2: [-0.25, 3, 3, 1], A10: [1, 0, 2, 1], A3: [2.75, 3, 2, 1], A4: [4.75, 3, 1, 1],
+  A2: [-0.25, 3, 3, 1], A10: [1, 0, 2, 1], A10R: [-1, -1, 2, 1], A3: [2.75, 3, 2, 1], A4: [4.75, 3, 1, 1],
   A5: [-0.25, 4, 2, 1], A6: [-2, 2, 1, 1], A7: [0, 5, 1, 2], A8: [0, 2, 1, 1], A9: [0, 1, 1, 1],
   A11: [-1, 1, 1, 1], A12: [3, 4, 1, 1], A13: [-3, 2, 1, 1],
   CV1: [-6, 5, 2, 1], CV1B: [-6, 6, 1, 1], CV2: [-4, 5, 2, 1], CV3: [-2, 5, 1, 1],

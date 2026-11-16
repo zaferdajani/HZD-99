@@ -64,14 +64,15 @@ function alphaCall(dt) {
   if (G.state !== 'PLAY' || G.dialog || G.cut || G.trans) return;
   const id = G.roomId; let far;
   if (id === 'A10') { const b = G.boss; if (!b || b.dead || b.kind !== 'alpha') { G.alphaCallT = null; return; } far = false; }
+  else if (id === 'A10R') { far = false; }                 // on the Run he is close: the full voice, all the way in
   else if (id === 'A2') {
-    const d = typeof gateDoors === 'function' ? gateDoors().find(q => q.to === 'A10') : null;
+    const d = typeof gateDoors === 'function' ? gateDoors().find(q => q.to === 'A10R') : null;
     if (!d || Math.abs(player.x + player.w / 2 - gateWorldX(d)) > ALPHA_CALL.mouth) { G.alphaCallT = null; return; }
     far = true;
   } else { G.alphaCallT = null; return; }
   if (G.alphaCallRoom !== id || G.alphaCallT == null) { G.alphaCallRoom = id; G.alphaCallT = far ? 1.1 : ALPHA_CALL.first; G.alphaCallN = 0; }
   // (once the fight is on, his howl is a MOVE with its own tell — the den's call stops)
-  if (!far && G.alphaCallN > 0 && typeof bossActive === 'function' && bossActive()) return;
+  if (!far && id === 'A10' && G.alphaCallN > 0 && typeof bossActive === 'function' && bossActive()) return;
   G.alphaCallT -= dt;
   if (G.alphaCallT > 0) return;
   sfx(far ? 'alpha_howl_far' : 'alpha_howl'); G.alphaCallN++;

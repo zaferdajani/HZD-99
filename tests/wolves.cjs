@@ -261,8 +261,14 @@ const { chromium } = require('playwright');
       return ok && G.roomId === to;
     };
     loadRoom('A2'); G.meet = null;
-    const inDen = walkDoor(room);
-    const home = inDen && walkDoor('A2');
+    // (2026-11-16: the den's mouth opens onto THE RUN — A10R, the road of wolves
+    // — and the Run's far mouth onto his floor; and back the same way. Its own
+    // harness is tests/alpha-run.cjs.)
+    const inRun = walkDoor('A10R'); G.enemies = [];
+    const inDen = inRun && walkDoor(room);
+    if (G.boss) G.boss.st = 'dorm';
+    const backRun = inDen && walkDoor('A10R'); G.enemies = [];
+    const home = backRun && walkDoor('A2');
     // and the lion is reached without it: the camp's east seam, through the
     // real crossing, with every milestone the lair needs and no Alpha
     G.save.flags = { tut: 1, woke: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 };
@@ -276,8 +282,8 @@ const { chromium } = require('playwright');
   check('...OFF the road: no room walks into it sideways and it walks into none',
     !(placed.sideFrom || []).length && !(placed.sideTo || []).length,
     'from ' + (placed.sideFrom || []).join(',') + ' -> ' + (placed.sideTo || []).join(','));
-  check('...the optional den is reached from A2\'s depth door', placed.inDen, placed.room);
-  check('...and its own door walks her back to the hub (A10 -> A2)', placed.home);
+  check('...the optional den is reached from A2\'s depth door, by the Run', placed.inDen, placed.room);
+  check('...and its own door walks her back to the hub (A10 -> the Run -> A2)', placed.home);
   check('the road runs on without it: A2 -> A3 -> A4 reached with the Alpha untouched',
     placed.a2r === 'A3' && placed.lion === 'A4' && !placed.alpha, 'A2.R ' + placed.a2r + ', A3 east -> ' + placed.lion);
 

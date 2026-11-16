@@ -40,9 +40,12 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     let at = -1; for (let i = 0; i < 90; i++) { quiet(); update(1 / 60); if (at < 0 && heard.includes('alpha_howl')) at = i; }
     out.E = { denAt: at };
     fresh(); loadRoom('A2'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; G.enemies = []; if (G.boss) G.boss = null;
-    const dd = gateDoors().find(q => q.to === 'A10'); out.E.door = !!dd;
+    const dd = gateDoors().find(q => q.to === 'A10R'); out.E.door = !!dd;   // (the den's mouth opens onto the Run now)
     if (dd) { player.x = gateWorldX(dd) - 200; const gc = groundColumnAt(player.x + 12); if (gc) player.y = Math.min.apply(null, gc) - player.h - 1; player.iT = 99; heard.length = 0;
       let far = -1; for (let i = 0; i < 200; i++) { quiet(); player.iT = 99; update(1 / 60); if (far < 0 && heard.includes('alpha_howl_far')) far = i; } out.E.mouthAt = far; }
+    // ...and on the Run he calls the whole way in
+    fresh(); loadRoom('A10R'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = null; G.enemies = []; heard.length = 0;
+    { let n = 0, first = -1; for (let i = 0; i < 1300; i++) { quiet(); player.iT = 99; update(1 / 60); const k = heard.filter(q => q === 'alpha_howl').length; if (k > n) { n = k; if (first < 0) first = i; } } out.E.run = { first, calls: n }; }
     fresh({ alpha: 1 }); loadRoom('A2'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; G.enemies = []; if (dd) { player.x = gateWorldX(dd) - 200; heard.length = 0; for (let i = 0; i < 200; i++) { quiet(); player.iT = 99; update(1 / 60); } }
     out.E.afterYield = heard.filter(n => n.indexOf('alpha_howl') === 0).length; window.sfx = real;
     out.m = {}; for (const n of ['alpha_howl', 'alpha_howl_far', 'hit', 'bosshit', 'hit_wolf', 'hit_cat', 'hit_wing', 'hit_robe', 'hit_housing', 'hit_soft', 'hit_ice', 'hit_spark']) out.m[n] = await measure(n);
@@ -62,6 +65,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('E  the howl is a voice: as loud as a clang, and long', R.m.alpha_howl.peak >= R.m.bosshit.peak * 0.8 && R.m.alpha_howl.peak >= 0.15 && R.m.alpha_howl.lenMs >= 700, { howl: R.m.alpha_howl, clang: R.m.bosshit.peak });
   check('   ...he howls within a second of her coming through into the den', R.E.denAt >= 0 && R.E.denAt <= 60, R.E);
   check('   ...at the den\'s mouth in the meadow she hears him through the rock, quieter', R.E.door && R.E.mouthAt >= 0 && R.m.alpha_howl_far.peak > 0.01 && R.m.alpha_howl_far.peak < R.m.alpha_howl.peak * 0.6, { at: R.E.mouthAt, far: R.m.alpha_howl_far.peak, near: R.m.alpha_howl.peak });
+  check('   ...on the Run to him he calls from the first second and keeps calling', R.E.run && R.E.run.first >= 0 && R.E.run.first <= 60 && R.E.run.calls >= 2, R.E.run);
   check('   ...and a pack that has yielded does not call', R.E.afterYield === 0, R.E.afterYield);
   check('no page errors', errs.length === 0, errs.slice(0, 2));
   await browser.close(); console.log(bad ? '\nFAILED: ' + bad : '\nOK — each body has its own voice under her blade'); process.exit(bad ? 1 : 0);

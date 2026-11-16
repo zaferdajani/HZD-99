@@ -157,7 +157,8 @@ const { chromium } = require('playwright');
       check('B  ' + key + ': the plate is a closed ring, and its hole is where the table says', !!P && !P.edge && Math.abs(P.cx - T.cx) < 0.012 && Math.abs(P.top - T.top) < 0.012 && Math.abs(P.bot - T.bot) < 0.012 && Math.abs(P.rx - T.rx) < 0.012,
         P ? 'hole cx ' + P.cx.toFixed(3) + ' top ' + P.top.toFixed(3) + ' bot ' + P.bot.toFixed(3) + ' rx ' + P.rx.toFixed(3) + ' (' + P.px + ' px plate)' : 'plate did not load');
       check('B  ' + key + ': the field fills the opening and none of it shows past the metal', !!P && P.covered >= 99 && P.leak <= 0.2, P ? P.covered + '% of the hole covered, ' + P.leak + '% of the field lands where there is neither hole nor metal' : ''); }
-    const denA = R.doors.find(d => d.room === 'A2' && d.to === 'A10'), denB = R.doors.find(d => d.room === 'A10' && d.to === 'A2');
+    // (2026-11-16: the den's mouth opens onto THE RUN — A10R — and the Run's far mouth onto his floor)
+    const denA = R.doors.find(d => d.room === 'A2' && d.to === 'A10R'), denB = R.doors.find(d => d.room === 'A10' && d.to === 'A10R');
     check('C  the Wolf King\'s door is the fanged ring, at both ends', !!denA && denA.drawn === 'ringDen' && !!denB && denB.drawn === 'ringDen', (denA && denA.drawn) + ' / ' + (denB && denB.drawn));
     const keeper = R.doors.find(d => d.room === 'CV3' && d.to === 'GA1T');
     check('C  the keeper\'s passage is the quarry\'s ring', !!keeper && keeper.drawn === 'ringQuarry', keeper ? keeper.drawn : 'no such door');

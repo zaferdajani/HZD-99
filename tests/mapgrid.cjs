@@ -29,7 +29,7 @@ const check = (name, ok, detail) => {
 };
 
 const K1 = ['W1', 'W2', 'A0', 'A0B', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7',
-  'A8', 'A9', 'A10', 'CV1', 'CV1B', 'CV2', 'CV3'];
+  'A8', 'A9', 'A10', 'A10R', 'CV1', 'CV1B', 'CV2', 'CV3'];
 
 (async () => {
   console.log('── mapgrid — two rooms cannot stand on the same square\n');

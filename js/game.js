@@ -9732,11 +9732,13 @@ const GATE_ROOM = {
   V1B: { at: 0.12, to: 'V1',  ax: 0.75, style: 'kerf' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.23, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, lock: 'bossGlitch', lockLine: 'ring_dormant' },   // dormant until its Sage wakes it (ringWake)
-  A2: { at: 0.84, to: 'A10', ax: 0.12, style: 'den' },      // the Wolf King's den: a mouth in rock (drawGateDoor)
+  A2: { at: 0.84, to: 'A10R', ax: 0.07, style: 'den' },      // the Wolf King's den: a mouth in rock (drawGateDoor)
   // (the grotto's ring stood at 0.23 — 162 px from the way out at 0.12, and a
   // ring is 236 wide: two doors drawn through each other, "looks like a glitch"
   // (owner, 2026-11-16). It stands in the middle of the den floor now.)
-  A10: [{ at: 0.12, to: 'A2', ax: 0.84, style: 'den' }, { at: 0.52, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, lock: 'alpha', lockLine: 'ring_dormant' }],
+  // the Run: the den's mouth in the meadow at one end, the inner mouth at the other
+  A10R: [{ at: 0.07, to: 'A2', ax: 0.84, style: 'den' }, { at: 0.93, to: 'A10', ax: 0.12, style: 'den' }],
+  A10: [{ at: 0.12, to: 'A10R', ax: 0.93, style: 'den' }, { at: 0.52, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, lock: 'alpha', lockLine: 'ring_dormant' }],
   B4:  { at: 0.62, to: 'GB1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossBrood' },
   C3:  { at: 0.31, to: 'GC1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossAtlas' },
   D3:  { at: 0.62, to: 'GD1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossZero' },
@@ -12398,7 +12400,7 @@ function gateHere() {
 function gateEnter() {
   const G2 = gateHere();
   if (!G2 || G.gateWalk) return false;
-  if (G2.to === 'A10' && !isHero() && !G.save.flags.crystal) { G.toast(t('story_need_blade')); return false; }
+  if ((G2.to === 'A10' || G2.to === 'A10R') && G.roomId !== 'A10' && !isHero() && !G.save.flags.crystal) { G.toast(t('story_need_blade')); return false; }
   const storyHint = typeof openingGateHint === 'function' ? openingGateHint(G2.to) : '';
   if (storyHint) {G.toast(storyHint);return false;}
   // BURIED: the mouth is there, she can hear through it, and it will not take
@@ -12517,7 +12519,7 @@ function drawOneGatePrompt(def) {
     c.globalAlpha = 0.95;
     c.fillStyle = '#fff2cf';
     c.font = 'bold 20px monospace'; c.textAlign = 'center';
-    if (def.to === 'A10') { c.font = 'bold 12px system-ui'; c.fillText(t('alpha_den'), gx, gy - (typeof RING_H !== 'undefined' ? RING_H + 14 : 250)); c.font = 'bold 20px monospace'; }   // over the crown, never across the field she is standing in
+    if (def.to === 'A10' || (def.to === 'A10R' && G.roomId === 'A2')) { c.font = 'bold 12px system-ui'; c.fillText(t('alpha_den'), gx, gy - (typeof RING_H !== 'undefined' ? RING_H + 14 : 250)); c.font = 'bold 20px monospace'; }   // over the crown, never across the field she is standing in
     c.fillText('↑', gx, gy - 44 + Math.sin(pulseTime * 3.2) * 3);
   }
   c.restore();
