@@ -182,6 +182,37 @@ authorised instead of on the work that landed.
   clear, or a defect shipped that he would otherwise discover himself.
 - Then keep firing. The list is run top to bottom without being narrated.
 
+## A CORRECTION IS A RULE FOR THE WHOLE GAME (2026-11-17)
+
+**"Why do you not remember what I told you and improve?"** — the owner, after
+being told that a session starts with no memory of the last one. He is right to
+ask, and the answer has two halves that must not be confused.
+
+**What carries over is only what is written here.** No session remembers the
+one before it. A correction survives as a rule in this file, a harness in
+`tests/`, a skill in `.claude/skills/`, or the code — and nowhere else. A
+correction that is fixed in one place and written nowhere is a correction he
+will have to make again, and that is this session's failure, not his.
+
+**And a correction has been applied too narrowly.** He refused the light round
+enemies three times before it was removed outright. After NO LIGHT ROUND A BODY
+became a standing order, the ember ring behind the Eye's agents — the same
+thing — stayed in the game until it was noticed by accident and he was ASKED
+whether to keep it. The rule already answered that.
+
+So, for every correction he gives:
+
+1. **Fix the instance he pointed at.**
+2. **Sweep.** Search the whole game for every other place that breaks the same
+   rule — other enemies, other rooms, other kingdoms, the comic, NOSTOS — and
+   fix those in the same change. If one is a real judgement call, fix the clear
+   ones and name that one; do not ask about things the rule already decides.
+3. **Write it down**: the rule here in his words with the date, and a harness
+   that fails if it comes back. A fix with neither is not finished.
+4. **Report the sweep**: what else was found and fixed, in one or two lines.
+
+Do not answer a correction with an explanation of why it was that way.
+
 ## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
 
 **"All arts, videos, images, STRUCTURES should be created through
