@@ -12167,7 +12167,8 @@ function drawSage(c, e) {
   // opposite way to the front-on set. The bow transform stays only as the
   // fallback while the exhale plate is in flight. Cell heights are matched to
   // the standing plate's 1.12 hitboxes of body (the bow stands a little lower).
-  let sageDrew = typeof drawSageDuelBody==='function'&&drawSageDuelBody(c,e);
+  // (the rig, where one is asked for and has landed — js/agentrig.js: the same body posed from parts)
+  let sageDrew = (typeof agentRigDraw === 'function' && agentRigDraw(c, e)) || (typeof drawSageDuelBody==='function'&&drawSageDuelBody(c,e));
   const towardHer = !sageFlip;
   // (this chamber's agent, if it has been fired: its own picture of each state — AGENT_ART)
   const AK = typeof agentKey === 'function' ? agentKey : (k) => k;

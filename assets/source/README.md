@@ -136,6 +136,12 @@ exactly like the first one I fought"): `stand_asfired.webp` and the six states
 `walks_take_2.jpg` are the seven filmed walks' contact sheets (one stride each). `agents/jobs.json` has every job id and the
 exact cut. Shipped as `characters/agents/<name>/<state>.webp`.
 
+`agents/tally/parts_asfired.webp` is TALLYMAN TAKEN APART (2026-11-17, GPT
+Image 2.6, job `0d8bc2f9-5503-480d-a629-1cd36830c30c`): seven pieces in a row
+on a green screen, the one sheet a rig needs. `tools/agentparts.cjs tally` cuts
+them into `characters/agents/tally/rig/` with every joint measured; the brief is
+in `agents/jobs.json` (`tally.parts`).
+
 `platforms/platobj_{a,x,b}_asfired.jpg` are THE DECKS AS OBJECTS (2026-11-17,
 GPT Image 2.6, jobs `e42fe118-c048-40f4-8919-ad6df8ba0f87` city gantry,
 `4bb8b776-29c9-411d-a53a-9b8c6e870052` cave rock shelf,

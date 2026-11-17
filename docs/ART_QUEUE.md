@@ -59,6 +59,25 @@ taken as far as existing art goes:
 
 ---
 
+## 2bw. RIGS — one sheet of parts instead of a picture per move ◐ PROVED ON TALLYMAN 2026-11-17, OFF; the owner to judge before anything is converted
+
+The owner: *"Do you have the ability to animate those agents between those
+moves?... instead of generating the artwork for every single move... to
+minimize the amount of artwork needed."* **Fired 2026-11-17**: TALLYMAN's
+parts sheet (job `0d8bc2f9-5503-480d-a629-1cd36830c30c`, 1 credit, first
+attempt) — hood and head, torso, robe skirt, upper arm, forearm and hand, lower
+leg and foot, staff. `tools/agentparts.cjs` cuts and anchors it;
+`js/agentrig.js` poses it; it draws in GA1D only with `?rig=1`.
+`tests/agent-rig.cjs`. The method, the brief that worked and the cloth rules
+are the `rig-animation` skill.
+
+**If he says convert:** one parts sheet per agent, against that agent's own
+stand plate, same brief with its own pieces named (about 1 credit each at 2k
+medium); a row in `AGENT_RIG_ROOM`; nothing else. A sleeve that is raised often
+wants a second, raised forearm on the sheet (skill §4).
+
+---
+
 ## 2bu. THE EYE'S AGENTS — seven bodies, not one ✔ ALL SEVEN FIRED AND WIRED 2026-11-17
 
 **Fired 2026-11-17**, in two rounds (the second on the owner's word after he
