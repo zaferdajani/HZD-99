@@ -37,7 +37,7 @@ const { chromium } = require('playwright');
       const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, rubbleCV1B: 1, crystal: 1, pl_cshard: 1, beacon: 1, bossHorn: 1, ghMet: 1, gateOpened: 1 });
       if (room === 'CV3') { delete sv.flags.bossHorn; delete sv.flags.crystal; delete sv.flags.pl_cshard; }
       sv.weaponMode = mode; startGame(sv); loadRoom(room); const srcs = []; const h0 = player.hurt.bind(player); player.hurt = function (d, fx2, src, foe) { const c0 = player.cores; const r = h0(d, fx2, src, foe); if (player.cores < c0) srcs.push(src || '?'); return r; };
-      const clear = () => { if (G.dialog || G.cut || G.panels || G.meet || G.state !== 'PLAY') { G.dialog = G.cut = G.panels = G.meet = G.wake = null; G.state = 'PLAY'; } };
+      let hopStruck = false, hopN = 0; const bhitF = []; const clear = () => { if (G.dialog || G.cut || G.panels || G.meet || G.state !== 'PLAY') { G.dialog = G.cut = G.panels = G.meet = G.wake = null; G.state = 'PLAY'; } };
       const st = {}, hits = {}; let chains = 0, last = '', frames = 0, hp0 = player.cores, dmg = 0, lastHp = player.cores, bl = -1, bhits = [], hurtAt = [], deaths = 0, dealt = 0, bhp = 0, t0 = -1;
       const B = () => G.boss || G.enemies.find(e => e.kind === 'alpha' || e.boss);
       for (; frames < 60 * 150; frames++) {
@@ -85,27 +85,35 @@ const { chromium } = require('playwright');
               if (Math.abs(wdx) > 46) keys[wdx > 0 ? 'ArrowRight' : 'ArrowLeft'] = 1; else if (Math.sign(wdx) !== player.face) keys[wdx > 0 ? 'ArrowRight' : 'ArrowLeft'] = 1;
               if (frames % 5 === 0) { keysP.KeyX = 1; keys.KeyX = 1; } } }
           if (jump && player.on) { keysP.Space = 1; } if (jump || !player.on) keys.Space = 1;
+        } else if (bot === 'hop') {
+          // jump, ONE down-strike, step off his back to the floor, again (the hole the owner found:
+          // the count cleared on the floor, so every one of these was a whole blow and he never reached her)
+          if (player.on) { hopStruck = false; if (adx > 20) keys[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = 1; if (adx < 140 && frames % 3 === 0) keysP.Space = 1; keys.Space = 1; }
+          else { keys.Space = 1;
+            if (!hopStruck) { if (adx > 20) keys[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = 1; if (player.y + player.h < bo.y + 10) { keys.ArrowDown = 1; if (frames % 4 === 0) { keysP.KeyX = 1; keys.KeyX = 1; } } }
+            else keys[dx > 0 ? 'ArrowLeft' : 'ArrowRight'] = 1; }
+          if (player.pogoN > hopN) { hopN = player.pogoN; hopStruck = true; } else if (!player.pogoN) hopN = 0;
         } else {
           if (adx > 26) keys[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = 1;
           if (player.on && adx < 120 && frames % 3 === 0) { keysP.Space = 1; } keys.Space = 1;
           if (!player.on && player.y + player.h < bo.y + 10) { keys.ArrowDown = 1; if (frames % 4 === 0) { keysP.KeyX = 1; keys.KeyX = 1; } }
         }
-        const pre = bo.hp; update(1 / 60); if (bo.hp < pre) bhits.push(Math.round(pre - bo.hp));
+        const pre = bo.hp, down = !!(player.swing && player.swing.t > 0 && player.swing.ay > 0.5); update(1 / 60); if (bo.hp < pre) { bhits.push(Math.round(pre - bo.hp)); if (down) bhitF.push(frames); }   // bhitF: her DOWN-strikes that bit (a hurt she takes can cost him too)
         if (player.cores < lastHp) { dmg += lastHp - player.cores; hurtAt.push(bo.st); } lastHp = player.cores;
         if (player.dead) { deaths++; break; }
       }
       const bo = B();
-      return { bot, secs: +((frames - Math.max(0, t0)) / 60).toFixed(1), won: !!(bo && (bo.dead || bo.purified || bo.tamed || bo.hp <= 0)), died: deaths, dmg, hp0, bossHp: bo ? Math.round(bo.hp) + '/' + bo.hpMax : '?', fury: !!(bo && bo.fury), states: st, hits: bhits.length, hitSizes: [...new Set(bhits)].sort((a, b) => a - b).join('/'), hurtAt, srcs, chains, wolves: G.enemies.filter(e => !e.dead).length };
+      return { bot, secs: +((frames - Math.max(0, t0)) / 60).toFixed(1), won: !!(bo && (bo.dead || bo.purified || bo.tamed || bo.hp <= 0)), died: deaths, dmg, hp0, bossHp: bo ? Math.round(bo.hp) + '/' + bo.hpMax : '?', fury: !!(bo && bo.fury), states: st, hits: bhits.length, hitAt: bhitF, hitSizes: [...new Set(bhits)].sort((a, b) => a - b).join('/'), hurtAt, srcs, chains, wolves: G.enemies.filter(e => !e.dead).length };
     }, { room, mode, bot, seed: r + 1 });
 
     await p.close(); return res;
   };
   const sum = (o, ks) => ks.reduce((n, k) => n + (o[k] || 0), 0);
   try {
-    console.log('── boss-skill — mashing loses, bouncing on its back loses, reading it wins');
+    console.log('── boss-skill — mashing loses, bouncing on its back loses, hopping on and off it loses, reading it wins');
     // ---- THE WOLF KING ----
-    const A = { mash: [], pogo: [], skill: [] };
-    for (const bot of ['mash', 'pogo', 'skill']) for (let r = 0; r < 3; r++) A[bot].push(await fight('A10', 'single', bot, r));
+    const A = { mash: [], pogo: [], hop: [], skill: [] };
+    for (const bot of ['mash', 'pogo', 'hop', 'skill']) for (let r = 0; r < 3; r++) A[bot].push(await fight('A10', 'single', bot, r));
     const line = d => d.secs + ' s, ' + (d.won ? 'won' : d.died ? 'DIED' : 'timed out') + ', ' + d.dmg + ' cores lost, king at ' + d.bossHp;
     check('ALPHA  mash: a player who only presses ATTACK never beats it', A.mash.every(d => !d.won), A.mash.map(line).join(' | '));
     check('ALPHA  ...and is not close: the king still has a third of its health when she falls', A.mash.every(d => d.died && parseInt(d.bossHp, 10) >= 658 * 0.33), A.mash.map(d => d.bossHp).join(' | '));
@@ -113,8 +121,11 @@ const { chromium } = require('playwright');
     check('ALPHA  ...and it will not be stood next to: it springs clear of a mash', A.mash.every(d => (d.states.spring || 0) >= 2), A.mash.map(d => (d.states.spring || 0) + ' springs').join(' | '));
     check('ALPHA  pogo: bouncing on its back never beats it', A.pogo.every(d => !d.won), A.pogo.map(line).join(' | '));
     check('ALPHA  ...it answers the air above it: the skybite is what stops her', A.pogo.every(d => d.srcs.filter(s2 => s2 === 'alpha.sky').length >= 2), A.pogo.map(d => d.srcs.join(',')).join(' | '));
-    check('ALPHA  ...and each bounce without touching the floor is worth less', A.pogo.every(d => { const z = d.hitSizes.split('/').map(Number); return Math.min.apply(null, z) <= Math.max.apply(null, z) * 0.4; }), 'blows landed for ' + A.pogo[0].hitSizes);
+    // (owner, 2026-11-17: "do not allow player to keep hitting rhino with an endless down hit". The
+    // count is a five-second memory now, not cleared by the floor: one whole, one half, then plate.)
+    check('ALPHA  ...a down-strike is a move, not a plan: never three inside five seconds', A.pogo.every(d => d.hitAt.every((f, i) => i < 2 || f - d.hitAt[i - 2] >= 298)), A.pogo.map(d => d.hitAt.length + ' down-strikes bit, at ' + d.hitAt.map(f => (f / 60).toFixed(1)).join('/')).join(' | '));
     const wins = A.skill.filter(d => d.won);
+    check('ALPHA  hop: one down-strike, back to the floor, again — never beats it either', A.hop.every(d => !d.won && parseInt(d.bossHp, 10) >= 658 * 0.8), A.hop.map(line).join(' | '));
     check('ALPHA  skill: a player who reads it wins', wins.length >= 2, A.skill.map(line).join(' | '));
     check('ALPHA  ...in a fight, not a formality and not a siege (25–100 s)', wins.length > 0 && wins.every(d => d.secs >= 25 && d.secs <= 100), wins.map(d => d.secs + ' s').join(' | '));
     check('ALPHA  ...with something left (at most four of five cores lost)', wins.length > 0 && wins.every(d => d.dmg <= 4), wins.map(d => d.dmg).join(' | '));
@@ -126,12 +137,15 @@ const { chromium } = require('playwright');
     // ---- GRAVEHORN ----
     // (his own harness, tests/gravehorn.cjs, carries the player who reads him: its autopilot jumps the
     // charge, turns the toss and takes the hornless window, and must win. Here: the two who do not.)
-    const H = { mash: [], pogo: [] };
-    for (const bot of ['mash', 'pogo']) for (let r = 0; r < 3; r++) H[bot].push(await fight('CV3', 'single', bot, r));
+    const H = { mash: [], pogo: [], hop: [] };
+    for (const bot of ['mash', 'pogo', 'hop']) for (let r = 0; r < 3; r++) H[bot].push(await fight('CV3', 'single', bot, r));
     check('GRAVEHORN  mash: a player who only presses ATTACK never beats him', H.mash.every(d => !d.won), H.mash.map(line).join(' | '));
     check('GRAVEHORN  ...the toss is not turned by a mash: a parry is one clean strike', H.mash.every(d => !(d.states.stagger > 0) && d.srcs.indexOf('horn.toss') >= 0), H.mash.map(d => (d.states.stagger || 0) + ' parries, hurt by ' + d.srcs.join(',')).join(' | '));
     check('GRAVEHORN  pogo: bouncing on his back never beats him', H.pogo.every(d => !d.won), H.pogo.map(line).join(' | '));
     check('GRAVEHORN  ...and it does not get her there: he has more than half of the phase\'s health when she falls', H.pogo.every(d => d.died && parseInt(d.bossHp, 10) >= 329 * 0.5), H.pogo.map(d => d.bossHp).join(' | '));
+    check('GRAVEHORN  ...a down-strike is a move, not a plan: never three inside five seconds', H.pogo.every(d => d.hitAt.every((f, i) => i < 2 || f - d.hitAt[i - 2] >= 298)), H.pogo.map(d => d.hitAt.length + ' down-strikes bit, at ' + d.hitAt.map(f => (f / 60).toFixed(1)).join('/')).join(' | '));
+    check('GRAVEHORN  hop: one down-strike, back to the floor, again — never beats him (it used to: 67 blows, never touched)', H.hop.every(d => !d.won && d.died && parseInt(d.bossHp, 10) >= 329 * 0.8), H.hop.map(line).join(' | '));
+    check('GRAVEHORN  ...because the floor beside him is no refuge: the buck\'s shock or the buck itself is what stops her', H.hop.every(d => d.srcs.some(q => q === 'horn.quake' || q === 'horn.buck')), H.hop.map(d => d.srcs.join(',')).join(' | '));
     check('GRAVEHORN  ...struck from above, he bucks', H.pogo.some(d => d.srcs.indexOf('horn.buck') >= 0 || (d.states.buck || 0) > 0), H.pogo.map(d => (d.states.buck || 0) + ' bucks').join(' | '));
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await b.close(); }

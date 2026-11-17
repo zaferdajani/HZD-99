@@ -179,8 +179,10 @@ const PANEL_SEQ = [
       // only if the swipe actually took a core: the interactive meeting can be dodged
       { ref: 'game: m_down', src: PANEL_GAME('m_down'), crop: [0, 0, 1600, 893], cap: 'pc_core', move: 'in', focus: [0.6, 0.45],
         cond: s => !!s.meetHit },
-      { ref: 'p14 panel 3', src: PANEL_CLEAN(14), crop: [48, 1185, 540, 360], cap: null, move: 'right', focus: [0.5, 0.5] },
-      { ref: 'p14 panel 4', src: PANEL_CLEAN(14), crop: [605, 1185, 547, 275], cap: 'pc_bored', move: 'right', focus: [0.5, 0.5] },
+      // (2026-11-17: page 14's own panels 3 and 4 drew him WHITE — "does not look like the
+      // actual Nilfang". One new panel in his gunmetal, seen twice: the whole of him, then his face.)
+      { ref: 'game: m_stalk', src: PANEL_GAME('m_stalk'), crop: [0, 0, 1600, 1075], cap: null, move: 'right', focus: [0.6, 0.45] },
+      { ref: 'game: m_stalk (his face)', src: PANEL_GAME('m_stalk'), crop: [650, 215, 900, 452], cap: 'pc_bored', move: 'in', focus: [0.5, 0.5] },
     ] },
   // the sage's sentence happening in front of her: he resists, the bell wins
   { id: 'break', title: 'pn_s_break', room: 'A2', alsoRoom: 'A3', prefetch: ['A2', 'A3'],

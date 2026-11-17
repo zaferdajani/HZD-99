@@ -53,6 +53,9 @@ const GH = {
   // THE BUCK: his answer to the air above him (ghStep). The whole machine drops
   // on its legs for buckTell, then heaves — anything over his back is thrown.
   buckTell: 0.32, buck: 0.34, buckLive: 0.22, buckReach: 118, buckDwell: 0.30, buckKB: [470, 540],
+  // ...and the heave comes DOWN: a shock runs the floor both ways from his feet,
+  // so the ground beside him is no place to land after striking his back
+  quakeV: 560, quakeLife: 0.55, quakeH: 40, quakeW: 46, buckAfter: 0.16,
   // HIS HIDE: a blow thrown into a wind-up or a strike turns on the plate
   hide: 0.5,
 };
@@ -648,7 +651,7 @@ function ghHoldsStone() {
 }
 function ghInit(b) {
   b.hornBig = true; b.hornSmall = true;
-  b.missiles = []; b.rocks = [];
+  b.missiles = []; b.rocks = []; b.shocks = [];
   b.feet = null; b.gph = 0; b._bob = 0;
   b.dark = 1; b.fade = 0; b.hideBar = true;
   b.denied = 0; b.lastMove = null; b.chainLeg = 0;
@@ -798,6 +801,13 @@ function ghStep(b, dt) {
         const fy = b.y + b.h;
         if (!G.artProbe) { burst(b.cx() - 60, fy, 9, '#8a7f6c', 240, 0.45, 300, 3); burst(b.cx() + 60, fy, 9, '#8a7f6c', 240, 0.45, 300, 3); }
         if (typeof fx === 'function') fx('pillar', b.cx(), fy - 120, { rx: 120, ry: GH.buckReach + 40, dur: 0.3, col: '#ff5a3a', hot: '#ffe9d6', power: 1.1 });
+        // THE FLOOR ANSWERS TOO (owner, 2026-11-17: "do not allow player to keep
+        // hitting rhino with an endless down hit"). The heave only ever reached
+        // the air over his back, so one strike and a step off him was free —
+        // he bucked at nothing while she stood beside him. Where his weight
+        // comes down a shock runs the floor both ways: jump it, or be clear.
+        b.shocks = b.shocks || [];
+        for (const dir of [-1, 1]) b.shocks.push({ x: b.cx() + dir * 96, dir, t: 0, hit: false });
       }
       break;
     }
@@ -815,7 +825,10 @@ function ghStep(b, dt) {
           }
         }
       }
-      if (b.t <= 0) ghSet(b, 'recover', GH.recover);
+      // the buck is an ANSWER, not an opening: he is back on his feet and
+      // choosing his next blow at once (it used to end in a full recovery,
+      // which made striking his back the way to open him)
+      if (b.t <= 0) ghSet(b, 'idle', GH.buckAfter);
       break;
     }
     // ------------------------------------------------------------ neutral
@@ -1182,6 +1195,21 @@ function ghLaunch(b, which) {
   burst(s[0], s[1], 10, '#ff4a2a', 220, 0.3, 0, 2.5, true);
 }
 function ghMissileBox(m) { return { x: m.x - 11, y: m.y - 11, w: 22, h: 22 }; }
+// THE WHOLE HORN IS SHARP (owner, 2026-11-17: "his flying horn is not hurting me
+// when touching them"). It was drawn 62 long and hurt in a 22-pixel square at
+// its middle, and on its way home it hurt nowhere. Three samples down its
+// length, tip first, the way it is drawn.
+function ghMissileHeading(m) {
+  const sp = Math.hypot(m.vx, m.vy);
+  if (sp > 30) m.ha = Math.atan2(m.vy, m.vx);
+  return m.ha == null ? -Math.PI / 2 : m.ha;
+}
+function ghMissilePts(m) {
+  const len = m.which === 'big' ? 62 : 32, r = m.which === 'big' ? 12 : 9, a = ghMissileHeading(m);
+  const hx = Math.cos(a), hy = Math.sin(a);
+  return [0.5, 0.05, -0.4].map(d => ({ x: m.x + hx * len * d - r, y: m.y + hy * len * d - r, w: r * 2, h: r * 2 }));
+}
+function ghMissileTouches(m, box) { return ghMissilePts(m).some(q => aabb(q, box)); }
 function ghBoom(b, m, swatted) {
   m.ph = 'boom'; m.boomT = 0.4; m.vx = 0; m.vy = 0;
   burst(m.x, m.y, swatted ? 10 : 22, swatted ? '#ffffff' : '#ff5f6d', swatted ? 200 : 300, 0.45, 160, 3.4, true);
@@ -1231,10 +1259,10 @@ function ghProjStep(b, dt) {
       if (m.lockFx > 0) m.lockFx -= dt;
       m.x += m.vx * dt; m.y += m.vy * dt;
       if (chance(0.8)) addPart(m.x - m.vx * 0.03, m.y - m.vy * 0.03, rnd(-20, 20), rnd(-30, 10), rnd(0.3, 0.6), chance(0.5) ? '#6b6b6b' : '#8a8580', rnd(2.5, 4), -30);
-      const bx = ghMissileBox(m);
+      const pts = ghMissilePts(m);
       // her claws knock it out of the air: it bursts, harmlessly, where it was
-      if (player.swing && player.swing.t > 0 && swingTouches(player, bx)) { ghBoom(b, m, true); continue; }
-      if (!player.dead && player.iT <= 0 && aabb(bx, player)) { m.hit = true; ghHurtBy(b, m.x, 'horn.missile'); ghBoom(b, m, false); continue; }
+      if (player.swing && player.swing.t > 0 && pts.some(q => swingTouches(player, q))) { ghBoom(b, m, true); continue; }
+      if (!player.dead && player.iT <= 0 && pts.some(q => aabb(q, player))) { m.hit = true; ghHurtBy(b, m.x, 'horn.missile'); ghBoom(b, m, false); continue; }
       const gy = ghGround(b, m.x);
       const solid = solidAt(Math.floor(m.x / TILE), Math.floor(m.y / TILE));
       if (solid || (m.y > gy - 6 && m.vy > 0 && Math.abs(gy - (b.y + b.h)) < 40) || m.x < 0 || m.x > W || m.y > H || m.y < -40 || m.t > m.life) ghBoom(b, m, false);
@@ -1242,9 +1270,18 @@ function ghProjStep(b, dt) {
       m.boomT -= dt;
       if (m.boomT <= 0) m.ph = 'ret';
     } else if (m.ph === 'ret') {
-      // IT COMES HOME, harmless: up off the floor first, then to its socket.
-      // It waits out the rest of the opening — the hornless window is a
-      // promise, not an accident of where the shot landed.
+      // IT COMES HOME: up off the floor first, then to its socket. It waits
+      // out the rest of the opening — the hornless window is a promise, not an
+      // accident of where the shot landed. But it is still a horn in the air:
+      // touching it cuts (once — her own mercy frames cover the rest), her
+      // blade bats it aside, and once he is down it is only metal going home.
+      if ((m.swatT || 0) > 0) m.swatT -= dt;
+      else if (!G.ghHold && !b.dead && !player.dead) {
+        if (player.swing && player.swing.t > 0 && ghMissilePts(m).some(q => swingTouches(player, q))) {
+          m.swatT = 0.45; m.vx += (Math.sign(m.x - (player.x + player.w / 2)) || 1) * 320; m.vy -= 220;
+          burst(m.x, m.y, 8, '#ffffff', 200, 0.25, 0, 2.2, true); sfx('block');
+        } else if (player.iT <= 0 && ghMissileTouches(m, player)) ghHurtBy(b, m.x, 'horn.return');
+      }
       const s = ghSockWorld(b, m.which);
       const early = m.t < away - 0.55;
       const tx = s[0] + (early ? -(b.face || -1) * 60 : 0), ty = s[1] - (early ? 90 : 0);
@@ -1264,6 +1301,23 @@ function ghProjStep(b, dt) {
         b.missiles.splice(i, 1);
         if (m.which === 'big') b.hornBig = true; else b.hornSmall = true;
       }
+    }
+  }
+  // the buck's floor shock: it runs the ground it is on, it is low enough to
+  // jump, and it is gone in half a second
+  if (b.shocks) for (let i = b.shocks.length - 1; i >= 0; i--) {
+    const s = b.shocks[i];
+    s.t += dt; s.x += s.dir * GH.quakeV * dt;
+    const gy = ghGround(b, s.x);
+    const wall = solidAt(Math.floor(s.x / TILE), Math.floor((gy - TILE * 0.6) / TILE));
+    if (s.t >= GH.quakeLife || wall || s.x < 0 || s.x > W) { b.shocks.splice(i, 1); continue; }
+    if (!G.artProbe) {
+      burst(s.x, gy - 2, 2, '#b8a888', 150, 0.3, 420, 3.2);
+      if (chance(0.5)) burst(s.x, gy - 4, 1, '#ffb070', 120, 0.22, 200, 2.2, true);
+    }
+    if (!s.hit && !G.ghHold && !player.dead && player.iT <= 0
+        && aabb({ x: s.x - GH.quakeW / 2, y: gy - GH.quakeH, w: GH.quakeW, h: GH.quakeH + 6 }, player)) {
+      s.hit = true; ghHurtBy(b, s.x, 'horn.quake');
     }
   }
   for (let i = b.rocks.length - 1; i >= 0; i--) {
@@ -1393,7 +1447,7 @@ function ghDown(b) {
     b.hp = Math.max(1, b.hp); return;
   }
   b.hp = 1; b.invHp = 1; b.vx = 0;
-  b.rocks.length = 0; b.kickBox = null;
+  b.rocks.length = 0; b.kickBox = null; b.shocks = [];
   for (const m of b.missiles) if (m.ph === 'fly') { m.ph = 'ret'; burst(m.x, m.y, 8, '#ffffff', 160, 0.3, 0, 2, true); }
   G.ghHold = true;
   G.hitStop = Math.max(G.hitStop, 0.16); cam.shake = Math.max(cam.shake, 12);
@@ -1406,7 +1460,7 @@ function ghDown(b) {
 function ghGone(b) {
   if (!b.missiles) ghInit(b);
   b.dead = true; b.hp = 0; b.fade = 1; b.vx = 0;
-  b.missiles.length = 0; b.rocks.length = 0;
+  b.missiles.length = 0; b.rocks.length = 0; b.shocks = [];
   G.ghHold = null;
   if (G.save) {
     G.save.flags.bossHorn = 1;
@@ -1704,7 +1758,7 @@ function ghDrawShots(c, b) {
   }
   for (const mm of b.missiles) {
     if (mm.ph === 'boom') continue;
-    const a = Math.atan2(mm.vy, mm.vx) + Math.PI / 2;
+    const a = ghMissileHeading(mm) + Math.PI / 2;
     // the exhaust: red-white light behind the horn's base
     if (mm.ph === 'fly') {
       c.save(); c.globalCompositeOperation = 'lighter';
@@ -1728,7 +1782,7 @@ function ghDrawShots(c, b) {
     const len = mm.which === 'big' ? 62 : 32;
     c.save();
     c.translate(mm.x, mm.y); c.rotate(a);
-    ghPart(c, part, 0, len * 0.45, 0, mm.ph === 'ret' ? { far: true } : {}, p2);
+    ghPart(c, part, 0, len * 0.45, 0, mm.ph === 'ret' && (G.ghHold || b.dead) ? { far: true } : {}, p2);
     c.restore();
   }
   for (const r of b.rocks) {

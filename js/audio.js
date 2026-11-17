@@ -109,11 +109,45 @@ function stopRecorded() {
 // a call arrives, or the loop simply fails to come round. None of it raises an
 // error anybody was listening for — the music just ends, mid-level, and stays
 // ended. Anything that leaves the current track paused gets it started again.
+// (owner, 2026-11-17: "why music stopped?" — it could not be reproduced in a
+// clean run, so this closes the three ways a session can go quiet that nothing
+// here was watching. One: the audio CONTEXT, which every synthesised sound
+// goes through, is left 'suspended' — or on iOS 'interrupted' — by a call, a
+// lock screen or a trip to another app, and the only resume was on the next
+// key press and only from 'suspended'. Two: a stream that ERRORS mid-track
+// (the network drops on a phone) cannot be restarted by play() at all; it has
+// to be rebuilt, and after a few tries the next candidate or the synth score
+// takes over. Three: a slot that ended up with nothing playing is asked again.)
+const MUS_FAILS = {}, MUS_DEAD = {};
 function musKick() {
-  const n = RECNODE;
-  if (!n || MUTED || !MUSIC_ON) return;
   try {
-    if (n.el.paused && n.el.src) {
+    if (AC && AC.state !== 'running' && AUD_UNLOCKED && !(typeof document !== 'undefined' && document.hidden)) {
+      const r = AC.resume(); if (r && r.catch) r.catch(() => {});
+    }
+  } catch (e) {}
+  const n = RECNODE;
+  if (MUTED || !MUSIC_ON) return;
+  if (!n) {
+    if (MUS.name && !MUS.cur) { const nm = MUS.name; MUS.name = null; try { setMusic(nm); } catch (e) {} }
+    return;
+  }
+  try {
+    const el = n.el, hidden = typeof document !== 'undefined' && document.hidden;
+    // stalled: asked to play, not paused, starved of data, and the clock has
+    // not moved for six seconds (by the wall clock: kicks can come in bursts)
+    const t = el.currentTime || 0, now = Date.now();
+    if (n.lastT !== t || el.paused || hidden || el.readyState >= 3 || !n.movedAt) n.movedAt = now;
+    n.lastT = t;
+    if (el.error || el.networkState === 3 || now - n.movedAt > 6000) {
+      const key = n.key, gain = n.target, nm = MUS.name;
+      MUS_FAILS[key] = (MUS_FAILS[key] || 0) + 1;
+      if (t > 0 && !MUS_RESTART.test(key)) MUS_POS[key] = t;
+      RECNODE = null; musKill(el);
+      if (MUS_FAILS[key] <= 3) playRecorded(key, gain);
+      else { MUS_DEAD[key] = 1; MUS.name = null; setMusic(nm); }   // the next candidate, or the synth score
+      return;
+    }
+    if (el.paused && el.src) {
       const pr = n.el.play();
       if (pr && pr.catch) pr.catch(() => {});
     }
@@ -136,9 +170,12 @@ if (typeof setInterval === 'function') {
     const n = RECNODE;
     if (!n || n.el._fading) return;
     try {
-      const want = Math.max(0, Math.min(1, n.target * MUS_DUCK));
+      const dip = typeof musDipK === 'function' ? musDipK() : 1;
+      const want = Math.max(0, Math.min(1, n.target * MUS_DUCK * dip));
       const v = n.el.volume;
-      if (Math.abs(v - want) > 0.025) n.el.volume = v + Math.sign(want - v) * 0.05;
+      // down under a roar in a quarter of a second, back up at the usual pace
+      const stepV = want < v && dip < 1 ? 0.12 : 0.05;
+      if (Math.abs(v - want) > stepV / 2) n.el.volume = Math.max(0, Math.min(1, v + Math.sign(want - v) * stepV));
       else if (v !== want) n.el.volume = want;
     } catch (e) {}
   }, 90);
@@ -146,7 +183,7 @@ if (typeof setInterval === 'function') {
 function playRecorded(key, gain) {
   stopRecorded();
   const src = MEDIA_SRC.stream && MEDIA_SRC.stream[key];
-  if (!src) return false;
+  if (!src || MUS_DEAD[key]) return false;
   try {
     const el = new Audio();
     el.src = src; el.loop = true; el.preload = 'auto';
@@ -425,6 +462,56 @@ function bufOnset(key) {
 function mf(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
 // ---------- low-level voices ----------
+// ---------------------------------------------------------------------------
+// THE VOICE BUS — a guardian is HEARD (owner, 2026-11-16: "I should hear his
+// howl. There is no sound for the howling"; 2026-11-17: "alfa still has no
+// sound"). The first answer turned the howl's numbers up and stopped there.
+// Measured (tests/voice-heard.cjs): the Alpha's claw, leap and step were a
+// QUARTER of the level of her own hit, his wind-ups were almost entirely below
+// 400 Hz — which a phone speaker does not reproduce at all — and all of it sat
+// under a score streaming at 0.6. It was there; nobody could hear it.
+//
+// So a voice does not go straight to the output any more. Every synth helper
+// connects to sfxDest(); for the sounds named in SFX_VOICE that is this bus:
+// a gain, a soft saturator (which is what makes a low growl audible on a small
+// speaker: it writes the harmonics the speaker CAN say), a presence shelf, and
+// a limiter so a loud voice never clips. One bus per level, built once.
+// The score steps back under a roar (musDip) and comes straight back.
+// ---------------------------------------------------------------------------
+let SFX_OUT = null;
+const VOICE_BUS = {};
+function sfxDest() { return SFX_OUT || AC.destination; }
+function voiceBus(k) {
+  const key = k.toFixed(2), have = VOICE_BUS[key];
+  if (have && have.ctx === AC) return have.node;
+  const inG = AC.createGain(); inG.gain.value = k;
+  const sh = AC.createWaveShaper(), N = 1024, c = new Float32Array(N);
+  for (let i = 0; i < N; i++) { const x = i / (N - 1) * 2 - 1; c[i] = Math.tanh(x * 2.2) / Math.tanh(2.2); }
+  sh.curve = c; sh.oversample = '2x';
+  const shelf = AC.createBiquadFilter(); shelf.type = 'highshelf'; shelf.frequency.value = 700; shelf.gain.value = 6;
+  const lim = AC.createDynamicsCompressor();
+  lim.threshold.value = -9; lim.knee.value = 6; lim.ratio.value = 12; lim.attack.value = 0.003; lim.release.value = 0.12;
+  inG.connect(sh); sh.connect(shelf); shelf.connect(lim); lim.connect(AC.destination);
+  VOICE_BUS[key] = { ctx: AC, node: inG };
+  return inG;
+}
+// what goes through it, and how hard it is driven. A sound that is not named
+// here is unchanged. The numbers are set against the measurement, not by ear:
+// a move is at least as loud as her own hit, a roar is the loudest thing in the room.
+const SFX_VOICE = {
+  alpha_howl: 2.3, alpha_howl_far: 1.3, alpha_bark: 1.2, alpha_fury: 1.0, alpha_furywarn: 1.6,
+  alpha_rendwarn: 2.0, alpha_rend: 1.6, alpha_claw: 5.8, alpha_snap: 3.4, alpha_leap: 8.5,
+  alpha_step: 2.4, alpha_quake: 0.9, tell_alpha: 2.2,
+  // the sweep: every guardian's wind-up cue and roar had the same fault
+  tell_glitch: 2.2, tell_brood: 2.6, tell_atlas: 2.0, tell_zero: 2.4, tell_prism: 2.8, tell_mother: 2.0,
+  roar: 1.6, roar_eagle: 1.5, roar_glc: 1.6, roar_drg: 1.1, roar_prism: 1.9,
+};
+// how long the score steps back under a call, and to what share of itself
+const SFX_DIP = { alpha_howl: [1.9, 0.35], alpha_fury: [1.4, 0.45], roar: [1.2, 0.5], roar_beast: [1.2, 0.5],
+  roar_eagle: [1.2, 0.5], roar_glc: [1.2, 0.5], roar_drg: [1.2, 0.5], roar_prism: [1.2, 0.5] };
+let MUS_DIP_UNTIL = 0, MUS_DIP_K = 1;
+function musDip(sec, k) { MUS_DIP_UNTIL = Date.now() + sec * 1000; MUS_DIP_K = k; }
+function musDipK() { return Date.now() < MUS_DIP_UNTIL ? MUS_DIP_K : 1; }
 function tone(freq, dur, type, vol, slideTo, delay) {
   if (!AC || MUTED) return;
   const t0 = AC.currentTime + (delay || 0);
@@ -435,7 +522,7 @@ function tone(freq, dur, type, vol, slideTo, delay) {
   g.gain.value = vol || 0.07;
   g.gain.setValueAtTime(vol || 0.07, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  o.connect(g).connect(AC.destination);
+  o.connect(g).connect(sfxDest());
   o.start(t0); o.stop(t0 + dur + 0.03);
 }
 function noiseBuf(dur) {
@@ -453,7 +540,7 @@ function hiss(dur, vol, delay) {
   g.gain.value = vol || 0.1;                       // see note below on delays
   g.gain.setValueAtTime(vol || 0.1, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  src.connect(g).connect(AC.destination);
+  src.connect(g).connect(sfxDest());
   src.start(t0);
 }
 // A GROWL is not a tone: it is a low reed with a FLUTTER on it — the roughness
@@ -480,7 +567,7 @@ function growl(freq, dur, vol, rate, slideTo, delay) {
   lg.gain.value = v * 0.55; lg.gain.setValueAtTime(v * 0.55, t0);
   lg.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   l.connect(lg).connect(g.gain);
-  o.connect(f).connect(g).connect(AC.destination);
+  o.connect(f).connect(g).connect(sfxDest());
   o.start(t0); o.stop(t0 + dur + 0.03); l.start(t0); l.stop(t0 + dur + 0.03);
 }
 function whoosh(dur, f0, f1, vol, delay) {
@@ -494,7 +581,7 @@ function whoosh(dur, f0, f1, vol, delay) {
   g.gain.value = vol;
   g.gain.setValueAtTime(vol, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  src.connect(f).connect(g).connect(AC.destination);
+  src.connect(f).connect(g).connect(sfxDest());
   src.start(t0);
 }
 
@@ -529,7 +616,7 @@ function clawShear(f0, f1, dur, vol, delay, q) {
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(vol, t0 + 0.004);   // instant, but not a click
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  src.connect(f).connect(g).connect(AC.destination);
+  src.connect(f).connect(g).connect(sfxDest());
   src.start(t0);
 }
 // ===========================================================================
@@ -1122,6 +1209,14 @@ const VOX = {
 };
 let HZSW = false, HZST = false;   // stride/swing alternation for her paired takes
 function sfx(n) {
+  if (!AC || MUTED || (typeof FOE_READ !== 'undefined' && FOE_READ.sil)) return;
+  const dip = SFX_DIP[n]; if (dip) musDip(dip[0], dip[1]);
+  const k = SFX_VOICE[n];
+  if (!k) return sfxPlain(n);
+  try { SFX_OUT = voiceBus(k); } catch (e) { SFX_OUT = null; }
+  try { return sfxPlain(n); } finally { SFX_OUT = null; }
+}
+function sfxPlain(n) {
   if (!AC || MUTED || (typeof FOE_READ !== 'undefined' && FOE_READ.sil)) return;   // a rim's stencil pass is silent (js/foeread.js)
   if (narrativeAudioActive() && ['ui', 'ok', 'no', 'purr'].includes(n)) return;
   if (typeof isHero === 'function' && isHero() && heroSfx(n)) return;

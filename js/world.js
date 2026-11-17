@@ -897,11 +897,18 @@ const ROOMS = {
     ents: [['crawler', 11, 15], ['hopper', 24, 15], ['scrap', 31, 9, 10], ['crawler', 37, 15],
            ['hopper', 38, 15], ['crawler', 46, 15], ['crawler', 51, 15], ['scrap', 48, 11, 12],
            // (the Braid thins a room's population in this country — these two keep the road CROWDED after it has)
-           ['crawler', 25, 15], ['crawler', 61, 15],
+           ['crawler', 25, 15], ['crawler', 58, 15],
            // A POD AT THE END OF THE ROAD, by the inner mouth: the fight beyond it
            // is the Wolf King's, and nobody should have to earn the Run twice to
            // try him again (tests/bossbench.cjs — a save point a door from every boss)
-           ['bench', 64, 15]],
+           // ...but not IN the mouth (owner, 2026-11-17: "some pods are existing
+           // superimposed on doors which makes it hard to choose enter or rest").
+           // It stood three tiles from the den door, inside the door's own reach,
+           // so UP and INTERACT answered two different things on one spot. It is
+           // eight tiles back now, on flat ground the last hulk was shortened to
+           // leave, so the pod and the ring are two objects with air between them;
+           // tests/pod-door.cjs holds every pod clear of every door.
+           ['bench', 59, 15]],
     build(g) {
       frame(g);
       // hulks, piled where the pack left them and never square: each is a heap
@@ -909,7 +916,7 @@ const ROOMS = {
       hull(g, 14, 22, 3, 81);
       hull(g, 27, 35, 4, 83);          // the big one: the scrap on its back is worth the climb
       hull(g, 39, 45, 3, 85);
-      hull(g, 52, 60, 4, 89);          // (clear of the inner mouth's levelled pad, which begins at 62)
+      hull(g, 52, 57, 3, 89);          // (ends at 57: the pod stands on the flat at 59, and the inner mouth's levelled pad begins at 62)
       // NO STEP TALLER THAN A TILE: a heap's noise can leave a two-tile notch,
       // and a notch she hops is a wall to a wolf — which is how a hunter ends
       // up penned on the wrong side of its own ground. What she can walk up,
@@ -1082,7 +1089,7 @@ const ROOMS = {
     // door at mid-room (GATE_ROOM B3, the A0/A0B booth pattern): walk UP into
     // the cable-shrine and she is inside, in a place of her own — the same
     // promotion Ratchet got when the meadow stopped being his shop floor.
-    ents: [['bench', 12, 15], ['term', 22, 15, 2], ['trial', 25, 15]],
+    ents: [['bench', 9, 15], ['term', 22, 15, 2], ['trial', 25, 15]],   // the pod stands clear of the parlor door at 16 (tests/pod-door.cjs)
     // One way down, at 4-6, into C1's ceiling. There used to be a second hole
     // at col 30, cut so the seam check found the floor open over C1's two dead
     // columns — C1 was declared 32 wide and built 30, so its lid read open at

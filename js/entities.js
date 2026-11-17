@@ -2522,6 +2522,7 @@ class Player {
     // first used to decide the swing. Holding the intent for a beat fixes that.
     if (inD('DOWN')) this.downBuf = 0.16; else this.downBuf -= dt;
     this.pogoT -= dt;
+    if ((this.pogoMemT || 0) > 0) { this.pogoMemT -= dt; if (this.pogoMemT <= 0) this.pogoN = 0; }
     // ---- THE SLASH -------------------------------------------------------
     // The single worst thing about the old melee was invisible: pressing ATK
     // during recovery DROPPED the press. A player attacking on rhythm — which is
@@ -2847,7 +2848,6 @@ class Player {
         burst(this.x + this.w / 2, this.y + this.h, wasFalling > 700 ? 14 : 6, '#9fb8c8', wasFalling > 700 ? 150 : 90, 0.35, 500, 2);
       }
       this.on = true; this.coyote = 0.1;
-      this.pogoN = 0;                       // the floor: the next down-strike is whole again
       this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
     } else { this.on = false; this.coyote -= dt; }
     const contact = Math.floor((this.stridePh || 0) / 2);
@@ -2917,7 +2917,7 @@ class Player {
       if (!this.on && this.swing.ay > 0.5 && this.vy > 90 && !G.artProbe && !(typeof isHero === 'function' && isHero()) && chance(dt * 46))
         addPart(this.x + this.w / 2 + rnd(-9, 9), this.y + this.h - rnd(0, 16), rnd(-26, 26), rnd(-70, 10), rnd(0.22, 0.5), PLUNGE_EMBER[(Math.random() * 3) | 0], rnd(1.2, 2.4), -90, true);
       const hb = this.hitbox();
-      let pogo = false;
+      let pogo = false, ring = false;
       // A freed guardian is never a target. Swinging at the beast you saved is
       // not an attack, it is a poke — so it is intercepted here, before any of
       // the damage machinery, and answered instead.
@@ -2948,11 +2948,31 @@ class Player {
           // finding the floor is worth less (POGO_FADE) — and the guardian is
           // told it was struck from above (plungedT), which is what its own
           // answer to the air reads.
+          //
+          // AND IT IS NOT A PLAN FROM THE FLOOR EITHER (owner, 2026-11-17: "do not
+          // allow player to keep hitting rhino with an endless down hit, rhino
+          // should not allow it"). The count used to clear the moment her feet
+          // found the floor, so hop - one down-strike - land beside him - hop
+          // was a whole blow every time, and he spent the fight answering the
+          // air while she was already on the ground: 67 hits, never touched
+          // (measured). The count is a MEMORY now (POGO_MEMORY): it clears only
+          // when she has left his back alone that long. And the fade ends at
+          // nothing — the third one inside it rings off the plate.
           const bounce = this.swing.ay > 0.5 && e instanceof Boss;
-          if (bounce) dm = Math.max(1, Math.round(dm * POGO_FADE[Math.min(this.pogoN || 0, POGO_FADE.length - 1)]));
+          const fade = bounce ? POGO_FADE[Math.min(this.pogoN || 0, POGO_FADE.length - 1)] : 1;
+          if (bounce) { this.pogoN = (this.pogoN || 0) + 1; this.pogoMemT = POGO_MEMORY; e.plungedT = 0.7; }
+          if (bounce && fade <= 0) {
+            // plate: sparks, the ring of a blade that did not bite — and no
+            // rebound. She is left hanging just over him, her blade spent,
+            // inside whatever he has for the air above his back (see `ring`)
+            sfx('block'); cam.shake = Math.max(cam.shake, 3);
+            burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 12, '#bfe9ff', 260, 0.28, 300, 2.4, true);
+            ring = true;
+            continue;
+          }
+          if (bounce) dm = Math.max(1, Math.round(dm * fade));
           dm = dealDmg(e, dm, armEl(), hb.x + hb.w / 2, hb.y + hb.h / 2, true, aid);
           if (dm <= 0) continue;
-          if (bounce) { this.pogoN = (this.pogoN || 0) + 1; e.plungedT = 0.7; }
           if (attackKnock(e, aid, kx, ky)) {
             // RISECUT: the up-slash becomes a LAUNCHER (Lost Crown's juggle
             // grammar). The enemy goes up far enough to meet an air chain,
@@ -3044,6 +3064,15 @@ class Player {
           else if (!floorBlock) { if (G.knockTile(tx, ty, true) >= 2) G.breakTile(tx, ty); }
           else G.knockTile(tx, ty, false);
         } else if (c === '^' && this.swing.ay > 0) pogo = true;
+      }
+      // A BLOW THAT RANG OFF PLATE is not a bounce: no height, no second
+      // jump back, no dash handed back, and the blade is a moment recovering.
+      // (A real rebound put her 210 px up, over the top of the Alpha's
+      // skybite, on a rhythm that never broke — measured, 58 in a row.)
+      if (ring && !pogo) {
+        this.swing.pogoed = 1; this.swing.t = 0;
+        this.vy = -210; this.atkCD = Math.max(this.atkCD, 0.5); this.pogoT = 0.1;
+        if (this.dashT > 0 && this.dashVY > 0) { this.dashT = 0; this.dashVY = 0; }
       }
       if (pogo && this.swing.ay > 0) {
         this.swing.pogoed = 1;                 // it has landed its blow: the hold is over
@@ -12476,7 +12505,9 @@ function drawCrescents(c) {
 }
 // what each successive down-strike off a guardian's back is worth, until her
 // feet find the floor again (Player.update, the swing)
-const POGO_FADE = [1, 0.55, 0.3];
+const POGO_FADE = [1, 0.5, 0];
+// how long she must leave a guardian's back alone before a down-strike is whole again
+const POGO_MEMORY = 5.0;
 // Every state whose whole job is to say "this is coming". The cue fires when
 // the state is ENTERED, centrally, so a new attack cannot be written without
 // one — which is exactly how the old swipe ended up with its sound on the hit

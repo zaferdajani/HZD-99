@@ -1,0 +1,137 @@
+{
+ "what": "What she is holding in each comic panel that plays BEFORE the blade is forged, and the md5 of the picture that was looked at. tests/panel-continuity.cjs fails when a panel changes without being looked at again. Owner, 2026-11-17: \"why images show me entering cave with marble holding my sword when i dont have it yet ?\"",
+ "before_the_blade": [
+  "wake",
+  "bay",
+  "gate",
+  "letter",
+  "drawer",
+  "ratchet",
+  "meet",
+  "cave",
+  "marble"
+ ],
+ "blade_first": "f_blade",
+ "panels": {
+  "w_cradle": {
+   "holds": "nothing",
+   "md5": "ca7917043925b20336133895fc389247",
+   "looked": "2026-11-17"
+  },
+  "w_eyes": {
+   "holds": "nothing",
+   "md5": "5016f9433999a48cd12d8fbc1a8997c4",
+   "looked": "2026-11-17"
+  },
+  "w_quiet": {
+   "holds": "nothing",
+   "md5": "f4913992cd2ca2fb1a0b5301f6a29edc",
+   "looked": "2026-11-17"
+  },
+  "w_sit": {
+   "holds": "nothing",
+   "md5": "1cf48534ef81bcbe530547eb86adfc60",
+   "looked": "2026-11-17"
+  },
+  "w_unplug": {
+   "holds": "nothing",
+   "md5": "c6a55b05d0a4bcf521701f7ccdde0e4d",
+   "looked": "2026-11-17"
+  },
+  "d_door": {
+   "holds": "nothing",
+   "md5": "faf532e8de5e99239dc3e2fb06845010",
+   "looked": "2026-11-17"
+  },
+  "d_road": {
+   "holds": "nothing",
+   "md5": "45c5e5c312f3399cca389b04e46752c7",
+   "looked": "2026-11-17"
+  },
+  "d_walk": {
+   "holds": "nothing",
+   "md5": "dd32225254909b4ed8bcafb28637c7ab",
+   "looked": "2026-11-17"
+  },
+  "g_closed": {
+   "holds": "nothing",
+   "md5": "4b643b26bb6583edf5220da7ca9b213b",
+   "looked": "2026-11-17"
+  },
+  "g_gates": {
+   "holds": "nothing",
+   "md5": "a0f0202d897e0224a2885460e2f5c0bd",
+   "looked": "2026-11-17"
+  },
+  "l_cell": {
+   "holds": "nothing",
+   "md5": "ce8af8b35a321ffcb2fef62fa7b53a8e",
+   "looked": "2026-11-17"
+  },
+  "l_marble": {
+   "holds": "nothing",
+   "md5": "b414ff11377164178caba9454b719df3",
+   "looked": "2026-11-17"
+  },
+  "l_song": {
+   "holds": "nothing",
+   "md5": "85e82f566c1ac621069c6788e5819f26",
+   "looked": "2026-11-17"
+  },
+  "letter": {
+   "holds": "nothing",
+   "md5": "bb2f23535d7567d0d0854d61d2006ace",
+   "looked": "2026-11-17"
+  },
+  "toolbox": {
+   "holds": "nothing",
+   "md5": "ab255fa0f052bbaf40a153d43d445bff",
+   "looked": "2026-11-17"
+  },
+  "r_cell": {
+   "holds": "nothing",
+   "md5": "56d32d5fa3dbf6531f68bde79c10b6b2",
+   "looked": "2026-11-17"
+  },
+  "r_marble": {
+   "holds": "nothing",
+   "md5": "41c9c94197454dc2ec4c8421649f5257",
+   "looked": "2026-11-17"
+  },
+  "m_down": {
+   "holds": "nothing",
+   "md5": "11986761a7a2cb6a54920b2928bf1102",
+   "looked": "2026-11-17"
+  },
+  "m_stalk": {
+   "holds": "nothing",
+   "md5": "bb89d79b8d9aa6faa2546cb65f28e029",
+   "looked": "2026-11-17"
+  },
+  "cv_dark": {
+   "holds": "nothing",
+   "md5": "d89905473541c026245a7d52810fd42d",
+   "looked": "2026-11-17"
+  },
+  "cv_mouth": {
+   "holds": "nothing",
+   "md5": "83e72161458cbdf2f2544157b97e2c4d",
+   "looked": "2026-11-17"
+  },
+  "cv_walk": {
+   "holds": "nothing",
+   "md5": "2d87a7a57cec5be8b732b3b7639b9101",
+   "looked": "2026-11-17"
+  },
+  "marble_a": {
+   "holds": "nothing",
+   "md5": "0fb47d30cbb385983ccacb57169f5462",
+   "looked": "2026-11-17"
+  },
+  "marble_b": {
+   "holds": "nothing",
+   "md5": "67dc5edce82154272e684298958dee87",
+   "looked": "2026-11-17"
+  }
+ }
+}

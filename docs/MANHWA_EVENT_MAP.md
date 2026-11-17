@@ -189,8 +189,8 @@ player's input rules.
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 1) | [23, 18, 1154, 334] | — (silent) |  |
 | 2 | `assets/manhua/ch1/game/m_down.webp` (game: m_down) | [0, 0, 1600, 893] | `pc_core` · conditional | It took one core. Never her last. |
-| 3 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 3) | [48, 1185, 540, 360] | — (silent) |  |
-| 4 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 4) | [605, 1185, 547, 275] | `pc_bored` | She was nothing to it. It got bored of her. |
+| 3 | `assets/manhua/ch1/game/m_stalk.webp` (game: m_stalk) | [0, 0, 1600, 1075] | — (silent) |  |
+| 4 | `assets/manhua/ch1/game/m_stalk.webp` (game: m_stalk (his face)) | [650, 215, 900, 452] | `pc_bored` | She was nothing to it. It got bored of her. |
 
 ### break — NULLFANG resists
 

@@ -459,7 +459,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const flank = await strike(false);
     const onHead = await strike(true);
     check('hornless, a strike on the HEAD deals more than one on his flank', onHead > flank && flank > 0, 'head ' + onHead + ' vs flank ' + flank);
-    // the return: put her in the horn's way home — it does not hurt her
+    // the return: put her in the horn's way home — it CUTS (owner, 2026-11-17: "his
+    // flying horn is not hurting me when touching them"; it used to be harmless here)
     await page.evaluate(() => { T.arena(1000, 760); player.iT = 0; T.go('hornprep', GH.hornPrep); });
     await waitFor(s => s.st === 'hornless', 3000);
     const boom = await waitFor(s => s.nm && true, 100);
@@ -481,7 +482,25 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       await sleep(10);
     }
     const sb = await S();
-    check('the horn flies home and SEATS (harmless on its way back)', retSeen && !hurtOnReturn && sb.hornBig, 'returned ' + retSeen + ', hurt ' + hurtOnReturn);
+    check('the horn flies home and SEATS — and touching it on its way back cuts', retSeen && hurtOnReturn && sb.hornBig, 'returned ' + retSeen + ', hurt ' + hurtOnReturn);
+    // the whole horn is sharp, not a square at its middle: touched at the tip and at the base
+    const whole = await page.evaluate(() => { const b = G.boss, out = {};
+      for (const [nm, d] of [['tip', 0.5], ['base', -0.4]]) { const m = { which: 'big', ph: 'fly', x: 500, y: 300, vx: 300, vy: 0, t: 0 };
+        const q = { x: m.x + 62 * d - 4, y: m.y - 4, w: 8, h: 8 }; out[nm] = ghMissileTouches(m, q); }
+      const m2 = { which: 'big', ph: 'fly', x: 500, y: 300, vx: 300, vy: 0, t: 0 }; out.beside = ghMissileTouches(m2, { x: 500 - 4, y: 300 + 30, w: 8, h: 8 });
+      return out; });
+    check('...and it is sharp along its whole length: tip and base touch, the air beside it does not', whole.tip && whole.base && !whole.beside, JSON.stringify(whole));
+    // THE BUCK'S FLOOR SHOCK: struck from above he heaves, and the ground both sides of him answers
+    const shock = await page.evaluate(async () => { T.arena(1000, 760); const b = G.boss, out = {}; b.missiles.length = 0; b.hornBig = b.hornSmall = true; G.ghHold = null;
+      const run = (jump) => { T.go('idle', 2); b.shocks = []; player.cores = player.maxCores(); player.iT = 0; player.dead = false; player.x = b.cx() + 150; player.y = T.floor - player.h - 1; player.vx = player.vy = 0; player.on = true;
+        b.plungedT = 0.5; const c0 = player.cores; let seen = 0, after = null; const src = [];
+        const h0 = player.hurt; player.hurt = function (d, fx2, s2) { src.push(s2); return h0.apply(this, arguments); };
+        for (let i = 0; i < 90; i++) { for (const k in keys) keys[k] = 0; if (jump && b.st === 'buck' && player.on) { keysP.Space = 1; } if (jump) keys.Space = 1; update(1 / 60); seen = Math.max(seen, (b.shocks || []).length); if (after == null && seen && b.st !== 'buck' && b.st !== 'buckprep') after = b.st; }
+        player.hurt = h0; return { lost: c0 - player.cores, seen, after, src: src.join(',') }; };
+      out.stood = run(false); out.jumped = run(true); return out; });
+    check('struck from above he bucks, and a shock runs the floor both ways: standing beside him is hit', shock.stood.seen === 2 && shock.stood.lost >= 1 && /horn\.quake/.test(shock.stood.src), JSON.stringify(shock.stood));
+    check('...it is low: jumping it clears it', shock.jumped.lost === 0, JSON.stringify(shock.jumped));
+    check('...and the buck is an answer, not an opening: he is choosing his next blow, not recovering', shock.stood.after && shock.stood.after !== 'recover', shock.stood.after);
     const hl = moves.openings['missile (hornless)'];
     check('the hornless opening lasts ~2.5 s', hl >= 2.2 && hl <= 3.0, Math.round(hl * 1000) + ' ms');
   }

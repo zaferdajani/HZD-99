@@ -69,7 +69,9 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('D  she crosses all of it on her feet and a plain jump', R.D.reached && !R.D.djump && !R.D.dash, R.D);
   check('   ...and a wolf comes over the tallest hulk after her', R.D.wolfOver >= 0, { frames: R.D.wolfOver, hulk: R.D.hulk, wolfAtTile: R.D.wolfAt, nearestPx: R.D.nearest });
   check('E  his arena is as it was: the fighting floor is clear', R.E.clear && R.E.boss === 'alpha' && R.E.w === 46, R.E);
-  check('a save point stands at the END of the road, by his door, with no wolf between it and him', R.pod && R.pod.fromInner >= 0 && R.pod.fromInner <= 6 && R.pod.wolvesPast === 0, R.pod);
+  // (owner, 2026-11-17: "some pods are existing superimposed on doors" — it stood three tiles from the
+  // mouth, inside the door's own reach. By his door still, but never in it: five to nine tiles off.)
+  check('a save point stands at the END of the road, by his door and not IN it, with no wolf between it and him', R.pod && R.pod.fromInner >= 5 && R.pod.fromInner <= 9 && R.pod.wolvesPast === 0, R.pod);
   check('the Run is on the map', R.map.on, R.map.pos);
   check('no page errors', errs.length === 0, errs.slice(0, 2));
   await browser.close(); console.log(bad ? '\nFAILED: ' + bad : '\nOK — he is reached, not walked in on'); process.exit(bad ? 1 : 0);
