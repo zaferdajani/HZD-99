@@ -106,7 +106,7 @@ function sageDuelPose(e){
 // THE AGENTS ARE NOT ONE BODY (owner, 2026-11-16, of the second robed duelist:
 // "it looks exactly like the first one I fought, which means there is no story
 // behind it"). Seven of them wore one set of plates. Each that has been fired
-// has its own eight — TALLYMAN the surveyor (abacus, sighting staff), LEASH
+// has its own eight (all seven have, since 2026-11-17) — TALLYMAN the surveyor (abacus, sighting staff), LEASH
 // who turned the pack (wolf fur, chains, the collar), UNDERTOW who drowned the
 // canals (soaked green, cable-weed, a sluice wheel) — keyed by the chamber it
 // holds. Every state name is the shared set's (`sageStand`, `sageCoil`...):
@@ -129,6 +129,10 @@ const AGENT_ART = {
   GA1D: { pre: 'agTally', hk: { Stand: 1.09, Walk8: 1.09, Exhale: 1.10, Lunge: 1.12, Gather: 1.03, Lock: 1.05, Pure: 1.12 } },
   GA2D: { pre: 'agLeash', hk: { Pure: 1.07 } },
   GB1D: { pre: 'agUndertow', hk: {} },
+  GC1D: { pre: 'agSlag', hk: { Lunge: 1.1 } },      // SLAGFATHER: the iron apron, the ladle
+  GD1D: { pre: 'agRedact', hk: { Lunge: 1.06 } },    // REDACTOR: black bars on paper, the visor bar, the stylus
+  GX1D: { pre: 'agLapid', hk: { Lunge: 1.1 } },     // LAPIDARY: plum, cut-glass shoulders, the cutter's wheel
+  GE1D: { pre: 'agPupil', hk: {} },     // PUPIL: one great lens where the hood opens
 };
 function agentSet() {
   if (typeof isHero === 'function' && isHero()) return null;

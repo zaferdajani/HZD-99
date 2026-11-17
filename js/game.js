@@ -15383,9 +15383,9 @@ function drawLights(P) {
     G._auraCount++;
     for (const e of G.enemies) {
       if (e.dead) continue;
-      // the sages carry their OWN halos: black-with-ember while infected
-      // (drawn with the body — black cannot ride this additive pass), blue
-      // once purified. Counted here either way so the sense reads complete.
+      // an agent: blue once purified, and nothing at all while infected (the
+      // dark halo with the ember ring it wore is withdrawn — owner, 2026-11-17).
+      // Counted here either way so the sense reads complete.
       if (e.kind === 'sage') {
         if (e.tame) lightAt(e.x + e.w / 2, e.y + e.h / 2, 60, '#57a8ff', 0.14 * pu);
         G._auraCount++;

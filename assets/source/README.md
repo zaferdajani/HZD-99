@@ -132,8 +132,8 @@ all four: `turn34`, `turn_front`, `turn_rear`, `turn_tail`.
 `agents/<name>/` is ONE OF THE EYE'S AGENTS each (2026-11-17, owner: "it looks
 exactly like the first one I fought"): `stand_asfired.webp` and the six states
 `<state>_asfired.jpg` exactly as fired on their green screens, and
-`states_asfired.jpg`, the six side by side. `agents/walks_take.jpg` is the
-three filmed walks' contact sheet. `agents/jobs.json` has every job id and the
+`states_asfired.jpg`, the six side by side. `agents/walks_take.jpg` and
+`walks_take_2.jpg` are the seven filmed walks' contact sheets (one stride each). `agents/jobs.json` has every job id and the
 exact cut. Shipped as `characters/agents/<name>/<state>.webp`.
 
 `platforms/platobj_{a,x,b}_asfired.jpg` are THE DECKS AS OBJECTS (2026-11-17,

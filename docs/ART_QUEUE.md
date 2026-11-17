@@ -59,18 +59,19 @@ taken as far as existing art goes:
 
 ---
 
-## 2bu. THE EYE'S AGENTS — seven bodies, not one ◐ THREE FIRED AND WIRED 2026-11-17 (TALLYMAN, LEASH, UNDERTOW); four to fire
+## 2bu. THE EYE'S AGENTS — seven bodies, not one ✔ ALL SEVEN FIRED AND WIRED 2026-11-17
 
-**Fired 2026-11-17**: TALLYMAN (GA1D), LEASH (GA2D) and UNDERTOW (GB1D) each
-have their own eight states — stand, a filmed 8-cell walk, exhale, coil, lunge,
-gather, lock, pure — under `assets/characters/agents/<name>/`, keyed by chamber
-in `AGENT_ART` (js/sage-motion.js) with one height table for both drawings
-(`AGENT_H`, `agentHeight`). Masters and job ids: `assets/source/agents/`.
-`tests/fired-art.cjs` A and B. **Still to fire, same recipe (stand against the
-shared stand plate, then six states and a walk against that stand):
-SLAGFATHER (GC1D), REDACTOR (GD1D), LAPIDARY (GX1D), PUPIL (GE1D)** — about 33
-credits an agent. The multi-cell LUNGE and EXHALE takes of the original brief
-are not fired for any of them yet: each is one plate.
+**Fired 2026-11-17**, in two rounds (the second on the owner's word after he
+saw the first: *"fire the rest of the agents"*): TALLYMAN (GA1D), LEASH (GA2D),
+UNDERTOW (GB1D), SLAGFATHER (GC1D), REDACTOR (GD1D), LAPIDARY (GX1D) and PUPIL
+(GE1D) each have their own eight states — stand, a filmed walk cut from ONE
+stride, exhale, coil, lunge, gather, lock, pure — under
+`assets/characters/agents/<name>/`, keyed by chamber in `AGENT_ART`
+(js/sage-motion.js) with one height table for both drawings (`AGENT_H`,
+`agentHeight`). Masters, job ids and each walk's stride:
+`assets/source/agents/` (`jobs.json`). `tests/fired-art.cjs` A and B.
+**Not fired for any of them:** the multi-cell LUNGE and EXHALE takes of the
+original brief — each is one plate.
 
 The owner, on the second robed duelist: *"it looks exactly like the first one I
 fought, which means there is no story behind it... Each one has a fragment that

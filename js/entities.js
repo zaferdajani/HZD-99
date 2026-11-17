@@ -12131,31 +12131,18 @@ function sageTame(e) {
 }
 // THE SAGE, DRAWN — a robed machine monk, hooded, kneeling half-inside the
 // song. Engine-drawn first pass in the minion fallback style; authored
-// plates queued (ART_QUEUE). The aura rule lives here too: while she holds
-// crystal light an infected sage wears the BLACK HALO WITH THE EMBER RIM
-// (the owner's spec — black cannot ride the additive pass, so it is its own
-// dark ring), and a purified one shows blue from the light pass.
+// plates queued (ART_QUEUE). A purified one shows blue from the light pass;
+// an infected one wears nothing but its body (the halo it had is withdrawn).
 function drawSage(c, e) {
   const cx = e.x + e.w / 2, base = e.y + e.h;
   const t2 = e.anim;
   const kneel = e.locked || e.tame;
   const bob = kneel || (typeof sageDuelActive==='function'&&sageDuelActive(e)) ? 0 : Math.sin(t2 * 2.2) * 1.6;
-  // the aura sense: the black halo, under everything
-  if (typeof auraSense === 'function' && auraSense() && !e.tame) {
-    const fl = 0.75 + Math.sin(t2 * 7 + Math.sin(t2 * 13)) * 0.25;
-    c.save();
-    const dg = c.createRadialGradient(cx, base - e.h * 0.5, 4, cx, base - e.h * 0.5, 52);
-    dg.addColorStop(0, 'rgba(0,0,0,0.5)'); dg.addColorStop(0.72, 'rgba(10,2,4,0.3)');
-    dg.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = dg; c.beginPath(); c.arc(cx, base - e.h * 0.5, 52, 0, 7); c.fill();
-    c.globalCompositeOperation = 'lighter';
-    c.globalAlpha = 0.3 * fl;
-    c.strokeStyle = '#ff5a2a'; c.lineWidth = 2.5;
-    c.shadowColor = '#ff5a2a'; c.shadowBlur = 8;
-    c.beginPath(); c.arc(cx, base - e.h * 0.5, 40 + fl * 4, 0, 7); c.stroke();
-    c.shadowBlur = 0;
-    c.restore();
-  }
+  // NOTHING IS DRAWN BEHIND IT (owner, 2026-11-17: "remove the ring"). While
+  // she carried crystal light an infected agent wore a dark disc with an ember
+  // ring stroked round it — a red circle framing the body, which is the line
+  // NO LIGHT ROUND A BODY refuses. The crystal's sense still counts it
+  // (drawLights); the body is told by its own art.
   // THE AUTHORED SAGE (§2e): six plates indexed by the same state the whole
   // fight reads — amber on exactly the three telegraph states, ember gone and
   // crystal blue on pure. The procedural monk below stays as the fallback

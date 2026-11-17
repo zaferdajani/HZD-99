@@ -207,6 +207,11 @@ only the stencil, for a body's pigment and its hit flash).
 - **Never draw a rim, halo, keyline, outline or glow round an enemy, a guardian
   or an NPC to make it read.** A body that sinks into its room is a job for its
   own art and that room's light.
+- **An infected agent wears nothing behind it either** (owner, 2026-11-17:
+  "remove the ring"). While she carried crystal light `drawSage` laid a dark
+  disc with an ember ring stroked round it behind the body. It is withdrawn;
+  the crystal's sense still counts the agent, and `tests/fired-art.cjs` holds
+  that the body draws the same pixels with the light in her hands as without.
 - `tests/contrast.cjs` holds it: a body drawn through the frame's own call has
   no pixel the bare body lacks. It still prints how much of each silhouette
   reads off its room — a record for the art, not a bar to buy with a line.
@@ -500,7 +505,7 @@ the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
 | *(game.js)* SHE STEPS OUT OF A RING ONTO ITS PAD | `gateSetDown` sets her on the ground under the far ring when a door walk lands (it used to keep the y of the room she left, which buried her a tile deep outside every guardian chamber and the quarry). ONE RING TO A FRAME: no two rings of a room stand within 640 px (the haul ring beside the marble is withdrawn; the Alpha's dormant ring is at the far end of his floor). `tests/ring-pads.cjs` F and B |
 | *(game.js)* AN NPC WEARS ITS FILMED BODY | `NPC_TALL` — the Oracle draws his strip everywhere he is, at a merchant's stature (flat-lined screen while unpowered), never the old atlas wisp; `tools/shroudback.cjs` derives the strip from its keyed master by backing the robe. Unpowered he rests on his own plate (`rest`), and speaking he goes between his talking pair (`talk`, `beat`) |
 | *(wolves.js)* THE CATS | `CAT_SIZE` 1.5 — body, wall and drawing together, set in Enemy's constructor (`sizeK`); a cat her blow binds plays its own filmed FOLD (`CHEETAH_ART.down`, six cells over `fall` seconds from `e._fallAt`) and lies in the last cell, breathing — never the warning plate |
-| *(sage-motion.js)* THE AGENTS ARE NOT ONE BODY | `AGENT_ART` keys a fired agent's own eight plates by its chamber (TALLYMAN GA1D, LEASH GA2D, UNDERTOW GB1D — `assets/characters/agents/<name>/`); `agentKey` swaps the picture, `agentHeight`/`AGENT_H` is the ONE size table both drawings read (the duel's and `drawSage`'s), `agentLeft` turns the left-facing art toward her. An unfired chamber keeps the shared set. `tests/fired-art.cjs` |
+| *(sage-motion.js)* THE AGENTS ARE NOT ONE BODY | `AGENT_ART` keys each agent's own eight plates by its chamber (TALLYMAN GA1D, LEASH GA2D, UNDERTOW GB1D, SLAGFATHER GC1D, REDACTOR GD1D, LAPIDARY GX1D, PUPIL GE1D — `assets/characters/agents/<name>/`); `agentKey` swaps the picture, `agentHeight`/`AGENT_H` is the ONE size table both drawings read (the duel's and `drawSage`'s), `agentLeft` turns the left-facing art toward her. A chamber with no row keeps the shared set. Each walk strip is ONE stride of its take (the period measured off the take; `assets/source/agents/jobs.json`). `tests/fired-art.cjs` |
 | *(game.js)* A DECK IS AN OBJECT | `PLAT_OBJ` (city gantry, cave shelf, Conduits tray; rows printed by `tools/platobj.cjs`) and `platObjFinish`, which runs LAST in the tile bake: it clears what the terrain passes made of each `=` run and lays the object with its surface on the curve. Never indoors, in a `decks` room or in NOSTOS; a zone without a set keeps the old deck. `tests/fired-art.cjs` |
 | `tools/plate.cjs` | one fired still into a plate: keyed (chroma or a black flood), trimmed, seated on the cell floor, webp. `PLATE_SCALE` gives a SET one scale; `PLATE_KEY`/`PLATE_DESPILL=edge` for a subject near the screen's hue |
 | `warp.js` | `?room=<id>` — the owner's jump into any room, behind the Forge's own passphrase. Inert without the query string; its own save slot |

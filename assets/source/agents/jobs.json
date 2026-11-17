@@ -79,6 +79,107 @@
     3.813,
     4.031
    ]
+  },
+  "slag": {
+   "from": 2.0,
+   "period": 1.42,
+   "times": [
+    2.0,
+    2.178,
+    2.355,
+    2.533,
+    2.71,
+    2.888,
+    3.065,
+    3.243
+   ]
+  },
+  "redact": {
+   "from": 2.0,
+   "period": 1.38,
+   "times": [
+    2.0,
+    2.173,
+    2.345,
+    2.518,
+    2.69,
+    2.863,
+    3.035,
+    3.208
+   ]
+  },
+  "lapid": {
+   "from": 2.5,
+   "period": 1.67,
+   "times": [
+    2.5,
+    2.709,
+    2.918,
+    3.126,
+    3.335,
+    3.544,
+    3.753,
+    3.961
+   ]
+  },
+  "pupil": {
+   "from": 2.0,
+   "period": 1.54,
+   "times": [
+    2.0,
+    2.193,
+    2.385,
+    2.578,
+    2.77,
+    2.963,
+    3.155,
+    3.348
+   ]
   }
- }
+ },
+ "slag": {
+  "name": "SLAGFATHER (GC1D)",
+  "stand": "f4035eab-87d5-4ac5-9841-5febcfa02fbf",
+  "coil": "3ca80465-1ec6-4d3c-ab6d-656c2259dd4b",
+  "lunge": "a170f6f6-7042-4b98-a50d-4af28d902740",
+  "gather": "2de3d84a-fa0a-4002-a180-f565c17fbd27",
+  "lock": "e81025ac-18d4-4208-a95a-2ad62f4b0214",
+  "pure": "9da44004-860b-4345-9af7-345e7772d9fe",
+  "exhale": "15822f00-bf98-4861-98d4-7670c6f4a206",
+  "walk_take": "f3af7654-8cad-4767-85a3-d866c10b5af9"
+ },
+ "redact": {
+  "name": "REDACTOR (GD1D)",
+  "stand": "1fe94fbd-16de-4f60-8a93-03d06a73e350",
+  "coil": "af80fd03-3d50-493c-b05c-8fd2a3c9d60b",
+  "lunge": "fdc15d51-1419-448b-8ab7-9818cf042555",
+  "gather": "99706516-7606-41e4-b813-a36a738fc91b",
+  "lock": "3d669358-c988-4136-990d-bf38e373162a",
+  "pure": "4ff03ccd-42f1-4da0-b27a-09c787ba558d",
+  "exhale": "c0dba0d6-e033-4072-b62a-9d6c2e227c43",
+  "walk_take": "3470f089-27c5-4763-9fd1-d0e812e6f45e"
+ },
+ "lapid": {
+  "name": "LAPIDARY (GX1D)",
+  "stand": "3d14cc29-3696-4d8b-a7f6-0a5d53192c4d",
+  "coil": "767e4cfc-1bc0-4593-a4b6-bf981defbfe5",
+  "lunge": "8e762249-dba4-4b79-92fa-2d1b43020fc3",
+  "gather": "b1a840e9-7e2c-426c-ba13-05b4ae2cfd71",
+  "lock": "53cff29a-c087-4034-9ebc-fba1886bdbf2",
+  "pure": "28c01f93-a19a-4ce8-bd4a-1e8cc57bf000",
+  "exhale": "a5fe087c-9b02-42ee-98fc-2c0fc094f8c4",
+  "walk_take": "15816c98-43aa-4e21-9797-414ed9226548"
+ },
+ "pupil": {
+  "name": "PUPIL (GE1D)",
+  "stand": "0d69e8a2-0da9-4542-8c1f-b716f9d330bc",
+  "coil": "05c8eaaa-2ea9-4cc5-a6d7-f552677edaef",
+  "lunge": "3837736d-b84e-4f15-8b9f-4eb630bcd351",
+  "gather": "7311ffff-8b27-40bc-9104-b115ab986248",
+  "lock": "c6cc50d2-2c38-4c40-a3bb-5b829bbb3452",
+  "pure": "1578256e-3d5a-4082-b9fa-76b5f6c1dcff",
+  "exhale": "0dce4fa3-4111-4c29-a63c-6d89883c301d",
+  "walk_take": "63e24083-8e63-46c8-973e-eb4be0267e3e"
+ },
+ "quality": "stand plates 2k HIGH; the six states of each agent 2k MEDIUM (they ship as 512 px cells)"
 }

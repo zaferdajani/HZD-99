@@ -10,7 +10,7 @@
 // and each has been "fixed" once already by art that was fired, archived,
 // declared and never reached a frame. So this draws them and measures.
 //   A  each fired agent wears its OWN eight plates in its own chamber, they are
-//      three different pictures, and an unfired chamber keeps the shared set
+//      seven different pictures, and a chamber with no set keeps the shared one
 //   B  a state is one size: a crouch is lower than the standing body, a leap is
 //      not a doll, and the duel's drawing agrees with the plain one
 //   C  a deck is an OBJECT: opaque along its slab, in the city, the caves and
@@ -43,24 +43,33 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       for (const k in keep) e[k] = keep[k];
       const d = x.getImageData(0, 0, 420, 320).data; let y0 = 320, y1 = -1, n = 0, r = 0, g = 0, b = 0;
       for (let yy = 0; yy < 320; yy++) for (let xx = 0; xx < 420; xx++) { const j = (yy * 420 + xx) * 4; if (d[j + 3] > 200) { if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; n++; r += d[j]; g += d[j + 1]; b += d[j + 2]; } }
-      return { h: y1 - y0 + 1, n, rgb: n ? [Math.round(r / n), Math.round(g / n), Math.round(b / n)] : null, art }; };
-    for (const room of ['GA1D', 'GA2D', 'GB1D']) {
+      let x0 = 420, x1 = -1; for (let yy = y0; yy <= y1; yy++) for (let xx = 0; xx < 420; xx++) if (d[(yy * 420 + xx) * 4 + 3] > 200) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; }
+      const sig = []; if (n) for (let gy = 0; gy < 10; gy++) for (let gx = 0; gx < 6; gx++) { let cr = 0, cg = 0, cb = 0, ca = 0, cn = 0;
+        for (let yy = Math.floor(y0 + (y1 - y0 + 1) * gy / 10); yy < Math.floor(y0 + (y1 - y0 + 1) * (gy + 1) / 10); yy++) for (let xx = Math.floor(x0 + (x1 - x0 + 1) * gx / 6); xx < Math.floor(x0 + (x1 - x0 + 1) * (gx + 1) / 6); xx++) { const j = (yy * 420 + xx) * 4, al = d[j + 3] / 255; cr += d[j] * al; cg += d[j + 1] * al; cb += d[j + 2] * al; ca += al; cn++; }
+        sig.push(Math.round(cr / Math.max(1, cn)), Math.round(cg / Math.max(1, cn)), Math.round(cb / Math.max(1, cn)), Math.round(255 * ca / Math.max(1, cn))); }
+      return { h: y1 - y0 + 1, n, rgb: n ? [Math.round(r / n), Math.round(g / n), Math.round(b / n)] : null, sig, art }; };
+    for (const room of Object.keys(AGENT_ART)) {
       enter(room); const e = G.enemies.find(q => q.kind === 'sage'); if (!e) { out.agents[room] = { missing: 'no agent in the room' }; continue; }
       player.x = e.x - 200;
       const keys = STATES.map(s => agentKey('sage' + s)); for (const k of keys) mediaFetch(k, true);
       for (let n = 0; n < 60 && !keys.every(k => MEDIA_IMG[k] && MEDIA_IMG[k].naturalWidth); n++) await wait(120);
       const A = { h: e.h, keys, own: keys.every((k, i) => k !== 'sage' + STATES[i]), loaded: keys.every(k => MEDIA_IMG[k] && MEDIA_IMG[k].naturalWidth), plain: {}, duel: null };
-      // (no halo behind it while it is measured: the aura is light, not anatomy)
+      // with crystal light in her hands nothing is drawn round it: the same pixels as without (the ember ring is withdrawn)
+      { const px = (on) => { G.save.flags.crystal = on; const o = Object.assign(document.createElement('canvas'), { width: 420, height: 320 }), x = o.getContext('2d'); x.setTransform(1, 0, 0, 1, 210 - (e.x + e.w / 2), 280 - (e.y + e.h));
+          const sd = e.sageDuel; e.sageDuel = null; G.artProbe = 1; try { e.draw(x); } finally { G.artProbe = 0; e.sageDuel = sd; } const d = x.getImageData(0, 0, 420, 320).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++; return n; };
+        const keepC = G.save.flags.crystal; A.ring = { sense: px(1), bare: px(0) }; G.save.flags.crystal = keepC; }
       const sense = G.save.flags.crystal; G.save.flags.crystal = 0; const cr = G.save.crystal; G.save.crystal = 0;
       for (const s of STATES) A.plain[s] = shoot(e, s, false);
       if (typeof sageDuelActive === 'function' && sageDuelActive(e)) { A.duel = {}; for (const s of ['Stand', 'Coil', 'Lunge', 'Gather']) A.duel[s] = shoot(e, s, true); }
       G.save.flags.crystal = sense; G.save.crystal = cr;
       out.agents[room] = A; }
-    // an agent that has not been fired keeps the shared set — and is the yardstick for how tall an agent stands
-    { let other = null; for (const id of Object.keys(ROOMS)) { if (AGENT_ART[id] || !/^G[A-Z]\dD$/.test(id)) continue; enter(id); if (G.enemies.some(q => q.kind === 'sage')) { other = id; break; } }
-      if (other) { out.unfired = { room: other, key: agentKey('sageStand') };
-        const e = G.enemies.find(q => q.kind === 'sage'); if (e) { mediaFetch('sageStand', true); for (let n = 0; n < 60 && !(MEDIA_IMG.sageStand && MEDIA_IMG.sageStand.naturalWidth); n++) await wait(120);
-          player.x = e.x - 200; const sense = G.save.flags.crystal; G.save.flags.crystal = 0; out.unfired.stand = shoot(e, 'Stand', false).h; out.unfired.body = e.h; G.save.flags.crystal = sense; } } else { G.roomId = 'A1'; out.unfired = { room: 'A1', key: agentKey('sageStand') }; } }
+    // a chamber with no set of its own keeps the shared one — and the shared one is the yardstick for how tall an agent stands.
+    // (All seven chambers have a set now, so the first is measured with its row taken away for a moment.)
+    { const room = 'GA1D', row = AGENT_ART[room]; delete AGENT_ART[room];
+      try { enter(room); out.unfired = { room, key: agentKey('sageStand') };
+        const e = G.enemies.find(q => q.kind === 'sage'); mediaFetch('sageStand', true); for (let n = 0; n < 60 && !(MEDIA_IMG.sageStand && MEDIA_IMG.sageStand.naturalWidth); n++) await wait(120);
+        player.x = e.x - 200; const sense = G.save.flags.crystal; G.save.flags.crystal = 0; out.unfired.stand = shoot(e, 'Stand', false).h; out.unfired.body = e.h; G.save.flags.crystal = sense;
+      } finally { AGENT_ART[room] = row; } }
     // ---- C: the decks ---------------------------------------------------------
     out.decks = {};
     const deckRoom = async (room) => { fresh(); enter(room); G.enemies = [];
@@ -99,10 +108,12 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       out.mono.talking = Array.from(seen); }
     return out; });
   console.log('── fired-art  — the agents, the decks, the bound cat and the Oracle wear what was fired for them');
-  const AG = R.agents, names = { GA1D: 'TALLYMAN', GA2D: 'LEASH', GB1D: 'UNDERTOW' };
+  const AG = R.agents, names = { GA1D: 'TALLYMAN', GA2D: 'LEASH', GB1D: 'UNDERTOW', GC1D: 'SLAGFATHER', GD1D: 'REDACTOR', GX1D: 'LAPIDARY', GE1D: 'PUPIL' };
+  check('A  every one of the seven chambers has its own agent', Object.keys(names).every(r => AG[r] && AG[r].own) && Object.keys(AG).length === 7, Object.keys(AG));
   for (const room of Object.keys(names)) { const A = AG[room] || {};
     check('A  ' + names[room] + ' (' + room + ') wears its own eight plates, and they load', A.own === true && A.loaded === true, A.missing || A.keys);
     if (!A.plain) continue;
+    check('   ...and with crystal light in her hands nothing is drawn round it (no ring, no halo)', A.ring.sense === A.ring.bare && A.ring.bare > 1500, A.ring);
     const st = A.plain.Stand.h, P = A.plain;
     const yard = R.unfired.stand * A.h / R.unfired.body, prop = room === 'GA1D' ? 1.09 : 1;   // (TALLYMAN's staff stands over his hood)
     check('B  ...standing it is the height the shared agent stands (within 8%), taller than she is', st >= 52 * 1.5 && Math.abs(st / prop - yard) <= yard * 0.08, { shared: Math.round(yard), stand: st, staff: prop });
@@ -113,9 +124,12 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     if (A.duel) check('   ...and the duel draws each state the size the plain drawing does (within 8%)', ['Stand', 'Coil', 'Lunge', 'Gather'].every(s => A.duel[s].art && Math.abs(A.duel[s].h - P[s].h) <= P[s].h * 0.08),
       ['Stand', 'Coil', 'Lunge', 'Gather'].map(s => s + ' ' + P[s].h + '/' + A.duel[s].h + ' ' + A.duel[s].art).join(', '));
   }
-  { const c = Object.keys(names).map(r => AG[r] && AG[r].plain && AG[r].plain.Stand.rgb).filter(Boolean); const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-    check('A  ...three different pictures: their standing bodies are three different colours', c.length === 3 && dist(c[0], c[1]) >= 12 && dist(c[0], c[2]) >= 12 && dist(c[1], c[2]) >= 12, c); }
-  check('A  ...and a chamber whose agent has not been fired keeps the shared set', R.unfired.key === 'sageStand', R.unfired);
+  { const rooms = Object.keys(names).filter(r => AG[r] && AG[r].plain && AG[r].plain.Stand.sig.length);
+    const diff = (a, b) => { let t = 0; for (let i = 0; i < a.length; i++) t += Math.abs(a[i] - b[i]); return t / a.length; };
+    const pairs = []; for (let i = 0; i < rooms.length; i++) for (let j = i + 1; j < rooms.length; j++) pairs.push({ a: names[rooms[i]], b: names[rooms[j]], d: +diff(AG[rooms[i]].plain.Stand.sig, AG[rooms[j]].plain.Stand.sig).toFixed(1) });
+    pairs.sort((p, q) => p.d - q.d);
+    check('A  ...seven different pictures: no two standing bodies are alike (the nearest pair still differs by 10 levels a cell)', rooms.length === 7 && pairs[0].d >= 10, pairs.slice(0, 3)); }
+  check('A  ...and a chamber with no set of its own keeps the shared one', R.unfired.key === 'sageStand', R.unfired);
   for (const room of ['A1', 'CV1B', 'B6']) { const D = R.decks[room];
     check('C  ' + room + ': its decks are an object plate (' + (D.set || 'none') + '), opaque along the slab', !!D.set && D.ready && D.runs > 0 && D.worst.opaque >= 0.85, D); }
   check('C  ...a furnished interior keeps its furniture (the den\'s table is not a gantry)', R.den.set === null && R.den.decks > 0, R.den);

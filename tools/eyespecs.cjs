@@ -124,7 +124,8 @@ module.exports = [
   // placed by the head, the same drop below the hood's crown as the stand
   ...strips(['sageWalk8'], { rule: 'hood', hoodY: 0.085 }),
   // the Eye's agents, each its own set (ART_QUEUE §2bu): eyes inside the hood, by the head
-  ...strips(['agTallyStand', 'agTallyWalk8', 'agTallyExhale', 'agTallyCoil', 'agTallyLunge', 'agTallyGather', 'agTallyLock', 'agLeashStand', 'agLeashWalk8', 'agLeashExhale', 'agLeashCoil', 'agLeashLunge', 'agLeashGather', 'agLeashLock', 'agUndertowStand', 'agUndertowWalk8', 'agUndertowExhale', 'agUndertowCoil', 'agUndertowLunge', 'agUndertowGather', 'agUndertowLock'], { rule: 'hood', hoodY: 0.10 }),
+  ...strips(['agTallyStand', 'agTallyWalk8', 'agTallyExhale', 'agTallyCoil', 'agTallyLunge', 'agTallyGather', 'agTallyLock', 'agLeashStand', 'agLeashWalk8', 'agLeashExhale', 'agLeashCoil', 'agLeashLunge', 'agLeashGather', 'agLeashLock', 'agUndertowStand', 'agUndertowWalk8', 'agUndertowExhale', 'agUndertowCoil', 'agUndertowLunge', 'agUndertowGather', 'agUndertowLock',
+    'agSlagStand', 'agSlagWalk8', 'agSlagExhale', 'agSlagCoil', 'agSlagLunge', 'agSlagGather', 'agSlagLock', 'agRedactStand', 'agRedactWalk8', 'agRedactExhale', 'agRedactCoil', 'agRedactLunge', 'agRedactGather', 'agRedactLock', 'agLapidStand', 'agLapidWalk8', 'agLapidExhale', 'agLapidCoil', 'agLapidLunge', 'agLapidGather', 'agLapidLock', 'agPupilStand', 'agPupilWalk8', 'agPupilExhale', 'agPupilCoil', 'agPupilLunge', 'agPupilGather', 'agPupilLock'], { rule: 'hood', hoodY: 0.10 }),
   ...strips(['sageExhale'], { rule: 'hood', hoodY: 0.10 }),
   // ---- the kingdom machines --------------------------------------------------
   // Rooted machines with no face. Each has one sensor that reads as its eye
