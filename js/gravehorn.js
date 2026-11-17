@@ -101,7 +101,7 @@ const GH_CINE = { ghwake: 1, ghspeak: 1, ghbellow: 1, kneel: 1, rage: 1, beaten:
 
 // ---- the plates: registered only when they are on disk --------------------
 const GH_PART_KEYS = ['body', 'head', 'head_roar', 'horn_big', 'horn_small', 'fleg_up', 'fleg_low',
-  'hleg_up', 'hleg_low', 'hoof', 'tail', 'body2', 'head2', 'horn_big2', 'horn_small2', 'turn34', 'turn_front'];
+  'hleg_up', 'hleg_low', 'hoof', 'tail', 'body2', 'head2', 'horn_big2', 'horn_small2', 'turn34', 'turn_front', 'turn_rear', 'turn_tail'];
 (function ghRegister() {
   const on = (typeof window !== 'undefined' && window.GH_FILES) || [];
   if (typeof MEDIA_SRC === 'undefined') return;
@@ -148,16 +148,23 @@ GH_BOX.horn_big2 = GH_BOX.horn_big; GH_BOX.horn_small2 = GH_BOX.horn_small;
 //   H     : drawn height in world px — the rig's own standing height, measured
 const GH_TURN = {
   q: 0.62, f: 0.2, H: 152,
-  turn34: { w: 580, h: 496, ax: 0.4267, ay: 0.9919, eyes: [[0.2834, 0.3537]] },
-  turn_front: { w: 377, h: 492, ax: 0.4987, ay: 0.9919, eyes: [[0.3392, 0.3547], [0.6608, 0.3547]] },
+  turn34: { w: 837, h: 620, ax: 0.4638, ay: 0.9946, eyes: [[0.2975, 0.354]] },
+  turn_front: { w: 423, h: 620, ax: 0.5000, ay: 0.9946, eyes: [[0.3188, 0.3526], [0.6863, 0.3545]] },
+  // ...and the other way round: his quarters to the camera, then tail-on. A
+  // beast that always comes round the same way is one picture played twice;
+  // every second turn he goes round AWAY from us (b.turnAway, set where the
+  // turn begins), through the rear three-quarter and the tail-on plate.
+  turn_rear: { w: 680, h: 620, ax: 0.5270, ay: 0.9946, eyes: [[0.1103, 0.3192]] },
+  turn_tail: { w: 437, h: 620, ax: 0.4914, ay: 0.9979, eyes: [] },
 };
 // the picture his turn is showing right now: null (the rig, in profile), or
 // the plate, which way it is mirrored, and its row
 function ghTurnView(b) {
   const fv = b.faceVis == null ? (b.face || -1) : b.faceVis, k = Math.abs(fv);
   if (k >= GH_TURN.q) return null;
-  const key = k < GH_TURN.f ? 'turn_front' : 'turn34', im = ghPlate(key);
-  if (!im || !ghPlate('turn34') || !ghPlate('turn_front')) return null;
+  if (!ghPlate('turn34') || !ghPlate('turn_front')) return null;
+  const away = !!b.turnAway && !!ghPlate('turn_rear') && !!ghPlate('turn_tail');
+  const key = k < GH_TURN.f ? (away ? 'turn_tail' : 'turn_front') : (away ? 'turn_rear' : 'turn34'), im = ghPlate(key);
   return { key, im, row: GH_TURN[key], flip: fv > 0, k };   // the art faces LEFT, as the rig does
 }
 function ghPlate(part) {
@@ -1037,6 +1044,8 @@ function ghStep(b, dt) {
   // ---- facing: the weighted turn ---------------------------------------------
   const fv = b.faceVis == null ? b.face : b.faceVis;
   const rate = 2 / GH.turnT;
+  // a turn BEGINS: he is in profile and wants the other way. Every second one goes round away from the camera
+  if (Math.abs(fv) >= 0.97 && (Math.sign(b.face) || -1) !== (Math.sign(fv) || -1)) { b.turnN = (b.turnN || 0) + 1; b.turnAway = b.turnN % 2 === 0; }
   b.faceVis = fv + clamp((b.face || -1) - fv, -rate * dt, rate * dt);
   if ((Math.sign(b.faceVis) || 1) !== (Math.sign(fv) || 1)) {
     for (let i = 0; i < 10; i++)

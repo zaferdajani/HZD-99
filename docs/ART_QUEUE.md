@@ -21,7 +21,14 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
-## 2bv. THE CATS LIE DOWN, AND THE ORACLE STANDS ✱ QUEUED 2026-11-16 (owner's order, this thread; waiting on credits)
+## 2bv. THE CATS LIE DOWN, AND THE ORACLE STANDS ✔ FIRED AND WIRED 2026-11-17 (the Oracle's notice turn and a clean-keyed work take still to fire)
+
+**Fired 2026-11-17** (job ids in `assets/source/README.md`): the cat's fold —
+six beats picked off one filmed take, `cheetahDown6`, played over 0.8 s from
+the moment her blow binds it (`CHEETAH_ART.down.fall`, `e._fallAt`) and then
+held, breathing; the Oracle's RESTING plate and TALK pair (`NPC_TALL.mono.rest`
+/ `.talk`); `ch2_b` with UNDERTOW's own figure. `tests/fired-art.cjs` D and E.
+What is below is the brief as it was queued.
 
 Three things the owner pointed at on one evening, each of which the code has
 taken as far as existing art goes:
@@ -52,7 +59,18 @@ taken as far as existing art goes:
 
 ---
 
-## 2bu. THE EYE'S AGENTS — seven bodies, not one ✱ QUEUED 2026-11-16 (owner's order, this thread; waiting on credits)
+## 2bu. THE EYE'S AGENTS — seven bodies, not one ◐ THREE FIRED AND WIRED 2026-11-17 (TALLYMAN, LEASH, UNDERTOW); four to fire
+
+**Fired 2026-11-17**: TALLYMAN (GA1D), LEASH (GA2D) and UNDERTOW (GB1D) each
+have their own eight states — stand, a filmed 8-cell walk, exhale, coil, lunge,
+gather, lock, pure — under `assets/characters/agents/<name>/`, keyed by chamber
+in `AGENT_ART` (js/sage-motion.js) with one height table for both drawings
+(`AGENT_H`, `agentHeight`). Masters and job ids: `assets/source/agents/`.
+`tests/fired-art.cjs` A and B. **Still to fire, same recipe (stand against the
+shared stand plate, then six states and a walk against that stand):
+SLAGFATHER (GC1D), REDACTOR (GD1D), LAPIDARY (GX1D), PUPIL (GE1D)** — about 33
+credits an agent. The multi-cell LUNGE and EXHALE takes of the original brief
+are not fired for any of them yet: each is one plate.
 
 The owner, on the second robed duelist: *"it looks exactly like the first one I
 fought, which means there is no story behind it... Each one has a fragment that
@@ -83,7 +101,18 @@ Archive under `assets/source/agents/<name>/`; wire through `js/sage-motion.js`
 
 ---
 
-## 2bs. COMIC PANELS OFF MODEL — re-fire with the canon elements ✱ QUEUED 2026-11-16 (owner's order, this thread; one fired, the rest waiting on credits)
+## 2bs. COMIC PANELS OFF MODEL — re-fire with the canon elements ✔ ALL FIRED AND INSTALLED 2026-11-17
+
+**Fired 2026-11-17** (GPT Image 2.6, 2k HIGH, each against its own refused
+panel as the SHAPE reference, the hero as her canon element, NULLFANG against
+his studio stand plate, the keeper against TALLYMAN's own stand plate): every
+row of the table below, and the four keeper panels (`s_ring`, `s_cleanse`,
+`s_cell`, `sage_rev`), which now draw TALLYMAN — abacus, striped robe,
+surveyor's staff — and are captioned with his name (`pc_knelt`, `pc_letgo`,
+`pc_p_tunnel`, `pn_s_sage`, five languages). `passage_a` stands a machine ring
+where the steel slab was. Masters, the refused panels and the job ids:
+`assets/source/manhua/refire-2026-11/` (`jobs.json`). The table is the audit as
+it was written.
 
 The owner, on the passage panel: *"please, you need to review all the images we
 have, analyze them, and see if there's anything like just this one. This one is
@@ -100,15 +129,15 @@ the canon hero element and NULLFANG's studio plates. What is wrong, by panel:
 | panel | what is off | status |
 |---|---|---|
 | `passage_b` | the hero from behind as a tan hooded cat | **RE-FIRED 2026-11-16** (job `d903567c…`), installed |
-| `passage_a` | still shows the steel-slab door the ring gates replaced | queued |
-| `cv_mouth`, `cv_walk` | the hero as a tan cat, no helmet, no blade | queued |
-| `d_door`, `d_walk` | the same tan cat | queued |
-| `f_blade`, `f_strike` | the same; the blade is not her sword | queued |
-| `fight_a` | the hero off model; NULLFANG lilac | queued |
-| `break_a` | NULLFANG drawn WHITE | queued |
-| `f_walk` | NULLFANG ice-blue | queued |
-| `m_down` | NULLFANG lilac | queued |
-| the keeper's kneeling panel | captioned and drawn as "the sage": he is the Eye's AGENT (see STORY_CANON) | queued, with his new name |
+| `passage_a` | still shows the steel-slab door the ring gates replaced | **RE-FIRED 2026-11-17**, installed |
+| `cv_mouth`, `cv_walk` | the hero as a tan cat, no helmet, no blade | **RE-FIRED 2026-11-17**, installed |
+| `d_door`, `d_walk` | the same tan cat | **RE-FIRED 2026-11-17**, installed |
+| `f_blade`, `f_strike` | the same; the blade is not her sword | **RE-FIRED 2026-11-17**, installed |
+| `fight_a` | the hero off model; NULLFANG lilac | **RE-FIRED 2026-11-17**, installed |
+| `break_a` | NULLFANG drawn WHITE | **RE-FIRED 2026-11-17**, installed |
+| `f_walk` | NULLFANG ice-blue | **RE-FIRED 2026-11-17**, installed |
+| `m_down` | NULLFANG lilac | **RE-FIRED 2026-11-17**, installed |
+| the keeper's kneeling panel | captioned and drawn as "the sage": he is the Eye's AGENT (see STORY_CANON) | **RE-FIRED 2026-11-17** as TALLYMAN, with the three panels after it |
 
 Brief for each: the panel's own composition kept (use the existing panel as the
 SHAPE reference), the hero embedded as `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`,
@@ -119,7 +148,13 @@ beside it as `<panel>_before.jpg`.
 
 ---
 
-## 2br. GRAVEHORN'S TURN at full quality, and his phase-two plates ✱ QUEUED 2026-11-16 (waiting on credits)
+## 2br. GRAVEHORN'S TURN at full quality ✔ FIRED AND WIRED 2026-11-17 (his phase-two plates still to fire)
+
+**Fired 2026-11-17** at 2k HIGH: three-quarter, head-on and REAR three-quarter
+(job `162d01c2-6d32-44e0-bc6d-108d20cfc665`) and a tail-on plate
+(`df985622-6430-42d5-afce-cd08a95ee7d8`). Every second turn now goes round
+AWAY from the camera through the rear and tail-on views (`b.turnAway`,
+`GH_TURN.turn_rear` / `.turn_tail`). `tests/turn-roar.cjs` A2.
 
 The turn plate in the game was fired at 1k MEDIUM on the last half-credit and
 keyed hard to lose a haze. Fire it again at 2k HIGH against the same design
@@ -131,7 +166,15 @@ measures the result.
 
 ---
 
-## 2bt. PLATFORMS AS OBJECTS — one plate set per zone ✱ QUEUED 2026-11-16 (owner's order; waiting on credits)
+## 2bt. PLATFORMS AS OBJECTS — one plate set per zone ◐ THREE ZONES FIRED AND WIRED 2026-11-17 (city, caves, Conduits); Foundry, Glacier, Prism to fire
+
+**Fired 2026-11-17**: a gantry grating for the city (zone A), a rock shelf for
+every cave, a cable tray for the Conduits (zone B) — three lengths each on one
+plate, cut and measured by `tools/platobj.cjs` into `assets/tiles/platobj_*`.
+`PLAT_OBJ` / `platObjFinish` (js/game.js) lay the object over the finished tile
+layer in place of the slab. `tests/fired-art.cjs` C. **Still to fire: zones C,
+D, E** (a slag crust, an ice shelf, a glass ledge) — one plate each, 2.75
+credits; add the row `tools/platobj.cjs` prints to `PLAT_OBJ`.
 
 The owner: *"the platforms are so translucent, it does not actually indicate a
 platform or something that I have to walk on. It should have its own objective

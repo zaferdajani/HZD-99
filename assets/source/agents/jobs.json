@@ -1,0 +1,84 @@
+{
+ "model": "Higgsfield GPT Image 2.6 (stills, 2k) and Kling 4.0 Flash (walk takes, image-to-video, 5 s 720p)",
+ "fired": "2026-11-17",
+ "tally": {
+  "name": "TALLYMAN (GA1D)",
+  "stand": "c66fcc7d-3f7b-4d6d-bbcd-80e77a89e9e2",
+  "coil": "429f1e49-01f3-43f6-a3aa-c1a170e6b94b",
+  "lunge": "207c3b5e-ffb6-4dae-a471-496e03b15f2d",
+  "gather": "21980b7d-ff00-4172-b124-925f32bca791",
+  "lock": "253897cf-43ac-49fe-bf31-92e556858127",
+  "pure": "946f9828-2c5e-4d8d-9945-1605e20ce481",
+  "exhale": "b4a73779-ce91-44a4-80a8-53ade14456b2",
+  "walk_take": "68a97907-1800-4f02-b7bd-551d056eb84d"
+ },
+ "leash": {
+  "name": "LEASH (GA2D)",
+  "stand": "dbb94e15-b39f-4e57-850c-6386d580e6d7",
+  "coil": "7ee984d8-451c-4a9e-a847-ac5a242d8e80",
+  "lunge": "9e9ce2f4-1f29-4ce6-9843-f7add1214ff3",
+  "gather": "58f061d6-30f9-4b4f-bbe7-babf4402db8f",
+  "lock": "2025e5ba-5833-4223-92bb-11bcd2b0a915",
+  "pure": "5ceccad9-4666-4d6e-b98a-f702a9354f59",
+  "exhale": "ee7b68f1-b478-4457-bd86-0f3af9b91e70",
+  "walk_take": "0c3bc80e-d054-40b2-9a80-081738db3fc8"
+ },
+ "undertow": {
+  "name": "UNDERTOW (GB1D)",
+  "stand": "60ac5969-ced4-440e-8b1d-de9e52d72ad7",
+  "coil": "dd27f8f4-7615-4bcf-bcaa-9b0cee49e67d",
+  "lunge": "8c4b47e6-80d5-4726-8e19-8476ad17fde7",
+  "gather": "f8acb2e8-dcea-416e-899f-8af9e97cd6e0",
+  "lock": "599f5263-65d6-4d19-9cca-768dff7d3234",
+  "pure": "f59c1222-f405-473a-bebb-2e949682905c",
+  "exhale": "e23c4f7f-5532-41eb-9071-12d48cc77d92",
+  "walk_take": "b6dee424-870f-4e93-8c2a-e94c26e153ed"
+ },
+ "cut": "each still: tools/plate.cjs <asfired> assets/characters/agents/<a>/<state>.webp 512 (UNDERTOW: PLATE_KEY=60,115 PLATE_DESPILL=edge \u2014 a green robe on a green screen); each walk: ONE stride of the take, eight even beats, tools/vidstrip.cjs <take> <out> 8 192 with VIDSTRIP_DESPILL=edge and VIDSTRIP_TIMES (UNDERTOW also VIDSTRIP_KEY=60,115)",
+ "reference": "every state of an agent was fired against that agent's own stand plate (its job id above) as the shape and style reference; the three stand plates against the approved shared stand plate",
+ "walk_strides": {
+  "note": "the stride's period was measured off the take (the keyed silhouette against itself: the lag at which it comes back). A strip sampled across the whole five seconds is eight unrelated moments of several strides and does not loop.",
+  "tally": {
+   "from": 2.0,
+   "period": 1.25,
+   "times": [
+    2.0,
+    2.156,
+    2.313,
+    2.469,
+    2.625,
+    2.781,
+    2.938,
+    3.094
+   ]
+  },
+  "leash": {
+   "from": 2.0,
+   "period": 1.42,
+   "times": [
+    2.0,
+    2.178,
+    2.355,
+    2.533,
+    2.71,
+    2.888,
+    3.065,
+    3.243
+   ]
+  },
+  "undertow": {
+   "from": 2.5,
+   "period": 1.75,
+   "times": [
+    2.5,
+    2.719,
+    2.938,
+    3.156,
+    3.375,
+    3.594,
+    3.813,
+    4.031
+   ]
+  }
+ }
+}

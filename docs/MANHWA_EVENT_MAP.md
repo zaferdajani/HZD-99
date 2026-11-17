@@ -108,7 +108,7 @@ player's input rules.
 
 ### letter — Ratchet's letter
 
-- **Event / trigger:** Ratchet's letter read on his dark body (opNote), before the toolbox and the repair. Played by its own moment (see the trigger).
+- **Event / trigger:** Ratchet's letter read on his dark body (opNote), before the drawer and the repair. Played by its own moment (see the trigger).
 - **Completion flag:** `G.save.panels.seen.letter` (set when it starts; `past.letter` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
@@ -119,7 +119,7 @@ player's input rules.
 | 4 | `assets/manhua/ch1/game/l_cell.webp` (game: l_cell) | [0, 0, 1600, 893] | `pc_l_cell` | “I took my battery out before it could take me. It is in the toolbox beside this chair.” |
 | 5 | `assets/manhua/ch1/game/letter.webp` (game: letter) | [0, 0, 1600, 893] | `pc_l_hope` | “If you are reading this, there may still be hope. — R.” |
 
-### drawer — Ratchet's battery, in the toolbox on the floor (the id is a save key; the picture is `toolbox.webp` since 2026-11-15)
+### drawer — Ratchet's battery
 
 - **Event / trigger:** his battery taken from the toolbox on the den floor (ratchetCell in hand), before the repair. Plays over the crossing into `A0B` if it is already due when she arrives; otherwise in `A0B` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.drawer` (set when it starts; `past.drawer` if the save had already passed the event).
@@ -178,7 +178,7 @@ player's input rules.
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/game/passage_a.webp` (game: passage_a) | [0, 0, 1600, 893] | `pc_p_door` | Beside the stump she had cut, a door opened that had stayed shut for everyone else. |
-| 2 | `assets/manhua/ch1/game/passage_b.webp` (game: passage_b) | [0, 0, 1600, 893] | `pc_p_tunnel` | The survivors had carried a sage down here once, and sealed it in. |
+| 2 | `assets/manhua/ch1/game/passage_b.webp` (game: passage_b) | [0, 0, 1600, 893] | `pc_p_tunnel` | The survivors had carried one of the Eye's agents down here once, and sealed it in. |
 
 ### meet — The corridor
 
@@ -202,16 +202,16 @@ player's input rules.
 | 1 | `assets/manhua/ch1/game/break_a.webp` (game: break_a) | [0, 0, 1600, 893] | `pc_b_stop` | The purple went out of him. Nothing was driving him. |
 | 2 | `assets/manhua/ch1/game/break_b.webp` (game: break_b) | [0, 0, 1600, 893] | `pc_b_bell` | Then a bell answered from above the meadow, and the order was written back into him. |
 
-### sage — The Meadow Sage
+### sage — TALLYMAN
 
 - **Event / trigger:** the first Sage cleansed (sageTame_GA1D), after its gift card and revelation. Plays over the crossing into `GA1D` if it is already due when she arrives; otherwise in `GA1D` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.sage` (set when it starts; `past.sage` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/game/s_ring.webp` (game: s_ring) | [0, 0, 1600, 679] | `pc_knelt` | The sage knelt. The song held its body together. Broken, but not CLEAN. |
+| 1 | `assets/manhua/ch1/game/s_ring.webp` (game: s_ring) | [0, 0, 1600, 679] | `pc_knelt` | TALLYMAN knelt: the Eye's agent. The song held its body together. Broken, but not CLEAN. |
 | 2 | `assets/manhua/ch1/clean/p26.webp` (p26 panel 1) | [52, 42, 1096, 310] | `pc_cuts` | Claws could not purify the song. The PURIFIER could. |
-| 3 | `assets/manhua/ch1/game/s_cleanse.webp` (game: s_cleanse) | [0, 0, 1600, 893] | `pc_letgo` | The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light. |
+| 3 | `assets/manhua/ch1/game/s_cleanse.webp` (game: s_cleanse) | [0, 0, 1600, 893] | `pc_letgo` | The song let go. TALLYMAN remembered everything — and gave what it had kept for whoever would come with clean light. |
 | 4 | `assets/manhua/ch1/game/s_cell.webp` (game: s_cell) | [0, 0, 1600, 679] | `pc_cell` | It had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light. |
 | 5 | `assets/manhua/ch1/game/sage_rev.webp` (game: sage_rev) | [0, 0, 1600, 893] | `pc_s_point` | It pointed up, toward the climb above the meadow. |
 | 6 | `assets/manhua/ch1/game/sage_bell.webp` (game: sage_bell) | [0, 0, 1600, 679] | `pc_s_bell` · conditional | NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it. |
@@ -229,7 +229,7 @@ player's input rules.
 
 ### free — NULLFANG, free
 
-- **Event / trigger:** NULLFANG purified (bossGlitch), after the purification film and its rewards. Plays over the crossing into `A4` if it is already due when she arrives; otherwise in `A4` the moment its event is over.
+- **Event / trigger:** NULLFANG purified (bossGlitch) — library only; its film is what plays. Played by its own moment (see the trigger).
 - **Completion flag:** `G.save.panels.seen.free` (set when it starts; `past.free` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
@@ -287,7 +287,7 @@ The audit's list, each now a sequence or part of one, played at its game event:
 | 5 | The quarry maintenance door and tunnel | `passage` | `game/passage_a`, `passage_b` | first arrival in GA1T with the blade |
 | 6 | The on-model lion encounter and fight | `free` | `game/fight_a`, `fight_b` (+ clean p24 ×2); the corridor meeting is p14, on model | `bossGlitch` |
 | 7 | The camp-hatch departure | `ch2` | `game/hatch` | the climb above the camp |
-| 8 | Chapter two | `ch2` | `game/ch2_a` (the Conduits), `ch2_b` (UNDERTOW, the Conduits' agent — outline only; re-fire queued, ART_QUEUE §2bs: the outline must not be the first agent's), `ch2_c` (the talons — nothing else shown), then the title card | as above |
+| 8 | Chapter two | `ch2` | `game/ch2_a` (the Conduits), `ch2_b` (UNDERTOW, the Conduits' agent, in the cable ring — re-fired 2026-11-17 with his own drowned figure, so it cannot be read as TALLYMAN), `ch2_c` (the talons — nothing else shown), then the title card | as above |
 
 Old saves: a save made before these sequences existed is judged by what it has
 already done (`panelsState`, the `k` record) — it is not handed the marble or

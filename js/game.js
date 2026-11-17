@@ -739,7 +739,13 @@ const NPC_LOOP = {
 // at a merchant's stature. `h` is the cell's drawn height in px; `read` the
 // cells where the tape is in its hands; `fps` near her, and speaking.
 // `sink` seats the frayed hem on the floor (the strands thin out before the cell's foot).
-const NPC_TALL = { mono: { h: 188, read: [8, 14], fps: [4, 7], sink: 9 } };
+// PLATES OF ITS OWN (fired 2026-11-17, ART_QUEUE §2bv): powered down it is its
+// RESTING plate — screen dead, shroud slack, one standby lamp — which IS the
+// dark read, so it is not put through the dead-machine grey; spoken to, it is
+// a TALKING pair (a scan-line face, a hand raised) alternating on `beat`
+// seconds. `plateH` draws a plate's cell so its body is the strip's size.
+const NPC_TALL = { mono: { h: 188, read: [8, 14], fps: [4, 7], sink: 9,
+  rest: 'monoResting', talk: ['monoTalk1', 'monoTalk2'], beat: 0.55, plateH: 190 } };
 const NPC_LOOP_CELLS = { servo: 16, mono: 15, patch: 13, sage: 11, lumen: 10, kerf: 8, ratchet: 6 };
 function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
 // ...and the tempo doubles with the cell count, or the same job plays at half
@@ -7521,10 +7527,101 @@ function drawDeck(cx2, X, Y, RW, DH, variant) {
 // the one thing the erosion never touched. The runs render once into an
 // offscreen canvas, the same scallop treatment bites their top and bottom
 // edges, and the frame blits the result.
+// A DECK IS AN OBJECT (owner, 2026-11-16: "the platforms are so translucent, it
+// does not actually indicate a platform or something that I have to walk on.
+// It should have its own objective structure drawn and showing"). Where a
+// zone has its fired set (ART_QUEUE §2bt) a run of '=' is ONE whole thing from
+// that room's own backdrop — a slab of wreck deck with grass on it in the
+// meadow, a shelf of rock in the caves, a maintenance gantry in the Conduits —
+// drawn opaque and uneroded. Three lengths a zone, cut and measured by
+// tools/platobj.cjs: `top` is the row the feet stand on (grass and crystals
+// stand above it), `slab` the solid thickness. A run takes the length that
+// keeps the slab nearest PLAT_OBJ_SLAB px thick; a run longer than the long
+// one is the long one three-sliced. Zones without a set keep the old deck.
+const PLAT_OBJ_SLAB = 22;
+const PLAT_OBJ = {
+  A: { key: 'platObjA', p: [{ x: 2, y: 2, w: 155, h: 79, top: 19, slab: 44 }, { x: 2, y: 83, w: 345, h: 78, top: 18, slab: 42 }, { x: 2, y: 163, w: 546, h: 82, top: 20, slab: 44 }] },
+  X: { key: 'platObjX', p: [{ x: 2, y: 2, w: 142, h: 80, top: 14, slab: 44 }, { x: 2, y: 84, w: 349, h: 85, top: 14, slab: 44 }, { x: 2, y: 171, w: 534, h: 95, top: 16, slab: 47 }] },
+  B: { key: 'platObjB', p: [{ x: 2, y: 2, w: 151, h: 48, top: 0, slab: 44 }, { x: 2, y: 52, w: 306, h: 48, top: 0, slab: 43 }, { x: 2, y: 102, w: 434, h: 48, top: 0, slab: 43 }] },
+};
+// this room's set, or null: outdoors and in the rooms a zone's backdrop paints —
+// never a furnished interior (the den's table is a deck too), never NOSTOS
+function platObjSet() {
+  if (!G.roomDef || (typeof isHero === 'function' && isHero()) || G.roomDef.indoor || G.roomDef.decks) return null;
+  return PLAT_OBJ[G.roomDef.cave ? 'X' : G.roomDef.zone] || null;
+}
+function platObjReady(S) {
+  if (!S) return false;
+  const im = MEDIA_IMG[S.key];
+  return !!(im && im.naturalWidth);
+}
+// one run, X..X+RW with its walking surface at Y
+function drawPlatObj(p2, S, X, Y, RW) {
+  const im = MEDIA_IMG[S.key];
+  let P = S.p[0], best = 1e9;
+  for (const q of S.p) { const d = Math.abs(q.slab * RW / q.w - PLAT_OBJ_SLAB); if (d < best) { best = d; P = q; } }
+  const L = S.p[S.p.length - 1];
+  const sFit = RW / P.w;
+  if (P === L && L.slab * sFit > PLAT_OBJ_SLAB * 1.3) {
+    // longer than the long one: its two ends whole, its middle repeated
+    const s = PLAT_OBJ_SLAB / L.slab, cap = Math.round(L.w * 0.2), capD = Math.round(cap * s);
+    const y = Y - L.top * s, h = L.h * s, midS = L.w - cap * 2;
+    p2.drawImage(im, L.x, L.y, cap, L.h, X, y, capD, h);
+    p2.drawImage(im, L.x + L.w - cap, L.y, cap, L.h, X + RW - capD, y, capD, h);
+    let dx = X + capD; const end = X + RW - capD;
+    while (dx < end - 0.5) { const w = Math.min(midS * s, end - dx); p2.drawImage(im, L.x + cap, L.y, w / s, L.h, dx, y, w + 0.5, h); dx += w; }
+    return;
+  }
+  // (a run between two lengths is a thin slab at its own scale: it may stand up
+  // to a third taller than it is drawn, which reads as heavier, not as stretched)
+  const vs = clamp(PLAT_OBJ_SLAB / (P.slab * sFit), 1, 1.35);
+  p2.drawImage(im, P.x, P.y, P.w, P.h, X, Y - P.top * sFit * vs, RW, P.h * sFit * vs);
+}
+// THE OBJECT REPLACES THE SLAB, it does not sit on it. The terrain passes that
+// follow the tile draw (the slab silhouette, the surface curve, the edge
+// grammar) all treat a '=' run as ground and build it a dark body, a keel and
+// a lit crest — the see-through block the owner was looking at. So the object
+// is laid after every one of them: each run's own cells are cleared of what
+// the passes made of it (never a rock cell, never the teeth standing on it)
+// and the object is drawn with its walking surface on the line her feet
+// actually stand on, which is the curve's, not the tile's.
+function platObjFinish(x) {
+  const PO = platObjSet();
+  if (!platObjReady(PO) || !G.grid) return;
+  const g = G.grid, W = g[0].length, H = g.length;
+  const solidCh = (ch) => ch === '#' || ch === 'B' || ch === '=';
+  for (let ty = 0; ty < H; ty++) {
+    let tx = 0;
+    while (tx < W) {
+      if (g[ty][tx] !== '=') { tx++; continue; }
+      let e = tx; while (e + 1 < W && g[ty][e + 1] === '=') e++;
+      const X = tx * TILE, RW = (e - tx + 1) * TILE, Y = ty * TILE;
+      for (let cx2 = tx; cx2 <= e; cx2++) {
+        const above = ty > 0 ? g[ty - 1][cx2] : '.';
+        const yTop = (above === '^' || solidCh(above)) ? Y : Y - 24;
+        let yBot = Y + TILE + 30;
+        for (let yy = ty + 1; yy <= Math.min(H - 1, ty + 2); yy++) if (solidCh(g[yy][cx2]) || g[yy][cx2] === '^') { yBot = Math.min(yBot, yy * TILE); break; }
+        let x0 = cx2 * TILE, x1 = x0 + TILE;
+        if (cx2 === tx && !(tx > 0 && solidCh(g[ty][tx - 1]))) x0 -= 8;
+        if (cx2 === e && !(e + 1 < W && solidCh(g[ty][e + 1]))) x1 += 8;
+        x.clearRect(x0, yTop, x1 - x0, yBot - yTop);
+      }
+      // where she stands: the curve over this run (it may sit a little above the tile top)
+      let ys = [];
+      if (typeof groundColumnAt === 'function') for (let px = X + 6; px < X + RW; px += 12) { const gc = groundColumnAt(px); if (gc) ys.push(Math.min(gc[0], gc[1])); }
+      ys = ys.filter(v => v > Y - 20 && v <= Y + 2).sort((a, b) => a - b);
+      drawPlatObj(x, PO, X, ys.length ? ys[ys.length >> 1] : Y, RW);
+      tx = e + 1;
+    }
+  }
+}
 let platCv = null, platCvKey = '';
 function drawPlatformRuns() {
   if (!platReady()) return;
-  const key = G.roomId + '|' + platVariant();
+  const PO = platObjSet();
+  if (PO && !platObjReady(PO) && typeof mediaFetch === 'function') mediaFetch(PO.key, 1);
+  const poOn = platObjReady(PO);
+  const key = G.roomId + '|' + platVariant() + (poOn ? '|obj' : '');
   const W2px = G.roomDef.w * TILE, H2px = G.roomDef.h * TILE;
   if (platCvKey !== key || !platCv || platCv.width !== W2px) {
     platCvKey = key;
@@ -7545,6 +7642,7 @@ function drawPlatformRuns() {
         if (tileAt(tx, ty) !== '=') { tx++; continue; }
         let e = tx;
         while (e + 1 < W && tileAt(e + 1, ty) === '=') e++;
+        if (poOn) { tx = e + 1; continue; }      // an object deck is laid LAST, over the finished layer (platObjFinish)
         const X = tx * TILE, RW = (e - tx + 1) * TILE, Y = ty * TILE - LIFT;
         const cw = Math.min(capD, Math.floor(RW / 2));
         // a short run gets the caps squeezed rather than a stretched middle
@@ -7749,6 +7847,7 @@ function* tileBakeSteps(P) {
   if (G.roomDef) yield* surfaceCurveSteps(tctx);    // §10.1 — the surface stops being cells
   TILE_STATS.pass = 'edge';
   if (G.roomDef) yield* edgeGrammarSteps(tctx);
+  if (G.roomDef) platObjFinish(tctx);               // a deck that is an object (§2bt): laid over the finished layer
   // §9.1 — and lift the whole plane. Pushing the background down is only half
   // of aerial perspective; measured after the background pass alone, B4's
   // terrain still sat 9 points off its backdrop where the law asks for 10.
@@ -13527,7 +13626,9 @@ function drawStatics(P) {
           plateDrew = true;
         }
       }
-      const dimmed = !live && !plateDrew;
+      const tallRest = !live && NPC_TALL[s.extra] && NPC_TALL[s.extra].rest && !(typeof isHero === 'function' && isHero())
+        && typeof mediaHas === 'function' && (mediaHas(NPC_TALL[s.extra].rest) || (mediaFetch(NPC_TALL[s.extra].rest, 1), false));
+      const dimmed = !live && !plateDrew && !tallRest;
       if (dimmed) {
         c.save();
         // A DEAD MACHINE IS DARK, NOT TRANSPARENT — and it is still a MACHINE
@@ -13658,7 +13759,17 @@ function drawStatics(P) {
       // ...and one whose filmed body is the ONLY good picture of it wears that
       // body the rest of the time too (NPC_TALL): reading, while she stands by
       // or speaks to it, from the half of the take where the work is in hand.
-      // Unpowered, it is the take's first cell: hands down, the screen a flat line.
+      // Its own plates first: resting while unpowered, the talking pair while
+      // she speaks to it. Until one has landed the take stands in (unpowered,
+      // its first cell: hands down, the screen a flat line).
+      if (!stripDrew && tall && (tall.rest || tall.talk)) {
+        const pk = !live ? tall.rest : talking && tall.talk ? tall.talk[Math.floor(performance.now() / 1000 / tall.beat) % tall.talk.length] : null;
+        if (pk) {
+          stripDrew = drawStripCell(c, pk, 0, 1, s.x + s.w / 2, s.y + s.h + bob2 * 0.4 + tall.sink, tall.plateH, fdir < 0);
+          if (stripDrew) G.npcFrame = s.extra + ':' + pk;
+          if (talking && tall.talk) for (const k of tall.talk) mediaFetch(k, 1);      // both, so the pair never shows half
+        }
+      }
       if (!stripDrew && tall) {
         const nc = npcLoopCells(s.extra), span = tall.read[1] - tall.read[0];
         const u = Math.floor(performance.now() / 1000 * (talking ? tall.fps[1] : tall.fps[0])) % (span * 2);
@@ -15408,6 +15519,11 @@ function drawWorldFrame() {
   drawLair();                       // behind the level — see the LAIR table
   drawRoomProp();                   // the cradle, the gates — see ROOM_PROP
   drawFlora();                      // ...and what grows in it — see FLORA
+  // (a zone's platform objects that landed AFTER this room's tile layer was
+  // rendered: the layer is a cache, and the cache was painted with the old deck)
+  { const PO = platObjSet();
+    if (PO && !platObjReady(PO)) { if (typeof mediaFetch === 'function') mediaFetch(PO.key, 1); }
+    else if (PO && platCvKey.indexOf(G.roomId + '|') === 0 && platCvKey.slice(-4) !== '|obj') tileDirty = true; }
   if (tileDirty) renderTileLayer(P);
   // §9.1 — the playable plane is the TILE LAYER, not the bottom third of the
   // screen. Measuring a screen band called the floor "near" while it was

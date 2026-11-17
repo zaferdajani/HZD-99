@@ -42,7 +42,7 @@ module.exports = [
   { key: 'cheetahWarn', col: 'red', rule: 'front', at: { 0: [0.10, 0.33] } },
   { key: 'cheetahRun', col: 'red', rule: 'front', at: { 0: [0.33, 0.16] } },
   ...strips(['cheetahRest',
-             'cheetahWalk8', 'cheetahRun6', 'cheetahWinded6', 'cheetahLand4'], { col: 'red|orange|amber', region: [0, 0, 0.45, 0.6] }),
+             'cheetahWalk8', 'cheetahRun6', 'cheetahWinded6', 'cheetahLand4', 'cheetahDown6'], { col: 'red|orange|amber', region: [0, 0, 0.45, 0.6] }),
   // ---- the Alpha (a guardian: purple at runtime, whatever the art paints) ----
   // the pack's breed, filmed 2026-10-10 (ALPHA_STRIP): its eyes and seams glow
   // VIOLET in the art itself now. The strips do not carry their cell count in
@@ -123,6 +123,8 @@ module.exports = [
   // the walk and the exhale were filmed with the eyes unlit inside the hood:
   // placed by the head, the same drop below the hood's crown as the stand
   ...strips(['sageWalk8'], { rule: 'hood', hoodY: 0.085 }),
+  // the Eye's agents, each its own set (ART_QUEUE §2bu): eyes inside the hood, by the head
+  ...strips(['agTallyStand', 'agTallyWalk8', 'agTallyExhale', 'agTallyCoil', 'agTallyLunge', 'agTallyGather', 'agTallyLock', 'agLeashStand', 'agLeashWalk8', 'agLeashExhale', 'agLeashCoil', 'agLeashLunge', 'agLeashGather', 'agLeashLock', 'agUndertowStand', 'agUndertowWalk8', 'agUndertowExhale', 'agUndertowCoil', 'agUndertowLunge', 'agUndertowGather', 'agUndertowLock'], { rule: 'hood', hoodY: 0.10 }),
   ...strips(['sageExhale'], { rule: 'hood', hoodY: 0.10 }),
   // ---- the kingdom machines --------------------------------------------------
   // Rooted machines with no face. Each has one sensor that reads as its eye

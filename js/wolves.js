@@ -150,12 +150,14 @@ const CHEETAH_ART = {
   // marker over it: "its standing still !!!"). It had no low pose of its own,
   // so it fell back to the WARNING plate — a cat standing and snarling —
   // pressed a little flatter. This is the lowest cell of its own filmed
-  // landing, held: chest on the floor, forelegs folded under it, head sunk.
-  // `recover` lays it a little lower and gives it a slow breath (the wolves'
-  // BEAST_RECOVER.down is tuned to a taller cell and crushes this one).
-  // A lying-down take of its own is on THE FIRING LIST (ART_QUEUE §2bv).
-  down: { img: 'cheetahLand4', cells: 4, k: 3.57, hold: 1,
-          recover: { rot: -0.05, kx: 1.05, ky: 0.86, dx: 0.02, heave: 1.4, always: 1 } },
+  // landing, held, for a day. It has its own take now (FIRED 2026-11-17,
+  // ART_QUEUE §2bv): one filmed fold — standing, sinking, forelegs folding,
+  // chest down, flat on the floor — played ONCE from the blow that bound it
+  // (`fall` seconds, clocked from `_fallAt`), and then the last cell held
+  // while `recover` breathes it. A cat that was already bound when the room
+  // loaded has no `_fallAt` and is simply lying there.
+  down: { img: 'cheetahDown6', cells: 6, k: 3.57, fall: 0.8,
+          recover: { rot: 0, kx: 1, ky: 1, dx: 0, heave: 1.4, always: 1 } },
 };
 // THE CATS ARE HALF AS BIG AGAIN (owner, 2026-11-16: "sizewize should be bigger
 // 50%"). The whole animal — the box a claw has to find, the wall she cannot
@@ -461,6 +463,7 @@ function drawBeastPlate(c, e, ART, tame) {
     else if (A.loop) u = (((e.anim || 0) / A.loop) % 1 + 1) % 1;
     else if (A.once) u = beastOnce(e, A.once) * (A.upto || A.cells) / A.cells;
     else if (A.air) u = clamp(((e.vy || 0) + 520) / 1040, 0, 0.999);
+    else if (A.fall) u = e._fallAt != null ? clamp(((e.anim || 0) - e._fallAt) / A.fall, 0, 0.999) : 0.999;
     else if (A === ART.purify) u = clamp(((e.anim || 0) - (e._pur0 || 0)) / WOLF_PURIFY_T, 0, 0.999);
     cell = Math.min(A.cells - 1, Math.floor(u * A.cells));
   }
@@ -573,6 +576,7 @@ function drawBeastPlate(c, e, ART, tame) {
   }
   if (e.hurtT > 0) c.globalAlpha *= 0.85;
   const sx = cell >= 0 ? cell * cellW : 0;
+  e._shownImg = A.img; e._shownCell = cell;      // what this body is wearing this frame (tests/fired-art.cjs reads the fold)
   c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh);
   infEyeArt(c, A.img, cell >= 0 ? cell : 0, -dw / 2, -dh / 2, dw, dh);
   if (e.hurtT > 0) {

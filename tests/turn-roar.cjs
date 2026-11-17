@@ -29,11 +29,19 @@ const open = async () => { const browser = await chromium.launch({ executablePat
       return { w: x1 - x0, h: y1 - y0, feet: y1 - 350 }; };
     bo.st = 'idle'; bo.t = 9; bo.face = -1; bo.faceVis = -1; bo.vx = 0; player.x = bo.cx() - 260; player.iT = 99;
     out.rest = box();
+    bo.turnN = 0;   // the first turn of a fight comes round TOWARD the camera
     ghSet(bo, 'turn', GH.turnT); bo.face = 1; const seq = [], boxes = [];
     for (let i = 0; i < 30; i++) { bo.t = Math.max(bo.t, 0.05); player.iT = 99; update(1 / 60); G.dialog = null; G.state = 'PLAY';
       const v = ghTurnView(bo); const key = v ? v.key : 'profile'; if (seq[seq.length - 1] !== key) seq.push(key); boxes.push(Object.assign(box(), { key, fv: +bo.faceVis.toFixed(2) })); if (bo.faceVis >= 0.99) break; }
     out.seq = seq; out.narrow = boxes.slice().sort((a, b) => a.w - b.w)[0]; out.short = boxes.slice().sort((a, b) => a.h - b.h)[0]; out.tall = boxes.slice().sort((a, b) => b.h - a.h)[0];
     out.feet = Math.max.apply(null, boxes.map(q => Math.abs(q.feet - out.rest.feet))); out.end = +bo.faceVis.toFixed(2);
+    // ...and the next one goes round AWAY from it: rear three-quarter, tail-on, rear three-quarter
+    for (let n = 0; n < 40 && !(ghPlate('turn_rear') && ghPlate('turn_tail')); n++) await new Promise(r => setTimeout(r, 150));
+    { ghSet(bo, 'turn', GH.turnT); bo.face = -1; const seq2 = [], bx2 = [];
+      for (let i = 0; i < 30; i++) { bo.t = Math.max(bo.t, 0.05); player.iT = 99; update(1 / 60); G.dialog = null; G.state = 'PLAY';
+        const v = ghTurnView(bo); const key = v ? v.key : 'profile'; if (seq2[seq2.length - 1] !== key) seq2.push(key); bx2.push(Object.assign(box(), { key })); if (bo.faceVis <= -0.99) break; }
+      out.away = { seq: seq2, narrow: bx2.slice().sort((a, b) => a.w - b.w)[0], short: bx2.slice().sort((a, b) => a.h - b.h)[0], tall: bx2.slice().sort((a, b) => b.h - a.h)[0],
+        feet: Math.max.apply(null, bx2.map(q => Math.abs(q.feet - out.rest.feet))), end: +bo.faceVis.toFixed(2) }; }
     // ---- the meeting ----
     sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1 }); startGame(sv);
     loadRoom('A2'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = null; G.enemies = [];
@@ -80,6 +88,9 @@ const open = async () => { const browser = await chromium.launch({ executablePat
   check('B  never edge-on: head-on he is still as wide as most of his height', R.narrow.w >= R.rest.h * 0.6 && R.narrow.key === 'turn_front', { rest: R.rest, narrowest: R.narrow });
   check('C  he keeps his height through the turn', R.short.h >= R.rest.h * 0.85 && R.tall.h <= R.rest.h * 1.2, { rest: R.rest.h, shortest: R.short.h, tallest: R.tall.h });
   check('   ...and his feet stay on the floor', R.feet <= 8, R.feet + ' px');
+  check('A2 the next turn goes round AWAY from the camera: rear three-quarter, tail-on, rear three-quarter', ['turn_rear,turn_tail,turn_rear,profile', 'profile,turn_rear,turn_tail,turn_rear,profile'].includes(R.away.seq.join(',')) && R.away.end <= -0.99, R.away.seq);
+  check('   ...as wide, as tall and as planted as the turn toward it', R.away.narrow.w >= R.rest.h * 0.6 && R.away.short.h >= R.rest.h * 0.85 && R.away.tall.h <= R.rest.h * 1.2 && R.away.feet <= 8,
+    { narrowest: R.away.narrow, shortest: R.away.short.h, tallest: R.away.tall.h, feet: R.away.feet });
   const ph = R.M.ph, ri = ph.indexOf('roar');
   check('D  he lands, then ROARS, then moves on her', ri > 0 && ph.indexOf('settle') >= 0 && ph.indexOf('settle') < ri && ri < ph.indexOf('wind'), ph);
   check('   ...the roar holds her for about a second, a stagger back and no more, with the stick held', R.M.roarStun >= 40 && R.M.movedInRoar < 90, { stunnedFrames: R.M.roarStun, roarFrames: R.M.roarN, moved: Math.round(R.M.movedInRoar) });

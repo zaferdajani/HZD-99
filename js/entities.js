@@ -9496,6 +9496,7 @@ class Enemy {
     }
     if (this.storyKey && this.actorRole === 'infected-person') {
       this.disabled = true; this.hp = 1; this.vx = this.vy = 0;
+      this._fallAt = this.anim || 0;            // the moment it went down: a filmed fold plays from here (wolves.js)
       this.cleanseT = 0; this.tr.length = 0;
       (G.save.rescues || (G.save.rescues = {}))[this.storyKey] = 'disabled';
       persist();
@@ -12181,13 +12182,19 @@ function drawSage(c, e) {
   // the standing plate's 1.12 hitboxes of body (the bow stands a little lower).
   let sageDrew = typeof drawSageDuelBody==='function'&&drawSageDuelBody(c,e);
   const towardHer = !sageFlip;
+  // (this chamber's agent, if it has been fired: its own picture of each state — AGENT_ART)
+  const AK = typeof agentKey === 'function' ? agentKey : (k) => k;
+  const AH = typeof agentHeight === 'function' ? agentHeight : (k, h) => h;
+  const AL = typeof agentLeft === 'function' ? agentLeft : () => false;
+  // a lunge that is under way keeps the way it was thrown: stepping through it must not turn the picture round
+  const agentFace = (e.lungeT > 0 && Math.abs(e.vx || 0) > 1) ? e.vx > 0 : towardHer;
   if (!sageDrew && exhale && typeof drawStripCell === 'function')
-    sageDrew = drawStripCell(c, 'sageExhale', 0, 1, cx, base, e.h * 1.07, towardHer);
+    sageDrew = drawStripCell(c, AK('sageExhale'), 0, 1, cx, base, e.h * AH('sageExhale', 1.07), towardHer);
   else if (!sageDrew && !kneel && sagePlate === 'sageStand' && Math.abs(e.vx || 0) > 12 && typeof drawStripCell === 'function') {
     // one stride per 56 px of floor it covers (moveEnt's walkD), like every
     // walker — never the clock, or the robe would pace faster than the feet
     const cell = Math.floor(((((e.walkD || 0) / 56) % 1) + 1) % 1 * 8);
-    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer);
+    sageDrew = drawStripCell(c, AK('sageWalk8'), cell, 8, cx, base + bob, e.h * AH('sageWalk8', 1.155), towardHer);
   }
   if (!sageDrew) {
     if (exhale) {
@@ -12196,7 +12203,7 @@ function drawSage(c, e) {
     }
     try {
       sageDrew = typeof drawPlateAnchored === 'function' &&
-        drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true);
+        drawPlateAnchored(c, AK(sagePlate), cx, base + bob, e.h * AH(sagePlate, sageH), AL(sagePlate) ? agentFace : sageFlip, true);
     } finally { if (exhale) c.restore(); }
   }
   if (sageDrew) {

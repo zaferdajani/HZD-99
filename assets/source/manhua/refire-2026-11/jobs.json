@@ -1,0 +1,25 @@
+{
+ "model": "Higgsfield GPT Image 2.6, 2k HIGH",
+ "fired": "2026-11-17",
+ "references": "IMAGE 1 of every job: the refused panel (<panel>_before.jpg). The hero: the canon HZD-99 element embedded in the prompt. NULLFANG: his studio stand plate. The keeper: TALLYMAN's stand plate (assets/source/agents/tally/stand_asfired.webp). passage_a: the ring-gate style plate.",
+ "install": "cover-fitted to the refused panel's exact pixel size, so every crop rect in js/panels.js still holds",
+ "panels": {
+  "passage_a": "cae9149e-3b82-48a0-bde9-b24fa34de029",
+  "cv_mouth": "26e8a9e6-5b40-4437-af5c-1e276f56d5a6",
+  "cv_walk": "753e4441-94a3-4b4c-87fe-fd4be388f8c5",
+  "d_door": "a08d9002-4601-44c2-ad21-5125255da5ec",
+  "d_walk": "d77f372d-c453-4258-be22-0487eaee2f84",
+  "f_blade": "b280e14d-37e9-44ae-9c04-02109f238107",
+  "f_strike": "5156c604-6a87-4f30-a47b-c8dd3e98860b",
+  "fight_a": "fda24c47-bc94-4955-b0b0-7543c47f5d39",
+  "break_a": "63122b0d-a192-4beb-a658-f34a9178241f",
+  "f_walk": "d4fc9414-0786-4de9-b33e-d29aa4f6749b",
+  "m_down": "62616671-f067-4606-9fe6-3d5c1ee526fc",
+  "s_ring": "c4e304e2-04c1-4644-9f45-3e5380b934f9",
+  "sage_rev": "614c1829-54b2-45e5-81ab-5d22138a8614",
+  "s_cell": "c5b9846b-3372-45e3-9df7-83ce1873b711",
+  "s_cleanse": "240dab1e-6dd7-40cf-ad39-e72f3f2ad69f",
+  "ch2_b": "0ce2e62e-f84f-4557-87a1-ffd302b0e05c",
+  "passage_b": "d903567c-c576-40c9-89e7-8e268c53a9da"
+ }
+}

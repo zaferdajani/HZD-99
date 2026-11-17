@@ -117,6 +117,8 @@ const MEDIA_SRC = {
     cheetahRun6: 'assets/characters/beasts/cheetah_run6.webp',
     cheetahWinded6: 'assets/characters/beasts/cheetah_winded6.webp',
     cheetahLand4: 'assets/characters/beasts/cheetah_land4.webp',
+    // the cat folds down and lies there (ART_QUEUE §2bv): six beats of one take
+    cheetahDown6: 'assets/characters/beasts/cheetah_down6.webp',
     // THE ROSTER'S WALKS AND THE MINI'S FLIGHT (ART_QUEUE §2cc-iv/v/vi): filmed
     // strides, every cell measured distinct before it was cut
     guardWalk8: 'assets/characters/roster/guard_walk8.webp',
@@ -194,6 +196,32 @@ const MEDIA_SRC = {
     sageGather: 'assets/characters/sage/gather.webp',
     sageLock: 'assets/characters/sage/lock.webp',
     sagePure: 'assets/characters/sage/pure.webp',
+    // THE EYE'S AGENTS, EACH ITS OWN BODY (ART_QUEUE §2bu, fired 2026-11-17): the same
+    // eight states as the set above, per agent — see AGENT_ART in js/sage-motion.js
+    agTallyStand: 'assets/characters/agents/tally/stand.webp',
+    agTallyWalk8: 'assets/characters/agents/tally/walk8.webp',
+    agTallyExhale: 'assets/characters/agents/tally/exhale.webp',
+    agTallyCoil: 'assets/characters/agents/tally/coil.webp',
+    agTallyLunge: 'assets/characters/agents/tally/lunge.webp',
+    agTallyGather: 'assets/characters/agents/tally/gather.webp',
+    agTallyLock: 'assets/characters/agents/tally/lock.webp',
+    agTallyPure: 'assets/characters/agents/tally/pure.webp',
+    agLeashStand: 'assets/characters/agents/leash/stand.webp',
+    agLeashWalk8: 'assets/characters/agents/leash/walk8.webp',
+    agLeashExhale: 'assets/characters/agents/leash/exhale.webp',
+    agLeashCoil: 'assets/characters/agents/leash/coil.webp',
+    agLeashLunge: 'assets/characters/agents/leash/lunge.webp',
+    agLeashGather: 'assets/characters/agents/leash/gather.webp',
+    agLeashLock: 'assets/characters/agents/leash/lock.webp',
+    agLeashPure: 'assets/characters/agents/leash/pure.webp',
+    agUndertowStand: 'assets/characters/agents/undertow/stand.webp',
+    agUndertowWalk8: 'assets/characters/agents/undertow/walk8.webp',
+    agUndertowExhale: 'assets/characters/agents/undertow/exhale.webp',
+    agUndertowCoil: 'assets/characters/agents/undertow/coil.webp',
+    agUndertowLunge: 'assets/characters/agents/undertow/lunge.webp',
+    agUndertowGather: 'assets/characters/agents/undertow/gather.webp',
+    agUndertowLock: 'assets/characters/agents/undertow/lock.webp',
+    agUndertowPure: 'assets/characters/agents/undertow/pure.webp',
     // THE ROBOT BAT (§2d) — five authored states replacing drawBat's
     // procedural body. hang is the only one with its optic dark.
     batHang: 'assets/characters/bat/hang.webp',
@@ -367,6 +395,10 @@ const MEDIA_SRC = {
     swingBurstFx: 'assets/characters/hero/swing/burst_fx.webp',
     servoLoop: 'assets/characters/npc/servo/work_loop.webp',
     monoLoop: 'assets/characters/npc/mono/work_loop.webp',
+    // the Oracle's plates (ART_QUEUE §2bv): powered down, and a talking pair
+    monoResting: 'assets/characters/npc/mono/resting.webp',
+    monoTalk1: 'assets/characters/npc/mono/talk_1.webp',
+    monoTalk2: 'assets/characters/npc/mono/talk_2.webp',
     patchLoop: 'assets/characters/npc/patch/work_loop.webp',
     sageLoop: 'assets/characters/npc/sage/work_loop.webp',
     lumenLoop: 'assets/characters/npc/lumen/work_loop.webp',
@@ -501,6 +533,10 @@ const MEDIA_SRC = {
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.webp',
+    // PLATFORMS AS OBJECTS (ART_QUEUE §2bt): three whole decks a zone, cut by tools/platobj.cjs
+    platObjA: 'assets/tiles/platobj_a.webp',
+    platObjX: 'assets/tiles/platobj_x.webp',
+    platObjB: 'assets/tiles/platobj_b.webp',
     strataRubble: 'assets/backgrounds/strata_rubble.jpg',
     strataLava: 'assets/backgrounds/strata_lava.jpg',
     strataIceB: 'assets/backgrounds/strata_iceB.jpg',

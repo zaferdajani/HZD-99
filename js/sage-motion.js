@@ -103,15 +103,63 @@ function sageDuelPose(e){
 }
 // The source stride is the same approved body. Grade its warm infected cloth
 // and eyes to the established purified blue; retain alpha, frames and pivots.
+// THE AGENTS ARE NOT ONE BODY (owner, 2026-11-16, of the second robed duelist:
+// "it looks exactly like the first one I fought, which means there is no story
+// behind it"). Seven of them wore one set of plates. Each that has been fired
+// has its own eight — TALLYMAN the surveyor (abacus, sighting staff), LEASH
+// who turned the pack (wolf fur, chains, the collar), UNDERTOW who drowned the
+// canals (soaked green, cable-weed, a sluice wheel) — keyed by the chamber it
+// holds. Every state name is the shared set's (`sageStand`, `sageCoil`...):
+// agentKey swaps the picture, nothing else about the fight changes.
+//   AGENT_H  how tall each state's SILHOUETTE stands against the body box. The
+//         shared set's numbers were measured off the shared plates (a lunge
+//         that is a low dart, a coil that stands nearly upright); an agent's
+//         crouch is a real crouch and its lunge a full-height leap, so drawn
+//         by the shared numbers the crouch came out a giant and the leap a doll.
+//         One table, read by BOTH drawings of an agent (the duel's and the
+//         plain one), so a state cannot be two sizes in two chambers.
+//   hk    a plate whose silhouette a PROP makes taller than the body (a staff
+//         over the hood, a chart at the knees) is drawn that much larger, so
+//         the BODY keeps its size
+// All of an agent's plates face LEFT (the shared set is front-on and turns the
+// other way), so agentLeft flips them toward her the way the walk and the
+// exhale always were.
+const AGENT_H = { Coil: 0.74, Lunge: 1.0, Lock: 0.86, Pure: 0.82 };
+const AGENT_ART = {
+  GA1D: { pre: 'agTally', hk: { Stand: 1.09, Walk8: 1.09, Exhale: 1.10, Lunge: 1.12, Gather: 1.03, Lock: 1.05, Pure: 1.12 } },
+  GA2D: { pre: 'agLeash', hk: { Pure: 1.07 } },
+  GB1D: { pre: 'agUndertow', hk: {} },
+};
+function agentSet() {
+  if (typeof isHero === 'function' && isHero()) return null;
+  return AGENT_ART[G.roomId] || null;
+}
+// the shared state key -> this chamber's agent's picture of it
+function agentKey(key) {
+  const A = agentSet(); if (!A) return key;
+  const k = A.pre + key.slice(4);
+  return (typeof MEDIA_SRC !== 'undefined' && MEDIA_SRC.images && MEDIA_SRC.images[k]) ? k : key;
+}
+// the height a state is drawn at: the shared number, unless this chamber's agent has its own picture of it
+function agentHeight(key, shared) {
+  const A = agentSet(); if (!A || agentKey(key) === key) return shared;
+  const st = key.slice(4);
+  return (AGENT_H[st] || shared) * (A.hk[st] || 1);
+}
+function agentLeft(key) { return agentKey(key) !== key; }
 const SAGE_PURE_WALK_CACHE = new WeakMap();
-function sagePureWalkImage(raw){
+function sagePureWalkImage(raw,agent){
   if(!raw||!raw.naturalWidth)return null;
   const cached=SAGE_PURE_WALK_CACHE.get(raw);if(cached)return cached;
   const cv=document.createElement('canvas');cv.width=raw.naturalWidth;cv.height=raw.naturalHeight;
   const x=cv.getContext('2d');x.drawImage(raw,0,0);const image=x.getImageData(0,0,cv.width,cv.height),d=image.data;
   for(let i=0;i<d.length;i+=4){
     if(!d[i+3])continue;const r=d[i],g=d[i+1],b=d[i+2],l=.2126*r+.7152*g+.0722*b;
-    if(r>g*1.02&&r>=b*.90){
+    // an agent's own cloth is any colour (bone-grey, sea-green, rust): everything that is
+    // not its black metal or its brass goes to the purified blue, by its own light and shade
+    // (brass is SATURATED yellow: far more red than blue, green not far under red. A bone-grey
+    // robe is warm too, and a looser test left TALLYMAN walking in tan after he was purified)
+    if(agent?(l>26&&!(r>b*1.9&&g>r*.6&&r>g*1.08&&l>70)):(r>g*1.02&&r>=b*.90)){
       const eye=r>100&&g>55&&b<g*.8;
       d[i]=Math.min(255,l*(eye?.65:.55));d[i+1]=Math.min(255,l*(eye?1.30:1.02));d[i+2]=Math.min(255,l*(eye?1.70:1.50));
     }
@@ -119,7 +167,7 @@ function sagePureWalkImage(raw){
   x.putImageData(image,0,0);SAGE_PURE_WALK_CACHE.set(raw,cv);return cv;
 }
 function drawSagePureWalk(c,p,cx,feet,h){
-  mediaFetch(p.key,true);const raw=MEDIA_RAW[p.key];const im=sagePureWalkImage(raw);if(!im)return false;
+  mediaFetch(p.key,true);const raw=MEDIA_RAW[p.key];const im=sagePureWalkImage(raw,p.key.indexOf('ag')===0);if(!im)return false;
   const cw=im.width/p.cells,dw=h*cw/im.height;
   c.save();try{c.translate(cx,feet);if(p.flip)c.scale(-1,1);c.drawImage(im,p.cell*cw,0,cw,im.height,-dw/2,-h,dw,h);}finally{c.restore();}
   G.lastStrip=p.key+':'+p.cell;return true;
@@ -127,11 +175,14 @@ function drawSagePureWalk(c,p,cx,feet,h){
 function drawSageDuelBody(c,e){
   if(!sageDuelActive(e))return false;
   const p=sageDuelPose(e),cx=e.x+e.w/2,feet=e.y+e.h;
+  // this chamber's agent wears its own picture of the same state
+  const base=p.key;
+  if(agentLeft(base)){if(!p.strip)p.flip=!p.flip;p.height=agentHeight(base,p.height);p.key=agentKey(base);}
   c.save();
   try{c.translate(cx,feet);c.rotate(p.lean);c.scale(p.sx,p.sy);c.translate(-cx,-feet);
     const drawn=p.strip?(p.pure?drawSagePureWalk(c,p,cx,feet,e.h*p.height):drawStripCell(c,p.key,p.cell,p.cells,cx,feet,e.h*p.height,p.flip))
       :drawPlateAnchored(c,p.key,cx,feet,e.h*p.height,p.flip,true);
-    if(drawn)G.sageMotion={revision:SAGE_DUEL_REVISION,home:e.sageDuel.home,phase:e.sageDuel.phase,pose:p.key,frame:p.cell,face:p.face};
+    if(drawn)G.sageMotion={revision:SAGE_DUEL_REVISION,home:e.sageDuel.home,phase:e.sageDuel.phase,pose:base,art:p.key,frame:p.cell,face:p.face};
     return drawn;
   }finally{c.restore();}
 }

@@ -7,8 +7,8 @@ try{const p=await browser.newPage({viewport:{width:960,height:540},serviceWorker
  const url=process.env.GAME_URL||'http://127.0.0.1:8220/index.html';
  if(baseline)await p.route(url,r=>r.fulfill({status:200,contentType:'text/html',body:fs.readFileSync(process.env.BASELINE_HTML||'/home/user/clawbyte-sage-pass/base/index.html','utf8')}));
  await p.goto(url,{waitUntil:'domcontentloaded'});await p.waitForFunction(()=>typeof startGame==='function');
- await p.evaluate(()=>{window.requestAnimationFrame=()=>0;for(const k of ['sageStand','sageCoil','sageLunge','sageGather','sageExhale','sageWalk8','sageLock','sagePure'])mediaFetch(k,true)});
- await p.waitForFunction(()=>['sageStand','sageCoil','sageLunge','sageGather','sageExhale','sageWalk8','sageLock','sagePure'].every(k=>MEDIA_RAW[k]?.complete&&MEDIA_RAW[k].naturalWidth),null,{timeout:45000});await p.waitForTimeout(80);
+ await p.evaluate(()=>{window.requestAnimationFrame=()=>0;for(const k of ['sageStand','sageCoil','sageLunge','sageGather','sageExhale','sageWalk8','sageLock','sagePure']){mediaFetch(k,true);const a=typeof AGENT_ART!=='undefined'&&AGENT_ART.GA1D?AGENT_ART.GA1D.pre+k.slice(4):null;if(a&&MEDIA_SRC.images[a])mediaFetch(a,true);}});
+ await p.waitForFunction(()=>['sageStand','sageCoil','sageLunge','sageGather','sageExhale','sageWalk8','sageLock','sagePure'].every(k=>{const a=typeof AGENT_ART!=='undefined'&&AGENT_ART.GA1D?AGENT_ART.GA1D.pre+k.slice(4):null;return MEDIA_RAW[k]?.complete&&MEDIA_RAW[k].naturalWidth&&(!a||!MEDIA_SRC.images[a]||(MEDIA_RAW[a]?.complete&&MEDIA_RAW[a].naturalWidth));}),null,{timeout:45000});await p.waitForTimeout(80);
  const result=await p.evaluate(()=>{
  const checks=[],check=(name,pass,detail)=>checks.push({name,pass:!!pass,detail});
  const cv2=document.createElement('canvas');cv2.width=400;cv2.height=240;const ctx=cv2.getContext('2d');
@@ -33,7 +33,7 @@ try{const p=await browser.newPage({viewport:{width:960,height:540},serviceWorker
  check('the announced lunge commits its original direction',e.lungeT>0&&e.vx>0,{vx:e.vx,lunge:e.lungeT});
  // Observe renderer-facing, not only a state variable unused by drawing.
  let faces=[];const dp=drawPlateAnchored;
- drawPlateAnchored=function(c,k,x,y,h,f,...rest){if(k==='sageLunge')faces.push(f);return dp(c,k,x,y,h,f,...rest)};
+ drawPlateAnchored=function(c,k,x,y,h,f,...rest){if(k===agentKey('sageLunge'))faces.push(f);return dp(c,k,x,y,h,f,...rest)};
  try{player.x=e.x-100;drawSage(ctx,e);player.x=e.x+100;drawSage(ctx,e);}finally{drawPlateAnchored=dp;}
  check('crossing the Sage does not flip its active-strike artwork',faces.length===2&&faces[0]===faces[1],faces);
  e=stage();e.lungeT=.01;e.lunges=1;e.vx=e.spd*2.2;player.x=e.x-100;player.iT=999;
@@ -55,7 +55,7 @@ try{const p=await browser.newPage({viewport:{width:960,height:540},serviceWorker
  e=stage();e.gatherT=.01;player.iT=999;e.update(1/30);e.ringR=80;player.x=e.x+e.w/2+80-player.w/2;player.y=e.y+e.h-player.h;player.on=false;player.iT=0;player.cores=5;e.update(1/60);check('jump remains a valid answer to the ember ring',player.cores===5);
  e=stage();e.vx=100;e.walkD=14;let feet=[];for(const t of [0,.4,.8,1.2,1.6]){e.anim=t;feet.push(body(e).bottom);}check('walking feet are planted without a second floating bob',Math.max(...feet)-Math.min(...feet)<=1,feet);
  e=stage();const stand=body(e);e.lungeT=.15;e.vx=e.spd*2.2;const strike=body(e);check('lunge does not shrink to half the standing body',strike.height/stand.height>=.8,{stand,strike,ratio:strike.height/stand.height});
- e=stage();e.tame=1;e.calm=true;e.vx=45;e.walkD=22;G.lastStrip='';drawSage(ctx,e);check('the freed moving Sage uses its walking strip, not sliding kneeling artwork',(G.lastStrip||'').startsWith('sageWalk8:'),G.lastStrip);
+ e=stage();e.tame=1;e.calm=true;e.vx=45;e.walkD=22;G.lastStrip='';drawSage(ctx,e);check('the freed moving Sage uses its walking strip, not sliding kneeling artwork',(G.lastStrip||'').startsWith(agentKey('sageWalk8')+':'),G.lastStrip);
  // Review-derived gate: the moving rescued actor must retain its blue state,
  // not revert to the red/purple infected robe between idle and walk.
  e=stage();e.tame=1;e.calm=true;e.vx=45;e.walkD=14;body(e);

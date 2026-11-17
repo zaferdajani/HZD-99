@@ -121,12 +121,39 @@ prompts, the job ids and the exact cut.
 
 `gravehorn/turn.webp` is HIS TURN (2026-11-16): the three-quarter and head-on
 views `tools/ghturn.cjs` cuts into `characters/gravehorn/turn34.webp` and
-`turn_front.webp` — fired at medium quality on the last half-credit, so the
-high-quality re-fire is queued (ART_QUEUE §2br).
+`turn_front.webp` — fired at medium quality on the last half-credit. It is the
+first take now: `gravehorn/turn3.webp` (2026-11-17, GPT Image 2.6 at 2k HIGH
+against the design plate, job `162d01c2-6d32-44e0-bc6d-108d20cfc665`) is the
+same two views and a REAR three-quarter on a black field, and
+`gravehorn/turn_tail.webp` (job `df985622-6430-42d5-afce-cd08a95ee7d8`) is him
+tail-on. `tools/ghturn.cjs` keys the black by a flood from the border and cuts
+all four: `turn34`, `turn_front`, `turn_rear`, `turn_tail`.
+
+`agents/<name>/` is ONE OF THE EYE'S AGENTS each (2026-11-17, owner: "it looks
+exactly like the first one I fought"): `stand_asfired.webp` and the six states
+`<state>_asfired.jpg` exactly as fired on their green screens, and
+`states_asfired.jpg`, the six side by side. `agents/walks_take.jpg` is the
+three filmed walks' contact sheet. `agents/jobs.json` has every job id and the
+exact cut. Shipped as `characters/agents/<name>/<state>.webp`.
+
+`platforms/platobj_{a,x,b}_asfired.jpg` are THE DECKS AS OBJECTS (2026-11-17,
+GPT Image 2.6, jobs `e42fe118-c048-40f4-8919-ad6df8ba0f87` city gantry,
+`4bb8b776-29c9-411d-a53a-9b8c6e870052` cave rock shelf,
+`3718b223-742a-4bf5-a0a7-27cfaf6f5f31` Conduits cable tray): three lengths
+stacked on one plate. `tools/platobj.cjs` cuts them, measures where the walking
+surface and the slab are, and packs `assets/tiles/platobj_*.webp`.
+
+`beasts/cycles/cheetah_down_take.jpg` is the cat FOLDING DOWN (2026-11-17,
+Kling 4.0 Flash from `cheetah_green_start.jpg`, job
+`bb766327-5568-4482-a1d8-04cdc869b067`): six beats picked by hand off the take
+(0.35, 0.9, 1.2, 1.5, 1.85, 2.6 s) are `characters/beasts/cheetah_down6.webp`.
 
 `manhua/refire-2026-11/` holds comic panels fired again because a character was
 off model: the new panel under its game name, and the refused one as
-`*_before.jpg` (ART_QUEUE §2bs lists those still to do).
+`*_before.jpg`. All seventeen are in (2026-11-17); `jobs.json` there has each
+job id and what each was fired against.
+`ch2_b` (2026-11-17, job `0ce2e62e-f84f-4557-87a1-ffd302b0e05c`) is UNDERTOW in
+the cable ring, fired against UNDERTOW's own stand plate.
 
 `gravehorn/` is GRAVEHORN'S BODY (2026-11-15, owner: "the rhino looks so fake...
 it's the same box"). He had been drawn in flat stand-ins since October. The
@@ -595,3 +622,4 @@ describe it.
 ## npc/mono/
 
 - `work_loop_keyed.webp` — the Oracle's filmed work loop exactly as it was keyed (16 cells, 320 px): the dark inside of the cable shroud went with the plate, so the lower body is loose strands. `tools/shroudback.cjs` derives the shipped `assets/characters/npc/mono/work_loop.webp` from it by filling the robe behind the art (2026-11-16). A take keyed with its interior intact is queued (ART_QUEUE §2bv).
+- `resting_asfired.webp`, `talk_1_asfired.webp`, `talk_2_asfired.webp` — the Oracle powered down, and his talking pair (2026-11-17, GPT Image 2.6 against a cell of his own work loop; jobs `9e601989-075b-4c9c-b2c8-5d0bfc71042c`, `d6e096d8-3dd8-49c9-b565-c50ee7cd12d6`, `b131109b-c7ce-44da-94e3-7acdb8869cc0`). Cut with `tools/plate.cjs` at ONE scale (`PLATE_SCALE=0.314 PLATE_ANCHOR=x`) so a raised hand does not shrink the body: `characters/npc/mono/{resting,talk_1,talk_2}.webp`.

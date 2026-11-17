@@ -52,6 +52,8 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
   // VIDSTRIP_FLOAT=1 for anything that flies: no floor line, specks dropped
   // (see the two FLOAT notes in the page pass).
   const FLOAT = process.env.VIDSTRIP_FLOAT === '1';
+  const DESPILL_EDGE = process.env.VIDSTRIP_DESPILL === 'edge';
+  const KEYD = (process.env.VIDSTRIP_KEY || '90,165').split(',').map(Number);   // the chroma distance ramp
   // VIDSTRIP_TIMES=t,t,t... for a ONE-SHOT: a landing's beats (strike, fold,
   // lowest, half-risen) are not evenly spaced in time, and even sampling of
   // its window spends three cells on the hold. Seconds, one cell each.
@@ -75,7 +77,7 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
   await page.goto(captureURL);
   await page.addScriptTag({ content: selectMotionFrames.toString() });
 
-  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO, ROI, FLOAT, TIMES }) => {
+  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO, ROI, FLOAT, TIMES, DESPILL_EDGE, KEYD }) => {
     let N = N0, autoThr = null;
     const v = document.createElement('video');
     v.muted = true; v.playsInline = true;
@@ -216,7 +218,7 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
         // Colour distance, not connectedness: a chroma screen separates a black
         // coat from the background by HUE, which is exactly the axis luminance
         // threw away. The ramp is generous at the top so a soft edge stays soft.
-        const D0 = 90, D1 = 165;
+        const D0 = KEYD[0], D1 = KEYD[1];
         for (let p = 0; p < W * H; p++) {
           const j = p << 2;
           const dr = d[j] - keyR, dg = d[j + 1] - keyG, db = d[j + 2] - keyB;
@@ -227,6 +229,12 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
           // helmet, and it is the single thing that makes a keyed figure read
           // as pasted. Any channel that matches the screen and outruns both of
           // its neighbours is pulled back to their level.
+          // (VIDSTRIP_DESPILL=edge: only near the key. A subject that is itself
+          // the screen's colour — a sea-green robe on green — is not spill.)
+          if (DESPILL_EDGE) {
+            if (keyG > keyR && keyG > keyB && d[j + 1] > Math.max(d[j], d[j + 2]) * 1.5) d[j + 1] = Math.round(Math.max(d[j], d[j + 2]) * 1.1);
+            continue;
+          }
           if (keyG > keyR && keyG > keyB && d[j + 1] > (d[j] + d[j + 2]) / 2)
             d[j + 1] = Math.round((d[j] + d[j + 2]) / 2);
           else if (keyB > keyR && keyB > keyG && d[j + 2] > (d[j] + d[j + 1]) / 2)
@@ -372,7 +380,7 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
     return { png: strip.toDataURL('image/png'), N, CELL, src: W + 'x' + H, dur: +D.toFixed(2),
              box: bw + 'x' + bh, feet, foot, autoThr,
              times: times.map(t => +t.toFixed(3)) };
-  }, { N, CELL, THR, SRC, FROM, TO, AUTO, ROI, FLOAT, TIMES });
+  }, { N, CELL, THR, SRC, FROM, TO, AUTO, ROI, FLOAT, TIMES, DESPILL_EDGE, KEYD });
 
   if (res.err) { console.error('  ' + res.err); process.exit(1); }
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
