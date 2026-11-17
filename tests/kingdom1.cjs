@@ -1,6 +1,6 @@
 // KINGDOM 1, MEASURED — the kingdom protocol, driven live instead of trusted.
 //
-// The protocol (CLAUDE.md, KINGDOMS ARE THE UNIT) gives every kingdom a
+// The protocol (docs/SESSION_FLEET.md, KINGDOMS ARE THE UNIT) gives every kingdom a
 // shape: an arc that ends at its sage, at least one NPC with an identity and
 // a PLACE, at least one save point placed FOR the arc. Each of those is a
 // thing that reads fine in the source and breaks silently in play — a bench

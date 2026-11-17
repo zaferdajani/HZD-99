@@ -1,6 +1,6 @@
 // THE KINGDOM HARNESS — one kingdom at a time, the protocol driven live.
 //
-// CLAUDE.md, KINGDOMS ARE THE UNIT: a kingdom runs from its opening to its
+// docs/SESSION_FLEET.md, KINGDOMS ARE THE UNIT: a kingdom runs from its opening to its
 // sage and the sage's cave; it has at least one NPC with a PLACE, at least one
 // bench, and its guardian. Every one of those reads fine in the source and
 // breaks silently in play — the monuments were orphaned for half a day by a

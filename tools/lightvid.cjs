@@ -27,7 +27,7 @@
 //   - the FFMPEG environment variable pointing at a binary
 //   - an ffmpeg-static install anywhere under node_modules
 // The npm package is a TOOL dependency and must never enter package.json —
-// nothing the game ships comes from npm (see CLAUDE.md, Style).
+// nothing the game ships comes from npm (see the engine-map skill, Style).
 //
 // Writes assets/video/light/<name>.mp4 and assets/video/light/index.json,
 // which build.cjs compiles into the page as window.VID_LIGHT.
