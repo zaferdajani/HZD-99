@@ -28,7 +28,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   await page.goto('http://127.0.0.1:' + PORT + '/index.html', { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
   const R = await page.evaluate(async () => { window.requestAnimationFrame = () => 0; const out = {};
     const wait = (ms) => new Promise(r => setTimeout(r, ms));
-    const fresh = (flags) => { const sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { tut: 1, woke: 1, heal: 1, nfMeet: 1, crystal: 1, rubbleA5: 1, rubbleCV1B: 1 }, flags || {}); startGame(sv); };
+    const fresh = (flags) => { const sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { tut: 1, woke: 1, heal: 1, nfMeet: 1, crystal: 1, rubbleA5: 1, rubbleCV1B: 1 }, flags || {}); startGame(sv); G.agentRig = 0;   /* this harness measures the fired PLATES: the rig that mixes with them in GA1D (tests/agent-rig.cjs) is switched off */ };
     const enter = (room) => { loadRoom(room); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = null; };
     const STATES = ['Stand', 'Walk8', 'Exhale', 'Coil', 'Lunge', 'Gather', 'Lock', 'Pure'];
     // ---- A, B: the agents ---------------------------------------------------
