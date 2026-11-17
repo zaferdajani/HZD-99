@@ -13,7 +13,7 @@ You are integrating the senior studio review for zaferdajani/HZD-99. Work from t
 - manhua/full-story.md
 - manhua/edition.json
 
-Review pin: main/odyssey/integration were all 9248529edc7f7b9503d9c373c169593da419117d at intake. The verified bounded-fix source pin on codex/studio-review-2026-11-17 is 644693e13fb7dab1ca409a2c12acedcf27816a63, tree 61380a158c02013ca6732769767cbc2a49fcd6a8. Integrate the final review-branch tree difference, not just prose. Preserve every newer main change. Do not merge or deploy production automatically.
+Review pin: main, odyssey, and integration were all 9248529edc7f7b9503d9c373c169593da419117d at audit intake. The integration branch then advanced concurrently to bba411fc1b4b99238bbec7d41170deb375ae2a77. The verified bounded-fix source pin on codex/studio-review-2026-11-17 is 644693e13fb7dab1ca409a2c12acedcf27816a63, tree 61380a158c02013ca6732769767cbc2a49fcd6a8. Integrate the final review-branch tree difference onto the latest source, not just the prose and not by overwriting concurrent work. Preserve every newer main change and the late integration assets/runtime changes at bba411f. Do not merge or deploy production automatically.
 
 KEEP AND VERIFY THESE REVIEW-BRANCH FIXES:
 
@@ -43,10 +43,11 @@ C. ALPHA AND PRISM ENDINGS
 
 D. ART, MOTION, CINEMATICS, AND CAVES
 - Do not regenerate the completed NULLFANG film/strips, Alpha strips, pack-wolf strips, hero art, or the landed Gravehorn rig.
-- Create seven distinct Eye-agent silhouettes and stand/walk/lunge/exhale coverage with eye anchors and gameplay-scale captures. Preserve stable internal IDs.
+- Late integration bba411f already adds distinct TALLYMAN, LEASH, and UNDERTOW bodies/strips, a rear/three-quarter Gravehorn turn, object platform plates, Mono plates, and 17 refired manhwa panels. Preserve them, inspect them at gameplay scale, and fix only verified defects; do not regenerate them blindly.
+- Create equivalent distinct Eye-agent silhouettes and stand/walk/lunge/exhale coverage only for the still-missing SLAGFATHER, REDACTOR, LAPIDARY, and PUPIL. Preserve stable internal IDs.
 - Finish only missing Gravehorn phase-two parts, a true hind leg, and a high-quality rear-three-quarter turn.
 - Replace or grade the old pale-grey Ratchet wake film to match the live copper/bronze Ratchet; validate normal, skip, and fallback handoffs.
-- Pin one manhwa edition before refiring panels. Then repair only off-model/obsolete panels: pale/lilac lion, white/ice-blue NULLFANG, wrong tan cat, generic agent robe, and UNDERTOW teaser silhouette. Certify parity per scene.
+- Pin one manhwa edition before further refiring. First review the 17 panels already replaced by late integration bba411f; keep correct replacements and repair only remaining verified off-model/obsolete panels. Certify parity per scene.
 - Keep CV1B as a one-ring side chamber; update stale documentation rather than restoring the removed second ring.
 - Give each later GB1/GC1/GD1/GX1/GE1 agent network one kingdom-specific action, one durable visible consequence, and one later callback.
 - Produce only approved missing guardian ritual films (Brood/Atlas/Zero; PRISM only after canon decision). Preserve NULLFANG's 13.25-second authored film and its audio/picture fade.

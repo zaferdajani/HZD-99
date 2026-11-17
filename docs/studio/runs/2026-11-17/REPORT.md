@@ -14,7 +14,8 @@ Nothing was merged into `main`, `odyssey`, or the integration branch. Nothing wa
 |---|---|
 | Reviewed `main` | `9248529edc7f7b9503d9c373c169593da419117d` |
 | Reviewed `odyssey` | same as `main` |
-| Reviewed integration branch | same as `main` |
+| Reviewed integration branch at audit intake | same as `main` |
+| Integration branch after concurrent update | `bba411fc1b4b99238bbec7d41170deb375ae2a77`; source-inspected separately after the audit |
 | Reviewed base tree | `ccd649f286a5d72fc222a1df3936a9e2b804c9a0` |
 | Previous review | `codex/studio-review-2026-11-15`, report source `b28dc2ab…` |
 | Today's source/audit pin | `644693e13fb7dab1ca409a2c12acedcf27816a63` |
@@ -32,6 +33,8 @@ Current `main` advanced substantially and those changes were preserved:
 - The Wolf Run room, ring gates, hero plunge, sword reach, enemy motion, and several first-kingdom presentation fixes landed.
 - NULLFANG's purification now stages the hero and lion before the hold prompt, and the redundant post-purification comic is library-only.
 - The repository now identifies the seven robed `sage*` entities as distinct Eye agents. This supersedes the November 15 “Meadow Keeper” interpretation. Internal IDs may remain for save compatibility, but player-facing identity must follow the newer canon.
+
+While this review was being finalized, the integration branch advanced from the intake pin to `bba411f…`. That late commit was **not folded into or claimed by the full audit**, but its diff and assets were inspected in a detached worktree. It adds distinct TALLYMAN, LEASH, and UNDERTOW bodies/strips, a rear/three-quarter Gravehorn turn, object platform plates, Mono plates, and 17 refired manhwa panels. Its build passes. The three direct visual harnesses attempted there (`fired-art`, `sage-motion`, `turn-roar`) are browser harnesses and were blocked before page creation because the default Chromium path is absent on this host. These late assets are promising and must be preserved and validated rather than regenerated. Four named agents still lack equivalent unique production sets.
 
 Important November 15 engineering protections did not survive into current `main`: atomic NPC restoration, swept terminal-fall collision, exact broken-tile coordinate signatures, and rescued-agent walking. Caption FIFO and atomic quest/forge settlement were also absent, but were restored on this review branch. The evidence collector had regressed; this branch restores honest browser classification and dependency detection, but not yet the former immutable log-snapshot and descendant-cleanup system.
 
@@ -118,7 +121,7 @@ The passing `script-route` test proves internal consistency of the current route
 | 5 | Senior Boss Designer | **Hold P1** | NULLFANG ritual mechanics are strong and terminology is fixed; PRISM contradiction and four missing ritual films remain. |
 | 6 | Mission Designer — Campaign | **Hold P1** | Current runtime route conflicts with the newest canon; later agent networks remain template-like. |
 | 7 | Senior Mission Producer | **Release hold** | Pins and source evidence are valid; renderer, campaign, device, and full collector-integrity gates are incomplete. |
-| 8 | Senior Character Artist | **Component pass / overall hold** | Gravehorn and wolves improved; seven agents still share one body, Ratchet film is off-model, some manhwa panels are stale. |
+| 8 | Senior Character Artist | **Component pass / overall hold** | Audited main reuses one body; late integration proposes distinct TALLYMAN/LEASH/UNDERTOW sets, leaving four agents, Ratchet film continuity, and runtime validation open. |
 | 9 | Senior Cinematic Director | **Hold P1** | NULLFANG film/fade pass at asset level; Ratchet continuity, four rituals, manhwa parity, and current playback remain open. |
 | 10 | Senior VFX Artist | **Source-system pass / visual hold** | Finite trails are well bounded and clean-body authority is fixed; wider shader FX lack reduced-motion policy. |
 | 11 | World Systems Technical Director | **Hold P1** | Terminal-fall sweep and coordinate terrain signatures regressed; CV1B documentation is stale. |
@@ -182,7 +185,7 @@ The graphics review used stored provenance sheets and gameplay-size captures, no
 | Alpha | ten wolf-specific strips with readable prowl/howl/leap/claw/bite/yield | preserve; give a dedicated yield/covenant ending, not virus extraction |
 | Pack wolves | distinct hunt, snarl, coil, lunge, winded, bay, roll coverage | preserve and runtime-validate |
 | Gravehorn | authored mechanical-rhino silhouette and strong scale | preserve rig; finish only true hind leg, phase-two parts, and rear 3/4 turn |
-| Seven Eye agents | one enlarged generic `sage*` body reused seven times | create seven distinct silhouettes and stand/walk/lunge/exhale coverage |
+| Seven Eye agents | audited main reuses one generic body; late integration adds distinct TALLYMAN, LEASH, and UNDERTOW sets | preserve and validate those three; create equivalent distinct coverage only for SLAGFATHER, REDACTOR, LAPIDARY, and PUPIL |
 | Finite infection trails | 1.125–1.875 s life, quality caps 90/170/260/320, per-body cap 8, 10 px/s motion threshold, 2.2 px spacing, teleport reset >90 px, world-space cleanup | source authority passes; fresh render blocked |
 | Reduced motion | eye smoke correctly disables while glow remains | extend policy to `fxgl` pressure/cracks/slash/cone/flash/pillar/gather |
 | NULLFANG film | 1280×720, 24 fps, 13.25 s, H.264/AAC; white gather, dark extraction, golden return, picture/audio fade | preserve; runtime playback blocked |
@@ -198,7 +201,7 @@ The graphics review used stored provenance sheets and gameplay-size captures, no
 5. **NPC-WALK-01 — rescued agent kneeling slide.** `sage` is absent from distance gait and every tamed body selects `sagePure`. Acceptance: moving tamed agent selects purified `sageWalk8`; stationary agent kneels/stands; render all seven variants.
 6. **ALPHA-END-01 — wrong ritual semantics.** Alpha is not Song-infected but still uses blade gating and generic cleanse presentation. Acceptance: dedicated surrender/covenant sequence and copy; friendly pack outcome remains optional and durable.
 7. **PRISM-END-01 — canon contradiction.** PRISM is described as never infected but remains in purification/virus extraction authority. Acceptance: owner-approved non-virus stand-down/consent ritual or an explicit canon change before film production.
-8. **ART-AGENT-01 — seven named agents share one body.** Acceptance: distinct silhouettes, animation coverage, eye anchors, gameplay-scale captures, and room-specific identity for TALLYMAN, LEASH, UNDERTOW, SLAGFATHER, REDACTOR, LAPIDARY, and PUPIL.
+8. **ART-AGENT-01 — incomplete named-agent production.** Audited main shares one body; late integration adds promising distinct TALLYMAN, LEASH, and UNDERTOW sets but they lack successful browser/gameplay-size proof here. Preserve and validate those three. Acceptance: equivalent distinct silhouettes, animation coverage, eye anchors, gameplay-scale captures, and room-specific identity for the remaining SLAGFATHER, REDACTOR, LAPIDARY, and PUPIL.
 9. **MANHWA-AUTH-01 — Draft 3/4 and identity split.** Acceptance: one pinned edition, updated agent terminology/order, and scene-level runtime parity certification.
 10. **RELIC-ID-01 — coin identity collision.** A7 and multiple secrets share the same durable coin/relic authority. Acceptance: approved distinct IDs/payoffs, conservative migration, every-order/reload tests.
 
@@ -215,6 +218,6 @@ The graphics review used stored provenance sheets and gameplay-size captures, no
 
 ## Integration decision
 
-This branch is suitable for **selective integration and a new validation run**, not direct production. Preserve newer `main` work, integrate the verified source fixes, resolve the campaign graph before changing gates, and then obtain the missing renderer, continuous-route, phone-touch, controller, audio, and haptic evidence.
+This branch is suitable for **selective integration and a new validation run**, not direct production. Preserve newer `main` work and the late integration work at `bba411f…`, integrate the verified source fixes carefully around its overlapping art/text/runtime files, resolve the campaign graph before changing gates, and then obtain the missing renderer, continuous-route, phone-touch, controller, audio, and haptic evidence.
 
 The single implementation handoff is in `CLAUDE_INTEGRATION_PROMPT.md` beside this report.
