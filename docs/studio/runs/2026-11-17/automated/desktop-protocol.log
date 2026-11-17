@@ -1,0 +1,6 @@
+
+── desktop-protocol  — desktop local origin, media streaming and path confinement
+PASS: desktop origin confinement, media ranges, GET/HEAD and errors
+   (desktop-protocol: 0.1 s)
+
+all 1 harnesses ran
