@@ -61,8 +61,12 @@ const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 // are the story beats a clean route must deliver, in causal order. Missing
 // GRAVEHORN panels remain an explicit production gap; the harness cannot
 // invent non-existent art and count it as delivered.
+// ('free' is not on this list any more: the owner took the comic after
+// NULLFANG's purification off the room on 2026-11-16 — "You've already showed
+// the video with the scene where I purified it" — and it is library-only now.
+// The purification's film is what plays, and the lion mission waits it out.)
 const REQUIRED_PANELS = ['wake', 'bay', 'gate', 'letter', 'drawer', 'ratchet', 'meet',
-  'cave', 'marble', 'forge', 'passage', 'sage', 'break', 'chime', 'free', 'ch2'];
+  'cave', 'marble', 'forge', 'passage', 'sage', 'break', 'chime', 'ch2'];
 
 function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {
   const seen = Array.from(panelsSeen || []);
@@ -985,8 +989,9 @@ async function linger(s, seqId, maxMs) {
   if (e) { await fight(s, e); return false; }
   await hold([]); await sleep(150); return false;
 }
-mission('lion', s => s.flags.includes('bossGlitch') && (R.pansSeen && R.pansSeen.has('free') || s.room !== 'A4'), async s => {
-  if (s.flags.includes('bossGlitch')) { await linger(s, 'free', 25000); return; }
+mission('lion', s => s.flags.includes('bossGlitch') && (s.state === 'PLAY' || s.room !== 'A4'), async s => {
+  // purified: the film and the ring he wakes play themselves; a player watches
+  if (s.flags.includes('bossGlitch')) { await hold([]); await sleep(200); return; }
   if (!(await readyFor(s, 'A3', 'A4'))) return;
   if (s.room !== 'A4') { await travel(s, 'A4'); return; }
   await bossFight(s);
