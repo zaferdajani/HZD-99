@@ -48,6 +48,22 @@ tell him anything is done.**
 Keep this table short. A row leaves it only when he says so.
 `tests/ledger.cjs` holds the table's shape and this file's size.
 
+## How he wants to be answered (2026-11-17)
+
+He asked for this directly, more than once in one evening: **"Be honest."** ·
+"I'm simply not convinced on what you're selling" · "this is not what I'm
+looking for. I'm looking for your honest description."
+
+- **Plain and true, even when it is unflattering to the work or to you.** Say
+  what is worse as well as what is better. Do not sell.
+- **Answer first, short.** No agent-speak, no recital, no defending.
+- **He plays the game; you cannot.** What he reports from playing outranks
+  anything a harness says.
+- **He wants the work to grow with him.** It grows only through what is written
+  here, in the skills and in the tests. Leave each session's understanding of
+  him better written than you found it. (Working preferences only: this
+  repository is published, so nothing personal about him goes in it.)
+
 ## How to work here
 
 - **Finish the complete task** (owner-authorized, 2026-09-07): implement, test,
