@@ -12196,8 +12196,14 @@ function drawSage(c, e) {
   // opposite way to the front-on set. The bow transform stays only as the
   // fallback while the exhale plate is in flight. Cell heights are matched to
   // the standing plate's 1.12 hitboxes of body (the bow stands a little lower).
-  // (the rig, where one is asked for and has landed — js/agentrig.js: the same body posed from parts)
-  let sageDrew = (typeof agentRigDraw === 'function' && agentRigDraw(c, e)) || (typeof drawSageDuelBody==='function'&&drawSageDuelBody(c,e));
+  // (the rig, where one has landed — js/agentrig.js: the same body posed from parts. THE MIX,
+  // owner 2026-11-17: "rig for motion and plates for big poses". rigK says who has the body
+  // this frame: 1 the rig alone · 2 the plate alone (the rig kept its pose and stood aside) ·
+  // between 0 and 1 the rig is drawn and this pose's plate fades in over it at that share.)
+  const rigK = typeof agentRigDraw === 'function' ? (agentRigDraw(c, e) || 0) : 0;
+  const rigUnder = rigK > 0 && rigK < 1;
+  if (rigUnder) { c.save(); c.globalAlpha *= rigK; }
+  let sageDrew = rigK === 1 || (typeof drawSageDuelBody==='function'&&drawSageDuelBody(c,e));
   const towardHer = !sageFlip;
   // (this chamber's agent, if it has been fired: its own picture of each state — AGENT_ART)
   const AK = typeof agentKey === 'function' ? agentKey : (k) => k;
@@ -12223,6 +12229,7 @@ function drawSage(c, e) {
         drawPlateAnchored(c, AK(sagePlate), cx, base + bob, e.h * AH(sagePlate, sageH), AL(sagePlate) ? agentFace : sageFlip, true);
     } finally { if (exhale) c.restore(); }
   }
+  if (rigUnder) { c.restore(); sageDrew = true; }       // (the rig is under it: never the drawn fallback on top)
   if (sageDrew) {
     // the plate carries the body; the ring, purity bar and halo still ride it
   } else {

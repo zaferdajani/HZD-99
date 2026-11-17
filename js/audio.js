@@ -1913,8 +1913,10 @@ function sfxPlain(n) {
     case 'tell_alpha':
       tone(124, 0.20, 'sawtooth', 0.058, 190);
       tone(186, 0.18, 'sawtooth', 0.040, 300, 0.05);
-      tone(560, 0.12, 'square', 0.026, 880, 0.11);
-      hiss(0.09, 0.028);
+      tone(560, 0.14, 'square', 0.07, 1040, 0.10);   // the climbing voice LEADS the second half (it was a quarter of the growl under it)
+      // (the breath comes at the END now, under the climbing voice: through the voice bus a
+      // hiss at the front was the brightest thing in the cue, and the warning read as FALLING)
+      hiss(0.09, 0.028, 0.15);
       chink(0.016, 0.04);
       break;
     case 'grind':

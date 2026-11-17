@@ -73,11 +73,37 @@ const AGENT_RIG_PART_ORDER = ['head', 'torso', 'skirt', 'uarm', 'farm', 'leg', '
   if (typeof MEDIA_SRC === 'undefined') return;
   for (const name in R) for (const part in R[name].parts)
     MEDIA_SRC.images['agRig_' + name + '_' + part] = 'assets/characters/agents/' + name + '/rig/' + part + '.webp';
-  try { if (typeof location !== 'undefined' && new URLSearchParams(location.search).get('rig') === '1') window.AGENT_RIG_FLAG = 1; } catch (e) { /* no query string here */ }
+  try { const q = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('rig') : null;
+    if (q === '1') window.AGENT_RIG_FLAG = 1; else if (q === '0') window.AGENT_RIG_FLAG = 0; } catch (e) { /* no query string here */ }
 })();
+// THE MIX (owner, 2026-11-17: "mix them, rig for motion and plates for big poses").
+// The rig is the body whenever it is MOVING — standing, walking, and the whole
+// way from one move into the next. Once a big pose has been reached, the fired
+// plate of that pose takes over: the painted crouch, the painted flame in the
+// palms. So motion is never a cut, and a held pose is never a posed doll.
+// Between two big poses there is no rig at all: plate cuts to plate, the way a strike snaps.
+//   0  plates only   (?rig=0, G.agentRig = 0)
+//   1  the rig only  (?rig=1, G.agentRig = 1)
+//   2  the mix       (the default wherever a rig is on disk)
+const AGENT_RIG_BIG = { coil: 1, lunge: 1, gather: 1, exhale: 1, lock: 1, pure: 1 };
+// "reached": every one of these has covered HALF the way from where the body WAS to
+// where the move wants it (or is within the small figure beside it). Half, not all of it:
+// the moves are short — a lunge is 0.22 s, a wind-up 0.35 — and a plate that waited for the rig to
+// settle would be on screen for the last frames of its own pose. The rest of the way is under the fade.
+const AGENT_RIG_ARRIVE = [['hp', 0.03], ['air', 0.03], ['sp', 0.08], ['aF', 0.16], ['aB', 0.16], ['stA', 0.16]];
+const AGENT_RIG_ARRIVE_SHARE = 0.5;
+const AGENT_RIG_MIX_IN = 18;          // per second: the plate is the body about 55 ms after the rig gets there
+function agentRigMode() {
+  if (typeof isHero === 'function' && isHero()) return 0;
+  const g = typeof G !== 'undefined' ? G.agentRig : undefined;
+  const q = typeof window !== 'undefined' ? window.AGENT_RIG_FLAG : undefined;
+  const v = g != null ? g : q;
+  if (v === 0 || v === false) return 0;
+  if (v === 1 || v === true) return 1;
+  return 2;
+}
 function agentRigName() {
-  if (typeof isHero === 'function' && isHero()) return null;
-  if (!((typeof G !== 'undefined' && G.agentRig) || (typeof window !== 'undefined' && window.AGENT_RIG_FLAG))) return null;
+  if (!agentRigMode()) return null;
   const n = AGENT_RIG_ROOM[G.roomId];
   return n && typeof window !== 'undefined' && window.AGENT_RIGS && window.AGENT_RIGS[n] ? n : null;
 }
@@ -167,7 +193,11 @@ function agentRigReady(name) {
   for (const part in R.parts) { const k = 'agRig_' + name + '_' + part; if (typeof mediaFetch === 'function') mediaFetch(k); const im = MEDIA_IMG[k]; if (!im || !im.naturalWidth) ok = false; }
   return ok;
 }
-// THE DRAW. Returns false (and the plates draw as they always did) until every part has landed.
+// THE DRAW. What it returns is who the body is this frame:
+//   false  no rig here, or its parts have not landed: the plates draw as they always did
+//   1      the rig is the whole body
+//   0..1   the rig is drawn, and the plate of this pose fades in over it at that share
+//   2      the rig kept its pose and stood aside: the plate is the body
 function agentRigDraw(c, e) {
   const name = agentRigName(); if (!name) return false;
   if (!agentRigReady(name)) return false;
@@ -183,6 +213,28 @@ function agentRigDraw(c, e) {
   e._rigVx = (e.vx || 0) * -face;                       // speed along its own forward, for the robe
   const S = agentRigStep(e, T, (now - last > 0.25 || now < last) ? 0 : dt); S.at = now;
   if (now - last > 0.25 || now < last) { for (const k of AGENT_RIG_KEYS) { S.P[k] = T[k]; S.V[k] = 0; } }
+  // ---- the mix: who has the body ----
+  const mode = agentRigMode(), jumped = (now - last > 0.25 || now < last || S.mixMove === undefined);
+  let mix = 0;
+  if (mode === 2) {
+    const big = !!AGENT_RIG_BIG[move];
+    // a new move always starts on the rig, from wherever the body was; a body met already settled
+    // (a room entered, a probe) is met in its plate
+    if (jumped) S.mix = big ? 1 : 0;
+    // ...EXCEPT pose to pose (wind-up -> lunge -> spent): that is a cut from one fired plate to the
+    // next, as it always was. Looked at frame by frame, the rig's own lunge between two painted
+    // poses was the worst twelve frames in the fight — a posed doll between two paintings.
+    else if (S.mixMove !== move) { S.mix = (big && S.mix >= 1 && AGENT_RIG_BIG[S.mixMove]) ? 1 : 0; S.from = Object.assign({}, S.prev || S.P); }
+    S.mixMove = move; S.prev = Object.assign({}, S.P);
+    if (big && !jumped) {
+      const F = S.from || S.P;
+      const arrived = AGENT_RIG_ARRIVE.every(q => Math.abs(S.P[q[0]] - T[q[0]]) < Math.max(q[1], AGENT_RIG_ARRIVE_SHARE * Math.abs(T[q[0]] - F[q[0]])));
+      if (arrived || S.mix > 0) S.mix = Math.min(1, S.mix + AGENT_RIG_MIX_IN * dt);
+    }
+    mix = S.mix;
+  } else S.mixMove = move;
+  if (typeof G !== 'undefined') G.rigMix = { name, move, mode, mix };
+  if (mix >= 1) { if (typeof G !== 'undefined') G.rigDrawn = null; return 2; }
   const P = Object.assign({}, S.P);
   const H = e.h * AGENT_RIG_BODY;
   // ---- what no pose holds: the stride, the breath ----
@@ -264,5 +316,5 @@ function agentRigDraw(c, e) {
   }
   c.restore();
   if (typeof G !== 'undefined') { const ht = head(R.head.top[0], 0); G.rigDrawn = { name, move, face, H: Math.round(H), hp: +P.hp.toFixed(3), sp: +P.sp.toFixed(3), tell: +tell.toFixed(2), pelvis: Math.round(-pel[1]), neck: Math.round(-neck[1]), top: Math.round(-ht[1]), handF: [Math.round(handF[0]), Math.round(-handF[1])] }; }
-  return true;
+  return mix > 0 ? mix : 1;
 }

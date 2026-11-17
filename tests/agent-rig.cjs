@@ -2,7 +2,8 @@
 // Owner, 2026-11-17: "Do you have the ability to animate those agents between those
 // moves?... instead of generating the artwork for every single move. And this way we
 // can make everything smoother."
-//   A  it is OFF unless asked for: the shipped drawing is still the fired plates
+// Owner, 2026-11-17, after seeing it: "mix them, rig for motion and plates for big poses".
+//   A  switched off (G.agentRig = 0, ?rig=0) the drawing is the fired plates alone
 //   B  asked for, every move draws a whole body the size the plates draw it, with its
 //      feet on the floor in every move that stands on one
 //   C  the moves are different BODIES, not one body relabelled: the hips drop in the
@@ -12,6 +13,9 @@
 //      arrived a little over half a second after each change
 //   E  a wind-up is said in light: the tell raises the amber over the body at rest
 //   F  purified, it is the same parts gone blue; NOSTOS has no rig
+//   G  THE MIX is what ships: standing and walking are the rig; a big pose is travelled to
+//      on the rig and then HELD in its fired plate; pose to pose (wind-up -> lunge -> spent)
+//      is plate to plate, as a strike snaps; back to standing is the rig; a whole body in every frame
 const { chromium } = require('playwright');
 const PORT = process.env.TEST_PORT || 8220;
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') + n + (d != null ? '  ' + (typeof d === 'string' ? d : JSON.stringify(d)) : '')); if (!ok) bad++; };
@@ -47,10 +51,21 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
         if (at < 0 && KEYS.every(key => Math.abs(e._rig.P[key] - T[key]) < TOL[key])) at = k; }
       arrive[n] = at; }
     out.motion = { worst: +worst.toFixed(3), worstAt, arrive };
+    // G: the mix (nothing set: the default)
+    delete G.agentRig; const mixOf = () => G.rigMix ? G.rigMix.mix : -1; out.mix = { mode: null, seq: {} };
+    settle('stand'); { const s = shot(); out.mix.stand = { rig: !!s.rig, mix: mixOf(), n: s.n }; out.mix.mode = G.rigMix && G.rigMix.mode; }
+    settle('walk'); { const s = shot(); out.mix.walk = { rig: !!s.rig, mix: mixOf(), n: s.n }; }
+    settle('stand'); let minN = 1e9;
+    for (const [n, frames, key] of [['coil', 40], ['lunge', 16], ['spent', 45], ['stand', 30], ['gather', 40], ['stand', 30, 'stand2'], ['spent', 45, 'spentFromStand']]) { set(n); let first = null, full = -1, rigAtFull = null, both = 0;
+      for (let k = 0; k < frames; k++) { e.anim += 1 / 60; const s = shot(); const m = mixOf(); if (k === 0) first = { mix: m, rig: !!s.rig }; if (m > 0 && m < 1 && s.rig) both++; if (full < 0 && m >= 1) { full = k; rigAtFull = !!s.rig; } if (s.n < minN) minN = s.n; }
+      out.mix.seq[key || n] = { first, full, rigAtFull, both, end: mixOf() }; }
+    // met already settled (a room entered mid-pose, a probe): a big pose is met in its plate
+    settle('gather'); { const s = shot(); out.mix.met = { rig: !!s.rig, mix: mixOf(), n: s.n }; }
+    out.mix.minN = minN;
     G.agentRig = 0; return out; });
   console.log('── agent-rig  — one sheet of parts, posed by code: every move, and the motion between them');
   check('the parts are cut, anchored and in the build', R.parts === 7 && R.rigs.includes('tally'), { parts: R.parts, rigs: R.rigs });
-  check('A  off unless asked for: the plates are still the shipped drawing', R.off.drew === false && R.off.n > 1500, R.off);
+  check('A  switched off, the plates alone are the drawing', R.off.drew === false && R.off.n > 1500, R.off);
   const M = R.moves, names = Object.keys(M);
   check('B  asked for, every move draws a whole body', names.every(n => M[n].n > 1500 && M[n].move), names.map(n => n + ':' + M[n].n).join(' '));
   check('   ...its head as high as the plate stands (within 12%)', Math.abs(M.stand.head * 1.22 - 139) <= 139 * 0.12, { rigHead: Math.round(M.stand.head * 1.22), plateBody: 139 });
@@ -61,11 +76,22 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('   ...and it has arrived within about half a second of each change, never in one frame', Object.values(R.motion.arrive).every(k => k >= 3 && k <= 36), R.motion.arrive);
   check('E  a wind-up is said in light: more amber than the body at rest', M.coil.amber > M.stand.amber * 1.5 + 20 && M.gather.amber > M.stand.amber * 1.5 + 20, { rest: M.stand.amber, coil: M.coil.amber, gather: M.gather.amber });
   check('F  purified, the same parts go blue', M.pure.blue > M.pure.n * 0.3 && M.stand.blue < M.stand.n * 0.1, { pureBlue: M.pure.blue, of: M.pure.n, standBlue: M.stand.blue });
+  const X = R.mix, Q = X.seq;
+  check('G  the mix is what ships: nothing set, standing and walking are the rig', X.mode === 2 && X.stand.rig && X.stand.mix === 0 && X.walk.rig && X.walk.mix === 0, { mode: X.mode, stand: X.stand, walk: X.walk });
+  const FROM_STAND = ['coil', 'gather', 'spentFromStand'];
+  check('   ...from standing, a big pose is TRAVELLED TO on the rig (its first frame is the rig, not a cut to a plate)', FROM_STAND.every(n => Q[n].first.rig && Q[n].first.mix === 0), FROM_STAND.map(n => n + ' ' + JSON.stringify(Q[n].first)).join('  '));
+  // (the shortest wind-up is 0.35 s and the gather 0.7: the plate must have the body for most of each)
+  check('   ...and then HELD in its fired plate: the plate has the wind-up by 0.17 s, the gather by 0.2 s, the spent bow by 0.27 s, and the rig stands aside', Q.coil.full >= 3 && Q.coil.full <= 10 && Q.gather.full >= 3 && Q.gather.full <= 12 && Q.spentFromStand.full >= 3 && Q.spentFromStand.full <= 16 && FROM_STAND.every(n => Q[n].rigAtFull === false && Q[n].end === 1), FROM_STAND.map(n => n + ' ' + Q[n].full).join('  '));
+  check('   ...the hand-over is a fade over the rig, not a swap (frames where both are drawn)', FROM_STAND.every(n => Q[n].both >= 2), FROM_STAND.map(n => n + ' ' + Q[n].both).join('  '));
+  check('   ...pose to pose is plate to plate, the way a strike snaps: wind-up -> lunge -> spent never shows the rig', ['lunge', 'spent'].every(n => Q[n].first.mix === 1 && Q[n].first.rig === false && Q[n].full === 0 && Q[n].both === 0), { lunge: Q.lunge, spent: Q.spent });
+  check('   ...back to standing is the rig again, all the way', Q.stand.first.rig && Q.stand.end === 0 && Q.stand2.first.rig && Q.stand2.end === 0, Q.stand);
+  check('   ...there is a whole body in every frame of it', X.minN > 1500, X.minN);
+  check('   ...and a big pose met already settled is met in its plate', X.met.rig === false && X.met.mix === 1 && X.met.n > 1500, X.met);
   await page.goto('http://127.0.0.1:' + PORT + '/odyssey.html', { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
   const N = await page.evaluate(() => { G.agentRig = 1; G.roomId = 'GA1D'; return agentRigName(); });
   check('   ...and NOSTOS has no rig', N === null, N);
   check('no page errors', errs.length === 0, errs.slice(0, 3));
   await browser.close();
   if (bad) { console.log('\nFAILED: ' + bad); process.exit(1); }
-  console.log('\nOK — the rig stands, moves and settles, and it is off until it is asked for');
+  console.log('\nOK — the rig carries the motion and the fired plates carry the big poses');
 })().catch(e => { console.error(e); process.exit(1); });
