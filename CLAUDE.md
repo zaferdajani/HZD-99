@@ -32,6 +32,7 @@ tell him anything is done.**
 | 2× | **All art, video and structures come from Higgsfield; the code is ours** | "You are not good at it. You can create the code... but not the art." | `artbible` · skills `art-bible` `rig-animation` |
 | 2× | **Do the whole job; never recite what is left** | "You are not a kid that I need to keep monitoring." | no harness — check your report before sending it |
 | 1× | **The verb is PURIFY, never free; the robed ones are AGENTS, never sages** | "it should be purifying, not freeing" · "this is not a sage" | `pure-gift` `panels` |
+| 1× | **Turning the phone always brings the game up** — test it on a phone, upright first | "User stuck on rotate with nothing" | `rotate` |
 | 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` `sharp` |
 | 1× | **Do not waste the player's time** | "don't waste the player's time" | `campaign-ch1` |
 

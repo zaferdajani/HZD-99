@@ -61,13 +61,24 @@ function tcSetup() {
   }
   // embedded viewers (e.g. the artifact pane) can cover part of the page with
   // bars that can't be scrolled away — track the sub-rect actually on screen
+  //
+  // STUCK ON "ROTATE" (owner, 2026-11-18: "User stuck on rotate with nothing"). The observer
+  // only calls back when the visible SHARE crosses a threshold. Open the game upright and the
+  // page is 100% visible at 412x839; turn the phone and it is still 100% visible — no callback
+  // — so the upright rect stayed the "visible area" for ever, the frame stayed taller than
+  // wide, and the rotate screen never went away. (The app can do the same: an activity that
+  // starts upright for a moment before it turns.) So a measurement is kept with the viewport it
+  // was taken in and is never used in another one, and the observer is re-armed on every
+  // resize so it measures again.
   if (window.IntersectionObserver) {
     const th = []; for (let i = 0; i <= 50; i++) th.push(i / 50);
-    new IntersectionObserver(es => {
-      const e = es[es.length - 1];
+    TOUCH.io = new IntersectionObserver(es => {
+      const e = es[es.length - 1], vv = window.visualViewport;
       TOUCH.vis = e && e.intersectionRect && e.intersectionRect.height > 60 ? e.intersectionRect : null;
+      TOUCH.visAt = [Math.round(vv ? vv.width : innerWidth), Math.round(vv ? vv.height : innerHeight)];
       tcResize();
-    }, { threshold: th }).observe(document.documentElement);
+    }, { threshold: th });
+    TOUCH.io.observe(document.documentElement);
   }
   tc.addEventListener('touchstart', tStart, { passive: false });
   tc.addEventListener('touchmove', tMove, { passive: false });
@@ -87,8 +98,15 @@ function tcResize() {
   // if a host viewer's chrome covers part of the page, fit into the sub-rect
   // that is really visible (measured by the IntersectionObserver above)
   let OX = 0, OY = 0, W = rawW, H = rawH;
-  const vis = TOUCH.vis;
-  if (vis && (vis.height < rawH - 24 || vis.width < rawW - 24) && vis.height > 120 && vis.width > 200) {
+  // (only a measurement taken in THIS viewport, and only one that fits inside it)
+  const at = TOUCH.visAt, fresh = at && Math.abs(at[0] - rawW) <= 2 && Math.abs(at[1] - rawH) <= 2;
+  if (!fresh && TOUCH.vis && TOUCH.io && TOUCH.ioArmAt !== rawW + 'x' + rawH) {
+    TOUCH.ioArmAt = rawW + 'x' + rawH;                       // ask once more for this viewport
+    try { TOUCH.io.unobserve(document.documentElement); TOUCH.io.observe(document.documentElement); } catch (e) {}
+  }
+  const vis = fresh ? TOUCH.vis : null;
+  if (vis && vis.width <= rawW + 2 && vis.height <= rawH + 2
+      && (vis.height < rawH - 24 || vis.width < rawW - 24) && vis.height > 120 && vis.width > 200) {
     OX = Math.max(0, Math.round(vis.left)); OY = Math.max(0, Math.round(vis.top));
     W = Math.round(vis.width); H = Math.round(vis.height);
   }
