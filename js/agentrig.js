@@ -77,10 +77,11 @@ const AGENT_RIG_PART_ORDER = ['head', 'torso', 'skirt', 'uarm', 'farm', 'leg', '
     if (q === '1') window.AGENT_RIG_FLAG = 1; else if (q === '0') window.AGENT_RIG_FLAG = 0; } catch (e) { /* no query string here */ }
 })();
 // THE MIX (owner, 2026-11-17: "mix them, rig for motion and plates for big poses").
-// The rig is the body whenever it is MOVING — standing, walking, and the whole
-// way from one move into the next. Once a big pose has been reached, the fired
-// plate of that pose takes over: the painted crouch, the painted flame in the
-// palms. So motion is never a cut, and a held pose is never a posed doll.
+// The rig is the body whenever it is MOVING — walking, and the whole way from
+// standing into a pose and back. Once a pose has been reached (standing still
+// is one), its fired plate takes over: the painted stand, the painted crouch,
+// the painted flame in the palms. So motion is never a cut, and a held pose is
+// never a posed doll.
 // Between two big poses there is no rig at all: plate cuts to plate, the way a strike snaps.
 //   0  plates only   (?rig=0, G.agentRig = 0)
 //   1  the rig only  (?rig=1, G.agentRig = 1)
@@ -220,13 +221,16 @@ function agentRigDraw(c, e) {
     const big = !!AGENT_RIG_BIG[move];
     // a new move always starts on the rig, from wherever the body was; a body met already settled
     // (a room entered, a probe) is met in its plate
-    if (jumped) S.mix = big ? 1 : 0;
+    // STANDING STILL is a held pose too, and the painted stand is the better picture of it (the
+    // rig's stand is stiffer): the rig WALKS, and carries the body from one pose to the next.
+    const held = big || move === 'stand';
+    if (jumped) S.mix = held ? 1 : 0;
     // ...EXCEPT pose to pose (wind-up -> lunge -> spent): that is a cut from one fired plate to the
     // next, as it always was. Looked at frame by frame, the rig's own lunge between two painted
     // poses was the worst twelve frames in the fight — a posed doll between two paintings.
     else if (S.mixMove !== move) { S.mix = (big && S.mix >= 1 && AGENT_RIG_BIG[S.mixMove]) ? 1 : 0; S.from = Object.assign({}, S.prev || S.P); }
     S.mixMove = move; S.prev = Object.assign({}, S.P);
-    if (big && !jumped) {
+    if (held && !jumped) {
       const F = S.from || S.P;
       const arrived = AGENT_RIG_ARRIVE.every(q => Math.abs(S.P[q[0]] - T[q[0]]) < Math.max(q[1], AGENT_RIG_ARRIVE_SHARE * Math.abs(T[q[0]] - F[q[0]])));
       if (arrived || S.mix > 0) S.mix = Math.min(1, S.mix + AGENT_RIG_MIX_IN * dt);

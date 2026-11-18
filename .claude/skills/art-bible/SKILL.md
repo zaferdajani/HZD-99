@@ -74,6 +74,21 @@ That happened, it was wrong, and it cost a session.
 
 ---
 
+## A fifth, found 2026-11-18: the rim that was painted on
+
+The owner refused a light round a body four times. The engine's rim was removed
+and the cheetah still wore one, because its standing plate was FIRED with a cyan
+rim light down its back and tail — image models add a teal edge light by habit,
+and a chroma key leaves the same colour. Twenty-one plates had it.
+
+- **Say it in every brief**: "no rim light, no edge light, no backlight, no
+  coloured outline; lit from the front and above only".
+- **Measure every new plate**: `node tools/defringe.cjs --check` (the outer edge
+  cyan where the inside is not). `--all` takes it off without firing anything.
+  Then LOOK at the plate: a wide painted glow (a close-up bust) blotches, and a
+  part that is cyan by design must stay cyan.
+- `tests/no-rim-baked.cjs` holds it.
+
 ## The four failures this exists to prevent
 
 Each is now arithmetic. Each was prose first, and prose did not stop it.

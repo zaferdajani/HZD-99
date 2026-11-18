@@ -13,7 +13,7 @@
 //      arrived a little over half a second after each change
 //   E  a wind-up is said in light: the tell raises the amber over the body at rest
 //   F  purified, it is the same parts gone blue; NOSTOS has no rig
-//   G  THE MIX is what ships: standing and walking are the rig; a big pose is travelled to
+//   G  THE MIX is what ships: walking is the rig; standing still is the painted stand; a big pose is travelled to
 //      on the rig and then HELD in its fired plate; pose to pose (wind-up -> lunge -> spent)
 //      is plate to plate, as a strike snaps; back to standing is the rig; a whole body in every frame
 const { chromium } = require('playwright');
@@ -77,14 +77,14 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('E  a wind-up is said in light: more amber than the body at rest', M.coil.amber > M.stand.amber * 1.5 + 20 && M.gather.amber > M.stand.amber * 1.5 + 20, { rest: M.stand.amber, coil: M.coil.amber, gather: M.gather.amber });
   check('F  purified, the same parts go blue', M.pure.blue > M.pure.n * 0.3 && M.stand.blue < M.stand.n * 0.1, { pureBlue: M.pure.blue, of: M.pure.n, standBlue: M.stand.blue });
   const X = R.mix, Q = X.seq;
-  check('G  the mix is what ships: nothing set, standing and walking are the rig', X.mode === 2 && X.stand.rig && X.stand.mix === 0 && X.walk.rig && X.walk.mix === 0, { mode: X.mode, stand: X.stand, walk: X.walk });
+  check('G  the mix is what ships: nothing set, walking is the rig and standing still is the painted stand', X.mode === 2 && !X.stand.rig && X.stand.mix === 1 && X.stand.n > 1500 && X.walk.rig && X.walk.mix === 0, { mode: X.mode, stand: X.stand, walk: X.walk });
   const FROM_STAND = ['coil', 'gather', 'spentFromStand'];
   check('   ...from standing, a big pose is TRAVELLED TO on the rig (its first frame is the rig, not a cut to a plate)', FROM_STAND.every(n => Q[n].first.rig && Q[n].first.mix === 0), FROM_STAND.map(n => n + ' ' + JSON.stringify(Q[n].first)).join('  '));
   // (the shortest wind-up is 0.35 s and the gather 0.7: the plate must have the body for most of each)
   check('   ...and then HELD in its fired plate: the plate has the wind-up by 0.17 s, the gather by 0.2 s, the spent bow by 0.27 s, and the rig stands aside', Q.coil.full >= 3 && Q.coil.full <= 10 && Q.gather.full >= 3 && Q.gather.full <= 12 && Q.spentFromStand.full >= 3 && Q.spentFromStand.full <= 16 && FROM_STAND.every(n => Q[n].rigAtFull === false && Q[n].end === 1), FROM_STAND.map(n => n + ' ' + Q[n].full).join('  '));
   check('   ...the hand-over is a fade over the rig, not a swap (frames where both are drawn)', FROM_STAND.every(n => Q[n].both >= 2), FROM_STAND.map(n => n + ' ' + Q[n].both).join('  '));
   check('   ...pose to pose is plate to plate, the way a strike snaps: wind-up -> lunge -> spent never shows the rig', ['lunge', 'spent'].every(n => Q[n].first.mix === 1 && Q[n].first.rig === false && Q[n].full === 0 && Q[n].both === 0), { lunge: Q.lunge, spent: Q.spent });
-  check('   ...back to standing is the rig again, all the way', Q.stand.first.rig && Q.stand.end === 0 && Q.stand2.first.rig && Q.stand2.end === 0, Q.stand);
+  check('   ...back to standing is travelled on the rig, and then the painted stand has it (within a third of a second)', [Q.stand, Q.stand2].every(q => q.first.rig && q.first.mix === 0 && q.full >= 3 && q.full <= 20 && q.end === 1 && q.both >= 2), { afterSpent: Q.stand, afterGather: Q.stand2 });
   check('   ...there is a whole body in every frame of it', X.minN > 1500, X.minN);
   check('   ...and a big pose met already settled is met in its plate', X.met.rig === false && X.met.mix === 1 && X.met.n > 1500, X.met);
   await page.goto('http://127.0.0.1:' + PORT + '/odyssey.html', { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });

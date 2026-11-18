@@ -90,3 +90,14 @@ world each by `window.GAME_LOCK`; `isHero()` is the switch.
 `tools/pack-www.cjs` assembles `www/` (and strips the service worker, which an
 app does not want). `MainActivity.java` turns off the media-gesture requirement
 — the reason the app can start its music without asking. See `NATIVE.md`.
+
+## A track or a film is a plain MP4 with its index first (2026-11-18)
+
+The rhino's theme and the Alpha's truce shipped as FRAGMENTED MP4s and eleven
+tracks and three films kept their index (`moov`) at the end. A desktop browser
+plays both; a phone's player may not loop or seek a fragmented file (this game
+seeks every kingdom theme back to where it left off) and plays nothing until a
+tail-indexed file has fully arrived. After adding or re-encoding any track or
+film: `node tools/faststart.cjs` — it rewrites the container only and proves
+the audio is bit-for-bit the same. `tests/media-container.cjs` holds it.
+

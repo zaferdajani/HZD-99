@@ -17,14 +17,14 @@ tell him anything is done.**
 | said | the rule | his words | held by |
 |---|---|---|---|
 | 5× | **Motion looks like the real animal or machine** — never a slideshow, a tic or a paper flip | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "why do you have 6 identical frames ?!!!!!" | `frames` `enemygait` `turn-roar` `agent-rig` · skill `creature-motion-combat` |
-| 4× | **No light, rim, halo, outline or ring round any body** | "Why still framed with light ?!!!" · "remove the ring" | `contrast` `fired-art` |
+| 4× | **No light, rim, halo, outline or ring round any body** | "Why still framed with light ?!!!" · "remove the ring" | `contrast` `fired-art` `no-rim-baked` |
 | 4× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" | `shop-ask` `gear-how` `map-read` |
 | 4× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" | `fired-art` `artbible` `panels` `panel-continuity` |
 | 4× | **A door is an object that leads somewhere new; one ring to a frame, nothing standing in it** | "you end up with neon doors?" · "why two portals" · "pods... superimposed on doors which makes it hard to choose enter or rest" | `ring-gate` `ring-pads` `ring-wake` `pod-door` |
 | 3× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration | "No 90-degree elevation or walls in all game" · "these platforms are not organic" | `seam` `ring-pads` · skill `terrain-doors` |
 | 3× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" | `ring-pads` `gravehorn-ground` |
 | 2× | **No one move, repeated, beats a boss** — sweep every boss with the bot that does it | "hitting the rhino downward with a hit constantly is a easy hack" · "do not allow player to keep hitting rhino with an endless down hit" | `boss-skill` `gravehorn` |
-| 2× | **An enemy is HEARD over the score, on a phone; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" | `voice-heard` `whatplays` |
+| 2× | **An enemy is HEARD over the score, on a phone; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" | `voice-heard` `whatplays` `media-container` |
 | 2× | **No place to hide from a boss** | "I can just simply hide where the crystal is" · "again, just like the rhino" | `gravehorn-ground` `alpha-run` `boss-skill` |
 | 2× | **An enemy is big enough, and visibly alive or visibly down** | "This enemy is so small" · "its standing still !!!" | `cheetah-hunt` `fired-art` |
 | 2× | **A deck exists only where it is the way up, and it is a solid object** | "platforms that do not make any sense" · "so translucent" | `ring-pads` `fired-art` |
@@ -32,7 +32,7 @@ tell him anything is done.**
 | 2× | **All art, video and structures come from Higgsfield; the code is ours** | "You are not good at it. You can create the code... but not the art." | `artbible` · skills `art-bible` `rig-animation` |
 | 2× | **Do the whole job; never recite what is left** | "You are not a kid that I need to keep monitoring." | no harness — check your report before sending it |
 | 1× | **The verb is PURIFY, never free; the robed ones are AGENTS, never sages** | "it should be purifying, not freeing" · "this is not a sage" | `pure-gift` `panels` |
-| 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` |
+| 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` `sharp` |
 | 1× | **Do not waste the player's time** | "don't waste the player's time" | `campaign-ch1` |
 
 **When he corrects something — every time:**
@@ -109,6 +109,8 @@ Three things that will bite, every time:
   the same `const` is a black page. `node --check js/<file>.js`, then build.
 - **Nothing in code may name a file that is not on disk.** After art changes:
   `node tools/lowres.cjs`, `node tools/roomassets.cjs` (served), then build.
+  After a new track or film: `node tools/faststart.cjs` (phones need a plain MP4).
+  After a new plate: `node tools/defringe.cjs --check` (models paint a cyan rim by habit).
 - **Never edit sources or rebuild in a tree a harness run is using**, and run
   the suite in batches: the container restarts under long runs.
 

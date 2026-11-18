@@ -78,6 +78,7 @@ the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
 | `game.js` | loop, room loading, camera, HUD, menus, the opening film, tutorials, map |
 | `entities.js` | Player, Enemy, Boss, MovingPlat, SawRig — physics and combat |
 | `audio.js` | the synth engine, the SFX vocabulary, music streaming, NPC voices — and the VOICE BUS: every synth helper connects to `sfxDest()`, and a sound named in `SFX_VOICE` goes through a gain, a soft saturator, a presence shelf and a limiter so a guardian is heard over the score on a phone speaker; `SFX_DIP`/`musDip` step the stream back under a roar; `musKick` wakes a suspended context, rebuilds a dead stream and hands a dying one to the next candidate (`tests/voice-heard.cjs`) |
+| `tools/faststart.cjs`, `tools/defringe.cjs` | derive-with-a-tool for what a phone and the owner's eye need: every track and film a plain index-first MP4 (`tests/media-container.cjs`); no plate with a cyan rim on its outer edge (`tests/no-rim-baked.cjs`) |
 | `beast/eagle/glaciere/furnace/prism/mother.js` | one guardian's art and moves each |
 | `world.js` | every room: tile grid, entity list, exits |
 | `touch.js` | the on-screen controller, the power wheel, layout editor |

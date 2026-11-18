@@ -3024,7 +3024,7 @@ class Player {
         sfx('whiff');
       }
       // hostile projectiles can be swatted
-      for (const p of G.projs) if (!p.friendly && !p.dead && aabb(hb, p.box())) { p.dead = true; burst(p.x, p.y, 6, p.color, 150, 0.25, 300, 2, true); }
+      for (const p of G.projs) if (!p.friendly && !p.dead && (p.touches ? p.touches(hb) : aabb(hb, p.box()))) { p.dead = true; burst(p.x, p.y, 6, p.color, 150, 0.25, 300, 2, true); }
       // breakable + spike tiles in swing range
       const x0 = Math.floor(hb.x / TILE), x1 = Math.floor((hb.x + hb.w) / TILE);
       const y0 = Math.floor(hb.y / TILE), y1 = Math.floor((hb.y + hb.h) / TILE);
@@ -6116,6 +6116,26 @@ class Proj {
     this.grav = grav || 0; this.life = life || 3; this.dead = false; this.el = null;
   }
   box() { return { x: this.x - this.r, y: this.y - this.r, w: this.r * 2, h: this.r * 2 }; }
+  // WHAT LOOKS SHARP CUTS (owner, 2026-11-17, of the rhino's horn: "is not hurting me when
+  // touching them"). The sweep that correction asks for found the same fault here: a feather
+  // drawn 52 long, a void lance 115 long and an ice shard 42 long all hurt in the little square
+  // at their middle, so the point of the lance went through her. A projectile that wears a
+  // sprite is as long as its sprite: how far it reaches each side of its middle, along its flight.
+  reach() {
+    // (measured off the drawn pixels by tests/sharp.cjs: lance 57 a side, fast feather 20, shard 16)
+    if (this.glcFx === 'lance') return 44;
+    if (this.glcFx === 'shard') return 8;
+    if (this.feather) return Math.abs(this.vx) + Math.abs(this.vy) > 460 ? 13 : 4;
+    return 0;
+  }
+  boxes() {
+    const L = this.reach(); if (!(L > 0)) return [this.box()];
+    const sp = Math.hypot(this.vx, this.vy) || 1, hx = this.vx / sp, hy = this.vy / sp, out = [];
+    const n = Math.max(2, Math.ceil(L / this.r));
+    for (let i = -n; i <= n; i++) { const d = L * i / n; out.push({ x: this.x + hx * d - this.r, y: this.y + hy * d - this.r, w: this.r * 2, h: this.r * 2 }); }
+    return out;
+  }
+  touches(t) { return this.boxes().some(q => aabb(q, t)); }
   update(dt) {
     this.life -= dt; if (this.life <= 0) { this.dead = true; return; }
     this.vy += this.grav * dt;
@@ -6167,7 +6187,7 @@ class Proj {
           return;
         }
       }
-    } else if (!player.dead && aabb(this.box(), player)) {
+    } else if (!player.dead && this.touches(player)) {
       this.dead = true;
       player.hurt(DF().edmg, this.x);
       if (this.frost) {                          // Archivist beam: frozen joints

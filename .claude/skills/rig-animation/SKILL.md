@@ -170,7 +170,8 @@ are both right, about different frames:
 
 | the frame | who has the body |
 |---|---|
-| standing, walking | the rig |
+| walking | the rig |
+| standing still | the painted stand (the rig's own stand is stiffer; it is used only to leave from and arrive at) |
 | the way INTO a big pose (wind-up, lunge, gather, the spent bow, the kneel) | the rig, from wherever the body was |
 | the pose itself, once reached | its fired plate, faded in OVER the rig in about 70 ms |
 | the first frame of the next move | the rig again |
