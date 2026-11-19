@@ -102,7 +102,21 @@ function dlgLineText(d) {
   const s = d.lines[d.i];
   return Array.isArray(s) ? s.join(' ') : String(s == null ? '' : s);
 }
+// AN EMPTY LINE IS NO PAGE (js/text-lite.js): a line shortened to nothing is
+// dropped from the conversation before it is shown, wherever it was built
+function dlgClean(d) {
+  if (!d || d._clean || !Array.isArray(d.lines)) return;
+  d._clean = 1;
+  const keep = [], shots = [];
+  d.lines.forEach((s, i) => {
+    const txt = Array.isArray(s) ? s.join(' ') : String(s == null ? '' : s);
+    if (!txt.trim()) return;
+    keep.push(s); shots.push(d.shots ? d.shots[i] : null);
+  });
+  d.lines = keep; if (d.shots) d.shots = shots;
+}
 function dlgPages(d) {
+  dlgClean(d);
   const L = typeof LANG !== 'undefined' ? LANG : 'en';
   const txt = dlgLineText(d);
   const key = d.i + '|' + L + '|' + txt;
@@ -145,6 +159,7 @@ function dialogAdvance(d) {
 function dialogUpdate(dt) {
   const d = G.dialog;
   if (!d) { G.state = 'PLAY'; return; }
+  dlgClean(d);
   if (!d.lines || !d.lines.length) { d.i = 0; d.lines = d.lines || []; dialogClose(d); return; }
   if (!(d.i >= 0)) d.i = 0;
   if (d.i >= d.lines.length) { dialogClose(d); return; }

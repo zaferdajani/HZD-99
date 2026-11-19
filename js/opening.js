@@ -36,10 +36,28 @@ function opStepId() {
 }
 function opFill(line) { return typeof ctlFill === 'function' ? ctlFill(line) : line; }
 // one dialogue window; `keys` may name arrays (a page each) or single lines
+// A LINE MAY CARRY A SHOT (owner, 2026-11-19: "if there's a way to create
+// small images, shots to explain what is happening with Ratchet, I would go
+// there instead of typing it"). OP_SHOT names the picture each key's line is
+// said over — a game picture, a comic panel, or a moving demo — drawn above
+// the dialogue box (js/game.js, DIALOG). A key with no shot says its line as
+// before. The pictures are the authored ones the game already has.
+const OP_SHOT = {
+  op_seat: 'repairBattery',            // his own battery, the board's art
+  op_r_pod: 'podOn',                   // the pod in the wall, lit
+  op_p1: 'demo:pack',                  // hurt, mend, charge, burst: what it does
+  op_r_heal: 'demo:pack',
+  op_r_winch: 'demo:pack',
+  op_r2: 'rawMarble',                  // "bring me marble": the stone itself
+  op_sv_seat: 'spareCell',             // the cell she seats in him
+  op_sv2: 'rawMarble',                 // "the marble? break the loose floor"
+};
 function opSay(name, keys, npc, onEnd) {
-  const lines = [];
-  for (const k of keys) lines.push(...[].concat(t(k)));
-  G.dialog = { name, lines: lines.map(opFill), i: 0, npc: npc || undefined, onEnd: onEnd || null };
+  const lines = [], shots = [];
+  for (const k of keys) for (const l of [].concat(t(k))) { lines.push(l); shots.push(OP_SHOT[k] || null); }
+  G.dialog = { name, lines: lines.map(opFill), i: 0, npc: npc || undefined, onEnd: onEnd || null,
+    shots: shots.some(Boolean) ? shots : undefined };
+  for (const sh of shots) if (sh && !/^demo:|^assets\//.test(sh) && typeof mediaFetch === 'function') mediaFetch(sh, 1);
   G.state = 'DIALOG';
   if (npc && typeof npcSay === 'function') npcSay(npc, 0); else sfx('ui');
 }

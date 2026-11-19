@@ -35,6 +35,7 @@ tell him anything is done.**
 | 1× | **Turning the phone always brings the game up** — test it on a phone, upright first | "User stuck on rotate with nothing" | `rotate` |
 | 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` `sharp` |
 | 1× | **Do not waste the player's time** | "don't waste the player's time" | `campaign-ch1` |
+| 1× | **Few words to read: pictures, markers and icons do the telling** | "minimize all the text that we see while keeping the scenario understandable" · "small images, shots... instead of typing it with a small text unreadable" | `text-budget` `campaign-ch1` |
 
 **When he corrects something — every time:**
 

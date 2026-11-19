@@ -464,19 +464,37 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
     // they are first USED — Ratchet's Volt Pack pitch, {HEAL} and {ATK}.
     {
       fresh({ 'on_A0B|ratchet': 1, ratchetRepaired: 1, opTold: 1, opPod: 1 }); loadRoom('A0B'); G.state = 'PLAY';
+      // (2026-11-19, "less to read": his line is short and the keys are on
+      // the Volt Pack's own card straight after it, so the whole exchange is
+      // read — his lines, then the card — and the keys must be in it)
       const r = G.statics.find(s => s.extra === 'ratchet');
+      const exchange = () => {
+        const said = []; let n = 0;
+        while (n++ < 12) {
+          if (G.dialog) { said.push(...(G.dialog.lines || [])); const cb = G.dialog.onEnd; G.dialog = null; G.state = 'PLAY'; if (cb) cb(); continue; }
+          if (typeof OVERLAY_Q !== 'undefined' && OVERLAY_Q.length) { OVERLAY_Q.shift().open(); continue; }
+          break;
+        }
+        // ...and the card the purchase in his shop then shows (opPackCard)
+        G.dialog = null; G.state = 'PLAY';
+        const card = opPackCard(); said.push(...((card && card.lines) || []));
+        G.dialog = null; G.state = 'PLAY'; if (typeof OVERLAY_Q !== 'undefined') OVERLAY_Q.length = 0;
+        return said.join(' ');
+      };
+      const snap = JSON.stringify(G.save);
       doInteract(r);
-      const kb = ((G.dialog && G.dialog.lines) || []).join(' ');
-      G.dialog = null; G.state = 'PLAY';
+      const kb = exchange();
+      G.save = JSON.parse(snap);
       const keyH = KEYB.HEAL.find(c => /^Key/.test(c)).replace('Key', '');
       const keyA = KEYB.ATK.find(c => /^Key/.test(c)).replace('Key', '');
+      const holds = k => new RegExp('\\bhold ' + k + '\\b', 'i').test(kb);
       check('Ratchet names the keyboard\'s own heal and attack keys and no placeholder survives',
-        kb.indexOf('{') < 0 && kb.indexOf('hold ' + keyH + ' ') >= 0 && kb.indexOf('hold ' + keyA + ' ') >= 0, kb.slice(0, 200));
+        kb.indexOf('{') < 0 && holds(keyH) && holds(keyA), kb.slice(0, 200));
       const wasOn = PAD.on, wasH = PAD.map.HEAL;
       PAD.on = true; PAD.map.HEAL = 3;
       doInteract(r);
-      const pad = ((G.dialog && G.dialog.lines) || []).join(' ');
-      G.dialog = null; G.state = 'PLAY';
+      const pad = exchange();
+      G.save = JSON.parse(snap);
       PAD.on = wasOn; PAD.map.HEAL = wasH;
       check('...and, on a remapped controller, the button she bound', pad.indexOf(padLabel(3)) >= 0, pad.slice(0, 200));
     }

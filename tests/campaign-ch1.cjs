@@ -381,7 +381,7 @@ async function snap() {
       canBurst: typeof burstUnlocked === 'function' && G.save ? burstUnlocked() : false,
       burstVolts: typeof BURST_VOLTS === 'number' ? BURST_VOLTS : 66, healCost: P && P.healCost ? P.healCost() : 33,
       dialog: G.dialog ? { name: G.dialog.name || '', line: G.dialog.lines[G.dialog.i] || '', i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art || null, demo: G.dialog.demo || null } : null,
-      tut: st ? { id: st.id, i: G.tut.i, hold: G.tut.hold || 0, action: tp && tp.action, tx: tp && tp.target && tp.target.x, hint: tp ? ctlFill(t(tp.hint)) : '', label: tp && tp.label ? t(tp.label) : '' } : null,
+      tut: st ? { id: st.id, i: G.tut.i, hold: G.tut.hold || 0, action: tp && tp.action, tx: tp && tp.target && tp.target.x, hint: tp && typeof isHero === 'function' && isHero() ? ctlFill(t(tp.hint)) : '', label: tp && tp.label ? t(tp.label) : '' } : null,
       goal, toasts: (G.toasts || []).map(q => q.text),
       near: G.near ? { type: G.near.type, extra: G.near.extra || null } : null,
       en, boss: B ? { k: B.kind, x: Math.round(B.x), y: Math.round(B.y), w: B.w, h: B.h, hp: B.hp, max: B.maxHp || B.hp0 || null, st: B.st, dead: !!B.dead, tame: !!B.tame, meet: !!B.meet, face: B.face, t: B.t, wind: B.windT || 0, cx: B.cx ? B.cx() : B.x + B.w / 2, cy: B.cy ? B.cy() : B.y + B.h / 2, vx: B.vx || 0, vy: B.vy || 0, on: !!B.on, purified: !!(B.purified || B.freed),

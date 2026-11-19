@@ -195,6 +195,11 @@ const G = {
   // story turns on become cards she acknowledges; the rest live long enough to
   // be read, and inside a menu they are said where the menu can show them.
   toast(text) {
+    // AN EMPTY LINE IS NO TOAST (js/text-lite.js): a narration the screen
+    // already shows was shortened to nothing, and a toast with a leftover
+    // number ("  +10 IQ") is trimmed rather than drawn with its gap
+    text = String(text == null ? '' : text).trim();
+    if (!text) return;
     if (this.meet) return;
     if (typeof storyToast === 'function' && storyToast(text)) return;
     if (typeof menuMsgSet === 'function') menuMsgSet(text);
@@ -14857,13 +14862,53 @@ function drawTutor() {
   // the hint names controls as {ATK}/{INT}/{UP}…, filled with THIS player's own
   // binding (ctlFill) — the chip and the dialogue speak the same controls
   const fill = typeof ctlFill === 'function' ? ctlFill : (x => x);
-  tutCard(px, py, tutHand(prompt), t(prompt.label), fill(t(prompt.hint)), learned, Math.max(0, T.hold / 0.7));
+  // THE BUTTON AND ITS NAME, NOT A SENTENCE (owner, 2026-11-19: "minimize all
+  // the text that we see while keeping the scenario understandable"). The
+  // sentence under the name said where to go — which the marker in the world
+  // already says — and which button to press — which the key box already
+  // shows. In the robot world the chip is the key and two or three words; a
+  // HOLD is a ring that fills round the key, not the word "hold" in a line.
+  const lite = !(typeof isHero === 'function' && isHero());
+  // (only while the chip asks for the held button itself — not the door or the walk the step sends her through first)
+  const holdStep = (st.id === 'heal' && prompt.action === 'HEAL') || (st.id === 'burst' && prompt.action === 'ATK');
+  tutCard(px, py, tutHand(prompt), t(prompt.label), lite ? '' : fill(t(prompt.hint)), learned, Math.max(0, T.hold / 0.7), lite && holdStep);
+}
+// A PICTURE ABOVE THE WORDS. One per line at most, looked up by the line's
+// index (d.shots, aligned with d.lines — js/overlay.js dlgClean keeps them
+// aligned when an empty line is dropped). 'demo:<id>' plays a demonstration
+// (js/riddles.js), 'assets/...' is a comic panel, anything else a media key.
+// Not drawn until the picture is here: a frame with nothing in it is noise.
+const DLG_SHOT_W = 248, DLG_SHOT_H = 140;
+function drawDlgShot(d, x, boxY) {
+  const sh = d && d.shots && d.shots[d.i];
+  if (!sh) { G.dlgShot = null; return; }
+  const w = DLG_SHOT_W, h = DLG_SHOT_H, y = boxY - h - 10;
+  let im = null, demo = null;
+  if (/^demo:/.test(sh)) demo = sh.slice(5);
+  else if (/^assets\//.test(sh)) { const r = typeof panelsImg === 'function' ? panelsImg(sh) : null; im = r && r.ok ? r.im : null; }
+  else { if (typeof mediaFetch === 'function') mediaFetch(sh); const m = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[sh]; im = m && m.naturalWidth ? m : null; }
+  if (!im && !(demo && typeof demoScript === 'function' && demoScript(demo))) { G.dlgShot = null; return; }
+  c.save();
+  c.fillStyle = 'rgba(6,14,20,0.94)'; rr(c, x, y, w, h, 10); c.fill();
+  c.strokeStyle = 'rgba(200,215,225,0.35)'; c.lineWidth = 1.5; rr(c, x, y, w, h, 10); c.stroke();
+  if (demo) drawSkillDemo(c, x + 8, y + 6, w - 16, h - 12, demo, performance.now() / 1000);
+  else {
+    // contained, never stretched or cropped: the picture is the explanation
+    const sc = Math.min((w - 16) / im.naturalWidth, (h - 12) / im.naturalHeight);
+    const iw = im.naturalWidth * sc, ih = im.naturalHeight * sc;
+    c.save(); rr(c, x + 4, y + 4, w - 8, h - 8, 8); c.clip();
+    c.drawImage(im, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
+    c.restore();
+  }
+  c.restore();
+  G.dlgShot = { key: sh, x, y, w, h };
 }
 // one card, used by the waking floor and by every power she is handed after it
-function tutCard(px, py, key, label, hint, learned, fade) {
+function tutCard(px, py, key, label, hint, learned, fade, hold) {
   const touch = typeof TOUCH !== 'undefined' && TOUCH.enabled;
   const keySize = touch ? 26 : 20, titleSize = touch ? 27 : 22, helpSize = touch ? 22 : 16;
-  const height = touch ? 88 : 70;
+  const oneLine = !hint;
+  const height = oneLine ? (touch ? 72 : 58) : (touch ? 88 : 70);
   c.save();
   c.font = '700 ' + keySize + 'px "Segoe UI", Tahoma, sans-serif';
   const kw = Math.min(240, c.measureText(key).width + 28);
@@ -14887,11 +14932,25 @@ function tutCard(px, py, key, label, hint, learned, fade) {
   const maxText = w - kw - 44;
   c.font = '600 ' + titleSize + 'px "Segoe UI", Tahoma, sans-serif';
   const labelSize = Math.min(titleSize, titleSize * maxText / Math.max(1,c.measureText(label).width));
-  ftxt(learned ? '\u2713 ' + label : label, textX, y + (touch ? 35 : 29), labelSize,
+  ftxt(learned ? '\u2713 ' + label : label, textX, oneLine ? y + height / 2 + labelSize * 0.34 : y + (touch ? 35 : 29), labelSize,
     learned ? '#bff5d2' : '#f3f5f6', align, null, '600');
-  c.font = '700 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
-  const hintSize = Math.min(helpSize, helpSize * maxText / Math.max(1,c.measureText(hint).width));
-  ftxt(hint, textX, y + (touch ? 65 : 53), hintSize, '#c8d5db', align);
+  if (!oneLine) {
+    c.font = '700 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
+    const hintSize = Math.min(helpSize, helpSize * maxText / Math.max(1,c.measureText(hint).width));
+    ftxt(hint, textX, y + (touch ? 65 : 53), hintSize, '#c8d5db', align);
+  }
+  // HOLD, SHOWN: a ring round the key that fills over a second and empties,
+  // the way the press itself charges — a child reads it as "keep it down"
+  if (hold && !learned) {
+    const kx = keyX + kw / 2, ky = y + height / 2, R = Math.max(kw, height - 32) * 0.5 + 7;
+    const ph = (performance.now() / 1100) % 1;
+    c.lineWidth = 3.5; c.lineCap = 'round';
+    c.strokeStyle = 'rgba(143,246,255,0.22)';
+    c.beginPath(); c.ellipse(kx, ky, R, (height - 32) / 2 + 7, 0, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = '#8ff6ff';
+    c.beginPath(); c.ellipse(kx, ky, R, (height - 32) / 2 + 7, 0, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, ph * 1.25)); c.stroke();
+  }
+  G.tutChipHold = !!(hold && !learned);
   c.restore();
 }
 // ===========================================================================
@@ -17710,6 +17769,9 @@ function draw(tms) {
     const bh = Math.max(note ? 96 : 118, (note ? 40 : 62) + gh + body.length * lh + 26);
     const by = 504 - bh;                           // grows upward, foot stays put
     dimPanel(140, by, 680, bh);
+    // THE SHOT this line is said over (js/opening.js OP_SHOT): a small framed
+    // picture standing on the box, over the speaker's side
+    if (typeof drawDlgShot === 'function') drawDlgShot(d, rtl ? 820 - DLG_SHOT_W : 140, by);
     // 64×64 portrait bust — face acting the sprite is too small to carry
     if (!note) {
       let expr = 'neutral';
