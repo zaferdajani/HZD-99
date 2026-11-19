@@ -133,6 +133,9 @@ the only monument in the kingdom — and nobody has walked through them in a lon
 **Panels.** A wide shot of the road with the gates small at the end; the mite coming
 at her out of the grass and her first swing; the wreck and the scrap; then the gates
 huge above her; then the gates closing on the road behind her.
+**In the game** no pages play on the road (owner, 2026-11-19: *"you only show the
+comics when I enter the door, the first gate of the city"*): after the waking's pages,
+the next are the gate's, as she goes through it.
 
 ### 2.3 The waking floor — A0
 

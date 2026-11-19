@@ -108,7 +108,7 @@ async function tapKey(page, code) {
     const newSeq = await page.evaluate(() => {
       // 2026-10-11 (owner): the letter's pages play when it is READ, before the
       // repair; the drawer after the drawer; only his waking after the board
-      const want = { wake: ['w_cradle', 'w_eyes', 'w_unplug'], bay: ['d_door', 'd_road'], letter: ['letter', 'l_song', 'l_marble', 'l_cell'],
+      const want = { wake: ['w_cradle', 'w_eyes', 'w_unplug'], letter: ['letter', 'l_song', 'l_marble', 'l_cell'],
         drawer: ['toolbox'], ratchet: ['r_cell', 'r_marble'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
         break: ['break_a', 'break_b'], sage: ['sage_rev', 'sage_bell'], free: ['fight_a', 'fight_b'], ch2: ['hatch', 'ch2_a', 'ch2_b', 'ch2_c'] };
       const miss = [];
@@ -189,20 +189,34 @@ async function tapKey(page, code) {
       draw = function () { if (G.state === 'PLAY' && G.roomId === r && !panelsCovering()) window.__unc++; return d0.apply(this, arguments); };
     }, room);
     const coverDone = () => page.evaluate(() => { draw = window.__draw0; return window.__unc; });
-    // a real crossing: she walks out of the service bay (W1) through its door
+    // NO PAGES ON THE ROAD (owner, 2026-11-19: "the comic that shows before the
+    // door, there's no need for it. You only show the comics when I enter the
+    // door, the first gate of the city"): walking out of the service bay onto
+    // the road plays nothing, and the first pages after the waking are the
+    // gate's, as she enters the city.
     await stage(page, 'W1', { woke: 1 });
     await page.evaluate(() => { G.save.panels.past.wake = 1; });
     await sleep(300);
-    await coverWatch('W2');
     await page.evaluate(() => { G.trans = { t: TRANS_DUR, to: 'W2', side: 'R', half: false }; });
-    const fired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'bay');
-    check('leaving the service bay plays the bay panels in W2', fired, await page.evaluate(() => G.state + ' ' + G.roomId + ' ' + (G.panels && G.panels.seq.id)));
+    await sleep(2600);
+    let s = await state(page);
+    const road = await page.evaluate(() => ({ room: G.roomId, seqs: PANEL_SEQ.filter(q => q.room === 'W2' || q.room === 'W1').map(q => q.id), seen: Object.keys(G.save.panels.seen) }));
+    check('leaving the service bay onto the road plays no pages', s.st === 'PLAY' && road.room === 'W2' && road.seen.length === 0, JSON.stringify(Object.assign(s, road)));
+    check('...the only pages before the gate are the waking\'s, played before she takes a step', road.seqs.join() === 'wake', road.seqs.join());
+    // a real crossing into the city, through the gate: the gate pages cover it
+    await stage(page, 'W2', { woke: 1, gateOpened: 1 });
+    await page.evaluate(() => { G.save.panels.past.wake = 1; });
+    await waitFor(page, () => panelsLoaded(panelsSeq('gate')), 8000);
+    await sleep(300);
+    await coverWatch('A0');
+    await page.evaluate(() => { G.trans = { t: TRANS_DUR, to: 'A0', side: 'R', half: false }; });
+    const fired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'gate');
+    check('entering the city through the gate plays the gate panels in A0', fired, await page.evaluate(() => G.state + ' ' + G.roomId + ' ' + (G.panels && G.panels.seq.id)));
     const unc = await coverDone();
-    check('...over the crossing: not one frame of W2 is played before them', unc === 0, unc + ' frames');
+    check('...over the crossing: not one frame of A0 is played before them', unc === 0, unc + ' frames');
     const tr = await page.evaluate(() => ({ room: G.roomId, trans: !!G.trans }));
-    check('...and the crossing is finished by them, not resumed after', tr.room === 'W2' && !tr.trans, JSON.stringify(tr));
-    let s;
-    const seenSaved = await page.evaluate(() => !!JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).panels.seen.bay);
+    check('...and the crossing is finished by them, not resumed after', tr.room === 'A0' && !tr.trans, JSON.stringify(tr));
+    const seenSaved = await page.evaluate(() => !!JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).panels.seen.gate);
     check('it is marked seen (and saved) as it begins', seenSaved);
 
     // caption: reveal, confirm completes, separate confirm advances
@@ -229,15 +243,15 @@ async function tapKey(page, code) {
     const back = await waitFor(page, () => G.state === 'PLAY', 3000);
     check('holding the key skips the sequence back to play', back);
     // never again: revisit, and reload the saved game
-    await page.evaluate(() => { loadRoom('W1'); });
+    await page.evaluate(() => { loadRoom('W2'); });
     await sleep(300);
-    await page.evaluate(() => { loadRoom('W2'); G.state = 'PLAY'; player.on = true; });
+    await page.evaluate(() => { loadRoom('A0'); G.state = 'PLAY'; G.enemies = []; player.on = true; });
     await sleep(2200);
     s = await state(page);
     check('a revisit does not replay it', s.st === 'PLAY', JSON.stringify(s));
     await page.evaluate(() => {
       const sv = JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme)));
-      startGame(sv); loadRoom('W2'); G.wake = null; G.state = 'PLAY'; G.enemies = []; G.tut = null; G.tutorialLock = null; player.on = true;
+      startGame(sv); loadRoom('A0'); G.wake = null; G.state = 'PLAY'; G.enemies = []; G.tut = null; G.tutorialLock = null; player.on = true;
     });
     await sleep(2500);
     s = await state(page);
@@ -245,13 +259,13 @@ async function tapKey(page, code) {
 
     // replay: only what was seen
     const rows = await page.evaluate(() => panelsSeenList().map(q => q.id));
-    check('the replay list holds only the seen sequence', rows.length === 1 && rows[0] === 'bay', JSON.stringify(rows));
+    check('the replay list holds only the seen sequence', rows.length === 1 && rows[0] === 'gate', JSON.stringify(rows));
     const row = await page.evaluate(() => pauseItems().some(it => it.id === 'panels'));
     check('the pause menu offers Story panels once one is seen', row);
     await page.evaluate(() => { G.state = 'PANELLIST'; G.panelIdx = 0; });
     await tapKey(page, 'Enter');
     s = await state(page);
-    check('replay plays it again from the list', s.st === 'PANELS' && s.id === 'bay', JSON.stringify(s));
+    check('replay plays it again from the list', s.st === 'PANELS' && s.id === 'gate', JSON.stringify(s));
     await page.evaluate(() => { keys.Escape = true; keysP.Escape = true; });
     await sleep(1300);
     await page.evaluate(() => { delete keys.Escape; });

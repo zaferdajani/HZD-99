@@ -25,13 +25,14 @@ const { chromium } = require('playwright');
     const fresh = (flags) => { const sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { woke: 1 }, flags || {});
       startGame(sv); loadRoom('A0'); G.wake = G.cut = G.dialog = null; G.state = 'PLAY'; player.x = 40; };
     fresh();
-    for (const k of GLIMPSE_KEYS) mediaFetch(k, 1);
+    for (const k of GLIMPSE_KEYS.concat(GLIMPSE_LEAVE_KEYS)) mediaFetch(k, 1);
     for (let i = 0; i < 600 && !glimpseReady(); i++) await new Promise(r2 => setTimeout(r2, 25));
     const out = { art: glimpseReady() };
     const sounds = []; const bs0 = beastSound; beastSound = (cue) => { sounds.push(cue); };
     fresh();
     const cores0 = player.cores, foes0 = G.enemies.length;
-    const phases = [], frame = [];
+    const phases = [], frame = [], leave = { keys: [], turnMoved: 0, lift: 0, xAtTurn: null };
+    const scratch = document.createElement('canvas'); scratch.width = 64; scratch.height = 64; const sc = scratch.getContext('2d');
     let moved = 0, states = new Set(), bossSeen = false, hurt = false, maxShake = 0, x0 = null, xEnd = null;
     for (let i = 0; i < 420; i++) {
       // she walks right through the middle of it: her controls are hers
@@ -44,6 +45,13 @@ const { chromium } = require('playwright');
       if (GLIMPSE.on) {
         if (phases[phases.length - 1] !== GLIMPSE.ph) phases.push(GLIMPSE.ph);
         if (x0 == null) x0 = GLIMPSE.x; xEnd = GLIMPSE.x;
+        if (GLIMPSE.ph === 'leave') {
+          // what is drawn, take by take, and where he is while each plays
+          G.lastStrip = ''; drawGlimpse(sc); const key = String(G.lastStrip).split(':')[0];
+          if (key && leave.keys[leave.keys.length - 1] !== key) leave.keys.push(key);
+          if (key === 'beastStudioTurn') { if (leave.xAtTurn == null) leave.xAtTurn = GLIMPSE.x; leave.turnMoved = Math.max(leave.turnMoved, Math.abs(GLIMPSE.x - leave.xAtTurn)); }
+          leave.lift = Math.max(leave.lift, GLIMPSE.lift || 0);
+        }
         if (GLIMPSE.ph === 'watch' && GLIMPSE.t > 0.5 && !frame.length) {
           updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, 1 / 60);
           const z = cam.zoom || 1, right = cam.x + 480 + 480 / z, H = 256 * BEAST_STRIP_PX;
@@ -52,7 +60,7 @@ const { chromium } = require('playwright');
       }
     }
     out.first = { phases, flag: !!G.save.flags.nfGlimpse, over: !GLIMPSE.on, sounds: sounds.slice(), moved: Math.round(moved), states: [...states], bossSeen, hurt,
-      foes: G.enemies.length === foes0, shake: +maxShake.toFixed(1), east: xEnd > x0 + 200, frame: frame[0] };
+      foes: G.enemies.length === foes0, shake: +maxShake.toFixed(1), east: xEnd > x0 + 200, frame: frame[0], leave };
     // once: back through the room, nothing
     sounds.length = 0; loadRoom('A0'); G.wake = G.cut = G.dialog = null; G.state = 'PLAY'; player.x = 40;
     let again = false; for (let i = 0; i < 200; i++) { update(1 / 60); if (GLIMPSE.on) again = true; }
@@ -71,6 +79,11 @@ const { chromium } = require('playwright');
   check('...beyond the jammed winch, where she cannot get to him', r.first.frame && r.first.frame.winch);
   check('...he roars once, and the ground answers', r.first.sounds.filter(q => q === 'roar').length === 1 && r.first.shake >= 4, r.first.sounds.join(',') + ' shake ' + r.first.shake);
   check('...and goes east, the way the road runs', r.first.east);
+  // a real leap away, not a backwards slide (owner, 2026-11-19): the filmed turn
+  // on the spot, then the filmed spring with height under it, then the run
+  check('...turning first, then springing, then running', r.first.leave.keys.join('>') === 'beastStudioTurn>beastStudioLeap>beastGallop', r.first.leave.keys.join('>'));
+  check('...the turn is on the spot: he does not slide while he turns', r.first.leave.turnMoved < 1, r.first.leave.turnMoved.toFixed(1) + ' px');
+  check('...and the spring leaves the ground', r.first.leave.lift >= 60, r.first.leave.lift.toFixed(0) + ' px at the top');
   check('it takes nothing from her: she plays through it, untouched, and nothing joins the room',
     r.first.states.join() === 'PLAY' && !r.first.bossSeen && !r.first.hurt && r.first.foes && r.first.moved > 40, JSON.stringify({ s: r.first.states, moved: r.first.moved }));
   check('once per save', r.first.flag && !r.again);

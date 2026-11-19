@@ -85,16 +85,16 @@ player's input rules.
 | 4 | `assets/manhua/ch1/game/w_unplug.webp` (game: w_unplug) | [0, 0, 1600, 1600] | — (silent) |  |
 | 5 | `assets/manhua/ch1/game/w_quiet.webp` (game: w_quiet) | [0, 0, 1600, 893] | `pc_quiet` | ...quiet. |
 
-### bay — The service bay
+### bay — RETIRED 2026-11-19
 
-- **Event / trigger:** out of the service bay door, first arrival on the road (W1 → W2). Plays over the crossing into `W2` if it is already due when she arrives; otherwise in `W2` the moment its event is over.
-- **Completion flag:** `G.save.panels.seen.bay` (set when it starts; `past.bay` if the save had already passed the event).
-
-| # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
-|---|---|---|---|---|
-| 1 | `assets/manhua/ch1/game/d_walk.webp` (game: d_walk) | [0, 0, 1600, 679] | — (silent) |  |
-| 2 | `assets/manhua/ch1/game/d_door.webp` (game: d_door) | [0, 0, 1600, 679] | `pc_door` | The door had been open a long time. |
-| 3 | `assets/manhua/ch1/game/d_road.webp` (game: d_road) | [0, 0, 1600, 679] | `pc_city` | The city was standing. It was silent. |
+The owner: *"the comic that shows before the door, there's no need for it. You
+only show the comics when I enter the door, the first gate of the city."* The
+three pages that played as she stepped out of the service bay onto the road
+(W1 → W2) — `d_walk`, `d_door` (`pc_door`), `d_road` (`pc_city`) — are gone from
+`PANEL_SEQ`; their pictures are archived in
+`assets/source/manhua/ch1/game/retired-bay/`. After the waking pages, the next
+pages are the gate's, as she enters the city. `tests/panels.cjs` checks the road
+plays nothing.
 
 ### gate — The city gate
 

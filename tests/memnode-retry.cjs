@@ -86,6 +86,57 @@ const { chromium } = require('playwright');
     check('monument ' + r2.i + ' (' + r2.game + ') stays open after a miss, same level, then pays',
       r2.miss.state === 'TRIAL' && r2.miss.retry && r2.miss.node && !r2.miss.flag && r2.miss.level === r2.level0 && r2.solved,
       JSON.stringify(r2));
+  // ONLY THE ACTUAL LIGHTS (owner, 2026-11-19: "it starts with one virtual
+  // click on the top one, which is wrong because it confuses the player to think
+  // there are 4 clicks. It only should show the actual clicks"). Read off the
+  // SCREEN, in real time: every light that comes on during a demonstration must
+  // be the next note of the sequence, and nothing else — not the press that
+  // answered the last question wrongly, not a press copying the lights, and a
+  // note played twice running must come on twice.
+  const lights = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    G.state = 'PLAY'; G.dialog = null;
+    for (let j = 0; j < NODES.length; j++) G.save.flags['rd_n' + j] = 0;
+    const cvs = document.querySelector('canvas'), pads = [[330, 250], [480, 180], [630, 250], [480, 320]];
+    let rec = null;
+    const tick = () => {
+      if (rec && G.state === 'TRIAL' && TRI.st === 'play' && TRI.memPhase === 'show') {
+        const cx = cvs.getContext('2d'), k = cvs.width / 960, ky = cvs.height / 540;
+        rec.push(pads.map(([x, y]) => { const d = cx.getImageData(Math.round(x * k), Math.round((y - 20) * ky), 1, 1).data; return d[0] > 110 && d[2] > 170 ? 1 : 0; }));
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    const flashes = fr => { const out = []; let prev = [0, 0, 0, 0]; for (const f of fr) { for (let i = 0; i < 4; i++) if (f[i] && !prev[i]) out.push(i); prev = f; } return out.join(''); };
+    const K = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
+    const tap = i => { keys[K[i]] = 1; keysP[K[i]] = 1; setTimeout(() => { keys[K[i]] = 0; }, 60); };
+    const toInput = async () => { let g = 0; while (G.state === 'TRIAL' && !(TRI.st === 'play' && TRI.memPhase === 'input') && g++ < 600) await wait(16); };
+    const out = {};
+    // 1. a repeated note, with every light copied as it plays
+    triStartNode(8, { x: 100, y: 100 });
+    TRI.memSeq = [0, 3, 3];
+    rec = []; let last = -1, g = 0;
+    while (G.state === 'TRIAL' && !(TRI.st === 'play' && TRI.memPhase === 'input') && g++ < 600) {
+      if (TRI.st === 'play' && TRI.memShow >= 0 && TRI.memShow !== last) { last = TRI.memShow; await wait(40); tap(TRI.memSeq[last]); }
+      await wait(16);
+    }
+    out.copied = { seq: TRI.memSeq.join(''), seen: flashes(rec) };
+    // 2. the top node pressed as a WRONG answer, then the retry's demonstration
+    await wait(250);
+    const first = TRI.memSeq[0];
+    tap(first === 1 ? 2 : 1);
+    rec = [];
+    await wait(80);
+    out.retried = !!TRI.retry;
+    await toInput();
+    out.retry = { seq: TRI.memSeq.join(''), seen: flashes(rec) };
+    rec = null; G.state = 'PLAY'; TRI.node = null; TRI.mode = 'full';
+    return out;
+  });
+  check('a note played twice running lights twice, and copying the lights adds none',
+    lights.copied.seen === lights.copied.seq, JSON.stringify(lights.copied));
+  check('after a wrong press the next demonstration shows only its own notes — no light left over from the press',
+    lights.retried && lights.retry.seen === lights.retry.seq, JSON.stringify(lights));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.join(', ')); process.exit(1); }

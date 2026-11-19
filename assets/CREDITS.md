@@ -201,6 +201,8 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 
 `manhua/ch1/game/{passage_a,cv_mouth,cv_walk,d_door,d_walk,f_blade,f_strike,fight_a,break_a,f_walk,m_down,s_ring,sage_rev,s_cell,s_cleanse}.webp` were re-fired 2026-11-17 (Higgsfield GPT Image 2.6) so the hero, NULLFANG and TALLYMAN are on model; masters, the refused panels and job ids in `source/manhua/refire-2026-11/`. **Generated with Higgsfield.**
 
+`manhua/ch1/game/{d_walk,d_door,d_road}.webp` — the road pages, which played as she stepped out of the service bay — were taken out of the game 2026-11-19 on the owner's word (comics only from the city gate on) and moved, unchanged, to `source/manhua/ch1/game/retired-bay/`.
+
 `characters/agents/{slag,redact,lapid,pupil}/*.webp` — the other four of the Eye's agents (SLAGFATHER, REDACTOR, LAPIDARY, PUPIL), eight states each (2026-11-17): stills by Higgsfield GPT Image 2.6, walks filmed with Higgsfield Kling 4.0 Flash from each agent's own stand plate; masters, job ids and the cut in `source/agents/`. **Generated with Higgsfield.**
 
 `characters/agents/tally/rig/*.webp` — TALLYMAN's body as seven separate parts for the rig (2026-11-17, Higgsfield GPT Image 2.6 against his own stand plate; master `source/agents/tally/parts_asfired.webp`, cut by `tools/agentparts.cjs`). **Generated with Higgsfield.**

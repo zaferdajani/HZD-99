@@ -68,16 +68,14 @@ const PANEL_SEQ = [
       { ref: 'game: w_unplug', src: PANEL_GAME('w_unplug'), crop: [0, 0, 1600, 1600], cap: null, move: 'in', focus: [0.6, 0.4], hold: 1.8 },
       { ref: 'game: w_quiet', src: PANEL_GAME('w_quiet'), crop: [0, 0, 1600, 893], cap: 'pc_quiet', move: 'in', focus: [0.4, 0.45] },
     ] },
-  // ...and the door: going out of the bay, to the city, the moment she has.
-  { id: 'bay', title: 'pn_s_bay', room: 'W2', prefetch: ['W1', 'W2'],
-    event: 'out of the service bay door, first arrival on the road (W1 → W2)',
-    when: f => !!f.woke,
-    past: (f, s) => !!f.gateOpened || (!!f.woke && G.roomId !== 'W1'),
-    panels: [
-      { ref: 'game: d_walk', src: PANEL_GAME('d_walk'), crop: [0, 0, 1600, 679], cap: null, move: 'right', focus: [0.4, 0.6], hold: 2.0 },
-      { ref: 'game: d_door', src: PANEL_GAME('d_door'), crop: [0, 0, 1600, 679], cap: 'pc_door', move: 'in', focus: [0.5, 0.55] },
-      { ref: 'game: d_road', src: PANEL_GAME('d_road'), crop: [0, 0, 1600, 679], cap: 'pc_city', move: 'out', focus: [0.3, 0.5] },
-    ] },
+  // NO PAGES ON THE ROAD (owner, 2026-11-19: "the comic that shows before the
+  // door, there's no need for it. You only show the comics when I enter the
+  // door, the first gate of the city."). The bay sequence — the service-bay
+  // door, the road, the silent city — played as she stepped out onto the road
+  // (W1 → W2), a minute before the gate pages told the same arrival. It is gone
+  // from the game; its three pictures stay in the archive
+  // (assets/source/manhua/ch1/game/retired-bay/). The id stays in PANEL_V1
+  // below, which records what old saves already knew.
   { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'],
     event: 'gateOpened — through the gates, first arrival inside the city (W2 → A0)',
     when: f => !!f.gateOpened,

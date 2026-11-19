@@ -65,7 +65,7 @@ const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 // NULLFANG's purification off the room on 2026-11-16 — "You've already showed
 // the video with the scene where I purified it" — and it is library-only now.
 // The purification's film is what plays, and the lion mission waits it out.)
-const REQUIRED_PANELS = ['wake', 'bay', 'gate', 'letter', 'drawer', 'ratchet', 'meet',
+const REQUIRED_PANELS = ['wake', 'gate', 'letter', 'drawer', 'ratchet', 'meet',
   'cave', 'marble', 'forge', 'passage', 'sage', 'break', 'chime', 'ch2'];
 
 function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {

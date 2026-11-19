@@ -2,7 +2,6 @@
  "what": "What she is holding in each comic panel that plays BEFORE the blade is forged, and the md5 of the picture that was looked at. tests/panel-continuity.cjs fails when a panel changes without being looked at again. Owner, 2026-11-17: \"why images show me entering cave with marble holding my sword when i dont have it yet ?\"",
  "before_the_blade": [
   "wake",
-  "bay",
   "gate",
   "letter",
   "drawer",

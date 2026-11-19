@@ -8248,6 +8248,14 @@ class Enemy {
   update(dt) {
     if (this.disabled) {
       this.vx = 0; this.vy += 900 * dt; moveEnt(this, dt);
+      // A BOUND BODY'S CLOCK STILL RUNS (owner, 2026-11-19, of the cheetahs:
+      // "when they die, they should fall down the floor in a kneeling way, not
+      // standing still"). The fold that plays from the blow that binds it is
+      // clocked on `anim` from `_fallAt` (wolves.js), and so is the breath it
+      // lies there with — and this branch returned before `anim` moved, so the
+      // fold sat on its first cell, the cat STANDING, for as long as she looked.
+      // The fold art was fired and wired on 11-17 and never once played.
+      this.anim += dt;
       if (this.cleanseT > 0) {
         const near = player && Math.abs(player.x + player.w / 2 - this.x - this.w / 2) < rescueReach(this)
           && Math.abs(player.y + player.h / 2 - this.y - this.h / 2) < 60;
