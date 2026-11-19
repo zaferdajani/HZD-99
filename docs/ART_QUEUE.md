@@ -21,6 +21,46 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2cd. RATCHET SAYS IT IN COMICS — nine single unlettered panels ✱ QUEUED 2026-11-19 (owner's order, this thread; waiting on credits: 0.37 left, 2 per panel at 2k)
+
+The owner, on less reading: *"If there's a way to create small images, shots
+to explain what is happening with Ratchet, I would go there instead of typing
+it with a small text unreadable"* — then *"When I say pics I meant generated
+comics."* Every line Ratchet says in chapter one is shown over a drawn comic
+panel above the dialogue box (`drawDlgShot`, js/game.js; `OP_SHOT` and
+`LINE_SHOT`, js/opening.js). Three lines already have one and ship with it:
+"Bring me marble" and "Not with claws, bring me the marble first" (`r_marble`),
+"East: Old Servo" (`r_cell`). (The forge's thanks and the battery going home get none: their films tell
+them — "When there is a video no need for comic".) These nine are owed.
+
+**How to fire** (the method of `assets/source/manhua/ch1/game/toolbox-2026-11-15.json`):
+nano_banana_pro, 2k, 16:9, two takes each. Each prompt is `SCENE` below, then
+the CAST and STYLE paragraphs of `prompts.json` → `panels.drawer` word for
+word (elements: hero `467c8e08-8161-483f-a4cf-439875ff04e2`, Ratchet
+`795a5cd6-b404-4623-bcc9-2b32351d71ab`, den `44ecbf7f-0326-418f-9cc9-122391cad46f`,
+Servo `5549ba09-f898-4022-ab66-5686999059e0`, wolf `7aed7bd4-8738-4765-b953-d623eea6a359`,
+alpha `789ff708-5f77-4196-8bfd-5e180e1584d9`). Style reference: the shipped
+`toolbox` job `7a08eab6-57c6-4b18-82a6-afd0f09d3886` and `r_cell` job
+`b799521d-4e5d-4237-a6b9-178fc5a7ae09`, named as "style only". She carries NO
+sword in any of them (the blade is forged later). No light, rim, halo or ring
+round any body. Key to `assets/manhua/ch1/game/<name>.webp` at 1600 px, archive
+the as-fired takes beside the others, credit in `assets/CREDITS.md`, then add
+each to `OP_SHOT` / `LINE_SHOT` and run `node tests/run.cjs text-budget`.
+
+| panel | under the line | SCENE |
+|---|---|---|
+| `say_pod` | op_r_pod "My pod saves you and heals you." | The den's wall pod, an upright capsule with a glass front, lit cyan from inside; the small cat stands in it, eyes closed, and a crack across her chest plate is visibly closing, its edges drawn together by fine cyan threads. Ratchet, awake with blue eye-lights, stands beside it with one big hand on the pod's frame. |
+| `say_winch` | op_r_try "The winch outside is infected. Try your claws." | The street outside the den: a huge rusty yard winch whose hooked iron arm lies across the whole road, purple light pulsing in veins along it and a purple eye-light in its cab. The small cat, tiny in front of it, crouches with her claws out, ready. Ratchet's lit doorway behind her at the left. |
+| `say_pack` | op_p1 "It bit you? My Volt Pack stops it." | The den counter: Ratchet leans over it and holds out, in his open palm, a small compact charger box of brass and steel with one glowing cyan window and a short cable; the small cat looks up at it, a fresh scratch with a few sparks on her shoulder plate. |
+| `say_scrap` | op_p2 "Yours for 12 scrap." | The same counter: the small cat stands on a stool and tips a pawful of rusty scrap bits onto the wooden counter; Ratchet's big hand slides the charger box across to her. No sign, no letters, no numbers anywhere. |
+| `say_heal` | op_r_heal "Hold {HEAL} to heal." | The road: the small cat stands perfectly still, paws at her sides; the charger box is clicked into a port in her back between her shoulder discs and its cyan window glows; a cracked plate on her side closes as fine cyan threads draw it shut. |
+| `say_burst` | op_r_winch "Burst the winch with the pack." | THE RELEASE: the small cat throws both paws forward and a jagged burst of cyan-white current leaps from her claws into the purple-veined winch arm; the arm jerks up and lifts clear of the road, purple light breaking off it in shards. Motion lines only along the burst. |
+| `say_node` | op_r_node "Solve the monument past the winch." | Past the lifted winch on the street: a tall dark stone obelisk monument with a glowing cyan sigil carved in its face; the small cat reaches up and lays one paw on the sigil, and a few cyan nodes light around it like a puzzle waiting. |
+| `say_alpha` | q_ask_alpha_pack (the wolves' Alpha) | THE MEADOW DEN at dusk: the big robot wolf Alpha on a rock, head thrown back in a howl, purple light in its eyes and veins; around it the pack of robot wolves turn their purple eyes the same way. Small in the foreground, the cat watches from behind scrap. |
+| `say_camp` | sl_ratchet_moving "Find me at the camp by the lion." | The meadow road at evening: Ratchet walking away from us with his tools and canisters strapped high on his back, toward a small camp — a drum fire and a torn awning — beside the tall barred gate of a great enclosure. |
+
+---
+
 ## 2bv. THE CATS LIE DOWN, AND THE ORACLE STANDS ✔ FIRED AND WIRED 2026-11-17 (the Oracle's notice turn and a clean-keyed work take still to fire)
 
 **Fired 2026-11-17** (job ids in `assets/source/README.md`): the cat's fold —

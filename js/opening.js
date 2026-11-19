@@ -48,16 +48,41 @@ const OP_SHOT = {
   op_p1: 'demo:pack',                  // hurt, mend, charge, burst: what it does
   op_r_heal: 'demo:pack',
   op_r_winch: 'demo:pack',
-  op_r2: 'rawMarble',                  // "bring me marble": the stone itself
+  op_r2: PANEL_GAME('r_marble'),       // "bring me marble": the comic of the stone under the meadow becoming the blade
   op_sv_seat: 'spareCell',             // the cell she seats in him
   op_sv2: 'rawMarble',                 // "the marble? break the loose floor"
 };
+// THE SAME, FOR ANY LINE, HOWEVER IT IS OPENED (owner, 2026-11-19: "When I
+// say pics I meant generated comics"). Quest thanks and story lines open their
+// dialogue without opSay, so these are found by the line itself: a line that
+// is one of these keys' text is said over that drawn comic panel.
+const LINE_SHOT = {
+  op_r2: PANEL_GAME('r_marble'),
+  sl_ratchet_dent: PANEL_GAME('r_marble'),     // "not with claws: bring me the marble first"
+  op_r_go: PANEL_GAME('r_cell'),               // his spare cell, and Old Servo dark outside the door
+  // (none on the forge's thanks: the forge film shows it — "When there is a
+  // video no need for comic")
+};
+const LINE_SHOT_BY = { lang: null, map: null };
+function lineShot(line) {
+  if (typeof line !== 'string') return null;
+  if (LINE_SHOT_BY.lang !== LANG || !LINE_SHOT_BY.map) {
+    const m = new Map();
+    for (const k in LINE_SHOT) for (const l of [].concat(t(k))) if (typeof l === 'string' && l.trim()) m.set(l.trim(), LINE_SHOT[k]);
+    LINE_SHOT_BY.lang = LANG; LINE_SHOT_BY.map = m;
+  }
+  return LINE_SHOT_BY.map.get(line.trim()) || null;
+}
 function opSay(name, keys, npc, onEnd) {
   const lines = [], shots = [];
   for (const k of keys) for (const l of [].concat(t(k))) { lines.push(l); shots.push(OP_SHOT[k] || null); }
   G.dialog = { name, lines: lines.map(opFill), i: 0, npc: npc || undefined, onEnd: onEnd || null,
     shots: shots.some(Boolean) ? shots : undefined };
-  for (const sh of shots) if (sh && !/^demo:|^assets\//.test(sh) && typeof mediaFetch === 'function') mediaFetch(sh, 1);
+  for (const sh of shots) {
+    if (!sh || /^demo:/.test(sh)) continue;
+    if (/^assets\//.test(sh)) { if (typeof panelsImg === 'function') panelsImg(sh); }
+    else if (typeof mediaFetch === 'function') mediaFetch(sh, 1);
+  }
   G.state = 'DIALOG';
   if (npc && typeof npcSay === 'function') npcSay(npc, 0); else sfx('ui');
 }

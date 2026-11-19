@@ -31,11 +31,11 @@ tell him anything is done.**
 | 2× | **Nothing opens or buys by surprise** | "And it happened again... suddenly the window opened" | `shop-ask` |
 | 2× | **All art, video and structures come from Higgsfield; the code is ours** | "You are not good at it. You can create the code... but not the art." | `artbible` · skills `art-bible` `rig-animation` |
 | 2× | **Do the whole job; never recite what is left** | "You are not a kid that I need to keep monitoring." | no harness — check your report before sending it |
+| 2× | **Few words to read: drawn comic panels, markers and icons do the telling** | "minimize all the text that we see while keeping the scenario understandable" · "small images, shots... instead of typing it with a small text unreadable" · "When I say pics I meant generated comics" | `text-budget` `campaign-ch1` |
+| 2× | **Do not waste the player's time** — and no comic where a film already tells it | "don't waste the player's time" · "When there is a video no need for comic" | `campaign-ch1` `panels` |
 | 1× | **The verb is PURIFY, never free; the robed ones are AGENTS, never sages** | "it should be purifying, not freeing" · "this is not a sage" | `pure-gift` `panels` |
 | 1× | **Turning the phone always brings the game up** — test it on a phone, upright first | "User stuck on rotate with nothing" | `rotate` |
 | 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` `sharp` |
-| 1× | **Do not waste the player's time** | "don't waste the player's time" | `campaign-ch1` |
-| 1× | **Few words to read: pictures, markers and icons do the telling** | "minimize all the text that we see while keeping the scenario understandable" · "small images, shots... instead of typing it with a small text unreadable" | `text-budget` `campaign-ch1` |
 
 **When he corrects something — every time:**
 

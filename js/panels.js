@@ -57,7 +57,11 @@ const PANEL_SEQ = [
   // show an event after it ends." THE WAKE plays before the first step — right
   // after the difficulty is chosen, ahead of the waking itself (wakeStart
   // holds her until it ends). It is never room-triggered (`manual`).
-  { id: 'wake', title: 'pn_s_wake', room: 'W1', prefetch: ['W1'], manual: true,
+  // OFF THE ROOM (owner, 2026-11-19: "When there is a video no need for
+  // comic"): the opening film's last shot is her waking — eyes on, out of the
+  // corridor — and these pages told the same waking straight after it. `film`
+  // names what shows the beat; a sequence that has one is library only.
+  { id: 'wake', title: 'pn_s_wake', room: 'W1', prefetch: ['W1'], manual: true, film: 'intro8',
     event: 'new game: after the difficulty card, before the waking (wakeStart)',
     when: () => false,
     past: f => !!f.woke,
@@ -113,7 +117,11 @@ const PANEL_SEQ = [
     ] },
   // AFTER the board: him waking, and what he tells her. (The letter and the
   // drawer used to play here, after the repair — the story told backwards.)
-  { id: 'ratchet', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
+  // Library only since 2026-11-19: its two panels (the spare cell, the marble
+  // that becomes the blade) are shown under the lines he says them with
+  // (LINE_SHOT, js/opening.js), so playing them again after was the same
+  // pictures twice in a minute.
+  { id: 'ratchet', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'], manual: true,
     event: "Ratchet's battery restored (ratchetRepaired / on_A0B|ratchet), after his wake talk and errand",
     when: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']) && panelsQuest('ratchet_forge') !== 'none',
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
@@ -147,8 +155,10 @@ const PANEL_SEQ = [
       { ref: 'game: marble_a', src: PANEL_GAME('marble_a'), crop: PG_FULL, cap: 'pc_m_burst', move: 'in', focus: [0.6, 0.5] },
       { ref: 'game: marble_b', src: PANEL_GAME('marble_b'), crop: PG_FULL, cap: 'pc_m_freed', move: 'in', focus: [0.5, 0.45] },
     ] },
-  { id: 'forge', title: 'pn_s_forge', room: 'A0B', prefetch: ['A0B'],
-    event: 'the first sword forged from the raw marble (crystal), after the forge film and its card',
+  // Library only (owner, 2026-11-19: "When there is a video no need for
+  // comic"): the forge film (PURIFY_VID.gift) shows the forging.
+  { id: 'forge', title: 'pn_s_forge', room: 'A0B', prefetch: ['A0B'], manual: true, film: 'gift',
+    event: 'the first sword forged from the raw marble (crystal) — library only; its film is what plays',
     when: f => !!f.crystal,
     past: f => !!f.crystal,
     panels: [
@@ -222,7 +232,7 @@ const PANEL_SEQ = [
   // time"). The purification has a film, and these four pages told it again
   // straight after. `manual` keeps the scene in the library, where it is a
   // thing to go and read, and takes it off the room.
-  { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'], manual: true,
+  { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'], manual: true, film: 'glitch',
     event: 'NULLFANG purified (bossGlitch) — library only; its film is what plays',
     when: f => !!f.bossGlitch,
     past: f => !!f.bossGlitch,
@@ -375,7 +385,7 @@ function panelsTick(dt) {
   // a few seconds regardless, so a slow connection never strands her.
   if (G.wake && G.wake.pend && G.roomId === 'W1') {
     const w = panelsSeq('wake');
-    if (!w || S.seen.wake || S.past.wake) { G.wake.pend = false; return false; }
+    if (!w || w.film || S.seen.wake || S.past.wake) { G.wake.pend = false; return false; }
     panelsLoad(w); G.wake.pendT = (G.wake.pendT || 0) + dt;
     if (!panelsLoaded(w) && G.wake.pendT < 5) return false;
     return panelsStart('wake', { then: () => { if (G.wake) G.wake.pend = false; } });

@@ -96,11 +96,17 @@ const { chromium } = require('playwright');
     opSay(t('n_ratchet'), ['op_p1', 'op_p2'], 'ratchet'); G.dlgShot = null; draw(performance.now()); out.pack = G.dlgShot && G.dlgShot.key;
     G.dialog.i = 1; G.dlgShot = null; draw(performance.now()); out.packAfter = G.dlgShot && G.dlgShot.key;
     G.dialog = null; G.state = 'PLAY';
-    // "bring me marble": the stone, on that line and not on his name
-    mediaFetch('rawMarble', 1);
-    for (let i = 0; i < 120 && !(MEDIA_IMG.rawMarble && MEDIA_IMG.rawMarble.naturalWidth); i++) await new Promise(r => setTimeout(r, 50));
+    // "bring me marble": a DRAWN COMIC panel (owner: "When I say pics I meant
+    // generated comics"), on that line and not on his name
+    const comic = n => 'assets/manhua/ch1/game/' + n + '.webp';
+    for (const n of ['r_marble', 'f_forge']) panelsImg(comic(n));
+    for (let i = 0; i < 160 && !['r_marble', 'f_forge'].every(n => panelsImg(comic(n)).ok); i++) await new Promise(r => setTimeout(r, 50));
     opSay(t('n_ratchet'), ['op_r1', 'op_r2'], 'ratchet'); G.dlgShot = null; draw(performance.now()); out.marble0 = G.dlgShot && G.dlgShot.key;
-    G.dialog.i = 1; G.dlgShot = null; draw(performance.now()); out.marble1 = G.dlgShot && G.dlgShot.key;
+    G.dialog.i = 1; G.dlgShot = null; draw(performance.now()); out.marble1 = G.dlgShot && G.dlgShot.key; out.marbleComic = !!(G.dlgShot && G.dlgShot.comic && G.dlgShot.w >= 380);
+    G.dialog = null; G.state = 'PLAY';
+    // a line opened without opSay: the forge's thanks has a film, so no panel
+    G.dialog = { name: t('n_ratchet'), lines: [t('q_thanks_ratchet_forge')], i: 0, npc: 'ratchet' }; G.state = 'DIALOG';
+    G.dlgShot = null; draw(performance.now()); out.forge = G.dlgShot && G.dlgShot.key;
     G.dialog = null; G.state = 'PLAY';
     return out;
   });
@@ -108,7 +114,8 @@ const { chromium } = require('playwright');
   check('...and a held button wears a ring that fills', D.hold.ring === true, JSON.stringify(D.hold));
   check('Ratchet says the pod over a picture of the pod', D.pod === 'podOn', String(D.pod));
   check('...and the Volt Pack over the pack at work, and only on the line about it', D.pack === 'demo:pack' && D.packAfter == null, JSON.stringify([D.pack, D.packAfter]));
-  check('...and the marble over the stone itself', D.marble0 == null && D.marble1 === 'rawMarble', JSON.stringify([D.marble0, D.marble1]));
+  check('...and "bring me marble" over the drawn comic of it, framed as a comic and bigger', D.marble0 == null && /r_marble\.webp$/.test(D.marble1 || '') && D.marbleComic, JSON.stringify([D.marble0, D.marble1, D.marbleComic]));
+  check('...but the forge\'s thanks, whose film shows the forging, is said over no comic ("When there is a video no need for comic")', D.forge == null, String(D.forge));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await p.close();
 

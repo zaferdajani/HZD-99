@@ -149,21 +149,30 @@ async function tapKey(page, code) {
     });
     check('his letter and drawer are no longer told after the repair', !order.postHasLetter, JSON.stringify(order));
     check('the wake and the letter are played by their moments, not by a room watch', order.letterManual && order.wakeManual);
-    // the wake: a new game holds her, the pages open first, the waking follows
-    const w0 = await page.evaluate(() => {
+    // NO COMIC WHERE A FILM TELLS IT (owner, 2026-11-16 at the lion's pages,
+    // and 2026-11-19: "When there is a video no need for comic"). The opening
+    // film ends on her waking; the forge film is the forging; the lion's
+    // purification is its film. Their pages are library only, and a new game
+    // goes from the film straight to her first step.
+    const films = await page.evaluate(() => {
+      const filmed = PANEL_SEQ.filter(q => q.film).map(q => ({ id: q.id, film: q.film, manual: !!q.manual }));
       for (const k in keys) delete keys[k];
       const sv = newSave(1); sv.time = 99; startGame(sv); loadRoom('W1'); G.state = 'PLAY'; G.dialog = null;
-      return { pend: !!(G.wake && G.wake.pend) };
+      return { filmed, pend: !!(G.wake && G.wake.pend) };
     });
-    check('a new game holds the waking until its pages have played', w0.pend, JSON.stringify(w0));
-    const wFired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'wake', 9000);
-    check('the wake pages open before her first step', wFired, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
-    const wFirst = await page.evaluate(() => G.panels && G.panels.list[0].src);
-    check('...beginning in the cradle', /w_cradle/.test(wFirst || ''), wFirst);
-    await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
-    await waitFor(page, () => G.state === 'PLAY', 4000);
-    const w1 = await page.evaluate(() => ({ wake: !!G.wake, pend: !!(G.wake && G.wake.pend), st: G.state }));
-    check('...and when they close, the waking itself runs', w1.wake && !w1.pend && w1.st === 'PLAY', JSON.stringify(w1));
+    const want = { wake: 'intro8', forge: 'gift', free: 'glitch' };
+    check('every beat a film shows has its comic off the room (wake, forge, the lion)',
+      Object.keys(want).every(id => films.filmed.some(q => q.id === id && q.film === want[id] && q.manual))
+      && films.filmed.every(q => q.manual), JSON.stringify(films.filmed));
+    check('...a new game goes from the film to her first step, no wake pages', !films.pend, JSON.stringify(films));
+    await sleep(1500);
+    const w1 = await page.evaluate(() => ({ st: G.state, id: G.panels && G.panels.seq.id }));
+    check('...and none open while she wakes', w1.st !== 'PANELS', JSON.stringify(w1));
+    // the forge: the film plays, the forge's pages do not follow it
+    await stage(page, 'A0B', { woke: 1, gateOpened: 1, tut: 1, ratchetRepaired: 1, 'on_A0B|ratchet': 1, crystal: 1 });
+    await sleep(2000);
+    const fg = await state(page);
+    check('...and after the forge film, no forge pages', fg.st !== 'PANELS' || fg.id !== 'forge', JSON.stringify(fg));
     // the letter: reading it plays the pages; it is not typed out; then opNote
     await stage(page, 'A0B', { woke: 1, gateOpened: 1, tut: 1 });
     const l0 = await page.evaluate(() => {
@@ -200,9 +209,9 @@ async function tapKey(page, code) {
     await page.evaluate(() => { G.trans = { t: TRANS_DUR, to: 'W2', side: 'R', half: false }; });
     await sleep(2600);
     let s = await state(page);
-    const road = await page.evaluate(() => ({ room: G.roomId, seqs: PANEL_SEQ.filter(q => q.room === 'W2' || q.room === 'W1').map(q => q.id), seen: Object.keys(G.save.panels.seen) }));
+    const road = await page.evaluate(() => ({ room: G.roomId, seqs: PANEL_SEQ.filter(q => (q.room === 'W2' || q.room === 'W1') && !q.film).map(q => q.id), seen: Object.keys(G.save.panels.seen) }));
     check('leaving the service bay onto the road plays no pages', s.st === 'PLAY' && road.room === 'W2' && road.seen.length === 0, JSON.stringify(Object.assign(s, road)));
-    check('...the only pages before the gate are the waking\'s, played before she takes a step', road.seqs.join() === 'wake', road.seqs.join());
+    check('...and no pages wait on the road at all (the waking is the film\'s)', road.seqs.length === 0, road.seqs.join());
     // a real crossing into the city, through the gate: the gate pages cover it
     await stage(page, 'W2', { woke: 1, gateOpened: 1 });
     await page.evaluate(() => { G.save.panels.past.wake = 1; });

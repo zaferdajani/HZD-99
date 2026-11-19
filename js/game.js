@@ -13073,7 +13073,7 @@ function wakeStart() {
   // ... before the game plays"). She is held here; panelsTick opens them on
   // the first playing frame and lets the waking run when they close.
   // (never in the Forge: the owner's editor opens straight into the world)
-  if (fault && !(typeof window !== 'undefined' && window.EDITOR) && typeof panelsSeq === 'function' && panelsSeq('wake')) {
+  if (fault && !(typeof window !== 'undefined' && window.EDITOR) && typeof panelsSeq === 'function' && panelsSeq('wake') && !panelsSeq('wake').film) {
     const S = typeof panelsState === 'function' ? panelsState() : null;
     if (S && !S.seen.wake && !S.past.wake) { G.wake.pend = true; return; }
   }
@@ -14879,16 +14879,31 @@ function drawTutor() {
 // (js/riddles.js), 'assets/...' is a comic panel, anything else a media key.
 // Not drawn until the picture is here: a frame with nothing in it is noise.
 const DLG_SHOT_W = 248, DLG_SHOT_H = 140;
+// a drawn comic panel is shown bigger, in a comic panel's own frame
+const DLG_COMIC_W = 384, DLG_COMIC_H = 216;
 function drawDlgShot(d, x, boxY) {
-  const sh = d && d.shots && d.shots[d.i];
+  const sh = d && ((d.shots && d.shots[d.i]) || (d.lines && typeof lineShot === 'function' && lineShot(d.lines[d.i])));
   if (!sh) { G.dlgShot = null; return; }
-  const w = DLG_SHOT_W, h = DLG_SHOT_H, y = boxY - h - 10;
+  const comic = /^assets\/manhua\//.test(sh);
+  const w = comic ? DLG_COMIC_W : DLG_SHOT_W, h = comic ? DLG_COMIC_H : DLG_SHOT_H, y = boxY - h - 10;
+  if (x > 140) x = 820 - w;   // right-to-left: against the box's right edge
   let im = null, demo = null;
   if (/^demo:/.test(sh)) demo = sh.slice(5);
   else if (/^assets\//.test(sh)) { const r = typeof panelsImg === 'function' ? panelsImg(sh) : null; im = r && r.ok ? r.im : null; }
   else { if (typeof mediaFetch === 'function') mediaFetch(sh); const m = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[sh]; im = m && m.naturalWidth ? m : null; }
   if (!im && !(demo && typeof demoScript === 'function' && demoScript(demo))) { G.dlgShot = null; return; }
   c.save();
+  if (comic) {
+    // the page's gutter and ink line: the panel, edge to edge, cropped to fill
+    c.fillStyle = '#f4efe4'; c.fillRect(x, y, w, h);
+    const iw = w - 8, ih = h - 8, sc = Math.max(iw / im.naturalWidth, ih / im.naturalHeight);
+    const sw = iw / sc, shh = ih / sc;
+    c.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - shh) / 2, sw, shh, x + 4, y + 4, iw, ih);
+    c.strokeStyle = '#111'; c.lineWidth = 2; c.strokeRect(x + 4, y + 4, iw, ih);
+    c.restore();
+    G.dlgShot = { key: sh, x, y, w, h, comic: true };
+    return;
+  }
   c.fillStyle = 'rgba(6,14,20,0.94)'; rr(c, x, y, w, h, 10); c.fill();
   c.strokeStyle = 'rgba(200,215,225,0.35)'; c.lineWidth = 1.5; rr(c, x, y, w, h, 10); c.stroke();
   if (demo) drawSkillDemo(c, x + 8, y + 6, w - 16, h - 12, demo, performance.now() / 1000);
