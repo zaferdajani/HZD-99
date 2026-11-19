@@ -381,6 +381,22 @@ async function tapKey(page, code) {
     }, 6000);
     const atB1 = await page.evaluate(() => ({ room: G.roomId, on: player.on, feet: Math.round(player.y + player.h), st: G.state }));
     check('...and when it closes, she can still steer onto B1\'s ledge', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
+    // A BEAT DUE IN A ROOM SHE LEAVES IS NOT LOST (2026-11-19): the bell falls,
+    // she is still in the air when she leaves A9 — the bell's pages play over
+    // the next doorway instead of never
+    await stage(page, 'A9', { bossChime: 1 });
+    const left = await page.evaluate(async () => {
+      if (G.panels) { G.panels = null; G.state = 'PLAY'; }
+      panelsLoad(panelsSeq('chime'));
+      player.on = false; G.boss = null;
+      for (let i = 0; i < 20; i++) panelsTick(1 / 60);
+      const inRoom = G.state;
+      loadRoom('A8'); G.state = 'PLAY'; G.trans = null; player.on = true;
+      for (let i = 0; i < 300 && G.state === 'PLAY'; i++) { panelsTick(1 / 30); await new Promise(r => setTimeout(r, 10)); }
+      return { inRoom, st: G.state, id: G.panels && G.panels.seq.id, room: G.roomId };
+    });
+    check('a comic due in a room she left in mid-air plays over the next doorway, not never', left.inRoom === 'PLAY' && left.st === 'PANELS' && left.id === 'chime', JSON.stringify(left));
+    await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } G.panels = null; G.state = 'PLAY'; });
     check('no page errors (desktop)', errs.length === 0, errs.slice(0, 2).join(' | '));
     await ctx.close();
 

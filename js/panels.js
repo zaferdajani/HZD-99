@@ -254,7 +254,7 @@ const PANEL_SEQ = [
 const PANEL_ZOOM = 0.04;          // the most any crop is ever pushed or drifted
 const PANEL_XF = 0.45;            // cross-dissolve between panels
 const PANEL_TAP = 0.35;           // a press shorter than this is a confirm
-const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null };
+const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null, due: null };
 
 function panelsQuest(id) { return typeof qState === 'function' ? qState(id) : 'none'; }
 // the player's choice wins either way (an explicit OFF beats the OS setting);
@@ -358,7 +358,16 @@ function panelsTick(dt) {
   // an ARRIVAL is only the crossing itself: a room entered under a dialogue,
   // a repair or a film has already been shown, so whatever becomes due later
   // in it is an event and waits for panelsSafe like any other
-  if (PN.room !== G.roomId) { PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = G.state === 'PLAY'; }
+  if (PN.room !== G.roomId) {
+    // A BEAT DUE IN THE ROOM SHE LEFT is not lost: an event's pages wait for
+    // her to land, and a player who leaves the bell's room still in the air
+    // never did — the comic went with the room (campaign-ch1, 2026-11-19).
+    // It plays over the next doorway instead, which is where comics belong.
+    const S0 = PN.due && panelsState();
+    if (S0 && !S0.seen[PN.due] && !S0.past[PN.due]) panelsQueue(PN.due);
+    PN.due = null;
+    PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = G.state === 'PLAY';
+  }
   if (G.state !== 'PLAY') { PN.ready = 0; PN.arrival = false; return false; }
   const S = panelsState();
   // THE WAKE'S PAGES come before her first step: wakeStart left her held
@@ -395,7 +404,8 @@ function panelsTick(dt) {
   for (const s of PANEL_SEQ)
     if (!S.seen[s.id] && !S.past[s.id] && s.prefetch && s.prefetch.indexOf(G.roomId) >= 0) panelsLoad(s);
   const seq = panelsDue();
-  if (!seq) { PN.ready = 0; PN.arrival = false; return false; }
+  if (!seq) { PN.ready = 0; PN.arrival = false; PN.due = null; return false; }
+  PN.due = seq.id;
   panelsLoad(seq);
   if (PN.arrival) {
     // the crossing holds on its last frame while the pages arrive
