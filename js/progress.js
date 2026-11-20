@@ -243,8 +243,15 @@ function pgGoalRoom(key, f) {
   const ratchet = () => ['A3', 'A0B'].find(id => typeof npcPlaced !== 'function' || npcPlaced(id, 'ratchet')) || 'A3';
   switch (key) {
     case 'pg_goal_pack': case 'pg_goal_return': return ratchet();
-    case 'pg_goal_marble': return 'A5';                    // through the hatch (pgHatchPointer marks the hatch itself)
+    // THE MARBLE IS IN THE QUARRY, not under the hatch (owner, 2026-11-20:
+    // "Once I reach the gate and go inside, the arrow keeps directing me back to
+    // the gate entrance instead of through the cave to the actual place of the
+    // marble"). Naming A5 made every cave room route BACK to it. The route
+    // still goes down through the hatch (pgHatchPointer marks it in A2), then
+    // on through the caves to the stone.
+    case 'pg_goal_marble': return 'CV3';
     case 'pg_goal_quarry': case 'pg_goal_gravehorn': return 'CV3';
+    case 'pg_goal_cross': return 'A2';                     // east, to the crest where he meets her
     case 'pg_goal_sage': return 'GA1D';
     case 'pg_goal_chime': return 'A9';
     case 'pg_goal_lion': case 'pg_goal_east': return 'A4';
