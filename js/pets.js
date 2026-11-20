@@ -27,7 +27,7 @@
 // ===========================================================================
 
 const PET_ACTS = {
-  glitch: ['flop', 'lean', 'bonk'],     // NULLFANG — the lion
+  glitch: ['roar', 'lean', 'bonk'],     // NULLFANG — the lion (his own filmed roar, soft)
   brood: ['bow', 'preen', 'gift'],      // TALONHOST — the eagle
   zero: ['nuzzle', 'stamp', 'rear'],    // GLACIERE — the unicorn
   atlas: ['huff', 'duck', 'curl'],      // FURNACE CHOIR — the dragon
@@ -99,7 +99,7 @@ function petPoke(pet, hx, hy) {
     // a real smoke ring, and she can jump through it
     G.petRing = { x: cx + pet.face * pet.w * 0.6, y: cy - 6, r: 8, t: 1.6, t0: 1.6, dir: pet.face };
   }
-  if (a === 'flop' || a === 'belly') {
+  if (a === 'belly') {
     for (let i = 0; i < 8; i++)
       addPart(cx + rnd(-30, 30), pet.y + pet.h - 6, rnd(-50, 50), rnd(-40, -10),
         rnd(0.5, 0.9), '#e8f4ff', rnd(2, 3), 200, true);
@@ -136,22 +136,19 @@ function updatePets(dt) {
 // so a reaction reads in the CREATURE, not only in the particles around it.
 function petPose(b) {
   if (!b || !b.petAct) return null;
+  // NO PAPER FLIPS (owner, 2026-11-20, of the freed lion: "walking like a
+  // ghost on two legs, raising his hand"). The flop used to turn the whole
+  // picture 86 degrees on its end, which stands a lion on its hind legs with
+  // its forepaws up; the bow, the rear and the curl were the same rigid tilt,
+  // smaller. A body answers with its own motion — the lion's filmed roar
+  // (beastStrip), a step towards her, a nudge — and is never rotated, squashed
+  // or lifted off the ground as one flat picture (tests/pet-motion.cjs).
   const k = 1 - clamp((b.petT || 0) / (b.petT0 || 1), 0, 1);   // 0..1 through the beat
   const s = Math.sin(k * Math.PI);                              // rises and settles
   const a = b.petAct;
   const P = { rot: 0, dx: 0, dy: 0, sx: 1, sy: 1 };
-  if (a === 'flop' || a === 'belly') { P.rot = -s * 1.5 * (b.face || 1); P.dy = s * 6; }
-  else if (a === 'lean' || a === 'nuzzle' || a === 'cheek') { P.dx = s * 9 * (b.face || 1); P.rot = s * 0.12 * (b.face || 1); }
-  else if (a === 'bonk') { P.dx = Math.sin(k * Math.PI * 3) * 11 * (b.face || 1); }
-  else if (a === 'bow' || a === 'duck') { P.rot = s * 0.3 * (b.face || 1); P.dy = s * 5; }
-  else if (a === 'preen') { P.rot = Math.sin(k * Math.PI * 4) * 0.14; P.sy = 1 + s * 0.07; }
-  else if (a === 'rear') { P.rot = -s * 0.4 * (b.face || 1); P.dy = -s * 10; }
-  else if (a === 'stamp') { P.dy = Math.abs(Math.sin(k * Math.PI * 2)) * -7; }
-  else if (a === 'huff') { P.sx = 1 + s * 0.06; P.sy = 1 - s * 0.05; }
-  else if (a === 'curl') { P.rot = s * 0.22 * (b.face || 1); P.sx = 1 - s * 0.08; }
-  else if (a === 'knead') { P.dy = Math.sin(k * Math.PI * 5) * 3; }
-  // the milestone cheer bounces on top of everything
-  if ((b.petCheerT || 0) > 0) P.dy += Math.sin(b.petCheerT * 16) * 4;
+  if (a === 'lean' || a === 'nuzzle' || a === 'cheek') P.dx = s * 9 * (b.face || 1);
+  else if (a === 'bonk') P.dx = Math.sin(k * Math.PI * 3) * 11 * (b.face || 1);
   return P;
 }
 
@@ -171,13 +168,8 @@ function drawPetFx(c2) {
   const k = 1 - clamp((b.petT || 0) / (b.petT0 || 1), 0, 1);
   const s = Math.sin(k * Math.PI);
   const cx = b.cx(), cy = b.cy();
-  c2.save();
-  // a soft warm bloom, so the moment reads even in a busy room
-  c2.globalCompositeOperation = 'lighter'; c2.globalAlpha = s * 0.16;
-  const g = c2.createRadialGradient(cx, cy, 4, cx, cy, b.w * 1.1);
-  g.addColorStop(0, '#ffd0e0'); g.addColorStop(1, 'rgba(0,0,0,0)');
-  c2.fillStyle = g; c2.beginPath(); c2.arc(cx, cy, b.w * 1.1, 0, 7); c2.fill();
-  c2.restore();
+  // (no bloom round the body: NO LIGHT ROUND A BODY — the hearts and the
+  // creature's own motion carry the moment)
   // the eagle sheds a feather; the unicorn breathes a frost heart
   if (b.petAct === 'preen' || b.petAct === 'gift') {
     c2.save();

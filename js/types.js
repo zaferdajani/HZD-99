@@ -42,6 +42,10 @@ const ARMS = [
   { id: 'slag',    el: 'hott',  from: 'atlas',  cost: 12, cd: 0.52 },
   { id: 'frost',   el: 'glazz', from: 'zero',   cost: 14, cd: 0.60 },
   { id: 'arc',     el: 'zizt',  from: 'prism',  cost: 10, cd: 0.42 },
+  // THE PACK (js/packcall.js): the Alpha's, granted by its yield — calls one
+  // wolf for ten seconds. Not in the plating chain; murr, the colour of a
+  // thing that is on her side.
+  { id: 'pack',    el: 'murr',  from: 'alpha',  cost: 45, cd: 16 },
 ];
 const ARM_BY_BOSS = {}; for (const a of ARMS) ARM_BY_BOSS[a.from] = a.id;
 function armDef(id) { return ARMS.find(a => a.id === id); }
@@ -90,6 +94,7 @@ function fireArm(p, a) {
     const pr = new Proj(x, y, vx, vy, true, Math.round(dmg * base), r, E.col, grav || 0, life || 3);
     pr.el = a.el; G.projs.push(pr); return pr;
   };
+  if (a.id === 'pack') { if (typeof packCall === 'function' && !packCall(p)) { p.volts += a.cost; p.armCD = 0.2; if (typeof sfx === 'function') sfx('no'); } return; }
   if (a.id === 'shard') {
     if (typeof isHero === 'function' && isHero()) {     // NOSTOS: the wide cone, as ever
       for (let i = -2; i <= 2; i++) mk(p.face * (430 + Math.abs(i) * 30), i * 105, 11, 5, 260, 0.5);

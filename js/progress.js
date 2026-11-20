@@ -517,14 +517,8 @@ function drawCleanses(c) {
       const cw = q.w * 0.9;
       drawSoftShaft(c, cx, q.y - 260 * k, cw * 0.35, cx, q.y + q.h, cw * 1.2, '235,250,255', 0, colA * 1.3, false);
     }
-    // three slow white rings, the pulse going OUT and staying soft
-    for (let i = 0; i < 3; i++) {
-      const u = (q.t - i * 0.35) / 1.8;
-      if (u <= 0 || u >= 1) continue;
-      c.strokeStyle = 'rgba(225,245,255,' + ((1 - u) * 0.45 * k).toFixed(3) + ')';
-      c.lineWidth = (1 - u) * 3.5 + 1;
-      c.beginPath(); c.ellipse(cx, cy, R * (0.4 + u * 1.6), R * (0.32 + u * 1.25), 0, 0, 7); c.stroke();
-    }
+    // (no rings round the body: NO LIGHT ROUND A BODY, owner 2026-11-17,
+    // "remove the ring" — the column and the word tell it)
     c.restore();
     // ...and the word, so nobody reads the light as a death
     const la = Math.min(1, q.t / 0.35) * Math.max(0, Math.min(1, (3.4 - q.t) / 0.8));

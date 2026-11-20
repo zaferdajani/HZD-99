@@ -407,13 +407,16 @@ function alphaRoarFx(b) {
   if (typeof fx !== 'function') return;
   const cx = b.cx(), fy = alphaFloorY(b);
   // out to the edge of the stun and no further: the bend ends where the
-  // roar's reach does, so what the eye sees is what the blow covers
-  alphaWave(b, { R: 262, dur: 0.5, amp: 24, width: 46, col: TELL_COL, fronts: 2, gap: 0.1, nudge: 6, shimmer: 2.2, pulse: 0.14 });
-  b.rumbleT = 0.3;
-  if (!G.artProbe) {
-    fx('ground', cx, fy - 2, { rx: 270, ry: 34, dur: 0.55, col: TELL_COL, hot: '#fff6df', power: 1.2 });
-    fx('cracks', cx, fy + 3, { rx: 150, ry: 22, dur: 1.4, col: '#b06a1e', hot: '#fff6df', power: 1.0 });
-  }
+  // roar's reach does, so what the eye sees is what the blow covers.
+  // IN ITS OWN COLOURS, LIKE THE HOWL (owner, 2026-11-20: "the yellow circle,
+  // whether it's around it or underneath it, those are so bad ... aura-like
+  // or watery, fluid-like"). The roar used to wear the warning amber: a flat
+  // yellow ellipse laid on the floor and the whole screen washed yellow. It is
+  // the howl's bent light now, red into violet, with no ring on the floor and
+  // no wash — and its chakra flares off the body (alphaAura) as it bellows.
+  alphaWave(b, { R: 262, dur: 0.5, amp: 24, width: 46, col: '#ff5f8a', fronts: 2, gap: 0.1, nudge: 6, shimmer: 2.2, pulse: 0, light: 0.45 });
+  b.rumbleT = 0.3; b.auraT = Math.max(b.auraT || 0, 1.0);
+  if (!G.artProbe) fx('cracks', cx, fy + 3, { rx: 150, ry: 22, dur: 1.4, col: '#c2182c', hot: ALPHA_HOT, power: 1.0 });
 }
 
 // a wave from its throat (js/ripple.js); the dust it drags runs on its floor
@@ -424,26 +427,29 @@ function alphaWave(b, o) {
   return w;
 }
 // THE AURA. While it is drawing breath for a howl, howling, or burning, the
-// king stands in its own light: a soft body of colour that breathes, wider
-// with the note — a glow with no edge, never a ring.
+// king stands in its own light — and it is CHAKRA, not a lamp (owner,
+// 2026-11-20: "think like it's chakra or something from an anime ... aura-like
+// or watery, fluid-like"). It used to be one flat oval of glow behind the
+// body. Now it is tongues of light rising off the animal: each one sways,
+// stretches and falls back on its own clock, they lean with the wind of its
+// movement, and they are drawn at a quarter of the resolution and laid back
+// up at full size, so every edge is soft as water. There is no ring, no rim
+// and no outline: the body stands in it and occludes its roots.
 function alphaAura(c, b, cx) {
-  let k = 0, col = '255,95,138';
+  let k = 0, col = [255, 95, 138];
   if (b.st === 'broodcall') k = 0.35 + 0.65 * Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62);
   else if (b.st === 'howl') k = 1;
-  else if (b.st === 'furywarn') { k = 0.4 + 0.6 * Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62); col = '255,59,79'; }
-  else if (b.st === 'fury') { k = 1.2; col = '255,59,79'; }
-  else if ((b.auraT || 0) > 0) k = clamp(b.auraT / 1.3, 0, 1) * 0.8;
-  else if (b.fury) { k = 0.3; col = '255,59,79'; }
+  else if (b.st === 'furywarn') { k = 0.4 + 0.6 * Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62); col = [255, 59, 79]; }
+  else if (b.st === 'fury') { k = 1.2; col = [255, 59, 79]; }
+  else if ((b.auraT || 0) > 0) k = clamp(b.auraT / 1.3, 0, 1) * 0.85;
+  else if (b.fury) { k = 0.32; col = [255, 59, 79]; }
   if (k <= 0.01) return;
-  const t = b.anim || 0, pulse = 1 + Math.sin(t * 9) * 0.06 + Math.sin(t * 23) * 0.025;
-  const R = (b.h * 1.5 + 70 * k) * pulse, ay = b.y + b.h * 0.45;
-  c.save(); c.globalCompositeOperation = 'lighter';
-  const g = c.createRadialGradient(cx, ay, 6, cx, ay, R);
-  g.addColorStop(0, 'rgba(' + col + ',' + Math.min(0.7, 0.52 * k).toFixed(3) + ')');
-  g.addColorStop(0.45, 'rgba(' + col + ',' + Math.min(0.4, 0.24 * k).toFixed(3) + ')');
-  g.addColorStop(1, 'rgba(' + col + ',0)');
-  c.fillStyle = g; c.beginPath(); c.ellipse(cx, ay, R * 1.15, R, 0, 0, 7); c.fill();
-  c.restore();
+  // a wind-up already burns through Boss.draw's chakra: not twice
+  if (b.st && TELL_ST.test(b.st)) return;
+  alphaChakra(c, b, cx, Math.min(1.2, k), col);
+}
+function alphaChakra(c, b, cx, k, col) {
+  drawChakra(c, cx, b.y + b.h, b.w, b.h, k, col, b.anim || 0, b.vx || 0);
 }
 // ---- DRAWING -----------------------------------------------------------------
 // Behind the body: the floor it is about to tear or land on, and its ghosts.

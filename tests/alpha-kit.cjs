@@ -162,7 +162,7 @@ const { chromium } = require('playwright');
     })()`));
     check('D. the claw draws its arc and has its own sound', /claw/.test(D.claw.st) && /slash/.test(D.claw.fx) && /alpha_claw/.test(D.claw.heard), D.claw.st + ' | fx ' + D.claw.fx + ' | ' + D.claw.heard);
     check('   the bite flashes at the jaw and snaps', /bite/.test(D.bite.st) && /flash/.test(D.bite.fx) && /alpha_snap/.test(D.bite.heard), D.bite.st + ' | fx ' + D.bite.fx + ' | ' + D.bite.heard);
-    check('   the roar goes through the ground it stands on, and its wave ends where its stun does', /roar/.test(D.roar.st) && /ground/.test(D.roar.fx) && /alpha_bark/.test(D.roar.heard)
+    check('   the roar cracks the ground it stands on, with no ring laid on the floor (owner 2026-11-20: "the yellow circle ... underneath it ... so bad"), and its wave ends where its stun does', /roar/.test(D.roar.st) && /cracks/.test(D.roar.fx) && !/ground/.test(D.roar.fx) && /alpha_bark/.test(D.roar.heard)
       && D.roar.waves.length >= 1 && D.roar.waves.every(w => w.R <= 262) && D.roar.rings === 0, D.roar.st + ' | fx ' + D.roar.fx + ' | waves ' + D.roar.waves.map(w => w.R).join(','));
     check('   the howl raises its pillar, and the pack it calls arrives hunting', /howl/.test(D.howl.st) && /pillar/.test(D.howl.fx) && D.pack.length >= 1 && D.pack.every(p => p.hunt), D.howl.st + ' | fx ' + D.howl.fx + ' | ' + D.pack.length + ' wolves');
     check('   ...and the howl is a wave through the room, not rings drawn on it', D.howl.waves.length >= 2 && D.howl.waves.some(w => w.push > 0) && D.howl.rings === 0, D.howl.waves.length + ' waves, ' + D.howl.rings + ' stroked rings');

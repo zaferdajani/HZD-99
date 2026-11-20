@@ -169,10 +169,13 @@ const SHOP = [
   // everything"). A shelf she can clear is not a shop, it is a pickup. Every
   // permanent line costs about half again what it did: one kingdom's scrap now
   // buys one or two of these, and which one is a decision.
-  { id: 'claws', type: 'crest', cost: 340 }, { id: 'over', type: 'crest', cost: 360 },
-  { id: 'plate', type: 'crest', cost: 460 }, { id: 'siphon', type: 'crest', cost: 320 },
-  { id: 'sprint', type: 'crest', cost: 280 },
-  { id: 'slot', type: 'slot', cost: 620 }, { id: 'core', type: 'core', cost: 1200 },
+  // ...AND DEARER AGAIN (owner, 2026-11-20: "things need to be more expensive
+  // because it is easy to get shards in the game"): chapter one pays about 700,
+  // and every line is about 1.6x what it was — one crest a kingdom, if that.
+  { id: 'claws', type: 'crest', cost: 540 }, { id: 'over', type: 'crest', cost: 580 },
+  { id: 'plate', type: 'crest', cost: 740 }, { id: 'siphon', type: 'crest', cost: 520 },
+  { id: 'sprint', type: 'crest', cost: 450 },
+  { id: 'slot', type: 'slot', cost: 990 }, { id: 'core', type: 'core', cost: 1600 },
   // ONE MORE HORN-STAR (owner, 2026-11-20: "shooting one ... can be upgraded at
   // the shop into becoming shooting 2 and 3 and 4. Until it reaches the
   // maximum"). GRAVEHORN's suit fires one; each upgrade adds one, up to four.
@@ -333,7 +336,14 @@ const G = {
       this.save.flags.alpha = 1;
       this.save.quests = this.save.quests || {}; this.save.quests.alpha_pack = 'done';
       invAdd('batt');
-      showItem(t('alpha_won'), t('alpha_wond'));
+      // THE PACK ANSWERS HER (owner, 2026-11-20): the yield gives her the arm
+      // that calls one of its wolves (js/packcall.js) — one card says both
+      this.save.arms = this.save.arms || [];
+      if (!isHero() && !this.save.arms.includes('pack')) { this.save.arms.push('pack'); this.save.armIdx = this.save.arms.length; }
+      {
+        const card = showItem(t('alpha_won'), t('alpha_wond') + (isHero() ? '' : '  —  ' + t('arm_how')));
+        if (card && !isHero() && typeof loadoutTagCard === 'function') loadoutTagCard(card, 'arm', 'pack');
+      }
       this.save.scrap += 60;
       // its own cue, and it is the only one in the game that resolves major
       if (typeof setMusic === 'function') setMusic('alphaTame');
@@ -1262,6 +1272,7 @@ function loadRoom(id) {
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
+  G.packWolf = null;   // a called wolf stays in the room it was called to
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   // An attack belongs to the room where it began. Do not carry a damaging
   // hurricane, buffered strike or half-charged release through a doorway.
@@ -3035,8 +3046,8 @@ function doInteract(s) {
     else if (s.extra === 'core') {
       // a cache in a quarry pocket: scrap now, not a life (owner, 2026-11-20:
       // "Getting extra lives should be only rewarded when you defeat a sage")
-      G.save.scrap = (G.save.scrap || 0) + 150;
-      showItem(t('sp_cache'), t('sp_cache_d').replace('%s', '150'));
+      G.save.scrap = (G.save.scrap || 0) + 80;
+      showItem(t('sp_cache'), t('sp_cache_d').replace('%s', '80'));
     }
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
     else if (s.extra.indexOf('it:') === 0) {
@@ -3303,6 +3314,7 @@ function update(dt) {
       if (typeof updateGateWalk === 'function') updateGateWalk(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
+      if (typeof packStep === 'function') packStep(dt);       // her called wolf (js/packcall.js)
       for (const p of G.projs) if (!p.dead) p.update(dt);
       G.projs = G.projs.filter(p => !p.dead);
       if (typeof crescentStep === 'function') crescentStep(dt);
@@ -4073,7 +4085,7 @@ function updateShop() {
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
 }
-const SHOP_VOLLEY = [450, 700, 1000];          // to 2, to 3, to 4 stars
+const SHOP_VOLLEY = [600, 900, 1300];          // to 2, to 3, to 4 stars
 function shardLevel() { return Math.max(1, Math.min(4, (G.save && G.save.shardLv) | 0 || 1)); }
 function shopVolleyOpen() { return !isHero() && !!(G.save && G.save.arms && G.save.arms.includes('shard')); }
 function shopCoreOpen() { return !!(G.save && G.save.flags && (G.save.flags.sageLives | 0) > 0); }
@@ -11738,7 +11750,18 @@ function ringWakeStep(dt) {
   }
 }
 function gateLocked(def) {
+  if (def && gateFightSealed(def)) return true;
   return !!(def && def.lock && !(G.save && G.save.flags && G.save.flags[def.lock]));
+}
+// NO RUNNING FROM A FIGHT (owner, 2026-11-20: "When I'm in the alpha chamber,
+// the gate should deactivate once I'm inside ... so that I wouldn't run away
+// from the alpha"). While a boss in this room is fighting — met, awake, not
+// beaten and not purified — every ring in the room is asleep, and they wake
+// the moment it falls. Every boss room, not only the den: a boss is beaten by
+// fighting it (CLAUDE.md, the ledger), and a door out is a place to hide.
+function gateFightSealed(def) {
+  if (typeof bossActive !== 'function' || !bossActive() || G.boss.purified || G.boss.tamed) return false;
+  return gateDoorsAll(G.roomId).indexOf(def) >= 0;
 }
 function gateDoorsAll(id) {
   const room = id == null ? G.roomId : id;
@@ -15793,6 +15816,7 @@ function drawWorldFrame() {
   if (G.boss) foeDraw(c, G.boss);
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
+  if (typeof drawPackWolf === 'function') drawPackWolf(c);
   for (const p of G.projs) p.draw(c);
   if (typeof drawCrescents === 'function') drawCrescents(c);      // the single blade's charged cut (js/entities.js)
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);

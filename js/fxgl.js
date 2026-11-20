@@ -368,7 +368,7 @@ function fxProfile(e) {
 // across the terrain, ending where the ground ends. Canvas, not the shader
 // layer: it is part of the telegraph and has to exist with no GPU.
 const TELL_FLOOR = new Float32Array(98);
-function tellFloorLight(c, x, y, half, e) {
+function tellFloorLight(c, x, y, half, e, rgb) {
   if (typeof tileAt !== 'function' || typeof TILE === 'undefined') return;
   let yc = fxSurfaceY(x, y), fall = 0;
   if (isNaN(yc)) {
@@ -384,9 +384,11 @@ function tellFloorLight(c, x, y, half, e) {
   if (!fxWalk(x, yc, half, n, TELL_FLOOR)) return;
   const a = (0.22 + e * 0.5) * (1 - fall * 0.55);
   const g = c.createLinearGradient(x - half, 0, x + half, 0);
-  g.addColorStop(0, 'rgba(255,206,116,0)'); g.addColorStop(0.22, 'rgba(255,206,116,' + a + ')');
-  g.addColorStop(0.5, 'rgba(255,236,184,' + Math.min(1, a * 1.25) + ')');
-  g.addColorStop(0.78, 'rgba(255,206,116,' + a + ')'); g.addColorStop(1, 'rgba(255,206,116,0)');
+  // (a caller may light it in its own colour; the warning amber otherwise)
+  const C = rgb ? rgb.join(',') : '255,206,116', Hc = rgb ? [255, Math.min(255, rgb[1] + 110), Math.min(255, rgb[2] + 90)].join(',') : '255,236,184';
+  g.addColorStop(0, 'rgba(' + C + ',0)'); g.addColorStop(0.22, 'rgba(' + C + ',' + a + ')');
+  g.addColorStop(0.5, 'rgba(' + Hc + ',' + Math.min(1, a * 1.25) + ')');
+  g.addColorStop(0.78, 'rgba(' + C + ',' + a + ')'); g.addColorStop(1, 'rgba(' + C + ',0)');
   c.strokeStyle = g; c.lineCap = 'round'; c.lineJoin = 'round';
   // a wide soft pass sunk a little into the soil, then the lit lip of the surface
   for (let pass = 0; pass < 2; pass++) {
@@ -403,6 +405,68 @@ function tellFloorLight(c, x, y, half, e) {
     c.stroke();
   }
   c.globalAlpha = 1;
+}
+// CHAKRA (owner, 2026-11-20: "aura-like or watery, fluid-like ... think like
+// it's chakra or something from an anime"). A body gathering itself stands in
+// tongues of light that rise off it — each one sways, stretches and falls back
+// on its own clock, they lean with its run, and loose wisps break off the
+// tips. Drawn at a quarter of the resolution and laid back up at full size,
+// so every edge is soft as water: no ring, no rim, no outline, and drawn
+// BEHIND the body, which occludes their roots. The Alpha's aura and every
+// guardian's wind-up wear it (alphakit.js, Boss.draw).
+const CHAKRA = { n: 13, S: 4 };
+function drawChakra(c, cx, footY, bw, bh, k, col, t, vx) {
+  const S = CHAKRA.S, n = CHAKRA.n;
+  // the field: two body-widths across, two and a half body-heights tall
+  const Wd = bw * 2.2 + 60, Hd = bh * 2.6 + 50;
+  const W = Math.ceil(Wd / S), H = Math.ceil(Hd / S);
+  const cv = CHAKRA.cv || (CHAKRA.cv = document.createElement('canvas'));
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const x = cv.getContext('2d');
+  x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, W, H);
+  x.globalCompositeOperation = 'lighter';
+  const base = H * 0.94, lean = clamp(-(vx || 0) / 600, -0.5, 0.5);
+  const rgb = (a) => 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + clamp(a, 0, 1).toFixed(3) + ')';
+  // the hot root keeps the flame's own hue: brighter, never white (a white
+  // core reads as a lamp, and an amber warning has to stay amber)
+  const hot = (a) => 'rgba(255,' + Math.min(255, col[1] + 50) + ',' + Math.min(255, col[2] + 40) + ',' + clamp(a, 0, 1).toFixed(3) + ')';
+  for (let i = 0; i < n; i++) {
+    const u = (i + 0.5) / n, ph = i * 2.399;                  // golden-angle phases: no two in step
+    // the middle of the body burns tallest, the flanks lower
+    const mid = 1 - Math.pow(Math.abs(u - 0.5) * 2, 1.6) * 0.55;
+    const breathe = 0.62 + 0.38 * Math.pow(Math.sin(t * (2.1 + (i % 4) * 0.37) + ph) * 0.5 + 0.5, 1.4);
+    const h = H * (0.42 + 0.34 * k) * mid * breathe;
+    const w = W * (0.075 + 0.03 * Math.sin(t * 3.3 + ph));
+    const px = W * (0.16 + 0.68 * u) + Math.sin(t * 1.7 + ph) * W * 0.025;
+    // the tip wanders on two clocks and the whole tongue leans with its run
+    const sway = (Math.sin(t * 2.7 + ph) * 0.09 + Math.sin(t * 5.3 + ph * 1.7) * 0.035 + lean * 0.4) * W;
+    const g = x.createLinearGradient(0, base, 0, base - h);
+    g.addColorStop(0, rgb(0));
+    g.addColorStop(0.14, hot(0.26 * k));
+    g.addColorStop(0.45, rgb(0.36 * k));
+    g.addColorStop(1, rgb(0));
+    x.fillStyle = g;
+    x.beginPath();
+    x.moveTo(px - w, base);
+    x.bezierCurveTo(px - w * 1.15, base - h * 0.4, px - w * 0.3 + sway * 0.6, base - h * 0.72, px + sway, base - h);
+    x.bezierCurveTo(px + w * 0.3 + sway * 0.6, base - h * 0.72, px + w * 1.15, base - h * 0.4, px + w, base);
+    x.closePath(); x.fill();
+  }
+  // a few loose wisps break off the tips and rise on their own
+  for (let i = 0; i < 6; i++) {
+    const life = ((t * 0.9 + i * 0.37) % 1 + 1) % 1, ph = i * 1.93;
+    const wx = W * (0.25 + 0.5 * ((Math.sin(ph * 3.1) * 0.5 + 0.5))) + Math.sin(t * 2 + ph) * W * 0.06;
+    const wy = base - H * (0.5 + 0.45 * life) * (0.6 + 0.4 * k);
+    const r = W * 0.035 * (1 - life * 0.6);
+    x.fillStyle = rgb(0.5 * k * Math.sin(Math.PI * life));
+    x.beginPath(); x.ellipse(wx, wy, r * 0.7, r * 1.6, 0, 0, 6.2832); x.fill();
+  }
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.imageSmoothingEnabled = true;
+  c.globalAlpha = Math.min(1, 0.85 * k + 0.15);
+  c.drawImage(cv, 0, 0, W, H, cx - (W * S) / 2, footY - base * S, W * S, H * S);
+  c.restore();
 }
 // one ground effect, as FX_SEG columns each standing on its own ground
 function fxglStrip(gl, loc, m, e, k, W, H) {

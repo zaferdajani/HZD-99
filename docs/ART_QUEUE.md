@@ -21,6 +21,50 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2ce. BLOCKED ON CREDITS, 2026-11-20 — the owner's orders that need Higgsfield ✱ READY TO FIRE
+
+Higgsfield balance read **0.37 credits** (one 2k image costs 2; a 3-second
+sound effect costs 0.75). Everything below is decided; nothing below can be
+made until the balance is topped up. Fire in this order.
+
+1. **THE ALPHA'S VOICE — six sound effects** (owner: *"It sounds like I'm
+   listening to piano or electric, whatever, instead of an actual animalistic,
+   wolf-like howlings, attacks, vibes"*). Today every Alpha cue in
+   `js/audio.js` (`alpha_howl`, `alpha_howl_far`, `alpha_bark`, `alpha_snap`,
+   `alpha_claw`, `alpha_leap`, and the pack's `wolf_bite`) is oscillators.
+   Model `mirelo_text_to_audio` (0.75 per 3 s). Prompts, each "a real
+   recording, one large grey wolf, close microphone, dry, no music, no reverb
+   tail longer than half a second": a long rising pack-leader HOWL (3 s); the
+   same howl heard across a valley (3 s); a single deep warning BARK with a
+   growl under it (1.5 s); a snapping BITE with teeth clack (1 s); a
+   lunging SNARL with breath (1.5 s); paws on gravel, a heavy LEAP (1 s).
+   Wire through `playBuf('al_<cue>')` the way `beastSound` plays `nf_<cue>`,
+   the oscillator line kept only as the not-yet-loaded fallback; then
+   `node tools/faststart.cjs` is not needed (audio), but `tests/voice-heard`
+   must hear each over the score on a phone.
+2. **THE ALPHA'S BOW — the scene after the yield** (owner: *"After finishing
+   the alpha should step back, bow down to you as the new alpha ... other
+   small wolves will stand behind the alpha and bow to you too ... not as a
+   video, but as a gameplay"*). Two filmed strips from the approved Alpha
+   plate (`assets/source/beasts/alpha2/`) and the pack plate
+   (`assets/source/beasts/wolf2/green_plate.jpg`): `alBow` (12 cells: two
+   steps back, forelegs fold, head to the floor, held) and `wolfBow`
+   (8 cells, the same bow at the pack's size). Played in A10 by the yield
+   (Boss alpha `yield` state), three pack wolves arriving behind him.
+3. **TALLYMAN STRUCK — hit-reaction plates** (owner: *"create more artwork of
+   being hit instead of hitting a metallic statue that gets pushed backward
+   simply"*). Three plates from his own set (`agTally*`): struck high (head
+   snapped back, staff arm thrown wide), struck low (doubled over the
+   abacus), staggered (one knee buckling). Wired as `agTallyHit1..3`, chosen
+   by the blow's height, over the 0.12 s hit-stop the duel now has
+   (js/sage-motion.js `hitStop`). The code half shipped 2026-11-20.
+4. **THE CITY GATE, TEXTURED** (owner: *"improve the city gate to give it
+   more texture ... make it stand out, not fading into the background"*):
+   re-fire the city gate plate with the cave gates' material brief.
+5. **NULLFANG, SECOND STAGE** (owner: *"when it came to the second stage, it
+   is so bad. His graphic is so bad"*): re-fire the phase-two plates from the
+   approved first-stage lion.
+
 ## 2cd. RATCHET SAYS IT IN COMICS — nine single unlettered panels ✘ WITHDRAWN 2026-11-20 (owner: "It's not about oversaturating the game with images and videos. Certain key moments require videos or images, but that shouldn't be it for the whole [game], unless we're making it to look like a movie game") — do not fire. Chapter one's talk keeps two pictures (the marble comic on the goal, the Volt Pack demo on the first power); tests/text-budget.cjs counts them. Kept below as the record of what was briefed.
 
 The owner, on less reading: *"If there's a way to create small images, shots

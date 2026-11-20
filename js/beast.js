@@ -1300,7 +1300,9 @@ const BEAST_STRIPS = [...new Set([...Object.values(BEAST_STRIP).map(s => s.key),
 // is how the harness diffs the two.
 function beastStrip(c, b) {
   if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return false;
-  let st = b.purified ? (b.petWalk ? 'stalk' : 'idle') : b.dead ? 'dead' : b.st;
+  // freed, a poke is answered with his own roar, softly (js/pets.js): the
+  // filmed take, never the picture tipped on its end
+  let st = b.purified ? (b.petAct === 'roar' ? 'roar' : b.petWalk ? 'stalk' : 'idle') : b.dead ? 'dead' : b.st;
   // A LION THAT HAS NOT TAKEN A STEP IS STANDING. `stalk` is also where the
   // state machine decides what to do next, and a decision made on its first
   // frame used to show one cell of mid-stride prowl between the standing lion
@@ -1324,7 +1326,8 @@ function beastStrip(c, b) {
   if (turn) cell = turn.cell;
   else if (S.recoil) cell = Math.min(11, Math.floor((1 - b._recoilT / .3) * 12));
   else if (st === 'roar') {
-    const e = clamp(1.25 - (b.t || 0), 0, 1.25);
+    const e = b.purified ? clamp(1.25 * (1 - (b.petT || 0) / (b.petT0 || 1)), 0, 1.25)
+      : clamp(1.25 - (b.t || 0), 0, 1.25);
     // The jaw opens on the same fixed-step event that emits the roar.
     cell = e < .5 ? Math.floor(e / .5 * 8)
       : e < .9 ? 8 + Math.floor((e - .5) / .4 * 11)

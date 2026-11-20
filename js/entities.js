@@ -42,7 +42,7 @@ function crestSwingMul(k) {
 // NO LIVES FROM THE LADDER (owner, 2026-11-20: "Getting extra lives should be
 // only rewarded when you defeat a sage. Not everywhere."). It pays scrap now;
 // a life is a sage's, and Ratchet's one dear spare (sageLife, js/braid.js).
-const PURE_GIFTS = [[1, 'scrap', 60], [3, 'scrap', 120], [6, 'scrap', 180], [10, 'scrap', 260], [15, 'scrap', 360]];
+const PURE_GIFTS = [[1, 'scrap', 40], [3, 'scrap', 80], [6, 'scrap', 120], [10, 'scrap', 180], [15, 'scrap', 240]];
 function pureNext(n) { for (const g of PURE_GIFTS) if (g[0] > n) return g[0]; return 0; }
 function pureGift(n) {
   const g = PURE_GIFTS.find(q => q[0] === n);
@@ -2354,6 +2354,9 @@ class Player {
       // had left held down; it was measuring her WALKING.) For the beat hurt()
       // names, the throw keeps its flight and her stick cannot cancel it.
       const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : (this.flungT > 0 || this.knockT > 0) ? 420 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
+      // (a shove is a skid until she stops or takes the stick back: heroState)
+      if (this.knockT > 0) this._shoved = true;
+      else if (dir !== 0 || Math.abs(this.vx) <= 12 || !this.on) this._shoved = false;
       if (dir !== 0 && !healing && !(this.flungT > 0) && !(this.knockT > 0)) {
         // TURN BOOST: reversing bites harder than accelerating. Pressing away
         // from current speed is always a correction the player already wants
@@ -3725,6 +3728,13 @@ class Player {
       }
     }
     if (this.skidT > 0) return 'skid';
+    // SHOVED, SHE SKIDS — she does not walk (owner, 2026-11-20: "when the hero
+    // comes out of the gate to face the alpha, it glitches into multiple moves
+    // by its own"). The Alpha's howl throws her back a step (js/ripple.js), and
+    // the speed it gave her read as a walk: a few frames of stride she never
+    // asked for, sometimes backwards. A body carried by a blow or a wave slides
+    // on its feet, braced, until it stops.
+    if (((this.knockT || 0) > 0 || this._shoved) && Math.abs(this.vx) > 12 && !(this.flungT > 0)) return 'skid';
     if (this.landT > 0 && Math.abs(this.vx) <= 34) return 'land';
     // one core left and standing still: the carriage sags. Moving cancels it —
     // a limp that survives a sprint reads as a bug, not as damage.
@@ -4060,6 +4070,11 @@ class Player {
     }
     const T = HERO_TRANS[st];
     if (!T || !T.cells) return false;
+    // BLOWN BACK: a shove (the howl's wave, a blow's throw) is the skid take's
+    // third cell held — leaning back from the push, arms out, feet sliding —
+    // not its turnaround, which starts from a run
+    if (st === 'skid' && !(this.skidT > 0))
+      return drawHeroMotionCell(this, c, T.key, 2, T.cells, 0, HERO_FLOOR, HERO_DH * T.k, false);
     const t = T.t(this), t0 = T.t0(this);
     if (!(t > 0) || !(t0 > 0)) return false;
     const p = clamp(1 - t / t0, 0, 0.999);
@@ -9643,10 +9658,11 @@ class Enemy {
     if (this.disabled || this.rescued) {
       // A broken square is an exposed binding; a complete circle is a cure.
       // Shape as well as colour makes the state legible without audio.
-      c.save(); c.strokeStyle = this.rescued ? '#b9f3ff' : '#ffd685'; c.lineWidth = 2;
+      // (the cured one wears no circle over its head: a halo is a ring round
+      // a body, which the ledger refuses. It is told by its calm walk.)
+      c.save(); c.strokeStyle = '#ffd685'; c.lineWidth = 2;
       c.beginPath();
-      if (this.rescued) c.arc(cx, this.y - 12, 5, 0, Math.PI * 2);
-      else { c.moveTo(cx - 5, this.y - 9); c.lineTo(cx - 5, this.y - 17); c.lineTo(cx + 5, this.y - 17); c.lineTo(cx + 5, this.y - 9); }
+      if (!this.rescued) { c.moveTo(cx - 5, this.y - 9); c.lineTo(cx - 5, this.y - 17); c.lineTo(cx + 5, this.y - 17); c.lineTo(cx + 5, this.y - 9); }
       c.stroke();
       // ONE SHE CAN FREE SAYS SO, FROM ACROSS THE ROOM. The bracket above is
       // ten pixels of amber, and it was the only sign there was: with the
@@ -9772,7 +9788,7 @@ class Enemy {
     // chevron for quick, a bar for armoured, a dot for the one that goes off.
     // Colour alone would fail roughly one man in twelve, so the shape carries
     // the same information.
-    if (this.traits && this.traits.length && !this.dead) {
+    if (this.traits && this.traits.length && !this.dead && !this.rescued) {   // a cured one is no threat to read, and wears no ring
       c.save();
       this.traits.forEach((tr, ti) => {
         const T = TRAITS[tr]; if (!T) return;
@@ -15550,14 +15566,14 @@ class Boss {
       const bx = this.cx(), by = this.y + this.h * 0.55;
       const R = Math.max(104, Math.max(this.w, this.h) * 1.5);
       c.save();
-      c.globalCompositeOperation = 'lighter';
-      const gg = c.createRadialGradient(bx, by, 4, bx, by, R);
-      const al = 0.16 + e * 0.30 + Math.sin((this.anim || 0) * 14) * 0.04 * e;
-      gg.addColorStop(0, 'rgba(255,232,168,' + Math.min(0.7, al) + ')');
-      gg.addColorStop(0.42, 'rgba(255,194,74,' + al * 0.6 + ')');
-      gg.addColorStop(1, 'rgba(255,150,40,0)');
-      c.fillStyle = gg;
-      c.beginPath(); c.ellipse(bx, by, R, R * 0.86, 0, 0, 7); c.fill();
+      // CHAKRA, NOT AN OVAL (owner, 2026-11-20: "so linear and not 3D ... make
+      // it aura-like or watery, fluid-like"): the amber rises off the body in
+      // tongues of light (fxgl.js drawChakra), as tall as the body is and a
+      // floor for the small ones, growing with the wind-up
+      // (the Alpha's burns in its own colours, as its howl does)
+      if (typeof drawChakra === 'function')
+        drawChakra(c, bx, this.y + this.h, Math.max(this.w, R * 0.6), Math.max(this.h, R * 0.55), this.kind === 'alpha' ? 0.35 + e * 0.75 : Math.min(1.2, 0.5 + e * 0.85),
+          this.kind === 'alpha' ? [255, 95, 138] : [255, 176, 64], this.anim || 0, this.vx || 0);
       // and the floor under it takes the light — the one place a wind-up is
       // always visible even when the animal itself is off the top of the screen.
       // THE FLOOR, not an ellipse at the foot line (owner, 2026-11-14: "looks

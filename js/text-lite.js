@@ -150,6 +150,8 @@ const TEXT_LITE = {
     pg_sage_free: "The agent is purified!",
     gear_seeit: "In GEAR (%k).",
     arm_shardd: "One horn-star, straight. Ratchet adds more.",
+    arm_packd: "Call a wolf. It fights for you ten seconds.",
+    alpha_wond: "The pack is yours. Cast to call a wolf.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "Take my Volt Pack. It's yours.",
     op_gift2: "Hits fill your ring. Spend it: heal, or burst.",
@@ -268,6 +270,8 @@ const TEXT_LITE = {
     pg_sage_free: "تطهّر العميل!",
     gear_seeit: "في العتاد (%k).",
     arm_shardd: "نجمة قرن واحدة، مستقيمة. راتشيت يضيف المزيد.",
+    arm_packd: "استدعِ ذئبًا. يقاتل معكِ عشر ثوانٍ.",
+    alpha_wond: "القطيع لكِ. أطلقي لاستدعاء ذئب.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "خذي حزمة الفولت. إنها لكِ.",
     op_gift2: "الضربات تملأ حلقتكِ. أنفقيها: شفاء أو انفجار.",
@@ -386,6 +390,8 @@ const TEXT_LITE = {
     pg_sage_free: "Ajan arındı!",
     gear_seeit: "DONANIM'da (%k).",
     arm_shardd: "Tek boynuz-yıldız, dümdüz. Ratchet fazlasını ekler.",
+    arm_packd: "Bir kurt çağır. On saniye senin için savaşır.",
+    alpha_wond: "Sürü senin. Kurt çağırmak için ateşle.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "Volt Paketimi al. Artık senin.",
     op_gift2: "Vuruşlar halkanı doldurur. Harca: iyileş ya da patlat.",
@@ -504,6 +510,8 @@ const TEXT_LITE = {
     pg_sage_free: "使者已被净化！",
     gear_seeit: "在「装备」里（%k）。",
     arm_shardd: "一枚角星，直线射出。拉切特能加更多。",
+    arm_packd: "召唤一只狼，为你战斗十秒。",
+    alpha_wond: "狼群归你了。施放即可召唤一只狼。",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "拿着我的电能背包，归你了。",
     op_gift2: "击中敌人会充满你的能量环。用它：治疗，或爆发。",
@@ -622,6 +630,8 @@ const TEXT_LITE = {
     pg_sage_free: "Агент очищен!",
     gear_seeit: "В СНАРЯЖЕНИИ (%k).",
     arm_shardd: "Одна рог-звезда, прямо. Рэтчет добавит ещё.",
+    arm_packd: "Позови волка. Он бьётся за тебя десять секунд.",
+    alpha_wond: "Стая твоя. Применяй, чтобы позвать волка.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "Возьми мой Вольт-пак. Он твой.",
     op_gift2: "Удары наполняют кольцо. Трать: лечись или бей разрядом.",
