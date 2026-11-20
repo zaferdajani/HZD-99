@@ -70,7 +70,7 @@ const check = (name, ok, detail) => {
       stage(bx, px, o) {
         o = o || {};
         const sv = newSave(1); sv.time = 99;
-        Object.assign(sv.flags, { tut: 1, woke: 1, hymnTold: 1, fcBellowsTold: 1, parryTold: 1 });
+        Object.assign(sv.flags, { tut: 1, woke: 1, hymnTold: 1, fcBellowsTold: 1, parryTold: 1, crystal: 1 });   // (kingdom C: she has the blade, and with it the brace)
         sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
         startGame(sv); loadRoom('C3');
         G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.cut = null; G.wake = null; G.bossEntry = null; G.tut = null;

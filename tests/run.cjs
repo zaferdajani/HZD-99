@@ -195,6 +195,7 @@ const SUITE = [
   ['impatient', 'arms crossed and a tapping foot over "yalla": wired, paced, turned with her — and inert until its sheet is approved'],
   ['text-budget', 'chapter one says less and shows more: short lines in five languages, no sentence on the chip, a ring for a held key, Ratchet over pictures'],
   ['route-arrow', 'the way arrow leads on through the rooms to each goal\'s real place, never back to the door she came in by'],
+  ['lives', 'a life is a sage\'s: the ladder, the chests and the spoils pay none; Ratchet\'s one spare is dear and waits for a sage'],
   ['toolbox', 'his battery is in the toolbox on the den floor: the words, the comic panel, the fired plate, its light — and never the work table'],
   ['film',      'the intro reel plays all eight shots without falling back'],
   ['filmflow',  'the opening plays as one film: no black, no caption freeze, between shots'],

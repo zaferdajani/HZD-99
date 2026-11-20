@@ -149,7 +149,7 @@ const TEXT_LITE = {
     pg_bound_wait: "Purify the ones you beat.",
     pg_sage_free: "The agent is purified!",
     gear_seeit: "In GEAR (%k).",
-    arm_shardd: "A shrapnel cone that knocks jumpers down.",
+    arm_shardd: "One horn-star, straight. Ratchet adds more.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "Take my Volt Pack. It's yours.",
     op_gift2: "Hits fill your ring. Spend it: heal, or burst.",
@@ -267,7 +267,7 @@ const TEXT_LITE = {
     pg_bound_wait: "طهّري من هزمتِهم.",
     pg_sage_free: "تطهّر العميل!",
     gear_seeit: "في العتاد (%k).",
-    arm_shardd: "مخروط شظايا يُسقط القافزين.",
+    arm_shardd: "نجمة قرن واحدة، مستقيمة. راتشيت يضيف المزيد.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "خذي حزمة الفولت. إنها لكِ.",
     op_gift2: "الضربات تملأ حلقتكِ. أنفقيها: شفاء أو انفجار.",
@@ -385,7 +385,7 @@ const TEXT_LITE = {
     pg_bound_wait: "Yendiklerini arındır.",
     pg_sage_free: "Ajan arındı!",
     gear_seeit: "DONANIM'da (%k).",
-    arm_shardd: "Zıplayanları düşüren şarapnel konisi.",
+    arm_shardd: "Tek boynuz-yıldız, dümdüz. Ratchet fazlasını ekler.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "Volt Paketimi al. Artık senin.",
     op_gift2: "Vuruşlar halkanı doldurur. Harca: iyileş ya da patlat.",
@@ -503,7 +503,7 @@ const TEXT_LITE = {
     pg_bound_wait: "净化被你击倒的机器。",
     pg_sage_free: "使者已被净化！",
     gear_seeit: "在「装备」里（%k）。",
-    arm_shardd: "弹片锥，能把跳跃的敌人打落。",
+    arm_shardd: "一枚角星，直线射出。拉切特能加更多。",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "拿着我的电能背包，归你了。",
     op_gift2: "击中敌人会充满你的能量环。用它：治疗，或爆发。",
@@ -621,7 +621,7 @@ const TEXT_LITE = {
     pg_bound_wait: "Очисти тех, кого победила.",
     pg_sage_free: "Агент очищен!",
     gear_seeit: "В СНАРЯЖЕНИИ (%k).",
-    arm_shardd: "Конус шрапнели сбивает прыгунов.",
+    arm_shardd: "Одна рог-звезда, прямо. Рэтчет добавит ещё.",
     // the pack is his thanks, on waking (owner, 2026-11-20)
     op_gift1: "Возьми мой Вольт-пак. Он твой.",
     op_gift2: "Удары наполняют кольцо. Трать: лечись или бей разрядом.",

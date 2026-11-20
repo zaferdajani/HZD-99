@@ -475,9 +475,11 @@ function ghPose(b) {
       break;
     }
     case 'kick': {
+      // both hind legs THROWN back and up off the floor, the rump rising on
+      // the front legs — a mule kick, read from across the room
       const up = Math.sin(Math.PI * Math.min(1, k * 1.25));
-      P.q = frontQ; P.br = -0.30 * up; P.hr = -0.2;
-      P.lift[2] = [66, 30]; P.lift[3] = [60, 36];
+      P.q = frontQ; P.br = -0.34 * up; P.hr = -0.2;
+      P.lift[2] = [30 + 60 * up, 70 - 34 * up]; P.lift[3] = [26 + 54 * up, 72 - 30 * up];
       break;
     }
     case 'buckprep': {
@@ -806,8 +808,14 @@ function ghStep(b, dt) {
         // the air over his back, so one strike and a step off him was free —
         // he bucked at nothing while she stood beside him. Where his weight
         // comes down a shock runs the floor both ways: jump it, or be clear.
-        b.shocks = b.shocks || [];
-        for (const dir of [-1, 1]) b.shocks.push({ x: b.cx() + dir * 96, dir, t: 0, hit: false });
+        // ...IN PHASE TWO (owner, 2026-11-20: "The first phase, you can hit it
+        // from the back without being hit back"). In phase one the heave still
+        // throws her off his back — the endless down-hit stays answered — but
+        // the floor behind him is hers to stand on and strike from.
+        if (b.phase === 2) {
+          b.shocks = b.shocks || [];
+          for (const dir of [-1, 1]) b.shocks.push({ x: b.cx() + dir * 96, dir, t: 0, hit: false });
+        }
       }
       break;
     }
@@ -963,8 +971,16 @@ function ghStep(b, dt) {
     case 'kick': {
       want = 0;
       if (!b.kickHit && b._el > 0.03 && b._el < 0.16 && !player.dead) {
-        const fy = b.y + b.h, rx = b.cx() - face * 92;
-        const box = { x: face < 0 ? rx : rx - 92, y: fy - 78, w: 92, h: 74 };
+        // THE HIT IS THE HOOVES (owner, 2026-11-20: "the back hit is reaching
+        // too far. It's not proportionate to the actual leg distance. And I
+        // don't see his legs hitting backward"). It was a fixed box reaching
+        // 184 px behind his centre, sixty past his rump, whatever the legs did.
+        // Now it is the two hind hooves where they are DRAWN this frame, and a
+        // hoof's width round them — what looks like it kicks is what kicks.
+        const hv = ghHoofWorld(b), h2 = hv[2], h3 = hv[3], pad = 16;
+        const x0 = Math.min(h2.x, h3.x) - pad, x1 = Math.max(h2.x, h3.x) + pad;
+        const y0 = Math.min(h2.y, h3.y) - pad - 10, y1 = Math.max(h2.y, h3.y) + pad;
+        const box = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
         b.kickBox = box;
         if (aabb(box, player) && player.iT <= 0) {
           b.kickHit = true;
@@ -1465,6 +1481,17 @@ function ghGone(b) {
   if (G.save) {
     G.save.flags.bossHorn = 1;
     G.save.flags.ghWon = 1;            // the one record that he was DRIVEN off (ghMigrate)
+    // HIS HORN, HERS: the suit that fires one horn-star (owner, 2026-11-20:
+    // "the rhino ... shooting stars. But it should be only one star because
+    // rhino was shooting a horn"). Ratchet adds stars, up to four.
+    if (!(typeof isHero === 'function' && isHero())) {
+      G.save.arms = G.save.arms || [];
+      if (!G.save.arms.includes('shard')) {
+        G.save.arms.push('shard'); G.save.armIdx = G.save.arms.length; G.save.shardLv = 1;
+        const card = typeof showItem === 'function' ? showItem(t('arm_shard'), t('arm_shardd') + '  —  ' + t('arm_how')) : null;
+        if (card && typeof loadoutTagCard === 'function') loadoutTagCard(card, 'arm', 'shard');
+      }
+    }
     if (typeof persist === 'function') persist();
   }
   if (typeof setMusic === 'function') setMusic(G.roomDef.zone);

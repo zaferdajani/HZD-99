@@ -1385,21 +1385,26 @@ function drawBeast(c, b) {
       const rot = b.st === 'pounce'
         ? Math.max(-0.3, Math.min(0.26, -(b.vy || 0) / 2600))
         : (b.st === 'dive' ? 0.3 : -0.22);
-      if (!last || Math.hypot(cx - last.x, footY - last.y) > 30) {
-        tr.push({ x: cx, y: footY, t: b.anim, sgn: fv < 0 ? 1 : -1, rot, pose: b._stripPose });
-        if (tr.length > 3) tr.shift();
+      // HIS DASH WEARS RED (owner, 2026-11-20: "for Nilfang, it can be red
+      // after effect when he dashes at me"): a lunge lays more, closer copies
+      // and holds them longer, tinted red — the move she will learn from him
+      const lunge = !!b.lungeFly;
+      if (!last || Math.hypot(cx - last.x, footY - last.y) > (lunge ? 22 : 30)) {
+        tr.push({ x: cx, y: footY, t: b.anim, sgn: fv < 0 ? 1 : -1, rot, pose: b._stripPose, red: lunge });
+        if (tr.length > (lunge ? 6 : 3)) tr.shift();
       }
     }
     if (b._smear && b._smear.length) {
       const vim = beastViolet();
       const sA = BEAST_P.aAtk, gw = sA[2] * BEAST_F, gh = sA[3] * BEAST_F;
       for (let i = b._smear.length - 1; i >= 0; i--) {
-        const sm = b._smear[i], age = (b.anim || 0) - sm.t;
-        if (age > 0.18 || !leaping) { b._smear.splice(i, 1); continue; }
+        const sm = b._smear[i], age = (b.anim || 0) - sm.t, life = sm.red ? 0.3 : 0.18;
+        if (age > life || !leaping) { b._smear.splice(i, 1); continue; }
         if (!vim || age < 0.03) continue;
         c.save();
         c.globalCompositeOperation = 'lighter';
-        c.globalAlpha *= 0.18 * (1 - age / 0.18);
+        c.globalAlpha *= (sm.red ? 0.42 : 0.18) * (1 - age / life);
+        if (sm.red && typeof c.filter === 'string') c.filter = 'sepia(1) saturate(9) hue-rotate(-38deg) brightness(1.05)';
         c.translate(sm.x, sm.y);
         c.scale(sm.sgn * S, S);
         if (sm.rot) { c.translate(0, -gh * 0.4); c.rotate(sm.rot); c.translate(0, gh * 0.4); }

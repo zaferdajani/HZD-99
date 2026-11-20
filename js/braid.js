@@ -398,7 +398,16 @@ function brOffer(kind, x, y) {
 // this one enriches you or whether ending it does. It is fixed for a given world
 // (the same code always plays the same), and unknowable before you commit. Some
 // runs will teach you that mercy pays. Those runs are lying to you.
-const BR_SPOIL = ['core', 'scrap', 'iq', 'slot'];
+// (no 'core': a life is the sage's own, given every time — sageLife below)
+const BR_SPOIL = ['scrap', 'iq', 'slot'];
+function sageLife() {
+  if (!G.save) return;
+  G.save.flags = G.save.flags || {};
+  G.save.flags.sageLives = (G.save.flags.sageLives | 0) + 1;
+  G.save.coresMax = (G.save.coresMax || 4) + 1;
+  if (player) player.cores = player.maxCores();
+  if (typeof spoilLater === 'function') spoilLater({ name: t('sage_life'), desc: t('sage_lifed') });
+}
 function bossSpoil(kind, pick) {
   if (!G.save) return null;
   const R = brRng(brHash('spoil/' + braid().led + '/' + kind + '/' + pick));
@@ -446,6 +455,10 @@ function brAnswer(pick) {
   if (G.forkBoss) {
     const b2 = G.forkBoss; G.forkBoss = null;
     const first = o.kind === 'firstboss';
+    // A SAGE FALLEN IS A LIFE (owner, 2026-11-20: "Getting extra lives should
+    // be only rewarded when you defeat a sage. Not everywhere."). Whichever way
+    // the fight ends; never for the Alpha, who was only the biggest wolf.
+    if (b2.kind !== 'alpha') sageLife();
     if (pick === 'L') {
       b2.hp = 0; b2.tamed = true;
       b2.die();                                  // the purification film: it lives

@@ -382,6 +382,13 @@ async function tapKey(page, code) {
     await page.evaluate(() => { G.save.panels.past.free = 1; if (G.save.visited) delete G.save.visited.B1; });
     await waitFor(page, () => panelsLoaded(panelsSeq('ch2')), 10000);
     await page.evaluate(() => {
+      // (the staging itself raises cards — the bell's evolution — that would
+      // re-open mid-climb and hold the crossing; they are not what is tested)
+      if (typeof OVERLAY_Q !== 'undefined') OVERLAY_Q.length = 0;
+      // (the climb holds JUMP, and a held key is also the skip: the pages can
+      // open and be skipped between two polls — so their start is recorded)
+      window.__tzStart = false; const ps0 = panelsStart;
+      panelsStart = function (id) { if (id === 'ch2' && G.roomId === 'B1') window.__tzStart = true; return ps0.apply(this, arguments); };
       G.dialog = null; G.state = 'PLAY'; G.enemies = []; G.projs = [];
       const g = G.grid, cols = [];
       if (g.tGap) for (let x = g.tGap[0]; x <= g.tGap[1]; x++) cols.push(x);
@@ -392,10 +399,10 @@ async function tapKey(page, code) {
     });
     const shaftTz = await waitFor(page, () => {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
-      return G.state === 'PANELS' && G.panels.seq.id === 'ch2';
+      return (G.state === 'PANELS' && G.panels.seq.id === 'ch2') || window.__tzStart;
     }, 6000);
     await page.evaluate(() => { for (const k in keys) keys[k] = 0; });
-    check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId));
+    check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId + ' seen=' + Object.keys(G.save.panels.seen).join(',') + ' past=' + Object.keys(G.save.panels.past).join(',') + ' q=' + PN.queue.join(',') + ' due=' + PN.due + ' bossGlitch=' + G.save.flags.bossGlitch));
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
     // ...she steers her own landing in a seamless shaft (owner, 2026-10-13),
     // toward the ledge beside the hatch, letting go once over it

@@ -172,7 +172,11 @@ const SHOP = [
   { id: 'claws', type: 'crest', cost: 340 }, { id: 'over', type: 'crest', cost: 360 },
   { id: 'plate', type: 'crest', cost: 460 }, { id: 'siphon', type: 'crest', cost: 320 },
   { id: 'sprint', type: 'crest', cost: 280 },
-  { id: 'slot', type: 'slot', cost: 620 }, { id: 'core', type: 'core', cost: 800 },
+  { id: 'slot', type: 'slot', cost: 620 }, { id: 'core', type: 'core', cost: 1200 },
+  // ONE MORE HORN-STAR (owner, 2026-11-20: "shooting one ... can be upgraded at
+  // the shop into becoming shooting 2 and 3 and 4. Until it reaches the
+  // maximum"). GRAVEHORN's suit fires one; each upgrade adds one, up to four.
+  { id: 'volley', type: 'volley', get cost() { return SHOP_VOLLEY[Math.min(SHOP_VOLLEY.length - 1, shardLevel() - 1)]; } },
 ];
 const BENCH_ROOMS = ['A3', 'B3', 'D2', 'E2'];   // (D2: the archive's pod is at ZERO's door now — world.js, SAVE POINTS ARE FOR CRITICAL PLACES)
 
@@ -358,7 +362,11 @@ const G = {
     showItem(t('i_batt'), t('i_battd'));
     // …and the suit it was wearing. This is the Mega Man X loop: the thing that
     // beat you becomes the thing that beats the next one.
-    const arm = ARM_BY_BOSS[kind];
+    // (the robot world: the volley is GRAVEHORN's now — owner, 2026-11-20,
+    // "shooting ninja stars ... that's an extra skill that I should not be
+    // getting from Nelfang ... Maybe the rhino" — ghGone gives it; NULLFANG
+    // teaches the dash and only the dash)
+    const arm = (kind === 'glitch' && !isHero()) ? null : ARM_BY_BOSS[kind];
     if (arm) {
       if (!this.save.arms) this.save.arms = [];
       if (!this.save.arms.includes(arm)) {
@@ -928,11 +936,19 @@ function drawTinker(c, s, talking) {
   // he works while she is not standing over him. The moment she is close he
   // has looked up — which is what makes walking into the den feel like
   // interrupting somebody rather than approaching a shop fixture.
-  const working = inDen && !talking && !near;
-  r.t -= dt; r.tic -= dt;
+  // ...AND AT THE CAMP TOO, AND SLOWER (owner, 2026-11-20, seeing him the
+  // second time: "his movement is so fast. It looks like glitching instead of
+  // actually moving. It needs to be smooth, slow, chill, doing his thing
+  // outside of his room"). Outside the den he used to stand cutting between
+  // held plates every second, with a twitch every few: now he works his loop
+  // at a gentler pace, and the twitch belongs to the den alone.
+  const camp = !inDen;
+  const working = !talking && !near;
+  if (camp && !r.campReady) { r.campReady = 1; mediaFetch('ratchetLoop'); }
+  r.t -= dt; if (!camp) r.tic -= dt;
   // the job's own clock, and it only runs while he is working: a task that
   // keeps advancing behind a tic comes back mid-stroke in the wrong stage
-  if (working) tinkerTask(r, dt);
+  if (working) tinkerTask(r, camp ? dt * 0.55 : dt);
   if (working) r.vent -= dt;                             // he only cooks while he works
   const locked = r.pose === 'tic' || r.pose === 'vent';  // these two run to the end
   if (locked) {
@@ -3017,10 +3033,10 @@ function doInteract(s) {
     sfx('chest');
     if (s.extra === 'slot') { G.save.slots++; showItem(t('s_slot'), t('s_slotd')); }
     else if (s.extra === 'core') {
-      // a spare core in a quarry pocket (CV1): the first cave pays in health
-      G.save.coresMax = (G.save.coresMax || 4) + 1;
-      if (player) player.cores = player.maxCores();
-      showItem(t('sp_core'), t('sp_core_d'));
+      // a cache in a quarry pocket: scrap now, not a life (owner, 2026-11-20:
+      // "Getting extra lives should be only rewarded when you defeat a sage")
+      G.save.scrap = (G.save.scrap || 0) + 150;
+      showItem(t('sp_cache'), t('sp_cache_d').replace('%s', '150'));
     }
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
     else if (s.extra.indexOf('it:') === 0) {
@@ -3981,7 +3997,7 @@ function shopPick() {
   const f = G.save.flags || {}, cell = SHOP.find(q => q.type === 'cell');
   if (cell && !f.heal) return { it: cell, why: 'shop_why_pack' };
   if (cell && player && player.volts < player.voltMax() * 0.5 && G.save.scrap >= shopCost(cell)) return { it: cell, why: 'shop_why_cell' };
-  const open = SHOP.filter(q => q.type !== 'cell' && !shopSold(q));
+  const open = SHOP.filter(q => q.type !== 'cell' && !shopSold(q) && (q.type !== 'core' || shopCoreOpen()) && (q.type !== 'volley' || shopVolleyOpen()));
   if (!open.length) return null;
   const rank = (q) => { const i = SHOP_PICK_ORDER.indexOf(q.id); return i < 0 ? 99 : i; };
   const can = open.filter(q => G.save.scrap >= shopCost(q)).sort((a, b) => rank(a) - rank(b) || a.cost - b.cost);
@@ -4019,6 +4035,12 @@ function updateShop() {
       G.toast(t('story_pack_first')); sfx('no'); return;
     }
     if (shopSold(it)) { sfx('no'); return; }
+    // ONE DEAR LIFE, AND NOT ALWAYS (owner, 2026-11-20: "You might be able to
+    // purchase one life from Ratchet with a higher price, like a very high
+    // price, but shouldn't be available all the time"): on his shelf only once
+    // a sage has fallen, once, at 1200
+    if (it.type === 'core' && !shopCoreOpen()) { G.toast(t('s_core_wait')); sfx('no'); return; }
+    if (it.type === 'volley' && !shopVolleyOpen()) { G.toast(t('s_volley_wait')); sfx('no'); return; }
     const cost = Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1));
     if (G.save.scrap < cost) { G.toast(t('poor')); sfx('no'); return; }
     G.save.scrap -= cost; sfx('buy');
@@ -4047,11 +4069,17 @@ function updateShop() {
     }
     if (it.type === 'crest') grantCrest(it.id);
     else if (it.type === 'slot') { G.save.slots++; G.save.shop[it.id] = 1; showItem(t('s_slot'), t('s_slotd')); }
+    else if (it.type === 'volley') { G.save.shardLv = shardLevel() + 1; showItem(t('s_volley'), t('s_volley_now').replace('%n', String(G.save.shardLv))); }
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
 }
+const SHOP_VOLLEY = [450, 700, 1000];          // to 2, to 3, to 4 stars
+function shardLevel() { return Math.max(1, Math.min(4, (G.save && G.save.shardLv) | 0 || 1)); }
+function shopVolleyOpen() { return !isHero() && !!(G.save && G.save.arms && G.save.arms.includes('shard')); }
+function shopCoreOpen() { return !!(G.save && G.save.flags && (G.save.flags.sageLives | 0) > 0); }
 function shopSold(it) {
   if (it.type === 'cell') return false;          // a consumable is never sold out
+  if (it.type === 'volley') return shardLevel() >= 4;
   return it.type === 'crest' ? G.save.crests.indexOf(it.id) >= 0 : !!G.save.shop[it.id];
 }
 function effSlots() { return G.save.slots + (G.save.skills && G.save.skills.indexOf('mind') >= 0 ? 1 : 0); }
@@ -14244,7 +14272,25 @@ function mapUnlocked() {
   for (const k in (G.save && G.save.visited) || {}) { if (++n >= 2) return true; }
   return false;
 }
-function mapBtnRect() { return { x: 846, y: 22, w: 92, h: 28 }; }
+function mapBtnRect() { return { x: 826, y: 22, w: 112, h: 30 }; }
+// the chart flying from the agent's hands to the button that opens it
+function drawMapGive() {
+  const M = G.mapGive;
+  if (!M || G.state !== 'PLAY') return;
+  M.t += 1 / 60;
+  const T = 1.1, k = Math.min(1, M.t / T), e = 1 - Math.pow(1 - k, 3);
+  const sx0 = typeof worldScreenX === 'function' ? worldScreenX(M.wx) : M.wx - cam.x;
+  const sy0 = typeof worldScreenY === 'function' ? worldScreenY(M.wy) : M.wy - cam.y;
+  const r = mapBtnRect(), touch = typeof TOUCH !== 'undefined' && TOUCH.enabled;
+  const x1 = touch ? 60 : r.x + r.w / 2, y1 = touch ? 110 : r.y + r.h / 2;
+  const x = sx0 + (x1 - sx0) * e, y = sy0 + (y1 - sy0) * e - Math.sin(Math.PI * k) * 90, sc = 1.6 - 0.8 * e;
+  c.save(); c.translate(x, y); c.scale(sc, sc);
+  c.fillStyle = '#e9dcb8'; c.strokeStyle = '#5b4a2a'; c.lineWidth = 2;
+  rr(c, -16, -12, 32, 24, 4); c.fill(); c.stroke();
+  ftxt('▦', 0, 1, 16, '#5b4a2a', 'center');
+  c.restore();
+  if (k >= 1) { G.mapGive = null; if (typeof sfx === 'function') sfx('pick'); }
+}
 function braidBtnRect() { return { x: 846, y: 56, w: 92, h: 28 }; }
 function drawMapButton() {
   if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
@@ -14262,7 +14308,10 @@ function drawMapButton() {
   c.strokeStyle = nw ? 'rgba(120,240,255,' + (0.5 + pu * 0.5) + ')' : 'rgba(120,200,230,0.45)';
   c.lineWidth = nw ? 2 : 1.3;
   rr(c, r.x, r.y, r.w, r.h, 7); c.stroke();
-  ftxt('▦ ' + t('map_btn'), r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  // the button says the key that opens it, so the button teaches the key
+  const mk = typeof ctlName === 'function' ? ctlName('MAP') : 'M';
+  ftxt('▦ ' + t('map_btn') + '  ' + mk, r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  if (nw && (G.mapPointT || 0) > 0 && !G.mapGive) { G.mapPointT -= 1 / 60; c.restore(); drawHudPointer(r.x + r.w / 2 - 20, r.y + r.h / 2); c.save(); }
   // and the multiverse itself, once she has actually forked one
   const b2 = braid();
   if (b2 && b2.led.length) {
@@ -17671,6 +17720,7 @@ function draw(tms) {
   if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js
   if (typeof drawOpeningHUD === 'function') drawOpeningHUD();
   drawMapButton();
+  drawMapGive();
   if (typeof drawSoundChip === 'function') drawSoundChip(tsec);
   if (typeof drawSaveFeedback === 'function') drawSaveFeedback();
   // THE PUSH. The frame she left is held and slid off the edge she left by, so
@@ -19440,8 +19490,10 @@ function drawShop() {
     // THE PACK IS NOT A REFILL. Until it is bought the first row is the Volt
     // Pack — permanent, marked, and the only thing on the list she can buy;
     // after it, the same row is the refill it always was (js/opening.js).
-    const row = typeof opShopRow === 'function' ? opShopRow(it, y, sel) : null;
+    let row = typeof opShopRow === 'function' ? opShopRow(it, y, sel) : null;
     if (row) { name = row.name; desc = row.desc; }
+    if (it.type === 'core' && !sold && !shopCoreOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_core_wait'); }
+    if (it.type === 'volley' && !sold && !shopVolleyOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_volley_wait'); }
     const col = row && row.locked ? '#56626e' : sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
     // WHICH SYSTEM IS THIS LINE? A crest — and the port width a crest sits
     // in — wears the crest's diamond (js/loadout.js): dashed while it is on

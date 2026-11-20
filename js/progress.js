@@ -816,3 +816,37 @@ TEXT_LAYERS.push({
   ru: { pure_first: 'ПЕРВЫЙ ОЧИЩЕННЫЙ', pure_firstd: 'Он вспомнил, кем был — и где спрятал запасное. ЯДРО, и оно твоё навсегда: ещё одна жизнь.', pure_core: 'ЯДРО В ДАР', pure_cored: 'Очищенные поговорили между собой. Один из них сберёг ядро через всё это и хочет отдать его тебе.', pure_scrap: 'ЧТО ОНИ СБЕРЕГЛИ', pure_scrapd: 'Очищенные собрали то, что прятали от песни: %s лома.', pure_next: 'Очищено: %n. На %m они одарят снова.', pure_all: 'Очищено: %n. Каждый из них откликнется на твой зов.', gear_how: 'Применить: %k', gear_how_arm: 'Сменить костюм: %k', gear_how_wall: 'Применить: прыгни к стене и держи к ней; прыгни ещё раз, чтобы оттолкнуться.', bag_gear: 'Клинки, способности и клавиши для них: СНАРЯЖЕНИЕ — %k', gear_seeit: 'Теперь это в СНАРЯЖЕНИИ (%k), вместе с клавишей.', nf_break1: 'NULLFANG — путы рвутся. Теперь он быстрее.', nf_break2: 'NULLFANG — рвутся последние путы. Больше он не отдыхает.', map_locked: 'Карты этих земель пока нет. Съёмку хранит один из агентов Ока — очисти его, и карта твоя.', map_goal: 'Цель', shop_pick: 'ВЫБОР РАТЧЕТА', shop_browse: 'Посмотреть', shop_later: 'Не сейчас', shop_why_pack: 'У тебя ещё нет блока. Вольт-блок нужен первым — на нём работают и лечение, и разряд.', shop_why_cell: 'Вольт осталось мало. Одна ячейка зарядит тебя.', shop_why_buy: 'На твоём месте я бы взял: {item}. Тебе хватает, и это изменит твой бой.', shop_why_save: 'Пока тебе здесь ничего не по карману. Накопи ещё {n} лома на {item}.', shop_why_none: 'У тебя есть всё с моей полки. Сегодня покупать нечего.',
     ring_dormant: 'Кольцо спит. Тот, кто держит это место, ещё не разбудил его.', hz_back: 'Её отбросило на последнюю безопасную опору.', pg_seam_high: 'На полке наверху что-то припрятано. Одним прыжком не достать — вернись, когда научишься взбираться по воздуху.' },
 });
+
+// ---- lives are a sage's (owner, 2026-11-20), in five languages; both worlds ----
+TEXT_LAYERS.push({
+  en: {
+    s_volley: 'One More Horn-Star', s_volleyd: 'GRAVEHORN\'s suit fires one more star.', s_volley_wait: 'For the suit GRAVEHORN leaves.', s_volley_now: 'Your suit fires %n stars now.',
+    pure_first_scrapd: 'It remembers who it was, and where it hid its savings: %s scrap.',
+    sp_cache: 'A QUARRY CACHE', sp_cache_d: 'Someone hid this from the song: %s scrap.',
+    s_core_wait: 'Only after a sage falls. Ratchet has one spare.',
+    sage_life: 'A LIFE, EARNED', sage_lifed: 'A sage has fallen. One more core, for good.' },
+  ar: {
+    s_volley: 'نجمة قرن أخرى', s_volleyd: 'بدلة قَرن القبر تطلق نجمة إضافية.', s_volley_wait: 'للبدلة التي يتركها قَرن القبر.', s_volley_now: 'بدلتكِ تطلق %n نجوم الآن.',
+    pure_first_scrapd: 'تذكّر من كان، وأين خبّأ مدّخراته: %s خردة.',
+    sp_cache: 'مخبأ في المحجر', sp_cache_d: 'أحدهم خبّأ هذا عن الأغنية: %s خردة.',
+    s_core_wait: 'فقط بعد سقوط حكيم. لدى راتشيت واحدة احتياطية.',
+    sage_life: 'حياة مستحقّة', sage_lifed: 'سقط حكيم. نواة أخرى، إلى الأبد.' },
+  tr: {
+    s_volley: 'Bir Boynuz-Yıldız Daha', s_volleyd: 'MEZARBOYNUZ zırhı bir yıldız fazla atar.', s_volley_wait: 'MEZARBOYNUZ\'un bıraktığı zırh için.', s_volley_now: 'Zırhın artık %n yıldız atıyor.',
+    pure_first_scrapd: 'Kim olduğunu ve birikimini nereye sakladığını hatırlıyor: %s hurda.',
+    sp_cache: 'TAŞ OCAĞI ZULASI', sp_cache_d: 'Biri bunu şarkıdan saklamış: %s hurda.',
+    s_core_wait: 'Ancak bir bilge düşünce. Ratchet\'in bir yedeği var.',
+    sage_life: 'KAZANILMIŞ BİR CAN', sage_lifed: 'Bir bilge düştü. Kalıcı bir çekirdek daha.' },
+  zh: {
+    s_volley: '再多一枚角星', s_volleyd: '墓角的战甲多发射一枚星。', s_volley_wait: '给墓角留下的那套战甲用。', s_volley_now: '你的战甲现在发射 %n 枚星。',
+    pure_first_scrapd: '它想起了自己是谁，也想起了积蓄藏在哪里：%s 废料。',
+    sp_cache: '采石场的藏匿处', sp_cache_d: '有人把这些从歌声里藏了起来：%s 废料。',
+    s_core_wait: '要等一位贤者倒下。拉切特只有一枚备用。',
+    sage_life: '赢得的一条命', sage_lifed: '一位贤者倒下了。永久多一枚核心。' },
+  ru: {
+    s_volley: 'Ещё одна рог-звезда', s_volleyd: 'Доспех МОГИЛЬНОГО РОГА выпускает ещё одну звезду.', s_volley_wait: 'Для доспеха, что оставит МОГИЛЬНЫЙ РОГ.', s_volley_now: 'Теперь доспех выпускает звёзд: %n.',
+    pure_first_scrapd: 'Он вспомнил, кем был, и где спрятал запас: %s лома.',
+    sp_cache: 'ТАЙНИК В КАРЬЕРЕ', sp_cache_d: 'Кто-то спрятал это от песни: %s лома.',
+    s_core_wait: 'Только после падения мудреца. У Рэтчета одно запасное.',
+    sage_life: 'ЗАСЛУЖЕННАЯ ЖИЗНЬ', sage_lifed: 'Мудрец пал. Ещё одно ядро — навсегда.' },
+});

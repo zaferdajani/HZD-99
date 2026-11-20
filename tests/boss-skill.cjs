@@ -145,7 +145,10 @@ const { chromium } = require('playwright');
     check('GRAVEHORN  ...and it does not get her there: he has more than half of the phase\'s health when she falls', H.pogo.every(d => d.died && parseInt(d.bossHp, 10) >= 329 * 0.5), H.pogo.map(d => d.bossHp).join(' | '));
     check('GRAVEHORN  ...a down-strike is a move, not a plan: never three inside five seconds', H.pogo.every(d => d.hitAt.every((f, i) => i < 2 || f - d.hitAt[i - 2] >= 298)), H.pogo.map(d => d.hitAt.length + ' down-strikes bit, at ' + d.hitAt.map(f => (f / 60).toFixed(1)).join('/')).join(' | '));
     check('GRAVEHORN  hop: one down-strike, back to the floor, again — never beats him (it used to: 67 blows, never touched)', H.hop.every(d => !d.won && d.died && parseInt(d.bossHp, 10) >= 329 * 0.8), H.hop.map(line).join(' | '));
-    check('GRAVEHORN  ...because the floor beside him is no refuge: the buck\'s shock or the buck itself is what stops her', H.hop.every(d => d.srcs.some(q => q === 'horn.quake' || q === 'horn.buck')), H.hop.map(d => d.srcs.join(',')).join(' | '));
+    // (phase one: his back and the floor behind him are hers by order — owner,
+    // 2026-11-20, "The first phase, you can hit it and from the back without
+    // being hit back" — so what stops the hopper may be any blow of his)
+    check('GRAVEHORN  ...because the floor beside him is no refuge: one of his blows is what stops her', H.hop.every(d => d.srcs.some(q => /^horn\./.test(q))), H.hop.map(d => d.srcs.join(',')).join(' | '));
     check('GRAVEHORN  ...struck from above, he bucks', H.pogo.some(d => d.srcs.indexOf('horn.buck') >= 0 || (d.states.buck || 0) > 0), H.pogo.map(d => (d.states.buck || 0) + ' bucks').join(' | '));
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await b.close(); }

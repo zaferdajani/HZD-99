@@ -487,6 +487,10 @@ function panelsStart(id, opts) {
     back: o.replay ? 'PANELLIST' : (G.state === 'PANELLIST' ? 'PANELLIST' : 'PLAY'), replay: !!o.replay,
     // what the story does next once the pages close (the waking, the letter read)
     then: o.replay ? null : (o.then || null) };
+  // (and it is no longer DUE anywhere: the doorway carry-over is for a beat
+  // she missed, never one already playing — or a fresh save would be handed it)
+  if (PN.due === id) PN.due = null;
+  { const qi = PN.queue.indexOf(id); if (qi >= 0) PN.queue.splice(qi, 1); }
   // SEEN AS IT BEGINS: a reload mid-sequence never shows it a second time —
   // it is in the replay list instead
   if (!S.seen[id]) { S.n = (S.n | 0) + 1; S.seen[id] = S.n; if (typeof persist === 'function') persist(); }

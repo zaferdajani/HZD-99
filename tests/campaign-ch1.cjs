@@ -975,8 +975,8 @@ mission('sage', s => s.flags.includes('sageTame_GA1D'), async s => {
 });
 // 6. CHIME — the bell on the climb above the meadow (A8 -> A9)
 mission('chime', s => s.flags.includes('bossChime'), async s => {
-  // NULLFANG's break plays on the road (A2 west / A3 east): watch it, and its pages
-  if (s.flags.includes('nfBreak') && (s.room === 'A2' || s.room === 'A3') && !(R.pansSeen && R.pansSeen.has('break'))) { await linger(s, 'break', 20000); return; }
+  // (NULLFANG's break has no pages in the game since 2026-11-20 — the owner
+  // chose the key moments — so there is nothing to wait for on the road)
   if (!(await readyFor(s, 'A3', 'A9'))) return;
   if (s.room !== 'A9') { await travel(s, 'A9'); return; }
   await bossFight(s);

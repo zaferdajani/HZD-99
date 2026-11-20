@@ -30,7 +30,17 @@ const check = (name, ok, detail) => {
   await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
 
   const r = await page.evaluate(async () => {
-    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    // NO BLOCK BEFORE THE SWORD (owner, 2026-11-20: "for now there is no
+    // block. But it's only claw"): with claws alone, holding GUARD braces nothing
+    {
+      const sv0 = newSave(1); sv0.time = 99; sv0.flags.tut = 1; sv0.flags.woke = 1;
+      startGame(sv0); loadRoom('A1'); G.wake = null; G.state = 'PLAY'; G.enemies = []; G.boss = null;
+      for (let i = 0; i < 10; i++) { keys['KeyL'] = 1; await new Promise(k => requestAnimationFrame(k)); }
+      window.__clawGuard = player.guardT; delete keys['KeyL'];
+      for (let i = 0; i < 4; i++) await new Promise(k => requestAnimationFrame(k));
+    }
+    // ...and with the blade she braces
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1; sv.flags.crystal = 1;
     startGame(sv); loadRoom('A1');
     G.wake = null; G.state = 'PLAY'; G.enemies = []; G.boss = null;
     mediaFetch('hzdGuard', 1);
@@ -54,9 +64,11 @@ const check = (name, ok, detail) => {
     player.iT = 0; player.vx = 0;
     player.hurt(1, player.x - 40, player.y);
     out.kbOpen = Math.abs(player.vx);
+    out.clawGuard = window.__clawGuard;
     return out;
   });
 
+  check('no block before the sword: with claws alone, GUARD braces nothing', r.clawGuard === 0, String(r.clawGuard));
   check('the guard is still wired into the transition table', r.declared === 'hzdGuard', String(r.declared));
   check('holding GUARD raises the timer', r.guardT > 0, 'guardT ' + r.guardT);
   check('...and the timer names the state', r.state === 'guard', r.state);

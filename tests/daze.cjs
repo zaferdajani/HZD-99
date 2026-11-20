@@ -43,11 +43,11 @@ const { chromium } = require('playwright');
     // five hits inside the rolling window, which is what a committed melee
     // player produces: dealDmg is the funnel every real hit goes through, so
     // calling it is calling the game and not a mock of it
-    for (let i = 0; i < 5; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
+    for (let i = 0; i < BSTAT.glitch.dazeAt; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
     b.update(1 / 60);
     return { st: b.st, dur: b.dazeDur || 0 };
   });
-  check('five grouped hits break it', grouped.st === 'daze', 'st=' + grouped.st);
+  check('a group of hits (BSTAT.glitch.dazeAt — six since he was made harder, 2026-11-20) breaks it', grouped.st === 'daze', 'st=' + grouped.st);
 
   await boot();
   const spaced = await page.evaluate(async () => {
@@ -68,7 +68,7 @@ const { chromium } = require('playwright');
   await boot();
   const window_ = await page.evaluate(() => {
     const b = G.boss;
-    for (let i = 0; i < 5; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
+    for (let i = 0; i < BSTAT.glitch.dazeAt; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
     const seen = {}; let frames = 0;
     b.update(1 / 60);
     while (b.st === 'daze' && frames < 400) { seen[b.st] = 1; b.update(1 / 60); frames++; }

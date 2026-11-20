@@ -90,8 +90,16 @@ function fireArm(p, a) {
     const pr = new Proj(x, y, vx, vy, true, Math.round(dmg * base), r, E.col, grav || 0, life || 3);
     pr.el = a.el; G.projs.push(pr); return pr;
   };
-  if (a.id === 'shard') {                       // wide cone of ferrous shrapnel
-    for (let i = -2; i <= 2; i++) mk(p.face * (430 + Math.abs(i) * 30), i * 105, 11, 5, 260, 0.5);
+  if (a.id === 'shard') {
+    if (typeof isHero === 'function' && isHero()) {     // NOSTOS: the wide cone, as ever
+      for (let i = -2; i <= 2; i++) mk(p.face * (430 + Math.abs(i) * 30), i * 105, 11, 5, 260, 0.5);
+    } else {
+      // GRAVEHORN'S HORN-STAR: one, straight, and Ratchet adds the rest
+      // (1: straight; 2: a pair; 3: a fan; 4: the full spread)
+      const n = typeof shardLevel === 'function' ? shardLevel() : 1;
+      const spread = { 1: [0], 2: [-55, 55], 3: [-90, 0, 90], 4: [-130, -45, 45, 130] }[n] || [0];
+      for (const vy of spread) { const pr = mk(p.face * 560, vy, 14, 6, 0, 0.9); pr.star = true; }
+    }
     sfx('shoot');
   } else if (a.id === 'jet') {                  // continuous shove
     mk(p.face * (520 + rnd(-40, 40)), rnd(-40, 40), 6, 7, 0, 0.32);

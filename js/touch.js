@@ -257,7 +257,7 @@ function tLayout() {
       // seat here so it cannot land inside another circle's reach.
       { code: 'VGUARD', x: rgx - 86 * u, y: H - 268 * u, r: 26 * u, sym: 'shield',
         tint: { fill: 'rgba(150,210,255,0.95)', ring: 'rgba(120,190,255,0.7)' },
-        show: () => tAllow('GUARD') },
+        show: () => tAllow('GUARD') && (typeof guardUnlocked !== 'function' || guardUnlocked()) },
     ],
     // menu buttons live in the LEFT column, actions in the right — no clutter
     // THE MAP BUTTON KEPT LOSING TO THE CREST BUTTON (owner, 2026-09-05:
@@ -271,7 +271,7 @@ function tLayout() {
     // and the rows are far enough apart that no two hit circles meet.
     corners: [
       { code: 'VPAUSE', x: lgx, y: 26 * u + 4, r: 16 * u + 2, icon: '▐▌', show: () => true },
-      { code: 'VMAP', x: lgx, y: 92 * u + 4, r: 22 * u + 2, icon: '▦', show: () => true },
+      { code: 'VMAP', x: lgx, y: 92 * u + 4, r: 22 * u + 2, icon: '▦', show: () => typeof mapUnlocked !== 'function' || mapUnlocked() },
       { code: 'VSKILL', x: lgx, y: 156 * u + 4, r: 16 * u + 2, icon: '◈', show: () => tAllow('SKILL') },
     ],
   };
