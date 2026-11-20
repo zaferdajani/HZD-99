@@ -345,18 +345,18 @@ const { chromium } = require('playwright');
   if (saved.bench !== 'A0B' || saved.stored !== 'A0B') fails.push('the pod did not move the save point to the den: ' + JSON.stringify(saved));
   if (!foe0 || foe0.role !== 'empty-construct' || foe0.hp > 20) fails.push('the first foe is not a small empty construct: ' + JSON.stringify(foe0));
   if (!firstKill.flag) fails.push('breaking the first machine was not recorded');
-  if (!bit.flag || bit.cores !== before.cores - 1 || bit.dead) fails.push('the winch did not bite one core off her: ' + JSON.stringify(before) + ' -> ' + JSON.stringify(bit));
   if (!bit.winch || bit.winch.disabled || bit.winch.hp < 1) fails.push('claws broke the winch (they only scratch it): ' + JSON.stringify(bit.winch));
-  if (bit.knocks < 3) fails.push('the winch paid out no scrap for the blows (' + bit.knocks + ' knocks)');
-  if (scrapAfter < 12) fails.push('the counter opened on less than the pack costs (' + scrapAfter + ')');
-  if (!pitch.text || !/12 scrap/.test(pitch.text)) fails.push('the pack was not pitched with its cost before the counter: ' + pitch.text);
-  if (pitch.row !== 'cell') fails.push('the counter did not open on the pack');
-  if (!bought.flag || !bought.heal) fails.push('buying the pack did not register / wire it');
+  // THE PACK IS HIS THANKS ON WAKING (owner, 2026-11-20: "he should give me
+  // the power cell instead of me having to go back outside, hit the machine,
+  // coming back inside ... one shot instead of multiple steps"): she has it
+  // before she ever reaches the winch, it costs her nothing, no counter opens
+  // for it, and nothing hurts her just so there is something to mend.
+  if (!bought.flag || !bought.heal) fails.push('Ratchet did not give her the pack on waking (flags.heal / pack): ' + JSON.stringify(bought));
+  if (bought.scrap !== scrapBefore) fails.push('the pack cost her scrap (' + scrapBefore + ' -> ' + bought.scrap + ')');
+  if (pitch.row) fails.push('a counter opened for the pack: ' + pitch.row);
+  if (hurtTo.cores < hurtTo.max) fails.push('the heal lesson took a core from her to have something to mend (' + hurtTo.cores + '/' + hurtTo.max + ')');
   if (!burstLock.had) fails.push('the pack did not wire (flags.heal)');
   if (burstLock.locked > 0) fails.push('the claw charges before the pack is bought (chargeT ' + burstLock.locked + ')');
-  if (bought.scrap !== scrapAfter - 12) fails.push('the pack did not cost the 12 scrap (' + scrapAfter + ' -> ' + bought.scrap + ')');
-  if (hurtTo.cores >= hurtTo.max) fails.push('the repair lesson opened at full health, so it teaches nothing');
-  if (hurtTo.cores !== bit.cores) fails.push('the heal lesson cost her a SECOND core on top of the winch\'s (' + bit.cores + ' -> ' + hurtTo.cores + ')');
   if (!winchCalm || !winchCalm.calm || winchCalm.phase !== 'idle') fails.push('the winch swings while she is being taught: ' + JSON.stringify(winchCalm));
   if (!winchDown) fails.push('the Volt Burst lesson did not stop the winch');
   if (!door.opened) fails.push('the way out never opened');

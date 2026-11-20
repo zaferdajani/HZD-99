@@ -85,9 +85,10 @@ const { chromium } = require('playwright');
     startGame(sv); loadRoom('W1');
     await new Promise(r => requestAnimationFrame(r));
     const started = !!G.wake;
-    // THE WAKE'S PAGES COME FIRST (2026-10-11): the waking waits for them
-    // (tests/panels.cjs plays them); here they are closed, as the reader does
-    const pagesFirst = !!(G.wake && G.wake.pend);
+    // NO WAKE PAGES (owner, 2026-11-19: "When there is a video no need for
+    // comic"): the opening film's last shot is her waking, so nothing holds
+    // the waking for pages any more
+    const pagesFirst = !(G.wake && G.wake.pend);
     if (G.panels) panelsEnd();
     if (G.wake) G.wake.pend = false;
     // she is holding right through the whole thing
@@ -106,7 +107,7 @@ const { chromium } = require('playwright');
     return { started, pagesFirst, moved, stillHeld, movedAfter, flag: !!(G.save.flags && G.save.flags.woke) };
   });
   check('the cradle takes hold of her when she arrives', wake.started);
-  check('...and its pages come before the waking', wake.pagesFirst);
+  check('...and no comic holds it: the opening film already showed her waking', wake.pagesFirst);
   check('...and she cannot walk out of the release',
     wake.moved < 1, wake.moved.toFixed(2) + ' px');
   check('...it ENDS, and gives her back',

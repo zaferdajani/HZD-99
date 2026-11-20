@@ -385,33 +385,33 @@ async function play(browser, mode) {
       // the errand — and nothing else stands between the repair and the cell.
       // SHORT LINES (owner, 2026-11-19: "minimize all the text"): the song's
       // sickness is the letter's pages; he says only the marble and the sword.
-      check('he wakes in two short lines: who he is, and the errand — marble, a sword',
-        iSpare - iWake === 2 && /marble/.test(expl) && /sword/.test(expl) && expl.split(/\s+/).length <= 20, (iSpare - iWake) + ' lines: ' + expl);
+      // ...AND HIS THANKS IS THE VOLT PACK (owner, 2026-11-20: "he should give
+      // me the power cell instead of me having to go back outside, hit the
+      // machine, coming back inside ... one shot instead of multiple steps").
+      // Who he is, the errand, the pack and what its ring is for: four lines.
+      const wakeLines = lines.slice(iWake, iWake + 4).join(' ');
+      check('he wakes in four short lines: who he is, the errand (marble, a sword), and the Volt Pack he gives her, with its ring and its two uses',
+        /marble/.test(wakeLines) && /sword/.test(wakeLines) && /Volt Pack/.test(wakeLines) && /ring/.test(wakeLines) && /heal/.test(wakeLines) && /burst/.test(wakeLines)
+        && wakeLines.split(/\s+/).length <= 40, wakeLines);
       check('the spare Power Cell is handed over with a card that names Servo', iSpare > iWake && /Servo/.test(lines[iSpare]), lines[iSpare]);
       const iPod = lines.findIndex(l => /pod saves/.test(l));
       check('...and no further page sends her to the pod: its chip does', iPod < 0, iPod);
-      const iPack = lines.findIndex(l => /Volt Pack (is what )?stops it/.test(l));
-      const iBit = lines.findIndex(l => /It bit back/.test(l));
+      const iPack = lines.findIndex(l => /Take my Volt Pack/.test(l));
       const podStep = R.stepLog.find(q => q.step === 'atk');
       check('the pod saves first: the save point is in the den before she is sent out to the winch', podStep && podStep.bench === 'A0B', podStep);
       check('...and the save is confirmed on screen', R.podBanner);
-      // NEED BEFORE TEACH: the pack is pitched only after the winch has bitten her
-      const sAtk = R.steps.indexOf('atk'), sPack = R.steps.indexOf('pack'), sHeal = R.steps.indexOf('heal');
-      check('the winch is struck, and bites, BEFORE the pack is offered — and the heal comes after it is bought',
-        sAtk >= 0 && sAtk < sPack && sPack < sHeal && R.winchBit, { steps: [sAtk, sPack, sHeal], bit: R.winchBit });
-      // what it DOES is the moving picture the line is said over, not a sentence
-      check('the pack is explained in two lines — what it does (shown, over the pack at work), what it costs — and then the counter opens',
-        iPack >= 0 && /12 scrap/.test(lines.slice(iPack, iPack + 2).join(' ')) && R.dialogs.some(d => d.line === lines[iPack] && d.shot === 'demo:pack'), lines.slice(iPack, iPack + 2).join(' | '));
-      const iScrap = R.dialogs.findIndex(d => /^12 Scrap/.test(d.line || ''));
-      check('...with no card about money in the way', iScrap < 0, iScrap);
-      check('the counter opens on the Volt Pack, marked permanent, the rest locked until it is bought',
-        R.shopRow && R.shopRow.type === 'cell' && /permanent/.test(R.shopRow.name) && R.shopRow.others.every(Boolean), R.shopRow);
+      // ONE STEP: the pack is given on waking, over the pack at work; nothing
+      // sends her out to be bitten and back in to buy it
+      check('the Volt Pack is his gift on waking, said over the pack at work — before the spare cell, the pod and the winch',
+        iPack > iWake && iPack < iSpare && R.dialogs.some(d => d.line === lines[iPack] && d.shot === 'demo:pack'), lines[iPack]);
+      check('...no trip out to the winch and back: no counter opens, no "it bit you" pitch, nothing to pay',
+        !R.shopRow && lines.findIndex(l => /It bit you/.test(l)) < 0 && R.scrapAtShop == null, { shop: R.shopRow, scrapAtShop: R.scrapAtShop });
       const iCard = R.dialogs.findIndex(d => d.demo === 'pack');
-      check('...and the purchase card shows the two verbs with her controls', iCard > iPack && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
+      check('...and its card shows the two verbs with her controls', iCard > iPack && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
     }
     // (what the winch and the first machine threw out pays for it — or he makes up
     // the difference — and no scrap pile lying in a room is ever needed)
-    check(mode + ': the Volt Pack is always affordable, with no room scrap gathered', R.scrapAtShop >= 12 && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
+    check(mode + ': the Volt Pack costs her nothing, and no room scrap is gathered for it', R.scrapAtShop == null && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
     if (R.monument) {
       const m = R.monument;
       check(mode + ': the monument is east of the booth door, within one screen, before the way out',

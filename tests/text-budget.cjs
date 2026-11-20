@@ -38,7 +38,7 @@ const { chromium } = require('playwright');
     const words = s => ([].concat(s).join(' ').match(/[\p{L}\p{N}’'%+-]+/gu) || []).length;
     const kind = k => /^op_o_/.test(k) ? 'goal' : /^(pc_|pt_)/.test(k) ? 'caption'
       : /d$|_desc$|^op_spared$|^sg_t_GA1Dd$/.test(k) && !/^(op_r|op_p|op_sv|sl_|sg_rev)/.test(k) ? 'card'
-      : /^(op_r|op_p|op_sv|op_seat|sl_|sg_rev|grv_intro|grv_phase2|grv_down|q_ask|q_thanks|pc_forge)/.test(k) ? 'say' : 'popup';
+      : /^(op_r|op_p|op_gift|op_sv|op_seat|sl_|sg_rev|grv_intro|grv_phase2|grv_down|q_ask|q_thanks|pc_forge)/.test(k) ? 'say' : 'popup';
     const CAP = { goal: 5, popup: 8, say: 12, card: 10, caption: 10 };
     const missing = [], long = [], free = [];
     for (const k of Object.keys(L.en)) {
@@ -93,8 +93,8 @@ const { chromium } = require('playwright');
     for (let i = 0; i < 80 && !(MEDIA_IMG.podOn && MEDIA_IMG.podOn.naturalWidth); i++) await new Promise(r => setTimeout(r, 50));
     opSay(t('n_ratchet'), ['op_r_pod'], 'ratchet'); G.dlgShot = null; draw(performance.now()); out.pod = G.dlgShot && G.dlgShot.key;
     G.dialog = null; G.state = 'PLAY';
-    opSay(t('n_ratchet'), ['op_p1', 'op_p2'], 'ratchet'); G.dlgShot = null; draw(performance.now()); out.pack = G.dlgShot && G.dlgShot.key;
-    G.dialog.i = 1; G.dlgShot = null; draw(performance.now()); out.packAfter = G.dlgShot && G.dlgShot.key;
+    opSay(t('n_ratchet'), ['op_gift1', 'op_gift2'], 'ratchet'); G.dlgShot = null; draw(performance.now()); out.pack = G.dlgShot && G.dlgShot.key;
+    G.dialog.i = 1; G.dlgShot = null; G.hudPoint = null; draw(performance.now()); out.packAfter = G.dlgShot && G.dlgShot.key; out.ring = G.hudPoint;
     G.dialog = null; G.state = 'PLAY';
     // "bring me marble": a DRAWN COMIC panel (owner: "When I say pics I meant
     // generated comics"), on that line and not on his name
@@ -117,11 +117,12 @@ const { chromium } = require('playwright');
   // game with images and videos"): two pictures in all of chapter one's
   // dialogue, the goal and the first power; the pod line is just said
   check('pictures only at key moments: two in all of chapter one\'s talk (the goal, the first power)',
-    D.nShots.length === 2 && D.nShots.indexOf('op_r2') >= 0 && D.nShots.indexOf('op_p1') >= 0 && D.lineShots.join() === 'op_r2', JSON.stringify([D.nShots, D.lineShots]));
+    D.nShots.length === 2 && D.nShots.indexOf('op_r2') >= 0 && D.nShots.indexOf('op_gift1') >= 0 && D.lineShots.join() === 'op_r2', JSON.stringify([D.nShots, D.lineShots]));
   check('...and the pod line is just said', D.pod == null, String(D.pod));
-  check('...and the Volt Pack over the pack at work, and only on the line about it', D.pack === 'demo:pack' && D.packAfter == null, JSON.stringify([D.pack, D.packAfter]));
+  check('...and the Volt Pack he gives her over the pack at work, and only on the line about it', D.pack === 'demo:pack' && D.packAfter == null, JSON.stringify([D.pack, D.packAfter]));
   check('...and "bring me marble" over the drawn comic of it, framed as a comic and bigger', D.marble0 == null && /r_marble\.webp$/.test(D.marble1 || '') && D.marbleComic, JSON.stringify([D.marble0, D.marble1, D.marbleComic]));
   check('...but the forge\'s thanks, whose film shows the forging, is said over no comic ("When there is a video no need for comic")', D.forge == null, String(D.forge));
+  check('...and "hits fill your ring" points at the ring on her screen', D.ring && D.ring.x === 38 && D.ring.y === 66, JSON.stringify(D.ring));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await p.close();
 

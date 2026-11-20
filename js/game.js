@@ -14409,7 +14409,11 @@ const TUT_OLD_IDS = ['move', 'out', 'jump', 'gate', 'atk', 'kill', 'coin', 'buy'
 // Some lessons need the world to change before they make any sense.
 function tutEnter(st) {
   if (!st || !player) return;
-  if (st.id === 'heal' && player.cores >= player.maxCores()) {
+  // (the robot world: the pack is Ratchet's gift on waking, owner 2026-11-20,
+  // "one shot instead of multiple steps" — she is whole, the card has said what
+  // the pack does, and the first real hurt is what teaches the mend. Only
+  // NOSTOS, whose hero heals from birth, still stages the surge.)
+  if (st.id === 'heal' && player.cores >= player.maxCores() && typeof isHero === 'function' && isHero()) {
     // THE FIRST SURGE, ON PURPOSE. Repair cannot be taught to somebody at full
     // health: the button does nothing, and a lesson whose demonstration is a
     // no-op lands as noise. So the pack's first surge bites once — scripted,
@@ -14878,6 +14882,23 @@ function drawTutor() {
 // aligned when an empty line is dropped). 'demo:<id>' plays a demonstration
 // (js/riddles.js), 'assets/...' is a comic panel, anything else a media key.
 // Not drawn until the picture is here: a frame with nothing in it is noise.
+// A LINE THAT NAMES SOMETHING ON HER SCREEN POINTS AT IT: a bobbing arrow
+// and a breathing outline round the HUD element (the charge ring), so "your
+// ring" is never a guess at which of the things in the corner he means
+function drawHudPointer(x, y) {
+  const tt = performance.now() / 1000, bob = Math.sin(tt * 5) * 5, pu = 0.55 + Math.sin(tt * 4) * 0.45;
+  c.save();
+  c.strokeStyle = 'rgba(255,215,106,' + (0.5 + pu * 0.5).toFixed(3) + ')'; c.lineWidth = 3;
+  c.beginPath(); c.arc(x, y, 25 + pu * 3, 0, Math.PI * 2); c.stroke();
+  // the arrow, from below-right, pointing up-left at it
+  const ax = x + 46 + bob, ay = y + 46 + bob;
+  c.translate(ax, ay); c.rotate(-Math.PI * 0.75);
+  c.fillStyle = '#ffd76a'; c.strokeStyle = 'rgba(20,14,4,0.85)'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(18, 0); c.lineTo(2, -11); c.lineTo(2, -4); c.lineTo(-16, -4); c.lineTo(-16, 4); c.lineTo(2, 4); c.lineTo(2, 11); c.closePath();
+  c.stroke(); c.fill();
+  c.restore();
+  G.hudPoint = { x, y };
+}
 const DLG_SHOT_W = 248, DLG_SHOT_H = 140;
 // a drawn comic panel is shown bigger, in a comic panel's own frame
 const DLG_COMIC_W = 384, DLG_COMIC_H = 216;
@@ -17787,6 +17808,7 @@ function draw(tms) {
     // THE SHOT this line is said over (js/opening.js OP_SHOT): a small framed
     // picture standing on the box, over the speaker's side
     if (typeof drawDlgShot === 'function') drawDlgShot(d, rtl ? 820 - DLG_SHOT_W : 140, by);
+    if (d.points && d.points[d.i] === 'ring') drawHudPointer(38, 66);
     // 64×64 portrait bust — face acting the sprite is too small to carry
     if (!note) {
       let expr = 'neutral';

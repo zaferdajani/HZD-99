@@ -150,6 +150,9 @@ const TEXT_LITE = {
     pg_sage_free: "The agent is purified!",
     gear_seeit: "In GEAR (%k).",
     arm_shardd: "A shrapnel cone that knocks jumpers down.",
+    // the pack is his thanks, on waking (owner, 2026-11-20)
+    op_gift1: "Take my Volt Pack. It's yours.",
+    op_gift2: "Hits fill your ring. Spend it: heal, or burst.",
   },
   ar: {
     op_o_booth: 'اعثري على كشك راتشيت',
@@ -265,6 +268,9 @@ const TEXT_LITE = {
     pg_sage_free: "تطهّر العميل!",
     gear_seeit: "في العتاد (%k).",
     arm_shardd: "مخروط شظايا يُسقط القافزين.",
+    // the pack is his thanks, on waking (owner, 2026-11-20)
+    op_gift1: "خذي حزمة الفولت. إنها لكِ.",
+    op_gift2: "الضربات تملأ حلقتكِ. أنفقيها: شفاء أو انفجار.",
   },
   tr: {
     op_o_booth: "Ratchet'in kulübesini bul",
@@ -380,6 +386,9 @@ const TEXT_LITE = {
     pg_sage_free: "Ajan arındı!",
     gear_seeit: "DONANIM'da (%k).",
     arm_shardd: "Zıplayanları düşüren şarapnel konisi.",
+    // the pack is his thanks, on waking (owner, 2026-11-20)
+    op_gift1: "Volt Paketimi al. Artık senin.",
+    op_gift2: "Vuruşlar halkanı doldurur. Harca: iyileş ya da patlat.",
   },
   zh: {
     op_o_booth: '找到拉切特的小铺',
@@ -495,6 +504,9 @@ const TEXT_LITE = {
     pg_sage_free: "使者已被净化！",
     gear_seeit: "在「装备」里（%k）。",
     arm_shardd: "弹片锥，能把跳跃的敌人打落。",
+    // the pack is his thanks, on waking (owner, 2026-11-20)
+    op_gift1: "拿着我的电能背包，归你了。",
+    op_gift2: "击中敌人会充满你的能量环。用它：治疗，或爆发。",
   },
   ru: {
     op_o_booth: 'Найди будку Рэтчета',
@@ -610,6 +622,9 @@ const TEXT_LITE = {
     pg_sage_free: "Агент очищен!",
     gear_seeit: "В СНАРЯЖЕНИИ (%k).",
     arm_shardd: "Конус шрапнели сбивает прыгунов.",
+    // the pack is his thanks, on waking (owner, 2026-11-20)
+    op_gift1: "Возьми мой Вольт-пак. Он твой.",
+    op_gift2: "Удары наполняют кольцо. Трать: лечись или бей разрядом.",
   },
 };
 // outranks every layer registered before it AND after it
