@@ -108,11 +108,17 @@ const { chromium } = require('playwright');
     G.dialog = { name: t('n_ratchet'), lines: [t('q_thanks_ratchet_forge')], i: 0, npc: 'ratchet' }; G.state = 'DIALOG';
     G.dlgShot = null; draw(performance.now()); out.forge = G.dlgShot && G.dlgShot.key;
     G.dialog = null; G.state = 'PLAY';
+    out.nShots = Object.keys(OP_SHOT); out.lineShots = Object.keys(LINE_SHOT);
     return out;
   });
   check('the lesson chip is the key and its name, with no sentence under it', D.chip === 58, 'chip height ' + D.chip + ' (one line 58, two lines 70)');
   check('...and a held button wears a ring that fills', D.hold.ring === true, JSON.stringify(D.hold));
-  check('Ratchet says the pod over a picture of the pod', D.pod === 'podOn', String(D.pod));
+  // KEY MOMENTS ONLY (owner, 2026-11-20: "It's not about oversaturating the
+  // game with images and videos"): two pictures in all of chapter one's
+  // dialogue, the goal and the first power; the pod line is just said
+  check('pictures only at key moments: two in all of chapter one\'s talk (the goal, the first power)',
+    D.nShots.length === 2 && D.nShots.indexOf('op_r2') >= 0 && D.nShots.indexOf('op_p1') >= 0 && D.lineShots.join() === 'op_r2', JSON.stringify([D.nShots, D.lineShots]));
+  check('...and the pod line is just said', D.pod == null, String(D.pod));
   check('...and the Volt Pack over the pack at work, and only on the line about it', D.pack === 'demo:pack' && D.packAfter == null, JSON.stringify([D.pack, D.packAfter]));
   check('...and "bring me marble" over the drawn comic of it, framed as a comic and bigger', D.marble0 == null && /r_marble\.webp$/.test(D.marble1 || '') && D.marbleComic, JSON.stringify([D.marble0, D.marble1, D.marbleComic]));
   check('...but the forge\'s thanks, whose film shows the forging, is said over no comic ("When there is a video no need for comic")', D.forge == null, String(D.forge));

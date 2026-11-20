@@ -42,26 +42,20 @@ function opFill(line) { return typeof ctlFill === 'function' ? ctlFill(line) : l
 // said over — a game picture, a comic panel, or a moving demo — drawn above
 // the dialogue box (js/game.js, DIALOG). A key with no shot says its line as
 // before. The pictures are the authored ones the game already has.
+// KEY MOMENTS ONLY (owner, 2026-11-20: "It's not about oversaturating the
+// game with images and videos. Certain key moments require videos or images,
+// but that shouldn't be it for the whole [game], unless we're making it to
+// look like a movie game"). Two of his lines carry a picture in all of
+// chapter one: the one that sets the chapter's goal, and the one that hands
+// her her first power. Every other line is just said. tests/text-budget.cjs
+// counts them; a third needs the owner's word.
 const OP_SHOT = {
-  op_seat: 'repairBattery',            // his own battery, the board's art
-  op_r_pod: 'podOn',                   // the pod in the wall, lit
-  op_p1: 'demo:pack',                  // hurt, mend, charge, burst: what it does
-  op_r_heal: 'demo:pack',
-  op_r_winch: 'demo:pack',
-  op_r2: PANEL_GAME('r_marble'),       // "bring me marble": the comic of the stone under the meadow becoming the blade
-  op_sv_seat: 'spareCell',             // the cell she seats in him
-  op_sv2: 'rawMarble',                 // "the marble? break the loose floor"
+  op_r2: PANEL_GAME('r_marble'),       // "bring me marble": the stone under the meadow becoming the blade
+  op_p1: 'demo:pack',                  // "my Volt Pack stops it": what the pack does, moving
 };
-// THE SAME, FOR ANY LINE, HOWEVER IT IS OPENED (owner, 2026-11-19: "When I
-// say pics I meant generated comics"). Quest thanks and story lines open their
-// dialogue without opSay, so these are found by the line itself: a line that
-// is one of these keys' text is said over that drawn comic panel.
+// The same pictures, found by the line itself however its dialogue opened.
 const LINE_SHOT = {
   op_r2: PANEL_GAME('r_marble'),
-  sl_ratchet_dent: PANEL_GAME('r_marble'),     // "not with claws: bring me the marble first"
-  op_r_go: PANEL_GAME('r_cell'),               // his spare cell, and Old Servo dark outside the door
-  // (none on the forge's thanks: the forge film shows it — "When there is a
-  // video no need for comic")
 };
 const LINE_SHOT_BY = { lang: null, map: null };
 function lineShot(line) {

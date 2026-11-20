@@ -21,7 +21,7 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
-## 2cd. RATCHET SAYS IT IN COMICS — nine single unlettered panels ✱ QUEUED 2026-11-19 (owner's order, this thread; waiting on credits: 0.37 left, 2 per panel at 2k)
+## 2cd. RATCHET SAYS IT IN COMICS — nine single unlettered panels ✘ WITHDRAWN 2026-11-20 (owner: "It's not about oversaturating the game with images and videos. Certain key moments require videos or images, but that shouldn't be it for the whole [game], unless we're making it to look like a movie game") — do not fire. Chapter one's talk keeps two pictures (the marble comic on the goal, the Volt Pack demo on the first power); tests/text-budget.cjs counts them. Kept below as the record of what was briefed.
 
 The owner, on less reading: *"If there's a way to create small images, shots
 to explain what is happening with Ratchet, I would go there instead of typing
