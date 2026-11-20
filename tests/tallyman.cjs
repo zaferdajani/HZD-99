@@ -10,8 +10,9 @@
 //   - below half health a coil opens a chain of THREE lunges, above it two;
 //   - a blow stops him where he stands: the knock it gives moves him a short
 //     step, not a slide across the floor.
-// (The hit-reaction PLATES — a body that folds round the blow — are art, and
-//  wait on Higgsfield: docs/ART_QUEUE.md.)
+//   - and the blow is DRAWN on a body: two fired plates (Higgsfield, 2026-11-20) —
+//     struck (head back, arm flung) and, on the third blow of a quick chain,
+//     doubled over round the abacus with a knee gone.
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
@@ -22,7 +23,7 @@ const { chromium } = require('playwright');
   await p.addInitScript(() => { localStorage.setItem('cb_intro_seen', '1'); window.requestAnimationFrame = () => 0; });
   await p.goto('http://127.0.0.1:8220/index.html');
   await p.waitForFunction(() => typeof startGame === 'function', { timeout: 30000 });
-  const R = await p.evaluate(() => {
+  const R = await p.evaluate(async () => {
     const stage = () => {
       const sv = newSave(1); sv.time = 99; sv.flags.tut = sv.flags.woke = 1; startGame(sv); loadRoom('GA1D');
       G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.gateWalk = G.bossEntry = null; G.boss = null; G.projs = [];
@@ -48,12 +49,32 @@ const { chromium } = require('playwright');
     e = stage(); const x0 = e.x; e.kbT = 0.22; e.vx = 260;
     for (let f = 0; f < 40; f++) e.update(1 / 60);
     out.slide = Math.round(e.x - x0);
+    // THE BLOW, DRAWN: what the body is on each frame after a claw lands, through the real
+    // draw (rig and plates mixed, as the game draws him)
+    e = stage();
+    for (const k of Object.keys(MEDIA_SRC.images).filter(k => k.startsWith('agTally') || k.startsWith('agRig_tally_'))) mediaFetch(k, true);
+    for (let i = 0; i < 200 && !['agTallyHitHigh', 'agTallyHitLow', 'agTallyStand'].every(k => MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth); i++) await new Promise(r => setTimeout(r, 50));
+    const ctx = document.querySelector('canvas').getContext('2d');
+    const frame = () => { e.update(1 / 60); e.anim = (e.anim || 0); G.sageMotion = null; e.draw(ctx); return G.sageMotion ? G.sageMotion.art : (G.rigMix && G.rigMix.mix < 1 ? 'rig:' + G.rigMix.move : '-'); };
+    for (let f = 0; f < 30; f++) frame();
+    const blow = () => { e.kbT = 0.22; e.vx = 260; e.hp -= 1; };
+    blow(); const one = []; for (let f = 0; f < 40; f++) { player.x = e.x + 100; one.push(frame()); }
+    out.first = one[0]; out.highFrames = one.filter(a => a === 'agTallyHitHigh').length; out.after = one[one.length - 1];
+    // three quick blows: the third doubles him over
+    for (let f = 0; f < 60; f++) { player.x = e.x + 100; frame(); }   // a second's rest: a new chain
+    const seq = [];
+    // (five frames apart: each lands while he still reels from the one before, as a claw combo does)
+    for (let k = 0; k < 3; k++) { blow(); for (let f = 0; f < (k < 2 ? 5 : 12); f++) { player.x = e.x + 100; seq.push(frame()); } }
+    out.third = seq.slice(10, 16); out.lowAny = seq.slice(10).includes('agTallyHitLow'); out.lowEarly = seq.slice(0, 10).includes('agTallyHitLow');
     return out;
   });
   check('TALLYMAN duels, and is half as much again to break', R.duel && Math.abs(R.hp / (R.base * 1.5) - 1) < 0.05, JSON.stringify({ hp: R.hp, base: R.base }));
   check('...a quicker mind and a shorter breather', R.prof.step <= 0.7 && R.prof.denied <= 0.8, JSON.stringify(R.prof));
   check('...above half health a coil opens two lunges, below it three', R.full === 2 && R.half === 3, R.full + ' / ' + R.half);
   check('a blow stops him where he stands: a short step, not a slide', R.slide >= 0 && R.slide <= 16, R.slide + ' px');
+  check('a blow snaps him into his struck picture on the frame it lands', R.first === 'agTallyHitHigh', R.first);
+  check('...held long enough to read (a quarter second), then he comes back', R.highFrames >= 12 && R.highFrames <= 22 && R.after !== 'agTallyHitHigh', R.highFrames + ' frames, then ' + R.after);
+  check('the third blow of a quick chain doubles him over, not the first two', R.lowAny && !R.lowEarly, JSON.stringify(R.third));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.join(', ')); process.exit(1); }

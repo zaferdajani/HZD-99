@@ -206,6 +206,8 @@ const MEDIA_SRC = {
     agTallyGather: 'assets/characters/agents/tally/gather.webp',
     agTallyLock: 'assets/characters/agents/tally/lock.webp',
     agTallyPure: 'assets/characters/agents/tally/pure.webp',
+    agTallyHitHigh: 'assets/characters/agents/tally/hithigh.webp',   // struck: head snapped back, arm flung
+    agTallyHitLow: 'assets/characters/agents/tally/hitlow.webp',     // staggered: doubled round the abacus, a knee gone
     agLeashStand: 'assets/characters/agents/leash/stand.webp',
     agLeashWalk8: 'assets/characters/agents/leash/walk8.webp',
     agLeashExhale: 'assets/characters/agents/leash/exhale.webp',

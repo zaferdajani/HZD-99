@@ -18,6 +18,18 @@
    "archive": "tally/parts_asfired.webp",
    "cut": "node tools/agentparts.cjs tally  ->  assets/characters/agents/tally/rig/",
    "brief": "The reference image is a finished game character on a green screen: a tall hooded robed machine in a dusty bone-grey and slate robe with black stripes, a brass abacus frame of dark beads on its chest, rolled charts at its belt, black mechanical arms and hands, and a tall surveyor's staff topped with a brass sighting ring.\n\nDraw a PARTS SHEET of this SAME character for a 2D cut-out animation rig: the character TAKEN APART into SEVEN SEPARATE PIECES, laid out side by side in ONE ROW with wide empty green gaps between them. No piece touches or overlaps another. Identical design, cloth, colours, materials and realistic 3D-render style as the reference, lit from above, every piece drawn in the same three-quarter view facing LEFT as the reference, and all pieces at the SAME SCALE, as if the standing figure had simply been pulled apart.\n\nThe seven pieces, from LEFT to RIGHT:\n1. HOOD AND HEAD: the tall squared hood with the black mechanical face and two amber eye-lights inside it and the ribbed metal neck below, ending in a flat cut at the base of the neck. Nothing else.\n2. TORSO: from the shoulders down to the belt only: the short ragged mantle over both shoulders and the brass abacus frame on the chest. NO head, NO arms (the shoulder openings are closed with cloth), ending in a flat cut at the belt.\n3. ROBE SKIRT: from the belt down to the ragged hem only: the long hanging lower robe with its black stripes and the rolled charts hanging at the belt. No legs or feet showing, no torso.\n4. UPPER ARM: one sleeve from shoulder to elbow, hanging straight down, a rounded cloth shoulder cap at the top.\n5. FOREARM AND HAND: one wide ragged sleeve cuff with the black mechanical forearm and open hand coming out of it, hanging straight down, fingers pointing down.\n6. LOWER LEG AND FOOT: one black mechanical shin and foot standing upright, the foot pointing left.\n7. STAFF: the complete surveyor's staff standing perfectly vertical, full length, brass sighting ring at the top, with no hand on it.\n\nBackground: one flat, perfectly uniform chroma-green field (#00FF00). No floor line, no cast shadows, no labels, no numbers, no text, no outlines round the pieces, no extra pieces, no assembled figure anywhere."
+  },
+  "hit_high": "f15cf3f5-523c-4b89-988c-eecc7b56985c",
+  "hit_low": "37b46ba1-5e77-4c62-9ef8-43d970e600e6",
+  "hits": {
+   "fired": "2026-11-20",
+   "model": "GPT Image 2.6, 2k MEDIUM, 3:4, reference tally.stand",
+   "archive": [
+    "tally/hithigh_asfired.jpg",
+    "tally/hitlow_asfired.jpg"
+   ],
+   "cut": "PLATE_ANCHOR=x node tools/plate.cjs <asfired> assets/characters/agents/tally/hit{high,low}.webp 512; drawn at 1.15 / 1.17 body (sized by the brass sighting ring against the stand)",
+   "brief": "Same character exactly (design, cloth, colours, materials, proportions, realistic 3D render). HIGH: just struck high by a blow from the left — head snapped back, upper body recoiling, free arm thrown out behind, staff tilting away, weight on the rear foot. LOW: staggered — doubled over round the abacus, one arm clutching its middle, a knee buckling, leaning on the planted staff. Side-on facing LEFT, flat chroma green, whole figure, no ground, shadow, motion lines, glow, rim or outline."
   }
  },
  "leash": {
@@ -42,7 +54,7 @@
   "exhale": "e23c4f7f-5532-41eb-9071-12d48cc77d92",
   "walk_take": "b6dee424-870f-4e93-8c2a-e94c26e153ed"
  },
- "cut": "each still: tools/plate.cjs <asfired> assets/characters/agents/<a>/<state>.webp 512 (UNDERTOW: PLATE_KEY=60,115 PLATE_DESPILL=edge \u2014 a green robe on a green screen); each walk: ONE stride of the take, eight even beats, tools/vidstrip.cjs <take> <out> 8 192 with VIDSTRIP_DESPILL=edge and VIDSTRIP_TIMES (UNDERTOW also VIDSTRIP_KEY=60,115)",
+ "cut": "each still: tools/plate.cjs <asfired> assets/characters/agents/<a>/<state>.webp 512 (UNDERTOW: PLATE_KEY=60,115 PLATE_DESPILL=edge — a green robe on a green screen); each walk: ONE stride of the take, eight even beats, tools/vidstrip.cjs <take> <out> 8 192 with VIDSTRIP_DESPILL=edge and VIDSTRIP_TIMES (UNDERTOW also VIDSTRIP_KEY=60,115)",
  "reference": "every state of an agent was fired against that agent's own stand plate (its job id above) as the shape and style reference; the three stand plates against the approved shared stand plate",
  "walk_strides": {
   "note": "the stride's period was measured off the take (the keyed silhouette against itself: the lag at which it comes back). A strip sampled across the whole five seconds is eight unrelated moments of several strides and does not loop.",

@@ -54,7 +54,7 @@ made until the balance is topped up. Fire in this order.
    steps back, forelegs fold, head to the floor, held) and `wolfBow`
    (8 cells, the same bow at the pack's size). Played in A10 by the yield
    (Boss alpha `yield` state), three pack wolves arriving behind him.
-3. **TALLYMAN STRUCK — hit-reaction plates** (owner: *"create more artwork of
+3. ✔ **FIRED AND SHIPPED 2026-11-20 — TALLYMAN STRUCK — hit-reaction plates** (two, not three: `agTallyHitHigh` on a blow, `agTallyHitLow` — doubled over with the knee gone, which covers the stagger — on a stagger or the third blow of a quick chain; the rig snaps to them and carries him out; tests/tallyman.cjs) (owner: *"create more artwork of
    being hit instead of hitting a metallic statue that gets pushed backward
    simply"*). Three plates from his own set (`agTally*`): struck high (head
    snapped back, staff arm thrown wide), struck low (doubled over the

@@ -142,6 +142,11 @@ on a green screen, the one sheet a rig needs. `tools/agentparts.cjs tally` cuts
 them into `characters/agents/tally/rig/` with every joint measured; the brief is
 in `agents/jobs.json` (`tally.parts`).
 
+`agents/tally/hit{high,low}_asfired.jpg` are TALLYMAN STRUCK (2026-11-20, GPT Image
+2.6 against his stand plate, jobs `f15cf3f5-523c-4b89-988c-eecc7b56985c` struck high,
+`37b46ba1-5e77-4c62-9ef8-43d970e600e6` doubled over): the blow drawn on a body. Cut by
+`tools/plate.cjs` to `characters/agents/tally/hit{high,low}.webp`; brief in `agents/jobs.json` (`tally.hits`).
+
 `platforms/platobj_{a,x,b}_asfired.jpg` are THE DECKS AS OBJECTS (2026-11-17,
 GPT Image 2.6, jobs `e42fe118-c048-40f4-8919-ad6df8ba0f87` city gantry,
 `4bb8b776-29c9-411d-a53a-9b8c6e870052` cave rock shelf,
