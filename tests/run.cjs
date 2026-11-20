@@ -193,6 +193,7 @@ const SUITE = [
   ['tallyman', 'TALLYMAN is a fight: half as much again to break, a quicker mind, three lunges below half health, and a blow stops him where he stands instead of sliding him'],
   ['hero-still', 'standing still she is one drawing: the frames off a lip and a fidget whose take is not here both stay on her filmed idle, never the old pose-sheet still'],
   ['ch2-road', 'chapter two is played in order: the CARRIER, then the gallery ring it wakes down to UNDERTOW, then TALONHOST\'s hall; the arrow leads each step; a loading ring draws no stand-in'],
+  ['hit-voices', 'the Alpha and its pack play recorded wolves (the howls real, public domain); every body and guardian has its own bank of recorded impacts, never the same take twice running'],
   ['prize', 'the first room shows a prize she cannot reach: every real jump misses it, the double jump lands on it, and it is in the frame'],
   ['bossbench', 'a save point near every boss — one door away or a short walk through one more — and nowhere else: every pod is near a boss, the den\'s, in a Sage\'s cave or at the bottom of a one-way drop, no two a short walk apart, and each standing clear on something'],
   ['grounded', 'every cannon is bolted to something and every trap has ground under it, room by room'],

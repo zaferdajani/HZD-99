@@ -206,3 +206,20 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 `characters/agents/{slag,redact,lapid,pupil}/*.webp` — the other four of the Eye's agents (SLAGFATHER, REDACTOR, LAPIDARY, PUPIL), eight states each (2026-11-17): stills by Higgsfield GPT Image 2.6, walks filmed with Higgsfield Kling 4.0 Flash from each agent's own stand plate; masters, job ids and the cut in `source/agents/`. **Generated with Higgsfield.**
 
 `characters/agents/tally/rig/*.webp` — TALLYMAN's body as seven separate parts for the rig (2026-11-17, Higgsfield GPT Image 2.6 against his own stand plate; master `source/agents/tally/parts_asfired.webp`, cut by `tools/agentparts.cjs`). **Generated with Higgsfield.**
+
+## The Alpha's voice and the struck-metal hits — 2026-11-20
+
+`sfx/alpha/howl.ogg` — a real wolf: National Park Service recording, Denali National Park
+(`nps.gov/subjects/sound/sounds-wolf.htm`, `nri-WolfDENA.mp3`), a work of the U.S. Government,
+public domain. Cut and level-normalised; master `source/audio/alpha/nps_wolf_dena.mp3`.
+
+`sfx/alpha/howl_far.ogg` — real wolves: National Park Service recording, Yellowstone National Park,
+25 December 2013 (`yell-YELLWolvesDec252013.mp3`, the park's sound library), public domain. Cut,
+low-passed and normalised; master `source/audio/alpha/nps_yell-YELLWolvesDec252013.mp3`.
+
+`sfx/alpha/{bark,snap,bite,claw,leap,growl,fury,rend}.ogg` — generated wolf foley (Higgsfield,
+Mirelo text-to-audio), declared as generated; masters `source/audio/alpha/hf_*.mp3`.
+
+`sfx/hits/*.ogg` — 45 impacts (metal, plate, tin, glass, bell, punch, soft, generic; three takes
+each) from **Impact Sounds** by Kenney (www.kenney.nl), CC0 1.0 — no attribution required, given
+anyway. Licence: `source/audio/kenney-impact/License.txt`.

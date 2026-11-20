@@ -73,7 +73,8 @@ function pureGift(n) {
 // 2026-11-14; the fury's own gear 2026-11-16)
 function nfPace(b, running) { return running ? (b.fury ? 330 : 300) : (b.fury ? 240 : b.phase === 2 ? 210 : 180); }
 function foeHitSound(e, big) {
-  if (big) return 'bosshit';
+  // (each guardian rings in its own metal: audio.js HIT_BANK)
+  if (big) return e && e.kind ? 'bosshit_' + e.kind : 'bosshit';
   if (!e) return 'hit';
   if (typeof isCheetah === 'function' && isCheetah(e)) return 'hit_cat';
   if (typeof isWolf === 'function' && isWolf(e)) return 'hit_wolf';
