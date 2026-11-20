@@ -80,7 +80,10 @@ const PANEL_SEQ = [
   // from the game; its three pictures stay in the archive
   // (assets/source/manhua/ch1/game/retired-bay/). The id stays in PANEL_V1
   // below, which records what old saves already knew.
-  { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'], manual: true,
     event: 'gateOpened — through the gates, first arrival inside the city (W2 → A0)',
     when: f => !!f.gateOpened,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
@@ -108,7 +111,10 @@ const PANEL_SEQ = [
   // said. (The sequence keeps the id 'drawer' — it is a save key, G.save.panels
   // — but the picture was wrong: it had her at a waist-high drawer, and the
   // battery is in the toolbox on the den floor. Owner, 2026-11-15.)
-  { id: 'drawer', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'drawer', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'], manual: true,
     event: "his battery taken from the toolbox on the den floor (ratchetCell in hand), before the repair",
     when: f => !!f.opNote && !f.ratchetRepaired && typeof invCount === 'function' && invCount('ratchetCell') > 0,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet'] || f.pl_cshard || f.crystal),
@@ -135,7 +141,10 @@ const PANEL_SEQ = [
       { ref: 'game: r_cell', src: PANEL_GAME('r_cell'), crop: [0, 0, 1600, 893], cap: 'pc_r_cell', move: 'in', focus: [0.5, 0.45] },
       { ref: 'game: r_marble', src: PANEL_GAME('r_marble'), crop: [0, 0, 1600, 893], cap: 'pc_r_marble', move: 'in', focus: [0.5, 0.7] },
     ] },
-  { id: 'cave', title: 'pn_s_cave', room: 'CV1', prefetch: ['A5', 'CV1'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'cave', title: 'pn_s_cave', room: 'CV1', prefetch: ['A5', 'CV1'], manual: true,
     event: 'first entry into the marble cave (CV1), through the buried mouth under the hub',
     when: () => true,
     past: (f, s) => !!(s.visited && s.visited.CV1) || !!f.pl_cshard || !!f.crystal,
@@ -145,7 +154,10 @@ const PANEL_SEQ = [
       { ref: 'game: cv_dark', src: PANEL_GAME('cv_dark'), crop: [0, 0, 1600, 679], cap: null, move: 'in', focus: [0.5, 0.6] },
     ] },
   // the marble freed: why the burst matters, and that it is material, not a blade
-  { id: 'marble', title: 'pn_s_marble', room: 'CV3', prefetch: ['CV2', 'CV3'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'marble', title: 'pn_s_marble', room: 'CV3', prefetch: ['CV2', 'CV3'], manual: true,
     event: 'the raw marble freed from its host rock in CV3 (pl_cshard)',
     when: f => !!f.pl_cshard,
     past: f => !!f.crystal,
@@ -167,7 +179,10 @@ const PANEL_SEQ = [
       { ref: 'game: f_blade', src: PANEL_GAME('f_blade'), crop: [0, 0, 1600, 2143], cap: null, move: 'out', focus: [0.5, 0.5] },
     ] },
   // the way to the first sage: the door that opens beside the stump she cut
-  { id: 'passage', title: 'pn_s_passage', room: 'GA1T', prefetch: ['CV3', 'GA1T'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'passage', title: 'pn_s_passage', room: 'GA1T', prefetch: ['CV3', 'GA1T'], manual: true,
     event: 'first arrival in the maintenance tunnel (GA1T) through the door beside the quarry',
     when: f => !!f.crystal,
     past: (f, s) => !!f.sageTame_GA1D || !!(s.visited && s.visited.GA1D),
@@ -193,7 +208,10 @@ const PANEL_SEQ = [
       { ref: 'game: m_stalk (his face)', src: PANEL_GAME('m_stalk'), crop: [650, 215, 900, 452], cap: 'pc_bored', move: 'in', focus: [0.5, 0.5] },
     ] },
   // the sage's sentence happening in front of her: he resists, the bell wins
-  { id: 'break', title: 'pn_s_break', room: 'A2', alsoRoom: 'A3', prefetch: ['A2', 'A3'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'break', title: 'pn_s_break', room: 'A2', alsoRoom: 'A3', prefetch: ['A2', 'A3'], manual: true,
     event: "NULLFANG's break (nfBreak): the purple goes out of him, then the bell writes the order back",
     when: f => !!f.nfBreak && !f.bossChime && !f.bossGlitch,
     past: f => !!(f.bossChime || f.bossGlitch),

@@ -67,8 +67,9 @@ const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 // The purification's film is what plays, and the lion mission waits it out.)
 // (2026-11-19, "When there is a video no need for comic": the wake and the
 // forge are told by their films, and Ratchet's two panels by his own lines)
-const REQUIRED_PANELS = ['gate', 'letter', 'drawer', 'meet',
-  'cave', 'marble', 'passage', 'sage', 'break', 'chime', 'ch2'];
+// (2026-11-20, the owner choosing the key moments: the gate, the toolbox, the
+// cave mouth, the marble, the maintenance door and the break are library pages)
+const REQUIRED_PANELS = ['letter', 'meet', 'sage', 'chime', 'ch2'];
 
 function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {
   const seen = Array.from(panelsSeen || []);
