@@ -206,6 +206,7 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 `characters/agents/{slag,redact,lapid,pupil}/*.webp` — the other four of the Eye's agents (SLAGFATHER, REDACTOR, LAPIDARY, PUPIL), eight states each (2026-11-17): stills by Higgsfield GPT Image 2.6, walks filmed with Higgsfield Kling 4.0 Flash from each agent's own stand plate; masters, job ids and the cut in `source/agents/`. **Generated with Higgsfield.**
 
 `characters/agents/tally/rig/*.webp` — TALLYMAN's body as seven separate parts for the rig (2026-11-17, Higgsfield GPT Image 2.6 against his own stand plate; master `source/agents/tally/parts_asfired.webp`, cut by `tools/agentparts.cjs`). **Generated with Higgsfield.**
+`backgrounds/gate_city.jpg` re-fired 2026-11-20 — the city gate in armour plate, rust and hydraulic hinges, its own old plate as the composition reference (Higgsfield GPT Image 2.6, job `f2147536-ce5b-4e5c-a7dd-3a76b12c8f64`; master `source/gates/gate_city_asfired.jpg`). **Generated with Higgsfield.**
 `characters/agents/tally/hit{high,low}.webp` — TALLYMAN struck and staggered (2026-11-20, Higgsfield GPT Image 2.6 against his own stand plate; masters `source/agents/tally/hit{high,low}_asfired.jpg`, cut by `tools/plate.cjs`). **Generated with Higgsfield.**
 
 ## The Alpha's voice and the struck-metal hits — 2026-11-20

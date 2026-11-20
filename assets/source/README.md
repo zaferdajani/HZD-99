@@ -142,6 +142,11 @@ on a green screen, the one sheet a rig needs. `tools/agentparts.cjs tally` cuts
 them into `characters/agents/tally/rig/` with every joint measured; the brief is
 in `agents/jobs.json` (`tally.parts`).
 
+`gates/gate_city_asfired.jpg` is THE CITY GATE RE-FIRED (2026-11-20, GPT Image 2.6 2k high 16:9, job
+`f2147536-ce5b-4e5c-a7dd-3a76b12c8f64`, the old plate as composition reference; a second take,
+`515fcab0-c365-4ea3-a94c-0d163bba49a2`, was flatter and not used). Shipped as
+`backgrounds/gate_city.jpg` (1920x1072, scaled and centre-cropped).
+
 `agents/tally/hit{high,low}_asfired.jpg` are TALLYMAN STRUCK (2026-11-20, GPT Image
 2.6 against his stand plate, jobs `f15cf3f5-523c-4b89-988c-eecc7b56985c` struck high,
 `37b46ba1-5e77-4c62-9ef8-43d970e600e6` doubled over): the blow drawn on a body. Cut by

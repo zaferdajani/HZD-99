@@ -61,7 +61,7 @@ made until the balance is topped up. Fire in this order.
    abacus), staggered (one knee buckling). Wired as `agTallyHit1..3`, chosen
    by the blow's height, over the 0.12 s hit-stop the duel now has
    (js/sage-motion.js `hitStop`). The code half shipped 2026-11-20.
-4. **THE CITY GATE, TEXTURED** (owner: *"improve the city gate to give it
+4. ✔ **FIRED AND SHIPPED 2026-11-20 — THE CITY GATE, TEXTURED** (re-fired from its own plate as composition reference: armour plate, rust, hinges, the light through the gap; the flat code-drawn leaves that were laid over the painted doors no longer draw once the painting is up; tests/city-gate.cjs) (owner: *"improve the city gate to give it
    more texture ... make it stand out, not fading into the background"*):
    re-fire the city gate plate with the cave gates' material brief.
 5. **NULLFANG, SECOND STAGE** (owner: *"when it came to the second stage, it
@@ -3644,7 +3644,7 @@ done, and no two of these are the same shape.
 - `gate_deep.jpg` — a ringed organic iris of dull flesh in wet mineral,
   violet light only in the tendrils.
 
-**THE CITY GATE IS DELIBERATELY NOT RE-FIRED.** `gate_city.jpg` already
+**(Superseded 2026-11-20: the owner asked for it — re-fired, §2ce item 4.)** **THE CITY GATE IS DELIBERATELY NOT RE-FIRED.** `gate_city.jpg` already
 exists and is the one gate the standing order singles out as the huge epic
 multilayer monument. Re-rolling it would have been duplication, which the
 ledger forbids, so the sixth slot is spent and closed rather than filled.

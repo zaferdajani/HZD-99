@@ -12225,6 +12225,14 @@ function drawGateDoor(P, def, nearPlane) {
       return;
     }
   }
+  // THE PAINTED CITY GATE IS THE GATE (owner, 2026-11-20: "improve the city gate to
+  // give it more texture ... make it stand out, not fading into the background"). The
+  // leaves below are flat code-drawn panels laid over the painting's own doors; the
+  // re-fired gate_city plate (Higgsfield, armour plate, rust, hinges, the light through
+  // the gap) is the structure, so once it is up nothing is drawn over it — the same rule
+  // the cave mouths keep. The procedural monument stays only as the stand-in while the
+  // painting is still in flight.
+  if (G.roomId === 'W2' && G._vistaRoom === 'W2' && MEDIA_RAW[ROOM_VISTA.W2] && MEDIA_RAW[ROOM_VISTA.W2].naturalWidth) return;
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a
