@@ -218,6 +218,8 @@ const WOLF_ART = {
   // still by BEAST_RECOVER.down — chest on the ground, head sunk, breathing.
   // A lying-down take of its own is on THE FIRING LIST (ART_QUEUE §2cc-ix).
   down: wolfStrip('wolfCrouch4', 4, 97, { hold: 0 }),
+  // the pack's bow to its new leader (packcall.js): the crouch at its lowest, held
+  bow: wolfStrip('wolfCrouch4', 4, 97, { hold: 3 }),
   // THE AGGRESSIVE SET (owner, 2026-11-15: "find wolves, see how they move,
   // how they attack, how they roll ... concentrate on the aggressive
   // attacking moods"). Filmed over real-wolf motion references and cut at
@@ -355,6 +357,7 @@ function wolfPose(e, ART, tame) {
   e._lastX = e.x;
   // bound by her blow and waiting for the blade: it lies where it is
   if (e.disabled) return 'down';
+  if (tame && e.bowing && ART && ART.bow) return 'bow';
   // the purify plays through whatever it was doing when the pack turned
   if (tame && e._pur0 != null && (e.anim || 0) - e._pur0 < WOLF_PURIFY_T && ART && ART.purify) return 'purify';
   // thrown off its feet by her heavy blow: over its back and up (wolfFrame)
@@ -603,6 +606,7 @@ function drawBeastPlate(c, e, ART, tame) {
 function wolfTameStep(e, dt) {
   if (!isWolf(e) || !packTamed()) return false;
   e.coilT = 0; e.lungeT = 0; e.windedT = 0; e.crouchT = 0; e.guard = false;
+  if (typeof wolfBowStep === 'function' && wolfBowStep(e, dt)) return true;
   e.vy += 2000 * dt;
   const px = player.x + player.w / 2, cx = e.x + e.w / 2;
   const d = px - cx, ad = Math.abs(d);
@@ -732,6 +736,8 @@ function alphaMotionEnd(b,dt) {
 }
 function alphaStripCell(b) {
   if (typeof G!=='undefined'&&(G.bossRig||G.alphaRig))return null;
+  // THE BOW (packcall.js): its filmed yield, played through and held
+  if(b.bowing&&(b.purified||b.tamed)){const S=ALPHA_STRIP.free;return {S,cell:Math.min(S.cells-1,Math.floor((b.bowU||0)*S.cells))};}
   let st=(b.purified||b.tamed)?(b.petWalk?'prowl':'rest'):(b.dead&&!b.forceKill)?'free':b.st;
   if(st==='idle')st='rest';
   if(st==='intro'||st==='dorm')st='roarwarn';

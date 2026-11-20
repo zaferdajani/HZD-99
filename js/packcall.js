@@ -148,3 +148,75 @@ function drawPackWolf(c) {
   const w = G.packWolf; if (!w || typeof drawBeastPlate !== 'function') return;
   drawBeastPlate(c, w, WOLF_ART, true);
 }
+
+// ===========================================================================
+// THE BOW (owner, 2026-11-20: "After finishing the alpha should step back, bow
+// down to you as the new alpha ... not as a video, but as a gameplay ... and
+// then maybe some other small wolves will stand behind the alpha and bow to
+// you too").
+//
+// The yielded Alpha backs off two steps with its eyes on her — its own prowl,
+// played backwards, so the paws walk back rather than slide — and then plays
+// its filmed yield: the head drops, the forelegs fold, the chin goes to the
+// floor, and it holds there. Three of the pack come in from the den behind it,
+// stop in a row at its back facing her, and go down low on their forelegs
+// (their own crouch, held at its lowest). A breath later they all rise, and
+// they are hers. Once per save (flags.alphaBowed); she keeps her controls.
+// ===========================================================================
+const ALPHA_BOW = { back: 0.9, backV: 60, bow: 1.2, hold: 3.6, pack: 3, gap: 74 };
+function alphaBowBegin(b) {
+  const f = G.save && G.save.flags;
+  if (!f || f.alphaBowed || (typeof isHero === 'function' && isHero())) { b.bowT = 0; return; }
+  f.alphaBowed = 1;
+  b.bow0 = b.bowT = ALPHA_BOW.back + ALPHA_BOW.bow + ALPHA_BOW.hold;
+  const px = player.x + player.w / 2;
+  b.bowSide = Math.sign(b.cx() - px) || 1;           // away from her: where it backs to, and where the pack stands
+  b.face = -b.bowSide; b.faceVis = b.face;
+  const W = G.roomDef.w * TILE;
+  for (let i = 0; i < ALPHA_BOW.pack; i++) {
+    const tx = clamp(b.cx() + b.bowSide * (b.w * 0.5 + ALPHA_BOW.backV * ALPHA_BOW.back + 60 + i * ALPHA_BOW.gap), 50, W - 90);
+    const sx = clamp(b.cx() + b.bowSide * (b.w * 0.5 + 400 + i * 70), 30, W - 70);
+    const w = new Enemy('crawler', sx, (G.roomDef.h - 2) * TILE - 40);
+    w.bowTo = tx; w.bowT = b.bowT + 0.3 - i * 0.2; w.dir = -b.bowSide;
+    w.spd0 = w.spd; w.spd = 280;          // they come at a run, and walk once they are hers
+    G.enemies.push(w);
+  }
+}
+// the Alpha's own beat, inside its purified update; true while it runs
+function alphaBowStep(b, dt) {
+  if (!(b.bowT > 0)) { b.bowing = false; return false; }
+  b.bowT -= dt;
+  const el = b.bow0 - b.bowT;
+  b.face = -b.bowSide;
+  if (el < ALPHA_BOW.back) {
+    b.vx = b.bowSide * ALPHA_BOW.backV; b.x += b.vx * dt; b.petWalk = true; b.bowing = false;
+  } else {
+    b.vx = 0; b.petWalk = false; b.bowing = true;
+    b.bowU = clamp((el - ALPHA_BOW.back) / ALPHA_BOW.bow, 0, 0.999);
+  }
+  const ground = typeof groundColumnAt === 'function' ? groundColumnAt(b.cx()) : null;
+  if (ground && ground.length) b.y = Math.min(...ground) - b.h;
+  b.vy = 0;
+  if (b.bowT <= 0) b.bowing = false;
+  return true;
+}
+// a wolf of the pack coming in to bow behind it (from wolfTameStep)
+function wolfBowStep(e, dt) {
+  if (!(e.bowT > 0) || e.bowTo == null) { e.bowing = false; return false; }
+  e.bowT -= dt;
+  const cx = e.x + e.w / 2, d = e.bowTo - cx;
+  const px = player.x + player.w / 2;
+  if (!e.bowing && Math.abs(d) > 6) {
+    e.dir = Math.sign(d);
+    enemyGait(e, e.dir * e.spd, dt);
+  } else {
+    // arrived: round to face her, then down
+    e.dir = Math.sign(px - cx) || e.dir;
+    enemyGait(e, 0, dt);
+    if (faceSide(e) === e.dir && Math.abs(e.vx) < 4) e.bowing = true;
+  }
+  e.vy += 2000 * dt;
+  moveEnt(e, dt);
+  if (e.bowT <= 0) { e.bowing = false; e.bowTo = null; if (e.spd0) e.spd = e.spd0; }
+  return true;
+}

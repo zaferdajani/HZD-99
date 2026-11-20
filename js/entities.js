@@ -1621,6 +1621,19 @@ const HERO_IMPATIENT_BEATS = (() => {
   b.push([2, Math.max(0.2, FIDGET_BOUT - beatsLength(b))]);
   return b;
 })();
+// THE FIDGET IS NOT A POSE-SHEET STILL (owner, 2026-11-20: "hero keeps
+// glitching when standing into just like twitching"). When a bout of fidgeting
+// began before its filmed take had arrived, the frame fell through to the old
+// pose sheet's idle cell — a different drawing of her, held for the bout or
+// until the file landed, then snapped back: a twitch. Like the impatient take
+// above it, the fidget plays only once it is here; until then she keeps
+// breathing on her own idle, and the take is asked for at once.
+function heroFidgetReady() {
+  const F = typeof HERO_FIDGET !== 'undefined' ? HERO_FIDGET : null, im = F && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[F.key];
+  if (im && im.complete && im.naturalWidth) return true;
+  if (F && typeof mediaFetch === 'function') mediaFetch(F.key, true);
+  return false;
+}
 function heroImpatientReady() {
   const P = HERO_IMPATIENT, im = P && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[P.key];
   if (im && im.complete && im.naturalWidth) return true;
@@ -4030,8 +4043,16 @@ class Player {
     // Keep the supplied expressive idle in every idle mood. A mood changes
     // only the eye lights; it must not swap the entire body for an old still.
     const I = HERO_IDLE;
-    const clip = heroIdleClip(this.idleT || 0);
-    if (I && I.cells && st === 'idle' && this.on && !clip.fidget) {
+    // (asked for well before the first bout: standing a second and a half is enough)
+    if ((this.idleT || 0) > 1.5 && st === 'idle') heroFidgetReady();
+    let clip = heroIdleClip(this.idleT || 0);
+    // (a fidget whose take is not here yet stays on the idle: heroFidgetReady)
+    if (clip.fidget && !clip.imp && !heroFidgetReady()) clip = { fidget: false, cell: beatCell(HERO_IDLE_BEATS, this.idleT || 0) };
+    // (and through the coyote frames: off a lip for a frame or two she is still
+    // STANDING — heroState keeps 'idle' there — and the idle that draws standing
+    // has to be the same picture, or the old pose-sheet still flashes in: the
+    // twitch the owner saw "in certain areas", which were lips and bumps)
+    if (I && I.cells && st === 'idle' && (this.on || this.coyote > 0) && !clip.fidget) {
       const cell = clip.cell;
       const h = HERO_DH * (I.k || 1), flip = this.faceVis < 0;
       if (drawHeroMotionCell(this, c, I.key, cell, I.cells, 0, HERO_FLOOR, h, flip)) {
@@ -13086,6 +13107,11 @@ class Boss {
           addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
             rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
         const floorY2 = 15 * TILE - this.h;
+        // THE ALPHA BOWS FIRST, its pack behind it (js/packcall.js)
+        if (this.kind === 'alpha' && this.bowT == null && typeof alphaBowBegin === 'function') alphaBowBegin(this);
+        if (this.kind === 'alpha' && typeof alphaBowStep === 'function' && alphaBowStep(this, dt)) {
+          // (its own beat owns the frame)
+        } else
         if (this.kind === 'glitch' || this.kind === 'atlas' || this.kind === 'alpha') {
           if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
           let mv = 0;
@@ -13240,7 +13266,19 @@ class Boss {
         cam.shake = Math.max(cam.shake, 11);
         this.roarBuzzT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
-        if (typeof roarWave === 'function')
+        // NULLFANG'S WAKE IS AN EVENT (owner, 2026-11-20: "more dramatic and
+        // more epic instead of just standing there ... intimidating"): his roar
+        // goes through the room as the crest's did — the picture bends as the
+        // note passes, the frame stops for a breath, the floor's dust goes up
+        // and she is shoved back a step (no damage: a roar is not a blow)
+        if (this.kind === 'glitch' && typeof shockRipple === 'function') {
+          shockRipple(this.cx() + (this.face || -1) * 30, this.cy() - this.h * 0.35,
+            { R: 700, dur: 1.1, amp: 28, width: 66, col: '#b06aff', fronts: 3, gap: 0.12, push: 170, nudge: 7, pulse: 0, light: 0.45 });
+          G.hitStop = Math.max(G.hitStop || 0, 0.08);
+          cam.shake = Math.max(cam.shake, 15);
+          for (let i = 0; i < 22; i++)
+            addPart(this.cx() + rnd(-this.w, this.w), this.y + this.h - 4, rnd(-200, 200), rnd(-230, -60), 0.6, '#9c8f78', 3, 320, true);
+        } else if (typeof roarWave === 'function')
           roarWave(this.cx(), this.cy() - this.h * 0.35,
             { glitch: '#b48cff', brood: '#ff5f6d', zero: '#a5d8ff',
               atlas: '#ff9a5a', prism: '#37ffd0', alpha: '#ffc24a' }[this.kind] || '#e05aff');   // atlas: molten, not reward gold (owner, 2026-10-12)

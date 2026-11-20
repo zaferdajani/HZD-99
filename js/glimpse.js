@@ -86,7 +86,7 @@ function glimpseTick(dt) {
     if (player.x > 8 * TILE || !glimpseReady()) return;
     const gx = glimpseSpot();
     const gc = typeof groundColumnAt === 'function' ? groundColumnAt(gx) : null;
-    Object.assign(GLIMPSE, { on: true, t: 0, ph: 'watch', x: gx, roared: false, lift: 0, leapt: false,
+    Object.assign(GLIMPSE, { on: true, t: 0, ph: 'steps', x: gx, roared: false, lift: 0, leapt: false, stepN: 0,
       y: gc ? Math.min(gc[0], gc[1]) : (G.roomDef.h - 2) * TILE });
     f.nfGlimpse = 1;
     if (typeof persist === 'function') persist();
@@ -100,15 +100,44 @@ function glimpseTick(dt) {
     if (gc) GLIMPSE.y = Math.min(gc[0], gc[1]);
   }
   const near = Math.abs(player.x + player.w / 2 - GLIMPSE.x) < 190;
+  // MORE DRAMATIC, MORE EPIC (owner, 2026-11-20: "the first show of Nilfang
+  // should be more dramatic and more epic instead of just standing there ...
+  // it needs to be intimidating and revealing and actually exciting for the
+  // player to see and wants to follow"). He is HEARD before he is seen: two
+  // footfalls that shake the frame from somewhere ahead in the dark. Then his
+  // eyes, alone. Then the body comes up out of the dark — brightening, never
+  // fading in like a ghost — and he looks at her. The roar bends the picture
+  // as it passes (the howl's bent light, ripple.js), throws the road's dust
+  // up, and for that moment lights him; he holds the stare a beat after it,
+  // and only then turns and goes.
+  if (GLIMPSE.ph === 'steps') {
+    const due = [0.05, 0.5];
+    if (GLIMPSE.stepN < due.length && GLIMPSE.t >= due[GLIMPSE.stepN]) {
+      GLIMPSE.stepN++;
+      if (typeof beastSound === 'function') beastSound('land');
+      cam.shake = Math.max(cam.shake, 3.2);
+      if (typeof padRumble === 'function') padRumble(0.45, 0.3, 180);
+    }
+    if (GLIMPSE.t > 0.95) { GLIMPSE.ph = 'watch'; GLIMPSE.t = 0; }
+    return;
+  }
   if (GLIMPSE.ph === 'watch' && (GLIMPSE.t > 1.7 || near)) { GLIMPSE.ph = 'roar'; GLIMPSE.t = 0; }
   if (GLIMPSE.ph === 'roar') {
     // the sound lands on the frame his head goes back, not on the cut
     if (!GLIMPSE.roared && GLIMPSE.t > 0.28) {
       GLIMPSE.roared = true;
       if (typeof beastSound === 'function') beastSound('roar');
-      cam.shake = Math.max(cam.shake, 5);
+      cam.shake = Math.max(cam.shake, 10);
+      G.hitStop = Math.max(G.hitStop || 0, 0.06);
+      if (typeof padRumble === 'function') padRumble(0.9, 0.7, 700);
+      const H = glimpseH(), mx = GLIMPSE.x - H * 0.5, my = GLIMPSE.y - H * 0.42;
+      if (typeof shockRipple === 'function')
+        shockRipple(mx, my, { R: 520, dur: 0.95, amp: 24, width: 58, col: '#b06aff', fronts: 3, gap: 0.12, nudge: 6, pulse: 0, light: 0.4, shimmer: 2.2 });
+      if (typeof addPart === 'function') for (let i = 0; i < 16; i++)
+        addPart(GLIMPSE.x + rnd(-H * 0.6, H * 0.3), GLIMPSE.y - 3, rnd(-160, 160), rnd(-190, -40), 0.6, '#9c8f78', 2.6, 320, true);
     }
-    if (GLIMPSE.t > 1.15 || (near && GLIMPSE.t > 0.5)) {
+    // he holds the stare a beat after the roar: the moment she reads him
+    if (GLIMPSE.t > 1.75 || (near && GLIMPSE.t > 0.6)) {
       GLIMPSE.ph = 'leave'; GLIMPSE.t = 0; GLIMPSE.lift = 0; GLIMPSE.leapt = false;
       // the turn and the spring are filmed; without them (a slow phone, the
       // files not here yet) he goes straight to the run, as he always did
@@ -143,9 +172,14 @@ function drawGlimpse(c) {
   const H = glimpseH();
   const g = GLIMPSE, canFilter = typeof c.filter === 'string';
   c.save();
-  if (canFilter) c.filter = GLIMPSE_DARK;
-  // he fades up out of the dark of the road rather than popping into it
-  c.globalAlpha = g.ph === 'watch' ? Math.min(1, g.t / 0.45) : 1;
+  if (g.ph === 'steps') { c.restore(); return; }        // heard, not yet seen
+  // OUT OF THE DARK, not faded in: the eyes come first (drawn below), then the
+  // body brightens up from black — a solid animal the whole time, never a
+  // translucent one — and for the second of the roar he stands lit
+  const up = g.ph === 'watch' ? clamp((g.t - 0.35) / 0.7, 0, 1) : 1;
+  const roarLit = g.ph === 'roar' && g.roared ? Math.max(0, 1 - Math.abs(g.t - 0.6) / 0.6) : 0;
+  if (canFilter) c.filter = 'brightness(' + (0.03 + 0.19 * up + 0.3 * roarLit).toFixed(3) + ') saturate(' + (0.6 + 0.3 * roarLit).toFixed(2) + ')';
+  else if (up < 1) c.globalAlpha = up;
   // the shadow stays on the ground and shrinks as he rises off it
   const lifted = clamp(1 - g.lift / (GLIMPSE_LEAP_UP * 1.6), 0.35, 1);
   if (typeof contactShadow === 'function' && !(G.artProbe)) contactShadow(c, g.x, g.y, H * 0.32 * lifted, 0.45 * lifted);
@@ -178,7 +212,7 @@ function drawGlimpse(c) {
   // the one thing that is not dark: his eyes, while he is looking at her
   if (g.ph !== 'leave' && !G.artProbe) {
     const k = 0.55 + Math.sin(performance.now() / 180) * 0.25;
-    c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = Math.min(1, g.t / 0.5 + (g.ph === 'roar' ? 1 : 0)) * k;
+    c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = Math.min(1, g.t / 0.25 + (g.ph === 'roar' ? 1 : 0)) * k;
     // (measured off the idle and roar cells: the near eye, facing left)
     const ex = g.x - H * 0.54, ey = g.y - H * 0.41;
     const gr = c.createRadialGradient(ex, ey, 0, ex, ey, 9);

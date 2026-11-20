@@ -76,7 +76,9 @@ const { chromium } = require('playwright');
   });
 
   check('his art is here by the time she is through the gates', r.art);
-  check('he is there on her first arrival: he watches, roars, and leaves', r.first.phases.join('>') === 'watch>roar>leave' && r.first.over, r.first.phases.join('>'));
+  // (owner, 2026-11-20: "more dramatic and more epic": he is HEARD first — two
+  // footfalls out of the dark — before he is seen)
+  check('he is there on her first arrival: heard, then he watches, roars, and leaves', r.first.phases.join('>') === 'steps>watch>roar>leave' && r.first.over, r.first.phases.join('>'));
   // HIS OWN SIZE (owner, 2026-11-20: "a very big, oversized lion instead of
   // its actual size ... just keep it in its own size"), and all of him in the
   // frame, so the turn is seen as a turn ("Nilfang still jumps backward, not

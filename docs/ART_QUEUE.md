@@ -42,7 +42,10 @@ made until the balance is topped up. Fire in this order.
    the oscillator line kept only as the not-yet-loaded fallback; then
    `node tools/faststart.cjs` is not needed (audio), but `tests/voice-heard`
    must hear each over the score on a phone.
-2. **THE ALPHA'S BOW — the scene after the yield** (owner: *"After finishing
+2. **THE ALPHA'S BOW — the scene after the yield** — *STAGED 2026-11-20 with
+   the filmed art it already had (its yield take is a bow; the pack goes down
+   on its crouch held low — js/packcall.js, tests/alpha-bow.cjs). The takes
+   below would replace the pack's crouch with a true bow; optional.* (owner: *"After finishing
    the alpha should step back, bow down to you as the new alpha ... other
    small wolves will stand behind the alpha and bow to you too ... not as a
    video, but as a gameplay"*). Two filmed strips from the approved Alpha
