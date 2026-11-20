@@ -728,6 +728,10 @@ function updateCam(px, py, rw, rh, dt) {
       py = py*.75 + boss.cy()*.25;
     }
   }
+  // a STAGED showing of a guardian (the break: NULLFANG lets go of the order, then the bell
+  // takes it back) is framed the way his fight frames him at mid-range — all of him, sharp,
+  // with ground round him — not at the close exploration camera, where he filled the screen
+  if (robo && typeof G !== 'undefined' && G.break && boss) wantZoom = Math.min(wantZoom, 1.3);
   const snap=dt>=.5 || cam.room!==(typeof G!=='undefined'?G.roomId:null);
   const step=Math.max(0,Math.min(dt,.1));
   cam.zoom = snap ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*4));

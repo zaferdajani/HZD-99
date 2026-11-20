@@ -193,6 +193,8 @@ const SUITE = [
   ['hero-still', 'standing still she is one drawing: the frames off a lip and a fidget whose take is not here both stay on her filmed idle, never the old pose-sheet still'],
   ['ch2-road', 'chapter two is played in order: the CARRIER, then the gallery ring it wakes down to UNDERTOW, then TALONHOST\'s hall; the arrow leads each step; a loading ring draws no stand-in'],
   ['city-gate', 'the city gate is the painted gate and stands out: with the re-fired plate up, nothing flat is drawn over its doors (the door area reads as the painting\'s warm metal, not navy panels) and it has visible texture'],
+  ['nf-break', 'NULLFANG\'s second showing (the break, after the sword) is solid and his own size: free of the order he stands in full colour, not the 15% ghost of a guardian rising from defeat, and the beat is framed no closer than 1.3'],
+  ['nf-dash', 'NULLFANG\'s dash is his signature: the fight opens with it; phase one a single dash and a short opening, phase two a chain of two and of three below a quarter health, every link a readable red crouch, only the end of a chain the long opening'],
   ['hit-voices', 'the Alpha and its pack play recorded wolves (the howls real, public domain); every body and guardian has its own bank of recorded impacts, never the same take twice running'],
   ['prize', 'the first room shows a prize she cannot reach: every real jump misses it, the double jump lands on it, and it is in the frame'],
   ['bossbench', 'a save point near every boss — one door away or a short walk through one more — and nowhere else: every pod is near a boss, the den\'s, in a Sage\'s cave or at the bottom of a one-way drop, no two a short walk apart, and each standing clear on something'],

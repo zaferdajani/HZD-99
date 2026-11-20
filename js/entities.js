@@ -71,6 +71,62 @@ function pureGift(n) {
 // their own clang.
 // NULLFANG's prowl and run, by gear (p1 prowl 165 -> 180, run 285 -> 300 on
 // 2026-11-14; the fury's own gear 2026-11-16)
+// HIS DASH IS HIS SIGNATURE (owner, 2026-11-20: "his fight should be epic as i
+// described with dash attack as signature"). The crouch-and-dash — the red, curved,
+// low lunge that ends in a slash, the move he gives her when he is purified — is
+// what the fight is built round now, not one of two coin-flip outcomes of a crouch:
+//   - it is the FIRST thing he does: the first coil of the fight is always the dash;
+//   - in phase two it CHAINS: dash, slash, crouch again (a shorter red tell, never
+//     under 0.42 s) and dash again — and below a quarter of his health, three;
+//   - only the END of a chain is the opening: he lands the last slash spent, flank
+//     heaving, for long enough to make her chain of blows count. In the middle of
+//     one, the answer is to be out of the line (jump it, or dash through it).
+// A chain is a sentence the player learns: it always runs to its count, the last
+// link always looks different (it is struck hardest and he stays down), and the
+// next dash cannot start a new chain straight away (lastMove 'lunge'). Between links
+// he takes one breath on his feet (0.3 s, a blow's worth: the openings doctrine);
+// the end of a chain is 0.2 s down plus the standing idle after it (~0.75 s, under the gift line).
+const NF_DASH = { coil2: 0.48, coil3: 0.42, link: 0.3, spentEnd: 0.2 };
+function nfDashChainStart(b) {
+  if (b.dashLeft > 0) return;                       // a link inside a running chain
+  b.dashOpened = true;
+  b.dashLeft = b.phase === 2 ? (b.hp <= b.hpMax * 0.25 ? 2 : 1) : 0;   // links AFTER this one
+  b.dashLink = 0;
+}
+function nfDashChainNext(b, adist) {
+  if (b.dashLeft > 0 && !player.dead) {
+    // AGAIN — after a breath: a third of a second on his feet (one blow's opening,
+    // the doctrine's floor), then straight back down into the red crouch. The
+    // crouch's own replant turns him if she got behind him; he never snaps round.
+    b.dashLeft--; b.dashLink = (b.dashLink || 0) + 1;
+    b.st = 'recover'; b.t = NF_DASH.link; b.vx = 0; b.dashNext = true;
+    b.landAt = b.anim || 0;
+    return;
+  }
+  const chained = (b.dashLink || 0) > 0;
+  b.dashLink = 0; b.dashLeft = 0; b.dashNext = false;
+  if (!chained) {
+    // one dash, then the short opening it always had
+    b.st = 'idle'; b.t = b.fury ? rnd(0.3, 0.45) : b.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52);
+    return;
+  }
+  // SPENT: the end of the chain. He stays down a beat longer, and it is announced,
+  // because she has earned it — but it is not a gift (that is the null crash's)
+  b.st = 'recover'; b.t = NF_DASH.spentEnd; b.vx = 0; b.landAt = b.anim || 0;
+  b.pounced2 = true;     // and the phase-two leap-again does not spend the opening for him
+  cam.shake = Math.max(cam.shake, 10); G.hitStop = Math.max(G.hitStop || 0, 0.08);
+  if (typeof padRumble === 'function') padRumble(0.7, 0.5, 200);
+  for (let i = 0; i < 12; i++) addPart(b.cx() + rnd(-b.w * 0.6, b.w * 0.6), b.y + b.h - 4, rnd(-170, 170), rnd(-120, -30), rnd(0.35, 0.6), '#cdbd9c', rnd(2.5, 4.5), 200, false);
+}
+// the next link: out of the breath, down into the red crouch
+function nfDashLink(b) {
+  b.dashNext = false;
+  b.lunging = true; b.coilDur = b.dashLeft > 0 ? NF_DASH.coil2 : NF_DASH.coil3;
+  b.st = 'crouch'; b.t = b.coilDur; b.vx = 0; b.coilTick = 0; b.coilFlashed = false; b.replanted = false;
+  b.lastMove = 'lunge'; b.turnStreak = 0;
+  if (typeof fx === 'function') b.coilFx = fx('gather', b.cx(), b.y + b.h - 34, { rx: 150, ry: 120, dur: b.t, col: '#ff4a3a', hot: '#fff6df', follow: b, power: 1.1 });
+  beastSound('coil');
+}
 function nfPace(b, running) { return running ? (b.fury ? 330 : 300) : (b.fury ? 240 : b.phase === 2 ? 210 : 180); }
 function foeHitSound(e, big) {
   // (each guardian rings in its own metal: audio.js HIT_BANK)
@@ -13515,7 +13571,8 @@ class Boss {
               // after-images streaming off him, that ends in a slash. The leap
               // and the lunge share a tell on purpose: what he does out of it is
               // the read, and the lunge's coil is shorter.
-              this.lunging = this.lastMove === 'pounce' || chance(this.phase === 2 ? 0.55 : 0.45);
+              this.lunging = !this.dashOpened || this.lastMove === 'pounce' || chance(this.phase === 2 ? 0.55 : 0.45);
+              if (this.lunging) nfDashChainStart(this);
               this.coilDur = this.lunging ? (this.phase === 2 ? 0.55 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
               this.st = 'crouch'; this.t = this.coilDur; this.turnStreak = 0; this.replanted = false;
               this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = this.lunging ? 'lunge' : 'pounce';
@@ -13592,7 +13649,8 @@ class Boss {
             // beastCoilFx. The difficulty is paid for on the other side: the
             // leap leads her now, and in phase two it lands and goes again.
             // (or his DASH out of the same crouch: see the idle's entry above)
-            this.lunging = this.lastMove === 'pounce' || (this.lastMove !== 'lunge' && chance(this.phase === 2 ? 0.55 : 0.45));
+            this.lunging = !this.dashOpened || this.lastMove === 'pounce' || (this.lastMove !== 'lunge' && chance(this.phase === 2 ? 0.55 : 0.45));
+            if (this.lunging) nfDashChainStart(this);
             this.coilDur = this.lunging ? (this.phase === 2 ? 0.55 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
             this.st = 'crouch'; this.t = this.coilDur; this.turnStreak = 0; this.replanted = false;
             this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = this.lunging ? 'lunge' : 'pounce';
@@ -13641,7 +13699,8 @@ class Boss {
             // out after the first and nothing has changed. Conditional, not
             // random: the same choice always gets the same lion.
             const stays = adist < 150 && (Math.sign(dist) || this.face) === this.face;
-            if (!this.swiped2 && (this.phase === 2 || stays)) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
+            if (this.dashSlash) { this.dashSlash = false; this.swiped2 = false; nfDashChainNext(this, adist); }
+            else if (!this.swiped2 && (this.phase === 2 || stays)) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
             else { this.swiped2 = false; this.st = 'idle'; this.t = this.fury ? rnd(0.3, 0.45) : this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52); }
           }
         } else if (this.st === 'crouch') {
@@ -13910,7 +13969,9 @@ class Boss {
           // up: the settle is the opening (one hit, 300 ms and more), and the
           // swipe that follows has its whole tell. Staying to trade is a
           // choice now, and so is leaving.
-          if (this.t <= 0) {
+          if (this.t <= 0 && this.dashNext && !turning) { nfDashLink(this); }
+          else if (this.t <= 0 && this.dashNext) { /* the breath holds through his turn */ }
+          else if (this.t <= 0) {
             const chain = adist < 135 && (Math.sign(dist) || this.face) === this.face && !turning && this.swipeCD <= 0.5
               && !(!this.nullUsed && this.hp <= this.hpMax * 0.5) && !(this.nullSeq > 0);
             // AND IN PHASE TWO IT LEAPS AGAIN. She dodged the first pounce and
@@ -14026,9 +14087,10 @@ class Boss {
             // ...and the lunge does not stop at the landing: it SLASHES out of
             // it, a short wind-up straight into the swipe
             if (this.lungeFly) {
-              this.lungeFly = false;
-              this.st = 'swipewarn'; this.t = this.phase === 2 ? 0.16 : 0.2; this.vx = 0; this.swiped = false; this.swiped2 = true;
-              this.face = Math.sign(player.x + player.w / 2 - this.cx()) || this.face;
+              this.lungeFly = false; this.dashSlash = true;
+              this.st = 'swipewarn'; this.t = 0.4; this.vx = 0; this.swiped = false; this.swiped2 = true;   // the paw rises a full tell (bosswindow floor): the dash is his signature now, so its slash is read often
+              // the slash goes along the dash's own line: a lion that has committed
+              // does not snap round on the frame it lands. Behind him, she dodged it.
             }
           }
         }
