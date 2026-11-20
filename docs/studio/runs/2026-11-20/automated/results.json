@@ -1,0 +1,2515 @@
+{
+  "started_utc": "2026-11-20T08:38:49.486329+00:00",
+  "base_commit": "7400831a20e97f574e6e7a8d94d6366bb0ace1c6",
+  "dirty_at_start": "",
+  "profile": "full",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.66633,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "97dc528cd5ec81f74e65383f8cd2fb3b7824f45dfb4ebf26543a5a3b4e90ef81"
+    },
+    {
+      "name": "pack",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.468413,
+      "timeout_seconds": 180,
+      "log": "pack.log",
+      "sha256": "35d5fd4ad941aa4d449e162f158e7efe58898b51c1af2f07625e0bf663a6b8b0"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "a3ca9cbba9436ddd290fd8bf7d0c2f2182446b6c38f2967bbe1440f45031856f",
+        "odyssey.html": "b6b016a9c97a4dff3776f21543c195af0f64e192c05b1db7488034b5bb315daf",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "5a5b159b258e86b064537f28cd0b8ff1e4c31c528bee7b3daa6aad4fd8d24965",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "combat-impact-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164466,
+      "timeout_seconds": 480,
+      "log": "combat-impact-contract.log",
+      "sha256": "05aba05fc6f6147fa8fc44184910cd7f9f81afae80aa5a17856cdd7693d8a50a"
+    },
+    {
+      "name": "combat-impact-browser",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "combat-impact-browser.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "purification-controls",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "purification-controls.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "purification",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "purification.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "combat-impact-input",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "combat-impact-input.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "wrist-release",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "wrist-release.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "repair-browser",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "repair-browser.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "repair-lifecycle",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164672,
+      "timeout_seconds": 480,
+      "log": "repair-lifecycle.log",
+      "sha256": "0e15e559d14bbaec11d9f9e5d10a1841677ab33250332688551a7c3c9de2b5fe"
+    },
+    {
+      "name": "lion-studio",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "lion-studio.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "lion-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "lion-motion.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "boss-hitfeel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "boss-hitfeel.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "first-foe",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "first-foe.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "hit-voices",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hit-voices.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "gear-how",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "gear-how.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "alpha-run",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "alpha-run.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "pure-gift",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "pure-gift.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ring-pads",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "ring-pads.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ring-wake",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "ring-wake.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "shop-ask",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "shop-ask.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "turn-roar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "turn-roar.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "map-read",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "map-read.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "fired-art",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "fired-art.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "agent-rig",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "agent-rig.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "pod-door",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "pod-door.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "voice-heard",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "voice-heard.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "panel-continuity",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.368416,
+      "timeout_seconds": 480,
+      "log": "panel-continuity.log",
+      "sha256": "caf620338e0c5040aab06a5369e9004f1f1bec8daf701f6168d5e274269c683d"
+    },
+    {
+      "name": "media-container",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.370452,
+      "timeout_seconds": 480,
+      "log": "media-container.log",
+      "sha256": "71e105c97a0e34d093c67c661066f69800d069d5910e635d290e8025fb7f43f3"
+    },
+    {
+      "name": "sharp",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "sharp.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "no-rim-baked",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "no-rim-baked.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "rotate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "rotate.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ledger",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.368151,
+      "timeout_seconds": 480,
+      "log": "ledger.log",
+      "sha256": "c86cf6e509564cc25ac2605995dc84a5f7ac00659ec88322489a2ed9cbea1508"
+    },
+    {
+      "name": "gravehorn-ground",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "gravehorn-ground.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cheetah-hunt",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cheetah-hunt.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "seam-backdrop",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "seam-backdrop.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "sword-edge",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "sword-edge.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "marble-seat",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "marble-seat.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "boss-skill",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "boss-skill.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ring-gate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "ring-gate.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "bound-cue",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "bound-cue.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "decode-ahead",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "decode-ahead.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "plunge",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "plunge.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "boss-fx",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "boss-fx.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "alpha-kit",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "alpha-kit.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "wolf-hunt",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "wolf-hunt.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "solid-enemies",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "solid-enemies.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "solid-bodies",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "solid-bodies.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ios-ready",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "ios-ready.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "story-opening",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114298,
+      "timeout_seconds": 480,
+      "log": "story-opening.log",
+      "sha256": "4d24a76bfb865353e0a32ea3d3c82d8211f11b54c1b43e9ea163bde3fd349460"
+    },
+    {
+      "name": "scene-caption-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164631,
+      "timeout_seconds": 480,
+      "log": "scene-caption-contract.log",
+      "sha256": "07b90ae2b4a78ab0933c71fff5283741c48226e2143332e9a5e15ed76e26c78b"
+    },
+    {
+      "name": "purification-language-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.166571,
+      "timeout_seconds": 480,
+      "log": "purification-language-contract.log",
+      "sha256": "5b80b43db0451cee9710a79541d18ddbdd9a05a61be1d4ba088b35f3d9f2ff83"
+    },
+    {
+      "name": "infection-eye-authority-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.115018,
+      "timeout_seconds": 480,
+      "log": "infection-eye-authority-contract.log",
+      "sha256": "bef6fba84359c299ede4e01fd27262cee458ccf7510dcbbcc789166314d9b1f2"
+    },
+    {
+      "name": "quest-payment-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164676,
+      "timeout_seconds": 480,
+      "log": "quest-payment-contract.log",
+      "sha256": "cbb76367e165202eecdb480c87ce4c60fd5373575fd7990ffb6101444a52eeb9"
+    },
+    {
+      "name": "story-order",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "story-order.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "caves-ch1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "caves-ch1.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "survey-a7",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "survey-a7.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "den-gate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "den-gate.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "comic-rewards",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "comic-rewards.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "story-battery",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "story-battery.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "story-rescue",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "story-rescue.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "story-meeting",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "story-meeting.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "first-sage-route",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "first-sage-route.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "script-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16475,
+      "timeout_seconds": 480,
+      "log": "script-route.log",
+      "sha256": "485e35e3caa9ea77fc14c4ee966a46682ba9d2143e87e54917a7bf8db11bcad1"
+    },
+    {
+      "name": "guardian-break",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "guardian-break.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "sage-quiet",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "sage-quiet.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "mobile-platform",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "mobile-platform.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "gesture-input",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "gesture-input.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "input-contract",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "input-contract.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "winch-integration",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "winch-integration.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "winch-purpose",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "winch-purpose.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "manhwa-reader",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "manhwa-reader.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "panels",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "panels.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "entrance-integration",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "entrance-integration.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "hero-cache-regression",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hero-cache-regression.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "scratch-visual",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "scratch-visual.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "scratch-reach",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164601,
+      "timeout_seconds": 480,
+      "log": "scratch-reach.log",
+      "sha256": "ffa2216e547011a907c1f1157f4281ea6fbe184744575951a7803f5a49de6d39"
+    },
+    {
+      "name": "hero-move-coverage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hero-move-coverage.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "hero-feedback",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164417,
+      "timeout_seconds": 480,
+      "log": "hero-feedback.log",
+      "sha256": "be52f8a8e5e29cdc98e5981886e34eeea486fd8e36e71c43627e40eef3b065f0"
+    },
+    {
+      "name": "hero-delivery",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hero-delivery.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "hero-frame-alpha",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hero-frame-alpha.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "hero-alpha",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hero-alpha.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "tutorial-controller",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164387,
+      "timeout_seconds": 480,
+      "log": "tutorial-controller.log",
+      "sha256": "b15e9c8d93aa7f4bcc7887dcbd4d1c1a785244fe4adc0691f89db7c6d13cf5a7"
+    },
+    {
+      "name": "offline-release",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164529,
+      "timeout_seconds": 480,
+      "log": "offline-release.log",
+      "sha256": "e95b1b36733610861291a45e8d26a0576adfbdd35eb275b98c41c8477bb4c42d"
+    },
+    {
+      "name": "release-polish",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "release-polish.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "chapter-one",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "chapter-one.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "sage-specials",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164384,
+      "timeout_seconds": 480,
+      "log": "sage-specials.log",
+      "sha256": "83e612131a12629c96e0d4c864d2083d28b6422fec599b54fbaa1a841f810d20"
+    },
+    {
+      "name": "tutorial-clarity",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164945,
+      "timeout_seconds": 480,
+      "log": "tutorial-clarity.log",
+      "sha256": "d38d462670977c2eb01a793c0d5ab18551c99cee4a49bb64646728ddecf391ff"
+    },
+    {
+      "name": "story-progression",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164458,
+      "timeout_seconds": 480,
+      "log": "story-progression.log",
+      "sha256": "6816c053e1b610eedcd5e9d82ebd39c833240870d66cb344d6f0f535ed57cab0"
+    },
+    {
+      "name": "input-focus",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164792,
+      "timeout_seconds": 480,
+      "log": "input-focus.log",
+      "sha256": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44"
+    },
+    {
+      "name": "voice-handoff",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.17181,
+      "timeout_seconds": 480,
+      "log": "voice-handoff.log",
+      "sha256": "53a90d21b5e2fd75a38aa43fbb2b721a533e64ce7c93735d50e8012c305bf384"
+    },
+    {
+      "name": "desktop-protocol",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.173145,
+      "timeout_seconds": 480,
+      "log": "desktop-protocol.log",
+      "sha256": "72ab3995559ccdd043452f8db0db369292a565081c937fb13e23ce592cae07a4"
+    },
+    {
+      "name": "cave-passage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cave-passage.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cave-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.46716,
+      "timeout_seconds": 480,
+      "log": "cave-ground.log",
+      "sha256": "30d3dd1b38a00f492eb0f9b71f83f6e4bb1f482a7ecbd01655b25f7c7f1d2631"
+    },
+    {
+      "name": "seam-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165004,
+      "timeout_seconds": 480,
+      "log": "seam-route.log",
+      "sha256": "63acaf57fdd59a7562520ff81ea78758ce00dc8466d56589e7c0eda92a216de8"
+    },
+    {
+      "name": "shadow-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165073,
+      "timeout_seconds": 480,
+      "log": "shadow-ground.log",
+      "sha256": "73da52a301ef0e3abb066462991eb76cb477de26399f190aa61b89ad78b5aefc"
+    },
+    {
+      "name": "visual-depth",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "visual-depth.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "dialogue-audio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164415,
+      "timeout_seconds": 480,
+      "log": "dialogue-audio.log",
+      "sha256": "044a47d071898fdcae0e5e6948eded494d07a6eb7cab2f5f58f75aaecdc86563"
+    },
+    {
+      "name": "weapons",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.264651,
+      "timeout_seconds": 480,
+      "log": "weapons.log",
+      "sha256": "bcd5241bfea20d19c43456d8fed284b03058547d134f0433fa62ca4f77435fea"
+    },
+    {
+      "name": "gear",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.166127,
+      "timeout_seconds": 480,
+      "log": "gear.log",
+      "sha256": "800676a9991c4b59349b0e3fa5f38a48c00a1404cab6f2b60e8165168577bd83"
+    },
+    {
+      "name": "motion-sampling",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16441,
+      "timeout_seconds": 480,
+      "log": "motion-sampling.log",
+      "sha256": "0f0d61bbfb0a51d4888af715427d96a75fe9b0ceaaa9a84c77632b7922956796"
+    },
+    {
+      "name": "combo-routing",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164473,
+      "timeout_seconds": 480,
+      "log": "combo-routing.log",
+      "sha256": "9f5db0bd7427473dbccdd2d46425f91476c746c39a5caacf9c55506d67dceb38"
+    },
+    {
+      "name": "regress",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "regress.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "wake",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "wake.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "lesson",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "lesson.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "nodes",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "nodes.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "memnode-retry",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "memnode-retry.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "denfloor",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "denfloor.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cadence",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cadence.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "glimpse",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "glimpse.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "prize",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "prize.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "bossbench",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "bossbench.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "grounded",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "grounded.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "dighub",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "dighub.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "camjump",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "camjump.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "padfeel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "padfeel.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "impatient",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "impatient.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "text-budget",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "text-budget.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "toolbox",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "toolbox.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "film",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "film.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "filmflow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "filmflow.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cutskip",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cutskip.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "frames",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "frames.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "whatplays",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "whatplays.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "overlap",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "overlap.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cuepitch",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cuepitch.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cues",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cues.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "herofoley",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "herofoley.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "feel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "feel.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "attacks",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "attacks.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "credits",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.466995,
+      "timeout_seconds": 480,
+      "log": "credits.log",
+      "sha256": "e4cf75fbecfdc41baa86d2ef11cc02694f5399d51704ca60eb0cde483b6be763"
+    },
+    {
+      "name": "brand",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "brand.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "slashsnd",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "slashsnd.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "voxmeas",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "voxmeas.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "speed2",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "speed2.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "saw",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "saw.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "boss-counters",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "boss-counters.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "combat",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "combat.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "pace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "pace.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ceiling",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "ceiling.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "ceillock",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "ceillock.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "tutor",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "tutor.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "tells",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "tells.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "boss-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "boss-motion.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "bosswindow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "bosswindow.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "threat",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "threat.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "errands",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "errands.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "deadend",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "deadend.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "benchloop",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "benchloop.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "padlife",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "padlife.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "climbout",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "climbout.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cover",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cover.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "tap",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "tap.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "textreveal",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "textreveal.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "text-rules",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "text-rules.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "servo-presence",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "servo-presence.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "bosspace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "bosspace.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "daze",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "daze.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "openings",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "openings.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "guardians",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "guardians.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "arc",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "arc.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "meet",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "meet.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "secrets",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "secrets.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "secrettell",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "secrettell.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "tails",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.966401,
+      "timeout_seconds": 480,
+      "log": "tails.log",
+      "sha256": "e26a1cb33c7ef63936378f1581bdad1b2935c605d4aac08a421226fe85253108"
+    },
+    {
+      "name": "kingdom",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "kingdom.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "artbible",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "artbible.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "grammar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "grammar.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "battery",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "battery.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "minis",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "minis.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "hzdvox",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hzdvox.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "wolves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "wolves.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "gravehorn",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "gravehorn.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "furnace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "furnace.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "retired",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "retired.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "gait",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "gait.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "motion.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "tinker",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "tinker.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "folk",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "folk.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "rubble",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "rubble.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cavedark",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cavedark.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "terrainrun",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "terrainrun.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "enemygait",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "enemygait.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "infection-eyes",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "infection-eyes.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "infection-roster",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 420,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "infection-roster.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "infection-poses",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "infection-poses.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "reach",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "reach.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "gatecue",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "gatecue.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cuefamily",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cuefamily.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "shopread",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "shopread.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "beacon",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "beacon.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "doorway",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "doorway.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cross",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cross.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "look",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "look.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "seam",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "seam.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "vlink",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "vlink.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "seam-look",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "seam-look.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "roomcache",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "roomcache.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "mapgrid",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "mapgrid.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "mapexits",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "mapexits.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "shaftfit",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "shaftfit.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "glowcost",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "glowcost.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "meadow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "meadow.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "drawclock",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "drawclock.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "guard",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "guard.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "shield",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "shield.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "airattack",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "airattack.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "grapple",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "grapple.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "grapple-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164473,
+      "timeout_seconds": 480,
+      "log": "grapple-contract.log",
+      "sha256": "7c721a72da07456da64e4880da4dc844a9717bd38ba29db323b16a3437da6f5b"
+    },
+    {
+      "name": "reel-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.365426,
+      "timeout_seconds": 480,
+      "log": "reel-contract.log",
+      "sha256": "f238413a245411bd04bcb642d5e72f87bee47f400dc1fd4c2b9d376decbfdd36"
+    },
+    {
+      "name": "hitshape",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hitshape.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "slashlayer",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "slashlayer.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "crestfight",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "crestfight.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "face",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "face.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "glide",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "glide.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "dmglog",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "dmglog.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "loadout",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "loadout.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "soar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "soar.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "shopscale",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "shopscale.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "foescale",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "foescale.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "contrast",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "contrast.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "foelevel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "foelevel.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "scrapmoves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "scrapmoves.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "conduits",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "conduits.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "foundry",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "foundry.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "archives",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "archives.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "nestmoves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "nestmoves.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cachemoves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cachemoves.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "cacheroster",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "cacheroster.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "npcstrip",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "npcstrip.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "opening",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "opening.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "opening-order",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "opening-order.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "campaign-ch1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 3780,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "campaign-ch1.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "campaign-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.466972,
+      "timeout_seconds": 480,
+      "log": "campaign-contract.log",
+      "sha256": "5d8a0d8f96aa5fc83e0e9c67cec6a2796b39906cd4a4efb9e343a6d0e6926ae1"
+    },
+    {
+      "name": "hero",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "hero.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "preload",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "preload.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "boot",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "boot.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "lowres",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "lowres.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "demo",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "demo.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "twin",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "twin.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "crystal",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "crystal.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "sage-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "sage-motion.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "sage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "sage.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "kingdom1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "kingdom1.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "memnote",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "memnote.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "platform",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "platform.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "packs",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "packs.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "warp",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "warp.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "denlight",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "denlight.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "bake3d",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "bake3d.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "forge",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium cannot create its required Unix socket: [Errno 1] Operation not permitted",
+      "log": "forge.log",
+      "sha256": "12b2ff6d3af6113517aed4f4f57cc6412eb37cb193f74996fc590825e7dfc251"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "a3ca9cbba9436ddd290fd8bf7d0c2f2182446b6c38f2967bbe1440f45031856f",
+        "odyssey.html": "b6b016a9c97a4dff3776f21543c195af0f64e192c05b1db7488034b5bb315daf",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "5a5b159b258e86b064537f28cd0b8ff1e4c31c528bee7b3daa6aad4fd8d24965",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "a3ca9cbba9436ddd290fd8bf7d0c2f2182446b6c38f2967bbe1440f45031856f",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-11-20T08:38:59.692958+00:00"
+}

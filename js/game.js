@@ -284,11 +284,16 @@ const G = {
     stopMusic(); sfx('dieSting');
     this.state = 'DEAD'; this.deadT = 1.8;
   },
-  grantRelic(id) {
+  grantRelic(id, presentStored) {
     if (!this.save.relics) this.save.relics = [];
-    if (this.save.relics.indexOf(id) >= 0) return;
-    this.save.relics.push(id);
-    persist(); sfx('win');
+    const stored = this.save.relics.indexOf(id) >= 0;
+    if (stored && !presentStored) return;
+    if (!stored) {
+      if (presentStored) return;
+      this.save.relics.push(id);
+      persist();
+    }
+    sfx('win');
     loadoutTagCard(showItem(t('rl_' + id), t('rl_' + id + 'd')), 'relic', id);
   },
   maybeDropRelic(x, y) {
@@ -2712,13 +2717,14 @@ const NPC_GIFT = {
 // is its code hook — when the film asset lands it plays from here, and until
 // then the moment is the flash, the sting and the card. The grant itself
 // never waits on the art.
-function forgeCrystal() {
-  if (!grantWeapon('single')) return;
-  // ...and the trader packs his tools for the camp by the lion's door: the
-  // next time a room is loaded he stands there, not here (npcPlaced). He says
-  // so as he hands the job over (sl_ratchet_moving), never silently.
-  if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
-  persist();
+function forgeCrystal(presentStored) {
+  if (presentStored) {
+    if (!weaponOwned('single')) return false;
+  } else {
+    if (!grantWeapon('single')) return false;
+    if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
+    if (persist() === false) return false;
+  }
   sfx('chargeReady');
   G.flash = Math.max(G.flash, 0.6);
   if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
@@ -2736,6 +2742,7 @@ function forgeCrystal() {
   const card = showItem(t('i_crystal'), t('i_crystald'));
   if (card) card.onEnd = () => alphaQuestOffer();
   else if (G.dialog) G.dialog.onEnd = () => alphaQuestOffer();
+  return true;
 }
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();

@@ -21,7 +21,7 @@ check('a timed-out story beat fails', !r.certified && r.result === 'complete-wit
 r = campaignCertification('complete', good(), [], ['ReferenceError: test'], null, null);
 check('a page error fails', !r.certified && r.result === 'complete-with-page-errors', JSON.stringify(r));
 
-const late = good(); late.splice(late.indexOf('cave'), 1); late.splice(late.indexOf('forge') + 1, 0, 'cave');
+const late = good(); late.splice(late.indexOf('cave'), 1); late.splice(late.indexOf('marble') + 1, 0, 'cave');
 r = campaignCertification('complete', late, [], [], null, null);
 check('a late cave introduction fails chronology', !r.certified && r.orderErrors.includes('marble'), JSON.stringify(r));
 
