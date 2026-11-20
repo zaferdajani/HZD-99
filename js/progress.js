@@ -86,7 +86,20 @@ function pgTermRead(room, which) {
 // chapter's own opening lessons (or a later chapter) own the answer.
 function progressGoal(f) {
   f = f || (G.save && G.save.flags) || {};
-  if (!pgRobo() || f.bossGlitch && f.ch2Climb) return null;
+  if (!pgRobo()) return null;
+  // CHAPTER TWO HAS A ROAD (owner, 2026-11-20: "the second one is super fast
+  // with nothing to play"). The sage's chamber (B4) was three rooms from the
+  // way in, and nothing named the kingdom's mini-boss up the relay climb or the
+  // agent who drowned its canals. Now the kingdom is played in order: the
+  // CARRIER first (its fall wakes a ring in the relay gallery, B6), then the
+  // agent UNDERTOW through it, and only then is TALONHOST's hall open
+  // (world.js B3, gate_brood_ward).
+  if (f.bossGlitch && f.ch2Climb) {
+    if (f.bossBrood) return null;
+    if (!f.bossCarrier) return 'pg_goal_carrier';
+    if (!f.sageTame_GB1D) return 'pg_goal_undertow';
+    return 'pg_goal_brood';
+  }
   if (!f['on_A0B|ratchet']) return null;               // the opening's lessons speak first
   if (!f.crystal) {
     if (G.save.bag && G.save.bag.cshard || f.pl_cshard && !f.crystal) return 'pg_goal_return';
@@ -256,6 +269,9 @@ function pgGoalRoom(key, f) {
     case 'pg_goal_chime': return 'A9';
     case 'pg_goal_lion': case 'pg_goal_east': return 'A4';
     case 'pg_goal_up': return 'B1';
+    case 'pg_goal_carrier': return 'B8';
+    case 'pg_goal_undertow': return 'GB1D';
+    case 'pg_goal_brood': return 'B4';
   }
   return null;
 }

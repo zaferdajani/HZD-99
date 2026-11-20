@@ -47,7 +47,9 @@ chosen at runtime by `sageRevealLines` / `ratchetStandingKey`
 | 21 | conduits_line | A3 | `bossGlitch`, `ratchetCamp` (+ `ratchetSays`) | — | Ratchet (at the camp) | The hatch above the camp unjammed when the lion was freed; the climb leads to the Data Conduits. | conduits_open, said the moment NULLFANG is free | `@ratchetStanding`, `conduits_open` → `sl_ratchet_conduits` |
 | 22 | conduits | B1 | `bossGlitch`, `crystal` | — | none | The second kingdom. | Ratchet: 'That climb goes up into the Data Conduits' (sl_ratchet_conduits); conduits_open; gate_conduits whenever the hatch refuses | `gate_conduits` |
 | 23 | mono | B3B | `bossGlitch` | `on_B3B\|mono` | Mono | The order comes up from beneath the Archives in Mother's voice — her voice, not her command. | The Oracle's parlour door, the only door on the conduit corridor (B3) | `d_mono` |
-| 24 | talonhost | B4 | `bossGlitch` | `bossBrood` | TALONHOST (no words) | — | The conduit corridor runs east from the Oracle straight into her hall | `b_brood` |
+| 23b | carrier | B8 | `bossGlitch` | `bossCarrier` | CARRIER (no words) | It never finished its route. | The goal line from the first conduit room on: 'Climb to the CARRIER's nest' (pg_goal_carrier); the arrow up the relay climb (B2 → B7 → B8) | — |
+| 23c | undertow | GB1D | `bossCarrier` | `sageTame_GB1D` | UNDERTOW (the second kingdom's agent) | He drowned the data canals inside his own head; purified, he gives what he kept. | The CARRIER's fall wakes the ring on the relay gallery's floor (B6 → GB1T); the goal line (pg_goal_undertow) | — |
+| 24 | talonhost | B4 | `bossGlitch`, `sageTame_GB1D` | `bossBrood` | TALONHOST (no words) | — | UNDERTOW purified opens her hall (gate_brood_ward); the goal line (pg_goal_brood) | `b_brood` |
 | 25 | prowler | X1 | `bossGlitch`, `bossBrood`, `crystal` | `bossPrism`, `relic sigil1` | the Prism Prowler (no words) | It was never infected; it guards the seam's second blade and stands down. | Mono: 'Cracked walls hide old maintenance shafts. Strike them' — B5's breakable ceiling | `pure_prism` |
 | 26 | sigil_foundry | C1 | `bossGlitch`, `crystal` | `relic sigil3` | none (a hidden seal) | The last seal of the old vault lies on a ledge in the Foundry tower. | Patch-7 in the pour gallery: 'The walls hum near the old vault...'; the sealed vault itself, refused without it: 'The third seal was carried down into the Foundry tower.' (vault_where3) | `rl_sigil3d` |
 | 27 | mind_nodes | E1 | `bossZero`, `bossPrism` (+ `allNodeRooms`) | `relic sigil2` | none (the last Mind Node) | Out-thinking every Mind Node earns the second seal. | Every node is marked where it stands (rd_hint); Vault Sigil II says what it was for (rl_sigil2d) | — |
@@ -92,6 +94,8 @@ line itself is the introduction (the beat's `introduces`).
 | GA1T → GA1D (the first sage) | forged blade | `sage_need_forge` |
 | A2 depth door → A10 (the Alpha) | forged blade | `story_need_blade` |
 | B5 → V1 (the vault's side) | `vaultOpen` (three sigils) | `gate_vault_side` |
+| B6 ring → GB1T (the way to UNDERTOW) | `bossCarrier`; the ring stands dark until then, and is withdrawn once `bossBrood` opens the hall's own (owner, 2026-11-20: "There is no game in the second kingdom") | `ring_dormant` |
+| B3 → B4 (TALONHOST's hall) | `sageTame_GB1D` (or `bossBrood`), robot story only; once walked it stays open | `gate_brood_ward` |
 | D3 ↓ E1 | `bossZero` | — |
 | any guardian or the Alpha at zero health | forged blade (`brNeedsBlade`, js/braid.js) | `sg_hint` |
 

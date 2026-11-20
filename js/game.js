@@ -10525,15 +10525,10 @@ function drawCaveMouth(cx2, gy, P, k, buried) {
   sh.addColorStop(0, '#1a2129'); sh.addColorStop(0.5, '#12171e'); sh.addColorStop(1, '#0b0f14');
   c.fillStyle = sh;
   rim(MW + 62, MH + 52, gy); c.fill();
-  // moss line riding the outer lip
-  c.strokeStyle = 'rgba(110,160,90,0.35)'; c.lineWidth = 3;
-  rim(MW + 60, MH + 50, gy); c.stroke();
-  // ...and the kingdom's own light catching one shoulder — the rim light
-  // that makes the mound read as a BODY standing in the room
-  c.save(); c.globalCompositeOperation = 'lighter';
-  c.strokeStyle = P.glow; c.lineWidth = 2.2; c.globalAlpha = 0.22;
-  rim(MW + 56, MH + 46, gy); c.stroke();
-  c.restore();
+  // (NO LINE ROUND IT. A moss stroke and a lit rim stroke used to ride the
+  // lip — a green outline drawn in light round the mouth, which the ledger
+  // refuses for any object: "Why still framed with light ?!!!". The rock's
+  // own filled layers below carry its shape.)
   // 2 — the mid rim: a darker collar inside the shoulder
   const md = c.createLinearGradient(0, gy - MH - 30, 0, gy);
   md.addColorStop(0, '#10151b'); md.addColorStop(1, '#080b0f');
@@ -11660,6 +11655,10 @@ function drawKerfStone(cx2, gy, P, k) {
 const GATE_STORY = {
   CV3: { at: 36 / 56, to: 'GA1T', ax: 0.5, lock: 'crystal', lockLine: 'ring_dormant' },
   GA1T: { at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' },
+  // CHAPTER TWO'S ROAD (progress.js): the relay gallery's floor carries a ring,
+  // dark until the CARRIER falls, down to UNDERTOW's tunnel — and back
+  B6: { at: 26 / 32, to: 'GB1T', ax: 0.5, lock: 'bossCarrier', lockLine: 'ring_dormant' },
+  GB1T: { at: 0.5, to: 'B6', ax: 26 / 32, need: 'bossCarrier' },
 };
 // ---------------------------------------------------------------------------
 // A RING IS WOKEN, NOT POPPED IN (owner, 2026-11-16: "if you're going to show
@@ -11761,6 +11760,9 @@ function gateLocked(def) {
 // fighting it (CLAUDE.md, the ledger), and a door out is a place to hide.
 function gateFightSealed(def) {
   if (typeof bossActive !== 'function' || !bossActive() || G.boss.purified || G.boss.tamed) return false;
+  // (a guardian the save already counts as beaten is not a fight)
+  const k = G.boss.kind, won = k === 'alpha' ? 'alpha' : 'boss' + k.charAt(0).toUpperCase() + k.slice(1);
+  if (G.save && G.save.flags && G.save.flags[won]) return false;
   return gateDoorsAll(G.roomId).indexOf(def) >= 0;
 }
 function gateDoorsAll(id) {
@@ -11785,6 +11787,13 @@ function gateDoorsAll(id) {
     }
     if (room === 'CV3') doors.push(GATE_STORY.CV3);
     if (room === 'GA1T') doors.push(GATE_STORY.GA1T);
+    // ...and chapter two's: the gallery's ring is the road to UNDERTOW and back
+    // until the eagle falls, when the hall's own ring (B4) leads into that
+    // network and this one would lead nowhere new
+    if (!(G.save.flags && G.save.flags.bossBrood)) {
+      if (room === 'B6') doors.push(GATE_STORY.B6);
+      if (room === 'GB1T') doors.push(GATE_STORY.GB1T);
+    }
   }
   return doors;
 }

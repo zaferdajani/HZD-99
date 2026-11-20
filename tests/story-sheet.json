@@ -516,17 +516,48 @@
       ]
     },
     {
+      "id": "carrier",
+      "room": "B8",
+      "requires": [
+        "bossGlitch"
+      ],
+      "sets": [
+        "bossCarrier"
+      ],
+      "speaker": "CARRIER (no words)",
+      "knows": "It never finished its route.",
+      "pointer": "The goal line from the first conduit room on: 'Climb to the CARRIER's nest' (pg_goal_carrier); the arrow up the relay climb (B2 → B7 → B8)",
+      "lines": [],
+      "introduces": []
+    },
+    {
+      "id": "undertow",
+      "room": "GB1D",
+      "requires": [
+        "bossCarrier"
+      ],
+      "sets": [
+        "sageTame_GB1D"
+      ],
+      "speaker": "UNDERTOW (the second kingdom's agent)",
+      "knows": "He drowned the data canals inside his own head; purified, he gives what he kept.",
+      "pointer": "The CARRIER's fall wakes the ring on the relay gallery's floor (B6 → GB1T); the goal line (pg_goal_undertow)",
+      "lines": [],
+      "introduces": []
+    },
+    {
       "id": "talonhost",
       "room": "B4",
       "requires": [
-        "bossGlitch"
+        "bossGlitch",
+        "sageTame_GB1D"
       ],
       "sets": [
         "bossBrood"
       ],
       "speaker": "TALONHOST (no words)",
       "knows": "—",
-      "pointer": "The conduit corridor runs east from the Oracle straight into her hall",
+      "pointer": "UNDERTOW purified opens her hall (gate_brood_ward); the goal line (pg_goal_brood)",
       "lines": [
         "b_brood"
       ],

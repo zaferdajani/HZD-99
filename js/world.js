@@ -1084,7 +1084,9 @@ const ROOMS = {
       rect(g, 13, 0, 16, 0, '.');
       hline(g, 8, 11, 2, '=');
     } },
-  B3: { zone: 'B', w: 32, h: 17, exits: { L: 'B2', R: 'B4', B: 'C1' },
+  // (TALONHOST's hall opens when the kingdom has been played: the agent UNDERTOW
+  // purified — progress.js, chapter two's road; a save past the eagle keeps it)
+  B3: { zone: 'B', w: 32, h: 17, exits: { L: 'B2', R: { to: 'B4', flag: 'sageTame_GB1D', or: ['bossBrood'], robo: 1, why: 'gate_brood_ward' }, B: 'C1' },
     // The Oracle no longer stands in the corridor. Her PARLOR is the depth
     // door at mid-room (GATE_ROOM B3, the A0/A0B booth pattern): walk UP into
     // the cable-shrine and she is inside, in a place of her own — the same
@@ -2311,6 +2313,8 @@ function doorPadCols(id) {
   const ats = list.filter(d => (!d.style || d.style === 'den') && id !== 'W2').map(d => d.at);
   if (id === 'CV3') ats.push(36 / 56);       // the maintenance landing (gateDoorsAll)
   if (id === 'GA1T') ats.push(0.5);
+  if (id === 'B6') ats.push(26 / 32);       // the relay gallery's ring to UNDERTOW (gateDoorsAll)
+  if (id === 'GB1T') ats.push(0.5);
   return ats.map(a => Math.max(1, Math.min(def.w - 2, Math.floor(a * def.w))));
 }
 function levelDoorPads(g, id) {
