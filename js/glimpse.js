@@ -40,8 +40,20 @@ const GLIMPSE_KEYS = ['beastStudioIdle', 'beastStudioRoar', 'beastGallop'];
 const GLIMPSE_LEAVE_KEYS = ['beastStudioTurn', 'beastStudioLeap'];
 const GLIMPSE_TURN_T = 0.55;     // the turn, seconds
 const GLIMPSE_LEAP_T = 0.8;      // crouch, spring, flight, landing
-const GLIMPSE_LEAP_DX = 340;     // the ground the spring covers, world px
-const GLIMPSE_LEAP_UP = 92;      // the height of the arc at its top, world px
+// HIS OWN SIZE (owner, 2026-11-20: "When nilfang first shows as a very big,
+// oversized lion instead of its actual size, which makes its image lower
+// quality due to that. So just keep it in its own size"). He was drawn at the
+// strips' full 341 px, twice the 166 px his fight draws him at (drawBeast:
+// the body's height x 2.35 over the atlas's 270). The glimpse uses the fight's
+// own number, so he is the same animal she meets later, and all of him fits in
+// the frame — head, body and tail — so the turn reads as a turn.
+function glimpseH() {
+  const def = typeof BSTAT !== 'undefined' && BSTAT.glitch;
+  const bh = (def && def.h) || 56, BH = typeof BEAST_H === 'number' ? BEAST_H : 270;
+  return 256 * (typeof BEAST_STRIP_PX === 'number' ? BEAST_STRIP_PX : 1.33) * bh * 2.35 / BH;
+}
+const GLIMPSE_LEAP_DX = 190;     // the ground the spring covers, world px (about a body and a half)
+const GLIMPSE_LEAP_UP = 58;      // the height of the arc at its top, world px
 // where the STANDING animal stands in each take's cells (strip px right of the
 // cell centre, the art facing LEFT) — beast.js BEAST_STRIP / BEAST_TURN, the
 // takes' own anchors. Drawing every take at the same spot without these is
@@ -54,6 +66,13 @@ function glimpseReady() {
   // properly (the art is asked for a room early, in W2)
   return typeof MEDIA_RAW !== 'undefined' && GLIMPSE_KEYS.concat(GLIMPSE_LEAVE_KEYS).every(k => MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth);
 }
+// all of him in the frame (his own size leaves room for it): no further right
+// than a body's length inside the view's right edge, and while he stands and
+// roars he keeps to that if the camera settles under him
+function glimpseSpot() {
+  const z = cam.zoom || 1, sx = typeof camSX === 'function' ? camSX() : cam.x;
+  return Math.min(GLIMPSE_AT * TILE, sx + 960 - 480 * (1 - 1 / z) - glimpseH() * 0.7);   // (his tail reaches ~0.62 H past his feet)
+}
 function glimpseTick(dt) {
   if (typeof opOn !== 'function' || !opOn() || !player || !G.save) return;
   const f = G.save.flags;
@@ -65,7 +84,7 @@ function glimpseTick(dt) {
     if (G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk || G.wake || !player.on) return;
     // just inside the gates, with the road ahead of her on screen — and his art here
     if (player.x > 8 * TILE || !glimpseReady()) return;
-    const gx = GLIMPSE_AT * TILE;
+    const gx = glimpseSpot();
     const gc = typeof groundColumnAt === 'function' ? groundColumnAt(gx) : null;
     Object.assign(GLIMPSE, { on: true, t: 0, ph: 'watch', x: gx, roared: false, lift: 0, leapt: false,
       y: gc ? Math.min(gc[0], gc[1]) : (G.roomDef.h - 2) * TILE });
@@ -75,6 +94,11 @@ function glimpseTick(dt) {
   }
   if (G.roomId !== 'A0') { GLIMPSE.on = false; return; }
   GLIMPSE.t += dt;
+  if (GLIMPSE.ph === 'watch' || GLIMPSE.ph === 'roar') {
+    GLIMPSE.x = glimpseSpot();
+    const gc = typeof groundColumnAt === 'function' ? groundColumnAt(GLIMPSE.x) : null;
+    if (gc) GLIMPSE.y = Math.min(gc[0], gc[1]);
+  }
   const near = Math.abs(player.x + player.w / 2 - GLIMPSE.x) < 190;
   if (GLIMPSE.ph === 'watch' && (GLIMPSE.t > 1.7 || near)) { GLIMPSE.ph = 'roar'; GLIMPSE.t = 0; }
   if (GLIMPSE.ph === 'roar') {
@@ -116,7 +140,7 @@ function glimpseTick(dt) {
 // drawn in WORLD space on the ground layer: under her, the booth's people and the winch
 function drawGlimpse(c) {
   if (!GLIMPSE.on || G.roomId !== 'A0' || typeof drawStripCell !== 'function') return;
-  const H = 256 * (typeof BEAST_STRIP_PX === 'number' ? BEAST_STRIP_PX : 1.33);
+  const H = glimpseH();
   const g = GLIMPSE, canFilter = typeof c.filter === 'string';
   c.save();
   if (canFilter) c.filter = GLIMPSE_DARK;
@@ -124,7 +148,7 @@ function drawGlimpse(c) {
   c.globalAlpha = g.ph === 'watch' ? Math.min(1, g.t / 0.45) : 1;
   // the shadow stays on the ground and shrinks as he rises off it
   const lifted = clamp(1 - g.lift / (GLIMPSE_LEAP_UP * 1.6), 0.35, 1);
-  if (typeof contactShadow === 'function' && !(G.artProbe)) contactShadow(c, g.x, g.y, 110 * lifted, 0.45 * lifted);
+  if (typeof contactShadow === 'function' && !(G.artProbe)) contactShadow(c, g.x, g.y, H * 0.32 * lifted, 0.45 * lifted);
   if (g.ph === 'watch') {
     drawStripCell(c, 'beastStudioIdle', Math.floor(g.t * 8) % 6, 24, g.x, g.y, H, false);       // his strips face LEFT: at her
   } else if (g.ph === 'roar') {

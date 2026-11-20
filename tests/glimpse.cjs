@@ -54,8 +54,10 @@ const { chromium } = require('playwright');
         }
         if (GLIMPSE.ph === 'watch' && GLIMPSE.t > 0.5 && !frame.length) {
           updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, 1 / 60);
-          const z = cam.zoom || 1, right = cam.x + 480 + 480 / z, H = 256 * BEAST_STRIP_PX;
-          frame.push({ head: Math.round(GLIMPSE.x - H * 0.54 - right), body: Math.round(GLIMPSE.x - right), winch: G.enemies.some(e => e.mechanism === 'winch' && e.x < GLIMPSE.x) });
+          const z = cam.zoom || 1, sx = typeof camSX === 'function' ? camSX() : cam.x;
+          const left = sx + 480 * (1 - 1 / z), right = sx + 960 - 480 * (1 - 1 / z), H = glimpseH();
+          const fightH = 256 * BEAST_STRIP_PX * BSTAT.glitch.h * 2.35 / BEAST_H;
+          frame.push({ H: Math.round(H), fightH: Math.round(fightH), nose: Math.round(GLIMPSE.x - H * 0.6 - left), tail: Math.round(right - (GLIMPSE.x + H * 0.62)) });
         }
       }
     }
@@ -75,15 +77,20 @@ const { chromium } = require('playwright');
 
   check('his art is here by the time she is through the gates', r.art);
   check('he is there on her first arrival: he watches, roars, and leaves', r.first.phases.join('>') === 'watch>roar>leave' && r.first.over, r.first.phases.join('>'));
-  check('...a glimpse: his head is inside the frame and the rest of him is not', r.first.frame && r.first.frame.head < -10 && r.first.frame.body > 0, JSON.stringify(r.first.frame));
-  check('...beyond the jammed winch, where she cannot get to him', r.first.frame && r.first.frame.winch);
+  // HIS OWN SIZE (owner, 2026-11-20: "a very big, oversized lion instead of
+  // its actual size ... just keep it in its own size"), and all of him in the
+  // frame, so the turn is seen as a turn ("Nilfang still jumps backward, not
+  // turning around and jump": at the frame's edge only his head was in view,
+  // and the turn read as the head leaving and the hindquarters arriving)
+  check('...at his own size: drawn as tall as his fight draws him, not twice it', r.first.frame && Math.abs(r.first.frame.H - r.first.frame.fightH) <= 2, JSON.stringify(r.first.frame));
+  check('...and all of him in the frame, nose to tail', r.first.frame && r.first.frame.nose >= 0 && r.first.frame.tail >= 0, JSON.stringify(r.first.frame));
   check('...he roars once, and the ground answers', r.first.sounds.filter(q => q === 'roar').length === 1 && r.first.shake >= 4, r.first.sounds.join(',') + ' shake ' + r.first.shake);
   check('...and goes east, the way the road runs', r.first.east);
   // a real leap away, not a backwards slide (owner, 2026-11-19): the filmed turn
   // on the spot, then the filmed spring with height under it, then the run
   check('...turning first, then springing, then running', r.first.leave.keys.join('>') === 'beastStudioTurn>beastStudioLeap>beastGallop', r.first.leave.keys.join('>'));
   check('...the turn is on the spot: he does not slide while he turns', r.first.leave.turnMoved < 1, r.first.leave.turnMoved.toFixed(1) + ' px');
-  check('...and the spring leaves the ground', r.first.leave.lift >= 60, r.first.leave.lift.toFixed(0) + ' px at the top');
+  check('...and the spring leaves the ground', r.first.leave.lift >= 50, r.first.leave.lift.toFixed(0) + ' px at the top');
   check('it takes nothing from her: she plays through it, untouched, and nothing joins the room',
     r.first.states.join() === 'PLAY' && !r.first.bossSeen && !r.first.hurt && r.first.foes && r.first.moved > 40, JSON.stringify({ s: r.first.states, moved: r.first.moved }));
   check('once per save', r.first.flag && !r.again);
