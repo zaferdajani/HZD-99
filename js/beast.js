@@ -1546,6 +1546,20 @@ function drawBeast(c, b) {
       c.restore();
       return true;
     }
+    // HE STANDS ON THE GROUND UNDER HIS PAWS, not level over a rise (groundSeat,
+    // game.js). Fore paws 93 and hind paws 54 cell px either side of the cell's
+    // centre (measured off the idle and stalk takes, head at the left); only while
+    // he is standing on it — the curve is not consulted in the air.
+    {
+      const k = S * BEAST_STRIP_PX, fx = cx - sgn * 93 * k, hx = cx + sgn * 54 * k;
+      const seat = (typeof groundSeat === 'function' && b.st !== 'pounce' && b.st !== 'dive' && b.st !== 'spring')
+        ? groundSeat(cx, footY, fx, hx, 0.5, 80 * k) : null;
+      const tT = seat ? seat.tilt : 0, dT = seat ? seat.dy : 0;
+      b._seatT = (b._seatT || 0) + (tT - (b._seatT || 0)) * 0.25;
+      b._seatY = (b._seatY || 0) + (dT - (b._seatY || 0)) * 0.25;
+      if (Math.abs(b._seatY) > 0.3) c.translate(0, b._seatY);
+      if (Math.abs(b._seatT) > 0.003) c.rotate(b._seatT);
+    }
     c.translate(0, (1 - ta) * 7);
     c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
     // Keep authored armour opaque; foeDraw supplies the contact flash.

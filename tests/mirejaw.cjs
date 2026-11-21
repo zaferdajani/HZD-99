@@ -48,6 +48,39 @@ const { chromium } = require('playwright');
     out.walkHead = blow('backoff', mjHeadX(B));
     out.under = blow('sub', B.mj.wx);
     out.belly = blow('leap', B.mj.wx);
+    // HE STANDS ON THE GROUND (owner, 2026-11-21: "four of its limbs is almost on
+    // the air"): seated anywhere on any island, facing either way, every paw over
+    // land is ON its ground (never in it, never more than a few px over it), a paw
+    // over the water is under the surface, and he pitches with the ground
+    out.seat = { worst: 0, under: 0, wetAbove: 0, n: 0, tilts: 0 };
+    for (let x = 2 * TILE; x < (G.roomDef.w - 2) * TILE; x += 24) {
+      if (mjGroundAt(x) == null) continue;
+      for (const face of [-1, 1]) {
+        B.st = 'beached'; B.t = 1; B.mj.t0 = 1; B.mj.wx = x - face * 70; B.mj.face = face; B.mj.drawY = null; B.mj.tilt = null;
+        mjPoseStep(B, 1);
+        for (const pw of B.mj.paws) {
+          if (pw.wet) { if (pw.y < mjSurfY()) out.seat.wetAbove++; continue; }
+          out.seat.n++;
+          out.seat.worst = Math.max(out.seat.worst, pw.ground - pw.y);
+          if (pw.y > pw.ground + 1) out.seat.under++;
+        }
+        if (Math.abs(B.mj.tilt) > 0.05) out.seat.tilts++;
+      }
+    }
+    // HE SURFACES ON THE SLANT (owner: "comes up as an elevator instead of
+    // swimming up diagonally"): through the warning he travels forward at least
+    // as far as he rises, nose first
+    { fresh(); const B3 = G.boss; mjInit(B3);
+      player.x = 18 * TILE; player.y = 200; for (let k = 0; k < 60; k++) { update(1 / 60); G.dialog = null; G.state = 'PLAY'; }
+      B3.mj.wx = mjNearestWater(player.x + player.w / 2) - 200; B3.st = 'sub'; B3.t = 0; B3.mj.t0 = 0;
+      let a = null, z = null, nose = 0;
+      for (let k = 0; k < 600 && !z; k++) {
+        G.dialog = null; G.state = 'PLAY'; player.iT = 9; update(1 / 60);
+        if (B3.st === 'bitewarn' && !a) a = { x: B3.mj.wx, y: B3.mj.feet };
+        if (B3.st === 'bitewarn') nose = Math.max(nose, -B3.mj.face * (B3.mj.tilt || 0));
+        if (a && B3.st !== 'bitewarn') z = { x: B3.mj.wx, y: B3.mj.feet };
+      }
+      out.rise = a && z ? { dx: Math.round(Math.abs(z.x - a.x)), dy: Math.round(a.y - z.y), nose: +nose.toFixed(2) } : null; }
     // THE DEATH ROLL: the jaws close on her, she is held, dragged under, and
     // lets go two cores lighter, on an island
     fresh(); const B2 = G.boss; mjInit(B2);
@@ -104,6 +137,9 @@ const { chromium } = require('playwright');
   check('...the head is armour again once the jaws are not open', U.walkHead <= U.jaws * 0.2, U.walkHead);
   check('...under the water nothing reaches him', U.under === 0, U.under);
   check('...and the pale belly in the air is the other weak point', U.belly >= 60, U.belly);
+  check('HE STANDS ON THE GROUND: every paw over an island is on it, none in it, none floating', U.seat.n > 20 && U.seat.under === 0 && U.seat.worst <= 6, JSON.stringify(U.seat));
+  check('...a paw past the bank is under the water, and he pitches with the ground', U.seat.wetAbove === 0 && U.seat.tilts > 4, JSON.stringify(U.seat));
+  check('HE SURFACES ON THE SLANT, never straight up: forward at least as far as he rises, nose first', U.rise && U.rise.dy >= 30 && U.rise.dx >= U.rise.dy && U.rise.nose >= 0.1, JSON.stringify(U.rise));
   check('THE DEATH ROLL: the bite catches her and drags her under', U.roll.inRoll > 30 && U.roll.held, JSON.stringify({ inRoll: U.roll.inRoll, held: U.roll.held }));
   check('...and costs exactly two cores', U.roll.lost === 2, U.roll.lost + ' (' + U.roll.hurts.join(',') + ')');
   check('...and lets her go on an island, not in the water', U.roll.onLand && !U.roll.inWater, JSON.stringify({ onLand: U.roll.onLand, inWater: U.roll.inWater }));

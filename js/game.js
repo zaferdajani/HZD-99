@@ -8618,6 +8618,26 @@ function groundColumnAt(worldX) {
   return [y, t];
 }
 
+// A BODY STANDS ON THE GROUND UNDER ITS FEET (owner, 2026-11-21, of MIREJAW:
+// "when it stands on the platform is leveled and... four of its limbs is almost
+// on the air"). A plate is drawn level and seated by its centre, so on a hump or
+// a slope the paws at either end hang over the curve or sink into it. This gives
+// the pitch and the drop that put both ends on their own ground: the line through
+// the ground under the front feet and under the back feet, pitched no steeper than
+// `tiltMax`, lowered or raised so no foot is in the ground, and held up only as far
+// as the belly (`belly` px over the foot line) needs to clear a crest between.
+// Null when the body is not standing (airborne, or no ground under it).
+function groundSeat(cx, footY, xA, xB, tiltMax, belly) {
+  const g = x => { const gc = groundColumnAt(x); return gc ? Math.min(gc[0], gc[1]) : null; };
+  const gm = g(cx); if (gm == null || Math.abs(gm - footY) > 4) return null;   // standing means ON it (the resolver puts the feet on it exactly)
+  const ya = g(xA), yb = g(xB); if (ya == null || yb == null) return null;
+  const L = xA < xB ? [xA, ya] : [xB, yb], R = xA < xB ? [xB, yb] : [xA, ya];
+  const tilt = clamp(Math.atan2(R[1] - L[1], R[0] - L[0]), -tiltMax, tiltMax), sl = Math.tan(tilt);
+  let y = Math.min(L[1] - sl * (L[0] - cx), R[1] - sl * (R[0] - cx));
+  for (let x = L[0] + 8; x < R[0]; x += 8) { const gy = g(x); if (gy != null) y = Math.min(y, gy + belly - sl * (x - cx)); }
+  return { tilt, dy: y - footY };
+}
+
 function* slabSilhouetteSteps(x) {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return;

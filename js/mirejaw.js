@@ -38,6 +38,7 @@
 const MJ = {
   drawH: 190,             // the strip cell's height on screen: ~330 px nose to tail
   surfRow: 13,            // the pool's surface row (world.js SW3, k2Water)
+  glide: 90,              // how far he swims forward while he rises (never straight up)
   sub: [1.5, 2.3], sub2: [0.9, 1.4],   // seconds under between ambushes (p1, p2)
   swim: 250, swim2: 330,  // px/s under the surface
   warn: 0.8,              // the boil and the eyes: NEVER shortened between phases
@@ -108,12 +109,77 @@ function mjBox(b) {
   b.y = M.feet - b.h;
 }
 function mjHeadX(b) { return b.mj.wx + b.mj.face * 130; }
+// HE STANDS ON THE GROUND UNDER HIS PAWS (owner, 2026-11-21: "when it stands
+// on the platform is leveled and... four of its limbs is almost on the air, not
+// actually standing on actual ground"). The plates were drawn level and seated on
+// one height — the tile top under the head — while an island is a hump. So the
+// body is posed from where his feet are: the fore paws and the hind paws (measured
+// off the plates: 0.32 and 0.64 of a cell, the head at the left) each find the
+// ground under them — the island's own surface curve, or, over open water, a
+// depth below the surface, so a crocodile half out of the water lies along the
+// bank with his hind legs under it — the body pitches to the line between them,
+// and that line is lifted only as far as the belly needs to clear a crest.
+const MJ_PAW = { fore: 73, hind: 57, belly: 46, wet: 30, tiltMax: 0.5, tiltBank: 0.62 };   // belly: the plates' belly clears the paw line by ~24 px; a crocodile's belly rests ON a crest, so a crest may press up to it
+const MJ_SEATED = { beached: 1, spent: 1, tailwarn: 1, tail: 1, roarwarn: 1, daze: 1, down: 1, sink: 1, backoff: 1 };
+function mjFloorY(x) {
+  // the room's walls are not ground: a paw past one stands on the column inside it
+  if (G.roomDef) x = clamp(x, TILE * 1.5, (G.roomDef.w - 1.5) * TILE);
+  if (mjIsWater(x)) return mjSurfY() + MJ_PAW.wet;
+  const gc = (typeof groundColumnAt === 'function') ? groundColumnAt(x) : null;
+  if (gc) return Math.min(gc[0], gc[1]);
+  const g = mjGroundAt(x); return g != null ? g : mjSurfY() + MJ_PAW.wet;
+}
+// the pose a seated body takes at (wx, face): the pitch, and the height of the
+// paw line under the body's centre
+function mjSeat(wx, face) {
+  const xF = wx + face * MJ_PAW.fore, xH = wx - face * MJ_PAW.hind;
+  const inRoom = x => G.roomDef ? clamp(x, TILE * 1.5, (G.roomDef.w - 1.5) * TILE) : x;
+  const paws = [[xF, mjFloorY(xF), mjIsWater(inRoom(xF))], [xH, mjFloorY(xH), mjIsWater(inRoom(xH))]].sort((a, c) => a[0] - c[0]);
+  // climbing out up a bank he may rear steeper than he ever stands on land
+  const tMax = (paws[0][2] || paws[1][2]) ? MJ_PAW.tiltBank : MJ_PAW.tiltMax;
+  const tilt = clamp(Math.atan2(paws[1][1] - paws[0][1], paws[1][0] - paws[0][0]), -tMax, tMax);
+  const sl = Math.tan(tilt);
+  // a paw on land stands ON it; a paw in the water has no floor to meet, only
+  // the surface to stay under, so it never holds the body up off the bank
+  let y = Infinity;
+  for (const [x, gy, wet] of paws) if (!wet) y = Math.min(y, gy - sl * (x - wx));
+  if (y === Infinity) for (const [x, gy] of paws) y = Math.min(y, gy - sl * (x - wx));
+  for (let x = paws[0][0] + 8; x < paws[1][0]; x += 8)                       // the belly over a crest
+    y = Math.min(y, mjFloorY(x) + MJ_PAW.belly - sl * (x - wx));
+  return { tilt, y, paws: paws.map(([x, gy, wet]) => ({ x, ground: gy, wet, y: y + sl * (x - wx) })) };
+}
+// eased each step; the drawing reads M.tilt and M.drawY
+function mjPoseStep(b, dt) {
+  const M = b.mj, st = b.st;
+  let tilt = 0, y = M.feet;
+  if (MJ_SEATED[st]) {
+    const s = mjSeat(M.wx, M.face);
+    tilt = s.tilt; y = s.y; M.paws = s.paws;
+    // going back into the water, or sinking, he goes DOWN through it
+    if (st === 'sink' || (st === 'backoff' && mjIsWater(M.wx))) y = Math.max(y, M.feet);
+    else M.feet = y;
+  } else if (st === 'leap' && M.from && M.tgt) {
+    // nose along the arc: up out of the water, down onto her
+    const k = mjK(b), endX = M.tgt.x - M.face * 120;
+    const dx = endX - M.from.x, dy = (M.tgt.feet - M.from.feet) - Math.cos(Math.PI * k) * Math.PI * 120;
+    tilt = clamp(Math.atan2(dy, Math.abs(dx) + 60) * (dx >= 0 ? 1 : -1), -0.55, 0.55);
+    M.paws = null;
+  } else if (st === 'bitewarn') {
+    tilt = -M.face * 0.2 * mjK(b);                                           // the nose comes up first
+    M.paws = null;
+  } else M.paws = null;
+  const snap = st === 'leap' || M.drawY == null;
+  M.drawY = snap ? y : M.drawY + (y - M.drawY) * Math.min(1, dt * 16);
+  M.tilt = (M.tilt == null) ? tilt : M.tilt + (tilt - M.tilt) * Math.min(1, dt * 10);
+}
 // WHERE A BLOW LANDS DECIDES IT (types.js dealDmg)
 function mjHide(b, x, y) {
   const st = b.st;
   if (st === 'sub' || st === 'dorm' || st === 'roll') return 0;          // under the water: nothing reaches him
   if (st === 'daze' || st === 'down') return 1;
-  if (st === 'leap' || st === 'bitewarn' && mjK(b) > 0.7) return 1;      // the pale belly, in the air
+  // the pale belly, in the air. Rising out of the water he shows only his armoured
+  // head and back: the belly is open once he has left it
+  if (st === 'leap') return 1;
   const nearHead = Math.abs(x - mjHeadX(b)) < 95;
   if ((st === 'beached' || st === 'spent') && nearHead) {
     b.mj.weakHit = 0.3;
@@ -168,15 +234,25 @@ function mjStep(b, dt) {
     }
     case 'sub': {
       // eyes and ridge only, crossing toward the water beside her island
-      M.feet = mjSurfY() + 84;
-      const goal = mjNearestWater(px);
+      M.feet += (mjSurfY() + 84 - M.feet) * Math.min(1, dt * 5);
+      // he lines up a body-length out in open water, so the rise that carries
+      // him forward ends where the old straight rise stood (the leap is the same leap)
+      const edge = mjNearestWater(px), away = Math.sign(edge - px) || -M.face;
+      let goal = edge;
+      for (let r = MJ.glide; r > 0; r -= 8) if (mjIsWater(edge + away * r)) { goal = edge + away * r; break; }
+      M.edge = edge;
       const sp = p2 ? MJ.swim2 : MJ.swim, d = goal - M.wx;
       if (Math.abs(d) > 4) { M.wx += Math.sign(d) * Math.min(Math.abs(d), sp * dt); M.face = Math.sign(d); }
       if (b.t <= 0 && Math.abs(d) < 24) {
         // THE LOCK: the eyes rise and stop moving; where she is NOW is where
         // the jaws go — she has the whole warning to be elsewhere
         M.face = Math.sign(px - M.wx) || M.face;
-        M.tgt = { x: px, feet: mjGroundAt(px) != null ? mjGroundAt(px) : pfeet };
+        M.tgt = { x: px, feet: mjGroundAt(px) != null ? mjFloorY(px) : pfeet };
+        // he does not stop and rise like a lift: he keeps swimming at her and
+        // comes up on the slant, the way a crocodile breaks the surface
+        // the speed that carries him to the edge over the warning (decay 2.6/s)
+        M.rv = (M.edge - M.wx) / ((1 - Math.exp(-2.6 * MJ.warn)) / 2.6);
+        M.riseFrom = M.feet;
         mjSet(b, 'bitewarn', MJ.warn);
         playBuf('mj_hiss', 0.7);
       }
@@ -184,7 +260,9 @@ function mjStep(b, dt) {
     }
     case 'bitewarn': {
       // the boil: he rises until the head and the top of the jaws are out
-      M.feet = mjSurfY() + 84 - 50 * mjK(b);
+      { const k = mjK(b), e = k * k * (3 - 2 * k);
+        M.feet = (M.riseFrom != null ? M.riseFrom : mjSurfY() + 84) + (mjSurfY() + 34 - (M.riseFrom != null ? M.riseFrom : mjSurfY() + 84)) * e;
+        M.wx += (M.rv || 0) * dt; M.rv = (M.rv || 0) * Math.exp(-dt * 2.6); }
       if (b.t <= 0) {
         M.from = { x: M.wx, feet: M.feet };
         mjSet(b, 'leap', MJ.leap);
@@ -226,7 +304,7 @@ function mjStep(b, dt) {
         // he beaches where his HEAD comes down: the body behind it may still be in the water
         const gnd = mjGroundAt(mjHeadX(b));
         if (gnd != null) {
-          M.feet = gnd;
+          M.feet = mjSeat(M.wx, M.face).y;
           cam.shake = Math.max(cam.shake, 7); sfx('slam');
           mjSet(b, 'beached', MJ.beach);
           M.chain = 0;
@@ -234,7 +312,7 @@ function mjStep(b, dt) {
           // into the water: in phase two the next one comes at once, from
           // another gap — the end of a chain is always a beaching
           playBuf('mj_splash', 0.7);
-          M.feet = mjSurfY() + 84;
+          M.feet = Math.max(M.feet, mjSurfY() + 20);
           if (p2 && M.chain < 1) { M.chain++; mjSet(b, 'sub', 0.25); } else { M.chain = 0; mjSet(b, 'sub', 0.6); }
         }
       }
@@ -336,6 +414,7 @@ function mjStep(b, dt) {
   // a leap that comes down ON her without the jaws closing still lands on her
   if (b.st === 'leap' && !M.held && player && !player.dead && player.iT <= 0 && mjK(b) > 0.7
       && Math.abs(px - M.wx) < 120 && Math.abs(pfeet - M.feet) < 40) player.hurt(DF().edmg || 1, M.wx, 'mirejaw.body');
+  mjPoseStep(b, dt);
   mjBox(b);
 }
 function mjNearestLand(x) {
@@ -400,7 +479,8 @@ function mjDraw(c, b) {
   const cw = im.naturalWidth / n, ch = im.naturalHeight, H = MJ.drawH, W = H * cw / ch;
   c.save();
   if (b.fade != null && b.fade < 1) c.globalAlpha = Math.max(0, b.fade);
-  c.translate(M.wx, M.feet + 4);
+  c.translate(M.wx, (M.drawY != null ? M.drawY : M.feet) + 4);
+  if (M.tilt) c.rotate(M.tilt);
   if (M.face > 0) c.scale(-1, 1);
   if (b.hurtT > 0 && M.clink > 0) c.filter = 'brightness(1.25)';
   c.drawImage(im, (Math.max(0, i) % n) * cw, 0, cw, ch, -W / 2, -H, W, H);
