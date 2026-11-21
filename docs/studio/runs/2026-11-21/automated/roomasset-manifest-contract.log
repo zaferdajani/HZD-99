@@ -1,0 +1,6 @@
+
+── roomasset-manifest-contract  — new gate and TALLYMAN reaction art are present in cold-load metadata
+PASS gate bytes and TALLYMAN first-hit plates are current in the room preload manifest
+   (roomasset-manifest-contract: 0.1 s)
+
+all 1 harnesses ran

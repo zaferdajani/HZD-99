@@ -1,0 +1,6 @@
+
+── infection-eye-authority-contract  — only infected bodies receive red or purple finite eye trails
+PASS only infected bodies receive finite red/purple eye trails
+   (infection-eye-authority-contract: 0.1 s)
+
+all 1 harnesses ran

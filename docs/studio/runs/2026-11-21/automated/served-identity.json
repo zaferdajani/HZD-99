@@ -1,0 +1,32 @@
+{
+  "root": "/workspace/scratch/b4e9aa23d77e/hzd21",
+  "base": "http://127.0.0.1:8220/",
+  "takenAt": "2026-11-21T08:27:03.798Z",
+  "files": {
+    "index.html": {
+      "sha256": "4cc94a1a4752b7b2d688ac9781316f79cf161e01dbbe1f220699f7c696d49058",
+      "bytes": 5570837,
+      "buildId": "d00e1fa49591"
+    },
+    "odyssey.html": {
+      "sha256": "a9b276caa0fb1b38a71b02e323e533b3298fdad2026c89a4b30bc5017ab22dc2",
+      "bytes": 4285602,
+      "buildId": "d00e1fa49591"
+    },
+    "sw.js": {
+      "sha256": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+      "bytes": 2494,
+      "buildId": null
+    },
+    "assets/eyes.json": {
+      "sha256": "5a5b159b258e86b064537f28cd0b8ff1e4c31c528bee7b3daa6aad4fd8d24965",
+      "bytes": 19516,
+      "buildId": null
+    },
+    "assets/lowres/alBite.webp": {
+      "sha256": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2",
+      "bytes": 26442,
+      "buildId": null
+    }
+  }
+}

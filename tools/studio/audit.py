@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Evidence collector. Does not claim to replace the 15-role human/agent review."""
-import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
+import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, socket, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
@@ -35,6 +35,45 @@ def suite_budgets(source):
     if not budgets:
         raise ValueError('No test harnesses found; refusing empty coverage')
     return budgets
+
+def browser_test(name, root=ROOT):
+    """Detect direct or transitive Playwright use; honor explicit noBrowser."""
+    root = pathlib.Path(root)
+    try:
+        runner = (root / 'tests' / 'run.cjs').read_text()
+        if re.search(r"\['" + re.escape(name) + r"'[^\n]*\{[^\n}]*\bnoBrowser\s*:\s*true\b", runner):
+            return False
+    except OSError:
+        pass
+    seen = set()
+    def uses_browser(candidate):
+        try:
+            candidate = candidate.resolve()
+            if candidate in seen or not candidate.is_file(): return False
+            seen.add(candidate); source = candidate.read_text()
+        except OSError:
+            return False
+        if re.search(r"require\(\s*(['\"])playwright\1\s*\)", source): return True
+        for match in re.finditer(r"require\(\s*(['\"])(\.{1,2}/[^'\"]+)\1\s*\)", source):
+            dep = candidate.parent / match.group(2)
+            choices = [dep] if dep.suffix else [pathlib.Path(str(dep)+'.cjs'), pathlib.Path(str(dep)+'.js'), dep/'index.cjs', dep/'index.js']
+            if any(uses_browser(choice) for choice in choices): return True
+        return False
+    return uses_browser(root / 'tests' / (name + '.cjs'))
+
+def browser_block_reason(name, env=None, root=ROOT, socket_factory=socket.socket):
+    """Classify host launch restrictions before they become false gameplay failures."""
+    env = os.environ if env is None else env
+    if not browser_test(name, root): return None
+    executable = pathlib.Path(env.get('CHROMIUM_PATH', '/opt/pw-browsers/chromium'))
+    if not executable.is_file(): return 'Chromium executable is missing: ' + str(executable)
+    if not os.access(executable, os.X_OK): return 'Chromium executable is not executable: ' + str(executable)
+    if os.name == 'posix':
+        try:
+            probe = socket_factory(socket.AF_UNIX, socket.SOCK_STREAM); probe.close()
+        except OSError as error:
+            return 'Chromium cannot create its required Unix socket: ' + str(error)
+    return None
 
 def run_owned(cmd, *, cwd, log, timeout, env=None):
     """Run one owned process group and kill every descendant on timeout."""
@@ -93,6 +132,16 @@ def main():
         (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
         print(name+': '+state, flush=True)
         return state == 'pass'
+    def block(name, reason, timeout):
+        log = out/(name+'.log')
+        log.write_text('BLOCKED: '+reason+'\n')
+        entry = {'name': name, 'status': 'blocked', 'exit_code': None,
+                 'seconds': 0, 'timeout_seconds': timeout, 'reason': reason,
+                 'log': log.name, 'sha256': hashlib.sha256(log.read_bytes()).hexdigest()}
+        report['results'].append(entry)
+        (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
+        print(name+': blocked', flush=True)
+        return False
     ready = run('build', ['node', 'build.cjs'], 180)
     if ready and 'platform' in names: ready = run('pack', ['node', 'tools/pack-www.cjs'], 180)
     snapshot = out/'served-identity.json'
@@ -140,7 +189,9 @@ def main():
         for name in names:
             if not (ROOT/'tests'/f'{name}.cjs').exists():
                 report['results'].append({'name':name,'status':'missing'}); continue
-            run(name, ['node','tests/run.cjs', name], suite[name])
+            reason = browser_block_reason(name, run_env.get('env'))
+            if reason: block(name, reason, suite[name])
+            else: run(name, ['node','tests/run.cjs', name], suite[name])
         # and at the end: the served build must still be the one pinned at the start
         ready = identity('end', snapshot)
     report['complete_requested_scope'] = ready and len([x for x in report['results'] if x['name'] in names]) == len(names)

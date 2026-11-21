@@ -116,7 +116,7 @@ TEXT_LAYERS.push({
     op_o_return: 'Bring the raw marble to Ratchet',
     op_o_sage: 'Purify the Eye\'s agent — the door beside the marble quarry',
     op_o_chime: 'Silence the bell: the climb at the meadow hub\'s west end',
-    op_o_lion: 'Free NULLFANG in his enclosure past the camp',
+    op_o_lion: 'Purify NULLFANG in his enclosure past the camp',
     op_o_conduits: 'Climb to the Data Conduits above the camp',
   },
   ar: {
@@ -224,7 +224,7 @@ TEXT_LAYERS.push({
     op_o_return: 'أحضري الرخام الخام إلى راتشيت',
     op_o_sage: 'طهّري عميل العين — الباب بجانب محجر الرخام',
     op_o_chime: 'أسكتي الجرس: التسلّق عند الطرف الغربي لمحور المرج',
-    op_o_lion: 'حرّري نَلفانغ في حظيرته بعد المخيّم',
+    op_o_lion: 'طهّري نَلفانغ في حظيرته بعد المخيّم',
     op_o_conduits: 'تسلّقي إلى قنوات البيانات فوق المخيّم',
   },
   tr: {
@@ -332,7 +332,7 @@ TEXT_LAYERS.push({
     op_o_return: "Ham mermeri Ratchet'e götür",
     op_o_sage: 'Göz\'ün ajanını arındır — mermer ocağının yanındaki kapı',
     op_o_chime: 'Çanı sustur: tırmanış çayır merkezinin batı ucunda',
-    op_o_lion: "Kampın ötesindeki ağılında NULLFANG'i özgür bırak",
+    op_o_lion: "Kampın ötesindeki ağılında NULLFANG'i arındır",
     op_o_conduits: 'Kampın üstündeki Veri Kanallarına tırman',
   },
   zh: {
@@ -440,7 +440,7 @@ TEXT_LAYERS.push({
     op_o_return: '把原生大理石带给拉切特',
     op_o_sage: '净化「眼」的特工——大理石采石场旁的门',
     op_o_chime: '让钟沉默：攀登处在草原枢纽的西端',
-    op_o_lion: '在营地后的围栏里解放 NULLFANG',
+    op_o_lion: '在营地后的围栏里净化 NULLFANG',
     op_o_conduits: '爬上营地上方的数据导管',
   },
   ru: {
@@ -548,7 +548,7 @@ TEXT_LAYERS.push({
     op_o_return: 'Отнеси сырой мрамор Рэтчету',
     op_o_sage: 'Очисти агента Ока — дверь возле мраморного карьера',
     op_o_chime: 'Заставь колокол замолчать: подъём у западного края лугового узла',
-    op_o_lion: 'Освободи NULLFANG в его загоне за лагерем',
+    op_o_lion: 'Очисти NULLFANG в его загоне за лагерем',
     op_o_conduits: 'Поднимись к Каналам Данных над лагерем',
   },
 });
