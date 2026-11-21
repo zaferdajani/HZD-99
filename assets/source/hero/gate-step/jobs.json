@@ -1,0 +1,23 @@
+{
+  "fired": "2026-11-21",
+  "model": "gpt_image_2_6 (high, 2k, 2048x688, transparent)",
+  "why": "owner, 2026-11-21: entering a raised door she raises a leg and climbs, or hops in, seen from behind",
+  "references": {
+    "bare": "assets/source/hero/delivered/v2/walk_away.png",
+    "single": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+    "dual": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+    "joined": "assets/source/hero/delivered/v4/walk_away_armed_joined.png"
+  },
+  "jobs": {
+    "climb_single": "cf5384e4-90dd-4db7-ae1c-9e40191504b8",
+    "hop_single": "696f1652-5638-4dd9-a963-6ed7b96d09b4",
+    "climb_bare_refused_vents": "8a650b9b-336e-43dd-b0d4-c6b106a5b784",
+    "climb_bare": "c26f0f4d-fd26-46a0-a320-12ca0fb35f0e",
+    "hop_bare": "5f0c41a3-f509-4409-ad2c-bb03654db358",
+    "climb_dual": "fecb72bc-ef51-4d88-a1a7-d53ac966422e",
+    "hop_dual": "52417c7f-908a-49b2-9b89-756653d6e61e",
+    "climb_joined": "f08624d6-a210-4988-8766-6b5727d28d01",
+    "hop_joined": "51ffa622-b3ce-4b88-b038-20eb3a4675bf"
+  },
+  "method": "single-sword climb and hop fired first from the walk-away sheet; the other tiers redraw those poses with their own back gear (IMAGE 1 gear, IMAGE 2 poses). The first bare climb drew her belly vents on her back and was refused. Cut by tools/stepstrip.cjs (--frames 8 for the joined blade, which bridges frames)."
+}

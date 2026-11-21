@@ -12698,7 +12698,9 @@ function gateEnter() {
     ax0: player.x, axTo: gapX,
     align: Math.abs(need) < 6 ? 1 : 0,
     alignT: 0, alignDur: Math.min(0.45, Math.abs(need) / GATE_STEP_VX),
+    stepKey: gateStepKey(G2),
   };
+  if (G.gateWalk.stepKey && typeof mediaFetch === 'function') mediaFetch(G.gateWalk.stepKey, 1);
   // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
   // the only place in the game she is seen from behind, and the four plates that
   // do it are lazy-loaded like everything else — requested at draw time they
@@ -12816,6 +12818,35 @@ const GATE_CLIP_ARMED = {
   dual:   { key: 'heroGateDual',   cells: 8, turn: 4, turnFrac: 0.2 },
   joined: { key: 'heroGateJoined', cells: 8, turn: 4, turnFrac: 0.2 },
 };
+// SHE STEPS UP INTO A DOOR THAT STANDS ABOVE THE GROUND (owner, 2026-11-21:
+// "when it faces the background, it raises a leg and it jumps, or it jumps
+// inside of it... raises a leg and climbs like a ladder or an elevated object,
+// or it hops inside of it, which is also cute"). A machine ring's opening starts
+// at its sill, about half her height up, and the swamp's culvert is a pipe
+// mouth: she CLIMBS over a ring's sill — knee up, hands on it, hauled up, on top,
+// walking on — and HOPS into the pipe with both feet. Drawn from behind, one
+// sheet per weapon tier (assets/source/hero/gate-step/), cut by
+// tools/stepstrip.cjs KEEPING the height she gains (movestrip would seat every
+// cell on one floor and flatten the step). Cells 0-5 the step, 6-7 her stride
+// on top. Ratchet's den door is no ring and keeps its run (the owner asked for
+// that one fast); the Wolf King's fanged ring is a ring, and she climbs it.
+const GATE_STEP = {
+  climb: { claws: 'heroClimbBare', single: 'heroClimbSingle', dual: 'heroClimbDual', joined: 'heroClimbJoined' },
+  hop:   { claws: 'heroHopBare',   single: 'heroHopSingle',   dual: 'heroHopDual',   joined: 'heroHopJoined' },
+};
+const GATE_STEP_CELLS = 8, GATE_STEP_END = 0.62, GATE_STEP_WALK = 1.4;
+function gateStepKind(def) {
+  if (!def) return null;
+  if (def.style === 'culvert') return 'hop';
+  return (typeof ringGateFor === 'function' && ringGateFor(def)) ? 'climb' : null;
+}
+function gateStepKey(def) {
+  const kind = gateStepKind(def); if (!kind) return null;
+  const w = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
+  return GATE_STEP[kind][w] || GATE_STEP[kind].claws;
+}
+// a step takes a little longer than a run through: the climb is the shot
+function gateWalkDur(g) { return g && g.stepKey ? GATE_STEP_WALK : GATE_WALK; }
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
@@ -12879,7 +12910,7 @@ function updateGateWalk(dt) {
     if (g.turn < 1) return;
   }
   g.t += dt;
-  if (g.t >= GATE_WALK) {
+  if (g.t >= gateWalkDur(g)) {
     G.gateWalk = null;
     loadRoom(g.to);
     // AND SHE COMES OUT OF THE OTHER SIDE OF THE GATE. loadRoom keeps whatever
@@ -13021,7 +13052,7 @@ function drawGateWalk() {
     }
     return;
   }
-  const k = clamp(g.t / GATE_WALK, 0, 1);
+  const k = clamp(g.t / gateWalkDur(g), 0, 1);
   // she walks into the gap and away: position lerps toward the vanishing point
   // in SCREEN space, scale falls off, and the last third fades to black so the
   // room change lands on darkness rather than on a cut
@@ -13029,7 +13060,10 @@ function drawGateWalk() {
   // tenth eases her into the stride; after that the pace is CONSTANT — no
   // smoothstep rush through the middle — and she simply gets smaller the
   // deeper she goes, until the dark takes her.
-  const e = k < 0.1 ? (k * k) / 0.1 * 0.5 + k * 0.5 : k;
+  let e = k < 0.1 ? (k * k) / 0.1 * 0.5 + k * 0.5 : k;
+  // a raised door: she climbs (or hops) AT the door, and only then goes on in
+  const stepIm = g.stepKey ? gateBackImg(g.stepKey) : null;
+  if (stepIm) e = k < GATE_STEP_END ? 0.1 * k / GATE_STEP_END : 0.1 + 0.9 * (k - GATE_STEP_END) / (1 - GATE_STEP_END);
   const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
   const tg = gateTarget(g.def);
   const tx = tg.x, ty = tg.y;
@@ -13127,6 +13161,20 @@ function drawGateWalk() {
     const dh=92*sc/ratio;
     c.drawImage(departure,col*cw,0,cw,departure.naturalHeight,x-dh/2,y-dh,dh,dh);
     G.gateBackKey='heroDeparture';
+  } else if (stepIm) {
+    // her walk clip's own turn cells first (unless the doorway already turned
+    // her), then the step, then her stride on top of it
+    const turned = !armed && !!gateBackImg('heroDeparture');
+    const tf = (clipIm && !turned) ? CLIPU.turnFrac * 0.6 : 0;
+    let src = stepIm, n = GATE_STEP_CELLS, cell;
+    if (k < tf) { src = clipIm; n = CLIPU.cells; cell = Math.min(CLIPU.turn - 1, Math.floor(k / tf * CLIPU.turn)); }
+    else if (k < GATE_STEP_END) cell = Math.min(5, Math.floor((k - tf) / (GATE_STEP_END - tf) * 6));
+    else cell = 6 + (Math.floor(trav / 26) % 2);
+    const cw = src.naturalWidth / n;
+    const dh = 92 * sc, dw = dh * (cw / src.naturalHeight);
+    c.drawImage(src, cell * cw, 0, cw, src.naturalHeight, x - dw / 2, y - dh, dw, dh);
+    G.gateBackKey = src === stepIm ? g.stepKey : CLIPU.key;
+    G.gateStepCell = src === stepIm ? cell : -1;
   } else if (clipIm) {
     const nBack = CLIPU.cells - CLIPU.turn;
     // the run turns its legs over faster, so its stride counter is shorter
@@ -13145,15 +13193,15 @@ function drawGateWalk() {
   // what the shot actually drew her as, for tests/opening.cjs — "she turned her
   // back" is the whole point of this function and it is not readable from the
   // outside otherwise
-  if (!clipIm && !departure) G.gateBackKey = im ? want : '';
-  if (im && !departure) {
+  if (!clipIm && !departure && !stepIm) G.gateBackKey = im ? want : '';
+  if (im && !departure && !stepIm) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
     // the gait's vertical, off the same stride counter as the frames. The clip
     // does NOT get this: it carries its own vertical, and a second synthetic bob
     // over an authored cycle is the thing tests/gait.cjs forbids for the run.
     const rise = -Math.abs(Math.sin((trav / 26) * Math.PI)) * 2.2 * sc;
     c.drawImage(im, x - dw / 2, y - dh + rise, dw, dh);
-  } else if (!clipIm && !departure && player) {
+  } else if (!clipIm && !departure && !stepIm && player) {
     // Neither back plate decoded. Her live body is all that is left — but it is
     // driven at WALK speed, not the old 210, so that at worst the shot reads as
     // someone walking off rather than sprinting sideways into a wall.

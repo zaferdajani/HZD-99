@@ -111,6 +111,14 @@ visible projectile, so the flinch is the recoil take's rear-back; the winded
 pant is the recoil take's head-down tail (0.5 s period). Cycles measured
 distinct: prowl ≥ 0.239, gallop ≥ 0.432 (silhouette XOR / union).
 
+`hero/gate-step/` is HER STEP UP INTO A RAISED DOOR (2026-11-21, owner: "it raises
+a leg and climbs like a ladder or an elevated object, or it hops inside of it,
+which is also cute"). Eight sheets as fired, seen from behind — the climb over a
+ring's sill and the hop into a pipe, for claws, single blade, twin blades and the
+joined blade — and the bare climb that was refused for painting her belly vents on
+her back; job ids and references in `jobs.json`. Cut by `tools/stepstrip.cjs`
+into `characters/hero/gate_{climb,hop}_*.webp`.
+
 `hero/plunge/` is THE DIVE (2026-11-15, owner: "going down should be with a
 claw, not just a fist... also create the same motion or different motion for
 swords, but the same concept"). Four sheets as fired — claws, single blade,

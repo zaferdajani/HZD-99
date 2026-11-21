@@ -535,6 +535,11 @@ const MEDIA_SRC = {
     heroGateSingle: 'assets/characters/hero/gate_walk_single.webp',
     heroGateDual:   'assets/characters/hero/gate_walk_dual.webp',
     heroGateJoined: 'assets/characters/hero/gate_walk_joined.webp',
+    // the step up into a raised door, from behind, per weapon tier (js/game.js GATE_STEP)
+    heroClimbBare: 'assets/characters/hero/gate_climb_bare.webp', heroClimbSingle: 'assets/characters/hero/gate_climb_single.webp',
+    heroClimbDual: 'assets/characters/hero/gate_climb_dual.webp', heroClimbJoined: 'assets/characters/hero/gate_climb_joined.webp',
+    heroHopBare: 'assets/characters/hero/gate_hop_bare.webp', heroHopSingle: 'assets/characters/hero/gate_hop_single.webp',
+    heroHopDual: 'assets/characters/hero/gate_hop_dual.webp', heroHopJoined: 'assets/characters/hero/gate_hop_joined.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',
