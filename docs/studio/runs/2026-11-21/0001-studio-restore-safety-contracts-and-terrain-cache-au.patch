@@ -1,0 +1,938 @@
+From 8d2200d0ff016cbdf18c1efce1f6c789884d9025 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Sat, 21 Nov 2026 11:20:47 +0300
+Subject: [PATCH 1/4] studio: restore safety contracts and terrain cache
+ authority
+
+---
+ js/game.js                                 | 40 ++++++----
+ js/infection-eyes.js                       |  8 +-
+ js/overlay.js                              | 33 +++++---
+ js/purification.js                         | 12 +--
+ js/quests.js                               | 46 +++++++++--
+ js/text-manhwa.js                          | 30 ++++----
+ js/text-opening.js                         | 10 +--
+ js/text-progress.js                        | 10 +--
+ tests/infection-eye-authority-contract.cjs | 20 +++++
+ tests/purification-language-contract.cjs   | 30 ++++++++
+ tests/quest-payment-contract.cjs           | 88 ++++++++++++++++++++++
+ tests/run.cjs                              | 11 ++-
+ tests/scene-caption-contract.cjs           | 38 ++++++++++
+ tests/tile-signature-contract.cjs          | 15 ++++
+ tools/studio/audit.py                      | 55 +++++++++++++-
+ tools/studio/test_audit.py                 | 55 ++++++++++----
+ 16 files changed, 415 insertions(+), 86 deletions(-)
+ create mode 100644 tests/infection-eye-authority-contract.cjs
+ create mode 100644 tests/purification-language-contract.cjs
+ create mode 100644 tests/quest-payment-contract.cjs
+ create mode 100644 tests/scene-caption-contract.cjs
+ create mode 100644 tests/tile-signature-contract.cjs
+
+diff --git a/js/game.js b/js/game.js
+index 2d18165..382375a 100644
+--- a/js/game.js
++++ b/js/game.js
+@@ -291,11 +291,16 @@ const G = {
+     stopMusic(); sfx('dieSting');
+     this.state = 'DEAD'; this.deadT = 1.8;
+   },
+-  grantRelic(id) {
++  grantRelic(id, presentStored) {
+     if (!this.save.relics) this.save.relics = [];
+-    if (this.save.relics.indexOf(id) >= 0) return;
+-    this.save.relics.push(id);
+-    persist(); sfx('win');
++    const stored = this.save.relics.indexOf(id) >= 0;
++    if (stored && !presentStored) return;
++    if (!stored) {
++      if (presentStored) return;
++      this.save.relics.push(id);
++      persist();
++    }
++    sfx('win');
+     loadoutTagCard(showItem(t('rl_' + id), t('rl_' + id + 'd')), 'relic', id);
+   },
+   maybeDropRelic(x, y) {
+@@ -2739,13 +2744,14 @@ const NPC_GIFT = {
+ // is its code hook — when the film asset lands it plays from here, and until
+ // then the moment is the flash, the sting and the card. The grant itself
+ // never waits on the art.
+-function forgeCrystal() {
+-  if (!grantWeapon('single')) return;
+-  // ...and the trader packs his tools for the camp by the lion's door: the
+-  // next time a room is loaded he stands there, not here (npcPlaced). He says
+-  // so as he hands the job over (sl_ratchet_moving), never silently.
+-  if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
+-  persist();
++function forgeCrystal(presentStored) {
++  if (presentStored) {
++    if (!weaponOwned('single')) return false;
++  } else {
++    if (!grantWeapon('single')) return false;
++    if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
++    if (persist() === false) return false;
++  }
+   sfx('chargeReady');
+   G.flash = Math.max(G.flash, 0.6);
+   if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
+@@ -2763,6 +2769,7 @@ function forgeCrystal() {
+   const card = showItem(t('i_crystal'), t('i_crystald'));
+   if (card) card.onEnd = () => alphaQuestOffer();
+   else if (G.dialog) G.dialog.onEnd = () => alphaQuestOffer();
++  return true;
+ }
+ function doInteract(s) {
+   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
+@@ -8010,13 +8017,18 @@ function tileGridId(id) {
+   if (!n) { n = ++tileGridN; tileGridIds.set(g, n); }
+   return n;
+ }
++// A bake depends on WHICH cells were broken, not merely how many. Sorting
++// makes the signature stable across save insertion order while keeping two
++// equal-count/different-coordinate states distinct.
++function tileBreakSig(id, broken) {
++  const pre = id + ':';
++  return Object.keys(broken || {}).filter(k => broken[k] && k.lastIndexOf(pre, 0) === 0).sort().join(',');
++}
+ function tileSig(id) {
+   const def = ROOMS[id];
+   if (!def) return '';
+   const f = (G.save && G.save.flags) || {}, B = (G.save && G.save.broken) || {};
+-  let br = 0;
+-  const pre = id + ':';
+-  for (const k in B) if (B[k] && k.lastIndexOf(pre, 0) === 0) br++;
++  const br = tileBreakSig(id, B);
+   const ik = def.indoor ? (INDOOR_ART[id] || 'floorDen') : '';
+   // the fracture modifier re-faces loose '#' as 'B' inside the bake, so a run
+   // that gains or loses it must not reuse a bake made without it
+diff --git a/js/infection-eyes.js b/js/infection-eyes.js
+index 7a8866c..eb7cb97 100644
+--- a/js/infection-eyes.js
++++ b/js/infection-eyes.js
+@@ -84,14 +84,16 @@ function infEyeCap() {
+ 
+ // WHO IS INFECTED, AND WITH WHICH COLOUR. null = not infected now: dead,
+ // purified, tamed, calmed, friendly, or held by the Song for the moment. The
+-// guardians, the Alpha and the sage duelist carry the purple; everything else
+-// the red.
++// infected guardians and the sage duelist carry purple; infected rank-and-file
++// machines carry red. Clean rivals, territorial packs and Eye-built instruments
++// keep their authored optics and never emit infection smoke.
++const INF_EYE_CLEAN_KINDS = new Set(['alpha', 'horn', 'prism', 'chime', 'carrier', 'moth', 'lattice', 'lens']);
+ function infEyeClass(e) {
+   if (!e || e.dead || e.removed) return null;
+   if (e.purified || e.tame || e.calm || e.friendly || e.rescued || e.yielded || e.disabled) return null;
+   if ((e.pureM || 0) >= 1) return null;
+   if ((e.hypnoT || 0) > 0) return null;
+-  if (e.kind === 'alpha' || e.isAlpha) return (typeof alphaFreed === 'function' && alphaFreed()) ? null : 'purple';
++  if (INF_EYE_CLEAN_KINDS.has(e.kind) || e.isAlpha) return null;
+   // a tamed pack is every wolf, not one
+   if (typeof isWolf === 'function' && (isWolf(e) || (typeof isCheetah === 'function' && isCheetah(e)))
+       && typeof packTamed === 'function' && packTamed() && !(typeof isCheetah === 'function' && isCheetah(e))) return null;
+diff --git a/js/overlay.js b/js/overlay.js
+index 8a5e634..f7e6de8 100644
+--- a/js/overlay.js
++++ b/js/overlay.js
+@@ -66,7 +66,13 @@ function overlayPump() {
+   const n = OVERLAY_Q.shift();
+   try { n.open(); } catch (e) { if (typeof console !== 'undefined') console.error(e); }
+ }
+-function overlayClear() { OVERLAY_Q.length = 0; }
++function overlayClear() {
++  OVERLAY_Q.length = 0;
++  if (typeof G !== 'undefined') {
++    G.sceneCaps = null;
++    G.sceneCapQ = null;
++  }
++}
+ function dialogOpen(d) {
+   return overlayRequest(() => { G.dialog = d; G.state = 'DIALOG'; }, 'dialog');
+ }
+@@ -228,21 +234,28 @@ function storyToast(text) {
+ // replacing it unread.
+ function sceneCaption(text) {
+   const cr = capReader(text); cr.fade = 0;
+-  (G.sceneCaps || (G.sceneCaps = [])).push(cr);
+-  while (G.sceneCaps.length > 3) G.sceneCaps.shift();          // never a wall of text
++  const L = G.sceneCaps || (G.sceneCaps = []);
++  const Q = G.sceneCapQ || (G.sceneCapQ = []);
++  if (L.length < 3) L.push(cr);
++  else Q.push(cr);
+ }
++function sceneCaptionAll() { return (G.sceneCaps || []).concat(G.sceneCapQ || []); }
+ function sceneCaptionShown() {
+-  return !(G.sceneCaps || []).some(cr => !(cr.pg + 1 >= cr.pages.length && revealDone(cr.R)));
++  return !sceneCaptionAll().some(cr => !(cr.pg + 1 >= cr.pages.length && revealDone(cr.R)));
+ }
+-function sceneCaptionRead() { return !(G.sceneCaps || []).some(cr => !capRead(cr)); }
++function sceneCaptionRead() { return !sceneCaptionAll().some(cr => !capRead(cr)); }
+ function sceneCaptionTick(dt) {
+   const L = G.sceneCaps;
+-  if (!L || !L.length) return;
+-  for (const cr of L) {
+-    capTick(cr, dt); capAutoTurn(cr);
+-    if (capRead(cr)) cr.fade += dt;
++  const Q = G.sceneCapQ;
++  if (L && L.length) {
++    for (const cr of L) {
++      capTick(cr, dt); capAutoTurn(cr);
++      if (capRead(cr)) cr.fade += dt;
++    }
++    G.sceneCaps = L.filter(cr => cr.fade <= 1.2);
+   }
+-  G.sceneCaps = L.filter(cr => cr.fade <= 1.2);
++  const live = G.sceneCaps || (G.sceneCaps = []);
++  while (live.length < 3 && Q && Q.length) live.push(Q.shift());
+ }
+ function drawSceneCaption() {
+   const L = G.sceneCaps;
+diff --git a/js/purification.js b/js/purification.js
+index e8017b0..41db392 100644
+--- a/js/purification.js
++++ b/js/purification.js
+@@ -6,11 +6,11 @@ const PURIFICATION_HOLD = 1.6;
+ const PURIFICATION_MOVIES = {glitch:'assets/video/purify_glitch_ritual.mp4'};
+ if(!isHero()) Object.assign(PURIFY_VID,PURIFICATION_MOVIES);
+ const PURIFICATION_WORDS = {
+- en: ['Free the guardian', 'Release, then hold E / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is free.'],
+- ar: ['حرّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تحرّر الحارس.'],
+- tr: ['Muhafızı kurtar', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız artık özgür.'],
+- zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者重获自由。'],
+- ru: ['Освободите стража', 'Отпустите, затем удерживайте E / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж свободен.']
++ en: ['Purify the guardian', 'Release, then hold E / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is purified.'],
++ ar: ['طهّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تم تطهير الحارس.'],
++ tr: ['Muhafızı arındır', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız arındırıldı.'],
++ zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者已净化。'],
++ ru: ['Очистите стража', 'Отпустите, затем удерживайте E / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж очищен.']
+ };
+ function purificationPortrait() { return typeof TOUCH !== 'undefined' && TOUCH.enabled && window.innerHeight > window.innerWidth; }
+ function purificationText(i) { return (PURIFICATION_WORDS[LANG] || PURIFICATION_WORDS.en)[i]; }
+@@ -25,7 +25,7 @@ function purificationEnsureButton() {
+  if (purificationButton) return;
+  const b = document.createElement('button'); b.type = 'button'; b.hidden = true;
+  b.id = 'purification-hold'; b.style.cssText = 'position:fixed;z-index:10000;border:2px solid #fff3ba;border-radius:16px;background:#172431;color:#fffbe5;font:600 16px sans-serif;touch-action:none;user-select:none;box-shadow:0 0 24px #f9e4a755;';
+- b.setAttribute('aria-label', 'Hold to free the guardian');
++ b.setAttribute('aria-label', purificationText(0));
+  b.addEventListener('pointerdown', e => { if (!G.purification || G.purification.phase !== 'hold') return; e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} purificationPointer = true; });
+  for (const ev of ['pointerup','pointercancel','lostpointercapture']) b.addEventListener(ev, () => { purificationPointer = false; });
+  b.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); purificationPointer = true; } });
+diff --git a/js/quests.js b/js/quests.js
+index ac92535..c14c8c9 100644
+--- a/js/quests.js
++++ b/js/quests.js
+@@ -147,7 +147,16 @@ function qReadDone(q) {
+ //   * never asked, but visited A7: nothing to change — the early-discovery
+ //     path now asks about the survey, not the room.
+ function questMigrate(save) {
+-  if (!save || !save.qbase) return save;
++  if (!save) return save;
++  const quests = save.quests || {}, flags = save.flags = save.flags || {};
++  // Older hand-ins could persist the quest before the unique Purifier grant.
++  // A completed forge is unambiguous authority to repair that interrupted save.
++  if (quests.ratchet_forge === 'done' && !flags.crystal) {
++    if (typeof grantWeapon === 'function') grantWeapon('single', save);
++    else { flags.crystal = 1; save.weaponVersion = save.weaponVersion || 1; save.weaponMode = 'single'; }
++    flags.ratchetCamp = 1;
++  }
++  if (!save.qbase) return save;
+   for (const q of QUESTS)
+     if (q.kind === 'read' && save.qbase[q.id] && save.qbase[q.id].reached != null) delete save.qbase[q.id];
+   return save;
+@@ -247,17 +256,40 @@ function questTake(item) {
+ }
+ // paid out by the NPC who asked, face to face
+ function questPay(q) {
++  if (!q || !G.save || qState(q.id) !== 'active' || !qDone(q)) return false;
+   const r = q.reward || {};
+-  if (r.scrap) { G.save.scrap += r.scrap; G.toast('+' + r.scrap + ' ' + t('scrap')); }
+-  if (r.iq) { G.save.iq += r.iq; if (typeof iqNudge === 'function') iqNudge(); }
+-  if (r.relic && typeof G.grantRelic === 'function') G.grantRelic(r.relic);
+-  if (q.kind === 'fetch' && G.save.bag) delete G.save.bag[q.item];
+-  qSet(q.id, 'done');
++  const before = G.save;
++  let next;
++  try { next = JSON.parse(JSON.stringify(before)); }
++  catch (_) { return false; }
++  next.quests = next.quests || {};
++  next.flags = next.flags || {};
++  if (r.scrap) next.scrap = (next.scrap || 0) + r.scrap;
++  if (r.iq) next.iq = (next.iq || 0) + r.iq;
++  if (r.relic) {
++    next.relics = next.relics || [];
++    if (!next.relics.includes(r.relic)) next.relics.push(r.relic);
++  }
++  if (q.kind === 'fetch' && next.bag) delete next.bag[q.item];
++  if (r.forge) {
++    if (typeof grantWeapon !== 'function' || !grantWeapon('single', next)) return false;
++    if (typeof revisedStory === 'function' && revisedStory()) next.flags.ratchetCamp = 1;
++  }
++  next.quests[q.id] = 'done';
++  G.save = next;
++  let stored = false;
++  try { stored = persist() !== false; } catch (_) { stored = false; }
++  if (!stored) { G.save = before; return false; }
++
++  if (r.scrap) G.toast('+' + r.scrap + ' ' + t('scrap'));
++  if (r.iq && typeof iqNudge === 'function') iqNudge();
+   sfx('win');
+   burst(player.x + player.w / 2, player.y, 24, '#ffd76a', 280, 0.8, 120, 4, true);
+   // the forge is a REWARD KIND, not a special-cased NPC: any future quest can
+   // end in a making (see forgeCrystal in game.js — the cinematic's code hook)
+-  if (r.forge && typeof forgeCrystal === 'function') forgeCrystal();
++  if (r.relic && typeof G.grantRelic === 'function') G.grantRelic(r.relic, true);
++  if (r.forge && typeof forgeCrystal === 'function') forgeCrystal(true);
++  return true;
+ }
+ // how many are open, for the pause screen
+ function questOpen() {
+diff --git a/js/text-manhwa.js b/js/text-manhwa.js
+index 8c1bd57..4db1ec6 100644
+--- a/js/text-manhwa.js
++++ b/js/text-manhwa.js
+@@ -25,7 +25,7 @@ TEXT_LAYERS.push({
+     pn_skip_touch: 'hold the screen to skip',
+     pn_s_bay: 'The service bay', pn_s_gate: 'The city gate', pn_s_ratchet: "Ratchet's battery",
+     pn_s_cave: 'The marble cave', pn_s_forge: 'The forging', pn_s_meet: 'The corridor',
+-    pn_s_sage: 'TALLYMAN', pn_s_chime: 'CHIME', pn_s_free: 'NULLFANG, free',
++    pn_s_sage: 'TALLYMAN', pn_s_chime: 'CHIME', pn_s_free: 'NULLFANG, purified',
+     pn_s_ch2: 'Next: the Data Conduits',
+     // p04 / p05 lettering
+     pc_quiet: '...quiet.',
+@@ -42,7 +42,7 @@ TEXT_LAYERS.push({
+     // the forge: the game's own words (Draft 2 q_thanks, Oct 4 i_crystald);
+     // p18's balloons name a "pillar shard" the game no longer has
+     pc_forge: 'You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them — not what is left of them.',
+-    pc_blade: 'Ratchet forged a glowing white sword from the cave marble. It frees infected robots — and its handle can later connect to another weapon.',
++    pc_blade: 'Ratchet forged a glowing white sword from the cave marble. It purifies infected robots — and its handle can later connect to another weapon.',
+     // p25 / p26 lettering (p26's two are also the game's sg_tamedd / sg_t_GA1Dd)
+     pc_knelt: 'TALLYMAN knelt: the Eye\'s agent. The song held its body together. Broken, but not CLEAN.',
+     pc_cuts: 'Claws could not purify the song. The PURIFIER could.',
+@@ -55,7 +55,7 @@ TEXT_LAYERS.push({
+     // p14 / p24 lettering
+     pc_core: 'It took one core. Never her last.',
+     pc_bored: 'She was nothing to it. It got bored of her.',
+-    pc_oath: 'The virus was destroyed. NULLFANG was free. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead.',
++    pc_oath: 'The virus was destroyed. NULLFANG was purified. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead.',
+     // the chapter-two teaser
+     pt_behind: 'The Scrap Meadows are behind her. The Data Conduits are not.',
+     // (owner, 2026-11-16, shown this panel: "is this story correct timewise? didnt i defeat it?" —
+@@ -95,7 +95,7 @@ TEXT_LAYERS.push({
+     pn_skip_touch: 'استمر بلمس الشاشة للتخطي',
+     pn_s_bay: 'حجرة الصيانة', pn_s_gate: 'بوابة المدينة', pn_s_ratchet: 'بطارية راتشيت',
+     pn_s_cave: 'كهف الرخام', pn_s_forge: 'الصهر', pn_s_meet: 'الممر',
+-    pn_s_sage: 'العدّاد', pn_s_chime: 'رنين', pn_s_free: 'ناب العدم حرًّا',
++    pn_s_sage: 'العدّاد', pn_s_chime: 'رنين', pn_s_free: 'ناب العدم مُطهَّرًا',
+     pn_s_ch2: 'التالي: قنوات البيانات',
+     pc_quiet: '...هدوء.',
+     pc_door: 'كان الباب مفتوحًا منذ زمن طويل.',
+@@ -106,7 +106,7 @@ TEXT_LAYERS.push({
+     pc_r_marble: 'تحت المرج يرقد رخامٌ خام. قطعةٌ واحدة منه، ويصوغ لها نصلًا أبيض يقتلع الفيروس.',
+     pc_breathing: 'انهارت الصخرة. انفتح النفق، وكان يتنفّس.',
+     pc_forge: 'أحضرت الرخام. ثبّت المشبك؛ سأشكّل النصل ثم أركّب المقبض. اقطع ما يقيّدهم — لا ما بقي منهم.',
+-    pc_blade: 'صهر راتشيت من رخام الكهف سيفًا أبيض متوهّجًا. إنه يحرّر الآليين المصابين — ومقبضه يمكن أن يتّصل لاحقًا بسلاح آخر.',
++    pc_blade: 'صهر راتشيت من رخام الكهف سيفًا أبيض متوهّجًا. إنه يطهّر الآليين المصابين — ومقبضه يمكن أن يتّصل لاحقًا بسلاح آخر.',
+     pc_knelt: 'جثا العدّاد، عميل العين. كانت الأغنية تمسك جسده. محطّمًا، لكن غير نظيف.',
+     pc_cuts: 'لم تستطع المخالب تطهير الأغنية. أمّا المُطهّر فاستطاع.',
+     pc_letgo: 'أفلتت الأغنية. تذكّر العدّاد كل شيء — وأعطى ما احتفظ به لمن يأتي بالضوء النظيف.',
+@@ -116,7 +116,7 @@ TEXT_LAYERS.push({
+     pc_made: 'الحارس آلةٌ أُصيبت بالعدوى. أمّا هذا فلا. لقد صنعه مصدرُ الأغنية، ولم يكن تحت الفيروس شيء يُعاد.',
+     pc_core: 'أخذ نواةً واحدة. ولم يأخذ أبدًا آخر نواة لها.',
+     pc_bored: 'لم تكن شيئًا في نظره. ملَّ منها.',
+-    pc_oath: 'تحطّم الفيروس. صار ناب العدم حرًّا. بدا أنه أحبّها، وفي كل غرفة مرّة، كانت الضربة التي كانت ستكسرها تُقابَل بزئير يخرج من الظلام ويطرد مهاجميها.',
++    pc_oath: 'تحطّم الفيروس. تطهّر ناب العدم. بدا أنه أحبّها، وفي كل غرفة مرّة، كانت الضربة التي كانت ستكسرها تُقابَل بزئير يخرج من الظلام ويطرد مهاجميها.',
+     pt_behind: 'مروج الخردة خلفها الآن. أما قنوات البيانات فلا.',
+     pt_keeper: 'في مكانٍ ما بين الكوابل ينتظر عميلٌ آخر من عملاء العين — التيار السفلي، الذي أغرق القنوات كي لا يقرأها أحدٌ سواه.',
+     pt_talons: 'وفوق الخطوط المظلمة، مخالب من حديد تنتظر هي أيضًا.',
+@@ -152,7 +152,7 @@ TEXT_LAYERS.push({
+     pn_skip_touch: 'atlamak için ekrana basılı tut',
+     pn_s_bay: 'Bakım bölmesi', pn_s_gate: 'Şehir kapısı', pn_s_ratchet: "Ratchet'ın pili",
+     pn_s_cave: 'Mermer mağara', pn_s_forge: 'Dövme', pn_s_meet: 'Koridor',
+-    pn_s_sage: 'TALLYMAN, Göz\'ün ajanı', pn_s_chime: 'ÇAN', pn_s_free: 'NULLFANG, özgür',
++    pn_s_sage: 'TALLYMAN, Göz\'ün ajanı', pn_s_chime: 'ÇAN', pn_s_free: 'NULLFANG, arındırıldı',
+     pn_s_ch2: 'Sırada: Veri Kanalları',
+     pc_quiet: '...sessiz.',
+     pc_door: 'Kapı uzun zamandır açıktı.',
+@@ -163,7 +163,7 @@ TEXT_LAYERS.push({
+     pc_r_marble: 'Çayırın altında ham mermer yatıyordu. Ona tek bir parça getirirse, virüsü söküp atan beyaz bir kılıç dövecekti.',
+     pc_breathing: 'Kaya çöktü. Tünel açılmıştı ve nefes alıyordu.',
+     pc_forge: 'Mermeri getirdin. Mengeneyi sabit tut. Ağzı ben şekillendireceğim, sonra kabzayı takacağım. Onları bağlayanı kes — onlardan geriye kalanı değil.',
+-    pc_blade: 'Ratchet mağara mermerinden parlayan beyaz bir kılıç dövdü. Enfekte robotları özgür bırakır — ve kabzası ileride başka bir silaha bağlanabilir.',
++    pc_blade: 'Ratchet mağara mermerinden parlayan beyaz bir kılıç dövdü. Enfekte robotları arındırır — ve kabzası ileride başka bir silaha bağlanabilir.',
+     pc_knelt: 'TALLYMAN diz çöktü: Göz\'ün ajanı. Şarkı bedenini bir arada tutuyordu. Kırık, ama TEMİZ değil.',
+     pc_cuts: 'Pençeler şarkıyı temizleyemezdi. ARINDIRICI temizleyebilirdi.',
+     pc_letgo: 'Şarkı bıraktı. TALLYMAN her şeyi hatırladı — ve sakladığını temiz ışıkla gelecek olana verdi.',
+@@ -173,7 +173,7 @@ TEXT_LAYERS.push({
+     pc_made: 'Bir muhafız, enfekte olmuş bir makinedir. Bu değildi. Şarkının kaynağı tarafından YAPILMIŞTI ve virüsün altında geri verilecek hiçbir şey yoktu.',
+     pc_core: 'Bir çekirdeğini aldı. Asla sonuncusunu değil.',
+     pc_bored: 'Onun için hiçbir şeydi. Ondan sıkıldı.',
+-    pc_oath: 'Virüs yok edildi. NULLFANG özgürdü. Ondan hoşlanmış gibiydi; her odada bir kez, onu kıracak darbe karanlıktan çıkan bir kükremeyle savuşturuldu.',
++    pc_oath: 'Virüs yok edildi. NULLFANG arındırıldı. Ondan hoşlanmış gibiydi; her odada bir kez, onu kıracak darbe karanlıktan çıkan bir kükremeyle savuşturuldu.',
+     pt_behind: 'Hurda Çayırları artık arkasında. Veri Kanalları değil.',
+     pt_keeper: 'Kabloların bir yerinde Göz’ün BAŞKA bir ajanı bekliyor — UNDERTOW; kanalları, başka kimse okuyamasın diye boğan.',
+     pt_talons: 'Ve karanlık hatların üstünde, demir pençeler de bekliyor.',
+@@ -209,7 +209,7 @@ TEXT_LAYERS.push({
+     pn_skip_touch: '按住屏幕跳过',
+     pn_s_bay: '维修舱', pn_s_gate: '城门', pn_s_ratchet: '拉切特的电池',
+     pn_s_cave: '大理石洞穴', pn_s_forge: '锻造', pn_s_meet: '走廊',
+-    pn_s_sage: 'TALLYMAN——「眼」的特工', pn_s_chime: '风铃', pn_s_free: '自由的 NULLFANG',
++    pn_s_sage: 'TALLYMAN——「眼」的特工', pn_s_chime: '风铃', pn_s_free: '已净化的 NULLFANG',
+     pn_s_ch2: '下一章：数据回廊',
+     pc_quiet: '……好安静。',
+     pc_door: '那扇门已经开了很久。',
+@@ -220,7 +220,7 @@ TEXT_LAYERS.push({
+     pc_r_marble: '草原之下埋着原生大理石。只要带回一块，他就能锻出一把斩除病毒的白刃。',
+     pc_breathing: '岩石塌开了。隧道敞开着，它在呼吸。',
+     pc_forge: '你把大理石带来了。扶稳夹钳。我来打出刃口，再装上握柄。斩断束缚他们的东西——而不是他们仅存的部分。',
+-    pc_blade: '拉切特用洞穴里的大理石锻出一把发光的白剑。它能解放被感染的机器人——剑柄日后还能与另一件武器相连。',
++    pc_blade: '拉切特用洞穴里的大理石锻出一把发光的白剑。它能净化被感染的机器人——剑柄日后还能与另一件武器相连。',
+     pc_knelt: 'TALLYMAN跪着——「眼」的特工。歌声把它的身体拼在一起。破碎，却并不干净。',
+     pc_cuts: '爪子无法净化歌声。净化者可以。',
+     pc_letgo: '歌声松开了。TALLYMAN想起了一切——并把它守护的东西交给带着纯净之光而来的人。',
+@@ -230,7 +230,7 @@ TEXT_LAYERS.push({
+     pc_made: '守护者是被感染的机器。这个不是。它是歌声的源头亲手造出来的，病毒之下没有任何可以归还的东西。',
+     pc_core: '它夺走了一枚核心。从不是最后一枚。',
+     pc_bored: '她对它来说什么都不是。它对她失去了兴趣。',
+-    pc_oath: '病毒被摧毁了。NULLFANG 自由了。他似乎喜欢她：每个房间里有一次，那本会击垮她的一击，会被黑暗中冲出的咆哮挡开。',
++    pc_oath: '病毒被摧毁了。NULLFANG 已被净化。他似乎喜欢她：每个房间里有一次，那本会击垮她的一击，会被黑暗中冲出的咆哮挡开。',
+     pt_behind: '废料原野已在身后。数据回廊还在前方。',
+     pt_keeper: '在电缆深处的某个地方，“眼”的另一个代理在等着——UNDERTOW，它淹没了运河，好让别人谁也读不到。',
+     pt_talons: '而在黑暗的线路之上，铁爪也在等待。',
+@@ -266,7 +266,7 @@ TEXT_LAYERS.push({
+     pn_skip_touch: 'удерживай экран, чтобы пропустить',
+     pn_s_bay: 'Сервисный отсек', pn_s_gate: 'Городские ворота', pn_s_ratchet: 'Батарея Рэтчета',
+     pn_s_cave: 'Мраморная пещера', pn_s_forge: 'Ковка', pn_s_meet: 'Коридор',
+-    pn_s_sage: 'TALLYMAN, агент Ока', pn_s_chime: 'КОЛОКОЛ', pn_s_free: 'NULLFANG свободен',
++    pn_s_sage: 'TALLYMAN, агент Ока', pn_s_chime: 'КОЛОКОЛ', pn_s_free: 'NULLFANG очищен',
+     pn_s_ch2: 'Дальше: Каналы Данных',
+     pc_quiet: '...тихо.',
+     pc_door: 'Дверь была открыта уже давно.',
+@@ -277,7 +277,7 @@ TEXT_LAYERS.push({
+     pc_r_marble: 'Под лугом лежит сырой мрамор. Принеси ему один кусок — и он выкует белый клинок, что вырежет вирус.',
+     pc_breathing: 'Камень поддался. Туннель был открыт, и он дышал.',
+     pc_forge: 'Ты принесла мрамор. Держи зажим ровно. Я выкую лезвие, потом насажу рукоять. Режь то, что держит их, — а не то, что от них осталось.',
+-    pc_blade: 'Рэтчет выковал из пещерного мрамора светящийся белый меч. Он освобождает заражённых роботов — а его рукоять позже можно соединить с другим оружием.',
++    pc_blade: 'Рэтчет выковал из пещерного мрамора светящийся белый меч. Он очищает заражённых роботов — а его рукоять позже можно соединить с другим оружием.',
+     pc_knelt: 'TALLYMAN стоял на коленях — агент Ока. Песня держала его тело целым. Сломанным, но не ЧИСТЫМ.',
+     pc_cuts: 'Когти не могли очистить песню. ОЧИСТИТЕЛЬ мог.',
+     pc_letgo: 'Песня отпустила. TALLYMAN вспомнил всё — и отдал то, что хранил для того, кто придёт с чистым светом.',
+@@ -287,7 +287,7 @@ TEXT_LAYERS.push({
+     pc_made: 'Страж — это машина, которую заразили. Это — нет. Его СОЗДАЛ источник Песни, и под вирусом не было ничего, что можно вернуть.',
+     pc_core: 'Он забрал одно ядро. Никогда — последнее.',
+     pc_bored: 'Она была для него ничем. Ему стало скучно.',
+-    pc_oath: 'Вирус уничтожен. NULLFANG был свободен. Похоже, она ему понравилась: раз в каждой комнате удар, который сломал бы её, встречал рёв из темноты и отбрасывал врагов.',
++    pc_oath: 'Вирус уничтожен. NULLFANG очищен. Похоже, она ему понравилась: раз в каждой комнате удар, который сломал бы её, встречал рёв из темноты и отбрасывал врагов.',
+     pt_behind: 'Луга Лома позади. Каналы Данных — ещё нет.',
+     pt_keeper: 'Где-то в кабелях ждёт ДРУГОЙ агент Ока — UNDERTOW, утопивший каналы, чтобы никто больше не мог их прочесть.',
+     pt_talons: 'А над тёмными линиями ждут и железные когти.',
+diff --git a/js/text-opening.js b/js/text-opening.js
+index fa3b02f..985dab8 100644
+--- a/js/text-opening.js
++++ b/js/text-opening.js
+@@ -116,7 +116,7 @@ TEXT_LAYERS.push({
+     op_o_return: 'Bring the raw marble to Ratchet',
+     op_o_sage: 'Purify the Eye\'s agent — the door beside the marble quarry',
+     op_o_chime: 'Silence the bell: the climb at the meadow hub\'s west end',
+-    op_o_lion: 'Free NULLFANG in his enclosure past the camp',
++    op_o_lion: 'Purify NULLFANG in his enclosure past the camp',
+     op_o_conduits: 'Climb to the Data Conduits above the camp',
+   },
+   ar: {
+@@ -224,7 +224,7 @@ TEXT_LAYERS.push({
+     op_o_return: 'أحضري الرخام الخام إلى راتشيت',
+     op_o_sage: 'طهّري عميل العين — الباب بجانب محجر الرخام',
+     op_o_chime: 'أسكتي الجرس: التسلّق عند الطرف الغربي لمحور المرج',
+-    op_o_lion: 'حرّري نَلفانغ في حظيرته بعد المخيّم',
++    op_o_lion: 'طهّري نَلفانغ في حظيرته بعد المخيّم',
+     op_o_conduits: 'تسلّقي إلى قنوات البيانات فوق المخيّم',
+   },
+   tr: {
+@@ -332,7 +332,7 @@ TEXT_LAYERS.push({
+     op_o_return: "Ham mermeri Ratchet'e götür",
+     op_o_sage: 'Göz\'ün ajanını arındır — mermer ocağının yanındaki kapı',
+     op_o_chime: 'Çanı sustur: tırmanış çayır merkezinin batı ucunda',
+-    op_o_lion: "Kampın ötesindeki ağılında NULLFANG'i özgür bırak",
++    op_o_lion: "Kampın ötesindeki ağılında NULLFANG'i arındır",
+     op_o_conduits: 'Kampın üstündeki Veri Kanallarına tırman',
+   },
+   zh: {
+@@ -440,7 +440,7 @@ TEXT_LAYERS.push({
+     op_o_return: '把原生大理石带给拉切特',
+     op_o_sage: '净化「眼」的特工——大理石采石场旁的门',
+     op_o_chime: '让钟沉默：攀登处在草原枢纽的西端',
+-    op_o_lion: '在营地后的围栏里解放 NULLFANG',
++    op_o_lion: '在营地后的围栏里净化 NULLFANG',
+     op_o_conduits: '爬上营地上方的数据导管',
+   },
+   ru: {
+@@ -548,7 +548,7 @@ TEXT_LAYERS.push({
+     op_o_return: 'Отнеси сырой мрамор Рэтчету',
+     op_o_sage: 'Очисти агента Ока — дверь возле мраморного карьера',
+     op_o_chime: 'Заставь колокол замолчать: подъём у западного края лугового узла',
+-    op_o_lion: 'Освободи NULLFANG в его загоне за лагерем',
++    op_o_lion: 'Очисти NULLFANG в его загоне за лагерем',
+     op_o_conduits: 'Поднимись к Каналам Данных над лагерем',
+   },
+ });
+diff --git a/js/text-progress.js b/js/text-progress.js
+index 0caa55c..76037e7 100644
+--- a/js/text-progress.js
++++ b/js/text-progress.js
+@@ -14,7 +14,7 @@ TEXT_LAYERS.push({
+     pg_freed: 'PURIFIED',
+     pg_rescued: 'RESCUED',
+     pg_sage_free: "The Eye's agent is purified, not destroyed — and this cave lays down its orders.",
+-    pure_beast: "The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you.",
++    pure_beast: "The song lets go. NULLFANG is purified — cleansed, not killed. He seems to like you.",
+     // the relic NULLFANG leaves is a gift from a cleansed guardian, never a piece
+     // torn off a kill (owner: guardians are rescued, not killed); the base line
+     // read "Torn from GLITCH.EXE." on the toast right after "cleansed, not killed"
+@@ -57,7 +57,7 @@ TEXT_LAYERS.push({
+     pg_freed: 'تطهّر',
+     pg_rescued: 'أُنقِذ',
+     pg_sage_free: "عميل العين تطهّر ولم يُدمَّر — وهذا الكهف يُلقي أوامره.",
+-    pure_beast: "تُفلته الأغنية. ناب العدم حرّ — طُهِّر ولم يُقتَل. يبدو أنه أحبّك.",
++    pure_beast: "تُفلته الأغنية. تطهّر ناب العدم — ولم يُقتَل. يبدو أنه أحبّك.",
+     rl_fangd: "ضرر المخالب +8%. سقط من ناب العدم حين أفلتته الأغنية — هديّة، لا غنيمة.",
+     pg_keep_it: 'لا بدّ أن أحدًا يفتقد هذا. احتفظي به.',
+     q_early: 'وجدتِه بالفعل؟ إذن لم يبقَ ما أطلبه — شكرًا لك.',
+@@ -97,7 +97,7 @@ TEXT_LAYERS.push({
+     pg_freed: 'ARINDI',
+     pg_rescued: 'KURTARILDI',
+     pg_sage_free: "Göz'ün ajanı yok edilmedi, arındırıldı — ve bu mağara emirlerini bırakıyor.",
+-    pure_beast: "Şarkı onu bırakıyor. NULLFANG özgür — öldürülmedi, arındırıldı. Seni sevmiş gibi.",
++    pure_beast: "Şarkı onu bırakıyor. NULLFANG arındırıldı — öldürülmedi. Seni sevmiş gibi.",
+     rl_fangd: "+%8 pençe hasarı. Şarkı onu bıraktığında NULLFANG'dan düştü — bir hediye, ganimet değil.",
+     pg_keep_it: 'Birileri bunu arıyor olmalı. Sakla.',
+     q_early: 'Zaten buldun mu? O zaman isteyecek bir şey kalmadı — teşekkürler.',
+@@ -137,7 +137,7 @@ TEXT_LAYERS.push({
+     pg_freed: '已净化',
+     pg_rescued: '已救出',
+     pg_sage_free: "「眼」的特工被净化，而非被摧毁——这座洞穴放下了命令。",
+-    pure_beast: "歌声放开了他。NULLFANG自由了——是被净化，不是被杀死。他似乎喜欢你。",
++    pure_beast: "歌声放开了他。NULLFANG 已被净化——没有被杀死。他似乎喜欢你。",
+     rl_fangd: "爪击伤害+8%。歌声放开NULLFANG时，它从他身上脱落——是礼物，不是战利品。",
+     pg_keep_it: '一定有人在找这个。好好收着。',
+     q_early: '你已经找到了？那就没什么要拜托的了——谢谢你。',
+@@ -177,7 +177,7 @@ TEXT_LAYERS.push({
+     pg_freed: 'ОЧИЩЕН',
+     pg_rescued: 'СПАСЁН',
+     pg_sage_free: "Агент Ока очищен, а не уничтожен — и эта пещера слагает приказы.",
+-    pure_beast: "Песня отпускает его. NULLFANG свободен — очищен, а не убит. Ты ему нравишься.",
++    pure_beast: "Песня отпускает его. NULLFANG очищен, а не убит. Ты ему нравишься.",
+     rl_fangd: "+8% к урону когтями. NULLFANG сбросил его, когда песня его отпустила, — подарок, а не трофей.",
+     pg_keep_it: 'Кто-то наверняка это ищет. Сохрани.',
+     q_early: 'Ты уже нашла это? Тогда и просить не о чем — спасибо.',
+diff --git a/tests/infection-eye-authority-contract.cjs b/tests/infection-eye-authority-contract.cjs
+new file mode 100644
+index 0000000..d0ae09b
+--- /dev/null
++++ b/tests/infection-eye-authority-contract.cjs
+@@ -0,0 +1,20 @@
++const fs = require('fs');
++const vm = require('vm');
++const path = require('path');
++const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'infection-eyes.js'), 'utf8');
++const cleanDecl = source.match(/const INF_EYE_CLEAN_KINDS = new Set\([^;]+;/);
++const classify = source.match(/function infEyeClass\(e\) \{[\s\S]*?\n\}/);
++if (!cleanDecl || !classify) throw new Error('infection authority source is missing');
++
++class Boss { constructor(kind) { this.kind = kind; } }
++const ctx = { Boss, alphaFreed: () => false, isWolf: () => false, isCheetah: () => false, packTamed: () => false };
++vm.createContext(ctx);
++vm.runInContext(cleanDecl[0] + '\n' + classify[0], ctx);
++
++for (const kind of ['alpha', 'horn', 'prism', 'chime', 'carrier', 'moth', 'lattice', 'lens']) {
++  if (ctx.infEyeClass(new Boss(kind)) !== null) throw new Error(kind + ' incorrectly emits infection smoke');
++}
++if (ctx.infEyeClass(new Boss('glitch')) !== 'purple') throw new Error('infected guardian is not purple');
++if (ctx.infEyeClass({ kind: 'crawler' }) !== 'red') throw new Error('infected ordinary machine is not red');
++if (ctx.infEyeClass({ kind: 'crawler', purified: true }) !== null) throw new Error('purified machine still emits');
++console.log('PASS only infected bodies receive finite red/purple eye trails');
+diff --git a/tests/purification-language-contract.cjs b/tests/purification-language-contract.cjs
+new file mode 100644
+index 0000000..e387a54
+--- /dev/null
++++ b/tests/purification-language-contract.cjs
+@@ -0,0 +1,30 @@
++const fs = require('fs');
++const path = require('path');
++const read = name => fs.readFileSync(path.join(__dirname, '..', 'js', name), 'utf8');
++
++const ritual = read('purification.js');
++const opening = read('text-opening.js');
++const manhwa = read('text-manhwa.js');
++const progress = read('text-progress.js');
++const selected = [
++  ...ritual.split('\n').filter(line => /^\s*(en|ar|tr|zh|ru): \[/.test(line) || line.includes("setAttribute('aria-label'")),
++  ...opening.split('\n').filter(line => line.includes('op_o_lion:')),
++  ...manhwa.split('\n').filter(line => /pn_s_free:|pc_blade:|pc_oath:/.test(line)),
++  ...progress.split('\n').filter(line => line.includes('pure_beast:')),
++].join('\n');
++
++for (const [name, pattern] of [
++  ['English free', /\bfree(?:s|d)?\b/i],
++  ['Arabic free', /حر[ّ]?ر|تحر[ّ]?ر|حرّ/],
++  ['Turkish free', /özgür|kurtar/i],
++  ['Chinese free', /自由|解放/],
++  ['Russian free', /освобод|свобод/i],
++]) {
++  if (pattern.test(selected)) throw new Error(name + ' remains in purification copy');
++}
++for (const required of ['Purify the guardian', 'طهّر الحارس', 'Muhafızı arındır', '净化守护者', 'Очистите стража']) {
++  if (!selected.includes(required)) throw new Error('missing localized purification action: ' + required);
++}
++if (!ritual.includes("setAttribute('aria-label', purificationText(0))"))
++  throw new Error('purification accessibility label is not localized from the action copy');
++console.log('PASS purification is named consistently in all five languages and accessibility copy');
+diff --git a/tests/quest-payment-contract.cjs b/tests/quest-payment-contract.cjs
+new file mode 100644
+index 0000000..47dff85
+--- /dev/null
++++ b/tests/quest-payment-contract.cjs
+@@ -0,0 +1,88 @@
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const vm = require('node:vm');
++
++function harness(save, persistResult = true) {
++  const out = { persists: 0, wins: 0, bursts: 0, relicCards: 0, forgeCards: 0, stored: null };
++  const ctx = vm.createContext({
++    console,
++    persist: () => {
++      out.persists++;
++      if (!persistResult) return false;
++      out.stored = JSON.stringify(ctx.G.save);
++      return true;
++    },
++    t: key => key,
++    sfx: key => { if (key === 'win') out.wins++; },
++    burst: () => { out.bursts++; },
++    player: { x: 10, y: 20, w: 12 },
++    revisedStory: () => true,
++    grantWeapon: (stage, target) => {
++      if (stage !== 'single') return false;
++      target.flags = target.flags || {};
++      target.flags.crystal = 1;
++      target.weaponMode = 'single';
++      return true;
++    },
++    forgeCrystal: stored => { assert.equal(stored, true); out.forgeCards++; return true; },
++    G: {
++      save,
++      toast: () => {},
++      grantRelic: (id, stored) => {
++        assert.equal(stored, true);
++        assert(ctx.G.save.relics.includes(id));
++        out.relicCards++;
++      },
++    },
++  });
++  vm.runInContext(fs.readFileSync('js/quests.js', 'utf8'), ctx);
++  return { ctx, out };
++}
++
++{
++  const { ctx, out } = harness({ quests: { servo_coil: 'active' }, bag: { coil: 1 }, scrap: 0, iq: 0, flags: {} });
++  assert.equal(vm.runInContext("questPay(questById('servo_coil'))", ctx), true);
++  assert.equal(out.stored, JSON.stringify(ctx.G.save));
++  assert.equal(ctx.G.save.scrap, 60);
++  assert.equal(ctx.G.save.iq, 10);
++  assert.equal(ctx.G.save.quests.servo_coil, 'done');
++  assert.equal(ctx.G.save.bag.coil, undefined);
++  assert.equal(out.persists, 1);
++  assert.equal(vm.runInContext("questPay(questById('servo_coil'))", ctx), false);
++  assert.equal(out.persists, 1);
++}
++
++{
++  const save = { quests: { ratchet_forge: 'active' }, bag: { cshard: 1 }, flags: {}, scrap: 0, iq: 0 };
++  const { ctx, out } = harness(save);
++  assert.equal(vm.runInContext("questPay(questById('ratchet_forge'))", ctx), true);
++  const disk = JSON.parse(out.stored);
++  assert.equal(disk.quests.ratchet_forge, 'done');
++  assert.equal(disk.bag.cshard, undefined);
++  assert.equal(disk.flags.crystal, 1);
++  assert.equal(disk.flags.ratchetCamp, 1);
++  assert.equal(disk.weaponMode, 'single');
++  assert.equal(out.forgeCards, 1);
++}
++
++{
++  const save = { quests: { ratchet_forge: 'active' }, bag: { cshard: 1 }, flags: {}, scrap: 0, iq: 0 };
++  const before = JSON.stringify(save);
++  const { ctx, out } = harness(save, false);
++  assert.equal(vm.runInContext("questPay(questById('ratchet_forge'))", ctx), false);
++  assert.equal(JSON.stringify(ctx.G.save), before);
++  assert.equal(out.forgeCards + out.wins + out.bursts, 0);
++}
++
++{
++  const broken = { quests: { ratchet_forge: 'done' }, flags: {}, weaponVersion: 1, weaponMode: 'claws' };
++  const { ctx } = harness(broken);
++  vm.runInContext('questMigrate(G.save)', ctx);
++  assert.equal(ctx.G.save.flags.crystal, 1);
++  assert.equal(ctx.G.save.flags.ratchetCamp, 1);
++  assert.equal(ctx.G.save.weaponMode, 'single');
++  const repaired = JSON.stringify(ctx.G.save);
++  vm.runInContext('questMigrate(G.save)', ctx);
++  assert.equal(JSON.stringify(ctx.G.save), repaired);
++}
++console.log('PASS quest payments are atomic and completed forge saves recover their Purifier');
+diff --git a/tests/run.cjs b/tests/run.cjs
+index 4263805..3310948 100644
+--- a/tests/run.cjs
++++ b/tests/run.cjs
+@@ -129,6 +129,11 @@ const SUITE = [
+   ['solid-bodies', 'a machine keeps its pigment under the room\'s light, its cut-out has no window through it, and ground effects follow the terrain'],
+   ['ios-ready', 'the Xcode project, icon and privacy manifest meet the App Store\'s checks; every Ogg has an AAC copy and an iPhone is handed it'],
+   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
++  ['scene-caption-contract', 'visible-three scene captions preserve unread story text in FIFO order', {noBrowser:true}],
++  ['purification-language-contract', 'purify, never free, in five languages and accessible ritual copy', {noBrowser:true}],
++  ['infection-eye-authority-contract', 'only infected bodies receive red or purple finite eye trails', {noBrowser:true}],
++  ['quest-payment-contract', 'quest hand-ins persist rewards, items and the Purifier atomically', {noBrowser:true}],
++  ['tile-signature-contract', 'terrain cache signatures distinguish equal-count broken-tile layouts', {noBrowser:true}],
+   ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
+   ['caves-ch1', 'every chapter-one cave pays something of its own; early finds remembered; a rescue never looks like a kill'],
+   ['survey-a7', "Ratchet's shaft errand is finished by reading the A7 survey, not by entering the room; early reads remembered; old saves keep what they earned"],
+@@ -154,9 +159,9 @@ const SUITE = [
+   ['scratch-reach', 'scratch contact boundary, facing and non-damaging recovery wake', { noBrowser: true }],
+   ['hero-move-coverage', 'actual renderer coverage for movement, aerial attacks, reactions and departure'],
+   ['hero-feedback', 'haptic device routing and duplicate pulse suppression', { noBrowser: true }],
+-  ['hero-delivery', 'source provenance, frame gutters, scale and floor registration', { noBrowser: true }],
+-  ['hero-frame-alpha', 'discrete sprites never blend into doubled silhouettes', { noBrowser: true }],
+-  ['hero-alpha', 'original transparent artwork retains its dark visor', { noBrowser: true }],
++  ['hero-delivery', 'source provenance, frame gutters, scale and floor registration'],
++  ['hero-frame-alpha', 'discrete sprites never blend into doubled silhouettes'],
++  ['hero-alpha', 'original transparent artwork retains its dark visor'],
+   ['tutorial-controller', 'complete production tutorial, contextual locks and transition recovery', { noBrowser: true }],
+   ['offline-release', 'scoped version cache, media seeking and storage-denied fallback', { noBrowser: true }],
+   ['release-polish', 'cold artwork, actual screen scale, camera, input edges, workshop and movies'],
+diff --git a/tests/scene-caption-contract.cjs b/tests/scene-caption-contract.cjs
+new file mode 100644
+index 0000000..c9a2867
+--- /dev/null
++++ b/tests/scene-caption-contract.cjs
+@@ -0,0 +1,38 @@
++const fs = require('fs');
++const vm = require('vm');
++const path = require('path');
++
++const src = fs.readFileSync(path.join(__dirname, '..', 'js', 'overlay.js'), 'utf8');
++const ctx = {
++  console,
++  G: { state: 'PLAY', dialog: null, sceneCaps: null, sceneCapQ: null },
++  c: {},
++  paginate(_canvas, text) { return [[text]]; },
++  revealStart() { return { done: false, t: 0, since: 0 }; },
++  revealDone(R) { return !!R.done; },
++  revealSince(R) { return R.since || 0; },
++  revealTick() {},
++  readingTime() { return 1; },
++};
++vm.createContext(ctx);
++vm.runInContext(src, ctx, { filename: 'js/overlay.js' });
++
++for (const text of ['first', 'second', 'third', 'fourth']) ctx.sceneCaption(text);
++const names = a => (a || []).map(q => q.text);
++if (JSON.stringify(names(ctx.G.sceneCaps)) !== JSON.stringify(['first', 'second', 'third']))
++  throw new Error('visible captions evicted unread text: ' + JSON.stringify(names(ctx.G.sceneCaps)));
++if (JSON.stringify(names(ctx.G.sceneCapQ)) !== JSON.stringify(['fourth']))
++  throw new Error('fourth caption did not wait intact: ' + JSON.stringify(names(ctx.G.sceneCapQ)));
++if (ctx.sceneCaptionShown() || ctx.sceneCaptionRead()) throw new Error('completion gates ignored queued unread text');
++
++ctx.G.sceneCaps[0].R.done = true;
++ctx.G.sceneCaps[0].R.since = 2;
++ctx.sceneCaptionTick(1.3);
++if (JSON.stringify(names(ctx.G.sceneCaps)) !== JSON.stringify(['second', 'third', 'fourth']) || ctx.G.sceneCapQ.length)
++  throw new Error('caption FIFO promotion failed');
++if (ctx.G.sceneCaps[2].R.done || ctx.G.sceneCaps[2].fade !== 0)
++  throw new Error('promoted caption lost unread state');
++
++ctx.overlayClear();
++if (ctx.G.sceneCaps !== null || ctx.G.sceneCapQ !== null) throw new Error('reset did not clear both caption lanes');
++console.log('PASS scene captions retain unread lines and promote queued text in FIFO order');
+diff --git a/tests/tile-signature-contract.cjs b/tests/tile-signature-contract.cjs
+new file mode 100644
+index 0000000..893a676
+--- /dev/null
++++ b/tests/tile-signature-contract.cjs
+@@ -0,0 +1,15 @@
++// Terrain bakes must distinguish equal-count broken-tile layouts.
++const fs = require('fs'), vm = require('vm');
++const source = fs.readFileSync('js/game.js', 'utf8');
++const match = source.match(/function tileBreakSig\(id, broken\) \{[\s\S]*?\n\}/);
++if (!match) throw new Error('tileBreakSig helper missing');
++const tileBreakSig = vm.runInNewContext('(' + match[0] + ')');
++
++const a = { 'A2:3,4': 1, 'A2:7,8': 1, 'B1:3,4': 1 };
++const b = { 'A2:3,4': 1, 'A2:9,8': 1, 'B1:3,4': 1 };
++const reordered = { 'A2:7,8': 1, 'A2:3,4': 1 };
++const sa = tileBreakSig('A2', a), sb = tileBreakSig('A2', b);
++if (sa === sb) throw new Error('equal-count different-coordinate layouts collide');
++if (sa !== tileBreakSig('A2', reordered)) throw new Error('signature depends on insertion order');
++if (tileBreakSig('A2', { 'A2:3,4': 0, 'B1:3,4': 1 }) !== '') throw new Error('false or foreign cells leak into signature');
++console.log('PASS broken-tile signatures are coordinate-sensitive and order-stable');
+diff --git a/tools/studio/audit.py b/tools/studio/audit.py
+index 4e0d821..3ff00c0 100755
+--- a/tools/studio/audit.py
++++ b/tools/studio/audit.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Evidence collector. Does not claim to replace the 15-role human/agent review."""
+-import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
++import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, socket, subprocess, sys, time, urllib.request
+ 
+ ROOT = pathlib.Path(__file__).resolve().parents[2]
+ FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
+@@ -36,6 +36,45 @@ def suite_budgets(source):
+         raise ValueError('No test harnesses found; refusing empty coverage')
+     return budgets
+ 
++def browser_test(name, root=ROOT):
++    """Detect direct or transitive Playwright use; honor explicit noBrowser."""
++    root = pathlib.Path(root)
++    try:
++        runner = (root / 'tests' / 'run.cjs').read_text()
++        if re.search(r"\['" + re.escape(name) + r"'[^\n]*\{[^\n}]*\bnoBrowser\s*:\s*true\b", runner):
++            return False
++    except OSError:
++        pass
++    seen = set()
++    def uses_browser(candidate):
++        try:
++            candidate = candidate.resolve()
++            if candidate in seen or not candidate.is_file(): return False
++            seen.add(candidate); source = candidate.read_text()
++        except OSError:
++            return False
++        if re.search(r"require\(\s*(['\"])playwright\1\s*\)", source): return True
++        for match in re.finditer(r"require\(\s*(['\"])(\.{1,2}/[^'\"]+)\1\s*\)", source):
++            dep = candidate.parent / match.group(2)
++            choices = [dep] if dep.suffix else [pathlib.Path(str(dep)+'.cjs'), pathlib.Path(str(dep)+'.js'), dep/'index.cjs', dep/'index.js']
++            if any(uses_browser(choice) for choice in choices): return True
++        return False
++    return uses_browser(root / 'tests' / (name + '.cjs'))
++
++def browser_block_reason(name, env=None, root=ROOT, socket_factory=socket.socket):
++    """Classify host launch restrictions before they become false gameplay failures."""
++    env = os.environ if env is None else env
++    if not browser_test(name, root): return None
++    executable = pathlib.Path(env.get('CHROMIUM_PATH', '/opt/pw-browsers/chromium'))
++    if not executable.is_file(): return 'Chromium executable is missing: ' + str(executable)
++    if not os.access(executable, os.X_OK): return 'Chromium executable is not executable: ' + str(executable)
++    if os.name == 'posix':
++        try:
++            probe = socket_factory(socket.AF_UNIX, socket.SOCK_STREAM); probe.close()
++        except OSError as error:
++            return 'Chromium cannot create its required Unix socket: ' + str(error)
++    return None
++
+ def run_owned(cmd, *, cwd, log, timeout, env=None):
+     """Run one owned process group and kill every descendant on timeout."""
+     proc = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT,
+@@ -93,6 +132,16 @@ def main():
+         (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
+         print(name+': '+state, flush=True)
+         return state == 'pass'
++    def block(name, reason, timeout):
++        log = out/(name+'.log')
++        log.write_text('BLOCKED: '+reason+'\n')
++        entry = {'name': name, 'status': 'blocked', 'exit_code': None,
++                 'seconds': 0, 'timeout_seconds': timeout, 'reason': reason,
++                 'log': log.name, 'sha256': hashlib.sha256(log.read_bytes()).hexdigest()}
++        report['results'].append(entry)
++        (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
++        print(name+': blocked', flush=True)
++        return False
+     ready = run('build', ['node', 'build.cjs'], 180)
+     if ready and 'platform' in names: ready = run('pack', ['node', 'tools/pack-www.cjs'], 180)
+     snapshot = out/'served-identity.json'
+@@ -140,7 +189,9 @@ def main():
+         for name in names:
+             if not (ROOT/'tests'/f'{name}.cjs').exists():
+                 report['results'].append({'name':name,'status':'missing'}); continue
+-            run(name, ['node','tests/run.cjs', name], suite[name])
++            reason = browser_block_reason(name, run_env.get('env'))
++            if reason: block(name, reason, suite[name])
++            else: run(name, ['node','tests/run.cjs', name], suite[name])
+         # and at the end: the served build must still be the one pinned at the start
+         ready = identity('end', snapshot)
+     report['complete_requested_scope'] = ready and len([x for x in report['results'] if x['name'] in names]) == len(names)
+diff --git a/tools/studio/test_audit.py b/tools/studio/test_audit.py
+index a83fcdd..6831bfe 100644
+--- a/tools/studio/test_audit.py
++++ b/tools/studio/test_audit.py
+@@ -1,18 +1,14 @@
+-"""Collector regressions: runner budgets and timeout descendant cleanup."""
+-import importlib.util
+-import os
+-from pathlib import Path
+-import sys
+-import tempfile
+-import time
+-import unittest
++#!/usr/bin/env python3
++import importlib.util, os, pathlib, sys, tempfile, time, unittest
+ 
+-SPEC = importlib.util.spec_from_file_location('studio_audit', Path(__file__).with_name('audit.py'))
+-audit = importlib.util.module_from_spec(SPEC)
+-SPEC.loader.exec_module(audit)
++HERE = pathlib.Path(__file__).resolve().parent
++spec = importlib.util.spec_from_file_location('studio_audit', HERE/'audit.py')
++audit = importlib.util.module_from_spec(spec); spec.loader.exec_module(audit)
+ 
++class DeniedSocket:
++    def __init__(self, *_): raise OSError(1, 'Operation not permitted')
+ 
+-class AuditBudgets(unittest.TestCase):
++class AuditBudgetsAndOwnership(unittest.TestCase):
+     def test_actual_runner_deadlines_are_preserved(self):
+         budgets = audit.suite_budgets((audit.ROOT / 'tests/run.cjs').read_text())
+         self.assertEqual(budgets['campaign-ch1'], 3600 + 180)
+@@ -38,8 +34,8 @@ class AuditBudgets(unittest.TestCase):
+     @unittest.skipUnless(os.name == 'posix', 'process-group regression requires POSIX')
+     def test_timeout_stops_descendant_output(self):
+         with tempfile.TemporaryDirectory() as tmp:
+-            child = Path(tmp) / 'child.py'
+-            heartbeat = Path(tmp) / 'heartbeat'
++            child = pathlib.Path(tmp) / 'child.py'
++            heartbeat = pathlib.Path(tmp) / 'heartbeat'
+             child.write_text('import signal,time,pathlib\n'
+                 'signal.signal(signal.SIGTERM, signal.SIG_IGN)\n'
+                 f'p=pathlib.Path({str(heartbeat)!r})\n'
+@@ -59,6 +55,33 @@ class AuditBudgets(unittest.TestCase):
+             time.sleep(.2)
+             self.assertEqual(heartbeat.read_bytes(), before, 'timed-out child continued writing')
+ 
++class AuditPreflightTests(unittest.TestCase):
++    def make_repo(self):
++        tmp = tempfile.TemporaryDirectory(); root = pathlib.Path(tmp.name); (root/'tests').mkdir()
++        (root/'tests/run.cjs').write_text("const SUITE = [['source','x',{noBrowser:true}],['direct','x'],['transitive','x']];\n")
++        (root/'tests/source.cjs').write_text("require('playwright');\n")
++        (root/'tests/direct.cjs').write_text("require('playwright');\n")
++        (root/'tests/transitive.cjs').write_text("require('../helper.cjs');\n")
++        (root/'helper.cjs').write_text("require('playwright');\n")
++        return tmp, root
+ 
+-if __name__ == '__main__':
+-    unittest.main()
++    def test_no_browser_contract_wins(self):
++        tmp, root = self.make_repo(); self.addCleanup(tmp.cleanup)
++        self.assertFalse(audit.browser_test('source', root))
++
++    def test_direct_and_transitive_browser_detection(self):
++        tmp, root = self.make_repo(); self.addCleanup(tmp.cleanup)
++        self.assertTrue(audit.browser_test('direct', root))
++        self.assertTrue(audit.browser_test('transitive', root))
++
++    def test_missing_executable_blocks(self):
++        tmp, root = self.make_repo(); self.addCleanup(tmp.cleanup)
++        self.assertIn('missing', audit.browser_block_reason('direct', {'CHROMIUM_PATH':'/definitely/missing'}, root).lower())
++
++    def test_unix_socket_denial_blocks(self):
++        tmp, root = self.make_repo(); self.addCleanup(tmp.cleanup)
++        exe = pathlib.Path(tmp.name)/'chromium'; exe.write_text('#!/bin/sh\n'); exe.chmod(0o755)
++        reason = audit.browser_block_reason('direct', {'CHROMIUM_PATH':str(exe)}, root, DeniedSocket)
++        self.assertIn('unix socket', reason.lower())
++
++if __name__ == '__main__': unittest.main()
