@@ -23,6 +23,7 @@ const MEDIA_SRC = {
     beastStudioLeap: 'assets/characters/beast/studio-pounce.webp',
     beastStudioRoar: 'assets/characters/beast/studio-roar.webp',
     beastRearSwipe: 'assets/characters/beast/studio-rake.webp',
+    beastStudioRear: 'assets/characters/beast/studio-rear.webp',   // up on his hind legs, two swats, the slam (2026-11-21)
     beastHurt: 'assets/characters/beast/studio-hurt.webp',
     // the turn (a planted pivot through the front, LEFT to RIGHT) and the
     // standing idle — filmed 2026-11-13 from the same standing frame
@@ -679,6 +680,16 @@ const MEDIA_SRC = {
     nf_arrive: 'assets/sfx/nullfang/arrive.ogg',
     nf_awake: 'assets/sfx/nullfang/awake.ogg',
     nf_breath: 'assets/sfx/nullfang/breath.ogg',
+    // A REAL LION (owner, 2026-11-21: "a roar that you should download from any library of
+    // a lion roar"). One wild bout, recorded in the field (Freesound 69570, CC0): three of its
+    // full roars, the pair of them that opens his second phase, and three of its closing grunts.
+    nf_lroar1: 'assets/sfx/nullfang/lion/roar1.ogg',
+    nf_lroar2: 'assets/sfx/nullfang/lion/roar2.ogg',
+    nf_lroar3: 'assets/sfx/nullfang/lion/roar3.ogg',
+    nf_lroar_big: 'assets/sfx/nullfang/lion/roar_big.ogg',
+    nf_lgrunt1: 'assets/sfx/nullfang/lion/grunt1.ogg',
+    nf_lgrunt2: 'assets/sfx/nullfang/lion/grunt2.ogg',
+    nf_lgrunt3: 'assets/sfx/nullfang/lion/grunt3.ogg',
 
     hz_swing1: 'assets/sfx/hz_swing1.ogg',
     hz_swing2: 'assets/sfx/hz_swing2.ogg',
@@ -1552,6 +1563,34 @@ function pureArt(im) {
   PURE_ART.set(im, out);
   return out;
 }
+// HIS SECOND PHASE IS SEEN (owner, 2026-11-21: "I can only see one phase of nilfang").
+// From the roar that opens it, every authored violet light on NULLFANG — eyes, veins,
+// joints — burns the red of his dash: the same body, enraged. A recolour of the art's own
+// pixels (as pureArt washes them teal when he is purified), cached once per sheet.
+const RAGE_ART = new WeakMap();
+function rageArt(im) {
+  if (!im || !(im.naturalWidth || im.width)) return im;
+  const hit = RAGE_ART.get(im); if (hit) return hit;
+  let out = im;
+  try {
+    const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+    const id = x.getImageData(0, 0, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (d[i + 3] && b > 80 && b > g * 1.35 && r > g * 1.05) {
+        const v = Math.max(r, b);
+        d[i] = Math.min(255, v * 1.05); d[i + 1] = v * 0.26; d[i + 2] = v * 0.2;
+      }
+    }
+    x.putImageData(id, 0, 0);
+    cv.naturalWidth = w; cv.naturalHeight = h;
+    out = cv;
+  } catch (err) { out = im; }
+  RAGE_ART.set(im, out);
+  return out;
+}
 function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   // URGENT: a strip is asked for the frame it is needed, and a body that
   // waits a quarter-megabyte for its run cycle on a phone connection draws
@@ -1561,7 +1600,7 @@ function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   mediaFetch(key, 1);
   const raw = MEDIA_RAW[key];
   if (!raw || !raw.naturalWidth || !heroSheetCompatible(key, raw)) return false;
-  const im = pure ? pureArt(raw) : raw;
+  const im = pure === 'rage' ? rageArt(raw) : pure ? pureArt(raw) : raw;
   // what drew the body, for the diag panel: the owner's "nothing changed"
   // is answered by a screenshot that names the strip and the cell
   if (typeof G !== 'undefined') G.lastStrip = key + ':' + (((cell % cells) + cells) % cells);

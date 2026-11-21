@@ -127,6 +127,27 @@ function nfDashLink(b) {
   if (typeof fx === 'function') b.coilFx = fx('gather', b.cx(), b.y + b.h - 34, { rx: 150, ry: 120, dur: b.t, col: '#ff4a3a', hot: '#fff6df', follow: b, power: 1.1 });
   beastSound('coil');
 }
+// HE RISES ON HIS HIND LEGS (owner, 2026-11-21: "Maybe they rise up a little bit on and stand
+// on two legs, on the two back legs ... find out how real lions attack"). A lion squaring up
+// to a rival rears, head high, and swats with both forepaws, then drops its weight onto them.
+// Filmed on his own body over a real-lion motion reference (assets/source/beast/
+// studio-2026-11-21). Phase two only, close in, in front of him, never twice running:
+//   rearwarn  the rise (the tell, 0.6 s — the head goes up, the forelegs leave the ground)
+//   rear      two swats high in front, then both paws slammed down in front of him
+//   rearspent low on all fours after the slam — the opening — then the prowl
+// The answer: be out of his reach when he rises (or behind him). Swats reach high: a jump
+// over them is not an answer, which is what makes it his and not the swipe.
+const NF_REAR = { warn: 0.6, active: 0.75, swats: [0.3, 0.55], slam: 0.7, spent: 0.55, swatReach: 132, slamReach: 160, cd: 6 };   // swats and slam on the take's own frames (2.9 s, 3.55 s, 3.96 s)
+function nfRearReady(b, adist, dist) {
+  return b.kind === 'glitch' && b.phase === 2 && !!b.rageSeen && adist < 190 && adist > 40
+    && (Math.sign(dist) || b.face) === b.face && (b.rearCD || 0) <= 0 && b.lastMove !== 'rear'
+    && typeof player !== 'undefined' && Math.abs((player.y + player.h) - (b.y + b.h)) < 64   // on his own floor: the swats and the slam reach her there
+    && typeof MEDIA_RAW !== 'undefined' && !!(MEDIA_RAW.beastStudioRear && MEDIA_RAW.beastStudioRear.naturalWidth);
+}
+function nfRearStart(b) {
+  b.st = 'rearwarn'; b.t = NF_REAR.warn; b.vx = 0; b.lastMove = 'rear'; b.turnStreak = 0; b.rearCD = NF_REAR.cd; b.rearSlammed = false;
+  beastSound('coil');
+}
 function nfPace(b, running) { return running ? (b.fury ? 330 : 300) : (b.fury ? 240 : b.phase === 2 ? 210 : 180); }
 function foeHitSound(e, big) {
   // (each guardian rings in its own metal: audio.js HIT_BANK)
@@ -13413,6 +13434,7 @@ class Boss {
     // each boss up the chain is natively faster and more relentless
     const spd = DF().espd * (this.attackSpeed || BOSS_AGGRO[this.kind] || 1);
     this.windT -= dt; this.overdriveT -= dt;
+    if (this.rearCD > 0) this.rearCD -= dt;
     // every boss looks where it is going, even the ones that do not walk
     // GLACIERE owns facing in her state handler: a committed charge keeps
     // facing along its velocity even after the player crosses behind it.
@@ -13563,7 +13585,8 @@ class Boss {
             // every swipe in the fight. Same decision, same priority (the null
             // field and the ambush still go first), one frame sooner.
             const nullDue = !this.nullUsed && this.hp <= this.hpMax * 0.5;
-            if (!nullDue && this.ambushCD > 0 && adist < 130 && this.swipeCD <= 0) {
+            if (!nullDue && nfRearReady(this, adist, dist)) nfRearStart(this);
+            else if (!nullDue && this.ambushCD > 0 && adist < 130 && this.swipeCD <= 0) {
               this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
               this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
             } else if (inBand && (this.lastMove !== 'pounce' && this.lastMove !== 'lunge' || (this.lastMove === 'pounce' && chance(0.5)))) {
@@ -13577,7 +13600,7 @@ class Boss {
               // the read, and the lunge's coil is shorter.
               this.lunging = !this.dashOpened || this.lastMove === 'pounce' || chance(this.phase === 2 ? 0.55 : 0.45);
               if (this.lunging) nfDashChainStart(this);
-              this.coilDur = this.lunging ? (this.phase === 2 ? 0.55 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
+              this.coilDur = this.lunging ? (this.phase === 2 ? 0.48 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
               this.st = 'crouch'; this.t = this.coilDur; this.turnStreak = 0; this.replanted = false;
               this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = this.lunging ? 'lunge' : 'pounce';
               if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: this.lunging ? '#ff4a3a' : TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
@@ -13626,6 +13649,8 @@ class Boss {
               this.face = Math.sign(per[0][0] - this.cx()) || this.face;
             }
             this.ambushCD = rnd(this.phase === 2 ? 6 : 9, this.phase === 2 ? 9 : 12);
+          } else if (nfRearReady(this, adist, dist) && !(!this.nullUsed && this.hp <= this.hpMax * 0.5)) {
+            nfRearStart(this);
           } else if (adist < 130 && this.swipeCD <= 0) {
             // the same trap FURNACE's slam was in: gated on range alone, so a
             // player who stays in melee sees one telegraph and nothing else
@@ -13655,13 +13680,44 @@ class Boss {
             // (or his DASH out of the same crouch: see the idle's entry above)
             this.lunging = !this.dashOpened || this.lastMove === 'pounce' || (this.lastMove !== 'lunge' && chance(this.phase === 2 ? 0.55 : 0.45));
             if (this.lunging) nfDashChainStart(this);
-            this.coilDur = this.lunging ? (this.phase === 2 ? 0.55 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
+            this.coilDur = this.lunging ? (this.phase === 2 ? 0.48 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
             this.st = 'crouch'; this.t = this.coilDur; this.turnStreak = 0; this.replanted = false;
             this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = this.lunging ? 'lunge' : 'pounce';
             if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: this.lunging ? '#ff4a3a' : TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
           }
           else if (this.t <= 0) this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
           }
+        } else if (this.st === 'rearwarn') {
+          // UP ON HIS HIND LEGS: the head goes up, the forelegs come off the ground — the tell
+          this.vx = 0; this.t -= dt; this.windT = 0.4;
+          if (this.t <= 0) { this.st = 'rear'; this.t = NF_REAR.active; this.rearHits = 0; }
+        } else if (this.st === 'rear') {
+          // two swats at the top, then the slam
+          this.vx = 0; this.t -= dt;
+          const el = NF_REAR.active - this.t, f = this.face || 1;
+          const swat = NF_REAR.swats.filter(x => el >= x).length;
+          while ((this.rearHits || 0) < swat) {
+            this.rearHits = (this.rearHits || 0) + 1;
+            const box = { x: f > 0 ? this.cx() + 6 : this.cx() - 6 - NF_REAR.swatReach, y: this.y - 70, w: NF_REAR.swatReach, h: this.h * 0.75 + 70 };
+            beastSound('swipe');
+            if (typeof fx === 'function') fx('slash', this.cx() + f * 60, this.y - 6, { rx: 96, ry: 90, dur: 0.26, flip: f < 0, power: 3.5, col: '#ff4a3a', hot: '#fff6df' });
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.rear'); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
+          }
+          if (!this.rearSlammed && el >= NF_REAR.slam) {
+            this.rearSlammed = true;
+            const box = { x: f > 0 ? this.cx() + 20 : this.cx() - 20 - NF_REAR.slamReach, y: this.y + this.h - 54, w: NF_REAR.slamReach, h: 62 };
+            beastSound('land'); cam.shake = Math.max(cam.shake, 10); G.hitStop = Math.max(G.hitStop || 0, 0.06);
+            if (typeof padRumble === 'function') padRumble(0.8, 0.5, 220);
+            const lx = this.cx() + f * 90, ly = this.y + this.h - 2;
+            if (typeof fx === 'function') { fx('ground', lx, ly, { rx: 200, ry: 32, dur: 0.5, col: '#ff4a3a', hot: '#fff6df', power: 1.3 }); fx('cracks', lx, ly + 3, { rx: 150, ry: 24, dur: 1.3, col: '#a0281e', hot: '#fff0e0', power: 1.1 }); }
+            for (let i = 0; i < 12; i++) addPart(lx + rnd(-60, 60), ly - 3, rnd(-200, 200), rnd(-170, -30), rnd(0.35, 0.6), '#b9a888', rnd(2.5, 4), 260, true);
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.rearslam'); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
+          }
+          if (this.t <= 0) { this.st = 'rearspent'; this.t = NF_REAR.spent; this.rearSlammed = false; this.landAt = this.anim || 0; }
+        } else if (this.st === 'rearspent') {
+          // down on all fours, low, after the slam: the opening, then he rises and goes on
+          this.vx = 0; this.t -= dt;
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(0.2, 0.35); }
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
           this.vx = 0; this.t -= dt; this.windT = 0.3;
@@ -13772,10 +13828,11 @@ class Boss {
             // flight gives the eye the arc to read the landing from.
             // THE LUNGE flies low and fast — a curve a body-height high, not
             // the leap's arc — and it aims at where she IS, closer than the leap
-            const air = this.lunging ? (this.phase === 2 ? 0.34 : 0.38) + Math.min(0.06, adist / 6000)
+            const air = this.lunging ? (this.phase === 2 ? 0.29 : 0.38) + Math.min(0.06, adist / 6000)
               : (this.phase === 2 ? 0.62 : 0.70) + Math.min(0.12, adist / 4000);
             this.lungeFly = !!this.lunging; this.lunging = false;
-            this.vx = clamp(lead / air, this.lungeFly ? -1150 : -760, this.lungeFly ? 1150 : 760) * spd;
+            const lcap = this.lungeFly ? (this.phase === 2 ? 1400 : 1150) : 760;   // phase two: a faster dash
+            this.vx = clamp(lead / air, -lcap, lcap) * spd;
             this.vy = -2100 * air / 2;
             this.leapT0 = this.anim || 0;
             this.leapDuration = air;
@@ -13825,7 +13882,7 @@ class Boss {
           }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
-            cam.shake = 11; beastSound('roar'); G.flash = Math.max(G.flash, 0.18);
+            cam.shake = 11; beastSound(this.roarBig ? 'roar_big' : 'roar'); G.flash = Math.max(G.flash, 0.18);
             this.roarBuzzT = 0.6;
             if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
             if (typeof roarWave === 'function') roarWave(this.cx() + this.face * 30, this.cy() - 10, '#b48cff');
@@ -13838,6 +13895,7 @@ class Boss {
             // roar that answers a broken binding is the big one: wider, longer,
             // and it throws her from further off.)
             const big = this.roarBig || 0; this.roarBig = 0;
+            if (big && this.kind === 'glitch') this.rageSeen = true;   // from this roar he burns red (beast.js, media.js rageArt)
             if (typeof shockRipple === 'function')
               shockRipple(this.cx() + this.face * 30, this.cy() - 10, big
                 ? { R: 820, dur: 1.2, amp: 32 + big * 4, width: 74, col: '#b06aff', fronts: 4, gap: 0.12, nudge: 8, pulse: 0.24 }
@@ -14083,6 +14141,15 @@ class Boss {
             this.nullSeq--;
             if (this.nullSeq > 0) { this.st = 'nullhop'; this.t = 0.16; }
             else { this.st = 'nullend'; this.t = 1.15; }
+          } else if (this.phase === 2 && !this.lungeFly && this.kind === 'glitch' && !player.dead) {
+            // THE LEAP GOES ON (owner, 2026-11-21: "He jumps and scratch, but this time he
+            // should dash forward also"). In phase two the leap lands into the scratch (its
+            // full tell), and out of the scratch, after a breath on his feet, the red crouch
+            // and the dash: one sentence — leap, scratch, dash — that ends spent.
+            this.landAt = this.anim || 0;
+            this.dashSlash = true; this.dashLeft = 1; this.dashLink = 0; this.dashOpened = true;
+            this.st = 'swipewarn'; this.t = 0.4; this.vx = 0; this.swiped = false; this.swiped2 = true;
+            this.lastMove = 'lunge';
           } else {
             // the punish window: long enough for the three-hit combo, not for
             // three of them

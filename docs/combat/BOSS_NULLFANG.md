@@ -321,3 +321,21 @@ when he is purified. `js/entities.js` `NF_DASH`, `nfDashChainStart`,
 | chain end | announced (shake, hit-stop, dust), 0.2 s down + idle ≈ 0.75–0.85 s — the longer opening, under the 0.9 s gift line |
 | counters | jump the low lunge, dash through it, or be out of its line; hit him in the breaths and at the end |
 
+## Phase two, seen and heard (owner, 2026-11-21)
+
+*"I can only see one phase of nilfang ... It starts with a roar that you should download from
+any library of a lion roar. Makes him faster with his dashes. He jumps and scratch, but this time
+he should dash forward also ... stand on two legs ... its eyes need to blink."*
+
+| | |
+|---|---|
+| the break | at half health: the stagger, then a recorded lion's double roar (Freesound 69570, CC0) |
+| the look | from that roar every authored violet light on him burns red (media.js `rageArt`) |
+| the dash | phase two: red crouch 0.48 s (floor 0.42), flight 0.29 s, up to 1400 px/s (phase one 0.65 / 0.38 / 1150) |
+| the leap | phase two: leap → scratch (0.4 s tell) → a breath → red crouch → dash → spent |
+| the rear | phase two, close, on her floor, in front: rise 0.6 s (tell) → two high swats (reach 132) → two-paw slam (reach 160) → low crouch 0.55 s (the opening). Cooldown 6 s, never twice running. Counter: be out of reach, or behind him; the swats reach high, so jumping is not the answer. Filmed take `studio-rear` over a real-lion reference. |
+| the voice | the roar is one of three recorded takes, never the same twice running; the crouch is a recorded grunt |
+| the eyes | a blink every 1.8-3.5 s (sometimes twice), never in a wind-up: the eye's own pixels covered with the armour above it (assets/eyes.json positions) |
+
+Held by `tests/nf-phase2.cjs` and `tests/nf-dash.cjs`.
+

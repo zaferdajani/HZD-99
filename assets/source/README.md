@@ -142,6 +142,8 @@ on a green screen, the one sheet a rig needs. `tools/agentparts.cjs tally` cuts
 them into `characters/agents/tally/rig/` with every joint measured; the brief is
 in `agents/jobs.json` (`tally.parts`).
 
+`beast/studio-2026-11-21/` is NULLFANG REARING (2026-11-21): `rear-reference-lion.mp4` (a generated real lion, motion reference only, never shipped) and `rear.mp4` (his take over it); jobs and the cut in its `jobs.json`. `audio/lion/` holds the CC0 lion recordings his voice is cut from (Freesound 69570 by Bidone, 437980 by craigsmith).
+
 `gates/gate_city_asfired.jpg` is THE CITY GATE RE-FIRED (2026-11-20, GPT Image 2.6 2k high 16:9, job
 `f2147536-ce5b-4e5c-a7dd-3a76b12c8f64`, the old plate as composition reference; a second take,
 `515fcab0-c365-4ea3-a94c-0d163bba49a2`, was flatter and not used). Shipped as

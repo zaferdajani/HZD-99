@@ -1195,7 +1195,20 @@ function beastMotionEnd(b, dt) {
 }
 // The creature must never enter sfx('atk'/'dash'/'land'), which also voices
 // HZD-99. Each cue is an original generated take, with non-vocal fallbacks.
+// HIS VOICE IS A REAL LION'S (owner, 2026-11-21): the roar and the grunt are recorded
+// (js/media.js nf_lroar*, nf_lgrunt*), a different take each time, never the same twice
+// running; `roar_big` is the pair of roars that opens his second phase.
+const NF_LION = { roar: ['nf_lroar1', 'nf_lroar2', 'nf_lroar3'], roar_big: ['nf_lroar_big'], coil: ['nf_lgrunt1', 'nf_lgrunt2', 'nf_lgrunt3'] };
+const NF_LION_VOL = { roar: .9, roar_big: 1, coil: .6 };
+const NF_LION_LAST = {};
 function beastSound(cue) {
+  const bank = NF_LION[cue];
+  if (bank && typeof playBuf === 'function') {
+    let i = Math.floor(Math.random() * bank.length);
+    if (bank.length > 1 && bank[i] === NF_LION_LAST[cue]) i = (i + 1) % bank.length;
+    if (playBuf(bank[i], NF_LION_VOL[cue], 1)) { NF_LION_LAST[cue] = bank[i]; return; }
+    if (cue === 'roar_big') cue = 'roar';
+  }
   const volumes = { step: .22, breath: .18, coil: .28, leap: .44,
     swipe: .48, land: .52, hurt: .38, roar: .62, arrive: .58, awake: .42 };
   if (typeof playBuf === 'function' && playBuf('nf_' + cue, volumes[cue] || .4, 1)) return;
@@ -1239,6 +1252,12 @@ const BEAST_STRIP = {
   // tail swaying), not cell 0 of the leap held still under a scale wobble
   idle:       { key: 'beastStudioIdle', cells: 24, k: 1, ax: -6.9, loop: 6 },
   roar:       { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1,    t0: 1.25 },
+  // HE REARS (2026-11-21): one filmed take over a real lion's (assets/source/beast/studio-2026-11-21),
+  // cut by tools/lion-studio.py: the gather and the rise, the two swats and the slam, the low
+  // crouch and the stand. The times are entities.js NF_REAR's (warn 0.6, active 0.75, spent 0.55).
+  rearwarn:   { key: 'beastStudioRear', cells: 30, k: 1, ax: -6.89, from: 0,  to: 9,  t0: 0.6 },
+  rear:       { key: 'beastStudioRear', cells: 30, k: 1, ax: -6.89, from: 10, to: 21, t0: 0.75 },
+  rearspent:  { key: 'beastStudioRear', cells: 30, k: 1, ax: -6.89, from: 22, to: 29, t0: 0.55 },
   intro:      { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1, from: 6, t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
   swipewarn:  { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 0, to: 14 }, // load shoulder, raise paw
   swipe:      { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 15, to: 23 }, // contact, follow-through, settle
@@ -1364,9 +1383,87 @@ function beastStrip(c, b) {
   const px = BEAST_STRIP_PX * S.k;
   const root = S.root && !turn ? BEAST_LEAP_ROOT * clamp((cell - 10) / 14, 0, 1) : 0;
   const ox = (root - (S.ax || 0)) * px;
-  const drew = drawStripCell(c, S.key, cell, S.cells, ox, 0, height, false, !!b.purified);
+  const look = beastLook(b);
+  const drew = drawStripCell(c, S.key, cell, S.cells, ox, 0, height, false, look);
   b._stripPose = drew ? {key:S.key, cell, cells:S.cells, height, ox} : null;
+  if (drew && !b.dead) beastBlink(c, b, S.key, cell, ox, height);
   return drew;
+}
+
+// HE BLINKS (owner, 2026-11-21: "its eyes need to blink a little bit more ... to make it
+// more realistic"). His eyes are painted into every filmed cell, and assets/eyes.json holds
+// where the eye is in each one (tools/eyespecs.cjs). Every 2-4.5 s, and sometimes twice, the
+// lid comes down over it for a seventh of a second: a disc of the armour's own colour taken
+// from just above the eye, drawn from the top down. Never in a wind-up, a strike or a roar
+// — an animal about to act does not blink — and never while he lies beaten.
+const BEAST_LID = {};
+// the lid of one cell: the eye's OWN lit pixels (nothing round, nothing bigger than the eye),
+// filled with the armour colour from just above it — closing it covers exactly the light
+function beastLidSpec(key, cell, raw) {
+  const id = key + ':' + cell; if (BEAST_LID[id] !== undefined) return BEAST_LID[id];
+  const M = typeof EYE_MAP !== 'undefined' && EYE_MAP[key], pt = M && M.e && M.e[cell];
+  if (!pt || !raw || !raw.naturalWidth) return (BEAST_LID[id] = null);
+  let out = null;
+  try {
+    const cw = raw.naturalWidth / M.c, ch = raw.naturalHeight;
+    const ex = (cell + pt[0]) * cw, ey = pt[1] * ch, R = Math.max(5, Math.round(ch * 0.03)), S2 = R * 2;
+    const cv = document.createElement('canvas'); cv.width = S2 * 2; cv.height = S2 * 2;
+    const q = cv.getContext('2d', { willReadFrequently: true });
+    q.drawImage(raw, ex - S2, ey - S2, S2 * 2, S2 * 2, 0, 0, S2 * 2, S2 * 2);
+    const img = q.getImageData(0, 0, S2 * 2, S2 * 2), d = img.data;
+    const lit = (i) => d[i + 3] > 90 && d[i + 2] > 80 && d[i + 2] > d[i + 1] * 1.35 && d[i] > d[i + 1] * 1.05;
+    // the lid colour: the armour just above the eye
+    let n = 0, rr = 0, gg = 0, bb = 0;
+    for (let y = 0; y < S2 * 2; y++) for (let x = 0; x < S2 * 2; x++) {
+      const i = (y * S2 * 2 + x) * 4, dx = x - S2, dy = y - S2;
+      if (!lit(i) && d[i + 3] > 200 && dy < -R * 0.5 && dy > -R * 1.6 && Math.abs(dx) < R) { rr += d[i]; gg += d[i + 1]; bb += d[i + 2]; n++; }
+    }
+    if (n > 4) {
+      // the mask: only lit pixels within the eye's own radius, flood-connected to its centre
+      const keep = new Uint8Array(S2 * S2 * 4); let top = 1e9, bot = -1, cnt = 0;
+      const st = [];
+      for (let y = S2 - 2; y <= S2 + 2; y++) for (let x = S2 - 2; x <= S2 + 2; x++) if (lit((y * S2 * 2 + x) * 4)) st.push(y * S2 * 2 + x);
+      while (st.length) { const j = st.pop(); if (keep[j]) continue; const x = j % (S2 * 2), y = (j / (S2 * 2)) | 0;
+        if (Math.hypot(x - S2, y - S2) > R * 1.15 || !lit(j * 4)) continue; keep[j] = 1; cnt++; top = Math.min(top, y); bot = Math.max(bot, y);
+        if (x > 0) st.push(j - 1); if (x < S2 * 2 - 1) st.push(j + 1); if (y > 0) st.push(j - S2 * 2); if (y < S2 * 2 - 1) st.push(j + S2 * 2); }
+      if (cnt >= 3) {
+        const R0 = rr / n | 0, G0 = gg / n | 0, B0 = bb / n | 0;
+        for (let j = 0; j < keep.length; j++) { const i = j * 4;
+          if (keep[j]) { d[i] = R0; d[i + 1] = G0; d[i + 2] = B0; d[i + 3] = 255; } else d[i + 3] = 0; }
+        q.putImageData(img, 0, 0);
+        out = { cv, x: pt[0], y: pt[1], s: S2, ch, top, bot };
+      }
+    }
+  } catch (e) { out = null; }
+  return (BEAST_LID[id] = out);
+}
+// how his art is coloured: washed teal once purified, burning red from his second phase's roar
+function beastLook(b) { return b.purified ? true : (b.kind === 'glitch' && b.phase === 2 && b.rageSeen) ? 'rage' : false; }
+const BEAST_BLINK_STATES = /^(idle|stalk|run|recover|perch|daze)$/;
+function beastBlinkK(b) {
+  const now = b.anim || 0;
+  if (b._blinkAt == null || now < b._blinkAt - 10) b._blinkAt = now + 1 + Math.random() * 2;
+  if (now > b._blinkAt + 0.14) { b._blinkAt = now + (b._blink2 ? 0.22 : 1.8 + Math.random() * 1.7); b._blink2 = !b._blink2 && Math.random() < 0.25; }
+  const p = (now - b._blinkAt) / 0.14;
+  return p < 0 || p > 1 ? 0 : p < 0.45 ? p / 0.45 : p < 0.6 ? 1 : 1 - (p - 0.6) / 0.4;
+}
+function beastBlink(c, b, key, cell, ox, h) {
+  if (!(b.purified || BEAST_BLINK_STATES.test(b.st)) || b.stagT > 0 && b.st !== 'daze') {
+    // busy (a wind-up, a strike): the blink waits until he is free, it is not lost
+    const now = b.anim || 0; if (b._blinkAt != null && now > b._blinkAt - 0.3) b._blinkAt = now + 0.3 + Math.random() * 0.4;
+    b._blinkK = 0; return; }
+  const k = beastBlinkK(b); b._blinkK = k; if (k <= 0.02) return;
+  const raw = typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[key]; const M = typeof EYE_MAP !== 'undefined' && EYE_MAP[key];
+  if (!raw || !M) return;
+  const L = beastLidSpec(key, ((cell % M.c) + M.c) % M.c, raw); if (!L) return;
+  const cw = raw.naturalWidth / M.c, ch = raw.naturalHeight, dw = h * cw / ch, sc = h / ch;
+  const x = ox - dw / 2 + L.x * dw, y = -h + L.y * h;
+  // the lid comes DOWN: the top k of the eye's own shape
+  const cut = L.top + (L.bot - L.top + 1) * k;
+  c.save(); c.beginPath(); c.rect(x - L.s * sc, y + (L.top - L.s) * sc, L.s * 2 * sc, (cut - L.top) * sc); c.clip();
+  c.drawImage(L.cv, x - L.s * sc, y - L.s * sc, L.s * 2 * sc, L.s * 2 * sc);
+  c.restore();
+  if (typeof G !== 'undefined') G.beastBlinked = (G.beastBlinked || 0) + 1;
 }
 
 // boss entry point. Returns false so the old chain can catch a missing image.
@@ -1458,7 +1555,7 @@ function drawBeast(c, b) {
     if (b.stagT > 0 && !b.dead) {
       // staggered by the Song: cowering low, trembling
       BEAST_LIVE.glow = 0.35;
-      if (!drawStripCell(c, 'beastHurt', 7, 12, 0, 0, 256 * BEAST_STRIP_PX, false))
+      if (!drawStripCell(c, 'beastHurt', 7, 12, 0, 0, 256 * BEAST_STRIP_PX, false, beastLook(b)))
         bFig(c, 'aAtk', 0, 2.2);
     // THE WHOLE LEAP USED TO BE INTERCEPTED HERE and handed to `aAtk` — the
     // authored standing side view — squashed on the coil, stretched in the air.

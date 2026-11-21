@@ -1,0 +1,32 @@
+{
+ "provider": "Higgsfield",
+ "model": "seedance_2_5",
+ "fired": "2026-11-21",
+ "why": "Owner, 2026-11-21: 'Try to find real lion fighting. How they move their tail, their legs. Maybe they rise up a little bit on and stand on two legs, on the two back legs. When they hit, find out how real lions attack.' A web search found no freely licensed footage of a lion rearing and swatting (stock libraries are licensed), so the motion reference was generated as a realistic lion (never shipped), then performed by NULLFANG on his own body, as the turn was on 2026-11-14.",
+ "jobs": [
+  {
+   "name": "rear-reference-lion",
+   "job_id": "e27295e7-e3e0-4852-a732-5092ed2a501d",
+   "mode": "t2v",
+   "duration": 5,
+   "credits": "~28",
+   "file": "rear-reference-lion.mp4",
+   "note": "MOTION REFERENCE ONLY, never shipped",
+   "prompt": "Wildlife documentary footage, locked-off static camera, full-body side view of an adult male African lion ... REARS UP onto his two hind legs ... swats the air twice with his forepaws, then ... slams both front paws down ... holding a low crouch (full text in the job)."
+  },
+  {
+   "name": "rear",
+   "job_id": "b9949262-0e2e-49e1-ac61-1463c375daca",
+   "mode": "omni_reference",
+   "duration": 6,
+   "credits": "~34",
+   "file": "rear.mp4",
+   "start_image": "../studio-2026-11-13/start_left.png (uploaded as media 5162b6c5-c8b9-49f2-b829-76171ea29280)",
+   "end_image": "the same standing frame",
+   "video_references": "rear-reference-lion (e27295e7)",
+   "prompt": "The mechanical lion from the first frame performs exactly the rearing attack of the real lion in the reference video ... gathers onto its haunches, REARS UP onto its two hind legs ... head raised high and thrown back with the jaw open ... swats the air twice ... slams both front paws down ... holds a low crouch ... rises back into exactly the standing pose of the first frame ... Take ONLY the motion ... ivory armour plates, violet joint lights and eyes, plated mane ... pure black background."
+  }
+ ],
+ "delivery": "tools/lion-studio.py rear.mp4 assets/characters/beast/studio-rear.webp --times (10 cells 0.10-2.00 s gather and rise, 12 cells 2.05-4.10 s swats and slam, 8 cells 4.20-5.95 s crouch and stand) --rest 0.1 --threshold 22 --foot-right --min-coverage .3 --grade ../studio-2026-10-04/grade.json; exact times in characters/beast/studio-rear.motion.json",
+ "note": "Assistant-reviewed (contact sheet: on-model, hind paws planted, never turns, ends in the stand); awaiting the owner's eye."
+}

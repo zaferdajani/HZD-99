@@ -26,7 +26,7 @@ const { chromium } = require('playwright');
       bo.st = 'idle'; bo.t = 0.2; bo.dead = false; bo.meet = false; bo.hp = bo.hpMax * hpK; bo.phase = phase;
       if (phase === 2) bo.nullUsed = true;              // the once-a-fight null field is another test's
       const STEP = 1 / 60, lunges = [], chains = [], coils = [];
-      let first = null, open = null, cur = [], prev = bo.st, coilLen = 0, inCoil = false, spentT = null;
+      let first = null, open = null, leap = false, cur = [], prev = bo.st, coilLen = 0, inCoil = false, spentT = null;
       for (let i = 0; i < secs * 60; i++) {
         // she stands off at dash range, out of everything else's way
         player.iT = 99; player.dead = false;
@@ -35,12 +35,14 @@ const { chromium } = require('playwright');
         try { bo.update(STEP); } catch (e) { }
         if (bo.st === 'crouch') { if (!inCoil) { inCoil = true; coilLen = 0; if (first == null) first = !!bo.lunging; } coilLen += STEP; }
         else if (inCoil) { inCoil = false; coils.push({ len: coilLen, dash: bo.lungeFly }); }
+        if (bo.st === 'pounce' && prev !== 'pounce' && !bo.lungeFly && !cur.length) leap = true;   // a leap: does it go on into scratch and dash?
+        if (prev === 'pounce' && bo.st !== 'pounce' && bo.st !== 'swipewarn' && !cur.length) leap = false;   // it simply landed
         if (bo.st === 'pounce' && prev !== 'pounce' && bo.lungeFly) cur.push(1);
         // a chain closes when a dash slash ends in anything but the breath before another link;
         // its opening is the time he then stays on his feet before the next wind-up
-        if (prev === 'swipe' && bo.st !== 'swipe' && cur.length && !bo.dashNext) { open = { n: cur.length, f: 0 }; cur = []; }
+        if (prev === 'swipe' && bo.st !== 'swipe' && cur.length && !bo.dashNext) { open = { n: cur.length, f: 0, leap }; cur = []; leap = false; }
         else if (open) {
-          if (WIND.test(bo.st)) { chains.push({ n: open.n, spent: +(open.f * STEP).toFixed(2) }); open = null; }
+          if (WIND.test(bo.st)) { chains.push({ n: open.n, spent: +(open.f * STEP).toFixed(2), leap: open.leap }); open = null; }
           else open.f++;
         }
         prev = bo.st;
@@ -53,8 +55,10 @@ const { chromium } = require('playwright');
   check('the fight opens with his dash: the first coil is the dash', R.p1.first === true, String(R.p1.first));
   const med = a => { const q = a.map(c => c.spent).sort((x, y) => x - y); return q[q.length >> 1] || 0; };
   check('phase one: a dash is one dash, then an opening of at least a blow', R.p1.chains.length > 0 && R.p1.chains.every(c => c.n === 1 && c.spent >= 0.25 && c.spent <= 0.9), JSON.stringify(R.p1.chains));
-  check('phase two: the dash chains — two, then the longer opening (never a gift)', R.p2.chains.length > 0 && R.p2.chains.every(c => c.n === 2 && c.spent <= 0.9) && med(R.p2.chains) > med(R.p1.chains), JSON.stringify(R.p2.chains));
-  check('below a quarter health: three', R.p3.chains.length > 0 && R.p3.chains.every(c => c.n === 3 && c.spent >= 0.25 && c.spent <= 0.9), JSON.stringify(R.p3.chains));
+  const dash = a => a.chains.filter(c => !c.leap), leaps = a => a.chains.filter(c => c.leap);
+  check('phase two: the dash chains — two, then the longer opening (never a gift)', dash(R.p2).length > 0 && dash(R.p2).every(c => c.n === 2 && c.spent <= 0.9) && med(dash(R.p2)) > med(R.p1.chains), JSON.stringify(dash(R.p2)));
+  check('below a quarter health: three', dash(R.p3).length > 0 && dash(R.p3).every(c => c.n === 3 && c.spent >= 0.25 && c.spent <= 0.9), JSON.stringify(dash(R.p3)));
+  check('phase two: a leap goes on — it lands, scratches, then dashes (one dash), never in phase one', leaps(R.p1).length === 0 && leaps(R.p2).concat(leaps(R.p3)).length > 0 && leaps(R.p2).concat(leaps(R.p3)).every(c => c.n === 1 && c.spent >= 0.25 && c.spent <= 0.9), JSON.stringify(leaps(R.p2).concat(leaps(R.p3))));
   const all = R.p1.dashCoils.concat(R.p2.dashCoils, R.p3.dashCoils);
   check('every link keeps a readable red crouch (≥ 0.42 s)', all.length > 0 && all.every(x => x >= 0.40), JSON.stringify(all.slice(0, 12)));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
