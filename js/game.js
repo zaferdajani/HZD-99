@@ -1301,6 +1301,10 @@ function loadRoom(id) {
     // the rig popping into the take a second later
     if (G.boss && G.boss.kind === 'glitch' && typeof BEAST_STRIPS !== 'undefined'
         && typeof mediaFetch === 'function') for (const k of BEAST_STRIPS) mediaFetch(k);
+    // ...and his voice: the recorded lion is asked for with his art, so the first roar of the
+    // fight is the real one and not the stand-in a not-yet-loaded sound falls back to
+    if (G.boss && G.boss.kind === 'glitch' && typeof NF_LION !== 'undefined' && typeof mediaAudio === 'function')
+      for (const bank of Object.values(NF_LION)) for (const k of bank) mediaAudio(k);
   }, 0);
   parts.length = 0;
   const def = ROOMS[id];
