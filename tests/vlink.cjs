@@ -56,7 +56,8 @@ const check = (name, ok, detail) => {
     // the state the shafts are designed to be climbed in: the kernel sealed
     // over E1 is open once ZERO is down, and every guardian's chamber is
     // walked into as a room rather than staged as an entrance
-    for (const b of ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother', 'Alpha', 'Chime', 'Carrier', 'Moth', 'Lattice', 'Lens']) sv.flags['boss' + b] = 1;
+    for (const b of ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother', 'Alpha', 'Chime', 'Carrier', 'Moth', 'Lattice', 'Lens', 'Mirejaw']) sv.flags['boss' + b] = 1;
+    sv.flags.vaultOpen = 1; sv.flags.ferryPaid = 1;   // (the Cache's climb opens with the vault; the Mire is crossed by raft)
     // ...and carrying the blade: A3's climb to the Conduits is a story gate
     // (NULLFANG down AND the blade forged), and a save that has beaten every
     // guardian has forged it — blade-only taming says so
@@ -276,7 +277,7 @@ const check = (name, ok, detail) => {
   });
 
   // ---- report -----------------------------------------------------------------
-  check('every way up in the world is listed', r.count === 24, r.count + ' T exits');
+  check('every way up in the world is listed', r.count === 27, r.count + ' T exits');   // (+ the Mire: SW2 -> SW4, and the two drops' holes, SW5 -> SW1, SW3 -> SW2)
   for (const row of r.table) {
     const tag = row.id + ' -> ' + row.up;
     check(tag + ': a ledge from every column she can rise through',

@@ -428,6 +428,28 @@ const MEDIA_SRC = {
     // swing's own progress, so the energy has its own cadence over the same
     // window. See HERO_BURST_FX in js/entities.js.
     swingBurstFx: 'assets/characters/hero/swing/burst_fx.webp',
+    // THE SILT MIRE (js/conduits-road.js, js/mirejaw.js; owner, 2026-11-21):
+    // its three paintings, the drain culvert that is its door, Bilge and his
+    // raft, the insects, and MIREJAW's filmed takes (assets/source/swamp/)
+    swampFar: 'assets/backgrounds/swamp_far.jpg',
+    swampWallow: 'assets/backgrounds/swamp_wallow.jpg',
+    swampOutfall: 'assets/backgrounds/swamp_outfall.jpg',
+    culvertMouth: 'assets/characters/swamp/culvert.webp',
+    raftPlate: 'assets/characters/swamp/raft.webp',
+    bilgePole: 'assets/characters/swamp/bilge_pole.webp',
+    bilgeTalk: 'assets/characters/swamp/bilge_talk.webp',
+    dragonfly: 'assets/characters/swamp/dragonfly.webp',
+    mosquito: 'assets/characters/swamp/mosquito.webp',
+    mjIdle: 'assets/characters/croc/idle.webp',
+    mjWalk: 'assets/characters/croc/walk.webp',
+    mjSwim: 'assets/characters/croc/swim.webp',
+    mjBite: 'assets/characters/croc/bite.webp',
+    mjLeap: 'assets/characters/croc/leap.webp',
+    mjRoll: 'assets/characters/croc/roll.webp',
+    mjTail: 'assets/characters/croc/tailslam.webp',
+    mjBellow: 'assets/characters/croc/bellow.webp',
+    mjHurt: 'assets/characters/croc/hurt.webp',
+    mjDown: 'assets/characters/croc/down.webp',
     servoLoop: 'assets/characters/npc/servo/work_loop.webp',
     monoLoop: 'assets/characters/npc/mono/work_loop.webp',
     // the Oracle's plates (ART_QUEUE §2bv): powered down, and a talking pair
@@ -683,6 +705,13 @@ const MEDIA_SRC = {
     // A REAL LION (owner, 2026-11-21: "a roar that you should download from any library of
     // a lion roar"). One wild bout, recorded in the field (Freesound 69570, CC0): three of its
     // full roars, the pair of them that opens his second phase, and three of its closing grunts.
+    // the swamp and its crocodile: real recordings, CC0 / US public domain
+    // (assets/CREDITS.md) — an Everglades alligator, a film-library hiss
+    mj_bellow: 'assets/sfx/swamp/mj_bellow.ogg', mj_growl: 'assets/sfx/swamp/mj_growl.ogg',
+    mj_hiss: 'assets/sfx/swamp/mj_hiss.ogg', mj_snap: 'assets/sfx/swamp/mj_snap.ogg',
+    mj_splash: 'assets/sfx/swamp/mj_splash.ogg', mj_slap: 'assets/sfx/swamp/mj_slap.ogg',
+    k2_amb: 'assets/sfx/swamp/k2_amb.ogg', k2_mosq: 'assets/sfx/swamp/k2_mosq.ogg',
+    k2_punt: 'assets/sfx/swamp/k2_punt.ogg', k2_splash: 'assets/sfx/swamp/k2_splash.ogg',
     nf_lroar1: 'assets/sfx/nullfang/lion/roar1.ogg',
     nf_lroar2: 'assets/sfx/nullfang/lion/roar2.ogg',
     nf_lroar3: 'assets/sfx/nullfang/lion/roar3.ogg',

@@ -96,7 +96,7 @@ const FIGHTS = process.env.GUARDIANS
       return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
     };
     try {
-      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers)
       sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
       startGame(sv); loadRoom(F.room);
       G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.cut = null;
@@ -221,7 +221,7 @@ const FIGHTS = process.env.GUARDIANS
     // ---- 2. a group of hits breaks it ------------------------------------
     const br = await page.evaluate(({ F }) => {
       const boot = () => {
-        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers)
         sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
         startGame(sv); loadRoom(F.room);
         G.dialog = null; G.state = 'PLAY'; G.cut = null;
@@ -294,7 +294,7 @@ const FIGHTS = process.env.GUARDIANS
     const DT = 1 / 60;
     for (const phase of [1, 2]) for (const [st, t] of [['lancewarn', 0.7], ['shardwarn', 0.5], ['dashwarn', 0.55],
       ['prisonwarn', 0.5], ['orbs', 1.0], ['novawarn', 0.6], ['azhush', 1.1], ['dccast', 0.9]]) {
-      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers)
       startGame(sv); loadRoom('D3');
       G.dialog = null; G.state = 'PLAY';
       const b = G.boss; b.dead = false; b.hp = b.hpMax; b.dazeAt = 0; b.stagT = 0;
@@ -336,7 +336,7 @@ const FIGHTS = process.env.GUARDIANS
   console.log('  ── NULLFANG, the landing');
   const nf = await page.evaluate(() => {
     const run = (bx, pxv) => {
-      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers)
       startGame(sv); loadRoom('A4');
       G.dialog = null; G.state = 'PLAY';
       const b = G.boss, floor = (G.roomDef.h - 2) * TILE;
@@ -378,7 +378,9 @@ const FIGHTS = process.env.GUARDIANS
     arms: ARM_BY_BOSS, gate: BOSS_GATE,
     zeroSeal: (() => { const e = ROOMS.D3.exits.B; return e && e.flag; })(),
   }));
-  for (const [from, to] of [['glitch', 'brood'], ['brood', 'atlas'], ['atlas', 'zero'], ['zero', 'prism'], ['prism', 'mother']])
+  // THE ROBOT WORLD'S ORDER (owner, 2026-11-21; js/types.js BOSS_ORDER): NULLFANG ->
+  // the Prowler -> FURNACE -> TALONHOST -> GLACIERE -> MOTHER-V
+  for (const [from, to] of [['glitch', 'prism'], ['prism', 'atlas'], ['atlas', 'brood'], ['brood', 'zero'], ['zero', 'mother']])
     check('reward: ' + from + "'s arm shorts " + to + "'s plating", chain.arms[from] && chain.arms[from] === chain.gate[to],
       chain.arms[from] + ' vs ' + chain.gate[to]);
   check("reward: GLACIERE's fall opens the way down into the Nest", chain.zeroSeal === 'bossZero', String(chain.zeroSeal));

@@ -1123,7 +1123,12 @@ const ROOMS = {
     } },
   // The east side leads where the three-sigil vault leads (V1), so it opens on
   // the vault's own condition: an open side door was the way around the lock.
-  B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: { to: 'V1', flag: 'vaultOpen', why: 'gate_vault_side' } },
+  // THE CACHE IS THE CONDUITS' SAGE NOW (owner, 2026-11-21): the climb to the
+  // Prism Prowler is sealed by the same three seals as the vault — the
+  // CARRIER's, the swamp crocodile's and UNDERTOW's (js/conduits-road.js). She
+  // can break the ceiling; the seal at the top of the shaft holds until the
+  // vault turns (the A3 hatch's pattern: a refused climb, said why).
+  B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: { to: 'X1', flag: 'vaultOpen', robo: 1, why: 'gate_cache_seal' }, R: { to: 'V1', flag: 'vaultOpen', why: 'gate_vault_side' } },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15],
            ['bench', 26, 15]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key
           ],
@@ -1243,6 +1248,85 @@ const ROOMS = {
   //            once, the way every zone gets exactly one mixed exam
   // budget:    4 in encounter-gen points (two pressure); registry value 2 per
   //            screen. The bench is the rest beat, in the room, as CV2 has it.
+  // ============ THE SILT MIRE — Kingdom 2's swamp (owner, 2026-11-21) ============
+  // "The crocodile should live in a swamp, watery swamp... dragonflies flying,
+  // mosquitoes... just like we entered gates for the caves in the first
+  // kingdom, this time we need to enter something else... Maybe I will need a
+  // boat to reach it... a wooden raft that is operated by an NPC."
+  //
+  // UNDERTOW drowned the data canals; under the Conduits they rotted into a
+  // swamp. The way in is a DRAIN CULVERT off the long conduit (B2, GATE_ROOM),
+  // not a cave mouth. Everything that moves here — the raft, Bilge who poles
+  // it, the water and its insects — lives in js/conduits-road.js; these are
+  // only the ground. Water is open rows over a solid bed: the bed keeps a body
+  // from falling out of the world, and k2Water decides that a body below the
+  // surface is in the water, not standing on the bed.
+  //
+  // THE OUTFALL: the culvert's mouth on the left, the dock, Bilge's raft, and
+  // forty-five tiles of water to the far bank. The dock's rotten planks (6-8)
+  // break straight down into the spillway where his pole was lost (his errand).
+  SW1: { zone: 'B', sky: 1, mus: 'swamp', w: 64, h: 17, exits: { R: { to: 'SW2', flag: 'ferryPaid', why: 'k2_ferry_need' }, B: 'SW5' },
+    ents: [['ferry', 10, 15], ['scrap', 6, 15, 20]],
+    build(g) {
+      frame(g); openR(g);
+      rect(g, 12, 15, 56, 15, '.');           // the water (k2Water SW1): open over a solid bed
+      rect(g, 6, 15, 8, 16, 'B');             // the dock's rotten planks, down to the spillway
+    } },
+  // THE SPILLWAY: the drain under the dock, and Bilge's errand. Two runs of
+  // spikes, each wider than any jump: only a jump AND the dash at its top
+  // crosses (NULLFANG's gift, the kingdom's first exam of it). Every fall
+  // sends her back to where she dropped in — the errand is meant to be hard.
+  // The pole lies at the far end; the culvert there climbs back to the dock.
+  SW5: { zone: 'B', mus: 'swamp', w: 48, h: 17, exits: { T: 'SW1' },   // the drop's way back is the culvert at the far end
+    ents: [['k2pole', 42, 15]],
+    build(g) {
+      frame(g);
+      rect(g, 6, 0, 8, 0, '.');               // the hole she broke, overhead (the culvert is the way back)
+      rect(g, 10, 15, 22, 15, '.'); hline(g, 10, 22, 16, '^');  // the first run: 13 tiles of teeth
+      rect(g, 27, 15, 39, 15, '.'); hline(g, 27, 39, 16, '^');  // the second: 13 more
+    } },
+  // THE REEDBANK: where the raft lands. A boardwalk across the reeds whose
+  // middle planks are rotten through (16-19) — break them and the wallow is
+  // under them. East, the bank HEAVES UP into a wooded rise; from its crest
+  // the way goes on up into the high roost (40-43). Up and down, both.
+  SW2: { zone: 'B', sky: 1, mus: 'swamp', w: 48, h: 17, exits: { L: 'SW1', T: 'SW4', B: 'SW3' },
+    ents: [['bench', 6, 15], ['scrap', 24, 15, 20]],
+    build(g) {
+      frame(g); openL(g);
+      rect(g, 16, 15, 19, 16, 'B');           // the rotten boardwalk, down into the wallow
+      // the rise: one tile a column off the reeds, ten tall at the crest
+      for (let x = 27; x < 47; x++) { const h = Math.min(10, x - 26); for (let y = 15 - h; y < 15; y++) put(g, x, y, '#'); }
+      rect(g, 40, 0, 43, 0, '.');             // the way up out of the crest
+    } },
+  // THE HIGH ROOST: the canopy over the reeds, where the cable-trees' crowns
+  // meet. A cache of what the canal-keepers hid, and the long view.
+  SW4: { zone: 'B', sky: 1, mus: 'swamp', w: 48, h: 17, exits: { B: 'SW2' },
+    ents: [['chest', 20, 15, 'phantom'], ['scrap', 30, 15, 40], ['scrap', 34, 15, 30]],
+    build(g) {
+      frame(g);
+      rect(g, 40, 15, 43, 16, '.');           // the climb in from the reedbank's crest
+      mound(g, 8, 18, 3, 77);
+    } },
+  // THE WALLOW: MIREJAW's pool (js/mirejaw.js). Open water from wall to wall
+  // with four islands in it (owner, 2026-11-21: "a swamp with water, platforms
+  // on the water, like small islands. The crocodile will go inside the water
+  // and come out jumping or biting"). The islands are mounds on the bed — their
+  // shoulders slope under the surface, nothing stands in a square — and every
+  // gap between them is a jump, so the danger is never the gap: it is what is
+  // in it. She drops in through the reedbank's boardwalk onto the second
+  // island; the culvert on the east bank wakes when he is beaten. The camera
+  // pulls back (camFit) so the whole pool is one picture.
+  SW3: { zone: 'B', mus: 'swamp', camFit: 1, w: 40, h: 17, exits: { T: 'SW2' },   // the drop's way out is the culvert, once woken
+    ents: [['boss', 29, 12, 'mirejaw']],
+    build(g) {
+      frame(g);
+      rect(g, 16, 0, 19, 0, '.');             // the broken boardwalk overhead (the culvert is the way out)
+      rect(g, 1, 12, 38, 14, '.');            // the pool (k2Water SW3): the bed is rows 15-16
+      mound(g, 0, 9, 4, 301);                 // the west bank
+      mound(g, 13, 22, 4, 302);               // the island under the boardwalk
+      mound(g, 26, 32, 4, 303);               // the east island
+      mound(g, 34, 39, 4, 304);               // the east bank, under the culvert
+    } },
   V2: { zone: 'X', w: 32, h: 17, exits: { T: { to: 'B2', at: 44 } },
     ents: [['chest', 11, 15, 'nine'], ['scrap', 4, 15, 80], ['scrap', 17, 15, 80],
            ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4],   // (stays: the vault is a pit she drops into — see SAVE POINTS ARE FOR CRITICAL PLACES)
@@ -1343,7 +1427,10 @@ const ROOMS = {
       frame(g);
       hline(g, 3, 9, 12, '=');            // the slag-crusted tool loft
     } },
-  C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: 'C3', B: 'D1', L: 'C5' },
+  // EACH SAGE NEEDS THE LAST ONE'S GIFT (owner, 2026-11-21): FURNACE CHOIR's
+  // hall opens to the swords the Prowler gave back, and the Archives below
+  // open once TALONHOST — whom only the Foundry's throw brings down — is purified.
+  C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: { to: 'C3', flag: 'bossPrism', robo: 1, why: 'gate_furnace_swords' }, B: { to: 'D1', flag: 'bossBrood', robo: 1, why: 'gate_archives_talon' }, L: 'C5' },
     // Patch-7 no longer stands in the corridor — his forge is behind the
     // depth door in C5 (the same promotion Ratchet and the Oracle got).
     // And the door to that wing WORKS now: exits.L said C5 since the wing
@@ -2032,6 +2119,7 @@ const MAPPOS = {
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [10, 2, 1, 1], V2: [5, 4, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
+  SW1: [11, -1, 2, 1], SW5: [11, 0, 1.5, 1], SW2: [13, -1, 1.5, 1], SW3: [13, 0, 1.25, 1], SW4: [13, -2, 1.5, 1],
   C1: [6, 3, 1, 2], C2: [6, 5, 2, 1], C3: [8, 5, 1, 1], C4: [9, 5, 1, 1], C5: [5, 5, 1, 1], C5B: [4, 6, 1, 1],
   C6: [8, 4, 1, 1], C7: [8, 3, 1, 1],
   D1: [6, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [7, 6, 2, 1], D3: [9, 6, 1, 1], D4: [7, 4, 1, 1],

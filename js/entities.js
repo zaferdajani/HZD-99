@@ -11863,6 +11863,11 @@ const BSTAT = Object.assign({
   // blade comes after. 150 measured as a phase spent in ONE hornless window by
   // the chapter-one autopilot; at 220 a phase takes three or four openings.
   horn: { w: 176, h: 120, hp: 220, dazeAt: 6, dazeSpan: 2.6, zone: 'A', tell: 'tellbig' },
+  // MIREJAW (js/mirejaw.js), the swamp's crocodile: a mini-boss of the Conduits
+  // but not one of the Eye's constructs, so not in MINIS. A long body on the
+  // ground; a hide only its weak points get through, so its number is lower
+  // than its fight.
+  mirejaw: { w: 300, h: 64, hp: 240, dazeAt: 6, dazeSpan: 2.4, zone: 'B', mini: 1 },
 // ...and the Eye's constructs join the same table, so every piece of machinery
 // that already works on a boss — the hurt flash, the health bar, the telegraph
 // wash, the artbible harness — works on them without a second code path. They
@@ -12234,7 +12239,7 @@ function sageStruck(e, dm, x, y) {
 const SAGE_GIFT = {
   GA1D: () => invAdd('batt'),                                    // a cell, kept safe
   GA2D: () => { invAdd('kit'); G.save.scrap += 80; },            // what a pack values
-  GB1D: () => { G.save.iq += 25; },                              // it teaches
+  GB1D: () => { G.save.iq += 25; if (typeof k2Robo === 'function' && k2Robo()) G.grantRelic('sigil3'); },   // it teaches — and gives back the vault's last seal (conduits-road.js)
   GC1D: () => { G.save.scrap += 200; },                          // weight of metal
   GD1D: () => { G.save.scrap += 150; G.save.iq += 10; },         // the Archives hoard
   GX1D: () => { G.save.scrap += 120; G.save.iq += 15; },         // tribute to the sword
@@ -12247,7 +12252,7 @@ function sageTame(e) {
   G.save.flags[key] = 1;
   // the duel track resolves: the chamber goes back to its zone's own quiet
   // (the zone key is what loadRoom itself plays for a non-boss room)
-  if (e.duelMus && typeof setMusic === 'function' && G.roomDef) setMusic(G.roomDef.zone);
+  if (e.duelMus && typeof setMusic === 'function' && G.roomDef) setMusic(G.roomDef.mus || G.roomDef.zone);
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
   // A RESCUE, NOT A KILL (owner, 2026-10-09: "The Sage is rescued, not killed.
   // Cleansing must look and read differently from destroying an enemy"). No
@@ -13099,6 +13104,8 @@ class Boss {
     if (this.meet) return;
     // GRAVEHORN runs his own machine end to end (js/gravehorn.js): no fork, no
     // midpoint, no purification — he is the Eye's soldier, not a guardian.
+    // MIREJAW runs his own machine end to end (js/mirejaw.js), as GRAVEHORN does
+    if (this.kind === 'mirejaw') { mjStep(this, dt); return; }
     if (this.kind === 'horn') {
       // A STAGGER FROM OUTSIDE HIS OWN MACHINE (the Song, a weakness) holds
       // him where he stands, as it holds every guardian — none of his own
@@ -15606,6 +15613,7 @@ class Boss {
     // GRAVEHORN goes down on his knees (phase one) or backs into the rock
     // (phase two) — never the fork, never a wreck (js/gravehorn.js ghDown)
     if (this.kind === 'horn') { ghDown(this); return; }
+    if (this.kind === 'mirejaw') { mjDown(this); return; }
     // THE BLOW THAT WOULD END IT asks the question instead. This is the path
     // every real kill actually takes — the claw, the shuriken, the Song and the
     // pounce all call die() the moment health hits zero — so the guardian has
@@ -15625,7 +15633,7 @@ class Boss {
       this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
       this.purified = true; this.pureT = 0; this.rewardPend = true;
       this.vx = 0; this.vy = 0;
-      if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
+      if (this.kind !== 'mother') setMusic(G.roomDef.mus || G.roomDef.zone); else stopMusic();
       G.dropScrap(this.cx(), this.cy(), bossScrap(this));
       // the film path owes the same sentence the cleanse path says: the
       // campaign run freed NULLFANG through his film and never read that he
@@ -15650,7 +15658,7 @@ class Boss {
       this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
       this.purified = true; this.pureT = 0.7; this.vx = 0; this.vy = 0;
       this.rewardPend = true;
-      setMusic(G.roomDef.zone);
+      setMusic(G.roomDef.mus || G.roomDef.zone);
       G.dropScrap(this.cx(), this.cy(), bossScrap(this));
       const pk = { glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
                    zero: 'pure_zero', prism: 'pure_prism' }[this.kind];
@@ -15669,7 +15677,7 @@ class Boss {
     G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);
     G.addRing(this.cx(), this.cy()); G.addRing(this.cx(), this.cy(), 60);
     G.impact = { t: 0.24, t0: 0.24, x: this.cx(), y: this.cy() };
-    if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
+    if (this.kind !== 'mother') setMusic(G.roomDef.mus || G.roomDef.zone); else stopMusic();
     G.dropScrap(this.cx(), this.cy(), bossScrap(this));
     // the reward dialog used to open HERE — freezing the collapse mid-fall
     // so the wreck stood still. Now the death scene plays to its finale
@@ -15724,7 +15732,7 @@ class Boss {
     // the foot line that are not feet. Suppressing decoration for the probe is
     // honest; teaching the probe to guess which bright pixels are anatomy is
     // not. Nothing in the game ever sets it.)
-    if (!this.dead && !G.artProbe && this.st && TELL_ST.test(this.st)) {
+    if (!this.dead && !G.artProbe && this.kind !== 'mirejaw' && this.st && TELL_ST.test(this.st)) {   // (MIREJAW tells with the water itself: no light round a body)
       // ramp over the wind-up's own length, so the bloom grows as the blow
       // approaches instead of switching on
       const dur = Math.max(0.18, this._tellDur || this.t || 0.4);
@@ -15759,6 +15767,7 @@ class Boss {
     // GRAVEHORN draws his own rig (js/gravehorn.js): his weight is in his legs,
     // not in the shared lean below
     if (!heroWorld && this.kind === 'horn' && typeof drawGravehorn === 'function') { drawGravehorn(c, this); c.restore(); return; }
+    if (this.kind === 'mirejaw' && typeof mjDraw === 'function') { mjDraw(c, this); c.restore(); return; }
     // A REACTION HAS TO HAPPEN IN THE CREATURE. Particles thrown around a
     // motionless body read as an effect played AT it; the bend is what turns a
     // poke into an answer. Rides inside the save above, so every early return

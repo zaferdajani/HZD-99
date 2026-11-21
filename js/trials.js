@@ -97,7 +97,14 @@ function triNodeAnswer(ok) {
   burst(nd.st ? nd.st.x + 13 : 480, nd.st ? nd.st.y + 12 : 270, 24, '#b48cff', 260, 0.8, 100, 4, true);
   let all = true;
   for (let i = 0; i < NODES.length; i++) if (!G.save.flags[nodeKey(i)]) all = false;
-  if (all) G.grantRelic('sigil2');
+  // every node out-thought: the hero's world takes its vault seal from here;
+  // the robot world's seals are the Conduits' fights now (js/conduits-road.js),
+  // and the reward is a heavy handful of scrap instead
+  if (all && !G.save.flags.nodesAll) {
+    G.save.flags.nodesAll = 1;
+    if (typeof isHero === 'function' && isHero()) G.grantRelic('sigil2');
+    else { G.save.scrap += 300; G.toast('⬢ +300'); }
+  }
   persist();
 }
 // ===========================================================================

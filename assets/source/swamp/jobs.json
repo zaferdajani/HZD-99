@@ -1,0 +1,29 @@
+{
+ "provider": "Higgsfield",
+ "fired": "2026-11-21",
+ "why": "Owner, 2026-11-21: Kingdom 2 gets a swamp with its own scenario, reached through a new kind of door and across water on a raft poled by an amphibian robot NPC; a crocodile mini-boss lives there, built on the NULLFANG engine, whose signature is the bite and the death roll.",
+ "stills": {
+  "model": "gpt_image_2_6",
+  "style_references": ["assets/backgrounds/gate_conduits.jpg (media 650a12c2)", "assets/backgrounds/cave_mouth_a.jpg (media 9eba44e3)", "NULLFANG start_left.png (media 5162b6c5) for the crocodile's material only"],
+  "jobs": {
+   "far": "e4373c42-6b38-48f1-90ca-1c9610bbb557", "wallow": "7ef32f22-c9ca-437b-8788-1461ebbd90ae", "outfall": "578a2938-b452-4ac6-8d40-f0b96b7636c0",
+   "culvert": "ddaedc72-cc3f-481e-8070-50a9983429eb", "raft": "e0b49a34-01f3-4dfc-acf7-5f0f462f97a2", "bilge": "b3f68315-7c4c-4428-a35b-73b31c1e012f",
+   "dragonfly": "58ea8c89-3c59-40a4-9d37-add49a0d7e73", "mosquito": "3926e5cc-a1f4-4587-a9fc-2d6e6cf0440d",
+   "croc (first design, refused: glow halo)": "61080f79-161f-4f1f-b559-5239f28462a0", "croc2 (shipped design)": "26477206-0abc-4233-ae68-d48a5af467d8"
+  }
+ },
+ "takes": {
+  "model": "kling3_0_turbo (start frame: croc2 / bilge)",
+  "jobs": {
+   "walk": "a61044a3-7828-4b8e-ba7b-361c6fc15f1c", "lunge": "f327cdbb-42c1-4499-9aba-e62e24bbfe5e", "tailslam": "88e2743f-30fd-45a3-9b4c-4f8883b09cba",
+   "bellow": "69afb902-3730-4e91-a0cd-85c42b0f33b9", "hurt": "4c79447b-08b0-4f8a-add6-603a5dfb0a34", "down": "30faea0e-4e9a-4b0f-832f-ab5fd6ca7654",
+   "idle": "ff9c45f0-a36b-4f95-b712-7b976ef95faf", "bite": "b96e2340-2f3b-4891-941e-cff67079da06", "leap": "68b646ce-84ff-4706-8584-4301cb22a9a4",
+   "swim": "c0d41b65-f6d8-4b2c-81f9-7e2c7e15a2d3", "roll (REFUSED: a twist, not a roll; the roll strip is cut from 'down' 1.0-3.4 s)": "51bff110-02bc-4215-898f-a9303adf22a5",
+   "turn (fired, not used: he turns under the water)": "08e97d66-b52e-45f7-a649-75b272698455",
+   "bilge_pole": "736d28f8-1d7a-433b-9cce-3b575be8ce69", "bilge_talk": "c723298f-e96d-473b-9db9-da15fb6e6157"
+  },
+  "delivery": "tools/lion-studio.py <take> assets/characters/croc/<state>.webp --envelope 520x140 --cell 640x300 --rest 0.1 --grade croc-takes/grade.json (made from idle); exact times in each .motion.json. Bilge: tools/vidstrip.cjs, 16 cells of 320."
+ },
+ "music": { "model": "sonilo_music", "jobs": { "mus_swamp (take A, shipped)": "2e58ed24-17b6-4aa4-bfea-f9b3bedfc662", "mus_swamp take B": "1d88e19b-4a1b-49ef-999a-36d02342c5d7", "mus_mirejaw": "a1248965-10ba-4c02-9f02-b01cc69424ca" } },
+ "note": "Assistant-reviewed in motion (vid/mirejaw_takes.mp4 sent to the owner); awaiting the owner's eye. Bilge's pole loop is weak: he sways rather than plants and pushes."
+}

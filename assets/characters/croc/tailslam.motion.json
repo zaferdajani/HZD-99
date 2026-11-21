@@ -1,0 +1,114 @@
+{
+  "source": "assets/source/swamp/croc-takes/tailslam.mp4",
+  "frames": 12,
+  "cell": [
+    640,
+    300
+  ],
+  "times": [
+    0.42,
+    0.7618,
+    1.1036,
+    1.4455,
+    1.7873,
+    2.1291,
+    2.4709,
+    2.8127,
+    3.1545,
+    3.4964,
+    3.8382,
+    4.18
+  ],
+  "scale": 0.2887284841754581,
+  "threshold": 48,
+  "strictBorders": false,
+  "footRight": false,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 520x140px",
+  "rest": 0.1,
+  "anchor": -1.73,
+  "drift": 0.0,
+  "feet": [
+    [
+      -222.5,
+      120.0
+    ],
+    [
+      -222.5,
+      120.0
+    ],
+    [
+      -222.5,
+      120.0
+    ],
+    [
+      -222.5,
+      120.0
+    ],
+    [
+      -191.6,
+      120.0
+    ],
+    [
+      -183.2,
+      120.0
+    ],
+    [
+      -183.2,
+      120.0
+    ],
+    [
+      -183.2,
+      120.0
+    ],
+    [
+      -183.2,
+      229.1
+    ],
+    [
+      -183.2,
+      120.0
+    ],
+    [
+      -183.2,
+      120.0
+    ],
+    [
+      -183.2,
+      120.0
+    ]
+  ],
+  "grade": {
+    "reference": "assets/source/swamp/croc-takes/grade.json",
+    "takeMean": [
+      108.01,
+      96.03,
+      93.4
+    ],
+    "after": [
+      108.56,
+      96.51,
+      93.83
+    ],
+    "target": [
+      108.2,
+      96.2,
+      93.45
+    ],
+    "steady": [
+      1.021,
+      1.021,
+      1.014,
+      1.011,
+      1.01,
+      1.008,
+      0.992,
+      0.99,
+      0.988,
+      0.967,
+      0.958,
+      0.958
+    ]
+  },
+  "reviewed": false
+}

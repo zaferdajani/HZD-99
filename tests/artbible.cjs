@@ -320,7 +320,7 @@ const ENEMY_CAST = [
   // =========================================================================
   for (const S of CAST) {
     const shot = await page.evaluate(async ({ S, TELL_RGB }) => {
-      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; if (S.room === 'B4') Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers)
       sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
       startGame(sv); loadRoom(S.room);
       await new Promise(r => requestAnimationFrame(r));

@@ -7052,3 +7052,19 @@ The crossed arms and the tapping foot are a new strip.
   row. **Still open:** one strip per weapon tier with the blade on her back
   (today the armed costume crosses her arms without it), and the toe-tick cue
   (AUDIO_QUEUE A-TAP).
+
+## THE CONDUITS' ROAD — what is still owed (2026-11-21)
+
+Shipped: the Silt Mire (three paintings, the culvert, Bilge, the raft, the insects), MIREJAW on
+the lion engine (Kling 3.0 Turbo takes), the order NULLFANG → Prowler → FURNACE → TALONHOST →
+GLACIERE → MOTHER-V. Owed, in order:
+
+1. **The PRISM PROWLER on the lion engine** (the Conduits' sage now): a design still from
+   `prism_parts.webp` in the NULLFANG material, then takes over a real leopard/panther — stalk,
+   pounce, swipe, the light-split vanish, hurt, purify. ~8 takes × 10 credits (Kling 3.0 Turbo).
+2. **TALONHOST rebuilt to need the throw**: its breast plate turns blade, shards and grapple;
+   the joined blade's return pass strikes the engine on its back during its climb-out. Fight
+   code + takes of a real eagle's stoop and climb.
+3. **MIREJAW's death roll as its own take** (the first came back as a twist; the roll is drawn
+   from the collapse take). Try Seedance with a real-crocodile motion reference.
+4. **Bilge poling**: his loop sways; he should plant the pole and push.

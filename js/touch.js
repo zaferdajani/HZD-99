@@ -421,6 +421,8 @@ function tapMenu(x, y) {
     if (!isHero()) { gearTouch(x, y); return; }
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }
+  } else if (st === 'FERRY') {
+    if (typeof k2FerryTap === 'function') k2FerryTap(x, y);
   } else if (st === 'SHOP') {
     // the question card first (Browse / Not now); then the shelf, where a tap
     // SELECTS a row and a second tap on that row buys it — one tap used to do

@@ -1,0 +1,102 @@
+{
+  "source": "assets/source/swamp/croc-takes/hurt.mp4",
+  "frames": 10,
+  "cell": [
+    640,
+    300
+  ],
+  "times": [
+    1.62,
+    1.9044,
+    2.1889,
+    2.4733,
+    2.7578,
+    3.0422,
+    3.3267,
+    3.6111,
+    3.8956,
+    4.18
+  ],
+  "scale": 0.2887284841754581,
+  "threshold": 48,
+  "strictBorders": false,
+  "footRight": false,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 520x140px",
+  "rest": 0.1,
+  "anchor": 3.46,
+  "drift": 0.0,
+  "feet": [
+    [
+      -167.3,
+      258.0
+    ],
+    [
+      -167.6,
+      236.9
+    ],
+    [
+      -167.6,
+      262.0
+    ],
+    [
+      -208.9,
+      226.8
+    ],
+    [
+      -247.0,
+      247.6
+    ],
+    [
+      -236.9,
+      261.7
+    ],
+    [
+      -215.5,
+      233.1
+    ],
+    [
+      -245.0,
+      221.3
+    ],
+    [
+      -217.0,
+      261.7
+    ],
+    [
+      -217.0,
+      124.0
+    ]
+  ],
+  "grade": {
+    "reference": "assets/source/swamp/croc-takes/grade.json",
+    "takeMean": [
+      107.44,
+      95.17,
+      92.55
+    ],
+    "after": [
+      108.43,
+      96.16,
+      93.87
+    ],
+    "target": [
+      108.2,
+      96.2,
+      93.45
+    ],
+    "steady": [
+      1.04,
+      1.04,
+      1.036,
+      0.967,
+      0.967,
+      0.967,
+      0.972,
+      0.994,
+      1.006,
+      1.006
+    ]
+  },
+  "reviewed": false
+}

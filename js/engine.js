@@ -732,9 +732,18 @@ function updateCam(px, py, rw, rh, dt) {
   // takes it back) is framed the way his fight frames him at mid-range — all of him, sharp,
   // with ground round him — not at the close exploration camera, where he filled the screen
   if (robo && typeof G !== 'undefined' && G.break && boss) wantZoom = Math.min(wantZoom, 1.3);
+  // AN ARENA THAT IS ONE PICTURE (owner, 2026-11-21, of the crocodile's pool:
+  // "You probably will have to zoom out a little bit of the screen"): a room
+  // that says camFit is framed whole across its width — the islands, the water
+  // between them and what is in it are the fight, and none of it is off-screen
+  if (robo && typeof G !== 'undefined' && G.roomDef && G.roomDef.camFit && G.roomDef.w)
+    wantZoom = Math.min(wantZoom, Math.max(0.6, 960 / (G.roomDef.w * 32)));
   const snap=dt>=.5 || cam.room!==(typeof G!=='undefined'?G.roomId:null);
   const step=Math.max(0,Math.min(dt,.1));
-  cam.zoom = snap ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*4));
+  // (a camFit room is ARRIVED in, often by a drop: the frame eases out to the
+  // whole pool rather than cutting to it on the crossing step)
+  const fitIn = typeof G !== 'undefined' && G.roomDef && G.roomDef.camFit && cam.zoom && dt < .5;
+  cam.zoom = snap && !fitIn ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*(fitIn ? 2.5 : 4)));
   cam.room = typeof G!=='undefined'?G.roomId:null;
   const z=cam.zoom, ox=480*(1-1/z), oy=270*(1-1/z);
   const facing=p ? p.face : 0, speed=p ? Math.abs(p.vx) : 0;

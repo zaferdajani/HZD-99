@@ -59,7 +59,7 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
       for (const id of Object.keys(ROOMS)) if (id.startsWith('G' + Z) && !ids.includes(id)) ids.push(id);
       out.rooms = ids;
       const boot = (room, abil) => {
-        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.sawScrap = 1; sv.abil = abil || { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
+        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.sawScrap = 1; Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers) sv.abil = abil || { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
         startGame(sv); loadRoom(room); G.dialog = null; G.state = 'PLAY'; G.toasts = [];
         G.bossEntry = null; G.gateWalk = null; G.wake = null;
       };

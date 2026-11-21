@@ -227,3 +227,25 @@ Mirelo text-to-audio), declared as generated; masters `source/audio/alpha/hf_*.m
 `sfx/hits/*.ogg` — 45 impacts (metal, plate, tin, glass, bell, punch, soft, generic; three takes
 each) from **Impact Sounds** by Kenney (www.kenney.nl), CC0 1.0 — no attribution required, given
 anyway. Licence: `source/audio/kenney-impact/License.txt`.
+
+## The Silt Mire — Kingdom 2's swamp (2026-11-21)
+
+| file | source | notes |
+|---|---|---|
+| `backgrounds/swamp_far.jpg`, `swamp_wallow.jpg`, `swamp_outfall.jpg` | Higgsfield, GPT Image 2.6 | the Mire's three paintings, fired against `gate_conduits.jpg` and `cave_mouth_a.jpg` as style references only; as-fired in `source/swamp/2026-11-21/` |
+| `characters/swamp/culvert.webp`, `raft.webp`, `dragonfly.webp`, `mosquito.webp`, `bilge.webp` | Higgsfield, GPT Image 2.6 | the drain culvert (the kingdom's door), Bilge's raft, the insects, and Bilge the robot frog ferryman; keyed by `tools/plate.cjs` |
+| `characters/swamp/bilge_pole.webp`, `bilge_talk.webp` | Higgsfield, Kling 3.0 Turbo | Bilge's two loops, filmed from his plate, cut by `tools/vidstrip.cjs`; takes in `source/swamp/croc-takes/` |
+| `characters/croc/*.webp` | Higgsfield, GPT Image 2.6 (design) + Kling 3.0 Turbo (takes) | MIREJAW, the swamp crocodile: the design fired against NULLFANG's start frame for material only, then eleven filmed takes of it performing a real crocodile's high walk, swim, crushing bite, leaping strike, tail slam, bellow, hurt and collapse; cut by `tools/lion-studio.py` (cell 640x300, envelope 520x140, one grade). The death roll is drawn from the collapse take (its own take came back as a twist, not a roll, and is not shipped) |
+| `music/mus_swamp.m4a`, `mus_mirejaw.m4a` | Higgsfield, Sonilo | the Mire's zone loop and the crocodile's fight cue, mastered to −17 / −15 LUFS; as-fired in `source/music/` |
+| `sfx/swamp/mj_bellow.ogg` | **U.S. National Park Service**, "Alligator" (American alligator, Everglades National Park) — https://www.nps.gov/subjects/sound/sounds-alligator.htm | **public domain** (U.S. federal work). MIREJAW's phase-two bellow |
+| `sfx/swamp/mj_growl.ogg` | **"G12-01-Alligator Growl" by craigsmith** — https://freesound.org/people/craigsmith/sounds/437933/ | **CC0 1.0** |
+| `sfx/swamp/mj_hiss.ogg` | **"S27-21 Alligator hiss twice" by craigsmith** — https://freesound.org/people/craigsmith/sounds/675513/ | **CC0 1.0**. His warning |
+| `sfx/swamp/mj_snap.ogg` | **"Jaw or teeth bite at air" by Wigglesworth** — https://freesound.org/people/Wigglesworth/sounds/830093/ layered under **"Rock Splash" by Fission9** — https://freesound.org/people/Fission9/sounds/583348/ | both **CC0 1.0**. No free recording of a crocodile's jaws exists; this is real teeth over a real heavy splash, layered, not synthesized |
+| `sfx/swamp/mj_splash.ogg` | **"5 meters dive" by bruno.auzet** — https://freesound.org/people/bruno.auzet/sounds/529794/ | **CC0 1.0**. The eruption out of the water |
+| `sfx/swamp/k2_splash.ogg` | **"Rock Splash" by Fission9** — https://freesound.org/people/Fission9/sounds/583348/ | **CC0 1.0**. Her falling in |
+| `sfx/swamp/mj_slap.ogg` | **"water splashes big hand slaps spray and wave" by kyles** — https://freesound.org/people/kyles/sounds/637974/ | **CC0 1.0**. The tail slam |
+| `sfx/swamp/k2_amb.ogg` | **"Froggy Swamp at Night" by flumpytripod** — https://freesound.org/people/flumpytripod/sounds/828795/ | **CC0 1.0**. Frogs and crickets under the score |
+| `sfx/swamp/k2_mosq.ogg` | **"Mosquito, buzzing around bathroom" by TRP** — https://freesound.org/people/TRP/sounds/717891/ | **CC0 1.0** |
+| `sfx/swamp/k2_punt.ogg` | **"Punting on Cam water lapping 2" by itinerantmonk108** — https://freesound.org/people/itinerantmonk108/sounds/700576/ | **CC0 1.0**. The raft's pole |
+
+Masters (the public preview MP3s) and `SOURCES.json` with every page and licence are in `source/audio/swamp/`. Real recordings, never oscillators.

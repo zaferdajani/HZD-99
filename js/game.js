@@ -354,13 +354,19 @@ const G = {
       persist();
       return;
     }
-    if (typeof MINIS !== 'undefined' && MINIS[kind]) {
+    if ((typeof MINIS !== 'undefined' && MINIS[kind]) || kind === 'mirejaw') {
       invAdd('batt');
       showItem(t('i_batt'), t('i_battd'));
       this.save.scrap += 40;
+      // A MINI-BOSS GIVES A PIECE OF WHAT THE SAGE NEEDS (owner, 2026-11-21:
+      // "This mini boss will give you a piece of the puzzle"). In the Conduits
+      // the pieces are the vault's three seals: the CARRIER's, the swamp
+      // crocodile's (swallowed), and the agent UNDERTOW's (SAGE_GIFT GB1D).
+      // The vault is the way to the kingdom's sage (js/conduits-road.js).
+      if (typeof K2_MINI_SIGIL !== 'undefined' && K2_MINI_SIGIL[kind] && !isHero()) this.grantRelic(K2_MINI_SIGIL[kind]);
       // 'room' was never a real track key — resolve to the zone's own theme,
       // which is exactly what loadRoom plays for a non-boss room
-      if (typeof setMusic === 'function') setMusic(G.roomDef ? G.roomDef.zone : 'A');
+      if (typeof setMusic === 'function') setMusic(G.roomDef ? (G.roomDef.mus || G.roomDef.zone) : 'A');
       return;
     }
     const grants = { glitch: 'dash', brood: 'djump', atlas: 'emp', zero: 'key' };
@@ -395,7 +401,12 @@ const G = {
       this.save.relics.push(tr);
       this.toast(t('rl_' + tr) + ' — ' + t('rl_' + tr + 'd'));
     }
-    if (kind === 'prism') this.grantRelic('sigil1');
+    // THE SECOND SWORD IS THE SECOND SAGE'S GIFT (owner, 2026-11-21: "getting
+    // the second sword should probably happen while beating the second sage").
+    // The Prowler kept Kerf's second edge clean; purified, it hands it over.
+    // The hero's world keeps its old road (the seal, then the blade up the shaft).
+    if (kind === 'prism' && isHero()) this.grantRelic('sigil1');
+    if (kind === 'prism' && !isHero() && typeof k2GiveSecondSword === 'function') k2GiveSecondSword();
     if (kind === 'prism') {
       const def = ROOMS.X1.ents.find(e => e[0] === 'chest');
       spawnStatic('chest', def[1], def[2], def[3], 'ch_X1_' + ROOMS.X1.ents.indexOf(def));
@@ -1233,7 +1244,7 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   // npc was 32x40 — a head shorter than the player's own 60px plate, and the
   // owner's read of the first one he ever met was "very small, easy to miss".
   // The machine folk stand at her scale now.
-  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
+  const sizes = { ferry: [56, 64], k2pole: [30, 30], item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
   const [w, h] = sizes[type];
   // `room` is stamped at spawn rather than read from G.roomId at use time,
   // because npcKey() must stay stable for a static that outlives a room change
@@ -1275,6 +1286,7 @@ function loadRoom(id) {
   surfCurve = null; surfRoom = null;   // the surface curve belongs to the room
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
+  if (typeof k2RoomLoaded === 'function') k2RoomLoaded(id);   // the swamp's raft and its insects (conduits-road.js)
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
   G.packWolf = null;   // a called wolf stays in the room it was called to
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
@@ -1384,6 +1396,9 @@ function loadRoom(id) {
       // and rope, and a powered blade on a rail does not belong in it
       if (!(typeof isHero === 'function' && isHero())) G.saws.push(new SawRig(tx, ty, extra));
     } else if (kind === 'boss') {
+      // TALONHOST IS NOT HOME until she can throw (js/conduits-road.js): the
+      // eagle's hall in the Conduits stands empty on the way to the vault
+      if (typeof k2BossAway === 'function' && k2BossAway(extra)) return;
       if (!G.save.flags['boss' + extra.charAt(0).toUpperCase() + extra.slice(1)])
         G.boss = new Boss(extra, tx * TILE, ty * TILE);
     } else if (kind === 'chest') {
@@ -1399,12 +1414,16 @@ function loadRoom(id) {
     } else if (kind === 'riddle') {
       spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
+      // (the Foundry's hidden seal belongs to the hero's road; in the robot
+      // world the Conduits' own fights carry all three — js/conduits-road.js)
+      if (extra === 'sigil3' && !isHero()) return;
       if (!(extra === 'connector' && isHero()) && !G.save.flags['sr_' + extra]) spawnStatic('secret', tx, ty, extra);
     } else if (kind === 'pillar') {
       // the crystal pillar is quarried once per save — the shard in the bag
       // IS the pillar now, and a pillar that regrew would un-tell the story
       if (!G.save.flags['pl_' + (extra || 'cshard')]) spawnStatic('pillar', tx, ty, extra || 'cshard');
     } else {
+      if (kind === 'k2pole' && typeof k2PoleLive === 'function' && !k2PoleLive()) return;
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
@@ -1517,7 +1536,7 @@ function loadRoom(id) {
     G.bossEntry = { t: 0, dur: 2.3 };
     setMusic('boss_' + G.boss.kind);
   } else {
-    setMusic(def.zone);
+    setMusic(def.mus || def.zone);
   }
   // named for the kingdom the room lies in, not its palette (world.js zoneLabelKey)
   { const zk = typeof zoneLabelKey === 'function' ? zoneLabelKey(id) : 'z_' + def.zone;
@@ -1610,6 +1629,8 @@ function startGame(save) {
   G.save = save;
   if (typeof qualRestore === 'function') qualRestore();  // the player's own call outranks the guess
   applyTheme();
+  if (typeof bossOrderApply === 'function') bossOrderApply();     // the world's own sage order (types.js)
+  if (typeof k2Migrate === 'function') k2Migrate(save);           // the Conduits' new road (conduits-road.js)
   // no saved bench may stand inside a place the story has not opened yet
   // (js/progress.js) — a hand-edited or pre-gate save wakes at the camp
   if (typeof progressBenchGuard === 'function') progressBenchGuard(save);
@@ -1841,7 +1862,7 @@ function meetStep(dt) {
     b.x += b.vx * dt; b.y += b.vy * dt; b.vy += 900 * dt;
     if (b.x > W + 40 || M.t > 1.6) {
       G.boss = null; G.meet = null;
-      setMusic(G.roomDef.zone);
+      setMusic(G.roomDef.mus || G.roomDef.zone);
       persist();
       // the hatch has just come into being behind her (progress.js pgHubSealed):
       // say where, once, while she is still looking east after the lion
@@ -2775,6 +2796,7 @@ function forgeCrystal() {
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
   if (!s) return;
+  if (typeof k2Interact === 'function' && k2Interact(s)) return;   // Bilge's ferry (conduits-road.js)
   if (s.type === 'rescue') {
     const e = s.target;
     if (!e || !e.disabled || e.cleanseT > 0) return;
@@ -3119,7 +3141,8 @@ function doInteract(s) {
     } else {
       // the third seal is the one a player can walk past — it is the only one
       // not handed over by a fight or a puzzle — so the door says where it lies
-      G.toast(t('vault_locked') + '  ' + have + '/3' + (relicHas('sigil3') ? '' : '  ' + t('vault_where3')));
+      // (robot world: the goal arrow names the fight that still holds a seal)
+      G.toast(t('vault_locked') + '  ' + have + '/3' + (relicHas('sigil3') || !isHero() ? '' : '  ' + t('vault_where3')));
       sfx('no');
     }
   }
@@ -3290,6 +3313,7 @@ function update(dt) {
         }
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
+      if (typeof k2Update === 'function') k2Update(dt);   // the swamp: raft, water, insects (conduits-road.js)
       if (!(typeof isHero === 'function' && isHero())) ceilWeather(dt, G.roomDef.zone);
       sawHum(dt);
       updateTutor(dt);
@@ -3446,6 +3470,7 @@ function update(dt) {
   else if (G.state === 'CREST') updateCrest();
   else if (G.state === 'FILMS') updateFilms();
   else if (G.state === 'SHOP') updateShop();
+  else if (G.state === 'FERRY') k2FerryUpdate();
   else if (G.state === 'SKILLS') updateSkills();
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'TRIAL') updateTrial(dt);
@@ -12192,6 +12217,8 @@ function drawGateDoor(P, def, nearPlane) {
   // plate, so it fell through to the city monument's bones drawn at a third
   // strength in the far plane and graded to the wall behind them. A den is a
   // hole in rock — the kingdom's own fired mouth, in the near plane.
+  // THE CONDUITS' DOOR IS A DRAIN (js/conduits-road.js): a culvert, not a mouth
+  if (def.style === 'culvert' && typeof k2DrawCulvert === 'function' && k2DrawCulvert(ds, gy, k, def)) return;
   if (def.style === 'den') { drawCaveMouth(ds, gy, P, k, false); structBeacon(ds, gy, 200, 272, k, 1); return; }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
@@ -13374,6 +13401,7 @@ function drawStatics(P) {
   for (const pr of (ROOM_PROPS[G.roomId] || []))
     if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
   for (const s of G.statics) {
+    if (typeof k2DrawStatic === 'function' && k2DrawStatic(s)) continue;   // Bilge and his pole (conduits-road.js)
     const bob = Math.sin(performance.now() / 500 + s.t) * 3;
     if (s.type === 'bench' && typeof isHero === 'function' && isHero()) {
       // FOUNTAIN OF LIFE (hero world) — a marble spring of glowing elixir
@@ -14038,7 +14066,7 @@ function drawStatics(P) {
   // instruction, and the press it names would be refused anyway
   if (G.near && G.state === 'PLAY' && !G.recharge && (typeof tutAllows !== 'function' || tutAllows('INT'))) {
     const s = G.near;
-    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : t('open');
+    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : (typeof k2NearLabel === 'function' && k2NearLabel(s)) || t('open');
     // "{INT} — Talk": the label names this player's own interact control —
     // and what the press will actually DO (a switched-off Servo is woken)
     const ol = typeof opNearLabel === 'function' ? opNearLabel(s) : null;
@@ -16115,6 +16143,11 @@ function drawWorldFrame() {
     if (typeof drawHitShapes === 'function') drawHitShapes(c);      // the Forge's SHAPES overlay (js/hitshape.js)
     c.restore();
   }
+  // THE WATER goes over everything standing in it (js/conduits-road.js): a
+  // body below the line is under the surface, which is what makes it water
+  if (typeof k2DrawFront === 'function') {
+    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); k2DrawFront(c); c.restore();
+  }
   // ...and the edge of the world OVER her, so the last few pixels of her feet
   // pass behind it. See the fringe block above: this draw order is the effect.
   c.save();
@@ -18036,6 +18069,8 @@ function draw(tms) {
     drawPanelList();
   } else if (st === 'SHOP') {
     drawShop();
+  } else if (st === 'FERRY') {
+    k2FerryDraw();
   } else if (st === 'SKILLS') {
     drawSkills();
   } else if (st === 'RELICS') {

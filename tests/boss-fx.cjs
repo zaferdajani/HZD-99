@@ -29,7 +29,7 @@ const FIGHTS = [['B4', 'brood'], ['X1', 'prism'], ['C3', 'atlas'], ['D3', 'zero'
       const R = await page.evaluate(async ([id]) => {
         window.requestAnimationFrame = () => 0;
         let s = 0x51f0c0de; Math.random = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
-        const sv = newSave(1); sv.time = 99; sv.flags.tut = sv.flags.woke = 1; sv.flags.nfMeet = 1; sv.flags.ghMet = 1;
+        const sv = newSave(1); sv.time = 99; sv.flags.tut = sv.flags.woke = 1; sv.flags.nfMeet = 1; sv.flags.ghMet = 1; if (id === 'B4') Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers)
         startGame(sv); loadRoom(id);
         G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.gateWalk = G.bossEntry = null; G.ghHold = null; G.toasts = [];
         const b = G.boss; b.meet = null; if (b.st === 'dorm' || b.st === 'intro') { b.st = 'idle'; b.t = 0.5; }

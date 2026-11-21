@@ -58,8 +58,27 @@ function armDef(id) { return ARMS.find(a => a.id === id); }
 // stagger, TALONHOST's rest) and it takes damage for real. Each boss is also
 // natively faster and more relentless than the one before.
 // ---------------------------------------------------------------------------
-const BOSS_GATE = { brood: 'shard', atlas: 'jet', zero: 'slag', prism: 'frost', mother: 'arc' };
-const BOSS_AGGRO = { glitch: 1, brood: 1.12, atlas: 1.22, zero: 1.32, prism: 1.42, mother: 1.55 };
+// THE ROBOT WORLD'S ORDER (owner, 2026-11-21): NULLFANG -> the Prism Prowler
+// (the Conduits' sage, the second sword) -> FURNACE CHOIR (the connector) ->
+// TALONHOST (which only the throw brings down) -> GLACIERE -> MOTHER-V. Each
+// sage's plating still shorts to the arm the sage BEFORE it left her, in that
+// order. The hero's world keeps the order it was built in; bossOrderApply()
+// (called by startGame) writes the live world's row into these two objects,
+// which every reader indexes directly.
+const BOSS_ORDER = {
+  robo: { gate: { prism: 'shard', atlas: 'arc', brood: 'slag', zero: 'jet', mother: 'frost' },
+          aggro: { glitch: 1, prism: 1.12, atlas: 1.22, brood: 1.32, zero: 1.42, mother: 1.55 } },
+  hero: { gate: { brood: 'shard', atlas: 'jet', zero: 'slag', prism: 'frost', mother: 'arc' },
+          aggro: { glitch: 1, brood: 1.12, atlas: 1.22, zero: 1.32, prism: 1.42, mother: 1.55 } },
+};
+const BOSS_GATE = Object.assign({}, BOSS_ORDER.robo.gate);
+const BOSS_AGGRO = Object.assign({}, BOSS_ORDER.robo.aggro);
+function bossOrderApply() {
+  const row = BOSS_ORDER[typeof isHero === 'function' && isHero() ? 'hero' : 'robo'];
+  for (const k of Object.keys(BOSS_GATE)) delete BOSS_GATE[k];
+  Object.assign(BOSS_GATE, row.gate);
+  Object.assign(BOSS_AGGRO, row.aggro);
+}
 function bossGateOpen(b) {
   if (!BOSS_GATE[b.kind]) return true;
   if ((b.shieldT || 0) > 0) return true;
@@ -252,6 +271,9 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty, move) {
   // thrown INTO an attack lands, but turned — and 0 for the instant it is
   // springing clear. It says so: pale grit off the plate instead of the hit's
   // own gold, so a player can see which of her blows were worth throwing.
+  // A HIDE WITH A WEAK POINT (MIREJAW, js/mirejaw.js): where the blow LANDS
+  // decides it — the armoured back turns it, the open jaws and the belly do not
+  if (typeof e.hideAt === 'function') e.hideK = e.hideAt(x, y);
   if (e.hideK != null && e.hideK < 1 && e.st !== 'daze' && !e.dead) {
     if (e.hideK <= 0) { burst(x, y, 4, '#cfe0f0', 150, 0.2, 0, 2, true); return 0; }
     dm = Math.max(1, Math.round(dm * e.hideK));

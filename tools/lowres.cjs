@@ -39,7 +39,10 @@ const path = require('path');
 
 const SCALE = 0.25;
 const qualityArg = process.argv.find(arg => arg.startsWith('--quality='));
-const QUALITY = qualityArg ? Number(qualityArg.slice(10)) : 0.62;
+// 0.5 since 2026-11-21: the world grew by the Mire (five rooms, a crocodile, a
+// ferryman) and the front-loaded tier stays under its 2 MB budget by spending a
+// little less on every stand-in, not by leaving the new rooms out of it
+const QUALITY = qualityArg ? Number(qualityArg.slice(10)) : 0.5;
 if (!(QUALITY > 0 && QUALITY <= 1)) throw new Error('--quality must be in (0, 1]');
 // below this there is nothing to save and a second request costs more than the
 // bytes it avoids

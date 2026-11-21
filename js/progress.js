@@ -94,12 +94,11 @@ function progressGoal(f) {
   // CARRIER first (its fall wakes a ring in the relay gallery, B6), then the
   // agent UNDERTOW through it, and only then is TALONHOST's hall open
   // (world.js B3, gate_brood_ward).
-  if (f.bossGlitch && f.ch2Climb) {
-    if (f.bossBrood) return null;
-    if (!f.bossCarrier) return 'pg_goal_carrier';
-    if (!f.sageTame_GB1D) return 'pg_goal_undertow';
-    return 'pg_goal_brood';
-  }
+  // ...AND THE ROAD IS LONGER NOW (owner, 2026-11-21): the CARRIER, the swamp's
+  // crocodile (across Bilge's raft), the agent, the vault their three seals
+  // open, the Prism Prowler who keeps the second sword — then the Foundry, and
+  // TALONHOST last (js/conduits-road.js k2Goal)
+  if (f.bossGlitch && f.ch2Climb) return typeof k2Goal === 'function' ? k2Goal(f) : null;
   if (!f['on_A0B|ratchet']) return null;               // the opening's lessons speak first
   if (!f.crystal) {
     if (G.save.bag && G.save.bag.cshard || f.pl_cshard && !f.crystal) return 'pg_goal_return';
@@ -273,7 +272,7 @@ function pgGoalRoom(key, f) {
     case 'pg_goal_undertow': return 'GB1D';
     case 'pg_goal_brood': return 'B4';
   }
-  return null;
+  return typeof k2GoalRoom === 'function' ? k2GoalRoom(key) : null;
 }
 const PG_ROUTE = { key: '', step: null };
 function pgRouteEdges(id) {

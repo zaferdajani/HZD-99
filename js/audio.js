@@ -2717,6 +2717,11 @@ const RECORDED_TRACKS = {
   intro: [['mus_intro', 0.75], ['mus_title', 0.55]],
   A: [['mus_meadows', 0.55]], B: [['mus_conduits', 0.55]], C: [['mus_foundry', 0.55]],
   D: [['mus_archives', 0.55]], E: [['mus_nest', 0.55]], X: [['mus_cache', 0.55]],
+  // THE SILT MIRE has its own air (owner, 2026-11-21: "background, music,
+  // sound effects, creatures"): a room says `mus: 'swamp'` (js/world.js), and
+  // the crocodile in its wallow fights under its own cue
+  swamp: [['mus_swamp', 0.55], ['mus_conduits', 0.55]],
+  boss_mirejaw: [['mus_mirejaw', 0.6], ['mus_eye', 0.6], ['mus_boss', 0.6]],
   // THE FIGHTS GET THEIR OWN NAMES BACK.
   boss_glitch: [['mus_nullfang', 0.6], ['mus_boss', 0.6]],
   boss_brood: [['mus_talonhost', 0.6], ['mus_boss', 0.6]],
@@ -2752,7 +2757,7 @@ function pickRecorded(name) {
 // when a per-guardian slot has neither a recording nor a synth track of its own
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
-  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', boss_horn: 'boss',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', boss_horn: 'boss', boss_mirejaw: 'boss', swamp: 'B',
   // the sage duel has its OWN slot now: drop mus_sage.m4a into assets/music
   // (ART_QUEUE brief) and every chamber picks it up; until then the duels
   // borrow the guardian track through this fallback
