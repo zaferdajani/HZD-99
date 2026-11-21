@@ -49,7 +49,10 @@ const { chromium } = require('playwright');
     // 1. the break at half
     { const bo = stage(0.51, 1); played.length = 0; let roared = false, redAt = null, f0 = 0;
       bo.hp = bo.hpMax * 0.49;
-      fight(bo, 6, 300, (q) => { f0++; if (q.st === 'roar') roared = true; if (q.rageSeen && redAt == null) redAt = f0; });
+      const roarsAt = []; let seen = 0;
+      fight(bo, 9, 300, (q) => { f0++; if (q.st === 'roar') roared = true; if (q.rageSeen && redAt == null) redAt = f0; while (seen < played.length) { if (/roar/.test(played[seen])) roarsAt.push([f0, played[seen]]); seen++; } });
+      const bigAt = (roarsAt.find(r => r[1] === 'nf_lroar_big') || [0])[0];
+      out.roarGap = roarsAt.filter(r => r[1] !== 'nf_lroar_big' && r[0] > bigAt).map(r => +((r[0] - bigAt) / 60).toFixed(2));
       out.brk = { phase: bo.phase, roared, red: !!bo.rageSeen, big: played.filter(k => k === 'nf_lroar_big').length, keys: [...new Set(played)].filter(k => /roar/.test(k)) }; }
     // 2. dash speed by phase, and the rear
     const speed = (phase) => { const bo = stage(phase === 2 ? 0.4 : 1, phase); let vmax = 0, rears = 0, warn = [], cur = 0;
@@ -75,6 +78,7 @@ const { chromium } = require('playwright');
   check('half his health breaks him into phase two, and he roars', R.brk.phase === 2 && R.brk.roared, JSON.stringify(R.brk));
   check('...the roar is a recorded lion, the pair kept for the break', R.brk.big >= 1, JSON.stringify(R.brk.keys));
   check('...and from that roar every light on him burns red', R.brk.red);
+  check('...and no other roar runs into it (the null field waits)', R.roarGap.every(g => g >= 3.5), JSON.stringify(R.roarGap));
   check('phase one is never drawn red; from the roar on, phase two always is', !R.looks.p1.includes('rage') && R.looks.p2.includes('rage') && !R.looks.p2.includes('false'), JSON.stringify(R.looks));
   check('his roar is a recorded lion, never the same take twice running', R.roars.length === 9 && R.roars.every(k => /^nf_lroar[123]$/.test(k)) && R.roars.every((k, i) => i === 0 || k !== R.roars[i - 1]), R.roars.join(' '));
   check('phase two dashes faster than phase one', R.v2 > R.v1 * 1.1, Math.round(R.v1) + ' -> ' + Math.round(R.v2) + ' px/s');

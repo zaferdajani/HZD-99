@@ -13435,6 +13435,7 @@ class Boss {
     const spd = DF().espd * (this.attackSpeed || BOSS_AGGRO[this.kind] || 1);
     this.windT -= dt; this.overdriveT -= dt;
     if (this.rearCD > 0) this.rearCD -= dt;
+    if (this.nullHold > 0) this.nullHold -= dt;
     // every boss looks where it is going, even the ones that do not walk
     // GLACIERE owns facing in her state handler: a committed charge keeps
     // facing along its velocity even after the player crosses behind it.
@@ -13584,7 +13585,7 @@ class Boss {
             // flashed between the standing lion and the rising paw, before
             // every swipe in the fight. Same decision, same priority (the null
             // field and the ambush still go first), one frame sooner.
-            const nullDue = !this.nullUsed && this.hp <= this.hpMax * 0.5;
+            const nullDue = !this.nullUsed && this.hp <= this.hpMax * 0.5 && !(this.nullHold > 0) && !this.breakRoar;
             if (!nullDue && nfRearReady(this, adist, dist)) nfRearStart(this);
             else if (!nullDue && this.ambushCD > 0 && adist < 130 && this.swipeCD <= 0) {
               this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
@@ -13623,7 +13624,7 @@ class Boss {
           const desired = this.face * pace * spd;
           this.vx += clamp(desired - this.vx, -1050 * dt, 1050 * dt);
           this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
-          if (!this.nullUsed && this.hp <= this.hpMax * 0.5) {
+          if (!this.nullUsed && this.hp <= this.hpMax * 0.5 && !(this.nullHold > 0) && !this.breakRoar) {
             // NULL GRAVITY: once per fight, below half health, the virus
             // overrides the room's gravity — the charge-up is the tell
             this.nullUsed = true;
@@ -13895,7 +13896,7 @@ class Boss {
             // roar that answers a broken binding is the big one: wider, longer,
             // and it throws her from further off.)
             const big = this.roarBig || 0; this.roarBig = 0;
-            if (big && this.kind === 'glitch') this.rageSeen = true;   // from this roar he burns red (beast.js, media.js rageArt)
+            if (big && this.kind === 'glitch') { this.rageSeen = true; this.nullHold = 4; }   // ...and the null field waits: two roars must not run into each other   // from this roar he burns red (beast.js, media.js rageArt)
             if (typeof shockRipple === 'function')
               shockRipple(this.cx() + this.face * 30, this.cy() - 10, big
                 ? { R: 820, dur: 1.2, amp: 32 + big * 4, width: 74, col: '#b06aff', fronts: 4, gap: 0.12, nudge: 8, pulse: 0.24 }
