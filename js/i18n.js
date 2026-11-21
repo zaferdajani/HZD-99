@@ -1667,7 +1667,7 @@ const STORY_ORDER_TEXT = {
     b_zero: 'GLACIERE, THE FROZEN SENTINEL',
     b_mother: 'MOTHER-V, THE HIJACKED SONG',
     pure_mother: 'The command burns out of MOTHER-V. Her song stops — and she is still there.',
-    win2: 'MOTHER-V is free. Her song is silent, and it is her own again.',
+    win2: 'MOTHER-V is purified. Her song is silent, and it is her own again.',
     win2b: 'What remains is the Eye that stole her voice — exposed now, with nothing left to sing through.',
     demo_end3: "Four kingdoms, four more guardians and Mother's hijacked song are waiting in the full game.",
     d_servo: [
@@ -1756,7 +1756,7 @@ const STORY_ORDER_TEXT = {
     b_zero: 'غلاسيير، الحارسة المتجمِّدة',
     b_mother: 'MOTHER-V، الأغنية المختطَفة',
     pure_mother: 'يحترق الأمر خارج MOTHER-V. تتوقف أغنيتها — وما زالت هنا.',
-    win2: 'MOTHER-V حرّة. أغنيتها صامتة، وعادت لها من جديد.',
+    win2: 'MOTHER-V تطهّرت. أغنيتها صامتة، وعادت لها من جديد.',
     win2b: 'وما بقي هو العين التي سرقت صوتها — مكشوفة الآن، ولم يعد لها ما تغني به.',
     demo_end3: 'أربع ممالك وأربعة حُرّاس آخرون وأغنية الأم المختطَفة تنتظرك في اللعبة الكاملة.',
     d_servo: [
@@ -1845,7 +1845,7 @@ const STORY_ORDER_TEXT = {
     b_zero: 'GLACIERE, DONMUŞ NÖBETÇİ',
     b_mother: 'MOTHER-V, KAÇIRILAN ŞARKI',
     pure_mother: 'Komut MOTHER-V’nin içinden yanıp gider. Şarkısı durur — ve o hâlâ orada.',
-    win2: 'MOTHER-V özgür. Şarkısı sessiz ve yeniden kendisinin.',
+    win2: 'MOTHER-V arındı. Şarkısı sessiz ve yeniden kendisinin.',
     win2b: 'Geriye sesini çalan Göz kalıyor — artık açıkta ve şarkı söyleyecek hiçbir şeyi kalmadı.',
     demo_end3: 'Dört krallık, dört muhafız daha ve Anne’nin kaçırılan şarkısı tam oyunda bekliyor.',
     d_servo: [
@@ -1934,7 +1934,7 @@ const STORY_ORDER_TEXT = {
     b_zero: 'GLACIERE，冰封哨卫',
     b_mother: 'MOTHER-V，被劫持的歌',
     pure_mother: '命令从MOTHER-V体内燃尽。她的歌停了——而她还在。',
-    win2: 'MOTHER-V自由了。她的歌已沉默，又重新属于她自己。',
+    win2: 'MOTHER-V已被净化。她的歌已沉默，又重新属于她自己。',
     win2b: '剩下的，是偷走她声音的那只眼——如今暴露在外，再也没有可以借来歌唱的东西。',
     demo_end3: '四个王国、另外四位守护者，以及母亲被劫持的歌，都在完整版中等待。',
     d_servo: [
@@ -2023,7 +2023,7 @@ const STORY_ORDER_TEXT = {
     b_zero: 'GLACIERE, ЛЕДЯНОЙ СТРАЖ',
     b_mother: 'MOTHER-V, ПОХИЩЕННАЯ ПЕСНЯ',
     pure_mother: 'Приказ выгорает из MOTHER-V. Её песня стихает — а она всё ещё здесь.',
-    win2: 'MOTHER-V свободна. Её песня молчит и снова принадлежит ей.',
+    win2: 'MOTHER-V очищена. Её песня молчит и снова принадлежит ей.',
     win2b: 'Остаётся Око, укравшее её голос, — теперь оно на виду, и петь ему больше нечем.',
     demo_end3: 'Четыре королевства, ещё четыре стража и похищенная песня Матери ждут в полной игре.',
     d_servo: [

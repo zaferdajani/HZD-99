@@ -196,7 +196,11 @@ const G = {
   // for the halo (default: the room's own glow); seed salts the rim sparks so
   // two rings born in one frame do not spin in lockstep. Position-derived, so
   // it costs no randomness and a replayed frame draws the same ring.
-  addRing(x, y, r0, col) { this.rings.push({ x, y, r: r0 || 12, a: 0.85, a0: 0.85, col: col || null, seed: ((x * 7 + y * 13) | 0) & 0x7fffffff }); },
+  // NO RING ROUND ANY BODY (the ledger, 4x; owner 2026-11-21 on the purify scene, the
+  // teal circle round NULLFANG). Sixteen callers fired an expanding ring of light centred
+  // on a body — a blow, a parry, a roar, a death. The call stays so they need not change;
+  // it draws nothing. The impact is carried by the ripple, the cracks, the shake and sound.
+  addRing() {},
   // nothing speaks over the first meeting (manga-direction §6: the silence IS the beat)
   // A STORY LINE IS NOT A TOAST (js/overlay.js storyToast): the sentences the
   // story turns on become cards she acknowledges; the rest live long enough to
@@ -14246,6 +14250,12 @@ function drawRings(c) {
   }
 }
 function drawSeals(P) {
+  // A BOSS ROOM'S EXITS ARE SHUT WITHOUT A NEON BAR (owner, 2026-11-21: "the screen is
+  // glitched" — a flat teal strip pulsing down the room's edge, all fight long). The
+  // fight seal is the rule that holds them (gateFightSealed, the edge that does not
+  // take her); nothing is painted over the world for it.
+  return;
+  // eslint-disable-next-line no-unreachable
   if (!bossActive()) return;
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   const pu = 0.5 + Math.sin(performance.now() / 200) * 0.3;

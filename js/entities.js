@@ -4170,7 +4170,9 @@ class Player {
   drawRoboCharge(c) {
     if (this.dead || this.hurtPoseT > 0 || this.dashT > 0 || this.swingVis ||
         !this.on || Math.abs(this.vx)>34 || this.chargeT <= .08 || G.boomer) return false;
-    const mode=weaponMode(G.save);
+    let mode=weaponMode(G.save);
+    // the purify gesture is the SWORD's: she draws it for it even if she fought with her claws
+    if(G.state==='PURIFY'&&mode==='claws'&&typeof weaponOwned==='function'&&weaponOwned('single',G.save))mode=weaponOwned('dual',G.save)?'dual':'single';
     if(mode==='joined')return false;
     const S=HERO_WEAPON_CHARGES[mode] || (this._chargeArtCount>0 && this._chargeArtCount%2===0 ? SWING_STRIP.burstLegacy : SWING_STRIP.burst);
     const count=mode==='single'||mode==='dual'?3:6;
@@ -5940,7 +5942,9 @@ class Player {
     // (ART_BIBLE §0.0); no shadowBlur (measured +10 ms/frame elsewhere); no
     // allocation in the draw path — every random is hash2 of a time slot, so a
     // replayed frame draws the same storm (tests/drawclock.cjs).
-    if (this.chargeT > 0.02 && !(typeof G !== 'undefined' && G.artProbe)) {
+    // (not in the purify scene: there her charge is the PURIFY gesture, and the storm round
+    // her body smothered her — owner 2026-11-21 on that scene; the scene's own motes carry it)
+    if (this.chargeT > 0.02 && !(typeof G !== 'undefined' && (G.artProbe || G.state === 'PURIFY'))) {
       const ck = clamp(this.chargeT / 0.6, 0, 1);
       const cok = this.chargeOk !== false;
       const now = performance.now() / 1000;
