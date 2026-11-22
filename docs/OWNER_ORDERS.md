@@ -77,6 +77,19 @@ So, for every correction he gives:
 
 Do not answer a correction with an explanation of why it was that way.
 
+## A NEW SPECIES GETS ITS WHOLE MOVE SET (owner's rule, 2026-11-22)
+
+**"From now on, when you create a new species enemy, it all needs to have complete
+artwork concept, and then you adjust accordingly. So you have to have a template for
+each function: dying, hitting, defending, jumping, crouching, etc. So you have to see
+all the movements possible and create artwork for it. It's a rule."** The template and
+the procedure are `docs/SPECIES_MOVESET.md`; the record is `assets/movesets.json`;
+`tests/species-moveset.cjs` fails a species under the rule that lacks a function, shares
+a strip between two, or has a strip the fight never draws. Said the same day: **"The
+alligator should go on diagonal move, not like sliding, but like either swimming using
+its tail or legs... or to walk on the inclines"** — every strip that carries a body turns
+over by the distance it covers (`MJ_STRIDE`, `tests/mirejaw.cjs` NOTHING SLIDES).
+
 ## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
 
 **"All arts, videos, images, STRUCTURES should be created through

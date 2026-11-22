@@ -446,6 +446,11 @@ const MEDIA_SRC = {
     mjBite: 'assets/characters/croc/bite.webp',
     mjLeap: 'assets/characters/croc/leap.webp',
     mjRoll: 'assets/characters/croc/roll.webp',
+    // the rest of his move set (docs/SPECIES_MOVESET.md, assets/movesets.json)
+    mjRun: 'assets/characters/croc/run.webp', mjTurn: 'assets/characters/croc/turn.webp',
+    mjNotice: 'assets/characters/croc/notice.webp', mjCrouch: 'assets/characters/croc/crouch.webp',
+    mjLand: 'assets/characters/croc/land.webp', mjGape: 'assets/characters/croc/gape.webp',
+    mjDaze: 'assets/characters/croc/daze.webp',
     mjTail: 'assets/characters/croc/tailslam.webp',
     mjBellow: 'assets/characters/croc/bellow.webp',
     mjHurt: 'assets/characters/croc/hurt.webp',

@@ -42,3 +42,23 @@ cell, 40 scrap and **Vault Seal II**, which he swallowed (`K2_MINI_SIGIL`).
 
 ## Measured (tests/mirejaw.cjs)
 A masher dies in about 14 s, three death rolls; a bot that reads him wins in about 105 s.
+
+## His whole move set, and nothing slides (2026-11-22)
+
+Owner: "complete artwork concept... a template for each function" and "not like sliding,
+but like either swimming using its tail or legs... or to walk on the inclines".
+
+- **notice** opens the fight: he comes up in open water, lifts his head and hisses (1.1 s).
+- **bitewarn** is two beats: he SWIMS up on the slant (first 55%, strokes paced by distance),
+  then COILS at the surface (`mjCrouch`) — the tell is a body gathering, not drifting.
+- the jaws slamming in the leap are the bite take's own open-and-slam cells.
+- **beached**: the landing (`mjLand`, 0.32 s), then the threat gape (`mjGape`) — the open
+  jaws ARE the weak point and now look like the defence they are.
+- phase one backs off tail first: his legs walk it on the bank (the stride reversed, paced by
+  distance), his tail swims it once the water has him; a flinch stops him where he stands.
+- phase two **turns** round through the front (his filmed turn) and **runs** head first for
+  the water (`mjRun`), swimming once he is in.
+- at rest in the water he floats still (`mjIdle`); he strokes only to travel.
+- **daze** has its own take; the **death roll** is a real log roll.
+- `tests/mirejaw.cjs` NOTHING SLIDES: a moving strip's cell turns within a stride's share of the
+  distance covered, and every other strip is drawn only while his body is still.

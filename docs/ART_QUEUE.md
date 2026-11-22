@@ -7065,6 +7065,7 @@ GLACIERE → MOTHER-V. Owed, in order:
 2. **TALONHOST rebuilt to need the throw**: its breast plate turns blade, shards and grapple;
    the joined blade's return pass strikes the engine on its back during its climb-out. Fight
    code + takes of a real eagle's stoop and climb.
-3. **MIREJAW's death roll as its own take** (the first came back as a twist; the roll is drawn
-   from the collapse take). Try Seedance with a real-crocodile motion reference.
+3. ~~MIREJAW's death roll as its own take~~ — DELIVERED 2026-11-22 (Kling, second prompt: a
+   log roll, belly up and over), with the rest of his move set (docs/SPECIES_MOVESET.md).
+   The older species' gaps against that template are in `assets/movesets.json` (`missing`).
 4. **Bilge poling**: his loop sways; he should plant the pole and push.

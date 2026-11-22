@@ -199,6 +199,7 @@ const SUITE = [
   ['mire-ferry', 'the swamp is entered through a culvert; Bilge asks before anything is paid; a high fare or a hard errand (two runs only a jump with the dash crosses); the raft carries her; the water is water'],
   ['mirejaw',   'the swamp crocodile: the hide turns, jaws and belly do not, the death roll costs two, a masher loses and a reader wins'],
   ['gate-step', 'a raised door is climbed or hopped into from behind: the ring\'s sill climbed, the culvert hopped, her weapon tier\'s own strip, Ratchet\'s door still a run, under 2.4 s'],
+  ['species-moveset', 'a new species has art for every move it makes: every function of the template its own strip, from a recorded Higgsfield job, on disk and drawn by the fight (docs/SPECIES_MOVESET.md)'],
   ['stand-ground', 'long bodies stand on the ground under their own feet: MIREJAW on every island, NULLFANG across his arena, pitched with the slope, no paw in the ground or floating over it'],
   ['purify-stage', 'the purify scene from its worst case: he turns to her before the hold, the frame stays in the room, no ring of light and no neon seal, no blade drawn over her (the cross) but her own sword charge, a blade\'s length from his drawn head, and the words say purify in every language'],
   ['hit-voices', 'the Alpha and its pack play recorded wolves (the howls real, public domain); every body and guardian has its own bank of recorded impacts, never the same take twice running'],

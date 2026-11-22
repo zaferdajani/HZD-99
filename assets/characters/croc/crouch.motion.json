@@ -1,0 +1,115 @@
+{
+  "source": "assets/source/swamp/croc-takes/crouch.mp4",
+  "frames": 12,
+  "cell": [
+    640,
+    300
+  ],
+  "times": [
+    0.52,
+    0.88,
+    1.24,
+    1.6,
+    1.96,
+    2.32,
+    2.68,
+    3.04,
+    3.4,
+    3.76,
+    4.12,
+    4.48
+  ],
+  "scale": 0.43261231281198004,
+  "threshold": 48,
+  "strictBorders": false,
+  "footRight": false,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 520x140px",
+  "rest": 0.1,
+  "anchor": -3.03,
+  "drift": 0.0,
+  "feet": [
+    [
+      -223.7,
+      118.5
+    ],
+    [
+      -209.4,
+      118.5
+    ],
+    [
+      -170.0,
+      118.5
+    ],
+    [
+      -170.0,
+      249.2
+    ],
+    [
+      -242.3,
+      231.0
+    ],
+    [
+      -234.9,
+      257.8
+    ],
+    [
+      -240.5,
+      237.5
+    ],
+    [
+      -246.2,
+      263.0
+    ],
+    [
+      -248.8,
+      262.2
+    ],
+    [
+      -241.8,
+      199.0
+    ],
+    [
+      -242.3,
+      210.2
+    ],
+    [
+      -244.0,
+      226.3
+    ]
+  ],
+  "grade": {
+    "reference": "assets/source/swamp/croc-takes/grade.json",
+    "takeMean": [
+      108.78,
+      95.69,
+      93.64
+    ],
+    "after": [
+      108.22,
+      96.19,
+      93.93
+    ],
+    "target": [
+      108.2,
+      96.2,
+      93.45
+    ],
+    "steady": [
+      1.02,
+      0.991,
+      0.973,
+      0.973,
+      0.97,
+      0.969,
+      0.97,
+      1.009,
+      1.01,
+      1.016,
+      1.018,
+      1.018
+    ]
+  },
+  "reviewed": false,
+  "delivered": "resized to 200 px tall cells (as every MIREJAW strip)"
+}

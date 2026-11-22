@@ -23,6 +23,7 @@ const { chromium } = require('playwright');
     return p;
   };
   const FLAGS = { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, crystal: 1, bossGlitch: 1, ch2Climb: 1, bossCarrier: 1, ferryPaid: 1, sageTame_GA1D: 1, bossChime: 1, bossHorn: 1, gateOpened: 1, k2Road: 1 };
+  let S2 = null;
   console.log('── mirejaw — the hide, the weak points, the death roll, the bite, the bellow, the pool');
   const p = await page();
   const U = await p.evaluate(async (FLAGS) => {
@@ -40,6 +41,9 @@ const { chromium } = require('playwright');
     out.isles = (() => { let n = 0, inI = false; for (let x = 1; x < g[0].length - 1; x++) { const w = mjIsWater(x * TILE + 16); if (!w && !inI) n++; inI = !w; } return n; })();
     player.x = 18 * TILE; player.y = 200; for (let k = 0; k < 120; k++) { update(1 / 60); G.dialog = null; }
     out.zoom = cam.zoom; out.fitZoom = 960 / (G.roomDef.w * TILE);
+    // he comes up only in water a body fits in: never the one-tile channel at a wall
+    out.walls = []; { const W = G.roomDef.w * TILE;
+      for (let x = 2 * TILE; x < W - 2 * TILE; x += 16) { const wx = mjNearestWater(x); if (wx - 150 < TILE * 0.5 || wx + 150 > W - TILE * 0.5 || !mjIsWater(wx - 44) || !mjIsWater(wx + 44)) out.walls.push(Math.round(x / TILE) + '>' + Math.round(wx)); } }
     // THE HIDE AND ITS WEAK POINTS (types.js dealDmg -> e.hideAt)
     const blow = (st, x) => { B.st = st; B.t = 1; B.mj.t0 = 1; B.hp = B.hpMax; B.iT = 0; B.dazeCD = 99; const h = B.hp; dealDmg(B, 80, null, x, B.mj.feet - 40, false, 'test'); return h - B.hp; };
     B.mj.feet = mjGroundAt(18 * TILE) || 400; B.mj.wx = 18 * TILE; B.mj.face = -1;
@@ -131,6 +135,7 @@ const { chromium } = require('playwright');
   }, FLAGS);
   check('the wallow is islands in open water: at least four islands', U.isles >= 4, U.isles + ' islands, gaps ' + U.gaps.join('/'));
   check('...and every gap between them is a jump (at most 9 tiles), never a wall of water', U.gaps.every(n => n <= 9), U.gaps.join('/'));
+  check('he comes up only in open water his body fits in, never half inside a wall', U.walls.length === 0, U.walls.slice(0, 6).join(' ') || 'every island');
   check('the camera pulls back to frame the whole pool', U.zoom <= U.fitZoom + 0.02, 'zoom ' + U.zoom.toFixed(2) + ' (fit ' + U.fitZoom.toFixed(2) + ')');
   check('THE HIDE: a blow on his back turns (an eighth of it)', U.back > 0 && U.back <= U.jaws * 0.2, U.back + ' vs ' + U.jaws);
   check('...the open jaws of a beached crocodile take it whole', U.jaws >= 60, U.jaws);
@@ -151,6 +156,56 @@ const { chromium } = require('playwright');
   check('no light round his body: the shared tell glow is never drawn for him', U.chakra === 0, U.chakra + ' glows');
   check('beaten: he sinks, and the second seal comes back up', U.gone.dead && U.gone.flag && U.gone.seal, JSON.stringify(U.gone));
   await p.close();
+
+  // ---- NOTHING SLIDES (owner, 2026-11-22: "go on diagonal move, not like
+  // sliding, but like either swimming using its tail or legs... or to walk on the
+  // inclines"): in a played fight, while a swimming, walking or running strip is
+  // drawn, its cell turns over within a stride's share of the distance covered;
+  // every other strip is drawn only while his body stands still (the leap, the
+  // roll and a dead body sinking are the exceptions: they ARE the travel)
+  {
+    const q = await page();
+    S2 = await q.evaluate(async ({ FLAGS }) => {
+      for (const k of Object.keys(MEDIA_SRC.images)) if (/^mj/.test(k)) mediaFetch(k, true);
+      for (let i = 0; i < 200 && !Object.keys(MEDIA_SRC.images).filter(k => /^mj/.test(k)).every(k => MEDIA_IMG[k] && MEDIA_IMG[k].naturalWidth); i++) await new Promise(r => setTimeout(r, 25));
+      const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, FLAGS); sv.weaponMode = 'single'; startGame(sv); loadRoom('SW3');
+      G.state = 'PLAY'; G.dialog = null; player.x = 18 * TILE; player.y = 150;
+      const B = G.boss; const cv = document.createElement('canvas'); cv.width = 1600; cv.height = 600; const c = cv.getContext('2d');
+      const LOCO = { mjSwim: 230 / 14, mjWalk: 150 / 16, mjRun: 260 / 14 }, TRAVEL = { mjLeap: 1, mjRoll: 1, mjDown: 1 };
+      const run = {}, still = {}; let last = null, worst = { k: '', moved: 0 }, frames = 0, statesSeen = {};
+      const tick = () => {
+        if (G.dialog || G.state !== 'PLAY') { G.dialog = null; G.cut = null; G.state = 'PLAY'; }
+        for (const k in keys) keys[k] = 0; for (const k in keysP) keysP[k] = 0;
+        player.iT = 9; player.cores = player.coresMax || 5;      // she is a camera here
+        update(1 / 60); mjDraw(c, B); frames++;
+        const M = B.mj, key = M.drawKey, cell = M.drawCell, pos = [M.wx, M.drawY];
+        statesSeen[key] = 1;
+        if (last && last.key === key && !B.dead) {
+          const d = Math.hypot(pos[0] - last.pos[0], pos[1] - last.pos[1]);
+          if (LOCO[key]) {
+            if (cell === last.cell) { run[key] = (run[key] || 0) + d; if (run[key] / LOCO[key] > worst.moved) worst = { k: key, moved: +(run[key] / LOCO[key]).toFixed(2), st: B.st }; }
+            else run[key] = 0;
+          } else if (!TRAVEL[key] && !(key === 'mjBite' && B.st === 'leap') && d > 1.2) { still[key + '@' + B.st] = Math.max(still[key + '@' + B.st] || 0, +d.toFixed(1)); }
+        } else { for (const k in run) run[k] = 0; }
+        last = { key, cell, pos };
+      };
+      for (let f = 0; f < 60 * 70 && !B.dead; f++) { if (f === 60 * 25) B.hp = B.hpMax * 0.45; tick(); }   // phase two is seen too
+      // ...and a full beaching on the widest island, where his whole body is on land:
+      // phase one walks back to the water, phase two turns round and runs for it
+      for (const ph of [1, 2]) {
+        B.dead = false; B.phase = ph; B.hp = ph === 2 ? B.hpMax * 0.4 : B.hpMax; B.dazeReq = false;
+        player.x = 1.5 * TILE; player.y = mjGroundAt(1.5 * TILE) - player.h; player.vx = 0;
+        B.mj.wx = 5 * TILE; B.mj.face = -1; B.mj.drawY = null; B.mj.hurtT = 0; B.st = 'beached'; B.t = 0.05; B.mj.t0 = 1;
+        last = null;
+        for (let f = 0; f < 60 * 3 && B.st !== 'sub'; f++) tick();
+      }
+      return { worst, still, frames, seen: Object.keys(statesSeen) };
+    }, { FLAGS });
+    await q.close();
+  }
+  check('NOTHING SLIDES: a swimming, walking or running strip turns over with the distance he covers', S2.worst.moved <= 1.8, JSON.stringify(S2.worst) + ' (strides moved on one cell)');
+  check('...and every other strip is drawn only while his body is still', Object.keys(S2.still).length === 0, JSON.stringify(S2.still));
+  check('...his whole move set shows in a played fight', ['mjSwim', 'mjNotice', 'mjCrouch', 'mjLeap', 'mjLand', 'mjGape', 'mjWalk', 'mjTurn', 'mjRun'].every(k => S2.seen.includes(k)), S2.seen.join(' '));
 
   // ---- THE BOTS: a masher loses, a player who reads him wins ----
   const fight = async (bot, seed) => {

@@ -108,7 +108,12 @@ function manifest() {
       // webp, because it is the only format here that carries ALPHA and still
       // compresses like a photo — half these sheets are keyed cut-outs and a
       // jpeg stand-in would put a black box where the transparency was
-      return { url: cv.toDataURL('image/webp', QUALITY), w: W, h: H,
+      // a long move strip (many cells, 4000 px and more at full size) is a
+      // stand-in for a body in motion, seen for a second before its sheet lands:
+      // it takes a little less, so a species' whole move set fits the budget
+      // (2026-11-22: MIREJAW's full set, docs/SPECIES_MOVESET.md)
+      const q = im.naturalWidth >= 4000 && im.naturalHeight <= 320 ? QUALITY * 0.8 : QUALITY;
+      return { url: cv.toDataURL('image/webp', q), w: W, h: H,
                fw: im.naturalWidth, fh: im.naturalHeight };
     }, { b64, mime, SCALE, QUALITY });
     if (!/^data:image\/webp/.test(r.url)) {

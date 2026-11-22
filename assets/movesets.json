@@ -1,0 +1,39 @@
+{
+  "_rule": "owner, 2026-11-22: a new species enemy has artwork for every function before it is wired (docs/SPECIES_MOVESET.md). tests/species-moveset.cjs holds every species with rule:true.",
+  "_audit": "the older species (rule:false) were audited once, 2026-11-22, from their art tables: what each lacks against the template. Not held by the harness; the owner decides whether they are re-fired.",
+  "_template": ["idle", "walk", "run", "turn", "notice", "crouch", "attack", "jump", "land", "defend", "hurt", "daze", "die", "dead"],
+  "mirejaw": {
+    "rule": true,
+    "since": "2026-11-21",
+    "room": "SW3",
+    "flags": { "tut": 1, "woke": 1, "crystal": 1, "bossGlitch": 1, "ch2Climb": 1, "bossCarrier": 1, "ferryPaid": 1, "k2Road": 1 },
+    "probe": "mirejaw",
+    "draw": "mjDraw",
+    "states": ["dorm", "notice", "sub", "bitewarn", "leap", "roll", "beached", "spent", "tailwarn", "tail", "backoff", "turn", "run", "roarwarn", "daze", "down", "sink"],
+    "extras": [{ "land": 1 }, { "still": 1 }, { "hurt": 1 }, { "snap": 1 }],
+    "moves": {
+      "idle":   { "key": "mjIdle",   "job": "ff9c45f0-a36b-4f95-b712-7b976ef95faf", "drawn": "floating still in the water (sub, dorm)" },
+      "walk":   { "key": "mjWalk",   "job": "a61044a3-7828-4b8e-ba7b-361c6fc15f1c", "drawn": "backing off on land, the high walk run backwards, paced by distance" },
+      "run":    { "key": "mjRun",    "job": "57a37189-0e8e-49f3-b6ac-0adcea21f5ff", "drawn": "phase two: running head first for the water" },
+      "turn":   { "key": "mjTurn",   "job": "08e97d66-b52e-45f7-a649-75b272698455", "drawn": "phase two: turning round through the front before he runs" },
+      "notice": { "key": "mjNotice", "job": "1c3d60d9-ae67-48b5-933b-3f8a55802ded", "drawn": "the fight's first beat: head up, hiss" },
+      "crouch": { "key": "mjCrouch", "job": "28501fbb-be8b-4882-8ba4-293c0aff5894", "drawn": "the coil at the surface, the last 45% of the bite's warning" },
+      "attack": { "key": ["mjBite", "mjTail"], "job": "b96e2340-2f3b-4891-941e-cff67079da06 / 88e2743f-30fd-45a3-9b4c-4f8883b09cba", "drawn": "the jaws slamming in the leap; the tail slam" },
+      "jump":   { "key": "mjLeap",   "job": "68b646ce-84ff-4706-8584-4301cb22a9a4", "drawn": "the leap out of the water" },
+      "land":   { "key": "mjLand",   "job": "0df16df0-5737-4b8c-a170-57f78eaf8913", "drawn": "the first beat of a beaching" },
+      "defend": { "key": "mjGape",   "job": "87ebf994-60b1-4576-8707-a84d42357fda", "drawn": "the threat gape while beached or spent: his open jaws are the weak point" },
+      "hurt":   { "key": "mjHurt",   "job": "4c79447b-08b0-4f8a-add6-603a5dfb0a34", "drawn": "a blow that got through" },
+      "daze":   { "key": "mjDaze",   "job": "3f502c7f-176d-45af-a5c2-5788bdeefd17", "drawn": "the hit-group break" },
+      "die":    { "key": "mjDown",   "job": "30faea0e-4e9a-4b0f-832f-ab5fd6ca7654", "drawn": "the collapse, then the sinking" },
+      "dead":   { "from": "die:last", "drawn": "the last cell of the collapse, sinking" },
+      "signature": { "key": "mjRoll", "job": "6161c668-8194-4966-82ec-b562f11684cb", "drawn": "the death roll (the first roll take, a twist, refused)" },
+      "swim":   { "key": "mjSwim",   "job": "c0d41b65-f6d8-4b2c-81f9-7e2c7e15a2d3", "drawn": "every stroke paced by distance: under water, rising on the slant, backing into the water" },
+      "roar":   { "key": "mjBellow", "job": "69afb902-3730-4e91-a0cd-85c42b0f33b9", "drawn": "the bellow that opens phase two" }
+    }
+  },
+  "nullfang": { "rule": false, "since": "2026-10-04", "audit": "his studio strips (js/beast.js BEAST_STRIP)", "missing": ["notice", "defend"] },
+  "alpha":    { "rule": false, "since": "2026-11", "audit": "assets/characters/alpha (rest, prowl, roar, howl, leap, air, claw, bite, clinch, yield)", "missing": ["run", "turn", "crouch", "land", "defend", "hurt", "daze", "die"] },
+  "wolf":     { "rule": false, "audit": "js/wolves.js WOLF_ART", "missing": ["turn", "defend", "daze"] },
+  "cheetah":  { "rule": false, "audit": "js/wolves.js CHEETAH_ART", "missing": ["turn", "notice", "jump", "defend", "hurt", "daze"] },
+  "gravehorn": { "rule": false, "audit": "a parts rig with fired plates (js/gravehorn.js): poses, not takes — audited separately", "missing": [] }
+}
