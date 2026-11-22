@@ -91,8 +91,8 @@ function progressGoal(f) {
   // with nothing to play"). The sage's chamber (B4) was three rooms from the
   // way in, and nothing named the kingdom's mini-boss up the relay climb or the
   // agent who drowned its canals. Now the kingdom is played in order: the
-  // CARRIER first (its fall wakes a ring in the relay gallery, B6), then the
-  // agent UNDERTOW through it, and only then is TALONHOST's hall open
+  // CARRIER first, then MIREJAW; the second seal wakes the relay-gallery ring
+  // to agent UNDERTOW, and only then is TALONHOST's hall open
   // (world.js B3, gate_brood_ward).
   // ...AND THE ROAD IS LONGER NOW (owner, 2026-11-21): the CARRIER, the swamp's
   // crocodile (across Bilge's raft), the agent, the vault their three seals

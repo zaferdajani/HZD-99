@@ -7,9 +7,9 @@ const PURIFICATION_MOVIES = {glitch:'assets/video/purify_glitch_ritual.mp4'};
 if(!isHero()) Object.assign(PURIFY_VID,PURIFICATION_MOVIES);
 const PURIFICATION_WORDS = {
  en: ['Purify the guardian', 'Release, then hold E / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is purified.'],
- ar: ['طهّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تطهّر الحارس.'],
- tr: ['Muhafızı arındır', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız arındı.'],
- zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者已被净化。'],
+ ar: ['طهّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تم تطهير الحارس.'],
+ tr: ['Muhafızı arındır', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız arındırıldı.'],
+ zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者已净化。'],
  ru: ['Очистите стража', 'Отпустите, затем удерживайте E / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж очищен.']
 };
 function purificationPortrait() { return typeof TOUCH !== 'undefined' && TOUCH.enabled && window.innerHeight > window.innerWidth; }
@@ -25,7 +25,7 @@ function purificationEnsureButton() {
  if (purificationButton) return;
  const b = document.createElement('button'); b.type = 'button'; b.hidden = true;
  b.id = 'purification-hold'; b.style.cssText = 'position:fixed;z-index:10000;border:2px solid #fff3ba;border-radius:16px;background:#172431;color:#fffbe5;font:600 16px sans-serif;touch-action:none;user-select:none;box-shadow:0 0 24px #f9e4a755;';
- b.setAttribute('aria-label', purificationText(1));
+ b.setAttribute('aria-label', purificationText(0));
  b.addEventListener('pointerdown', e => { if (!G.purification || G.purification.phase !== 'hold') return; e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} purificationPointer = true; });
  for (const ev of ['pointerup','pointercancel','lostpointercapture']) b.addEventListener(ev, () => { purificationPointer = false; });
  b.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); purificationPointer = true; } });
