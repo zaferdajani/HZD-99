@@ -1,0 +1,8 @@
+{
+  "fired": "2026-11-22",
+  "why": "owner, 2026-11-22: \"create artwork for my hero when it's caught in the alligator's mouth and rolling with it\"",
+  "model": "gpt_image_2_6 (high, 2k, 2048x688)",
+  "references": { "pose and style": "assets/source/hero/delivered/v3/hurt.png", "back gear": "assets/source/hero/delivered/v2/walk_away.png, v4/walk_away_armed_{single,dual,joined}.png" },
+  "jobs": { "single (fired first)": "664c8d29-cc43-4a40-87d9-0d184298c2bc", "bare": "46b1616f-9ad5-4f18-8610-9d41accc63ab", "dual": "5bb82749-87d5-4da1-b32c-a70635119212", "joined": "5cab09c7-544a-4acc-a3c4-38fdd615df35" },
+  "delivery": "the model returned a pale fog instead of transparency: keyed by tools/keyheld.py (a flood from the border through faint or pale-unsaturated pixels, specks dropped, any light rim outside her dark outline removed), then tools/stepstrip.cjs --frames 8 --cell 256 --body 150 --center into characters/hero/held_roll_*.webp"
+}

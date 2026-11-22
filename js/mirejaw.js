@@ -73,6 +73,23 @@ const MJ_ART = {
 // level or up a bank — turns its strip over by the DISTANCE he covers, never by
 // the clock: one full cycle of each strip per this many px of travel.
 const MJ_STRIDE = { swim: 230, walk: 150, run: 260 };
+// SHE IS IN HIS JAWS WHILE HE ROLLS (owner, 2026-11-22: "create artwork for my hero
+// when it's caught in the alligator's mouth and rolling with it"). Her own painted
+// sheet — clamped at the waist, spun round like a ragdoll, one per weapon tier —
+// drawn UNDER his head at the grip in every cell of his roll, so his teeth close
+// over her middle. The grip, per roll cell, as a fraction of his cell (measured off
+// mjRoll: the snout's span, a jaw's length in from its tip).
+const MJ_HELD = { claws: 'heroHeldBare', single: 'heroHeldSingle', dual: 'heroHeldDual', joined: 'heroHeldJoined' };
+const MJ_HELD_CELLS = 8, MJ_HELD_SIZE = 157;   // her cell drawn so her body is her own height
+const MJ_ROLL_JAW = [[.185, .848], [.187, .845], [.187, .845], [.192, .835], [.197, .822], [.199, .738], [.197, .745], [.194, .755],
+                     [.192, .75], [.19, .74], [.192, .715], [.19, .772], [.19, .782], [.192, .715], [.19, .728], [.185, .745]];
+function mjHeldKey() { const w = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws'; return MJ_HELD[w] || MJ_HELD.claws; }
+// true while he holds her and her held sheet can be drawn: her ordinary body is not
+function mjHoldsHer() {
+  const B = G.boss; if (!B || !B.mj || !B.mj.held || B.st !== 'roll') return false;
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[mjHeldKey()];
+  return !!(im && im.naturalWidth);
+}
 
 function mjInit(b) {
   if (b.mj) return;
@@ -182,7 +199,7 @@ function mjPoseStep(b, dt) {
     tilt = -M.face * 0.2 * mjK(b);                                           // the nose comes up first
     M.paws = null;
   } else M.paws = null;
-  const snap = st === 'leap' || M.drawY == null;
+  const snap = st === 'leap' || M.drawY == null || M.hurtT > 0;   // a flinch holds him where he is
   M.drawY = snap ? y : M.drawY + (y - M.drawY) * Math.min(1, dt * 16);
   M.tilt = (M.tilt == null) ? tilt : M.tilt + (tilt - M.tilt) * Math.min(1, dt * 10);
 }
@@ -245,6 +262,7 @@ function mjStep(b, dt) {
         M.wx = mjNearestWater(M.wx); M.feet = mjSurfY() + 40; M.drawY = M.feet;
         M.face = Math.sign((player.x + player.w / 2) - M.wx) || M.face;
         mjSet(b, 'notice', MJ.notice);
+        if (typeof mediaFetch === 'function') mediaFetch(mjHeldKey(), 1);   // her held sheet, ahead of any bite
         playBuf('mj_bellow', 0.8);
       }
       break;
@@ -542,8 +560,23 @@ function mjDraw(c, b) {
   if (M.tilt) c.rotate(M.tilt);
   if (flip) c.scale(-1, 1);
   M.drawKey = key; M.drawCell = Math.max(0, i) % n;
+  M.heroDrawn = null;
+  const holding = st === 'roll' && M.held && key === 'mjRoll' && mjHoldsHer();
   if (b.hurtT > 0 && M.clink > 0) c.filter = 'brightness(1.25)';
   c.drawImage(im, (Math.max(0, i) % n) * cw, 0, cw, ch, -W / 2, -H, W, H);
+  if (holding) {
+    // her, over him at the front of his jaws, and then the band of his snout across
+    // her waist drawn again on top: his teeth close over her middle, the rest of her
+    // — head, arms, legs, cape — out of his mouth where she can be seen spinning
+    const him = MEDIA_IMG[mjHeldKey()], hcw = him.naturalWidth / MJ_HELD_CELLS;
+    const jw = MJ_ROLL_JAW[M.drawCell % MJ_ROLL_JAW.length], tip = jw[0] - 0.11;
+    const hx = (tip + 0.035 - 0.5) * W, hy = (jw[1] - 1) * H, hc = Math.floor(M.drawCell / 2) % MJ_HELD_CELLS;
+    c.drawImage(him, hc * hcw, 0, hcw, him.naturalHeight, hx - MJ_HELD_SIZE / 2, hy - MJ_HELD_SIZE / 2, MJ_HELD_SIZE, MJ_HELD_SIZE);
+    c.save(); c.beginPath(); c.rect((tip - 0.5) * W - 2, hy - 15, 0.11 * W, 30); c.clip();
+    c.drawImage(im, (Math.max(0, i) % n) * cw, 0, cw, ch, -W / 2, -H, W, H);
+    c.restore();
+    M.heroDrawn = { key: mjHeldKey(), cell: hc };
+  }
   c.restore();
   // the wave the tail sends along the ground
   if (M.wave) {

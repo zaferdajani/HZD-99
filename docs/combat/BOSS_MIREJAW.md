@@ -62,3 +62,7 @@ but like either swimming using its tail or legs... or to walk on the inclines".
 - **daze** has its own take; the **death roll** is a real log roll.
 - `tests/mirejaw.cjs` NOTHING SLIDES: a moving strip's cell turns within a stride's share of the
   distance covered, and every other strip is drawn only while his body is still.
+
+## She is in his jaws (2026-11-22)
+
+Through the death roll she is drawn from her own held sheet (one per weapon tier: claws, single, twin, joined), clamped at the waist and spun round with him, eight turns synced to his roll's sixteen cells; his snout is drawn again over her waist so his teeth close on her middle; her ordinary body is not drawn. `tests/mirejaw.cjs` IN HIS JAWS.

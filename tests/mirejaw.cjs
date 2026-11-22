@@ -203,6 +203,40 @@ const { chromium } = require('playwright');
     }, { FLAGS });
     await q.close();
   }
+  // ---- SHE IS IN HIS JAWS (owner, 2026-11-22: "create artwork for my hero when it's
+  // caught in the alligator's mouth and rolling with it"): through the roll her own
+  // held sheet for her weapon tier is drawn at his grip, spinning with him, and her
+  // ordinary body is not drawn
+  let HELD = null;
+  {
+    const q = await page();
+    HELD = await q.evaluate(async ({ FLAGS }) => {
+      const out = {};
+      for (const w of ['single', 'dual']) {
+        const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, FLAGS); sv.weaponMode = w; startGame(sv);
+        if (w !== 'single' && typeof grantWeapon === 'function') grantWeapon(w); G.save.weaponMode = w; loadRoom('SW3');
+        G.state = 'PLAY'; G.dialog = null; G.bossEntry = null;
+        for (const k of ['mjRoll', mjHeldKey()]) mediaFetch(k, true);
+        for (let i = 0; i < 200 && !(MEDIA_IMG.mjRoll && MEDIA_IMG.mjRoll.naturalWidth && MEDIA_IMG[mjHeldKey()] && MEDIA_IMG[mjHeldKey()].naturalWidth); i++) await new Promise(r => setTimeout(r, 25));
+        const B = G.boss; mjInit(B); const M = B.mj;
+        player.x = 18 * TILE; player.y = 300; M.wx = mjNearestWater(18 * TILE); M.feet = mjSurfY() + 40; M.face = 1;
+        M.held = true; M.rollFrom = { x: M.wx, feet: M.feet }; M.rollTo = M.wx; G.ghHold = true; mjSet(B, 'roll', 1.9);
+        let ordinary = 0; const d0 = player.draw.bind(player); player.draw = function (...a) { ordinary++; return d0(...a); };
+        const cells = new Set(), keysSeen = new Set(); let far = 0;
+        for (let f = 0; f < 80 && B.st === 'roll'; f++) {
+          G.dialog = null; update(1 / 60); draw(performance.now());
+          if (M.heroDrawn) { cells.add(M.heroDrawn.cell); keysSeen.add(M.heroDrawn.key); }
+          far = Math.max(far, Math.abs((player.x + player.w / 2) - mjHeadX(B)));
+        }
+        out[w] = { keys: [...keysSeen], cells: cells.size, ordinary, far: Math.round(far) };
+      }
+      return out;
+    }, { FLAGS });
+    await q.close();
+  }
+  check('IN HIS JAWS: through the roll she is drawn from her own held sheet, spinning (most of its turns)', HELD.single.keys.join() === 'heroHeldSingle' && HELD.single.cells >= 6, JSON.stringify(HELD.single));
+  check('...holding what she holds (her twin blades with them)', HELD.dual.keys.join() === 'heroHeldDual', JSON.stringify(HELD.dual));
+  check('...and her ordinary body is not drawn over it', HELD.single.ordinary === 0 && HELD.dual.ordinary === 0, HELD.single.ordinary + ' / ' + HELD.dual.ordinary);
   check('NOTHING SLIDES: a swimming, walking or running strip turns over with the distance he covers', S2.worst.moved <= 1.8, JSON.stringify(S2.worst) + ' (strides moved on one cell)');
   check('...and every other strip is drawn only while his body is still', Object.keys(S2.still).length === 0, JSON.stringify(S2.still));
   check('...his whole move set shows in a played fight', ['mjSwim', 'mjNotice', 'mjCrouch', 'mjLeap', 'mjLand', 'mjGape', 'mjWalk', 'mjTurn', 'mjRun'].every(k => S2.seen.includes(k)), S2.seen.join(' '));

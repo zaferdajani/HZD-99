@@ -451,6 +451,9 @@ const MEDIA_SRC = {
     mjNotice: 'assets/characters/croc/notice.webp', mjCrouch: 'assets/characters/croc/crouch.webp',
     mjLand: 'assets/characters/croc/land.webp', mjGape: 'assets/characters/croc/gape.webp',
     mjDaze: 'assets/characters/croc/daze.webp',
+    // HER, caught at the waist in his jaws and spun in the death roll (per weapon tier)
+    heroHeldBare: 'assets/characters/hero/held_roll_bare.webp', heroHeldSingle: 'assets/characters/hero/held_roll_single.webp',
+    heroHeldDual: 'assets/characters/hero/held_roll_dual.webp', heroHeldJoined: 'assets/characters/hero/held_roll_joined.webp',
     mjTail: 'assets/characters/croc/tailslam.webp',
     mjBellow: 'assets/characters/croc/bellow.webp',
     mjHurt: 'assets/characters/croc/hurt.webp',

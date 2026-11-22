@@ -111,6 +111,8 @@ visible projectile, so the flinch is the recoil take's rear-back; the winded
 pant is the recoil take's head-down tail (0.5 s period). Cycles measured
 distinct: prowl ≥ 0.239, gallop ≥ 0.432 (silhouette XOR / union).
 
+`hero/held-roll/` is HER IN MIREJAW'S JAWS (2026-11-22, owner: "create artwork for my hero when it's caught in the alligator's mouth and rolling with it"): four sheets as fired, one per weapon tier, of her clamped at the waist and spun round; `jobs.json` has the ids and how the fog backdrop was keyed. The clip `swamp/review/held_roll.mp4` shows it in the build.
+
 `hero/gate-step/` is HER STEP UP INTO A RAISED DOOR (2026-11-21, owner: "it raises
 a leg and climbs like a ladder or an elevated object, or it hops inside of it,
 which is also cute"). Eight sheets as fired, seen from behind — the climb over a

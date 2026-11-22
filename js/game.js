@@ -16200,7 +16200,8 @@ function drawWorldFrame() {
     // to be put back.
     if (player.iT > 0 && Math.floor(player.iT * 18) % 2 === 0) c.globalAlpha = 0.4;
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
-    if(!(typeof drawRatchetReleaseHero==='function'&&drawRatchetReleaseHero(c)))player.draw(c);
+    // (in MIREJAW's jaws she is drawn by him, under his teeth: js/mirejaw.js mjHoldsHer)
+    if(!(typeof drawRatchetReleaseHero==='function'&&drawRatchetReleaseHero(c))&&!(typeof mjHoldsHer==='function'&&mjHoldsHer()))player.draw(c);
     if (typeof drawPurificationWorld === 'function') drawPurificationWorld(c);
     c.globalAlpha = 1;
     if (typeof drawHeroHitFlash === 'function') drawHeroHitFlash(c, player);   // struck: her body lights (js/combat-stats.js)
