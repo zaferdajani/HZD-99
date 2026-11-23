@@ -6,9 +6,9 @@
 // named the CARRIER up the relay climb or the agent UNDERTOW. This holds the
 // order the kingdom is now played in, and that every step is pointed at:
 //   - first the CARRIER (B8): the goal says so and the arrow climbs B2 -> B7;
-//   - its fall wakes the ring on the relay gallery's floor (B6), down to
-//     UNDERTOW's tunnel — dark before, and the way back out after;
 //   - then the swamp (owner, 2026-11-21): the culvert, Bilge's raft, MIREJAW;
+//   - only both mini-boss seals wake the relay-gallery ring (B6), down to
+//     UNDERTOW's tunnel — dark before, and the way back out after;
 //   - the hall past B3 stays shut (with a line saying why) until UNDERTOW is
 //     purified, then the vault, the Prowler, the Foundry — and TALONHOST's hall
 //     stands EMPTY until the throw is hers; a save already past the eagle
@@ -35,7 +35,7 @@ const { chromium } = require('playwright');
     const o = {};
     const C = { bossCarrier: 1 }, M = { bossCarrier: 1, bossMirejaw: 1 }, U = Object.assign({ sageTame_GB1D: 1 }, M);
     o.b1 = stage({}, 'B1'); o.b2 = stage({}, 'B2'); o.b6 = stage({}, 'B6');
-    o.b1c = stage(C, 'B1'); o.b2c = stage(C, 'B2');
+    o.b1c = stage(C, 'B1'); o.b2c = stage(C, 'B2'); o.b6cOnly = stage(C, 'B6');
     o.sw1 = stage(Object.assign({ ferryPaid: 1 }, C), 'SW1');
     o.b1m = stage(M, 'B1'); o.b6c = stage(M, 'B6'); o.tun = stage(M, 'GB1T');
     o.done = stage(U, 'B3');
@@ -61,6 +61,7 @@ const { chromium } = require('playwright');
   check('...the hall is shut, and says why', !R.b1.hall && R.b1.why && !/^gate_/.test(R.b1.why), R.b1.why);
   check('...and the gallery ring stands dark', R.b6.doors.join() === 'GB1T!', R.b6.doors.join());
   check('then the swamp: the arrow goes to the culvert in the long conduit', R.b1c.goal === 'pg_goal_ferry' && R.b2c.doors.indexOf('SW1') >= 0 && R.b2c.step === 'SW1', JSON.stringify([R.b1c.goal, R.b2c.doors, R.b2c.step]));
+  check('CARRIER alone cannot skip MIREJAW and enter UNDERTOW', R.b6cOnly.doors.join() === 'GB1T!', R.b6cOnly.doors.join());
   check('...and once the fare is paid, across the water to the crocodile', R.sw1.goal === 'pg_goal_mire' && R.sw1.step === 'SW2', JSON.stringify([R.sw1.goal, R.sw1.step]));
   check('then the ring wakes the way to UNDERTOW', R.b1m.goal === 'pg_goal_undertow' && R.b1m.step === 'B6' && R.b6c.doors.join() === 'GB1T' && R.b6c.step === 'GB1T' && R.tun.step === 'GB1D', JSON.stringify([R.b1m.step, R.b6c.doors, R.b6c.step, R.tun.step]));
   check('...and the tunnel has its way back out', R.tun.doors.indexOf('B6') >= 0, R.tun.doors.join());

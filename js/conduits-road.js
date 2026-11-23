@@ -373,7 +373,11 @@ function k2Interact(s) {
   k2FerryOpen();
   return true;
 }
-function k2FerryOpen() { G.state = 'FERRY'; K2F.idx = 0; K2F.guard = 0.5; K2F.armed = false; }
+function k2FerryOpen() {
+  return overlayRequest(() => {
+    G.state = 'FERRY'; K2F.idx = 0; K2F.guard = 0.5; K2F.armed = false;
+  }, 'ferry');
+}
 function k2FerryChoose(i) {
   const f = G.save.flags;
   if (i === 2) { G.state = 'PLAY'; return; }

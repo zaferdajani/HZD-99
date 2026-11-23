@@ -295,11 +295,16 @@ const G = {
     stopMusic(); sfx('dieSting');
     this.state = 'DEAD'; this.deadT = 1.8;
   },
-  grantRelic(id) {
+  grantRelic(id, presentStored) {
     if (!this.save.relics) this.save.relics = [];
-    if (this.save.relics.indexOf(id) >= 0) return;
-    this.save.relics.push(id);
-    persist(); sfx('win');
+    const stored = this.save.relics.indexOf(id) >= 0;
+    if (stored && !presentStored) return;
+    if (!stored) {
+      if (presentStored) return;
+      this.save.relics.push(id);
+      persist();
+    }
+    sfx('win');
     loadoutTagCard(showItem(t('rl_' + id), t('rl_' + id + 'd')), 'relic', id);
   },
   maybeDropRelic(x, y) {
@@ -2768,13 +2773,14 @@ const NPC_GIFT = {
 // is its code hook — when the film asset lands it plays from here, and until
 // then the moment is the flash, the sting and the card. The grant itself
 // never waits on the art.
-function forgeCrystal() {
-  if (!grantWeapon('single')) return;
-  // ...and the trader packs his tools for the camp by the lion's door: the
-  // next time a room is loaded he stands there, not here (npcPlaced). He says
-  // so as he hands the job over (sl_ratchet_moving), never silently.
-  if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
-  persist();
+function forgeCrystal(presentStored) {
+  if (presentStored) {
+    if (!weaponOwned('single')) return false;
+  } else {
+    if (!grantWeapon('single')) return false;
+    if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
+    if (persist() === false) return false;
+  }
   sfx('chargeReady');
   G.flash = Math.max(G.flash, 0.6);
   if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
@@ -2792,6 +2798,7 @@ function forgeCrystal() {
   const card = showItem(t('i_crystal'), t('i_crystald'));
   if (card) card.onEnd = () => alphaQuestOffer();
   else if (G.dialog) G.dialog.onEnd = () => alphaQuestOffer();
+  return true;
 }
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
@@ -8043,13 +8050,18 @@ function tileGridId(id) {
   if (!n) { n = ++tileGridN; tileGridIds.set(g, n); }
   return n;
 }
+// A bake depends on WHICH cells were broken, not merely how many. Sorting
+// makes the signature stable across save insertion order while keeping two
+// equal-count/different-coordinate states distinct.
+function tileBreakSig(id, broken) {
+  const pre = id + ':';
+  return Object.keys(broken || {}).filter(k => broken[k] && k.lastIndexOf(pre, 0) === 0).sort().join(',');
+}
 function tileSig(id) {
   const def = ROOMS[id];
   if (!def) return '';
   const f = (G.save && G.save.flags) || {}, B = (G.save && G.save.broken) || {};
-  let br = 0;
-  const pre = id + ':';
-  for (const k in B) if (B[k] && k.lastIndexOf(pre, 0) === 0) br++;
+  const br = tileBreakSig(id, B);
   const ik = def.indoor ? (INDOOR_ART[id] || 'floorDen') : '';
   // the fracture modifier re-faces loose '#' as 'B' inside the bake, so a run
   // that gains or loses it must not reuse a bake made without it
@@ -11709,9 +11721,11 @@ const GATE_STORY = {
   CV3: { at: 36 / 56, to: 'GA1T', ax: 0.5, lock: 'crystal', lockLine: 'ring_dormant' },
   GA1T: { at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' },
   // CHAPTER TWO'S ROAD (progress.js): the relay gallery's floor carries a ring,
-  // dark until the CARRIER falls, down to UNDERTOW's tunnel — and back
-  B6: { at: 26 / 32, to: 'GB1T', ax: 0.5, lock: 'bossCarrier', lockLine: 'ring_dormant' },
-  GB1T: { at: 0.5, to: 'B6', ax: 26 / 32, need: 'bossCarrier' },
+  // dark until both seal-bearing mini-bosses have fallen. MIREJAW is only
+  // reachable after CARRIER, so its flag is the fail-closed proof that the
+  // player followed CARRIER -> swamp -> MIREJAW before UNDERTOW.
+  B6: { at: 26 / 32, to: 'GB1T', ax: 0.5, lock: 'bossMirejaw', lockLine: 'ring_dormant' },
+  GB1T: { at: 0.5, to: 'B6', ax: 26 / 32, need: 'bossMirejaw' },
 };
 // ---------------------------------------------------------------------------
 // A RING IS WOKEN, NOT POPPED IN (owner, 2026-11-16: "if you're going to show
