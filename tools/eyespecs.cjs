@@ -143,6 +143,19 @@ module.exports = [
     ({ key: k, cells: n, col: 'red|orange|purple', rule: 'front', region: [0, 0, 0.3, 0.6],
        // the pounce's two landing frames bury the face in the mane: placed
        at: k === 'beastStudioLeap' ? { 15: [0.15, 0.50], 24: [0.16, 0.70], 25: [0.15, 0.70] } : null })),
+  // The signature rear/swats/slam take is separate from beastRearSwipe. During
+  // the rise the forepaws become the silhouette's front, and during the slam
+  // the eye joins the muzzle glow, so automated "nearest the snout" selection
+  // chooses a paw or shoulder. These 30 points were inspected on the full
+  // gameplay contact sheet and sit on the filmed violet eye in every cell.
+  { key: 'beastStudioRear', cells: 30, rule: 'none', at: {
+    0:[0.1824,0.5918], 1:[0.1848,0.5956], 2:[0.1869,0.6096], 3:[0.1978,0.6182], 4:[0.2201,0.5707],
+    5:[0.2886,0.4206], 6:[0.3387,0.343], 7:[0.364,0.2869], 8:[0.3891,0.2257], 9:[0.4001,0.1735],
+    10:[0.4038,0.1536], 11:[0.4126,0.117], 12:[0.4096,0.0991], 13:[0.4082,0.0864], 14:[0.4063,0.0849],
+    15:[0.3994,0.0898], 16:[0.392,0.105], 17:[0.3763,0.1321], 18:[0.3672,0.1519], 19:[0.3376,0.207],
+    20:[0.2949,0.2828], 21:[0.222,0.469], 22:[0.1851,0.5934], 23:[0.1765,0.7981], 24:[0.189,0.8227],
+    25:[0.1891,0.7839], 26:[0.1872,0.7172], 27:[0.1867,0.6563], 28:[0.1816,0.6104], 29:[0.1823,0.5931]
+  } },
   // THE TURN (re-filmed 2026-11-14 from a real lion's turn) goes AWAY from the
   // camera: profile LEFT (the snout is the left tip) for three cells, then the
   // head swings round behind the mane and the body shows its back — ten cells
