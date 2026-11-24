@@ -11971,7 +11971,7 @@ function gateDoorNear(def) {
   if (def.style) return true;                       // booth, shrine, forge, carrel, hollow
   if (ringGateFor(def)) return true;                // a ring is an object she walks up to
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
-  return !!((G.roomDef && G.roomDef.cave) || (dest && dest.cave));   // and cave mouths
+  return !!((G.roomDef && (G.roomDef.cave || G.roomDef.grotto)) || (dest && (dest.cave || dest.grotto)));   // and cave mouths (and the sewer's grotto doors, js/sewer.js)
 }
 // EVERY DOOR IS A MACHINE RING (owner, 2026-11-15, on the outline arches this
 // replaces: "You have all the tools to build up awesome doors, and you end up
@@ -12014,7 +12014,8 @@ function ringGateFor(def) {
   if (def.style === 'den' || G.roomId === 'A10') return 'ringDen';
   if (def.style) return null;
   if ((G.roomId === 'CV3' && def.to === 'GA1T') || (G.roomId === 'GA1T' && def.to === 'CV3')) return 'ringQuarry';
-  if (G.roomDef.cave) return 'ringCave';
+  // (inside a guardian's network the way out is a ring — the sewer too, js/sewer.js)
+  if (G.roomDef.cave || G.roomDef.grotto) return 'ringCave';
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
   if (!(dest && (dest.cave || dest.grotto))) return null;
   if (def.to[0] === 'G' && GATE_PLATE_BY_ZONE[G.roomDef.zone]) return null;
@@ -12202,8 +12203,9 @@ function drawGateDoor(P, def, nearPlane) {
     if (G.artProbe) return;
   }
   // (a guardian's network that is not rock — the sewer, js/sewer.js — says so with `grotto`)
+  // (a door with a look of its own — the sewer's hatch — keeps it)
   const guardDoor = dest && (dest.cave || dest.grotto) && !(G.roomDef && (G.roomDef.cave || G.roomDef.grotto))
-    && def.to && def.to[0] === 'G';
+    && def.to && def.to[0] === 'G' && !def.style;
   const gzp = guardDoor && GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
   const gzim = gzp && scenePlate(gzp);
   // THE MEASUREMENT HOOK. tests/kingdom.cjs asks what share of a door is its
@@ -12230,7 +12232,7 @@ function drawGateDoor(P, def, nearPlane) {
     return;
   }
   // cave on EITHER side of the passage: it is a mouth, not a door
-  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) {
+  if ((G.roomDef && (G.roomDef.cave || G.roomDef.grotto)) || (dest && (dest.cave || dest.grotto))) {
     // The dedicated room painting already contains this exact opening.
     // Drawing a second mouth over it creates the pasted-on layer reported by
     // the owner. Rubble and the interaction remain at its shared world anchor.

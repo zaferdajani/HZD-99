@@ -143,7 +143,7 @@ function swLidCell(t) { const h = swHatchCell(t); return h <= 1 ? 0 : h === 2 ? 
 // as near along as the floor beside it, and from there the whole opening played
 // at floor level, off the top of her camera.
 function swHatchReach(def) {
-  if (!player || !player.on || !G.roomDef) return false;
+  if (!player || !G.roomDef) return false;
   return Math.abs(player.y + player.h - (G.roomDef.h - 2) * TILE) < 24;
 }
 // gateEnter hands the hatch over here: she lines up LEFT of the hole, facing it
