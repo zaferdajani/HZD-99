@@ -112,7 +112,10 @@ function manifest() {
       // stand-in for a body in motion, seen for a second before its sheet lands:
       // it takes a little less, so a species' whole move set fits the budget
       // (2026-11-22: MIREJAW's full set, docs/SPECIES_MOVESET.md)
-      const q = im.naturalWidth >= 4000 && im.naturalHeight <= 320 ? QUALITY * 0.8 : QUALITY;
+      // ...and so does any strip of eight cells or more (2026-11-24: the sewer's
+      // hatch, her steps through doors, Rivet's loop) — the same stand-in, shorter
+      const strip = (im.naturalWidth >= 4000 && im.naturalHeight <= 320) || im.naturalWidth >= 8 * im.naturalHeight;
+      const q = strip ? QUALITY * 0.8 : QUALITY;
       return { url: cv.toDataURL('image/webp', q), w: W, h: H,
                fw: im.naturalWidth, fh: im.naturalHeight };
     }, { b64, mime, SCALE, QUALITY });

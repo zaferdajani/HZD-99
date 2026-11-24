@@ -2402,7 +2402,6 @@ function doorPadCols(id) {
   if (id === 'CV3') ats.push(36 / 56);       // the maintenance landing (gateDoorsAll)
   if (id === 'GA1T') ats.push(0.5);
   if (id === 'B6') ats.push(26 / 32);       // the relay gallery's ring to UNDERTOW (gateDoorsAll)
-  if (id === 'GB1T') ats.push(0.5);
   return ats.map(a => Math.max(1, Math.min(def.w - 2, Math.floor(a * def.w))));
 }
 function levelDoorPads(g, id) {

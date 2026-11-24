@@ -2178,7 +2178,7 @@ class Player {
     this.dashTrailT = 0;                                 // afterimage spawn metronome
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
-  speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
+  speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1) * (typeof swShellSpeedK === 'function' ? swShellSpeedK() : 1); }
   // weaponAtk is the tier she is HOLDING (js/weapons.js): the one multiplier
   // that makes an earned sword worth earning. Every other move reads dmg(), so
   // the combo, finisher, burst, hurricane and throw all inherit it from here.
@@ -3663,6 +3663,10 @@ class Player {
       burst(pcx + faceDir * 12, this.y + this.h * 0.45, 16, '#ffd76a', 260, 0.45, 160, 2.6, true);
     }
     if (guarded) d = Math.max(1, Math.round(d * (1 - GUARD_REDUCTION)));
+    // THE HIDE SHELL on her back (js/sewer.js): a blow from behind rings off
+    // it (it heats like the brace), and a heavy one comes through lighter
+    if (typeof swShellTurn === 'function' && swShellTurn(this, fromX, src)) return;
+    if (typeof swShellCut === 'function') d = swShellCut(d);
     if (relicHas('aegis') && !G.save.usedAegis) {
       G.save.usedAegis = true;
       this.iT = 1.2;
@@ -4868,6 +4872,8 @@ class Player {
     // OUTSIDE the guard and draw either way.
     // (the cell that draws her this frame is remembered — whichever drawer it
     // came through, a stride or a swing — so a dash can leave HER behind it)
+    // the hide shell on her back goes behind her body (js/sewer.js)
+    if (typeof swShellOverlay === 'function') swShellOverlay(c, this._echoPose);
     HERO_ECHO.rec = true; HERO_ECHO.last = null;
     const _plate = this.drawRoboPlate(c, run);
     HERO_ECHO.rec = false; this._echoPose = HERO_ECHO.last;

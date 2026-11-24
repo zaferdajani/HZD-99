@@ -6,9 +6,11 @@
 // named the CARRIER up the relay climb or the agent UNDERTOW. This holds the
 // order the kingdom is now played in, and that every step is pointed at:
 //   - first the CARRIER (B8): the goal says so and the arrow climbs B2 -> B7;
-//   - its fall wakes the ring on the relay gallery's floor (B6), down to
-//     UNDERTOW's tunnel — dark before, and the way back out after;
+//   - its fall frees the HATCH in the relay gallery's floor (B6, owner
+//     2026-11-24: a sewer entered like Super Mario) — rusted shut before —
+//     down into the sewer, where Rivet the pipe-smith asks for MIREJAW's skin;
 //   - then the swamp (owner, 2026-11-21): the culvert, Bilge's raft, MIREJAW;
+//   - back to Rivet with the skin: the shell, and the tunnel to UNDERTOW;
 //   - the hall past B3 stays shut (with a line saying why) until UNDERTOW is
 //     purified, then the vault, the Prowler, the Foundry — and TALONHOST's hall
 //     stands EMPTY until the throw is hers; a save already past the eagle
@@ -33,11 +35,13 @@ const { chromium } = require('playwright');
       const g = progressGoal(G.save.flags), step = g ? pgRouteStep(pgGoalRoom(g, G.save.flags)) : null;
       return { goal: g, words: g ? t(g) : '', step: step && (step.to || step), doors: gateDoors(room).map(d => d.to + (gateLocked(d) ? '!' : '')), hall: exitOpen(ROOMS.B3.exits.R), why: t(ROOMS.B3.exits.R.why) }; };
     const o = {};
-    const C = { bossCarrier: 1 }, M = { bossCarrier: 1, bossMirejaw: 1 }, U = Object.assign({ sageTame_GB1D: 1 }, M);
+    const C0 = { bossCarrier: 1 }, C = { bossCarrier: 1, smithAsked: 1 }, M = { bossCarrier: 1, smithAsked: 1, bossMirejaw: 1 }, S = Object.assign({ shellMade: 1, shellOwned: 1 }, M), U = Object.assign({ sageTame_GB1D: 1 }, S);
     o.b1 = stage({}, 'B1'); o.b2 = stage({}, 'B2'); o.b6 = stage({}, 'B6');
+    o.b1s = stage(C0, 'B1'); o.b6s = stage(C0, 'B6');
     o.b1c = stage(C, 'B1'); o.b2c = stage(C, 'B2');
     o.sw1 = stage(Object.assign({ ferryPaid: 1 }, C), 'SW1');
-    o.b1m = stage(M, 'B1'); o.b6c = stage(M, 'B6'); o.tun = stage(M, 'GB1T');
+    o.b1m = stage(M, 'B1'); o.b6m = stage(M, 'B6');
+    o.gal = stage(S, 'GB1'); o.tun = stage(S, 'GB1T');
     o.done = stage(U, 'B3');
     o.vault = stage(Object.assign({ vaultOpen: 1 }, U), 'B5');
     o.prow = stage(Object.assign({ vaultOpen: 1, bossPrism: 1 }, U), 'B3');
@@ -46,8 +50,8 @@ const { chromium } = require('playwright');
     o.old = stage({ bossBrood: 1 }, 'B3');
     o.after = stage(Object.assign({ vaultOpen: 1, bossPrism: 1, bossAtlas: 1, connector: 1, crystal2: 1, bossBrood: 1 }, U), 'B6');
     // a ring without its picture: no strokes
-    const st = stage({ bossCarrier: 1 }, 'B6');
-    const d = gateDoors('B6')[0]; player.x = gateWorldX(d) - 60;
+    const st = stage(S, 'GB1');
+    const d = gateDoors('GB1')[0]; player.x = gateWorldX(d) + 60;
     const keys = Object.keys(RING_GATE); const saved = {}; for (const k of keys) { saved[k] = MEDIA_IMG[k]; delete MEDIA_IMG[k]; }
     const mf = window.mediaFetch; window.mediaFetch = () => {};
     const P = CanvasRenderingContext2D.prototype, so = P.stroke; let strokes = 0;
@@ -59,11 +63,13 @@ const { chromium } = require('playwright');
   });
   check('first the CARRIER: the goal names it and the arrow climbs to it', R.b1.goal === 'pg_goal_carrier' && R.b1.step === 'B2' && R.b2.step === 'B7', JSON.stringify([R.b1.words, R.b1.step, R.b2.step]));
   check('...the hall is shut, and says why', !R.b1.hall && R.b1.why && !/^gate_/.test(R.b1.why), R.b1.why);
-  check('...and the gallery ring stands dark', R.b6.doors.join() === 'GB1T!', R.b6.doors.join());
+  check('...and the gallery\'s hatch is rusted shut', R.b6.doors.join() === 'GB1!', R.b6.doors.join());
+  check('the CARRIER down: the arrow goes to the hatch, and the hatch opens into the sewer', R.b1s.goal === 'pg_goal_sewer' && R.b1s.step === 'B6' && R.b6s.doors.join() === 'GB1' && R.b6s.step === 'GB1', JSON.stringify([R.b1s.goal, R.b1s.step, R.b6s.doors, R.b6s.step]));
   check('then the swamp: the arrow goes to the culvert in the long conduit', R.b1c.goal === 'pg_goal_ferry' && R.b2c.doors.indexOf('SW1') >= 0 && R.b2c.step === 'SW1', JSON.stringify([R.b1c.goal, R.b2c.doors, R.b2c.step]));
   check('...and once the fare is paid, across the water to the crocodile', R.sw1.goal === 'pg_goal_mire' && R.sw1.step === 'SW2', JSON.stringify([R.sw1.goal, R.sw1.step]));
-  check('then the ring wakes the way to UNDERTOW', R.b1m.goal === 'pg_goal_undertow' && R.b1m.step === 'B6' && R.b6c.doors.join() === 'GB1T' && R.b6c.step === 'GB1T' && R.tun.step === 'GB1D', JSON.stringify([R.b1m.step, R.b6c.doors, R.b6c.step, R.tun.step]));
-  check('...and the tunnel has its way back out', R.tun.doors.indexOf('B6') >= 0, R.tun.doors.join());
+  check('with the skin, back down the hatch to Rivet', R.b1m.goal === 'pg_goal_smith' && R.b1m.step === 'B6' && R.b6m.step === 'GB1', JSON.stringify([R.b1m.goal, R.b1m.step, R.b6m.step]));
+  check('the shell made, the tunnel leads on to UNDERTOW', R.gal.goal === 'pg_goal_undertow' && R.gal.step === 'GB1T' && R.tun.step === 'GB1D', JSON.stringify([R.gal.goal, R.gal.step, R.tun.step]));
+  check('...and the sewer has its way back out (the gallery\'s ring to the hall)', R.gal.doors.indexOf('B4') >= 0, R.gal.doors.join());
   check('three seals: the hall opens and the arrow goes on to the vault', R.done.goal === 'pg_goal_vault' && R.done.hall && R.done.step === 'B4', JSON.stringify([R.done.goal, R.done.hall, R.done.step]));
   check('...the vault opens the climb to the Prowler', R.vault.goal === 'pg_goal_prowler' && R.vault.step === 'X1', JSON.stringify([R.vault.goal, R.vault.step]));
   check('the Prowler purified: on to the Foundry', R.prow.goal === 'pg_goal_furnace', R.prow.goal);

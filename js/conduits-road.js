@@ -435,7 +435,14 @@ function k2PoleLive() { const f = G.save.flags; return !f.k2pole && !f.ferryPaid
 // Kingdom 2 in order, from the save alone (js/progress.js progressGoal calls this)
 function k2Goal(f) {
   if (!f.bossCarrier) return 'pg_goal_carrier';
-  if (!f.bossMirejaw) return f.ferryPaid ? 'pg_goal_mire' : 'pg_goal_ferry';
+  // THE SEWER (js/sewer.js): down the hatch to Rivet first — he is who sends
+  // her after the crocodile's skin — and back to him with it before UNDERTOW
+  const sewer = typeof swOn === 'function' && swOn();
+  if (!f.bossMirejaw) {
+    if (sewer && !f.smithAsked && !f.sageTame_GB1D) return 'pg_goal_sewer';
+    return f.ferryPaid ? 'pg_goal_mire' : 'pg_goal_ferry';
+  }
+  if (sewer && !f.shellMade && !f.sageTame_GB1D) return 'pg_goal_smith';
   if (!f.sageTame_GB1D) return 'pg_goal_undertow';
   if (!f.vaultOpen) return 'pg_goal_vault';
   if (!f.bossPrism) return 'pg_goal_prowler';
@@ -446,7 +453,7 @@ function k2Goal(f) {
 }
 function k2GoalRoom(key) {
   return ({ pg_goal_ferry: 'SW1', pg_goal_mire: 'SW3', pg_goal_vault: 'B5', pg_goal_prowler: 'X1',
-            pg_goal_furnace: 'C3', pg_goal_connector: 'C4' })[key] || null;
+            pg_goal_furnace: 'C3', pg_goal_connector: 'C4' })[key] || (typeof swGoalRoom === 'function' ? swGoalRoom(key) : null);
 }
 
 // ---- words: robot world, all five languages --------------------------------

@@ -13,7 +13,7 @@
 //   - frame 1's soles on `--floor` (311, the walk clip's floor row); every other
 //     frame keeps its own height above it; each frame centred on its own ink.
 //
-//   node tools/stepstrip.cjs <sheet.png> <out.png> [--cell 320] [--body 183] [--floor 311] [--frames 8] [--center]
+//   node tools/stepstrip.cjs <sheet.png> <out.png> [--cell 320] [--body 183] [--floor 311] [--frames 8] [--center] [--feet]
 //   then: node tools/towebp.cjs <out.png> <out.webp> 0.9
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
@@ -21,12 +21,12 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? +args[i + 1] : d; };
 const [src, out] = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1].startsWith('--')));
 if (!src || !out) { console.error('usage: node tools/stepstrip.cjs <sheet.png> <out.png> [--cell 320] [--body 183] [--floor 311]'); process.exit(1); }
-const CELL = opt('cell', 320), BODY = opt('body', 183), FLOOR = opt('floor', 311), NF = opt('frames', 0), CENTER = args.includes('--center');
+const CELL = opt('cell', 320), BODY = opt('body', 183), FLOOR = opt('floor', 311), NF = opt('frames', 0), CENTER = args.includes('--center'), FEET = args.includes('--feet');
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   const url = 'data:image/png;base64,' + fs.readFileSync(src).toString('base64');
-  const r = await p.evaluate(async ({ url, CELL, BODY, FLOOR, NF, CENTER }) => {
+  const r = await p.evaluate(async ({ url, CELL, BODY, FLOOR, NF, CENTER, FEET }) => {
     const img = new Image(); img.src = url; await img.decode();
     const W = img.naturalWidth, H = img.naturalHeight;
     const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -57,12 +57,19 @@ const CELL = opt('cell', 320), BODY = opt('body', 183), FLOOR = opt('floor', 311
       const w = (f.x1 - f.x0 + 1) * k, h = (f.b - f.t + 1) * k;
       // --center: a body turning about its middle (held in a jaw, spun) — each frame's
       // ink centred in its cell instead of seated on a floor
-      const dx = n * CELL + CELL / 2 - w / 2, dy = CENTER ? CELL / 2 - h / 2 : FLOOR - (sole0 - f.t) * k;
+      // --feet: a body reaching out (an arm to a lid, a blade) is centred on its
+      // LEGS — the bottom fifth of its ink — so the reach goes out from where
+      // she stands instead of pushing her body back to keep the box centred
+      let mid = (f.x1 - f.x0 + 1) / 2;
+      if (FEET) { let a0 = 1e9, a1 = -1; const y0 = f.b - Math.round((f.b - f.t) * 0.2);
+        for (let i = f.x0; i <= f.x1; i++) for (let j = y0; j <= f.b; j++) if (ink(i, j)) { if (i < a0) a0 = i; if (i > a1) a1 = i; }
+        if (a1 >= a0) mid = (a0 + a1) / 2 - f.x0 + 0.5; }
+      const dx = n * CELL + CELL / 2 - mid * k, dy = CENTER ? CELL / 2 - h / 2 : FLOOR - (sole0 - f.t) * k;
       ox.drawImage(c, f.x0, f.t, f.x1 - f.x0 + 1, f.b - f.t + 1, dx, dy, w, h);
       placed.push({ top: Math.round(dy), sole: Math.round(dy + h), clipped: dy < 0 || dx < n * CELL || dx + w > (n + 1) * CELL });
     });
     return { n: box.length, scale: +k.toFixed(3), placed, png: o.toDataURL('image/png') };
-  }, { url, CELL, BODY, FLOOR, NF, CENTER });
+  }, { url, CELL, BODY, FLOOR, NF, CENTER, FEET });
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, Buffer.from(r.png.split(',')[1], 'base64'));
   console.log(path.basename(src), r.n, 'frames, scale', r.scale, 'soles', r.placed.map(q => q.sole).join(' '), r.placed.some(q => q.clipped) ? 'CLIPPED' : '');

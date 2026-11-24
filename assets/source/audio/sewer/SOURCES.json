@@ -1,0 +1,113 @@
+{
+  "note": "Sewer sounds for the hatch and the drain. All Freesound files are the public HQ preview MP3s (128 kbps), not the original WAV/FLAC (originals need a login). Every licence was read on the sound's own page (licence link http://creativecommons.org/publicdomain/zero/1.0/). Durations measured with ffprobe on the downloaded files. Judgements are from page title/description/tags plus a rough loudness, band-energy and envelope check, not listening. Dropped: 'Manhole Blows / Metallic Boom' (bevibeldesign 366093) is labelled CC0 but is built partly from Robinhood76 70799, which is CC BY-NC 4.0.",
+  "files": [
+    {
+      "file": "hatch_open_wolfpackbrickfilms_708772.mp3",
+      "category": "hatch_open",
+      "title": "Manhole Cover Moving",
+      "author": "WolfpackBrickfilms",
+      "page": "https://freesound.org/people/WolfpackBrickfilms/sounds/708772/",
+      "download": "https://cdn.freesound.org/previews/708/708772_15095852-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 5.56,
+      "page_duration_s": 5.51,
+      "sounds_like": "A real manhole cover being moved (tags: manhole, metal, concrete, grinding, grating): broadband metal-on-concrete scrape, strongest around 1.5 s then fading. The exact subject, but quiet (mean -38.5 dB) and with little low end, so it needs gain; no creak/groan."
+    },
+    {
+      "file": "hatch_open_kyles_637583.mp3",
+      "category": "hatch_open",
+      "title": "gate big rusty metal door garage open heavy creak rattle.flac",
+      "author": "kyles",
+      "page": "https://freesound.org/people/kyles/sounds/637583/",
+      "download": "https://cdn.freesound.org/previews/637/637583_612689-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 6.38,
+      "page_duration_s": 6.34,
+      "sounds_like": "Big rusty metal garage door/gate swung open: one loud heavy creak with rattle, swelling to a peak at about 2 s and dying by 3.5 s. Best rusty creak/groan; it is a door, not a lid, so no ground scrape."
+    },
+    {
+      "file": "hatch_open_thexrschool_790252.mp3",
+      "category": "hatch_open",
+      "title": "creaky_door_lound grind then squeak and grind at the end",
+      "author": "theXRschool.com",
+      "page": "https://freesound.org/people/theXRschool.com/sounds/790252/",
+      "download": "https://cdn.freesound.org/previews/790/790252_16337031-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 5.25,
+      "page_duration_s": 5.21,
+      "sounds_like": "Slow grind, a squeak, then a grind again; the uploader says it could be a heavy door or a coffin lid. Even level for about 3.5 s, mid-range; reads as a heavy lid dragged open. Material (metal or wood) not stated."
+    },
+    {
+      "file": "hatch_clang_kyles_406197.mp3",
+      "category": "hatch_clang",
+      "title": "door metal big heavy close kinda slam thud echo offmic.wav",
+      "author": "kyles",
+      "page": "https://freesound.org/people/kyles/sounds/406197/",
+      "download": "https://cdn.freesound.org/previews/406/406197_612689-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 3.0,
+      "page_duration_s": 2.96,
+      "sounds_like": "A big heavy metal door closed hard: one low, weighty slam-thud with a room echo, decaying over about 1 s. Low-heavy (most energy below 250 Hz). Best heavy single hit; more thud than ring."
+    },
+    {
+      "file": "hatch_clang_lunardrive_48980.mp3",
+      "category": "hatch_clang",
+      "title": "Metal Door Slam_SoundSmith.wav",
+      "author": "Lunardrive",
+      "page": "https://freesound.org/people/Lunardrive/sounds/48980/",
+      "download": "https://cdn.freesound.org/previews/48/48980_120830-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 1.25,
+      "page_duration_s": 1.2,
+      "sounds_like": "A metal industrial door slammed shut, no effects added (per the page): one short, dry, low slam. Clean single hit; short tail, so it may want reverb for a tunnel."
+    },
+    {
+      "file": "hatch_clang_animusic_167917.mp3",
+      "category": "hatch_clang",
+      "title": "Hard steel chain plate drop",
+      "author": "ani_music",
+      "page": "https://freesound.org/people/ani_music/sounds/167917/",
+      "download": "https://cdn.freesound.org/previews/167/167917_3008343-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 3.32,
+      "page_duration_s": 3.28,
+      "sounds_like": "A steel chain/plate dropped, with reverb; the uploader says it 'almost sounds like a manhole cover'. One bright metallic clang with a reverberant tail. Thin in the lows (energy mostly above 2 kHz), so less weighty than the two above, and slightly over 3 s."
+    },
+    {
+      "file": "sewer_amb_klangfabrik_123721.mp3",
+      "category": "sewer_amb",
+      "title": "StormSewer.aiff",
+      "author": "klangfabrik",
+      "page": "https://freesound.org/people/klangfabrik/sounds/123721/",
+      "download": "https://cdn.freesound.org/previews/123/123721_181941-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 91.12,
+      "page_duration_s": 91.07,
+      "sounds_like": "Civic storm sewer recorded from the manhole: steady rushing water in a narrow concrete chamber with tight, comb-filtered reverb. Level flat within about 2 dB for the whole 91 s, no swells in the low band (no sign of traffic). Best flowing bed; continuous flow rather than separate drips."
+    },
+    {
+      "file": "sewer_amb_prodmultimediashqi_512497.mp3",
+      "category": "sewer_amb",
+      "title": "lapping water in a sewer.wav",
+      "author": "ProdMultimediasHQI",
+      "page": "https://freesound.org/people/ProdMultimediasHQI/sounds/512497/",
+      "download": "https://cdn.freesound.org/previews/512/512497_11159345-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 135.6,
+      "page_duration_s": 135.56,
+      "sounds_like": "Slight water lapping in a sewer 'giving lots of echos' (page). Bright and watery, almost nothing below 250 Hz, steady level with small lapping movements; no low-band swells suggesting traffic. Gentler and more echoing than the storm sewer."
+    },
+    {
+      "file": "sewer_amb_william020304_593650.mp3",
+      "category": "sewer_amb",
+      "title": "Underground Ambiance.wav",
+      "author": "William020304",
+      "page": "https://freesound.org/people/William020304/sounds/593650/",
+      "download": "https://cdn.freesound.org/previews/593/593650_12595063-hq.mp3",
+      "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+      "duration_s": 120.03,
+      "page_duration_s": 120.0,
+      "sounds_like": "An underground room/tunnel leaking and dripping water: sparse individual drips over a quiet room tone. Quiet (mean -45 dB), needs gain. The drip layer the other two lack; could sit under either of them."
+    }
+  ]
+}

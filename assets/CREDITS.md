@@ -251,3 +251,19 @@ anyway. Licence: `source/audio/kenney-impact/License.txt`.
 | `sfx/swamp/k2_punt.ogg` | **"Punting on Cam water lapping 2" by itinerantmonk108** — https://freesound.org/people/itinerantmonk108/sounds/700576/ | **CC0 1.0**. The raft's pole |
 
 Masters (the public preview MP3s) and `SOURCES.json` with every page and licence are in `source/audio/swamp/`. Real recordings, never oscillators.
+
+## The sewer — UNDERTOW's caves in the robot world (2026-11-24)
+
+| file | source | what |
+|---|---|---|
+| `backgrounds/sewer_gallery.jpg`, `sewer_tunnel.jpg`, `sewer_cistern.jpg` | Higgsfield, GPT Image 2.6 | the sewer's three paintings; as-fired in `source/sewer/2026-11-24/` |
+| `characters/sewer/hatch.webp` | Higgsfield, GPT Image 2.6 (background removed by Higgsfield) | the rusty floor hatch in four states, closed to thrown open; cut by `tools/stepstrip.cjs` |
+| `characters/hero/hatch_{bare,single,dual,joined}.webp` | Higgsfield, GPT Image 2.6 | HER, OPENING IT: crouch, strain, lift, push, look, hop, air, drop — one sheet per blade, from her canon element; cut by `tools/stepstrip.cjs --feet` |
+| `characters/sewer/smith.webp`, `smith_talk.webp` | Higgsfield, GPT Image 2.6 (design) + Kling 3.0 Turbo (take) | Rivet the pipe-smith, and his loop cut by `tools/vidstrip.cjs`; take in `source/sewer/takes/` |
+| `characters/sewer/skin.webp`, `shell_side.webp`, `shell_back.webp` | Higgsfield, GPT Image 2.6 | MIREJAW's shed skin and the hide shell made of it |
+| `music/mus_sewer.m4a` | Higgsfield, ElevenLabs Music v2.5 | the sewer's zone loop, mastered to −17 LUFS; as-fired in `source/music/mus_sewer_asfired.mp3` |
+| `sfx/sewer/sw_creak.ogg` | **"gate big rusty metal door garage open heavy creak rattle" by kyles** — https://freesound.org/people/kyles/sounds/637583/ layered over **"Manhole Cover Moving" by WolfpackBrickfilms** — https://freesound.org/people/WolfpackBrickfilms/sounds/708772/ | both **CC0 1.0**. The hatch's groan and scrape |
+| `sfx/sewer/sw_clang.ogg` | **"door metal big heavy close kinda slam thud echo offmic" by kyles** — https://freesound.org/people/kyles/sounds/406197/ | **CC0 1.0**. The lid falling open; Rivet's hammer |
+| `sfx/sewer/sw_amb.ogg` | **"StormSewer" by klangfabrik** — https://freesound.org/people/klangfabrik/sounds/123721/ | **CC0 1.0**. Water running through the tunnels under the score |
+
+Masters (the public preview MP3s), the alternates and `SOURCES.json` with every page and licence are in `source/audio/sewer/`. Real recordings, never oscillators.

@@ -534,6 +534,27 @@
    ]
   },
   {
+   "id": "rivet",
+   "room": "GB1",
+   "requires": [
+    "bossCarrier"
+   ],
+   "sets": [
+    "smithAsked"
+   ],
+   "speaker": "Rivet (the pipe-smith)",
+   "knows": "The cistern below holds something her thin plate will not survive; the swamp's crocodile sheds a hide he can forge into a shell.",
+   "pointer": "The CARRIER's fall frees the hatch in the relay gallery's floor (B6 -> GB1, she drops into the sewer); the goal line (pg_goal_sewer)",
+   "lines": [
+    "sw_smith_1",
+    "sw_smith_2",
+    "sw_smith_3"
+   ],
+   "introduces": [
+    "Rivet"
+   ]
+  },
+  {
    "id": "ferry",
    "room": "SW1",
    "requires": [
@@ -574,17 +595,37 @@
    "introduces": []
   },
   {
+   "id": "shell",
+   "room": "GB1",
+   "requires": [
+    "bossMirejaw",
+    "smithAsked"
+   ],
+   "sets": [
+    "shellMade"
+   ],
+   "speaker": "Rivet (the pipe-smith)",
+   "knows": "MIREJAW's shed skin makes a shell: it slows her and turns what comes from behind.",
+   "pointer": "MIREJAW's skin card ('Take it to Rivet in the sewer', sw_skind); the goal line (pg_goal_smith)",
+   "lines": [
+    "sw_smith_craft",
+    "sw_smith_after"
+   ],
+   "introduces": []
+  },
+  {
    "id": "undertow",
    "room": "GB1D",
    "requires": [
-    "bossCarrier"
+    "bossCarrier",
+    "shellMade"
    ],
    "sets": [
     "sageTame_GB1D"
    ],
    "speaker": "UNDERTOW (the second kingdom's agent)",
    "knows": "He drowned the data canals inside his own head; purified, he gives back the vault's last seal.",
-   "pointer": "The CARRIER's fall wakes the ring on the relay gallery's floor (B6 → GB1T); the goal line (pg_goal_undertow)",
+   "pointer": "Rivet opens the sewer tunnel once the shell is made (GB1 -> GB1T -> GB1D); the goal line (pg_goal_undertow)",
    "lines": [],
    "introduces": [],
    "relics": [

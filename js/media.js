@@ -435,6 +435,17 @@ const MEDIA_SRC = {
     swampWallow: 'assets/backgrounds/swamp_wallow.jpg',
     swampOutfall: 'assets/backgrounds/swamp_outfall.jpg',
     culvertMouth: 'assets/characters/swamp/culvert.webp',
+    // THE SEWER (js/sewer.js; owner, 2026-11-24): its three paintings, the floor
+    // hatch, Rivet the pipe-smith, MIREJAW's shed skin and the shell made of it
+    sewerGallery: 'assets/backgrounds/sewer_gallery.jpg',
+    sewerTunnel: 'assets/backgrounds/sewer_tunnel.jpg',
+    sewerCistern: 'assets/backgrounds/sewer_cistern.jpg',
+    sewerHatch: 'assets/characters/sewer/hatch.webp',
+    sewerSmithTalk: 'assets/characters/sewer/smith_talk.webp',
+    sewerSmith: 'assets/characters/sewer/smith.webp',
+    sewerSkin: 'assets/characters/sewer/skin.webp',
+    sewerShellSide: 'assets/characters/sewer/shell_side.webp',
+    sewerShellBack: 'assets/characters/sewer/shell_back.webp',
     raftPlate: 'assets/characters/swamp/raft.webp',
     bilgePole: 'assets/characters/swamp/bilge_pole.webp',
     bilgeTalk: 'assets/characters/swamp/bilge_talk.webp',
@@ -546,6 +557,9 @@ const MEDIA_SRC = {
     // the step up into a raised door, from behind, per weapon tier (js/game.js GATE_STEP)
     heroClimbBare: 'assets/characters/hero/gate_climb_bare.webp', heroClimbSingle: 'assets/characters/hero/gate_climb_single.webp',
     heroClimbDual: 'assets/characters/hero/gate_climb_dual.webp', heroClimbJoined: 'assets/characters/hero/gate_climb_joined.webp',
+    // SHE OPENS THE SEWER HATCH (js/sewer.js): crouch, haul, push it over, hop, drop
+    heroHatchBare: 'assets/characters/hero/hatch_bare.webp', heroHatchSingle: 'assets/characters/hero/hatch_single.webp',
+    heroHatchDual: 'assets/characters/hero/hatch_dual.webp', heroHatchJoined: 'assets/characters/hero/hatch_joined.webp',
     heroHopBare: 'assets/characters/hero/gate_hop_bare.webp', heroHopSingle: 'assets/characters/hero/gate_hop_single.webp',
     heroHopDual: 'assets/characters/hero/gate_hop_dual.webp', heroHopJoined: 'assets/characters/hero/gate_hop_joined.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
@@ -725,6 +739,10 @@ const MEDIA_SRC = {
     mj_splash: 'assets/sfx/swamp/mj_splash.ogg', mj_slap: 'assets/sfx/swamp/mj_slap.ogg',
     k2_amb: 'assets/sfx/swamp/k2_amb.ogg', k2_mosq: 'assets/sfx/swamp/k2_mosq.ogg',
     k2_punt: 'assets/sfx/swamp/k2_punt.ogg', k2_splash: 'assets/sfx/swamp/k2_splash.ogg',
+    // the sewer: a manhole scrape under a rusty gate's groan, a steel door's
+    // slam, storm-drain water (Freesound, CC0 — assets/CREDITS.md)
+    sw_creak: 'assets/sfx/sewer/sw_creak.ogg', sw_clang: 'assets/sfx/sewer/sw_clang.ogg',
+    sw_amb: 'assets/sfx/sewer/sw_amb.ogg',
     nf_lroar1: 'assets/sfx/nullfang/lion/roar1.ogg',
     nf_lroar2: 'assets/sfx/nullfang/lion/roar2.ogg',
     nf_lroar3: 'assets/sfx/nullfang/lion/roar3.ogg',

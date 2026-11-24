@@ -356,7 +356,8 @@ const G = {
     }
     if ((typeof MINIS !== 'undefined' && MINIS[kind]) || kind === 'mirejaw') {
       invAdd('batt');
-      showItem(t('i_batt'), t('i_battd'));
+      // the crocodile's card is his shed skin, for the pipe-smith (js/sewer.js)
+      if (!(kind === 'mirejaw' && typeof swSkinDrop === 'function' && swSkinDrop())) showItem(t('i_batt'), t('i_battd'));
       this.save.scrap += 40;
       // A MINI-BOSS GIVES A PIECE OF WHAT THE SAGE NEEDS (owner, 2026-11-21:
       // "This mini boss will give you a piece of the puzzle"). In the Conduits
@@ -1244,7 +1245,7 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   // npc was 32x40 — a head shorter than the player's own 60px plate, and the
   // owner's read of the first one he ever met was "very small, easy to miss".
   // The machine folk stand at her scale now.
-  const sizes = { ferry: [56, 64], k2pole: [30, 30], item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
+  const sizes = { swsmith: [56, 72], ferry: [56, 64], k2pole: [30, 30], item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
   const [w, h] = sizes[type];
   // `room` is stamped at spawn rather than read from G.roomId at use time,
   // because npcKey() must stay stable for a static that outlives a room change
@@ -1287,6 +1288,7 @@ function loadRoom(id) {
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   if (typeof k2RoomLoaded === 'function') k2RoomLoaded(id);   // the swamp's raft and its insects (conduits-road.js)
+  if (typeof swRoomLoaded === 'function') swRoomLoaded(id);   // the sewer's lift and its air (sewer.js)
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
   G.packWolf = null;   // a called wolf stays in the room it was called to
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
@@ -1631,6 +1633,7 @@ function startGame(save) {
   applyTheme();
   if (typeof bossOrderApply === 'function') bossOrderApply();     // the world's own sage order (types.js)
   if (typeof k2Migrate === 'function') k2Migrate(save);           // the Conduits' new road (conduits-road.js)
+  if (typeof sewerApply === 'function') sewerApply(save);         // UNDERTOW's caves are a sewer in this world (sewer.js)
   // no saved bench may stand inside a place the story has not opened yet
   // (js/progress.js) — a hand-edited or pre-gate save wakes at the camp
   if (typeof progressBenchGuard === 'function') progressBenchGuard(save);
@@ -2797,6 +2800,7 @@ function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
   if (!s) return;
   if (typeof k2Interact === 'function' && k2Interact(s)) return;   // Bilge's ferry (conduits-road.js)
+  if (typeof swInteract === 'function' && swInteract(s)) return;   // Rivet the pipe-smith (sewer.js)
   if (s.type === 'rescue') {
     const e = s.target;
     if (!e || !e.disabled || e.cleanseT > 0) return;
@@ -3314,6 +3318,7 @@ function update(dt) {
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       if (typeof k2Update === 'function') k2Update(dt);   // the swamp: raft, water, insects (conduits-road.js)
+      if (typeof swUpdate === 'function') swUpdate(dt);   // the sewer: lift, channels (sewer.js)
       if (!(typeof isHero === 'function' && isHero())) ceilWeather(dt, G.roomDef.zone);
       sawHum(dt);
       updateTutor(dt);
@@ -11710,8 +11715,10 @@ const GATE_STORY = {
   GA1T: { at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' },
   // CHAPTER TWO'S ROAD (progress.js): the relay gallery's floor carries a ring,
   // dark until the CARRIER falls, down to UNDERTOW's tunnel — and back
-  B6: { at: 26 / 32, to: 'GB1T', ax: 0.5, lock: 'bossCarrier', lockLine: 'ring_dormant' },
-  GB1T: { at: 0.5, to: 'B6', ax: 26 / 32, need: 'bossCarrier' },
+  // ...a floor HATCH into the sewer since 2026-11-24 (js/sewer.js): she hauls
+  // it open and drops into the gallery's shaft; the way back out is the
+  // gallery's own ring to the hall
+  B6: { at: 26 / 32, to: 'GB1', style: 'hatch', lock: 'bossCarrier', lockLine: 'sw_hatch_rusted' },
 };
 // ---------------------------------------------------------------------------
 // A RING IS WOKEN, NOT POPPED IN (owner, 2026-11-16: "if you're going to show
@@ -11735,6 +11742,9 @@ function ringWakeKey(def, room) { return 'rw_' + (room || G.roomId) + '>' + def.
 // dark although its lock is open: it has not been woken yet
 function ringAsleep(def) {
   if (!def || !def.lock || gateLocked(def)) return false;
+  // only a RING wakes (ringWakeStep): a hatch or a culvert with a lock simply
+  // opens when its flag is set — asleep, it would refuse her forever
+  if (typeof ringGateFor === 'function' && !ringGateFor(def)) return false;
   if (G.save && G.save.flags && G.save.flags[ringWakeKey(def)]) return false;
   const w = G.ringWake;
   return !(w && w.def === def && w.t >= RING_WAKE.lit);
@@ -11845,7 +11855,6 @@ function gateDoorsAll(id) {
     // network and this one would lead nowhere new
     if (!(G.save.flags && G.save.flags.bossBrood)) {
       if (room === 'B6') doors.push(GATE_STORY.B6);
-      if (room === 'GB1T') doors.push(GATE_STORY.GB1T);
     }
   }
   return doors;
@@ -12239,6 +12248,8 @@ function drawGateDoor(P, def, nearPlane) {
   // hole in rock — the kingdom's own fired mouth, in the near plane.
   // THE CONDUITS' DOOR IS A DRAIN (js/conduits-road.js): a culvert, not a mouth
   if (def.style === 'culvert' && typeof k2DrawCulvert === 'function' && k2DrawCulvert(ds, gy, k, def)) return;
+  // ...and the sewer's is a hatch in the floor (js/sewer.js)
+  if (def.style === 'hatch' && typeof swDrawHatch === 'function' && swDrawHatch(ds, gy, k, def)) return;
   if (def.style === 'den') { drawCaveMouth(ds, gy, P, k, false); structBeacon(ds, gy, 200, 272, k, 1); return; }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
@@ -12701,6 +12712,7 @@ function gateEnter() {
     stepKey: gateStepKey(G2),
   };
   if (G.gateWalk.stepKey && typeof mediaFetch === 'function') mediaFetch(G.gateWalk.stepKey, 1);
+  if (G2.style === 'hatch' && typeof swHatchBegin === 'function') swHatchBegin(G.gateWalk);
   // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
   // the only place in the game she is seen from behind, and the four plates that
   // do it are lazy-loaded like everything else — requested at draw time they
@@ -12894,6 +12906,7 @@ function updateGateWalk(dt) {
     }
     return;
   }
+  if (g.hatch && typeof swHatchStep === 'function') { swHatchStep(g, dt); return; }
   // SHE DOES NOT TURN UNTIL THERE IS A BACK TO TURN. Holding the first moments
   // of the shot at the door costs nothing — she is standing there anyway, drawn
   // the way she always is — and it buys the plates the fraction of a second they
@@ -13006,6 +13019,7 @@ function gateTurnCell(dir, tp) {
 }
 function drawGateWalk() {
   const g = G.gateWalk; if (!g || g.align < 1) return;   // beat one is her own body
+  if (g.hatch && typeof swHatchDrawHer === 'function') { swHatchDrawHer(g); return; }
   // ---- beat two: the turn. She stands in the doorway at full size and her
   // body comes around through the authored angles. Nothing recedes yet — the
   // clock (g.t) is still at zero — so the recede below starts exactly where
@@ -13470,6 +13484,7 @@ function drawStatics(P) {
     if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
   for (const s of G.statics) {
     if (typeof k2DrawStatic === 'function' && k2DrawStatic(s)) continue;   // Bilge and his pole (conduits-road.js)
+    if (typeof swDrawStatic === 'function' && swDrawStatic(s)) continue;   // Rivet (sewer.js)
     const bob = Math.sin(performance.now() / 500 + s.t) * 3;
     if (s.type === 'bench' && typeof isHero === 'function' && isHero()) {
       // FOUNTAIN OF LIFE (hero world) — a marble spring of glowing elixir
@@ -14134,7 +14149,7 @@ function drawStatics(P) {
   // instruction, and the press it names would be refused anyway
   if (G.near && G.state === 'PLAY' && !G.recharge && (typeof tutAllows !== 'function' || tutAllows('INT'))) {
     const s = G.near;
-    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : (typeof k2NearLabel === 'function' && k2NearLabel(s)) || t('open');
+    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : (typeof k2NearLabel === 'function' && k2NearLabel(s)) || (typeof swNearLabel === 'function' && swNearLabel(s)) || t('open');
     // "{INT} — Talk": the label names this player's own interact control —
     // and what the press will actually DO (a switched-off Servo is woken)
     const ol = typeof opNearLabel === 'function' ? opNearLabel(s) : null;
@@ -16215,7 +16230,7 @@ function drawWorldFrame() {
   // THE WATER goes over everything standing in it (js/conduits-road.js): a
   // body below the line is under the surface, which is what makes it water
   if (typeof k2DrawFront === 'function') {
-    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); k2DrawFront(c); c.restore();
+    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); k2DrawFront(c); if (typeof swDrawFront === 'function') swDrawFront(c); c.restore();
   }
   // ...and the edge of the world OVER her, so the last few pixels of her feet
   // pass behind it. See the fringe block above: this draw order is the effect.

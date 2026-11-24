@@ -156,6 +156,8 @@ in `agents/jobs.json` (`tally.parts`).
 
 `swamp/` is THE SILT MIRE (2026-11-21), Kingdom 2's swamp: `2026-11-21/` the as-fired stills (three paintings, the culvert, the raft, Bilge, the insects, MIREJAW's two designs — the first refused for its glow); `croc-takes/` MIREJAW's filmed takes (his whole move set since 2026-11-22, with the refused roll and rise kept and named) and Bilge's two loops, and `grade.json`; every job id, the refused roll and the unused turn in `jobs.json`. `audio/swamp/` holds the recordings its sounds are cut from (CC0 Freesound pages and the NPS alligator, public domain), with `SOURCES.json`. `music/mus_swamp_*_asfired.m4a`, `mus_mirejaw_asfired.m4a` are the scores as fired. `review/` holds the two clips shown to the owner: `mirejaw_takes.mp4` (the filmed takes) and `silt_mire_mirejaw.mp4` (the swamp and the fight, played in the build by a test bot, with the game's own recordings).
 
+`sewer/` is THE SEWER (2026-11-24), UNDERTOW's caves in the robot world: `2026-11-24/` the as-fired stills (three paintings, the hatch, Rivet, MIREJAW's shed skin, the shell from the side and the back, and her four hatch-opening sheets, one per blade); `takes/smith_talk.mp4` Rivet's filmed loop; every job id and how each was cut in `jobs.json`. `audio/sewer/` holds the CC0 recordings its sounds are cut from, with `SOURCES.json`. `music/mus_sewer_asfired.mp3` is the score as fired.
+
 `gates/gate_city_asfired.jpg` is THE CITY GATE RE-FIRED (2026-11-20, GPT Image 2.6 2k high 16:9, job
 `f2147536-ce5b-4e5c-a7dd-3a76b12c8f64`, the old plate as composition reference; a second take,
 `515fcab0-c365-4ea3-a94c-0d163bba49a2`, was flatter and not used). Shipped as
