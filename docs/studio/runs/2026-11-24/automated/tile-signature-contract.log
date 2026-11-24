@@ -1,0 +1,6 @@
+
+── tile-signature-contract  — terrain cache signatures distinguish equal-count broken-tile layouts
+PASS broken-tile signatures are coordinate-sensitive and order-stable
+   (tile-signature-contract: 0.1 s)
+
+all 1 harnesses ran

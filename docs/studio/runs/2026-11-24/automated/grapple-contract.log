@@ -1,0 +1,6 @@
+
+── grapple-contract  — protected and zero-damage grapple targets never grant combat side effects
+{"rejectedStates":11,"tamedPackRejected":true,"bad":[],"targets":1,"accepted":false,"calls":{"knock":0,"volts":0,"sfx":0,"burst":0,"freeze":0,"rumble":0}}
+   (grapple-contract: 0.1 s)
+
+all 1 harnesses ran
