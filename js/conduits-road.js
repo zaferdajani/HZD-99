@@ -172,17 +172,15 @@ function k2RoomLoaded(id) {
       K2.flies.push({ fly, x, y, hx: x, hy: y, vx: 0, vy: 0, t: Math.random() * 9, dart: 0, face: 1, sw: fly ? 0 : (i % 3) });
     }
   }
-  // the swamp's own air under the score: frogs and crickets (a CC0 night recording)
-  if (/^SW/.test(id) && typeof playBuf === 'function' && !K2.ambOn) { playBuf('k2_amb', 0.32); K2.ambOn = true; K2.ambT = 44; }
-  if (!/^SW/.test(id)) K2.ambOn = false;
+  // the swamp's own air under the score: frogs and crickets (a CC0 night
+  // recording), streamed and looped (audio.js ambPlay); sewer.js stops it
+  if (/^SW/.test(id) && typeof ambPlay === 'function') ambPlay('k2_amb', 0.32);
 }
 function k2Water(id) { return K2_WATER[id] || null; }
 function k2Update(dt) {
   const id = G.roomId;
   if (!/^SW/.test(id || '')) return;
   if (id === 'SW1' && G.plats && !k2Raft()) G.plats.push(new K2Raft(!!G.save.flags.raftFar));
-  // the ambience bed re-arms when its recording ends (playBuf is one-shot)
-  if ((K2.ambT -= dt) <= 0 && typeof playBuf === 'function') { playBuf('k2_amb', 0.32); K2.ambT = 44; }
   // THE WATER. She cannot swim: under the surface she is pulled out where she
   // went in, as the teeth do (hazardRescue closes the picture first)
   const W = k2Water(id);

@@ -31,7 +31,7 @@
 // The hero's world (NOSTOS) keeps its caves exactly as they were.
 // ===========================================================================
 
-const SW = { lift: null, liftTop: false, flies: 0, ambT: 0, ambOn: false, hatchArrive: false, backCache: {} };
+const SW = { lift: null, liftTop: false, hatchArrive: false, backCache: {} };
 // water channels in each sewer room: [x0 tile, x1 tile, surface row] (absolute
 // rows; open rows over a solid bed, as the swamp's are)
 const SW_WATER = { GB1: [[17, 20, 22], [26, 28, 22]], GB1T: [[9, 12, 22], [21, 24, 22], [31, 33, 22]], GB1D: [[10, 13, 22]] };
@@ -59,7 +59,7 @@ const SW_CAVES = {};
 const SW_ROOMS = {
   // THE GALLERY. A tall shaft at the west end (the hatch's drop), the lift in
   // it, two channels across the walk, and Rivet's forge in the alcove east.
-  GB1: { zone: 'B', mus: 'sewer', w: 40, h: 17 + SW_AIR, air: SW_AIR, decks: 0,
+  GB1: { zone: 'B', grotto: 1, mus: 'sewer', w: 40, h: 17 + SW_AIR, air: SW_AIR, decks: 0,
     exits: { R: { to: 'GB1T', flag: 'shellMade', or: ['sageTame_GB1D'], why: 'sw_smith_wait' } },
     ents: [['swsmith', 31, 15 + SW_AIR], ['bench', 36, 15 + SW_AIR], ['bat', 23, 9 + SW_AIR],
            ['scrap', 13, 15 + SW_AIR, 30], ['scrap', 23, 15 + SW_AIR, 30]],
@@ -68,7 +68,7 @@ const SW_ROOMS = {
       for (const [x0, x1] of SW_WATER.GB1) rect(g, x0, 15, x1, 15, '.');   // the channels (row 22 overall)
     } },
   // THE TUNNEL: three channels to jump, its bats and a hopper on the walk
-  GB1T: { zone: 'B', mus: 'sewer', w: 40, h: 17 + SW_AIR, air: SW_AIR, exits: { L: 'GB1', R: 'GB1D' },
+  GB1T: { zone: 'B', grotto: 1, mus: 'sewer', w: 40, h: 17 + SW_AIR, air: SW_AIR, exits: { L: 'GB1', R: 'GB1D' },
     ents: [['term', 17, 15 + SW_AIR, 5], ['bat', 14, 6 + SW_AIR], ['bat', 27, 5 + SW_AIR], ['hopper', 28, 15 + SW_AIR],
            ['scrap', 6, 15 + SW_AIR, 30], ['scrap', 36, 15 + SW_AIR, 40]],
     build(g) {
@@ -76,7 +76,7 @@ const SW_ROOMS = {
       for (const [x0, x1] of SW_WATER.GB1T) rect(g, x0, 15, x1, 15, '.');   // (row 22 overall)
     } },
   // THE CISTERN: UNDERTOW at the far end, on dry flags; one channel on the way
-  GB1D: { zone: 'B', mus: 'sewer', w: 44, h: 17 + SW_AIR, air: SW_AIR, exits: { L: 'GB1T' },
+  GB1D: { zone: 'B', grotto: 1, mus: 'sewer', w: 44, h: 17 + SW_AIR, air: SW_AIR, exits: { L: 'GB1T' },
     ents: [['bat', 16, 5 + SW_AIR], ['sage', 33, 15 + SW_AIR], ['scrap', 6, 15 + SW_AIR, 30], ['scrap', 22, 15 + SW_AIR, 50], ['scrap', 40, 15 + SW_AIR, 60]],
     build(g) {
       frame(g); openL(g);
@@ -138,6 +138,14 @@ function swHatchKey() { const w = typeof weaponMode === 'function' ? weaponMode(
 // which of her cells, which of the lid's, at time t into the beat
 function swHatchCell(t) { let i = 0; while (i < 7 && t >= SW_HATCH.at[i + 1]) i++; return i; }
 function swLidCell(t) { const h = swHatchCell(t); return h <= 1 ? 0 : h === 2 ? 1 : h === 3 ? (t >= SW_HATCH.clangAt ? 3 : 2) : 3; }
+// THE HATCH IS IN THE FLOOR: she opens it standing on that floor. A door is
+// found by how far along the room she is (gateHere); a ledge above the hatch is
+// as near along as the floor beside it, and from there the whole opening played
+// at floor level, off the top of her camera.
+function swHatchReach(def) {
+  if (!player || !player.on || !G.roomDef) return false;
+  return Math.abs(player.y + player.h - (G.roomDef.h - 2) * TILE) < 24;
+}
 // gateEnter hands the hatch over here: she lines up LEFT of the hole, facing it
 function swHatchBegin(g) {
   if (!g || !player) return;
@@ -280,8 +288,10 @@ function swLift() { return (G.plats || []).find(p => p.swlift) || null; }
 // ---- room load / per frame -------------------------------------------------
 function swRoomLoaded(id) {
   SW.liftTop = !!SW.hatchArrive;
-  if (swRoom(id) && typeof playBuf === 'function' && !SW.ambOn) { playBuf('sw_amb', 0.4); SW.ambOn = true; SW.ambT = 44; }
-  if (!swRoom(id)) SW.ambOn = false;
+  // the sewer's water under the score, streamed and looped; and in a room with
+  // no air of its own (neither the sewer nor the swamp) the last bed stops
+  if (swRoom(id)) { if (typeof ambPlay === 'function') ambPlay('sw_amb', 0.4); }
+  else if (!/^SW/.test(id) && typeof ambStop === 'function') ambStop();
 }
 function swUpdate(dt) {
   const id = G.roomId;
@@ -289,7 +299,6 @@ function swUpdate(dt) {
   swForgeStep(dt);
   if (!swRoom(id)) return;
   if (id === 'GB1' && G.plats && !swLift()) G.plats.push(new SwLift(SW.liftTop));
-  if ((SW.ambT -= dt) <= 0 && typeof playBuf === 'function') { playBuf('sw_amb', 0.4); SW.ambT = 44; }
   // THE WATER: she still cannot swim (owner: "not yet"). In, and she is pulled
   // out where she went in, as the swamp's water does
   const W = SW_WATER[id];

@@ -12016,7 +12016,7 @@ function ringGateFor(def) {
   if ((G.roomId === 'CV3' && def.to === 'GA1T') || (G.roomId === 'GA1T' && def.to === 'CV3')) return 'ringQuarry';
   if (G.roomDef.cave) return 'ringCave';
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
-  if (!(dest && dest.cave)) return null;
+  if (!(dest && (dest.cave || dest.grotto))) return null;
   if (def.to[0] === 'G' && GATE_PLATE_BY_ZONE[G.roomDef.zone]) return null;
   return G.roomDef.zone === 'A' ? 'ringMeadow' : 'ringCave';
 }
@@ -12201,7 +12201,8 @@ function drawGateDoor(P, def, nearPlane) {
     // the ring itself and not the ring against the mouth standing in for it)
     if (G.artProbe) return;
   }
-  const guardDoor = dest && dest.cave && !(G.roomDef && G.roomDef.cave)
+  // (a guardian's network that is not rock — the sewer, js/sewer.js — says so with `grotto`)
+  const guardDoor = dest && (dest.cave || dest.grotto) && !(G.roomDef && (G.roomDef.cave || G.roomDef.grotto))
     && def.to && def.to[0] === 'G';
   const gzp = guardDoor && GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
   const gzim = gzp && scenePlate(gzp);
@@ -12653,6 +12654,8 @@ function gateHere() {
   const px = player.x + player.w / 2;
   let best = null, bd = 90;
   for (const d of gateDoors()) {
+    // (a floor hatch is reached only from the floor it is in — js/sewer.js)
+    if (d.style === 'hatch' && typeof swHatchReach === 'function' && !swHatchReach(d)) continue;
     const dx = Math.abs(px - gateWorldX(d));
     if (dx < bd) { bd = dx; best = d; }
   }

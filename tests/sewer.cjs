@@ -56,6 +56,10 @@ console.log('── sewer — the hatch, the drop, Rivet, the skin and the shell
     const hd = GATE_STORY.B6;
     player.x = gateWorldX(hd) + 40; player.y = (G.roomDef.h - 3) * TILE; player.vy = 0;
     await run(30);
+    // from a ledge above it the hatch is not hers to open (it is in the floor)
+    const y0 = player.y; player.y = (G.roomDef.h - 2) * TILE - 6 * TILE - player.h; player.on = true;
+    out.fromLedge = !!gateHere();
+    player.y = y0; await run(20);
     const cores0 = player.cores;
     sounds.length = 0;
     out.entered = gateEnter();
@@ -173,6 +177,7 @@ G.rescue = null; player.cores = player.maxCores();
   check('UNDERTOW still waits in the cistern', R.undertow);
   check('the relay gallery\'s door is a hatch into the sewer, rusted shut before the CARRIER falls', R.hatchDoor && R.hatchDoor.to === 'GB1' && R.hatchDoor.locked && R.hatchDoor.line === 'sw_hatch_rusted', JSON.stringify(R.hatchDoor) + ' "' + R.lockLine + '"');
   check('the old ring back up from the tunnel is gone (one way in: the hatch)', !R.tunnelRingBack);
+  check('from a ledge above it the hatch cannot be opened (she stands on the floor it is in)', R.fromLedge === false);
   check('her four hatch strips (one per blade) are named, on disk, eight cells each', R.strips.every(Boolean), JSON.stringify(R.strips));
   check('she opens it in her own art: all eight cells, in order (crouch, strain, lift, push, look, hop, air, drop)', R.cells.join() === '0,1,2,3,4,5,6,7', R.cells.join(' ') + ' ' + R.keys.join(','));
   check('the lid follows her hands: closed, cracked, raised, thrown open', R.lids.join() === '0,1,2,3', R.lids.join(' '));

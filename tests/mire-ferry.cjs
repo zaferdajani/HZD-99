@@ -114,8 +114,10 @@ const { chromium } = require('playwright');
     out.jumpOnly = cross(false); out.jumpDash = cross(true);
     // heard and alive
     const heard = []; const pb = window.playBuf; window.playBuf = (k) => { heard.push(k); return false; };
+    // (the frogs are the room's air: a streamed bed, audio.js ambPlay)
+    const ap = window.ambPlay; window.ambPlay = (k) => { heard.push(k); };
     K2.ambOn = false; fresh('SW2'); step(20);
-    window.playBuf = pb;
+    window.playBuf = pb; window.ambPlay = ap;
     out.heard = heard.filter(k => /^k2_|^mj_/.test(k));
     out.flies = K2.flies.length;
     out.music = MUS.name;

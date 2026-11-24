@@ -651,6 +651,12 @@ const MEDIA_SRC = {
   // sound effect in the game put together, for a quote that plays at a tier-up
   // and at a guardian's death and is never heard twice in a row. They are NOT
   // in `audio` below on purpose: loadMedia decodes everything in that map.
+  // A ROOM'S AIR: long recorded beds, STREAMED and looped by ambPlay (audio.js),
+  // never decoded — forty-odd seconds held as PCM is megabytes a room
+  amb: {
+    k2_amb: 'assets/sfx/swamp/k2_amb.ogg',
+    sw_amb: 'assets/sfx/sewer/sw_amb.ogg',
+  },
   sting: {
     hz_evosting: 'assets/sfx/hz_evosting.ogg',
     hz_winsting: 'assets/sfx/hz_winsting.ogg',
@@ -737,12 +743,11 @@ const MEDIA_SRC = {
     mj_bellow: 'assets/sfx/swamp/mj_bellow.ogg', mj_growl: 'assets/sfx/swamp/mj_growl.ogg',
     mj_hiss: 'assets/sfx/swamp/mj_hiss.ogg', mj_snap: 'assets/sfx/swamp/mj_snap.ogg',
     mj_splash: 'assets/sfx/swamp/mj_splash.ogg', mj_slap: 'assets/sfx/swamp/mj_slap.ogg',
-    k2_amb: 'assets/sfx/swamp/k2_amb.ogg', k2_mosq: 'assets/sfx/swamp/k2_mosq.ogg',
+    k2_mosq: 'assets/sfx/swamp/k2_mosq.ogg',
     k2_punt: 'assets/sfx/swamp/k2_punt.ogg', k2_splash: 'assets/sfx/swamp/k2_splash.ogg',
     // the sewer: a manhole scrape under a rusty gate's groan, a steel door's
     // slam, storm-drain water (Freesound, CC0 — assets/CREDITS.md)
     sw_creak: 'assets/sfx/sewer/sw_creak.ogg', sw_clang: 'assets/sfx/sewer/sw_clang.ogg',
-    sw_amb: 'assets/sfx/sewer/sw_amb.ogg',
     nf_lroar1: 'assets/sfx/nullfang/lion/roar1.ogg',
     nf_lroar2: 'assets/sfx/nullfang/lion/roar2.ogg',
     nf_lroar3: 'assets/sfx/nullfang/lion/roar3.ogg',

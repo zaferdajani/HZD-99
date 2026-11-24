@@ -2200,6 +2200,31 @@ function sfxVoice(id) {
 // Nothing here can make a moment quieter: the caller keeps its own sfx('win')
 // or sfx('chargeReady'), so a sting that never loads costs the game nothing —
 // which is exactly what the decoded version promised and this one still keeps.
+// THE ROOM'S AIR (the swamp's frogs, the sewer's water): one looping stream at
+// a time, started by the room and stopped when she leaves it. Streamed through
+// <audio> for the same reason the stings are: a bed is long, and decoded it
+// would sit in memory as raw PCM for the whole session (tests/herofoley.cjs).
+let AMBNODE = null;
+function ambPlay(key, vol) {
+  if (AMBNODE && AMBNODE.key === key) { try { AMBNODE.el.volume = vol; } catch (e) {} return; }
+  ambStop();
+  if (MUTED) return;
+  const src = (typeof MEDIA_SRC !== 'undefined' && MEDIA_SRC.amb && MEDIA_SRC.amb[key]);
+  if (!src) return;
+  try {
+    const el = new Audio();
+    el.src = typeof audioSrc === 'function' ? audioSrc(src) : src;
+    el.loop = true; el.volume = vol; el.preload = 'auto';
+    AMBNODE = { key, el };
+    const pr = el.play();
+    if (pr && pr.catch) pr.catch(() => {});
+  } catch (e) {}
+}
+function ambStop() {
+  if (!AMBNODE) return;
+  try { AMBNODE.el.pause(); AMBNODE.el.src = ''; } catch (e) {}
+  AMBNODE = null;
+}
 let STINGNODE = null;
 function stingPlay(key, vol) {
   if (MUTED) return;
