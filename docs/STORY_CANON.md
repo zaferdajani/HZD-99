@@ -176,6 +176,17 @@ Extra histories may expand the foundation but are not owner-confirmed facts.
 | 7 | Later find a second sword | Permanently unlock two separate swords |
 | 8 | Later find a separate connector | Unlock a joined double-bladed weapon |
 
+**THE DOOR TO KINGDOM 2 (owner, 2026-11-25).** The robot story leaves the Meadows
+through a door in NULLFANG's arena (A4), of the Conduits' own make and grown over
+with metal vines until he is purified; freed, he walks to it and roars the vines
+off, and the clumps beside it bend out of its way and stay so. It leads to the
+frontier road (A14), whose two pits need the dash, and its east edge is the
+Conduits (B1). The old climb over the camp into the light is gone from the robot
+story (NOSTOS keeps its own). At that edge, once per save, a short card: the first
+kingdom is purified, the quest goes on. The web build is never stopped there —
+everyone on the link is a tester; a paid gate can only ever close on a store build
+without the full game, and it is off.
+
 An early guardian encounter must not replace or silently reorder the first
 sage quest. Preserve the distinction between sages and guardians where the
 existing implementation uses both. Check every added dependency for circular
