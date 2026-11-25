@@ -21,7 +21,8 @@
 //     the VAULT — over the room onto her, a slam, and two ground waves to jump
 //     the PLUMB — her in the air over it: a sweep of the staff overhead
 //   THE OPENINGS — only the exhale after a committed move. Everywhere else it is plated: a blow in
-//     its neutral lands at a fifth, into a move at a tenth.
+//     its neutral lets through one part in sixteen (since 2026-11-25: the skilled player had been
+//     poking it to death between its moves), into a move a tenth.
 //   GREED — the opening holds two blows (one in phase two); the next is turned on the staff and
 //     wakes it into the RIPOSTE (a 0.4 s wind, then
 //     the staff round at the hip). Two blows in its neutral do the same. Face-hugged, it steps back.
@@ -39,7 +40,7 @@ const AGENT_DUEL = Object.freeze({
   plumb: 0.42, sweep: 0.2, sweepR: 140, sweepRec: 0.5, aaCd: 2.2,
   spinprep: 0.4, spin: 0.25, spinR: 150, spinRec: 0.5, greed: 2, greed2: 1, idleGreed: 2, idleWin: 1.2,
   spinCd: 2.0, hug: 0.6, backstep: 0.3, bsDist: 170,
-  unbind: 1.2, armAct: 0.08, armIdle: 0.15, denied: 0.8, p2: 0.6,
+  unbind: 1.2, armAct: 0.08, armIdle: 0.06, denied: 0.8, p2: 0.6,
   // (its health is SAGE_DUEL_PROFILE.hpK, half as much again as an agent off the duel — the owner's
   // 2026-11-20 order, applied by sage-motion.js's own init, which this one runs first)
 });

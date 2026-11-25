@@ -30,6 +30,10 @@ function insectSet(id, def) {
   return [];                                   // the Foundry burns and the Archives are frozen
 }
 const INSECTS = { room: null, list: [] };
+// their own dice: scenery must never draw from the game's Math.random, or a butterfly in the room
+// changes which note a boss sings next (the boss ladder seeds Math.random and measured exactly that)
+let INS_SEED = 0x9e3779b9;
+function insRnd() { INS_SEED = (INS_SEED * 1664525 + 1013904223) >>> 0; return INS_SEED / 4294967296; }
 
 function insectImg(key) {
   if (typeof mediaFetch === 'function') mediaFetch(key);
@@ -45,7 +49,7 @@ function insectAir(x, y) {
 function insectSpot(q, far) {
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   for (let i = 0; i < 24; i++) {
-    const x = 20 + Math.random() * (W - 40), y = 20 + Math.random() * (H * 0.72);
+    const x = 20 + insRnd() * (W - 40), y = 20 + insRnd() * (H * 0.72);
     if (!insectAir(x, y) || !insectAir(x, y + 10)) continue;
     if (far && typeof player !== 'undefined' && player && Math.abs(x - player.x) < 260) continue;
     q.x = x; q.y = y; return true;
@@ -54,7 +58,7 @@ function insectSpot(q, far) {
 }
 function insectTarget(q) {
   for (let i = 0; i < 10; i++) {
-    const a = Math.random() * Math.PI * 2, r = 40 + Math.random() * 110;
+    const a = insRnd() * Math.PI * 2, r = 40 + insRnd() * 110;
     const x = q.x + Math.cos(a) * r, y = q.y + Math.sin(a) * r * 0.6;
     if (insectAir(x, y) && y > 16 && y < G.roomDef.h * TILE - 24) { q.tx = x; q.ty = y; return; }
   }
@@ -67,7 +71,7 @@ function insectsFor() {
   for (const [k, n] of insectSet(G.roomId, G.roomDef)) {
     insectImg(INSECT_KIND[k].key);
     for (let i = 0; i < (lowTier ? Math.ceil(n / 2) : n); i++) {
-      const q = { k, x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, ph: Math.random() * 6.3, t: Math.random() * 2, flee: 0, hold: 0, face: 1 };
+      const q = { k, x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, ph: insRnd() * 6.3, t: insRnd() * 2, flee: 0, hold: 0, face: 1 };
       if (insectSpot(q, false)) { insectTarget(q); INSECTS.list.push(q); }
     }
   }
@@ -89,17 +93,17 @@ function updateInsects(dt) {
       if (q.flee <= 0) insectTarget(q);
     } else {
       const ex = q.tx - q.x, ey = q.ty - q.y, e = Math.hypot(ex, ey);
-      if (e < 8 || q.t <= 0) { insectTarget(q); q.t = 1.5 + Math.random() * 2.5; }
+      if (e < 8 || q.t <= 0) { insectTarget(q); q.t = 1.5 + insRnd() * 2.5; }
       let sp = K.spd;
       if (K.how === 'dart') {                                   // hover, then a straight dash
-        if (q.hold > 0) { q.hold -= dt; sp = 4; } else if (e < 14) q.hold = 0.4 + Math.random() * 0.9;
+        if (q.hold > 0) { q.hold -= dt; sp = 4; } else if (e < 14) q.hold = 0.4 + insRnd() * 0.9;
         sp = q.hold > 0 ? 4 : K.spd * 2.2;
       }
       const want = e > 0 ? sp / e : 0, steer = K.how === 'dart' ? 9 : 2.6;
       q.vx += (ex * want - q.vx) * Math.min(1, dt * steer);
       q.vy += (ey * want - q.vy) * Math.min(1, dt * steer);
       if (K.how === 'flutter') q.vy += Math.sin(q.ph * 0.18) * 40 * dt;           // the bob of a wingbeat
-      if (K.how === 'jitter') { q.vx += (Math.random() - 0.5) * 300 * dt; q.vy += (Math.random() - 0.5) * 300 * dt; }
+      if (K.how === 'jitter') { q.vx += (insRnd() - 0.5) * 300 * dt; q.vy += (insRnd() - 0.5) * 300 * dt; }
     }
     const nx = q.x + q.vx * dt, ny = q.y + q.vy * dt;
     // against rock it slides along it (a fleeing wing does not bounce back toward her)
