@@ -16,7 +16,7 @@
 //   B  nothing after it falls to the masher, or to bouncing on its back
 //   C  every fight after it costs the skilled player more than the rhino did: a lower win rate or
 //      more cores lost — and its openings are shorter (openShare below the rhino's)
-//   D  THE ORDER: rhino -> NULLFANG -> the Wolf King -> the agent climbs for the skilled player, and
+//   D  THE ORDER she plays: rhino -> the agent -> CHIME -> NULLFANG climbs for the skilled player, and
 //      NULLFANG, the first sage, is open the least of all of them
 //   E  healing between trades does not carry anyone through a fight after the rhino
 //   F  no page errors, no bot errors
@@ -56,13 +56,22 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     check('C  ' + N + ': harder than the rhino for a skilled player (fewer wins, or two more cores lost)', harder, best.map(s => s.won + '/' + s.n + ' won, ' + s.cores + ' cores').join(' | ') + '  (rhino ' + H.won + '/' + H.n + ', ' + H.cores + ')');
     check('   ' + N + ': open less than the rhino', X.skilled.open < H.open - 0.15, { open: X.skilled.open, rhino: H.open });
     check('E  ' + N + ': healing between trades does not carry a player through it', X.heal.won <= 1, X.heal); }
-  // THE ORDER (docs/STORY_CANON.md): GRAVEHORN -> NULLFANG -> the Wolf King -> the agent. It climbs:
-  // no fight is easier for the skilled player than the one before it — a win rate never rises, and
-  // at the same rate the cores lost never fall. (CHIME is a construct off the path; B, C and E hold it.)
-  const ORDER = [['the rhino', R.horn.skilled], ['NULLFANG', R.glitch.skilled], ['the Wolf King', R.alpha.skilled], ['the agent', R.tally.skilled]];
+  // THE ORDER SHE PLAYS THEM IN (tests/campaign-ch1.cjs's missions): GRAVEHORN -> the agent (GA1D,
+  // straight after the forge) -> CHIME -> NULLFANG, "until we reach the first sage, the lion" (the
+  // owner, 2026-11-24). It climbs: no fight is easier for the skilled player than the one before it —
+  // a win rate never rises, and at the same rate the cores lost never fall. (The Wolf King is off this
+  // road; B, C and E hold him.)
+  // docs/STORY_CANON.md orders the kingdom rhino -> NULLFANG -> the Wolf King -> "that agent"; the game
+  // does not yet. This checked the canon order until 2026-11-25, and passing it made the agent, the
+  // SECOND fight she meets, the hardest of all: the chapter bot died forty times to it. Which order is
+  // the owner's to say; until he does, the order she plays is the one that is measured, and the
+  // canon order is printed beside it.
+  const ORDER = [['the rhino', R.horn.skilled], ['the agent', R.tally.skilled], ['CHIME', R.chime.skilled], ['NULLFANG', R.glitch.skilled]];
+  const CANON = [['the rhino', R.horn.skilled], ['NULLFANG', R.glitch.skilled], ['the Wolf King', R.alpha.skilled], ['the agent', R.tally.skilled]];
+  console.log('info the canon order, for the owner: ' + CANON.map(q => q[0] + ' ' + q[1].won + '/' + q[1].n + ' ' + q[1].cores).join('  ->  '));
   const climbs = ORDER.every((q, i) => i === 0 || (q[1].won / q[1].n < ORDER[i - 1][1].won / ORDER[i - 1][1].n - 1e-9)
     || (Math.abs(q[1].won / q[1].n - ORDER[i - 1][1].won / ORDER[i - 1][1].n) < 1e-9 && q[1].cores >= ORDER[i - 1][1].cores));
-  check('D  the ladder climbs in the kingdom\'s order: no fight easier for a skilled player than the one before it', climbs, ORDER.map(q => q[0] + ' ' + q[1].won + '/' + q[1].n + ' ' + q[1].cores).join('  ->  '));
+  check('D  the ladder climbs in the order she plays it: no fight easier for a skilled player than the one before it', climbs, ORDER.map(q => q[0] + ' ' + q[1].won + '/' + q[1].n + ' ' + q[1].cores).join('  ->  '));
   const G2 = R.glitch.skilled;
   check('   ...and NULLFANG, the first sage, is open the least of them all', ['tally', 'chime', 'alpha'].every(b => G2.open <= R[b].skilled.open + 0.03), { nullfang: G2.open, others: ['tally', 'chime', 'alpha'].map(b => R[b].skilled.open) });
   const errs = Object.values(R).flatMap(x => Object.values(x).flatMap(s => s.errs));

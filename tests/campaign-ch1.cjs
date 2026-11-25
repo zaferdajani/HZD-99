@@ -346,7 +346,9 @@ async function snap() {
     const P = typeof player !== 'undefined' && player;
     const en = (G.enemies || []).filter(e => e && !e.dead).map(e => ({ k: e.kind || (e.constructor && e.constructor.name), x: Math.round(e.x), y: Math.round(e.y), w: e.w, h: e.h, hp: e.hp, mech: e.mechanism || null,
       calm: !!(e.tame || e.friendly || e.freed || e.calm || e.disabled || e.ally), st: e.st || e.state || null, wt: e.windT || 0,
-      sg: e.kind === 'sage' ? { coil: e.coilT || 0, lunge: e.lungeT || 0, winded: e.windedT || 0, gather: e.gatherT || 0, ring: e.ringR == null ? null : e.ringR, locked: !!e.locked, tame: !!e.tame, pure: e.pureM || 0, vx: e.vx || 0 } : null }));
+      sg: e.kind === 'sage' ? { coil: e.coilT || 0, lunge: e.lungeT || 0, winded: e.windedT || 0, gather: e.gatherT || 0, ring: e.ringR == null ? null : e.ringR, locked: !!e.locked, tame: !!e.tame, pure: e.pureM || 0, vx: e.vx || 0,
+        st: e.tSt || null, oh: e.openHits || 0, p2: e.hpMax0 ? e.hp <= e.hpMax0 * 0.6 : false, rr: (e.rr || []).map(r => [r.x, r.r]), marks: (e.marks || []).map(k => k.x), waves: (e.waves || []).map(w => [w.x, w.dir]),
+        beads: (e.beads || []).map(b => { const a = 450, c = b.y - b.floor, tl = (-b.vy + Math.sqrt(Math.max(0, b.vy * b.vy - 4 * a * c))) / (2 * a); return tl < 0.6 ? b.x + b.vx * tl : null; }).filter(x => x != null) } : null }));
     const projs = (G.projs || []).filter(q => q && !q.dead && !q.friendly).slice(0, 24).map(q => ({ x: Math.round(q.x), y: Math.round(q.y), vx: Math.round(q.vx || 0), vy: Math.round(q.vy || 0), r: q.r || 6, g: q.grav || 0 }));
     const B = G.boss;
     let goal = null; try { goal = typeof opGoalKey === 'function' && opGoalKey() ? ctlFill(t(opGoalKey())) : null; } catch (e) { }
@@ -1141,16 +1143,50 @@ async function sageFight(s, e) {
     if (dist > 30) { await approach(s, cx); return; }
     await strike(); return;
   }
-  if (g.winded > 0) {
-    if (dist > 30) { await approach(s, cx); return; }
-    await strike(); return;
+  // THE DUEL (js/agent-duel.js), read as the boss ladder's careful player reads it
+  // (tests/gauntlet/bots/tally_skilled.cjs, ported to the keyboard): what is already in the air or on
+  // the floor first — a fire ring or a ground wave is hopped, a burning mark or a bead's landing is a
+  // wall — then the agent's own move. A breath holds two blows (one in phase two): the next is turned
+  // on the staff and wakes the riposte, so she takes her blows and steps out.
+  if (g.st) {
+    const L = 'ArrowLeft', Rt = 'ArrowRight', W = ((model && model.info && model.info.w) || 44) * TL, key = d => d > 0 ? Rt : L;
+    const near = d => (d < 0 ? px < 130 : px > W - 130);
+    const ringHop = (g.rr || []).some(([x, r]) => { const gap = Math.abs(px - x) - r; return gap > -6 && gap < 44; })
+      || (g.waves || []).some(([x, d]) => { const q = (px - x) * d; return q > -4 && q < 56; });
+    if (ringHop && s.p.on) { await hold([]); await tap('Space', 120); return; }
+    const hz = (g.marks || []).map(x => [x, 46]).concat((g.beads || []).map(x => [x, 42]));
+    const inHz = hz.find(([x, r]) => Math.abs(px - x) < r);
+    if (inHz) { await hold([key(px >= inHz[0] ? 1 : -1)]); await sleep(110); await hold([]); return; }
+    const out = async (ms) => { if (near(-dir)) { await hold(['Space', key(dir)]); await sleep(380); await hold([]); } else { await hold([key(-dir)]); await sleep(ms); await hold([]); } };
+    switch (g.st) {
+      case 'exhale':
+        if (g.oh >= (g.p2 ? 1 : 2)) { if (dist < 120) await out(90); else { await hold([]); await sleep(40); } return; }
+        if (dist > 30) { await approach(s, cx); return; }
+        await strike(); return;
+      case 'coil': case 'lunge': case 'replant': case 'lastcoil':
+        if (dist < 400) await out(120); else { await hold([]); await sleep(40); } return;
+      case 'vaultcrouch': await hold([]); await sleep(40); return;
+      case 'vault': if (R.vaultFrom == null) R.vaultFrom = px; if (Math.abs(px - R.vaultFrom) < 95) await out(110); return;
+      case 'spinprep': case 'spin': if (dist < 150) await out(110); else { await hold([]); await sleep(40); } return;
+      case 'plumbprep': case 'sweep': if (dist < 170) await out(110); else { await hold([]); await sleep(40); } return;
+      case 'unbind': if (dist < 150) await out(90); else { await hold([]); await sleep(40); } return;
+      case 'gather': case 'gather2': if (dist > 140) await approach(s, cx); else { await hold([]); await sleep(40); } return;
+      case 'countprep': case 'sightprep': case 'mark': case 'volley': if (dist > 200) await approach(s, cx); else { await hold([]); await sleep(40); } return;
+      default:
+        R.vaultFrom = null;
+        // its neutral turns blows and two wake the riposte: keep just outside its reach and wait
+        if (dist > 160) { await approach(s, cx); return; }
+        if (dist < 100) { await out(80); return; }
+        await hold([]); await face(); await sleep(50); return;
+    }
   }
   if (g.lunge > 0 && dist < 110) { await hold([]); await tap('Space', 300); return; }
   if (g.coil > 0) { if (dist < 140) await backOff(s, -dir, 60); else { await hold([]); await sleep(40); } return; }
   if (g.gather > 0) { await hold([]); await sleep(40); return; }
   // neutral: it keeps 70-160 px; stand just outside its lunge and wait for the
   // sentence — or take the free hit when it drifts close
-  if (dist < 34) { await strike(); return; }
+  if (dist < 34 && !g.st) { await strike(); return; }      // (the duel turns blows in its neutral and two wake the riposte)
+  if (dist < 60 && g.st) { await backOff(s, -dir, 60); return; }
   if (dist > 150) { await approach(s, cx); return; }
   await hold([]); await face(); await sleep(50);
 }
