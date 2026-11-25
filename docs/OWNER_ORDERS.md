@@ -222,6 +222,11 @@ chasing a deploy that had in fact succeeded.
   it ... Going to the door will give me an entrance to a place where I will have to use my dash to
   reach the second kingdom. And this door should look different than the ones before and similar
   to the ones within the second kingdom. To make the story connected."*
+- **The web is for testers, always.** *"as long as we're on the web app, all people who access the
+  web are actually testers. So even if it shows it's a paid version or buy it or whatever, which
+  will direct users later on for the full version, depending on their platform, still users on
+  the link can access the second kingdom and all other kingdoms freely."* The paid gate stops
+  only store builds without the full game; the web link never stops anyone.
 
 ## THE WOLF MOUNT — ordered 2026-11-25, NOT TO START BEFORE "after next Friday, 9 p.m."
 
