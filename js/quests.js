@@ -70,6 +70,17 @@ const QUESTS = [
     reward: { scrap: 140, iq: 15 },
   },
   {
+    // THE HARNESS (owner, 2026-11-25: "an NPC that tells me about the secret of mounting wolves
+    // through a certain task that allows me to learn it when I finish the task ... make it in the
+    // one after that" — Kingdom 3). The Tinker builds things: he will fit a wolf with a harness,
+    // once the wolf has shown it fights for her — her CALLED wolf (the Alpha's pack) brings down
+    // three machines. Then she can ride it (js/wolfmount.js). Robot story; needs THE PACK.
+    id: 'patch_harness',                 // C5B — after his own errand
+    npc: 'patch', zone: 'C', after: 'patch_quiet', arm: 'pack', robo: 1,
+    kind: 'pack', count: 3,
+    reward: { mount: 1, iq: 15 },
+  },
+  {
     id: 'sage_index',                    // D1 — the climb into the cold stacks
     npc: 'sage', zone: 'D',
     kind: 'fetch', item: 'index',
@@ -104,6 +115,7 @@ function questSnap(id) {
   if (!q) return;
   const base = G.save.qbase = G.save.qbase || {};
   if (q.kind === 'cull') base[id] = { n: (G.save.culls && G.save.culls[q.foe]) | 0 };
+  else if (q.kind === 'pack') base[id] = { n: G.save.packKills | 0 };
   // a place counts once she stands in it AFTER being asked (questVisit)
   else if (q.kind === 'reach') base[id] = { reached: 0 };
   // Fetch items may already be in the bag before the request; questItemLive
@@ -190,6 +202,8 @@ function questFor(npc) {
     if (q.id === 'alpha_pack' || q.npc !== npc) continue;
     if (qState(q.id) === 'done') continue;
     if (q.after && qState(q.after) !== 'done') continue;
+    if (q.robo && typeof isHero === 'function' && isHero()) continue;
+    if (q.arm && !(G.save && G.save.arms && G.save.arms.includes(q.arm))) continue;
     return q;
   }
   return null;
@@ -201,18 +215,20 @@ function qProgress(q) {
   // before snapshots existed (an older save) keeps counting from zero, as it did
   const b = G.save.qbase && G.save.qbase[q.id];
   if (q.kind === 'cull') return Math.max(0, Math.min(q.count, ((G.save.culls && G.save.culls[q.foe]) | 0) - (b ? b.n | 0 : 0)));
+  if (q.kind === 'pack') return Math.max(0, Math.min(q.count, (G.save.packKills | 0) - (b ? b.n | 0 : 0)));
   if (q.kind === 'reach') return b ? (b.reached ? 1 : 0) : ((G.save.visited && G.save.visited[q.room]) ? 1 : 0);
   // the survey read, never the room visited — whenever it was read
   if (q.kind === 'read') return qReadDone(q) ? 1 : 0;
   return 0;
 }
-function qGoal(q) { return q.kind === 'cull' ? q.count : 1; }
+function qGoal(q) { return q.kind === 'cull' || q.kind === 'pack' ? q.count : 1; }
 function qDone(q) { return qProgress(q) >= qGoal(q); }
 // one line, in the player's language, describing what is being asked
 function qText(q) {
   if (q.kind === 'flag') return t('q_goal_' + q.id);
   if (q.kind === 'fetch') return t('q_fetch').replace('%s', t('it_' + q.item));
   if (q.kind === 'cull') return t('q_cull').replace('%n', q.count).replace('%s', t('e_' + q.foe));
+  if (q.kind === 'pack') return t('q_goal_' + q.id).replace('%n', q.count);
   if (q.kind === 'read') { const k = 'q_goal_' + q.id, v = t(k); if (v !== k) return v; }
   return t('q_reach');
 }
@@ -227,6 +243,17 @@ function questKill(kind) {
   // tell the player the moment an errand ticks over, or the counting is invisible
   for (const q of QUESTS) {
     if (q.kind !== 'cull' || q.foe !== kind || qState(q.id) !== 'active') continue;
+    const n = qProgress(q);
+    if (n >= q.count) { G.toast(t('q_ready')); sfx('chargeReady'); }
+    else G.toast(n + ' / ' + q.count);
+  }
+}
+// a machine her called wolf brought down (js/packcall.js): the harness errand counts these
+function questPackKill(e) {
+  if (!G.save || (e && (e instanceof Boss))) return;
+  G.save.packKills = (G.save.packKills | 0) + 1;
+  for (const q of QUESTS) {
+    if (q.kind !== 'pack' || qState(q.id) !== 'active') continue;
     const n = qProgress(q);
     if (n >= q.count) { G.toast(t('q_ready')); sfx('chargeReady'); }
     else G.toast(n + ' / ' + q.count);
@@ -251,6 +278,8 @@ function questPay(q) {
   if (r.scrap) { G.save.scrap += r.scrap; G.toast('+' + r.scrap + ' ' + t('scrap')); }
   if (r.iq) { G.save.iq += r.iq; if (typeof iqNudge === 'function') iqNudge(); }
   if (r.relic && typeof G.grantRelic === 'function') G.grantRelic(r.relic);
+  // the harness: from now on her called wolf can be ridden (js/wolfmount.js)
+  if (r.mount) { G.save.flags.wolfMount = 1; if (typeof showItem === 'function') showItem(t('wm_learn'), t('wm_learnd')); }
   if (q.kind === 'fetch' && G.save.bag) delete G.save.bag[q.item];
   qSet(q.id, 'done');
   sfx('win');

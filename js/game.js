@@ -180,6 +180,9 @@ const SHOP = [
   // the shop into becoming shooting 2 and 3 and 4. Until it reaches the
   // maximum"). GRAVEHORN's suit fires one; each upgrade adds one, up to four.
   { id: 'volley', type: 'volley', get cost() { return SHOP_VOLLEY[Math.min(SHOP_VOLLEY.length - 1, shardLevel() - 1)]; } },
+  // THE PACK, LONGER (owner, 2026-11-25: "Improving this skill by spending shards at certain NPCs"):
+  // the Alpha's called wolf stays longer and bites harder (js/packcall.js packStat)
+  { id: 'packup', type: 'packup', cost: 760 },
 ];
 const BENCH_ROOMS = ['A3', 'B3', 'D2', 'E2'];   // (D2: the archive's pod is at ZERO's door now — world.js, SAVE POINTS ARE FOR CRITICAL PLACES)
 
@@ -1297,7 +1300,8 @@ function loadRoom(id) {
   if (typeof k2RoomLoaded === 'function') k2RoomLoaded(id);   // the swamp's raft and its insects (conduits-road.js)
   if (typeof swRoomLoaded === 'function') swRoomLoaded(id);   // the sewer's lift and its air (sewer.js)
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
-  G.packWolf = null;   // a called wolf stays in the room it was called to
+  // a called wolf stays in the room it was called to — unless she is riding it (js/wolfmount.js)
+  if (!(G.mount && G.mount.w && G.mount.w === G.packWolf)) { G.packWolf = null; G.mount = null; }
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   // An attack belongs to the room where it began. Do not carry a damaging
   // hurricane, buffered strike or half-charged release through a doorway.
@@ -4104,14 +4108,14 @@ function updateCrest() {
 //     off it is.
 // ---------------------------------------------------------------------------
 const SHOP_PICK_ORDER = ['sprint', 'siphon', 'claws', 'over', 'plate'];
-const SHOP_ROW = { y0: 136, step: 45 };   // the shelf's rows: the drawing and the touch layer read the same two numbers
+const SHOP_ROW = { y0: 136, step: 41 };   // ten rows since THE PACK, LONGER (2026-11-25), the last at 505 — the shelf's rows: the drawing and the touch layer read the same two numbers
 function shopCost(it) { return Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)); }
 function shopPick() {
   if (!G.save) return null;
   const f = G.save.flags || {}, cell = SHOP.find(q => q.type === 'cell');
   if (cell && !f.heal) return { it: cell, why: 'shop_why_pack' };
   if (cell && player && player.volts < player.voltMax() * 0.5 && G.save.scrap >= shopCost(cell)) return { it: cell, why: 'shop_why_cell' };
-  const open = SHOP.filter(q => q.type !== 'cell' && !shopSold(q) && (q.type !== 'core' || shopCoreOpen()) && (q.type !== 'volley' || shopVolleyOpen()));
+  const open = SHOP.filter(q => q.type !== 'cell' && !shopSold(q) && (q.type !== 'core' || shopCoreOpen()) && (q.type !== 'volley' || shopVolleyOpen()) && (q.type !== 'packup' || shopPackOpen()));
   if (!open.length) return null;
   const rank = (q) => { const i = SHOP_PICK_ORDER.indexOf(q.id); return i < 0 ? 99 : i; };
   const can = open.filter(q => G.save.scrap >= shopCost(q)).sort((a, b) => rank(a) - rank(b) || a.cost - b.cost);
@@ -4155,6 +4159,7 @@ function updateShop() {
     // a sage has fallen, once, at 1200
     if (it.type === 'core' && !shopCoreOpen()) { G.toast(t('s_core_wait')); sfx('no'); return; }
     if (it.type === 'volley' && !shopVolleyOpen()) { G.toast(t('s_volley_wait')); sfx('no'); return; }
+    if (it.type === 'packup' && !shopPackOpen()) { G.toast(t('s_packup_wait')); sfx('no'); return; }
     const cost = Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1));
     if (G.save.scrap < cost) { G.toast(t('poor')); sfx('no'); return; }
     G.save.scrap -= cost; sfx('buy');
@@ -4183,6 +4188,7 @@ function updateShop() {
     }
     if (it.type === 'crest') grantCrest(it.id);
     else if (it.type === 'slot') { G.save.slots++; G.save.shop[it.id] = 1; showItem(t('s_slot'), t('s_slotd')); }
+    else if (it.type === 'packup') { G.save.packLv = 2; G.save.shop[it.id] = 1; showItem(t('s_packup'), t('s_packup_now')); }
     else if (it.type === 'volley') { G.save.shardLv = shardLevel() + 1; showItem(t('s_volley'), t('s_volley_now').replace('%n', String(G.save.shardLv))); }
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
@@ -4190,6 +4196,7 @@ function updateShop() {
 const SHOP_VOLLEY = [600, 900, 1300];          // to 2, to 3, to 4 stars
 function shardLevel() { return Math.max(1, Math.min(4, (G.save && G.save.shardLv) | 0 || 1)); }
 function shopVolleyOpen() { return !isHero() && !!(G.save && G.save.arms && G.save.arms.includes('shard')); }
+function shopPackOpen() { return !isHero() && !!(G.save && G.save.arms && G.save.arms.includes('pack')); }
 function shopCoreOpen() { return !!(G.save && G.save.flags && (G.save.flags.sageLives | 0) > 0); }
 function shopSold(it) {
   if (it.type === 'cell') return false;          // a consumable is never sold out
@@ -15581,6 +15588,7 @@ function heartIcon(heroHud, full, glowCol) {
   return cv;
 }
 function drawHUD() {
+  if (typeof drawWolfMountHud === 'function') drawWolfMountHud();   // the ridden wolf's stamina (js/wolfmount.js)
   const P = PAL[G.roomDef.zone];
   const teaching = !!(G.tut && !G.save.flags.tut);
   // DATA CORRUPTION: the whole HUD jitters, tears and lies for its 8 seconds
@@ -15925,8 +15933,12 @@ function drawLights(P) {
   // rim on the upper body whose gradient dies at her ankles: she still
   // carries light, the ground under her carries only her shadow. Dash and
   // heal still flare it — those are moments, not a standing lamp.
-  if (player && !player.dead)
-    lightAt(player.x + 12, player.y + 12, 56, P.glow, 0.15 + (player.dashT > 0 ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
+  // Riding (js/wolfmount.js), the light goes up with her to the wolf's back and the lunge
+  // does not flare it: a wolf's lunge is weight, not light.
+  if (player && !player.dead) {
+    const rid = typeof wmRiding === 'function' && wmRiding();
+    lightAt(player.x + 12, (rid ? wmSeatY(player) : player.y) + 12, 56, P.glow, 0.15 + (player.dashT > 0 && !rid ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
+  }
   G._auraCount = 0;
   if (auraSense() && player && !player.dead && G.state !== 'FILM') {
     const pu = 0.8 + Math.sin(performance.now() / 640) * 0.2;
@@ -16208,6 +16220,7 @@ function drawWorldFrame() {
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   if (typeof drawPackWolf === 'function') drawPackWolf(c);
+  if (typeof drawWolfMountPrompt === 'function') drawWolfMountPrompt(c);   // ▲ Ride, beside her called wolf
   for (const p of G.projs) p.draw(c);
   if (typeof drawCrescents === 'function') drawCrescents(c);      // the single blade's charged cut (js/entities.js)
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
@@ -19909,6 +19922,7 @@ function drawShop() {
     if (row) { name = row.name; desc = row.desc; }
     if (it.type === 'core' && !sold && !shopCoreOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_core_wait'); }
     if (it.type === 'volley' && !sold && !shopVolleyOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_volley_wait'); }
+    if (it.type === 'packup' && !sold && !shopPackOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_packup_wait'); }
     const col = row && row.locked ? '#56626e' : sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
     // WHICH SYSTEM IS THIS LINE? A crest — and the port width a crest sits
     // in — wears the crest's diamond (js/loadout.js): dashed while it is on

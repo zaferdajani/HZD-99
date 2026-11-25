@@ -31,6 +31,8 @@ const PACK_CALL = {
   dmg: 14,           // a bite, before her difficulty's scaling
   leave: 3,          // the lope away: until it is off the screen, or this long
 };
+// THE PACK, LONGER (Ratchet's shelf, 2026-11-25): the bought tier stays longer and bites harder
+function packStat(k) { const up = (G.save && G.save.packLv | 0) >= 2; return k === 'stay' ? (up ? 15 : PACK_CALL.stay) : k === 'dmg' ? (up ? 22 : PACK_CALL.dmg) : PACK_CALL[k]; }
 function packCallable() { return !(typeof isHero === 'function' && isHero()) && !!(G.save && G.save.arms && G.save.arms.includes('pack')); }
 // the quarry: what is still fighting her, nearest first
 function packQuarry(w) {
@@ -55,7 +57,7 @@ function packCall(p) {
   const back = -(p.face || 1);
   const w = {
     x: p.x + p.w / 2 + back * 150 - k.w / 2, y: p.y + p.h - k.h, w: k.w, h: k.h,
-    vx: -back * PACK_CALL.spd, vy: -260, on: false, anim: 0, t: PACK_CALL.stay,
+    vx: -back * PACK_CALL.spd, vy: -260, on: false, anim: 0, t: packStat('stay'),
     dir: -back, faceVis: -back, spd: PACK_CALL.spd, kind: 'crawler', hp: 1,
     coilT: 0, lungeT: 0, biteCD: 0.3, bit: null, leaveT: 0, airT: 0, pack: 1,
   };
@@ -69,6 +71,7 @@ function packCall(p) {
 function packStep(dt) {
   const w = G.packWolf; if (!w) return;
   if (G.state !== 'PLAY') return;
+  if (G.mount && G.mount.w === w) return;   // she is riding it: it goes where she does (js/wolfmount.js)
   w.anim += dt; w.t -= dt;
   if (w.biteCD > 0) w.biteCD -= dt;
   w.vy += 2000 * dt;
@@ -90,12 +93,12 @@ function packStep(dt) {
       const b = typeof hurtBoxOf === 'function' ? hurtBoxOf(q) : q;
       if (aabb(w, b)) {
         w.hitDone = true;
-        const dm = Math.round(PACK_CALL.dmg * ((typeof DF === 'function' && DF().pdmg) || 1));
+        const dm = Math.round(packStat('dmg') * ((typeof DF === 'function' && DF().pdmg) || 1));
         dealDmg(q, dm, null, b.x + b.w / 2, b.y + b.h / 2, true, 'pack');
         if (typeof sfx === 'function') sfx('wolf_bite');
         if (typeof burst === 'function') burst(b.x + b.w / 2, b.y + b.h / 2, 8, '#ffe6c8', 180, 0.3, 200, 2.2, true);
         if (!(q instanceof Boss) && q.kind !== 'turret') { q.kbT = 0.18; q.vx += w.dir * 200; q.vy -= 90; }
-        if (q.hp <= 0 && !q.dead && typeof q.die === 'function') q.die(w.dir, -0.3);
+        if (q.hp <= 0 && !q.dead && typeof q.die === 'function') { q.die(w.dir, -0.3); if (typeof questPackKill === 'function') questPackKill(q); }
       }
     }
     if (w.lungeT <= 0) { w.biteCD = PACK_CALL.again; w.bit = null; }
