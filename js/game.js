@@ -16117,7 +16117,8 @@ function drawWorldFrame() {
   // keeps each one off its room (js/foeread.js, tests/contrast.cjs)
   for (const e of G.enemies) foeDraw(c, e);
   for (const w of G.wrecks) w.draw(c);
-  if (G.boss) foeDraw(c, G.boss);
+  // (freed in his arena, the lion is drawn in front of the clumps instead — nfCoverDrawFront)
+  if (G.boss && !(typeof nfPetFront === 'function' && nfPetFront(G.boss))) foeDraw(c, G.boss);
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   if (typeof drawPackWolf === 'function') drawPackWolf(c);

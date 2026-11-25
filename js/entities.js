@@ -12705,6 +12705,8 @@ const BOSS_ART = {
 // which is the right thing to be looking at for the half second this lasts, and
 // is honest in a way that showing the wrong creature never was.
 function drawBossHold(c, b) {
+  // a freed guardian is never a menace in the dark: nothing until his own body lands
+  if (b && b.purified) return;
   const P = PAL[G.roomDef.zone];
   const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
   const pu = 0.5 + Math.sin((b.anim || 0) * 3) * 0.5;

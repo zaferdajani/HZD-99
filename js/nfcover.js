@@ -314,6 +314,20 @@ function nfCoverDrawFront(c) {
     for (const L of cl.leaves) nfCoverLeaf(c, cl, L);
   }
   nfCoverTornDraw(c);
+  // FREED, HE IS NO LONGER HIDING: the purified lion stands in front of the leaves, wherever he
+  // walks — his walk to his door and his roar at it are SEEN (owner's ledger: a character looks
+  // like itself). The pigment stencil is left alone: the stencil pass is over by now.
+  const pet = G.boss;
+  if (nfPetFront(pet)) {
+    const keep = typeof FOE_PIG !== 'undefined' ? FOE_PIG.on : null;
+    if (keep != null) FOE_PIG.on = false;
+    try { foeDraw(c, pet); } finally { if (keep != null) FOE_PIG.on = keep; }
+  }
+}
+// the freed lion in his own arena, among the clumps: drawn with them, in front of them
+function nfPetFront(b) {
+  return !!(b && b.kind === 'glitch' && b.purified && b.dead && !(typeof isHero === 'function' && isHero())
+    && NFC.room === G.roomId && NFC.list.length);
 }
 // ...and the meadow beyond, behind the level on parallax (js/game.js, after the flora)
 function nfCoverDrawBack(c) {

@@ -172,6 +172,101 @@ const check = (name, ok, detail) => {
   check('coming back, the door is still open and the trees still stand aside (no second roar)',
         !again.asleep && !again.vines && !again.wake && again.way.length >= 1 && again.way.every(v => v > 0.5), JSON.stringify(again));
 
+  // ---- 3b. THE FREED LION IS HIMSELF, AND IN FRONT OF THE LEAVES ---------
+  // The coordinator's review, 2026-11-25 (ledger: a character looks like itself): photographed
+  // standing in his arena he was a dark oval with two eyes — the waiting silhouette, drawn
+  // because the fight's parts sheet had not arrived — and in the wake he was hidden behind the
+  // clumps. So: a revisit with ONLY his filmed takes loaded (no parts sheet), mid-roar, among the
+  // clumps. His body is drawn from his own take (never the silhouette); the pixels he changes are
+  // about the area of the cell he is drawn from; they are lit, not a dark oval; and he is drawn
+  // AFTER the last clump, i.e. in front of them.
+  const pet = await page.evaluate(async () => {
+    __fresh({ bossGlitch: 1, 'rw_A4>A14': 1 });
+    // a revisit: the fight's parts sheet is not in memory, his takes are
+    const keepParts = MEDIA_IMG.beastParts, keepRaw = MEDIA_RAW.beastParts, keepSoft = typeof SOFT_ART !== 'undefined' ? SOFT_ART.beastParts : undefined;
+    delete MEDIA_IMG.beastParts; delete MEDIA_RAW.beastParts; if (typeof SOFT_ART !== 'undefined') delete SOFT_ART.beastParts;
+    const keepFetch = window.mediaFetch;
+    window.mediaFetch = function (k) { if (k === 'beastParts') return; return keepFetch.apply(this, arguments); };
+    for (const k of ['beastStudioIdle', 'beastStudioStalk', 'beastStudioRoar']) keepFetch(k, true);
+    const t0 = performance.now();
+    while (performance.now() - t0 < 15000 && !['beastStudioIdle', 'beastStudioStalk', 'beastStudioRoar'].every(k => MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth))
+      await new Promise(r => setTimeout(r, 100));
+    loadRoom('A4'); __clear(); G.state = 'PLAY';
+    const b = G.boss;
+    let T = performance.now();
+    player.x = 31 * TILE; player.y = 13 * TILE;
+    for (let i = 0; i < 90; i++) { __clear(); player.iT = 99; T += 1000 / 60; mainLoop(T); }
+    // in among the clumps (the tall one at 6.6 tiles and its neighbours), mid-roar
+    b.x = 6 * TILE; b.wakeTo = null; b.petAct = 'roar'; b.petT = b.petT0 = 1.5;
+    for (let i = 0; i < 30; i++) { __clear(); player.iT = 99; b.x = 6 * TILE; T += 1000 / 60; mainLoop(T); }
+    updateCam(b.x, b.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
+    // the draw, spied on: what drew him, and in what order against the clumps
+    const order = []; let cell = null, held = 0, mLion = null;
+    const sp = (name, tag) => { const f = window[name]; window[name] = function () { tag(arguments); return f.apply(this, arguments); }; return () => { window[name] = f; }; };
+    const un = [
+      sp('nfCoverPlate', () => order.push('clump')),
+      sp('foeDraw', a => { if (a[1] === b) { order.push('lion'); mLion = a[0].getTransform(); } }),
+      sp('drawBossHold', () => { held++; }),
+      sp('drawStripCell', a => { if (/^beast/.test(a[1])) { const m = a[0].getTransform(); cell = { key: a[1], i: a[2], n: a[3], h: a[6], sx: Math.hypot(m.a, m.b), sy: Math.hypot(m.c, m.d) }; } }),
+    ];
+    const x = cv.getContext('2d');
+    const snap = () => x.getImageData(0, 0, cv.width, cv.height).data;
+    const realNow = performance.now, realRand = Math.random;
+    performance.now = () => 0; Math.random = () => 0.5;
+    draw(0); const withLion = snap();
+    for (const u of un) u();
+    // the same frame without him
+    const keepPF = window.nfPetFront, keepFD = window.foeDraw;
+    window.foeDraw = function (cc, e) { if (e === b) return; return keepFD.apply(this, arguments); };
+    draw(0); const without = snap();
+    window.foeDraw = keepFD;
+    performance.now = realNow; Math.random = realRand;
+    // his body drawn ALONE, under the transform he was drawn with, on a clear canvas: the frame
+    // round him has its own light passes, this is the body (his ground shadow, at a third of
+    // full strength, is under the 140 cut)
+    let area = 0, lum = 0; const bb = [1e9, 1e9, -1, -1];
+    if (mLion) {
+      const o = document.createElement('canvas'); o.width = cv.width; o.height = cv.height;
+      const ox = o.getContext('2d', { willReadFrequently: true }); ox.setTransform(mLion);
+      performance.now = () => 0; Math.random = () => 0.5;
+      try { ox.filter = 'sepia(1) saturate(1.8) brightness(1.08)'; b.draw(ox); } finally { performance.now = realNow; Math.random = realRand; }
+      const d = ox.getImageData(0, 0, o.width, o.height).data;
+      for (let k = 0; k < d.length; k += 4) if (d[k + 3] > 140) {
+        area++; lum += 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2];
+        const px = (k / 4) % o.width, py = Math.floor(k / 4 / o.width);
+        bb[0] = Math.min(bb[0], px); bb[1] = Math.min(bb[1], py); bb[2] = Math.max(bb[2], px); bb[3] = Math.max(bb[3], py);
+      }
+    }
+    // ...and what the frame shows changed where he stands (he is really in it)
+    let seen = 0;
+    for (let k = 0; k < withLion.length; k += 4)
+      if (Math.abs(withLion[k] - without[k]) + Math.abs(withLion[k + 1] - without[k + 1]) + Math.abs(withLion[k + 2] - without[k + 2]) > 24) seen++;
+    // the cell's own opaque area, at the size it was drawn
+    let expect = 0;
+    if (cell) {
+      const raw = MEDIA_RAW[cell.key], cw = raw.naturalWidth / cell.n, chh = raw.naturalHeight;
+      const q = document.createElement('canvas'); q.width = Math.ceil(cw); q.height = chh;
+      const qx = q.getContext('2d'); qx.drawImage(raw, cell.i * cw, 0, cw, chh, 0, 0, cw, chh);
+      const d = qx.getImageData(0, 0, q.width, q.height).data; let op = 0;
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 40) op++;
+      const k = cell.h / chh;
+      expect = op * k * k * cell.sx * cell.sy;
+    }
+    // put the sheet back the way it was
+    window.mediaFetch = keepFetch;
+    if (keepParts) MEDIA_IMG.beastParts = keepParts; if (keepRaw) MEDIA_RAW.beastParts = keepRaw;
+    if (typeof SOFT_ART !== 'undefined' && keepSoft !== undefined) SOFT_ART.beastParts = keepSoft;
+    const lastClump = order.lastIndexOf('clump'), lion = order.lastIndexOf('lion');
+    return { key: cell && cell.key, held, area, expect: Math.round(expect), lum: area ? Math.round(lum / area) : 0, front: lion > lastClump && lastClump >= 0, lion, lastClump, bb, seen };
+  });
+  check('freed, on a revisit with only his filmed takes in memory, the lion is drawn from his own take (never the waiting silhouette)',
+        /^beastStudio/.test(pet.key || '') && pet.held === 0, 'take ' + pet.key + ', silhouette drawn ' + pet.held + 'x');
+  check('...his whole body: the pixels he changes are about the area of the cell he is drawn from, lit (not a dark oval)',
+        pet.expect > 0 && pet.area > pet.expect * 0.6 && pet.area < pet.expect * 1.5 && pet.lum > 70 && pet.seen > pet.area * 0.6
+          && (pet.bb[2] - pet.bb[0]) > 1.4 * (pet.bb[3] - pet.bb[1]),
+        'body ' + pet.area + ' px vs cell ' + pet.expect + ' px (' + (pet.bb[2] - pet.bb[0]) + 'x' + (pet.bb[3] - pet.bb[1]) + '), luminance ' + pet.lum + ', changed in the frame ' + pet.seen + ' px');
+  check('...and he stands IN FRONT of the clumps (drawn after the last of them)', pet.front, 'lion at ' + pet.lion + ', last clump at ' + pet.lastClump);
+
   // ---- 4. THE DASH ROOM --------------------------------------------------
   const road = await page.evaluate(() => {
     __fresh({ bossGlitch: 1, 'rw_A4>A14': 1 }); loadRoom('A14'); __clear();

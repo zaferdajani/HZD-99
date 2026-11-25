@@ -1476,7 +1476,13 @@ function beastBlink(c, b, key, cell, ox, h) {
 
 // boss entry point. Returns false so the old chain can catch a missing image.
 function drawBeast(c, b) {
-  const im = beastImg(); if (!im || !im.naturalWidth) return false;
+  // FREED, HE IS HIS FILMED TAKES ALONE (owner's ledger: a character looks like itself). The parts
+  // sheet serves the fight's rig; the freed lion is drawn from his idle / stalk / roar takes, so
+  // he never waits on it — before 2026-11-25 a revisit to his arena could show the waiting
+  // silhouette (a dark oval with two eyes) until the fight's sheet arrived.
+  const im = beastImg();
+  const parts = !!(im && im.naturalWidth);
+  if (!parts && !b.purified) return false;
   try {
     const fv = b.faceVis == null ? -1 : b.faceVis;
     const S = (b.h * 2.35) / BEAST_H;
@@ -1722,6 +1728,7 @@ function drawBeast(c, b) {
       // and the filmed idle breathes; scaling either a second time is the
       // double bob the boss-motion pass removed everywhere but here.)
       if (!beastStrip(c, b)) {
+        if (!parts) { c.restore(); return false; }     // (freed, and his take not here yet either)
         const since = (b.anim || 0) - (b.landAt == null ? -9 : b.landAt);
         if (b.st === 'recover' && since < 0.22) {
           const k = 1 - since / 0.22;
