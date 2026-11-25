@@ -62,7 +62,9 @@ function withWorldProjection(ctx, fn) {
   try { return fn(); } finally { ctx.restore(); }
 }
 function presentWorld() {
-  const z = worldZoom();
+  // ...magnified only by what the render scale did not already do: at z < 1 the
+  // world was drawn small (worldViewBegin) and there is nothing left to enlarge
+  const z = worldZoom() / worldRenderScale();
   if (z <= 1.001) return;
   const b = PRESENTATION.buffer || (PRESENTATION.buffer = document.createElement('canvas'));
   if (b.width !== cv.width || b.height !== cv.height) { b.width = cv.width; b.height = cv.height; }
@@ -71,6 +73,35 @@ function presentWorld() {
   c.save(); c.setTransform(1,0,0,1,0,0); c.imageSmoothingEnabled = true;
   c.drawImage(b, (b.width-b.width/z)/2, (b.height-b.height/z)/2, b.width/z,b.height/z, 0,0,cv.width,cv.height);
   c.restore();
+}
+// ZOOMED OUT IS DRAWN, NOT ONLY COUNTED (owner, 2026-11-25: "the screen should just zoom out to
+// fill out all the screen with all the data needed without moving the camera with me"). The world
+// is drawn 1:1 into the 960x540 frame and presentWorld enlarges its middle when z > 1; a z below 1
+// used to do nothing at all, so a boss fit that asked for 0.68 still showed 960 px of the arena.
+// Now a z below 1 draws the world SMALLER, about the frame's centre: WORLD_VIEW is the part of the
+// logical 960x540 space that lands on the canvas (wider and taller than it, x/y negative), and
+// every full-frame pass in the world draws over WORLD_VIEW instead of 0,0,960,540. The canvas, and
+// so the pixel count a phone pays for, is the same; worldScreenX/Y hold for every z.
+// The backdrop and the screen-wide grades (bloom, wash, vignette, lift, light) are drawn on the
+// canvas itself (worldOnScreen): they belong to the picture, not to a place in the room.
+const WORLD_VIEW = { k: 1, x: 0, y: 0, w: 960, h: 540, m0: null };
+function worldRenderScale() { const z = worldZoom(); return z > 0.05 && z < 0.999 ? z : 1; }
+function worldViewBegin(ctx) {
+  const V = WORLD_VIEW, k = worldRenderScale();
+  V.k = k; V.w = 960 / k; V.h = 540 / k; V.x = 480 - V.w / 2; V.y = 270 - V.h / 2;
+  V.m0 = ctx.getTransform();
+  if (k < 1) { ctx.translate(480, 270); ctx.scale(k, k); ctx.translate(-480, -270); }
+}
+function worldViewEnd(ctx) {
+  const V = WORLD_VIEW;
+  if (V.m0) ctx.setTransform(V.m0);
+  V.k = 1; V.x = 0; V.y = 0; V.w = 960; V.h = 540; V.m0 = null;
+}
+function worldOnScreen(ctx, fn) {
+  const V = WORLD_VIEW;
+  if (V.k >= 1 || !V.m0) return fn();
+  ctx.save(); ctx.setTransform(V.m0);
+  try { return fn(); } finally { ctx.restore(); }
 }
 function drawSaveFeedback() {
   const f = G.saveFeedback;
