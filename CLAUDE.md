@@ -16,8 +16,8 @@ tell him anything is done.**
 
 | said | the rule | his words | held by |
 |---|---|---|---|
-| 15× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` · skill `creature-motion-combat` |
-| 10× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` |
+| 16× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" · "watching the leaves moves" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` `nf-ambush` · skill `creature-motion-combat` |
+| 11× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" · "a place where the lion goes inside and hide" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` `nf-ambush` |
 | 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
 | 7× | **A door is an object that leads somewhere new; in a floor, a hole in broken ground; one ring to a frame, nothing in it** | "neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" · "a hole in the ground" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` `sewer` |
 | 7× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass painted, edgeless, bending under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" · "squares stuck together" | `seam` `ring-pads` `fired-art` `grass` · skill `terrain-doors` |
@@ -30,7 +30,7 @@ tell him anything is done.**
 | 3× | **Do the whole job, and show it as it is: motion as a clip, never a sheet of stills; never recite what is left** | "You are not a kid that I need to keep monitoring." · "a series of duplicate images?" | no harness — check your report before sending it |
 | 3× | **All art, video and structures come from Higgsfield; the code is ours** — real sounds, and art he asks for, may come from CC0 libraries, credited | "You are not good at it. You can create the code... but not the art." · "boss attk graphics so basic" | `artbible` `boss-vfx` · skills `art-bible` `rig-animation` |
 | 3× | **A kingdom is played, not walked through** — two mini-bosses that each give a piece and speak of its agent, its agent right before its sage; the six sages stay | "There is no game in the second kingdom" · "we do not change sages, but we add other bosses" · "It should be right before Nilfang" | `ch2-road` `story-order` `mirejaw` `boss-ladder` |
-| 2× | **An enemy is big enough, and visibly alive or visibly down** | "This enemy is so small" · "its standing still !!!" | `cheetah-hunt` `fired-art` |
+| 3× | **An enemy is big enough, visibly alive or down, and comes for her once it sees her** (never through rock) | "This enemy is so small" · "its standing still !!!" · "I don't want this small hero" · "once they see me, they come to me" | `cheetah-hunt` `fired-art` `enemy-sight` |
 | 2× | **Nothing opens or buys by surprise** | "And it happened again... suddenly the window opened" | `shop-ask` |
 | 2× | **Lives are hard to get: one for each sage, one dear spare at Ratchet** | "extra lives should be only rewarded when you defeat a sage" · "Lives should not be easy to obtain" | `lives` |
 | 1× | **The verb is PURIFY, never free; the robed ones are AGENTS, never sages** | "it should be purifying, not freeing" · "this is not a sage" | `pure-gift` `panels` |
@@ -72,21 +72,19 @@ you're selling" · "I'm looking for your honest description."
 - **Finish the complete task** (owner-authorized, 2026-09-07): implement, test,
   fix, ship, verify live; stop only when verified or he alone can clear the
   blocker. Never claim unverified completion, cut scope silently or weaken a test.
-- **Report what shipped** and anything he must decide. Do not list what remains:
-  the backlog is `docs/ART_QUEUE.md`.
+- **Report what shipped** and what he must decide, not what remains
+  (`docs/ART_QUEUE.md`).
 - **One branch**: `claude/clawbyte-repo-migration-byhyl8`. Fetch before work.
   Verify, then push it and mirror the same commit to `main` (production) and
   `odyssey`. Never force-push, never branch, never reset another author's work.
   Built pages are never hand-merged: rebuild.
 - **Standing deployment authorization** (2026-09-07): completed, verified
   updates may be published to `main` and mirrored to `odyssey`.
-- **Live: https://zaferdajani.github.io/HZD-99/** — the only URL to quote and
-  to check a deploy against.
-- **Story**: `docs/STORY_CANON.md` overrides older story text.
-- **The studio is VibeSolutions**: one constant, `STUDIO`, in `js/game.js` and
-  `build.cjs`; never an i18n key (`tests/brand.cjs`).
-- **Art**: generated through Higgsfield, the owner reviewing it; archived in
-  `assets/source/` in the same commit; credited in `assets/CREDITS.md`.
+- **Live: https://zaferdajani.github.io/HZD-99/** — the only URL to quote and check.
+- **Story**: `docs/STORY_CANON.md` overrides older text. **Studio**: VibeSolutions,
+  one constant `STUDIO` (js/game.js, build.cjs), never an i18n key.
+- **Art**: through Higgsfield; archived in `assets/source/` in the same commit;
+  credited in `assets/CREDITS.md`.
 - **RULE ZERO**: author at full quality, derive every cheaper tier with a tool.
 - **RULE ONE**: web, phone, the app and the desktop shell are ONE build. After
   touching assets, pages or input: `node build.cjs && npm run app:pack`.
@@ -104,12 +102,12 @@ npm run app:pack               # assemble www/ for the native shell
 
 Three things that bite:
 
-- `build.cjs` **concatenates** `js/*.js` into one script. Two files declaring
-  the same `const` is a black page. `node --check js/<file>.js`, then build.
+- `build.cjs` **concatenates** `js/*.js`: two files declaring one `const` is a
+  black page. `node --check js/<file>.js`, then build.
 - **Nothing in code may name a file that is not on disk.** After art changes:
   `node tools/lowres.cjs`, `node tools/roomassets.cjs` (served), then build.
   After a new track or film: `node tools/faststart.cjs` (phones need a plain MP4).
-  After a new plate: `node tools/defringe.cjs --check` (models paint a cyan rim).
+  After a new plate: `node tools/defringe.cjs --check` (cyan rims).
 - **Never edit sources or rebuild in a tree a harness run is using**; run the
   suite in batches (long runs restart the container).
 
@@ -118,12 +116,12 @@ Three things that bite:
 | when you are about to | read |
 |---|---|
 | change a room, platform, door, gate or ceiling | skill `terrain-doors` |
-| edit anything in `js/` or `tools/`, or find where something lives | skill `engine-map` |
-| add or change an asset, or how anything reaches a device | skill `platform-delivery`, `docs/DELIVERY.md` |
+| edit `js/` or `tools/`, or find where something lives | skill `engine-map` |
+| add an asset, or change how one reaches a device | skill `platform-delivery`, `docs/DELIVERY.md` |
 | touch a character's art, or generate anything | skills `art-bible`, `art-prompts`; `ART_BIBLE.md` |
-| give a character a new move or smoother motion | skill `rig-animation` |
+| give a character a new move | skill `rig-animation` |
 | build or tune a fight | skills `combat-design`, `boss-movegen`, `boss-openings`, `boss-patterns` |
-| know exactly what an order of his says, and why | `docs/OWNER_ORDERS.md` |
-| know the branch protocol's history, the session fleet, kingdoms | `docs/SESSION_FLEET.md` |
+| know what an order of his says, and why | `docs/OWNER_ORDERS.md` |
+| know the branch history, the session fleet | `docs/SESSION_FLEET.md` |
 
-Moved out unedited 2026-11-17; nothing deleted.
+Moved out unedited 2026-11-17.
