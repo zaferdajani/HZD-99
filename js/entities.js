@@ -2737,7 +2737,7 @@ class Player {
           sfx('burstout');
           burst(tx2, ty2, 22, '#fff6c0', 320, 0.6, 120, 4, true);
           // the bolt itself wounds anything beneath it
-          for (const e of G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro' ? [G.boss] : [])) {
+          for (const e of G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : [])) {
             if (e.dead || e.disabled || e.rescued) continue;
             if (Math.abs((e.x + e.w / 2) - tx2) < 46 && Math.abs((e.y + e.h / 2) - ty2) < 120) {
               if (dealDmg(e, this.attackDmg('thunder'), armEl(), tx2, ty2, true, 'thunder') <= 0) continue;
@@ -3023,7 +3023,7 @@ class Player {
         this.swing.set.add(G.boss);
         petPoke(G.boss, hb.x + hb.w / 2, hb.y + hb.h / 2);
       }
-      const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+      const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
       const n0 = Math.hypot(this.swing.ax, this.swing.ay) || 1;
       const kx = this.swing.ax / n0 || this.face, ky = this.swing.ay / n0;
       for (const e of targets) {
@@ -3253,7 +3253,7 @@ class Player {
     b.x += b.vx * dt; b.y += (b.vy || 0) * dt;
     // it cuts both ways, once per pass
     const bb = { x: b.x - 16, y: b.y - 16, w: 32, h: 32 };
-    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || e.disabled || e.rescued || b.set.has(e)) continue;
       if (typeof isPet === 'function' && isPet(e)) continue;
@@ -3312,7 +3312,7 @@ class Player {
   swirlPass() {
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     const R = SWIRL_R, dm = this.attackDmg('swirl');
-    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
     let hit = 0;
     for (const e of targets) {
       if (e.dead || e.disabled || e.rescued || (typeof isPet === 'function' && isPet(e))) continue;
@@ -3431,7 +3431,7 @@ class Player {
     // damage; 128 -> 165 on the radius, with the ring FX scaled to match so the
     // visible burst never undersells what it actually touches.
     const R = 165, dm = this.attackDmg('burst');
-    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || e.disabled || e.rescued || (typeof isPet === 'function' && isPet(e))) continue;
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
@@ -6285,7 +6285,7 @@ class Proj {
       return;
     }
     if (this.friendly) {
-      const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+      const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
       for (const e of targets) {
         if (e.dead || e.disabled || e.rescued) continue;
         if (aabb(this.box(), hurtBoxOf(e))) {
@@ -12644,7 +12644,7 @@ function crescentStep(dt) {
     const w = L[i]; w.t += dt;
     const adv = CRESCENT.v * dt; w.x += w.dir * adv; w.left -= adv;
     const hb = { x: w.x - CRESCENT.w / 2, y: w.y - w.h / 2, w: CRESCENT.w, h: w.h };
-    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || e.disabled || e.rescued || w.hit.has(e) || (typeof isPet === 'function' && isPet(e))) continue;
       if (!aabb(hb, hurtBoxOf(e))) continue;
@@ -15329,7 +15329,7 @@ class Boss {
       burst(this.cx(), this.cy(), 14, '#ffffff', 200, 0.5, 0, 3, true);
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro'
-      && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
+      && this.st !== 'lsvanish' && this.st !== 'arcstorm' && !(typeof nfHidden === 'function' && nfHidden(this))) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
     } finally {
       if (lionMotion) beastMotionEnd(this, dt);
       if (this.kind === 'alpha') alphaMotionEnd(this, dt);

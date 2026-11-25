@@ -373,7 +373,7 @@ function playSong() {
   // the Husk listens too — calming it is how you get your charge back
   const targets = G.enemies
     .concat(G.pickups.filter(o => o && o.kind === 'husk'))
-    .concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    .concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
   for (const e of targets) {
     if (e.dead || e.disabled || e.rescued) continue;
     if (Math.hypot(e.x + e.w / 2 - px, e.y + e.h / 2 - py) > SONG_RANGE) continue;
@@ -527,7 +527,7 @@ class Star {
       sfx('metal'); burst(this.x, this.y, 5, MAT.cyan.mid, 120, 0.25, 0, 2, true);
       return;
     }
-    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' && !(typeof nfHidden === 'function' && nfHidden(G.boss)) ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || e.disabled || e.rescued || (this.seen && this.seen.has(e))) continue;
       if (!aabb(this.box(), hurtBoxOf(e))) continue;

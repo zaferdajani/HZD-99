@@ -1259,6 +1259,11 @@ async function lionFight(s, b) {
   const now = Date.now(); if (st !== NFC.last) { NFC.enter = now; NFC.prev = NFC.last; NFC.last = st; }
   const since = (now - NFC.enter) / 1000 * RATE;
   if (st === 'pounce' || st === 'dive' || st === 'nullhop') { if (ad < 330) jump(); K.add(away); }
+  // the ambush from the leaves (js/nullfang-duel.js NF_AMB): run from the clump that shakes (his
+  // cx is that clump while he hides), over it with her back to a wall; his landing is the opening
+  else if (st === 'coverwarn' || st === 'coverin' || st === 'lurk') keep(240, 300);
+  else if (st === 'lurkwarn' || st === 'lurkpounce') { if (cornered && ad < 200) { K.add(toward); if (ad < 220) jump(); } else K.add(away); }
+  else if (st === 'lurkland') cut();
   else if (st === 'perch') { if ((b.t || 1) < 0.34 && ad < 220) { jump(); K.add(away); } else keep(150, 260); }
   else if (st === 'spring' || st === 'springwarn') keep(150, 260);
   else if (st === 'crouch') { if (!front && ad < 150 && !NFC.disc) cut(); else keep(230, 300); }

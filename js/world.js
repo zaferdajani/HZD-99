@@ -961,7 +961,14 @@ const ROOMS = {
       mound(g, 31, 44, 3, 83);
       hull(g, 46, 50, 1, 85);
     } },
+  // THE COVER (owner, 2026-11-25, js/nfcover.js): metal banana clumps standing on the fight's
+  // floor, which NULLFANG goes into and bursts out of (js/nullfang-duel.js NF_AMB) — one at
+  // the west seam, one between the two ledges, one under the hulk's shoulder; none under a ledge, none
+  // over the ring. [tile x of the foot, scale, plate, mirrored]; coverBack: the meadow beyond,
+  // on parallax behind the level [.., parallax].
   A4: { zone: 'A', sky: 1, w: 44, h: 17, exits: { L: 'A3' },
+    cover: [[3.3, 0.72, 'b', 1], [23.5, 0.88, 'a', 0], [35.7, 0.8, 'a', 1]],
+    coverBack: [[9.5, 0.62, 'a', 0, 0.9], [17.5, 0.7, 'b', 1, 0.9], [30.5, 0.6, 'b', 0, 0.9], [42.5, 0.7, 'a', 1, 0.9]],
     ents: [['boss', 24, 15, 'glitch']],
     build(g) {
       frame(g); seamL(g);

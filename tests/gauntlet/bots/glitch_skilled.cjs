@@ -31,6 +31,12 @@ module.exports = { boss: 'glitch', bot: `(bo, P, ctx) => {
   const st = s.st; ctx.last = ctx.last || ''; if (st !== ctx.last) { ctx.enter = ctx.frame; ctx.prev = ctx.last; ctx.last = st; }
   const since = (ctx.frame - ctx.enter) / 60;
   if (st === 'pounce' || st === 'dive' || st === 'nullhop') { if (ad < 330 && P.on) jump(); keys[away] = 1; return; }
+  // THE AMBUSH FROM THE LEAVES (js/nullfang-duel.js NF_AMB): hidden, he is wherever the leaves
+  // say. When the clump near her shakes (his cx is that clump), run from it; her back to a
+  // wall, go over it instead. Out of it he lands spent: cut.
+  if (st === 'coverwarn' || st === 'coverin' || st === 'lurk') { hold(240, 300); return; }
+  if (st === 'lurkwarn' || st === 'lurkpounce') { if (wallBehind || (cornered && ad < 200)) { keys[toward] = 1; if (P.on && ad < 220) jump(); } else keys[away] = 1; return; }
+  if (st === 'lurkland') { cut(); return; }
   if (st === 'perch') { if (s.t < 0.34 && ad < 220) { jump(); keys[away] = 1; return; } hold(150, 260); return; }
   if (st === 'spring' || st === 'springwarn') { hold(150, 260); return; }
   if (st === 'crouch') { if (!front && ad < 150 && !ctx.disc) { cut(); return; } hold(230, 300); return; }

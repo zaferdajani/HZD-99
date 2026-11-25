@@ -339,3 +339,46 @@ he should dash forward also ... stand on two legs ... its eyes need to blink."*
 
 Held by `tests/nf-phase2.cjs` and `tests/nf-dash.cjs`.
 
+
+## The ambush from the leaves (owner, 2026-11-25)
+
+> "zoom out in the fight to give it more room and space and create structures like green
+> structure, leaves, or maybe banana leaves ... converted into metallic ... a place where the lion
+> goes inside and hide and then comes attacking ... the indication of the place it comes from is by
+> watching the leaves moves in the place that is coming from to attack. Usually that happens
+> wherever I'm standing. So it gives me a split of second to move away from its attack."
+
+**The arena.** Three clumps of metal banana leaves stand on A4's floor (`ROOMS.A4.cover`: the
+west seam, between the two ledges, under the hulk's shoulder — none under a ledge, none over the
+ring), and four more behind the level on parallax (`coverBack`). `js/nfcover.js` draws them after
+the frame's grade, between the bodies and her: he goes INTO them, she walks in front. Every leaf
+is on a spring and bends along its length; she brushes them aside; they part round him as he goes
+in and close behind him.
+
+**The camera.** His fight is framed at zoom 1.0, out to 0.88 when the two are far apart
+(`NF_CAM`, `nfCamZoom`); every other guardian keeps the encounter camera (1.05-1.52). It eases on
+the camera's own lerp, out as the fight starts and back after it.
+
+**The move (`NF_AMB`, js/nullfang-duel.js), on its own clock (the first at 4-6 s, then every 8-11 s,
+6-9 s in phase two; the perch dive keeps the ambush clock it always had):**
+
+| state | s | what | her answer |
+|---|---|---|---|
+| coverwarn | 0.34 (after the turn) | gathers, facing the clump nearest him | — |
+| coverin | ~0.36 leap | low leap into it; the leaves part and close | — |
+| lurk | 0.55-0.95 (fury 0.55) | HIDDEN: not drawn, not a target, no body, `hideK` 0 | keep moving |
+| lurkwarn | 0.60 / 0.50 / 0.45 (fury) | HIDDEN; he moved unseen to the clump NEAREST HER, which shakes (leaves thrash, flecks, the meadow's recorded rustle, the wind-up cue) | leave its reach, or jump |
+| lurkpounce | ~0.4 flight | out of that clump at where she is NOW, low (apex 40/34/30 px), reach 440 px; hurts with the drawn body (`NF_LEAP_BOX`, measured by `tools/nfleapbox.cjs`) | — |
+| lurkland | 0.32 / 0.28 / 0.26 | THE OPENING: landed, whole hide | punish, one or two hits |
+
+Rung 2 (positional): the clump that shakes is always the one nearest her, so there is no place he
+cannot come from, and the answer is to be somewhere else when it opens. Hidden at most
+0.95 + 0.60 s. Not fair-game exploits: nothing can hit him hidden, and nothing hidden can hit her
+(no body contact, no wall). Veto: it is never chosen out of an opening, nor while the null field is
+due. Measured by `tests/nf-ambush.cjs` (a 250 ms reader who runs from the shaking clump is never
+hit; standing still at it always is).
+
+**Art (Higgsfield, 2026-11-25, `assets/source/nfcover/`):** the clump plates and the six leaves.
+His going in and coming out are the filmed leap (`beastStudioLeap`, the pounce's rows); there is
+no dedicated take of him bursting through leaves, and none of him crouched inside them — the
+leaves cover the join. A take of him pushing out through the leaves would be the next art.
