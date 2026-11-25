@@ -157,7 +157,7 @@ const COUNT = `(rect, cols, tol) => {
     const r = await shot(pg, `() => { LANG = '${lang}'; G.state = 'SHOP'; G.shopIdx = 1; }`, `(count) => {
       const ar = LANG === 'ar';
       return SHOP.map((it, i) => ({ type: it.type, lo: loadoutKindOf(it.type, it.id),
-        n: count({ x: (ar ? 774 : 186) - 16, y: 130 + i * 46 - 16, w: 32, h: 32 }, ${JSON.stringify(C3)}, ${TOL}) }));
+        n: count({ x: (ar ? 774 : 186) - 16, y: SHOP_ROW.y0 - 6 + i * SHOP_ROW.step - 16, w: 32, h: 32 }, ${JSON.stringify(C3)}, ${TOL}) }));
     }`);
     for (const row of r) {
       if (row.lo) frameCheck('shop [' + lang + ']: the ' + row.type + ' row wears the ' + row.lo + ' frame', row.n, row.lo, 25);
@@ -170,7 +170,7 @@ const COUNT = `(rect, cols, tol) => {
       LANG = 'en'; G.state = 'SHOP';
       const scrap = G.save.scrap = 0, out = [];
       for (let i = 0; i < SHOP.length; i++) {
-        G.shopIdx = -1; tapMenu(186, 130 + i * 46);
+        G.shopIdx = -1; tapMenu(186, SHOP_ROW.y0 - 6 + i * SHOP_ROW.step);
         out.push(G.shopIdx);
         for (const k in keysP) keysP[k] = 0; for (const k in keys) keys[k] = 0;
         if (TOUCH.tapRel) TOUCH.tapRel.length = 0;

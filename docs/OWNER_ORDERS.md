@@ -261,3 +261,24 @@ What it is, so the kingdom work keeps room for it:
   wolf art we have where possible), its own moves: **dash** (her dash, mounted), **scratch**,
   **jump**, **howl** (a short stun). Some later enemies are built to need it.
 - **When:** started 2026-11-25 on the owner's word (the earlier "after next Friday" is withdrawn).
+
+**Built 2026-11-25** (`js/wolfmount.js`, held by `tests/wolf-mount.cjs`):
+- **The upgrade (shards):** Ratchet's shelf sells **THE PACK, LONGER** (760 shards) once the pack
+  is hers — through the ask-before-buy shop, never by the question that opens it. Her called
+  wolf stays 15 s instead of 10 and bites for 22 instead of 14 (`packStat`, `G.save.packLv`).
+- **The Kingdom 3 task — THE TINKER'S HARNESS:** in the Foundry (zone C) the Tinker (`patch`),
+  once his own errand (`patch_quiet`) is done and she has the pack, says a wolf that trusts her
+  will carry her, and asks that **her called wolf bring down three of his machines**. Only kills
+  the wolf makes count (`questPackKill`), not hers. Paid, he fits its harness: `flags.wolfMount`.
+- **Mounting:** call the wolf, stand beside it, press the interact key (or UP). Off at will:
+  DOWN + JUMP. The wolf grows to carry her (1.9× its pack size) and she sits on its back in her
+  own landing crouch, bobbing with its stride — the filmed wolf strips and her own cells; no new
+  art was generated (0 credits).
+- **Mounted moves:** it runs 1.45× and leaps 1.22× higher; ATTACK is its **scratch** (the
+  lunge strip, hitting a box at the claws' reach in front of it, recorded claw and bite); DASH
+  is its **lunge** (1.4× further, hurts what it runs through, none of her dash's light — no
+  echoes, wake, ring or flare); the ARM button is its **howl** (the recorded howl; machines
+  within 280 px are staggered 1.2 s; a guardian only flinches 0.35 s; dust, no ring of light).
+- **The wolf's stamina:** a bar on the HUD (WOLF). Blows land on the wolf, not on her cores;
+  the howl costs a little; it tires with use. Spent, it shakes her off onto her feet and lopes
+  away, and the call waits its cooldown.

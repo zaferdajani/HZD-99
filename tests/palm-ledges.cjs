@@ -30,9 +30,11 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     for (let i = 0; i < 100 && !(MEDIA_IMG.platPalmA && MEDIA_IMG.platPalmA.naturalWidth); i++) await new Promise(r => setTimeout(r, 100));
     const D0 = CanvasRenderingContext2D.prototype.drawImage; let slab = 0;
     CanvasRenderingContext2D.prototype.drawImage = function (im) { if (im && MEDIA_IMG.platObjA && im === MEDIA_IMG.platObjA) slab++; return D0.apply(this, arguments); };
-    const out = {};
+    const out = {}, home = { x: player.x, y: player.y };
     for (const room of ['A4', 'A1', 'A2', 'A8']) {   // (A3's climb is gone since the door to Kingdom 2, 2026-11-25: A8 stands in for it)
-      G.palmProbe = {};
+      // every room starts her where the game starts her: the last room's check left her on one of ITS
+      // palms, and in A8 that spot is over the floor hole, so she fell back into A2 and A2 was measured
+      G.palmProbe = {}; player.x = home.x; player.y = home.y; player.vx = player.vy = 0;
       loadRoom(room); G.state = 'PLAY'; G.dialog = null;
       let T = performance.now();
       for (let i = 0; i < 400 && !(G.palmProbe[room] && G.palmProbe[room].length && !tileDirty); i++) { T += 16.7; player.iT = 99; G.dialog = null; G.state = 'PLAY'; mainLoop(T); if (i % 20 === 19) await new Promise(r => setTimeout(r, 0)); }
@@ -86,6 +88,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
         let ch = 0, n = 0; for (let i = 0; i < withIt.length; i += 4) { n++; if (Math.abs(withIt[i] - without[i]) + Math.abs(withIt[i + 1] - without[i + 1]) + Math.abs(withIt[i + 2] - without[i + 2]) > 30) ch++; }
         r.solid = +(ch / Math.max(1, n)).toFixed(2);
       }
+      r.end = G.roomId; if (G.roomId !== room) r.got = -1;   // she must still be in the room measured
       out[room] = r;
     }
     CanvasRenderingContext2D.prototype.drawImage = D0;
