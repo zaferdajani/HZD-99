@@ -7819,8 +7819,21 @@ function drawPlatPalm(p2, S, X, Y, RW, ty) {
     out.push({ x0, x1: x0 + P.w * k, top: Y, cb: top + P.cb * k, tx, gy, trunkTop: yT, trunkBot: yT + Math.max(0, L) });
   }
   // (what was drawn, per room — a neighbour is baked ahead of her under its own id: tests/palm-ledges.cjs)
-  if (typeof G !== 'undefined') { const pp = G.palmProbe || (G.palmProbe = {}); (pp[G.roomId] = pp[G.roomId] || []).push({ X, RW, Y, ty, palms: out }); }
+  if (typeof G !== 'undefined' && !PALM_FRONT) { const pp = G.palmProbe || (G.palmProbe = {}); const L = (pp[G.roomId] = pp[G.roomId] || []); if (!L.some(q => q.X === X && q.Y === Y && q.RW === RW)) L.push({ X, RW, Y, ty, palms: out }); }
   return out;
+}
+// THE PALMS AT FULL STRENGTH (owner, 2026-11-25, of her standing on one: "Why floating"). Baked into
+// the terrain they went through the room's wash, bloom and grade with it, and their silver crowns came
+// out as ghosts — a body on one read as standing on air (the ledger: "so translucent"). So each run is
+// drawn again after the grade, at full strength, BEFORE the bodies are laid back (foePigLay): the crown
+// is solid, and a lion or a wolf still passes in front of a trunk. The same function, the same places.
+let PALM_FRONT = false;
+function platPalmFront(c2) {
+  const S = typeof platObjSet === 'function' ? platObjSet() : null;
+  if (!S || !S.palm || !platObjReady(S) || !G.palmProbe) return;
+  const runs = G.palmProbe[G.roomId]; if (!runs || !runs.length) return;
+  PALM_FRONT = true;
+  try { for (const r of runs) drawPlatPalm(c2, S, r.X, r.Y, r.RW, r.ty); } finally { PALM_FRONT = false; }
 }
 // one run, X..X+RW with its walking surface at Y
 function drawPlatObj(p2, S, X, Y, RW, ty) {
@@ -16432,6 +16445,8 @@ function drawWorldFrame() {
   }
   // ...and the machines get back the bodies the light pass was given: a lit,
   // bloomed, washed lion reads as a see-through one (js/foeread.js FOE_PIG)
+  // the palms she stands on, solid, under the bodies laid back next (js/game.js platPalmFront)
+  if (typeof platPalmFront === 'function') { c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); platPalmFront(c); c.restore(); }
   if (typeof foePigLay === 'function') foePigLay(c);
   // the character herself, post-grade: full pigment, no bloom wash. Her own
   // emissive accents (visor, jets, claws) still glow via their shadowBlur.

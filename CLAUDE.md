@@ -24,7 +24,7 @@ tell him anything is done.**
 | 6× | **An enemy is HEARD over the score, on a phone, as a real animal or a real material — recorded, never oscillators, never the same hit twice; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" · "why arent you looking for free libraries for voices ???" · "download from any library of a lion roar" | `voice-heard` `whatplays` `media-container` `hit-voices` `nf-phase2` |
 | 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
 | 5× | **No light, rim, halo, outline or ring round any body; no comic devices over the fight** (white-out, action lines) | "Why still framed with light ?!!!" · "remove the ring" · "more like a comic effect than an actual game effect" | `contrast` `fired-art` `no-rim-baked` `pet-motion` `purify-stage` `no-body-light` `no-comic-fx` |
-| 4× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" · "four of its limbs is almost on the air" | `ring-pads` `gravehorn-ground` `stand-ground` |
+| 5× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" · "four of its limbs is almost on the air" · "Why floating" | `ring-pads` `gravehorn-ground` `stand-ground` `palm-ledges` |
 | 3× | **Few words to read — and a picture or film only at the key moments, never one per line** | "minimize all the text that we see" · "When I say pics I meant generated comics" · "Certain key moments require videos or images" | `text-budget` `campaign-ch1` |
 | 3× | **Do not waste the player's time** — and no comic where a film already tells it | "don't waste the player's time" · "When there is a video no need for comic" · "one shot instead of multiple steps" | `campaign-ch1` `panels` `opening-order` `tutor` |
 | 3× | **Do the whole job, and show it as it is: motion as a clip, never a sheet of stills; never recite what is left** | "You are not a kid that I need to keep monitoring." · "a series of duplicate images?" | no harness — check your report before sending it |
@@ -37,7 +37,7 @@ tell him anything is done.**
 | 1× | **Turning the phone always brings the game up** — test it on a phone, upright first | "User stuck on rotate with nothing" | `rotate` |
 | 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` `sharp` |
 
-**When he corrects something — every time:**
+**When he corrects something:**
 
 1. **Fix what he pointed at.**
 2. **Sweep.** Find every other place that breaks the same rule (enemies,
@@ -51,11 +51,11 @@ tell him anything is done.**
    correction by explaining why it was that way.
 
 Keep this table short. A row leaves it only when he says so.
-`tests/ledger.cjs` holds the table's shape and this file's size.
+`tests/ledger.cjs` holds this table and the file's size.
 
 ## How he wants to be answered (2026-11-17)
 
-He asked more than once: **"Be honest."** · "I'm simply not convinced on what
+He asked often: **"Be honest."** · "I'm simply not convinced on what
 you're selling" · "I'm looking for your honest description."
 
 - **Plain and true, even when unflattering.** Say what is worse as well as
@@ -88,7 +88,7 @@ you're selling" · "I'm looking for your honest description."
 - **RULE ZERO**: author at full quality, derive every cheaper tier with a tool.
 - **RULE ONE**: web, phone, the app and the desktop shell are ONE build. After
   touching assets, pages or input: `node build.cjs && npm run app:pack`.
-- **Display text** is never hard-coded: `js/i18n.js`, five languages.
+- **Display text**: `js/i18n.js`, five languages, never hard-coded.
 
 ## Commands
 

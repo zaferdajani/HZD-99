@@ -71,6 +71,21 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
           r.foot = Math.max(r.foot, Math.abs(t.trunkBot - t.gy));
         }
       }
+      // G: in the FINISHED frame the crown is drawn at full strength, not washed to a ghost by the
+      // room's grade (owner, 2026-11-25, of her on one: "Why floating"): the frame with the palms' own
+      // after-the-grade pass differs from the frame without it over most of the crown under her
+      if (runs.length) {
+        const q = runs[0]; player.x = q.X + q.RW / 2 - player.w / 2; player.y = q.Y - player.h - 1; player.vx = player.vy = 0;
+        for (let i = 0; i < 30; i++) { T += 16.7; player.iT = 99; G.dialog = null; G.state = 'PLAY'; mainLoop(T); }
+        const fc = document.querySelector('canvas'), fx = fc.getContext('2d'), kx = fc.width / 960, ky = fc.height / 540;
+        const x0 = Math.round(worldScreenX(q.X + q.RW * 0.3) * kx), x1 = Math.round(worldScreenX(q.X + q.RW * 0.7) * kx);
+        const y0 = Math.round(worldScreenY(q.Y + 4) * ky), y1 = Math.round(worldScreenY(q.Y + 22) * ky);
+        const grab = () => fx.getImageData(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0)).data;
+        draw(); const withIt = grab();
+        const keep = window.platPalmFront; window.platPalmFront = () => {}; draw(); const without = grab(); window.platPalmFront = keep; draw();
+        let ch = 0, n = 0; for (let i = 0; i < withIt.length; i += 4) { n++; if (Math.abs(withIt[i] - without[i]) + Math.abs(withIt[i + 1] - without[i + 1]) + Math.abs(withIt[i + 2] - without[i + 2]) > 30) ch++; }
+        r.solid = +(ch / Math.max(1, n)).toFixed(2);
+      }
       out[room] = r;
     }
     CanvasRenderingContext2D.prototype.drawImage = D0;
@@ -82,6 +97,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('C  the crown spans the run (solid across >= 90%)', rooms.every(([, r]) => r.span >= 0.9), Object.fromEntries(rooms.map(([k, r]) => [k, r.span])));
   check('D  every trunk reaches the ground (>= 95% solid down it, foot within 8 px of the ground)', rooms.every(([, r]) => r.trunk >= 0.95 && r.foot <= 8), Object.fromEntries(rooms.map(([k, r]) => [k, { trunk: r.trunk, foot: r.foot }])));
   check('E  no lawn along a crown', rooms.every(([, r]) => r.lawn <= 2), Object.fromEntries(rooms.map(([k, r]) => [k, r.lawn])));
+  check('G  in the finished frame the crown under her is solid, not washed to a ghost by the grade', rooms.every(([, r]) => r.solid >= 0.4), Object.fromEntries(rooms.map(([k, r]) => [k, r.solid])));
   check('F  no page errors', errs.length === 0, errs.slice(0, 3));
   await browser.close();
   if (bad) { console.log('\nFAILED: ' + bad); process.exit(1); }
