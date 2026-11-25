@@ -5,7 +5,7 @@
 //    human ... instead of hitting a metallic statue that gets pushed backward"
 //
 // This holds the duel's numbers (js/sage-motion.js SAGE_DUEL_PROFILE):
-//   - half as much again to break as an agent off the duel (hpK 1.5);
+//   - harder to break than an agent off the duel by SAGE_DUEL_PROFILE.hpK (1.5 on 2026-11-20, 2 since 11-24);
 //   - a decision every 0.7 s, and 0.8 s of breather after three denied lunges;
 //   - below half health a coil opens a chain of THREE lunges, above it two;
 //   - a blow stops him where he stands: the knock it gives moves him a short
@@ -38,9 +38,9 @@ const { chromium } = require('playwright');
     out.duel = !!e.sageDuel; out.hp = e.hpMax0;
     // the same agent built off the duel, in the same moment: what he would be without it
     { const orig = window.sageDuelInit; let pre = 0, post = 0;
-      window.sageDuelInit = function (q) { pre = q.hpMax0; orig(q); post = q.hpMax0; };
+      window.sageDuelInit = function (q) { pre = q.hpMax0 / (q.traits || []).reduce((m, k) => m * ((TRAITS[k] && TRAITS[k].hp) || 1), 1); orig(q); post = q.hpMax0; };   // (base: its own strength, the rolled trait taken off — one fight has one strength)
       new Enemy('sage', 0, 0); window.sageDuelInit = orig; out.base = pre; out.hp = post; }
-    out.prof = { step: SAGE_DUEL_PROFILE.step, denied: SAGE_DUEL_PROFILE.deniedRecovery };
+    out.hpK = SAGE_DUEL_PROFILE.hpK; out.prof = { step: SAGE_DUEL_PROFILE.step, denied: SAGE_DUEL_PROFILE.deniedRecovery };
     // the chain: above half, two lunges; below, three
     const chain = (k) => { e = stage(); e.hp = e.hpMax0 * k; e.coilT = 0.01; sageDuelEnter(e, 'coil', 0.01, 1); player.x = e.x + 140;
       let n = 0, was = false; for (let f = 0; f < 200; f++) { e.update(1 / 60); const l = e.lungeT > 0; if (l && !was) n++; was = l; if (e.windedT > 0 && !l) break; } return n; };
@@ -68,7 +68,7 @@ const { chromium } = require('playwright');
     out.third = seq.slice(10, 16); out.lowAny = seq.slice(10).includes('agTallyHitLow'); out.lowEarly = seq.slice(0, 10).includes('agTallyHitLow');
     return out;
   });
-  check('TALLYMAN duels, and is half as much again to break', R.duel && Math.abs(R.hp / (R.base * 1.5) - 1) < 0.05, JSON.stringify({ hp: R.hp, base: R.base }));
+  check('TALLYMAN duels, and is hpK times as hard to break', R.duel && R.hpK >= 1.5 && Math.abs(R.hp / (R.base * R.hpK) - 1) < 0.05, JSON.stringify({ hp: R.hp, base: R.base }));
   check('...a quicker mind and a shorter breather', R.prof.step <= 0.7 && R.prof.denied <= 0.8, JSON.stringify(R.prof));
   check('...above half health a coil opens two lunges, below it three', R.full === 2 && R.half === 3, R.full + ' / ' + R.half);
   check('a blow stops him where he stands: a short step, not a slide', R.slide >= 0 && R.slide <= 16, R.slide + ' px');

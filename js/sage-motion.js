@@ -4,14 +4,15 @@ const SAGE_DUEL_REVISION='meadow-sage-20261113-r1';
 // HARDER, AND HIT LIKE A BODY (owner, 2026-11-20: "he was super easy to beat
 // ... Hitting him did not feel smooth or realistic as hitting a human ...
 // instead of hitting a metallic statue that gets pushed backward simply").
-// Half as much again to break (hpK), a quicker mind (step: a decision every
+// Twice as much to break (hpK; 1.5 on 2026-11-20, 2 since the owner's 2026-11-24 "all the next ones
+// needs to be harder ... especially the agent" and tests/boss-ladder.cjs), a quicker mind (step: a decision every
 // 0.7 s, not 0.9), a shorter breather after three denied lunges (0.8 s, not
 // 1.2), and below half health the chain is THREE lunges. A blow no longer
 // slides him across the floor as one rigid picture: it stops him where he
 // stands — a short stagger (hitStop), the step he gives taken in place.
 const SAGE_DUEL_PROFILE=Object.freeze({room:'GA1D',lunge:.22,replant:.18,
   exhale:.70,ringRecovery:.55,deniedRecovery:.80,ringSpeed:200,ringMax:250,
-  hpK:1.5,step:.7,hitStop:.12,hitGive:.3,hitShow:.26,chainGap:.9});
+  hpK:2,step:.7,hitStop:.12,hitGive:.3,hitShow:.26,chainGap:.9});
 function sageDuelInit(e){
   if(e.kind!=='sage'||G.roomId!==SAGE_DUEL_PROFILE.room||(typeof isHero==='function'&&isHero()))return;
   e.sageDuel={home:G.roomId,phase:'idle',elapsed:0,duration:0,face:e.dir||1,

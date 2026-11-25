@@ -22,7 +22,8 @@
 //     the PLUMB — her in the air over it: a sweep of the staff overhead
 //   THE OPENINGS — only the exhale after a committed move. Everywhere else it is plated: a blow in
 //     its neutral lands at a fifth, into a move at a tenth.
-//   GREED — the opening holds two blows; the third wakes it into the RIPOSTE (a 0.4 s wind, then
+//   GREED — the opening holds two blows (one in phase two); the next is turned on the staff and
+//     wakes it into the RIPOSTE (a 0.4 s wind, then
 //     the staff round at the hip). Two blows in its neutral do the same. Face-hugged, it steps back.
 //   PHASE TWO at 60%: the UNBINDING (1.2 s, untouchable), then a faster beat and harder versions.
 //   NO DICE: a unique fight has one strength.
@@ -36,9 +37,9 @@ const AGENT_DUEL = Object.freeze({
   vcrouch: 0.55, vault: 0.6, vaultH: 170, land1: 0.8, land2: 0.6, slamR: 44, waveSpd: 380, waveLife: 0.9, waveH: 26,
   gather: 0.7, ringRec: 0.5, ring2: 0.45, ringSpd: 200, ringMax: 250,
   plumb: 0.42, sweep: 0.2, sweepR: 140, sweepRec: 0.5, aaCd: 2.2,
-  spinprep: 0.4, spin: 0.25, spinR: 100, spinRec: 0.5, greed: 2, idleGreed: 2, idleWin: 1.2,
+  spinprep: 0.4, spin: 0.25, spinR: 150, spinRec: 0.5, greed: 2, greed2: 1, idleGreed: 2, idleWin: 1.2,
   spinCd: 2.0, hug: 0.6, backstep: 0.3, bsDist: 170,
-  unbind: 1.2, armAct: 0.08, armIdle: 0.15, denied: 0.8, p2: 0.5,
+  unbind: 1.2, armAct: 0.08, armIdle: 0.15, denied: 0.8, p2: 0.6,
   // (its health is SAGE_DUEL_PROFILE.hpK, half as much again as an agent off the duel — the owner's
   // 2026-11-20 order, applied by sage-motion.js's own init, which this one runs first)
 });
@@ -109,13 +110,16 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
     if (e._agentNorm) return; e._agentNorm = 1;
     let th = 1, ts = 1;
     for (const tr of e.traits || []) if (typeof TRAITS !== 'undefined' && TRAITS[tr]) { th *= TRAITS[tr].hp || 1; ts *= TRAITS[tr].spd || 1; }
-    e.traits = []; e.spd /= ts;   // (its health stays as the duel's init made it: tests/tallyman.cjs)
+    // (its health too: a 'tough' roll made it 906 and a 'swift' one 430 — one fight, two strengths.
+    // The duel's own init multiplies what is left: tests/tallyman.cjs)
+    e.traits = []; e.spd /= ts; e.hp = e.hpMax0 = Math.round((e.hpMax0 || e.hp) / th);
   }
 
   // ---- the duel ----
   const _init = sageDuelInit;
   sageDuelInit = function (e) {
     if (e.kind !== 'sage' || !AGENT_DUEL_ROOMS[G.roomId] || (typeof isHero === 'function' && isHero())) return;
+    normalize(e);
     _init(e);
     if (!e.sageDuel) e.sageDuel = { home: G.roomId, phase: 'idle', elapsed: 0, duration: 0, face: e.dir || 1, ringOrigin: null, chain: 0 };
     e.sageReplantT = 0;
@@ -145,10 +149,15 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
       const k = e.hideK == null ? 1 : e.hideK;
       if (e.tSt === 'exhale') {
         e.openHits = (e.openHits || 0) + 1;
-        // GREED: the opening holds two blows. The third lands, the breath is over, and the staff
-        // is already coming round (the riposte, 400 ms of warning)
-        if (e.openHits > T.greed) {
-          const r0 = _ss(e, dm, x, y);
+        // GREED: the opening holds two blows (one in phase two: the owner, 2026-11-24, "decrease
+        // the openings"). The next is turned, the breath is over, and the staff is already coming
+        // round (the riposte, 400 ms of warning)
+        if (e.openHits > (e.hp <= e.hpMax0 * T.p2 ? T.greed2 : T.greed)) {
+          // (the greedy blow meets the staff coming round: it is turned like any blow outside an
+          // opening. It used to land in full, and a player who then hopped the riposte had three
+          // full blows from every breath — tests/boss-ladder.cjs)
+          burst(x, y, 8, '#fff2d8', 230, 0.25, 120, 2, true); e.turnedT = 0.25; if (typeof sfx === 'function') sfx('block');
+          const r0 = _ss(e, dm * T.armAct, x, y);
           if (!e.locked) { e.spinCd = T.spinCd; S(e, 'spinprep', T.spinprep); sfx('tellmid'); }
           return r0;
         }

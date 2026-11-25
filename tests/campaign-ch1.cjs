@@ -598,7 +598,9 @@ async function followChip(s) {
 let flight = null;       // the jump in the air: { prog, t0 }
 let stall = { k: -1, since: 0, best: Infinity };
 async function ensureModel() {
-  const sig = await page.evaluate(() => G.roomId + '|' + Object.keys(G.save.broken || {}).length + '|' + (G.grid && G.grid.length));
+  // (which exits are open is part of the plan: A3 planned before NULLFANG kept its shut hatch after he opened it)
+  const sig = await page.evaluate(() => { const ex = G.roomDef.exits || {}; const op = ['L', 'R', 'T', 'B'].filter(k => ex[k] && (typeof ex[k] !== 'object' || typeof exitOpen !== 'function' || exitOpen(ex[k]))).join('');
+    return G.roomId + '|' + Object.keys(G.save.broken || {}).length + '|' + (G.grid && G.grid.length) + '|' + op; });
   if (sig === modelKey && model) return;
   info = await roomInfo();
   // exits the room will actually let her through right now
