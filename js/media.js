@@ -132,6 +132,16 @@ const MEDIA_SRC = {
     // with a vista behind it. Fetched when she walks into the zone, never at
     // boot — see floraPreload().
     floraA1: 'assets/characters/flora/a1.webp',   // scrap-meadow bloom
+    // NULLFANG'S COVER (js/nfcover.js): the metal banana clumps of his arena and the six
+    // leaves the rig hangs in front of them (tools/nfcover.py, from assets/source/nfcover/)
+    coverClumpA: 'assets/characters/cover/clump_a.webp',
+    coverClumpB: 'assets/characters/cover/clump_b.webp',
+    coverLeaf0: 'assets/characters/cover/leaf0.webp',
+    coverLeaf1: 'assets/characters/cover/leaf1.webp',
+    coverLeaf2: 'assets/characters/cover/leaf2.webp',
+    coverLeaf3: 'assets/characters/cover/leaf3.webp',
+    coverLeaf4: 'assets/characters/cover/leaf4.webp',
+    coverLeaf5: 'assets/characters/cover/leaf5.webp',
     floraA2: 'assets/characters/flora/a2.webp',   // cable creeper
     floraB1: 'assets/characters/flora/b1.webp',   // conduit reed
     floraB2: 'assets/characters/flora/b2.webp',   // conduit fan

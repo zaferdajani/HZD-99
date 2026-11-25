@@ -731,6 +731,10 @@ function updateCam(px, py, rw, rh, dt) {
   if (robo && p && boss && typeof boss.cx === 'function') {
     const dx=Math.abs(boss.cx()-px), dy=Math.abs(boss.cy()-py);
     wantZoom=Math.max(1.05,Math.min(baseZoom,760/(dx+boss.w/2+100),400/(dy+boss.h/2+90)));
+    // NULLFANG'S ARENA (owner, 2026-11-25: "zoom out in the fight to give it more room and
+    // space"): his fight is framed wider than the rest — the whole height of the room and the
+    // leaves he hides in — and wider still when they are far apart (js/nfcover.js NF_CAM)
+    if (typeof nfCamZoom === 'function') { const nz = nfCamZoom(boss, dx); if (nz) wantZoom = Math.min(wantZoom, nz); }
     if (!(G.meet && (G.meet.ph==='watch'||G.meet.ph==='coil'))) {
       px = px*.65 + boss.cx()*.35;
       py = py*.75 + boss.cy()*.25;

@@ -15855,6 +15855,7 @@ function drawWorldFrame() {
   drawLair();                       // behind the level — see the LAIR table
   drawRoomProp();                   // the cradle, the gates — see ROOM_PROP
   drawFlora();                      // ...and what grows in it — see FLORA
+  if (typeof nfCoverDrawBack === 'function') nfCoverDrawBack(c);   // NULLFANG's meadow beyond (js/nfcover.js)
   if (typeof drawInsects === 'function') drawInsects(c);   // ...and what flies in it (js/insects.js)
   // (a zone's platform objects that landed AFTER this room's tile layer was
   // rendered: the layer is a cache, and the cache was painted with the old deck)
@@ -16221,6 +16222,11 @@ function drawWorldFrame() {
   // ...and she is drawn as herself through the align beat: the walk to the
   // doorway is the ordinary body walking, and only the recede down the doorway
   // is the special shot (see updateGateWalk)
+  // NULLFANG'S COVER (js/nfcover.js): the clumps he goes into stand between the bodies and
+  // her, at full strength like her — objects in the fight, not painted distance
+  if (typeof nfCoverDrawFront === 'function') {
+    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); nfCoverDrawFront(c); c.restore();
+  }
   if (player && !G.recharge && !(G.gateWalk && G.gateWalk.align >= 1)) {
     c.save();
     // THE I-FRAME FLICKER DIMS HER, IT DOES NOT DELETE HER.

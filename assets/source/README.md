@@ -682,3 +682,15 @@ describe it.
   butterflies ... dragonflies near swamps ... They are not NPCs ... And they're small."
   `tools/bugcut.py` keys and cuts them into `fx/insects/*.webp` (48 px tall at most); `js/insects.js`
   flies them — butterflies over the meadows, dragonflies over the swamp, moths in caves and the Nest.
+
+## `nfcover/` — NULLFANG's cover, metal banana leaves (2026-11-25)
+
+- `clump_a.webp`, `clump_b.webp` — two clumps of metal banana plants (GPT Image 2.6, high, 2K,
+  transparent background; jobs 1b8c70e7, 0e0fd4ee), fired against `flora/a1.jpg` for MATERIAL only
+  (brushed steel, verdigris bronze, front-and-above light, no rim). `leaves_a.webp` — six single
+  leaves, upright, stalk at the bottom (job b3f629ec), the sheet the game's leaves are cut from;
+  `leaves_b.webp` — its variant (job e4350f32), archived, not shipped. Archived at 1600 px.
+  The owner: "create structures like ... banana leaves ... converted into metallic ... a place
+  where the lion goes inside and hide". `tools/nfcover.py` trims, scales and measures them into
+  `characters/cover/` (the leaves' stalk foot in `cover.json`); `js/nfcover.js` draws them, the
+  leaves on springs, bent band by band.

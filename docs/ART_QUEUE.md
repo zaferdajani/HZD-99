@@ -7069,3 +7069,18 @@ GLACIERE → MOTHER-V. Owed, in order:
    log roll, belly up and over), with the rest of his move set (docs/SPECIES_MOVESET.md).
    The older species' gaps against that template are in `assets/movesets.json` (`missing`).
 4. **Bilge poling**: his loop sways; he should plant the pole and push.
+
+## NULLFANG'S AMBUSH FROM THE LEAVES — what is still owed (2026-11-25)
+
+The cover itself LANDED (metal banana clumps and six leaves, `assets/source/nfcover/`,
+`js/nfcover.js`). What his going in and coming out still borrow:
+
+- **`beastStudioBurst` — NULLFANG bursting out of leaves at her** (Seedance, omni-reference from
+  `beast/studio-2026-11-13/start_left.png`, the realistic-lion motion reference first as the rear
+  was; ~30 credits per take on 2026-11-25, which the account did not have). Low, fast, the
+  forequarters leading through parting fronds, claws out, landing into a crouch; on black; cut by
+  `tools/lion-studio.py` with the leap's grade. Today the burst plays the pounce's flight cells
+  (`beastStudioLeap` 11-23) with the clump drawn over his rear.
+- **`beastStudioLurk` — him crouched low, sliding into cover** (the same session, one take): the
+  last metre of the leap in, the shoulders dropping and the body going flat. Today the body sinks
+  over 0.18 s behind the leaves.

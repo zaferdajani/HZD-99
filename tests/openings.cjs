@@ -26,10 +26,14 @@ const FIGHTS = [
     // bite: they hurt, and their wind-ups are wind-ups — counting them as OPEN time
     // measured his own attacks as gifts he handed her. bitestop, after the bite, is
     // a real opening and stays OPEN.)
-    hurt: ['swipe', 'pounce', 'dive', 'rake', 'swat', 'bite'],
+    // (2026-11-25: the ambush from the leaves — js/nullfang-duel.js NF_AMB. The burst hurts; going
+    // in, the hiding and the shaking leaves are its wind-up — hidden he cannot be reached at all —
+    // and lurkland, after the burst, is its opening.)
+    hurt: ['swipe', 'pounce', 'dive', 'rake', 'swat', 'bite', 'lurkpounce'],
     // the roar cannot hurt her (it shoves and summons; its floor shocks travel on
     // their own), so it is OPEN time
-    tell: ['swipewarn', 'crouch', 'springwarn', 'nullcharge', 'perch', 'nullhop', 'rakewarn', 'swatwarn', 'bitewarn', 'spitwarn'],
+    tell: ['swipewarn', 'crouch', 'springwarn', 'nullcharge', 'perch', 'nullhop', 'rakewarn', 'swatwarn', 'bitewarn', 'spitwarn',
+           'coverwarn', 'coverin', 'lurk', 'lurkwarn'],
     // a move whose opening is allowed past 900: the once-per-fight set piece
     gift: ['pounce>nullend'],
     // the null field's own chain: pounce, hop, pounce, hop, pounce -> nullend. The

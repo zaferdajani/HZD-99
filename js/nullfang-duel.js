@@ -78,14 +78,49 @@ const NF_DUEL = Object.freeze({
   roarShock: [480, 1.15], landShock: [420, 0.8], shockH: 34, shockW: 40,   // px/s, s; jump them
   furyCrack: 58,                 // px of prowl between cracks under his paws, in fury
 });
+// THE AMBUSH FROM THE LEAVES (owner, 2026-11-25: "create structures like green structure,
+// leaves, or maybe banana leaves ... converted into metallic ... a place where the lion goes
+// inside and hide and then comes attacking ... the indication of the place it comes from is by
+// watching the leaves moves in the place that is coming from to attack. Usually that happens
+// wherever I'm standing. So it gives me a split of second to move away from its attack").
+// The arena's metal banana clumps are js/nfcover.js. The sentence, every number in seconds:
+//   coverwarn  he turns to the clump nearest him and gathers (the filmed leap's crouch)
+//   coverin    one low leap into it: the leaves part round him, close behind him, sway
+//   lurk       HIDDEN: not drawn, not a target, no body to walk into, no damage from anything
+//   lurkwarn   HIDDEN, THE TELL: the clump at or nearest where SHE stands shakes — leaves
+//              thrash, shed flecks, the recorded meadow rustles and the wind-up cue sounds
+//              (TELL_ST hears `warn`). He has moved to it unseen. 0.60 s, 0.50 in phase two,
+//              0.45 in the fury: never under kingdom one's 0.40 floor
+//   lurkpounce he bursts out of THAT clump at where she is NOW, low and fast; the box that
+//              hurts is his drawn body in the air (ledger: what looks sharp cuts)
+//   lurkland   the opening: landed, spent, whole hide
+// Answers: leave the shaking clump's reach (run from it), or jump the burst. No place is safe —
+// the clump that shakes is always the one nearest her — and no hiding is endless: he is hidden
+// at most lurk + tell (0.95 + 0.60 s), then he must come out.
+const NF_AMB = Object.freeze({
+  warn: 0.34,                    // the gather before the leap in
+  inApex: 70, inMax: 560,        // the leap into a clump: apex px, the farthest clump he will take
+  lurk: [0.55, 0.95],            // hidden, before the tell (fury: the low end)
+  tell: [0.60, 0.50, 0.45],      // the shaking clump, by phase (three = fury)
+  apex: [40, 34, 30],            // the burst's apex px over her floor
+  reach: 440,                    // the farthest the burst carries from the clump
+  land: [0.32, 0.28, 0.26],      // the opening after it, by phase (and the turn after it, when she is behind him: under 0.9 s together, tests/openings.cjs)
+  after: 0.15,                   // ...and straight back to work
+  fade: 0.18,                    // the body sinks into the leaves this long as he goes in
+  first: [4, 6], every: [[8, 11], [6, 9]],   // its clock: the first, then by phase
+});
 // the states he is DOING something in: a blow into them is turned, and the
 // break is not taken out of them
 const NF_ACT = { swipewarn: 1, swipe: 1, crouch: 1, pounce: 1, roar: 1, springwarn: 1, spring: 1, perch: 1,
   dive: 1, nullcharge: 1, nullhop: 1, stalk: 1, run: 1, rakewarn: 1, rake: 1, rearwarn: 1, rear: 1, swatwarn: 1, swat: 1,
-  spitwarn: 1, bitewarn: 1, bite: 1 };
+  spitwarn: 1, bitewarn: 1, bite: 1, coverwarn: 1, coverin: 1, lurk: 1, lurkwarn: 1, lurkpounce: 1 };
 // the moves this file owns: the entities switch does not know them, and they
 // run here, before it
-const NF_OWN = { rakewarn: 1, rake: 1, swatwarn: 1, swat: 1, spitwarn: 1, bitewarn: 1, bite: 1, bitestop: 1 };
+const NF_OWN = { rakewarn: 1, rake: 1, swatwarn: 1, swat: 1, spitwarn: 1, bitewarn: 1, bite: 1, bitestop: 1,
+  coverwarn: 1, coverin: 1, lurk: 1, lurkwarn: 1, lurkpounce: 1, lurkland: 1 };
+// in the leaves: not drawn, not a target, no body
+const NF_HID = { lurk: 1, lurkwarn: 1 };
+function nfHidden(b) { return !!b && b.kind === 'glitch' && !!NF_HID[b.st] && !b.dead; }
 function nfDuelOn(b) {
   return !!b && b.kind === 'glitch' && !b.meet && !(typeof isHero === 'function' && isHero());
 }
@@ -154,6 +189,7 @@ function nfStepHazards(b, dt) {
 }
 // the moves this file owns, ticked before the entities switch sees the frame
 function nfOwnStep(b, dt, dist, adist) {
+  if (/^(cover|lurk)/.test(b.st)) return nfAmbStep(b, dt, dist, adist);
   const N = NF_DUEL, f = b.face || 1;
   const turning = Math.abs((b.faceVis == null ? f : b.faceVis) - f) > 0.02;
   b.vx = b.st === 'bite' ? f * N.bite : 0;
@@ -236,6 +272,160 @@ function nfOwnStep(b, dt, dist, adist) {
     if (b.t <= 0) { nfEnter(b, 'idle', N.biteAfter); b.openIdle = false; b.swipeCD = Math.min(b.swipeCD || 0, N.biteAfter); }
   }
 }
+// THE BURST HURTS WITH THE BODY THAT IS DRAWN. The filmed leap carries the animal about
+// inside its cell as it flies (up, and well ahead of the physics box), so a box round his
+// physics body would cut where nothing is drawn and miss what is. Each flight cell's drawn
+// body, measured off the shipped art by tools/nfleapbox.cjs (nfMeasureLeapBox below):
+// [left, right, top, bottom] in px from (his centre x, his feet y), facing +x.
+// tests/nf-ambush.cjs re-measures it against the build and fails if the art moved.
+const NF_LEAP_BOX = [[-108, 110, -116, 8], [-96, 118, -126, 8], [-98, 122, -128, 8], [-114, 124, -128, 8], [-100, 128, -128, 8],
+  [-100, 132, -126, 8], [-106, 136, -94, 8], [-110, 136, -90, 8], [-114, 136, -84, 8], [-116, 134, -86, 8], [-120, 130, -92, 8],
+  [-116, 122, -110, 8], [-112, 118, -128, 8]];
+function nfLeapCell(b) {
+  const R = BEAST_STRIP.lurkpounce, n = R.to - R.from + 1, d = b.leapDuration || 0.4;
+  return Math.min(n - 1, Math.floor(clamp(((b.anim || 0) - (b.leapT0 || 0)) / d, 0, 0.999) * n));
+}
+function nfBurstBox(b) {
+  const T = NF_LEAP_BOX, f = b.face || 1, cx = b.cx(), fy = b.y + b.h;
+  const q = T && T[nfLeapCell(b)];
+  if (!q) { const H = hurtBoxOf(b); return { x: H.x, y: H.y, w: H.w, h: H.h }; }
+  // the silhouette's own fill: a tenth in from each side of its box (tail tip, ear tips)
+  const w = q[1] - q[0], h = q[3] - q[2], l = f > 0 ? cx + q[0] : cx - q[1];
+  return { x: l + w * 0.1, y: fy + q[2] + h * 0.1, w: w * 0.8, h: h * 0.8 };
+}
+function nfMeasureLeapBox() {
+  const b = G.boss; if (!b) return null;
+  const keep = {}; for (const k of ['st', 'anim', 'leapT0', 'leapDuration', 'face', 'faceVis', 't', 'coverFade', '_motionState', '_motionDuration']) keep[k] = b[k];
+  const probe = G.artProbe, R = BEAST_STRIP.lurkpounce, n = R.to - R.from + 1;
+  const cv = document.createElement('canvas'); cv.width = 1000; cv.height = 600;
+  const q = cv.getContext('2d', { willReadFrequently: true });
+  const out = [];
+  try {
+    b.st = 'lurkpounce'; b.face = 1; b.faceVis = 1; b.leapDuration = 1; b.coverFade = 0; G.artProbe = true;
+    for (let i = 0; i < n; i++) {
+      b.anim = 10; b.leapT0 = 10 - (i + 0.5) / n;
+      q.setTransform(1, 0, 0, 1, 0, 0); q.clearRect(0, 0, 1000, 600);
+      q.translate(500 - b.cx(), 450 - (b.y + b.h));
+      b.draw(q);
+      const d = q.getImageData(0, 0, 1000, 600).data;
+      let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      for (let y = 0; y < 600; y += 2) for (let x = 0; x < 1000; x += 2) if (d[(y * 1000 + x) * 4 + 3] > 140) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+      out.push(x1 < x0 ? null : [x0 - 500, x1 - 500, y0 - 450, y1 - 450]);
+    }
+  } finally { Object.assign(b, keep); G.artProbe = probe; }
+  return out;
+}
+// THE AMBUSH, STEPPED (see NF_AMB). Ticked before the entities switch, which still
+// runs gravity and moveEnt on him: the leaps are real arcs, and he lands on what is there.
+function nfAmbPh(b) { return b.fury ? 2 : (b.phase === 2 ? 1 : 0); }
+function nfAmbStep(b, dt, dist, adist) {
+  const A = NF_AMB, ph = nfAmbPh(b), pc = player.x + player.w / 2;
+  const turning = Math.abs((b.faceVis == null ? (b.face || 1) : b.faceVis) - (b.face || 1)) > 0.02;
+  const cl = b.coverAt != null && typeof nfCoverList === 'function' ? nfCoverList()[b.coverAt] : null;
+  if (!cl) { nfEnter(b, 'idle', NF_AMB.after); b.openIdle = false; b.coverHidT = 0; return; }
+  b.ambT = (b.ambT || 0) + dt;
+  // touched down: moveEnt stopped a fall since the last step (a guardian keeps no `on` flag)
+  const landed = (b._ambVy || 0) > 0 && b.vy <= 0 && b.ambT > 0.08;
+  b._ambVy = b.vy;
+  if (b.st === 'coverwarn') {
+    b.vx = 0;
+    if (!turning) b.t -= dt;                    // the gather is counted from the end of the pivot
+    if (chance(0.4)) addPart(b.cx() + rnd(-30, 30), b.y + b.h - 2, rnd(-30, 30), rnd(-90, -40), 0.3, '#b9a888', 2.2, 120, false);
+    if (b.t <= 0) {
+      // one low leap into the clump: the arc is solved for the distance, like the pounce's
+      const dx = cl.x - b.cx(), up = Math.sqrt(2 * 2100 * A.inApex), air = 2 * up / 2100;
+      b.face = Math.sign(dx) || b.face || 1;
+      b.vx = dx / air; b.vy = -up; b.ambT = 0; b._ambVy = b.vy; b.leapT0 = b.anim || 0; b.leapDuration = air;
+      nfEnter(b, 'coverin', air + 0.4);
+      beastSound('leap');
+      if (typeof nfCoverPart === 'function') nfCoverPart(cl, b.face, 0.5, air * 0.6);   // the leaves start to give as he comes
+    }
+  } else if (b.st === 'coverin') {
+    b.t -= dt;
+    const inside = Math.abs(b.cx() - cl.x) < 26;
+    if (landed || b.t <= 0 || (inside && b.vy > 0)) {
+      // in: the leaves close behind him and sway, and he is gone
+      b.x = cl.x - b.w / 2; b.y = cl.gy - b.h; b.vx = 0; b.vy = 0;
+      b.coverHidT = 0; b.coverFade = A.fade;
+      if (typeof nfCoverPart === 'function') nfCoverPart(cl, b.face || 1, 1.0, 0);
+      if (typeof nfCoverRustleSound === 'function') nfCoverRustleSound(0.8);
+      nfEnter(b, 'lurk', ph === 2 ? A.lurk[0] : nfRand(A.lurk[0], A.lurk[1]));
+    }
+  } else if (b.st === 'lurk' || b.st === 'lurkwarn') {
+    b.vx = 0; b.vy = 0; b.coverHidT = (b.coverHidT || 0) + dt;
+    if (b.coverFade > 0) b.coverFade -= dt;
+    b.t -= dt;
+    if (b.st === 'lurk' && b.t <= 0) {
+      // he goes where SHE is, unseen, and the clump nearest her is the one that shakes
+      const L = nfCoverList();
+      let k = 0;
+      for (let i = 1; i < L.length; i++) if (Math.abs(L[i].x - pc) < Math.abs(L[k].x - pc)) k = i;
+      const to = L[k];
+      b.coverAt = k; b.x = to.x - b.w / 2; b.y = to.gy - b.h;
+      b.face = Math.sign(pc - to.x) || b.face || 1; b.faceVis = b.face;
+      b.tellAt = b.ambT;
+      nfEnter(b, 'lurkwarn', A.tell[ph]);
+      if (typeof nfCoverRustle === 'function') nfCoverRustle(to, A.tell[ph]);
+    } else if (b.st === 'lurkwarn') {
+      // the shaking: flecks off the leaves, louder as it builds (nfcover.js draws the leaves)
+      const k = 1 - Math.max(0, b.t) / A.tell[ph];
+      if (!G.artProbe && chance(0.35 + 0.5 * k)) addPart(cl.x + rnd(-cl.w * 0.4, cl.w * 0.4), cl.gy - cl.h * rnd(0.35, 0.9), rnd(-70, 70), rnd(-60, 10), rnd(0.35, 0.6), chance(0.5) ? '#7f9a86' : '#a9b4ad', rnd(1.8, 3), 380, false);
+      if (b.t <= 0) {
+        // OUT, at where she is now: low and fast, solved for her floor (a deck too)
+        b.face = Math.sign(pc - cl.x) || b.face || 1; b.faceVis = b.face;
+        const tx = cl.x + clamp(pc - cl.x, -A.reach, A.reach);
+        const lx = bossLandClear(b, tx, player.on ? player.y + player.h : cl.gy) - b.w / 2;
+        const rise = Math.max(0, (cl.gy) - (player.on ? player.y + player.h : cl.gy));
+        const H = rise + A.apex[ph], up = Math.sqrt(2 * 2100 * H);
+        const air = up / 2100 + Math.sqrt(2 * Math.max(0, H - rise) / 2100);
+        b.vx = (lx + b.w / 2 - cl.x) / air; b.vy = -up; b.hitDone = false; b.coverHidT = 0;
+        b.thruPlat = false; b.ambT = 0; b._ambVy = b.vy; b.burstAt = b.cx(); b.leapT0 = b.anim || 0; b.leapDuration = air;
+        nfEnter(b, 'lurkpounce', air + 0.5);
+        beastSound('leap'); cam.shake = Math.max(cam.shake, 6);
+        if (typeof nfCoverBurst === 'function') nfCoverBurst(cl, b.face);
+        if (typeof padRumble === 'function') padRumble(0.6, 0.45, 160);
+      }
+    }
+  } else if (b.st === 'lurkpounce') {
+    b.t -= dt;
+    // the hurt is his drawn body in the air — the box the lion fills, claws forward
+    const f = b.face || 1, box = nfBurstBox(b);
+    if (!b.hitDone && aabb(box, player) && nfHurt(b, 'ambush')) {
+      b.hitDone = true; G.hitStop = Math.max(G.hitStop, 0.08); cam.shake = Math.max(cam.shake, 6);
+      burst(player.x + player.w / 2, player.y + player.h / 2, 12, '#f1dcff', 280, 0.3, 120, 3, true);
+    }
+    if (chance(0.6)) addPart(b.cx() - f * rnd(20, 60), b.y + rnd(4, b.h), -f * rnd(120, 260), rnd(-30, 30), 0.25, '#7f9a86', 2.2, 120, false);
+    if (landed || b.t <= 0) {
+      b.vx = 0;
+      nfEnter(b, 'lurkland', A.land[ph]); b.landAt = b.anim || 0;
+      beastSound('land'); cam.shake = Math.max(cam.shake, 5);
+      for (let i = 0; i < 8; i++) addPart(b.cx() + rnd(-40, 40), b.y + b.h - 3, rnd(-160, 160), rnd(-120, -20), 0.4, '#b9a888', 3, 300, true);
+    }
+  } else if (b.st === 'lurkland') {
+    b.vx = 0; b.t -= dt;
+    if (b.t <= 0) { nfEnter(b, 'idle', A.after); b.openIdle = false; b.coverAt = null; b.swipeCD = Math.min(b.swipeCD || 0, A.after); }
+  }
+}
+// ...and when it is chosen: on its own clock, which runs through the whole fight (the perch dive
+// keeps the ambush clock it always had: entities.js ambushCD) — the first at 4-6 s, then every
+// 8-11 s (6-9 in phase two), from a body that is free to choose and not in an opening
+function nfAmbChoose(b, dist, adist) {
+  if (typeof nfCoverList !== 'function') return false;
+  const L = nfCoverList();
+  if (!L.length || !(b.coverCD <= 0)) return false;
+  if (!(b.st === 'stalk' || b.st === 'run' || (b.st === 'idle' && !b.openIdle && b.t <= 0))) return false;
+  if (!b.nullUsed && b.hp <= b.hpMax * 0.5) return false;      // the null field goes first
+  let k = 0;
+  for (let i = 1; i < L.length; i++) if (Math.abs(L[i].x - b.cx()) < Math.abs(L[k].x - b.cx())) k = i;
+  if (Math.abs(L[k].x - b.cx()) > NF_AMB.inMax) return false;
+  b.coverAt = k;
+  b.face = Math.sign(L[k].x - b.cx()) || b.face || 1;          // the turn to it is inside the gather
+  b.coverCD = nfRand(NF_AMB.every[b.phase === 2 ? 1 : 0][0], NF_AMB.every[b.phase === 2 ? 1 : 0][1]);
+  nfEnter(b, 'coverwarn', NF_AMB.warn); b.vx = 0; b.ambT = 0; b.turnStreak = 0; b.lastMove = 'ambush';
+  return true;
+}
 // ...and what starts them, from a body that is free to choose
 function nfChoose(b, pre, dist, adist) {
   const N = NF_DUEL, f = b.face || 1;
@@ -254,6 +444,8 @@ function nfChoose(b, pre, dist, adist) {
       nfEnter(b, 'rakewarn', N.rake); b.vx = 0; b.rakeCD = N.rakeCD; b.turnStreak = 0; b.lastMove = 'rake'; return true;
     }
   }
+  // the leaves, on the ambush clock (NF_AMB)
+  if (nfAmbChoose(b, dist, adist)) return true;
   // the rest after a move is the opening, and nothing cuts it short — not from
   // behind, not from far away, not from the air (tests/openings.cjs: a rear-up
   // fired out of the rest left 17 ms)
@@ -302,6 +494,8 @@ function nfDuelUpdate(U, b, dt) {
   const pc = player.x + player.w / 2, dist = pc - b.cx(), adist = Math.abs(dist);
   if (!b.dead) nfStepHazards(b, dt);
   b.spitCD -= dt; b.rakeCD -= dt; b.rearCD -= dt;
+  if (b.coverCD == null) b.coverCD = nfRand(NF_AMB.first[0], NF_AMB.first[1]);
+  if (!/^(cover|lurk)/.test(b.st)) b.coverCD -= dt;
   if (b.dead || b.purified || b.st === 'dorm' || b.st === 'intro' || b.hp <= 0) return U.call(b, dt);
   const pre = { phase: b.phase, fury: b.fury, st: b.st, t: b.t, roared: b.roared, on: b.on };
   // a break asked for by a blow into something he is doing is refused
@@ -316,7 +510,7 @@ function nfDuelUpdate(U, b, dt) {
   if (b.st !== 'swipewarn' && b.st !== 'swipe') b.lungeLeft = null;
   // the hide: whole in the openings, turned while he acts or stands neutral
   if (b.st === 'idle' && st0 !== 'idle') b.openIdle = /swipe|recover|nullend|daze/.test(st0);
-  b.hideK = (NF_ACT[b.st] || (b.st === 'idle' && !b.openIdle)) ? N.hide : 1;
+  b.hideK = NF_HID[b.st] ? 0 : (NF_ACT[b.st] || (b.st === 'idle' && !b.openIdle)) ? N.hide : 1;
   const ph = b.fury ? 3 : (b.phase || 1);
   const setT = (t) => { b.t = t; if (b._motionState === b.st) b._motionDuration = Math.max(0.05, t); };
   // the break: shorter, by phase
@@ -378,6 +572,14 @@ if (typeof BEAST_STRIP !== 'undefined') Object.assign(BEAST_STRIP, {
   bitewarn: { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 0, to: 10 },
   bite:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 18 },
   bitestop: { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 24, to: 29, root: 1 },
+  // the ambush from the leaves (NF_AMB): the leap's gather, its flight into the clump and out
+  // of it, its landing. While he is hidden nothing is drawn; the rows are there for the clock
+  coverwarn:  { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 0, to: 10 },
+  coverin:    { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 23, air: 1, root: 1 },
+  lurk:       { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 24, to: 29, root: 1 },
+  lurkwarn:   { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 4, to: 10 },
+  lurkpounce: { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 23, air: 1, root: 1 },
+  lurkland:   { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 24, to: 29, root: 1 },
 });
 (function nfDuelInstall() {
   if (typeof Boss === 'undefined' || Boss.prototype.__nfDuel) return;
@@ -386,9 +588,18 @@ if (typeof BEAST_STRIP !== 'undefined') Object.assign(BEAST_STRIP, {
   const update = function (dt) { return nfDuelOn(this) ? nfDuelUpdate(U, this, dt) : U.call(this, dt); };
   // tests/artbible.cjs reads the update's source to confirm a state name is
   // real: it sees the entities switch and this file's states both
-  update.toString = () => U.toString() + '\n' + nfDuelUpdate.toString() + '\n' + nfOwnStep.toString() + '\n' + nfChoose.toString();
+  update.toString = () => U.toString() + '\n' + nfDuelUpdate.toString() + '\n' + nfOwnStep.toString() + '\n' + nfChoose.toString() + '\n' + nfAmbStep.toString();
   Boss.prototype.update = update;
   Boss.prototype.draw = function (c2, ...rest) {
+    // in the leaves he is not there to draw: the clump shows where he is, or nothing does
+    if (nfHidden(this) && !(this.coverFade > 0)) { try { nfDuelDraw(c2, this); } catch (_) {} return; }
+    if (nfHidden(this)) {
+      // ...and the moment he goes in, the body sinks into the leaves rather than blinking out
+      c2.save(); c2.globalAlpha *= Math.max(0, this.coverFade / NF_AMB.fade);
+      try { D.call(this, c2, ...rest); } finally { c2.restore(); }
+      try { nfDuelDraw(c2, this); } catch (_) {}
+      return;
+    }
     const out = D.call(this, c2, ...rest);
     try { nfDuelDraw(c2, this); } catch (_) {}
     return out;

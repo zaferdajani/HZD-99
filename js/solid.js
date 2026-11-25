@@ -53,7 +53,7 @@ function bodySolid(e) {
   if ((e.hypnoT || 0) > 0) return false;
   if (typeof isWolf === 'function' && isWolf(e) && typeof packTamed === 'function' && packTamed()) return false;
   if (e.kind === 'sage' && !(typeof sageDuelActive === 'function' && sageDuelActive(e))) return false;
-  if (typeof Boss !== 'undefined' && e instanceof Boss && /^(dorm|intro|lsvanish|arcstorm|sub|bitewarn|roll|sink)$/.test(e.st || '')) return false;   // (MIREJAW under the water is not a stepping stone)
+  if (typeof Boss !== 'undefined' && e instanceof Boss && /^(dorm|intro|lsvanish|arcstorm|sub|bitewarn|roll|sink|coverin|lurk|lurkwarn)$/.test(e.st || '')) return false;   // (MIREJAW under the water is not a stepping stone; NULLFANG in the leaves is not a wall)
   return true;
 }
 // the wall round one body, into SOLID_B
