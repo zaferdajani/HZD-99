@@ -50,6 +50,7 @@ const SUITE = [
   ['boot',      'a cold open spends what it needs and buys the rest behind itself'],
   ['lowres',    'the whole world at quarter size, and nothing sliced by pixel gets one'],
   ['demo',      'the free chapter ends at one door, and she can walk back in'],
+  ['polish',    'the first kingdom leads, and the near layer stays out of the fight'],
   ['twin',      'the swirl: four passes, a ring not a punch, and two blades afterwards'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],

@@ -103,6 +103,47 @@ it must add real brightness inside the beam (48 today), be measurably *bluer*
 than the kingdom it is falling into (+59 on blue over red), and add nothing
 beside the beam (0), so it can never quietly fade back to decoration.
 
+### The near layer — done
+
+Most people who ever open this game will see kingdom A and nothing else, so it
+should be the richest part of it rather than — as in almost every game ever
+made — the oldest and plainest, built first and never revisited.
+
+Measuring first said something unexpected: **kingdom A is already the biggest
+and most content-rich zone in the game** (13 rooms, 17 authored sheets, three
+boss fights, two NPCs, the shop, two Mind Nodes). It does not need more
+*things*. What it had, and what every other room in the game had, was four
+layers all sitting AT or BEHIND the plane she stands on — backdrop, tiles,
+entities, light. **Nothing was ever in front of her**, which is why the game
+read as a painting she walks across rather than a place she is inside.
+
+So `FGZONE` adds a near layer to every kingdom, with A tuned highest: hanging
+cables with worklights on their ends dropping from the top of the frame, grass
+and scrap growing up from the floor, and — only in the Meadows — warm pollen
+drifting across the lens. All procedural, so it cost no art at all, which is
+the only reason it was affordable.
+
+Three things it got wrong on the way, each caught by measurement rather than by
+looking:
+
+| What | Why it failed |
+|---|---|
+| One colour for both bands | A dark silhouette in front of a dark floor is nothing. The floor band measured **0 pixels changed**. The two bands face opposite directions and now have opposite colours. |
+| Dark shapes, no light | The top band scored 9054 in the one wide hall with a bright backdrop and **31 in the ordinary room next door**. Both bands now carry a lit element — lamp ends, grass tips — that reads against anything. |
+| Counts per room | In a 60-tile hall that worked out at one blade every 107 px. Counts are per **screen-width** now, because a foreground band is a screen-space effect. |
+
+**The readability rule is absolute**: a layer in front of the player must never
+cover the fight. It is pinned to the top and bottom edges of the view, never
+the middle; it is silhouette, never detail; and the floor band obeys
+`G.artProbe` like every other ground FX. `tests/polish.cjs` renders each room
+twice and counts which pixels moved — the play area is budgeted at under 80
+changed pixels against 1100 at the edges, and the whole thing is measured
+across eight rooms rather than one, because that is exactly how the one-room
+version hid a layer that existed in a quarter of the kingdom.
+
+It also fails if any other kingdom overtakes A, so "the first kingdom is the
+most polished" is a property of the build rather than a promise in a document.
+
 ### Still open
 
 - **One moment that feels expensive.** The flashiest thing she can do — the
@@ -111,9 +152,6 @@ beside the beam (0), so it can never quietly fade back to decoration.
   needs to land inside kingdom A.
 - **End on a question.** After NULLFANG she has freed one guardian. Something
   should tell her there are five more and that this was the smallest.
-- **Spend the art budget unevenly.** Most people who ever open this game will
-  only see kingdom A. It should be the most polished area in it, which is the
-  opposite of how games usually get made.
 
 ## Turning it on
 
