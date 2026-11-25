@@ -91,7 +91,7 @@ function sewerApply(save) {
     const want = on ? SW_ROOMS[id] : SW_CAVES[id];
     if (want && ROOMS[id] !== want) {
       ROOMS[id] = want;
-      if (typeof gridCache !== 'undefined') delete gridCache[id];
+      if (typeof gridDrop === 'function') gridDrop(id); else if (typeof gridCache !== 'undefined') delete gridCache[id];
     }
   }
   // the cave's ring out of GB1 told the painter "this picture holds the

@@ -67,11 +67,14 @@ function nfCoverBuild() {
     let gy = -1e9;
     for (let q = -0.3; q <= 0.3001; q += 0.05) gy = Math.max(gy, nfCoverGround(x + q * w));
     return { x, gy, s, w, h, key: P[0], flip: !!flip, par: par || 1, ph: tx * 1.37,
-             sw: 0, sv: 0, rust: 0, rustT: 0, rust0: 0,
+             sw: 0, sv: 0, rust: 0, rustT: 0, rust0: 0, way: 0,
              leaves: back ? [] : (P[3] || NF_COVER.slots).map((q, i) => ({ q, th: 0, tv: 0, be: 0, bv: 0, ph: tx + i * 2.1 })) };
   };
   for (const row of G.roomDef.cover || []) NFC.list.push(mk(row, false));
   for (const row of G.roomDef.coverBack || []) NFC.back.push(mk(row, true));
+  // the clumps that made way for NULLFANG's door stay out of its way (js/k2door.js)
+  if (typeof k2DoorOpen === 'function' && G.roomId === 'A4' && k2DoorOpen() && typeof k2DoorDef === 'function')
+    nfCoverMakeWay(gateWorldX(k2DoorDef()), 300, 1, false);
   if (typeof mediaFetch === 'function') {
     for (const k of ['coverClumpA', 'coverClumpB', 'coverClumpC', 'coverClumpD', 'coverClumpE']) mediaFetch(k, true);
     for (const L of NF_COVER.leaf) mediaFetch(L.key, true);
@@ -91,6 +94,19 @@ function nfCoverPart(cl, dir, k, delay) {
     L.tv += side * 4.2 * k; L.bv += side * 5 * k - dir * 1.5 * k;
   }
   cl.sv += dir * 160 * k;
+}
+// MAKING WAY (owner, 2026-11-25: "the trees will just respond and create an opening for it"):
+// the clumps within `r` of x bend away from it and STAY bent — the rest their springs come back
+// to leans out of the way; `kick` throws them there (the lion's roar), without it they are
+// simply found that way (a later visit)
+function nfCoverMakeWay(x, r, k, kick) {
+  for (const cl of nfCoverList()) {
+    const d = cl.x - x; if (Math.abs(d) > r) continue;
+    const dir = Math.sign(d) || 1;
+    cl.way = dir * k;
+    if (kick) { cl.sv += dir * 520 * k; for (const L of cl.leaves) { L.tv += dir * 6 * k; L.bv += dir * 7 * k; } }
+    else { cl.sw = dir * 30 * k; for (const L of cl.leaves) { L.th = dir * 0.3 * k; L.be = dir * 0.25 * k; } }
+  }
 }
 // THE TELL: thrash for `secs`, harder as it builds
 function nfCoverRustle(cl, secs) { cl.rustT = secs; cl.rust0 = secs; }
@@ -209,13 +225,14 @@ function nfCoverStep(dt) {
     const amp = telling ? 0.55 + 0.45 * (1 - Math.max(0, b.t) / (cl.rust0 || 0.5)) : 0;
     cl.rust = amp;
     const wind = 0.6 * Math.sin(t * 0.7 + cl.ph) + 0.4 * Math.sin(t * 1.9 + cl.ph * 1.7);
-    cl.sv += (-(cl.sw - wind * 4) * C.kS - cl.sv * C.dS) * dt;
+    cl.sv += (-(cl.sw - wind * 4 - (cl.way || 0) * 30) * C.kS - cl.sv * C.dS) * dt;
     cl.sw += cl.sv * dt;
     if (amp > 0) cl.sv += (Math.random() - 0.5) * 1400 * amp * dt * 6;
     for (const L of cl.leaves) {
       const w = 0.035 * Math.sin(t * 0.8 + L.ph) + 0.02 * Math.sin(t * 2.3 + L.ph * 1.3);
-      L.tv += (-(L.th - w) * C.kA - L.tv * C.dA) * dt;
-      L.bv += (-(L.be - w * 0.8) * C.kB - L.bv * C.dB) * dt;
+      const lw = (cl.way || 0) * (cl.flip ? -1 : 1);         // (a clump made way: its leaves rest leaning out)
+      L.tv += (-(L.th - w - lw * 0.3) * C.kA - L.tv * C.dA) * dt;
+      L.bv += (-(L.be - w * 0.8 - lw * 0.25) * C.kB - L.bv * C.dB) * dt;
       if (amp > 0) { L.tv += (Math.random() - 0.5) * 55 * amp * dt * 4; L.bv += (Math.random() - 0.5) * 70 * amp * dt * 4; }
       // a body in the leaves pushes them aside, harder the faster it goes
       const lx = cl.x + L.q[1] * cl.w;

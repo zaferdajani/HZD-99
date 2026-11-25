@@ -109,7 +109,7 @@ function progressGoal(f) {
     // before the meeting there is no hatch to name (pgHubSealed): send her east
     return pgHubSealed(f) ? 'pg_goal_cross' : 'pg_goal_marble';
   }
-  if (f.bossGlitch) return 'pg_goal_up';           // an older save may hold the lion without the rest
+  if (f.bossGlitch) return 'pg_goal_up';           // through his door (an older save may hold the lion without the rest)
   // THE AGENT COMES RIGHT BEFORE NULLFANG (owner, 2026-11-25: "build the suspense about the agent ... It should be right before Nilfang"): the forge, then the bell, then the agent, then the lion.
   if (!f.bossChime) return 'pg_goal_chime';
   if (!f.sageTame_GA1D) return 'pg_goal_sage';
@@ -463,15 +463,12 @@ function progressTick(dt) {
       G.toast(t('pg_marks'));
     }
   }
-  // THE END OF CHAPTER ONE: the climb above the camp, once the lion is free.
-  // This only closes the chapter's objective line. The chapter-two teaser is
-  // NOT queued here any more: a comic on the ledges is a comic in the middle
-  // of play (owner, 2026-10-12), so it plays over the crossing into B1
-  // instead (js/panels.js, the 'ch2' entry).
-  if (G.roomId === 'A3' && f.bossGlitch && f.crystal && !f.ch2Climb) {
-    const cx = (player.x + player.w / 2) / TILE, cy = (player.y + player.h / 2) / TILE;
-    if (cx >= 17 && cx <= 29 && cy < 8) { f.ch2Climb = 1; persist(); }
-  }
+  // THE END OF CHAPTER ONE: through the lion's door, once he is free (owner, 2026-11-25: the
+  // robot story leaves the Meadows through the door NULLFANG opens in his arena, not "up into the
+  // sky" over the camp — js/k2door.js). Walking out onto the frontier road beyond it (A14) closes
+  // the chapter's objective line; the chapter-two teaser plays over the crossing into B1
+  // (js/panels.js, the 'ch2' entry). (The flag keeps its old name: older saves hold it.)
+  if ((G.roomId === 'A14' || G.roomId === 'B1') && f.bossGlitch && f.crystal && !f.ch2Climb) { f.ch2Climb = 1; persist(); }
   // cleansing pulses: the reward waits for the light to settle, the way the
   // kill path waits for its finale
   if (G.cleanses && G.cleanses.length) {

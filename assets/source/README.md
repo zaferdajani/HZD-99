@@ -202,6 +202,14 @@ mouth — each with a true hole in it; the field in the hole is the engine's
 light. `ring_prompts.json` has the brief, the job ids and what is not done;
 `ring_ingame.jpg` is the four standing in the game; `tools/ringgate.cjs` cuts
 the shipped copies and measures the openings.
+`gates/ring_conduit.webp` and `gates/vines_conduit.webp` are THE DOOR TO KINGDOM 2
+(2026-11-25, owner: "cover the door with leaves and plants that stick to it, just
+like the climbing plants ... this door should look different than the ones before
+and similar to the ones within the second kingdom"). A fifth ring, the Conduits'
+own make — cables wound round its band and knotted at the crown (job 5ac50bab) —
+and the curtain of metal vines grown over it, fired in the ring's own frame so it
+lies on the band (job 0f4c9020). `tools/vinecut.py` cuts the curtain's shipped
+copy; `js/k2door.js` tears it off when NULLFANG roars.
 
 `beasts/wolf3/` is THE PACK'S AGGRESSIVE SET (2026-11-15, owner: "find wolves,
 see how they move, how they attack, how they roll, and replicate it with the
