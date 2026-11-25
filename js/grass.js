@@ -25,6 +25,7 @@
 const GRASS_ART = { grass: 'grassMeadow', frond: 'grassFrond' };
 const GRASS_H0 = 24;                // the card's nominal drawn height, px (its source scale)
 const GRASS_CROP = 0.8;             // the part of the card's height that is drawn (from its tips)
+const GRASS_OVER = 1.8;             // each column is drawn this many columns wide, over its neighbour
 const GRASS = { room: null, cols: [], key: null, collect: null, t: 0, last: 0, ready: false, wait: null };
 
 function grassImg(key) {
@@ -45,15 +46,14 @@ function grassTile(x, X, Y, tx, ty, kind, groundY) {
   const cw = grassColW(), n = Math.max(1, Math.round(TILE / cw)), w = TILE / n;
   for (let j = 0; j < n; j++) {
     const cx = X + j * w, mid = cx + w / 2;
-    // the height walks along the ground (a verge, not a hedge): long low swells, and here and there
-    // a tuft half again as tall — continuous, so neighbouring columns never step
-    const sw = Math.sin(mid * 0.031) * 0.5 + Math.sin(mid * 0.0113 + 1.7) * 0.5;
-    const tuft = Math.max(0, Math.sin(mid * 0.072 + ty * 1.3) - 0.72) * 2.2;
-    const h = GRASS_H0 * (0.62 + 0.3 * (sw * 0.5 + 0.5) + tuft * 0.5);
+    // ONE CONTINUOUS HEIGHT along the ground (owner, 2026-11-25: "It shouldn't look like squares
+    // stuck together. It should be continuous without edges"): a slow swell only, so neighbouring
+    // columns differ by a fraction of a pixel; the card's own ragged top is the variety
+    const h = GRASS_H0 * (0.82 + 0.1 * Math.sin(mid * 0.0083 + ty * 0.7) + 0.06 * Math.sin(mid * 0.0031 + 2.1));
     // its foot follows the ground's own slope between its two edges, so neighbouring columns join
     // along the drawn coastline instead of standing as a staircase of flat-bottomed blocks
     const gA = groundY(cx), gB = groundY(cx + w);
-    const col = { x: cx, y: gA + 5, s: (gB - gA) / w, w, h, a: 0, v: 0 };
+    const col = { x: cx, y: gA + 7, s: (gB - gA) / w, w, h, a: 0, v: 0, e: 1, sq: 0 };
     if (GRASS.collect) GRASS.collect.push(col);
     else grassDrawCol(x, im, col, 0, null);
   }
@@ -68,19 +68,27 @@ function grassDrawCol(c, im, col, a, M) {
   const iw = im.naturalWidth, ih = im.naturalHeight * GRASS_CROP, k = im.naturalHeight / GRASS_H0;
   const sw = col.w * k;
   let sx = (col.x * k) % iw; if (sx < 0) sx += iw;
-  const h = col.h * (1 - Math.min(0.25, a * a * 0.5));    // a bent blade is shorter than a standing one
+  // a bent blade is shorter than a standing one; one trodden on is pressed down; the last columns
+  // of a run taper, so a verge ends in a few low blades and not in a cut
+  const e = col.e == null ? 1 : col.e;
+  const h = col.h * (1 - Math.min(0.25, a * a * 0.5)) * (1 - (col.sq || 0)) * (0.3 + 0.7 * e);
   const sk = -Math.tan(a);                                // x' = x + sk*y, y up is negative
   const sl = col.s || 0;                                  // x' = x + sk*y, y' = y + sl*x
   if (M) c.setTransform(M.a + M.c * sl, M.b + M.d * sl, M.a * sk + M.c, M.b * sk + M.d, M.a * col.x + M.c * col.y + M.e, M.b * col.x + M.d * col.y + M.f);
   else { c.save(); c.transform(1, sl, sk, 1, col.x, col.y); }
   // (the card is seamless: a column that runs off its right edge takes the rest from its left)
-  const dw = col.w + 0.8;
-  if (sx + sw <= iw) c.drawImage(im, sx, 0, sw, ih, 0, -h, dw, h);
+  // Each column is drawn OVER THE NEXT ONE by most of its width: standing, the overlap is the very
+  // same pixels in the very same place and cannot be seen; bent, it fills what would have been a
+  // crack between two columns leaning differently.
+  const ov = e < 1 ? 1 : GRASS_OVER, dw = col.w * ov, sw2 = sw * ov;
+  if (e < 1) c.globalAlpha = 0.45 + 0.55 * e;
+  if (sx + sw2 <= iw) c.drawImage(im, sx, 0, sw2, ih, 0, -h, dw, h);
   else {
-    const s1 = iw - sx, d1 = dw * s1 / sw;
+    const s1 = iw - sx, d1 = dw * s1 / sw2;
     c.drawImage(im, sx, 0, s1, ih, 0, -h, d1, h);
-    c.drawImage(im, 0, 0, sw - s1, ih, d1, -h, dw - d1, h);
+    c.drawImage(im, 0, 0, sw2 - s1, ih, d1, -h, dw - d1, h);
   }
+  if (e < 1) c.globalAlpha = 1;
   if (!M) c.restore();
 }
 
@@ -89,6 +97,19 @@ function grassBegin() { GRASS.collect = []; GRASS.key = null; GRASS.wait = null;
 function grassEnd() {
   GRASS.cols = GRASS.collect || []; GRASS.collect = null;
   GRASS.cols.sort((p, q) => p.x - q.x);
+  // where a run of grass ends (a ledge, a gap, a step), its last three columns taper. A column's
+  // neighbour is the one in the next slot whose foot meets its own — not simply the next in x: where
+  // a deck runs above the ground the two layers interleave, and each must find its own
+  const cs = GRASS.cols, w0 = cs.length ? cs[0].w : 8, slot = new Map();
+  for (const q of cs) { const k = Math.round(q.x / w0); if (!slot.has(k)) slot.set(k, []); slot.get(k).push(q); }
+  const right = p => (slot.get(Math.round(p.x / w0) + 1) || []).find(q => Math.abs(q.y - (p.y + (p.s || 0) * p.w)) < 8) || null;
+  const left = q => (slot.get(Math.round(q.x / w0) - 1) || []).find(p => Math.abs(q.y - (p.y + (p.s || 0) * p.w)) < 8) || null;
+  for (const q of cs) {
+    let l = 0, r = 0, a = q, b = q;
+    while (l < 3 && (a = left(a))) l++;
+    while (r < 3 && (b = right(b))) r++;
+    q.e = Math.min(1, (Math.min(l, r) + 0.6) / 3.6);
+  }
   GRASS.room = G.roomId; GRASS.ready = GRASS.cols.length > 0;
 }
 
@@ -127,20 +148,23 @@ function drawGrass(c) {
     const col = cols[i]; if (col.x > x1) break;
     const mid = col.x + col.w / 2;
     // a breath of wind: two slow waves along the ground, never in step
-    let tgt = Math.sin(t * 1.3 + mid * 0.021) * 0.07 + Math.sin(t * 0.55 + mid * 0.006) * 0.05;
+    let tgt = Math.sin(t * 1.3 + mid * 0.021) * 0.07 + Math.sin(t * 0.55 + mid * 0.006) * 0.05, sq = 0;
     for (const b of bodies) {
       const feet = b.y + b.h;
       if (feet < col.y - col.h - 8 || feet > col.y + 14) continue;        // not in this grass's band
-      const bc = b.x + b.w / 2, reach = b.w / 2 + 16, d = (mid - bc) / reach;
+      const bc = b.x + b.w / 2, reach = b.w / 2 + 18, d = (mid - bc) / reach;
       if (d <= -1 || d >= 1) continue;
-      // pushed apart from its middle, and dragged along the way it moves
-      const push = (d >= 0 ? 1 : -1) * (1 - Math.abs(d) * 0.55) * 0.95 + Math.max(-0.5, Math.min(0.5, (b.vx || 0) / 700));
-      tgt += push * (1 - Math.abs(d) * 0.4);
+      // pushed apart from its middle — a smooth wave through zero, so there is no crack where the two
+      // sides part — dragged along the way it moves, and pressed down where the weight is
+      const win = 0.5 + 0.5 * Math.cos(Math.PI * d);
+      tgt += Math.sin(Math.PI * d) * 0.85 + Math.max(-0.5, Math.min(0.5, (b.vx || 0) / 700)) * win;
+      sq = Math.max(sq, 0.38 * win * win);
     }
     tgt = Math.max(-1.15, Math.min(1.15, tgt));
     // a stiff, damped spring: bends in a tenth of a second, settles in about one
     col.v += ((tgt - col.a) * 70 - col.v * 9) * dt;
     col.a += col.v * dt;
+    col.sq += (sq - col.sq) * Math.min(1, dt * 14);
     grassDrawCol(c, im, col, col.a, M);
   }
   c.setTransform(M);

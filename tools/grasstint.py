@@ -45,7 +45,13 @@ def main():
         base = tip_c * (1 - np.clip(y * 1.6, 0, 1)) + mid_c * np.clip(y * 1.6, 0, 1)
         shade = 1.0 - 0.34 * np.clip((y - 0.55) / 0.45, 0, 1)
         col = np.clip(base * rel * shade, 0, 255)
-        img = np.concatenate([col, al], axis=2).astype(np.uint8)
+        # THE ROOTS FADE INTO THE GROUND (owner, 2026-11-25: "It shouldn't look like squares stuck
+        # together. It should be continuous without edges"). The card's lower rows are a solid mat
+        # with a ruled bottom edge; laid over the rock that edge is a line. From 55% of its height
+        # down to the 80% the game draws (js/grass.js GRASS_CROP) the alpha falls to nothing, so the
+        # grass grows OUT of the rock instead of being pasted on it.
+        ramp = 1.0 - np.clip((y - 0.55) / 0.25, 0, 1)
+        img = np.concatenate([col, al * ramp], axis=2).astype(np.uint8)
         dst = os.path.join(out, 'grass_' + name + '.webp')
         # shipped at 512 x 128: it is drawn about 24 px tall, so the card's own 256 rows are five
         # times what any screen shows (the full card stays in assets/source/grass/)

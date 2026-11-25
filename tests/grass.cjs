@@ -8,6 +8,9 @@
 //   D  a walker bends it too (an enemy in the grass, not only her)
 //   E  it is cheap: every column on screen stepped and drawn in well under 2 ms a frame here, and
 //      the low tier draws fewer, wider columns
+//   G  without edges (owner: "It shouldn't look like squares stuck together. It should be continuous
+//      without edges"): standing, neighbouring columns' tops differ by under a pixel, every column
+//      foot meets its neighbour's, and a run's last column is tapered
 //   F  no page errors
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
@@ -28,6 +31,16 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     for (let i = 0; i < 100 && !(GRASS.ready && GRASS.room === 'A2'); i++) await new Promise(r => setTimeout(r, 100));
     window.requestAnimationFrame = () => 0;
     const out = { ready: GRASS.ready, cols: GRASS.cols.length, key: GRASS.key };
+    { // G: seams at rest
+      const cs = GRASS.cols, w0 = cs[0].w, slot = new Map(); let step = 0, foot = 0, ends = 0, endsTapered = 0;
+      for (const q of cs) { const k = Math.round(q.x / w0); if (!slot.has(k)) slot.set(k, []); slot.get(k).push(q); }
+      for (const p of cs) {
+        const nb = (slot.get(Math.round(p.x / w0) + 1) || []).find(q => Math.abs(q.y - (p.y + (p.s || 0) * p.w)) < 8);
+        if (nb) { step = Math.max(step, Math.abs(nb.h * (0.3 + 0.7 * nb.e) - p.h * (0.3 + 0.7 * p.e))); foot = Math.max(foot, Math.abs(nb.y - (p.y + (p.s || 0) * p.w))); }
+        else { ends++; if (p.e < 0.3) endsTapered++; }
+      }
+      out.seam = { topStep: +step.toFixed(2), footGap: +foot.toFixed(2), ends, endsTapered };
+    }
     const c = document.createElement('canvas').getContext('2d');
     const step = (n) => { for (let i = 0; i < n; i++) { GRASS.last = performance.now() / 1000 - 1 / 60; drawGrass(c); } };
     const cols = GRASS.cols;
@@ -63,6 +76,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('C  ...and it springs back once she has gone', R.backLean < 0.15, { after: R.backLean });
   check('D  a walker bends it too', R.enemyLean > 0.3, { enemy: R.enemyLean });
   check('E  it is cheap: a frame of it under 2 ms here, and the low tier draws wider columns', R.ms < 2 && R.colWLow > R.colW, { msPerFrame: R.ms, columnsOnScreen: R.onScreen, colW: R.colW, low: R.colWLow });
+  check('G  without edges: neighbouring tops within 5 px (the taper is the steepest), feet meet, run ends taper', R.seam && R.seam.footGap < 0.6 && R.seam.ends > 0 && R.seam.endsTapered === R.seam.ends && R.seam.topStep < 5, R.seam);
   check('F  no page errors', errs.length === 0, errs.slice(0, 3));
   await browser.close();
   if (bad) { console.log('\nFAILED: ' + bad); process.exit(1); }
