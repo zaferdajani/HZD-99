@@ -227,11 +227,14 @@ chasing a deploy that had in fact succeeded.
   will direct users later on for the full version, depending on their platform, still users on
   the link can access the second kingdom and all other kingdoms freely."* The paid gate stops
   only store builds without the full game; the web link never stops anyone.
+  The stores (owner, 2026-11-25): *"The stores I'm talking about are going to be for mobile as iOS,
+  Android store, and probably Steam."* — the paid gate checks the App Store, Google Play and Steam
+  entitlements on those builds; the web link stays open to testers.
   At the threshold, first an end-of-kingdom moment: *"You can show it as end of, okay, or
   something catchy for the first kingdom. And moving on to the next one. The quest is still
   going. And then it shows the payment or whatever gate or the message."*
 
-## THE WOLF MOUNT — ordered 2026-11-25, NOT TO START BEFORE "after next Friday, 9 p.m."
+## THE WOLF MOUNT — ordered 2026-11-25; started the same day (owner: *"Actually start the wolf right now."*)
 
 The owner: *"the logic of alpha wolf that gives me the ability to summon wolves. Improving this
 skill by spending shards at certain NPCs should allow me to later on mount the wolf ... I can use
@@ -257,4 +260,4 @@ What it is, so the kingdom work keeps room for it:
   wear it down until it is spent; then it runs off and leaves her on foot. Its own art (from the
   wolf art we have where possible), its own moves: **dash** (her dash, mounted), **scratch**,
   **jump**, **howl** (a short stun). Some later enemies are built to need it.
-- **When:** not before the date above. Do not start it in a session before then.
+- **When:** started 2026-11-25 on the owner's word (the earlier "after next Friday" is withdrawn).
