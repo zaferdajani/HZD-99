@@ -10,6 +10,8 @@
 //   C  the next visit finds it simply awake — no second ceremony
 //   D  a ring to a keeper's chamber she has already finished is not offered
 //   E  the comic that replayed the purification after its film is library-only
+// (since 2026-11-25 the ring in his arena is the door to Kingdom 2, A4>A14 — its own wake, the vines
+// torn off, is measured in tests/k2-door.cjs; A-C read that door, D the withdrawn A4<>GA1 ring)
 const { chromium } = require("playwright");
 const PORT = process.env.TEST_PORT || 8220;
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? "ok   " : "FAIL ") + n + (d != null ? "  " + (typeof d === "string" ? d : JSON.stringify(d)) : "")); if (!ok) bad++; };
@@ -23,7 +25,7 @@ const open = async () => { const browser = await chromium.launch({ executablePat
     const enter = (id) => { loadRoom(id); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.bossEntry = null; G.boss = null; G.enemies = []; };
     const stand = (x) => { player.x = x; const g = groundColumnAt(x + player.w / 2); if (g) player.y = Math.min.apply(null, g) - player.h - 1; player.vx = player.vy = 0; };
     fresh(); enter('A4'); await new Promise(r => setTimeout(r, 600));
-    let d = gateDoors().find(q => q.to === 'GA1'); out.A = { stands: !!d, ring: d ? !!ringGateFor(d) : false, locked: d ? gateLocked(d) : null };
+    let d = gateDoors().find(q => q.to === 'A14'); out.A = { stands: !!d, ring: d ? !!ringGateFor(d) : false, locked: d ? gateLocked(d) : null };
     if (d) { stand(gateWorldX(d) - player.w / 2); for (let i = 0; i < 20; i++) { quiet(); update(1 / 60); } stand(gateWorldX(d) - player.w / 2); const acc = gateEnter(); out.A.accepted = !!acc; out.A.room = G.roomId; quiet(); out.A.wake = !!G.ringWake; }
     // B: the fight is won
     G.save.flags.bossGlitch = 1; stand(gateWorldX(d) + 160); for (let i = 0; i < 20; i++) update(1 / 60);
@@ -33,12 +35,12 @@ const open = async () => { const browser = await chromium.launch({ executablePat
       else if (started >= 0) break; }
     keys.ArrowLeft = 0; B.started = started; B.flag = G.save.flags[ringWakeKey(d)] || 0; B.asleep = ringAsleep(d); B.lvl0 = B.lvl[0]; B.lvl1 = B.lvl[B.lvl.length - 1]; B.rises = B.lvl.every((v, i) => i === 0 || v >= B.lvl[i - 1]); delete B.lvl; out.B = B;
     // C: again
-    enter('A4'); d = gateDoors().find(q => q.to === 'GA1'); stand(gateWorldX(d) + 120); let again = 0; for (let i = 0; i < 120; i++) { quiet(); update(1 / 60); if (G.ringWake) again++; }
+    enter('A4'); d = gateDoors().find(q => q.to === 'A14'); stand(gateWorldX(d) + 120); let again = 0; for (let i = 0; i < 120; i++) { quiet(); update(1 / 60); if (G.ringWake) again++; }
     stand(gateWorldX(d) - player.w / 2); for (let i = 0; i < 5; i++) update(1 / 60); const acc2 = gateEnter(); for (let i = 0; i < 400 && G.gateWalk; i++) updateGateWalk(1 / 60);
     out.C = { again, accepted: !!acc2, room: G.roomId };
     // D: the keeper's chamber is finished
     fresh({ bossGlitch: 1, sageTame_GA1D: 1 }); enter('A4'); out.D = { a4: gateDoors().filter(q => q.to === 'GA1').length }; enter('GA1'); out.D.ga1 = gateDoors().filter(q => q.to === 'A4').length;
-    fresh({ bossGlitch: 1 }); enter('A4'); out.D.open = gateDoors().filter(q => q.to === 'GA1').length;
+    fresh({ bossGlitch: 1 }); enter('A4'); out.D.open = gateDoors().filter(q => q.to === 'GA1').length; out.D.k2 = gateDoors().filter(q => q.to === 'A14').length;
     // E: the comic
     const fr = PANEL_SEQ.find(q => q.id === 'free'); out.E = { manual: fr ? !!fr.manual : null, keys: PANEL_SEQ.length };
     return out; });
@@ -49,8 +51,8 @@ const open = async () => { const browser = await chromium.launch({ executablePat
   check('   ...her controls are held while it happens', R.B.held > R.B.frames * 0.7 && R.B.moved < 30, { held: R.B.held, of: R.B.frames, moved: Math.round(R.B.moved) });
   check('   ...the field comes UP, it does not appear', R.B.lvl0 === 0 && R.B.lvl1 === 1 && R.B.rises, { from: R.B.lvl0, to: R.B.lvl1 });
   check('   ...and the save remembers it', R.B.flag === 1 && R.B.asleep === false);
-  check('C  the next visit has no second ceremony, and the ring carries her', R.C.again === 0 && R.C.accepted && R.C.room === 'GA1', R.C);
-  check("D  a finished keeper's chamber is not offered again", R.D.a4 === 0 && R.D.ga1 === 0 && R.D.open === 1, R.D);
+  check('C  the next visit has no second ceremony, and the ring carries her', R.C.again === 0 && R.C.accepted && R.C.room === 'A14', R.C);   // (it carries her to the frontier road, 2026-11-25)
+  check("D  a finished keeper's chamber is not offered again (and his arena's one door is the door on, to Kingdom 2)", R.D.a4 === 0 && R.D.ga1 === 0 && R.D.open === 0 && R.D.k2 === 1, R.D);
   check('E  the comic that replayed the purification is library-only', R.E.manual === true, R.E);
   check('no page errors', errs.length === 0, errs.slice(0, 2));
   await browser.close(); console.log(bad ? '\nFAILED: ' + bad : '\nOK — rings are woken, once, and lead somewhere new'); process.exit(bad ? 1 : 0);
