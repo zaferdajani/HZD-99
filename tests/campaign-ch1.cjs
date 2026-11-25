@@ -1015,8 +1015,11 @@ async function travel(s, target) {
   const next = pth[1];
   // THE LANDMARK: the hub's loose floor down to the quarry is broken from above
   if (s.room === 'A2' && next === 'A5') {
+    // (where the hatch is, the game says: PG_HUB — it moved on 2026-11-14 and the bot kept striking the old tiles)
     await ensureModel();
-    if (model.info.rows[15].slice(12, 15).includes('B') || model.info.rows[16].slice(12, 15).includes('B')) { await breakFloor(s, 12, 14); return; }
+    const hub = await page.evaluate(() => typeof PG_HUB !== 'undefined' ? { x0: PG_HUB.tx0, x1: PG_HUB.tx1, y: PG_HUB.ty } : { x0: 12, x1: 14, y: 15 });
+    const rowB = y => (model.info.rows[y] || '').slice(hub.x0, hub.x1 + 1).includes('B');
+    if (rowB(hub.y) || rowB(hub.y + 1)) { await breakFloor(s, hub.x0, hub.x1); return; }
   }
   await leaveToward(s, next);
 }
@@ -1024,7 +1027,9 @@ async function travel(s, target) {
 async function breakFloor(s, x0, x1) {
   const cx = (x0 + x1 + 1) / 2 * TL;
   const px = s.p.x + 12;
-  if (!s.p.on) { await hold(['ArrowDown']); if (s.p.vy > 0) { await tap('KeyX', 40); } await sleep(40); return; }
+  // in the air: strike down only OVER the hatch — a down-strike anywhere else bounces her off the
+  // floor, and striking on every fall kept her bouncing in place for forty minutes
+  if (!s.p.on) { if (Math.abs(px - cx) <= 20) { await hold(['ArrowDown']); if (s.p.vy > 0) await tap('KeyX', 40); } else await hold([]); await sleep(40); return; }
   if (Math.abs(px - cx) > 14) { const r = await walkTo(s, { x: cx, tol: 12 }); if (r === 'stuck') await unstick(s, 'the loose floor'); return; }
   log('DOWN-STRIKE at the loose floor (tiles ' + x0 + '-' + x1 + ')');
   await hold([]);
