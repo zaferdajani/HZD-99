@@ -111,6 +111,16 @@ visible projectile, so the flinch is the recoil take's rear-back; the winded
 pant is the recoil take's head-down tail (0.5 s period). Cycles measured
 distinct: prowl ≥ 0.239, gallop ≥ 0.432 (silhouette XOR / union).
 
+`hero/held-roll/` is HER IN MIREJAW'S JAWS (2026-11-22, owner: "create artwork for my hero when it's caught in the alligator's mouth and rolling with it"): four sheets as fired, one per weapon tier, of her clamped at the waist and spun round; `jobs.json` has the ids and how the fog backdrop was keyed. The clip `swamp/review/held_roll.mp4` shows it in the build.
+
+`hero/gate-step/` is HER STEP UP INTO A RAISED DOOR (2026-11-21, owner: "it raises
+a leg and climbs like a ladder or an elevated object, or it hops inside of it,
+which is also cute"). Eight sheets as fired, seen from behind — the climb over a
+ring's sill and the hop into a pipe, for claws, single blade, twin blades and the
+joined blade — and the bare climb that was refused for painting her belly vents on
+her back; job ids and references in `jobs.json`. Cut by `tools/stepstrip.cjs`
+into `characters/hero/gate_{climb,hop}_*.webp`.
+
 `hero/plunge/` is THE DIVE (2026-11-15, owner: "going down should be with a
 claw, not just a fist... also create the same motion or different motion for
 swords, but the same concept"). Four sheets as fired — claws, single blade,
@@ -141,6 +151,22 @@ Image 2.6, job `0d8bc2f9-5503-480d-a629-1cd36830c30c`): seven pieces in a row
 on a green screen, the one sheet a rig needs. `tools/agentparts.cjs tally` cuts
 them into `characters/agents/tally/rig/` with every joint measured; the brief is
 in `agents/jobs.json` (`tally.parts`).
+
+`beast/studio-2026-11-21/` is NULLFANG REARING (2026-11-21): `rear-reference-lion.mp4` (a generated real lion, motion reference only, never shipped) and `rear.mp4` (his take over it); jobs and the cut in its `jobs.json`. `audio/lion/` holds the CC0 lion recordings his voice is cut from (Freesound 69570 by Bidone, 437980 by craigsmith).
+
+`swamp/` is THE SILT MIRE (2026-11-21), Kingdom 2's swamp: `2026-11-21/` the as-fired stills (three paintings, the culvert, the raft, Bilge, the insects, MIREJAW's two designs — the first refused for its glow); `croc-takes/` MIREJAW's filmed takes (his whole move set since 2026-11-22, with the refused roll and rise kept and named) and Bilge's two loops, and `grade.json`; every job id, the refused roll and the unused turn in `jobs.json`. `audio/swamp/` holds the recordings its sounds are cut from (CC0 Freesound pages and the NPS alligator, public domain), with `SOURCES.json`. `music/mus_swamp_*_asfired.m4a`, `mus_mirejaw_asfired.m4a` are the scores as fired. `review/` holds the two clips shown to the owner: `mirejaw_takes.mp4` (the filmed takes) and `silt_mire_mirejaw.mp4` (the swamp and the fight, played in the build by a test bot, with the game's own recordings).
+
+`sewer/` is THE SEWER (2026-11-24), UNDERTOW's caves in the robot world: `2026-11-24/` the as-fired stills (three paintings, the hatch, Rivet, MIREJAW's shed skin, the shell from the side and the back, and her four hatch-opening sheets, one per blade); `takes/smith_talk.mp4` Rivet's filmed loop; every job id and how each was cut in `jobs.json`. `audio/sewer/` holds the CC0 recordings its sounds are cut from, with `SOURCES.json`. `music/mus_sewer_asfired.mp3` is the score as fired. `sewer/review/sewer_hatch_rivet_shell.mp4` is the clip shown to the owner: the hatch, the drop and the lift, Rivet's ask and his forge, and her running with the shell, played in the build by a test bot with the game's own recordings.
+
+`gates/gate_city_asfired.jpg` is THE CITY GATE RE-FIRED (2026-11-20, GPT Image 2.6 2k high 16:9, job
+`f2147536-ce5b-4e5c-a7dd-3a76b12c8f64`, the old plate as composition reference; a second take,
+`515fcab0-c365-4ea3-a94c-0d163bba49a2`, was flatter and not used). Shipped as
+`backgrounds/gate_city.jpg` (1920x1072, scaled and centre-cropped).
+
+`agents/tally/hit{high,low}_asfired.jpg` are TALLYMAN STRUCK (2026-11-20, GPT Image
+2.6 against his stand plate, jobs `f15cf3f5-523c-4b89-988c-eecc7b56985c` struck high,
+`37b46ba1-5e77-4c62-9ef8-43d970e600e6` doubled over): the blow drawn on a body. Cut by
+`tools/plate.cjs` to `characters/agents/tally/hit{high,low}.webp`; brief in `agents/jobs.json` (`tally.hits`).
 
 `platforms/platobj_{a,x,b}_asfired.jpg` are THE DECKS AS OBJECTS (2026-11-17,
 GPT Image 2.6, jobs `e42fe118-c048-40f4-8919-ad6df8ba0f87` city gantry,

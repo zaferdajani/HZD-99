@@ -267,6 +267,12 @@ function breakPhase(S, b, dt) {
       b.vx = 0; S.ph = 'still'; S.t = 0;
       b.st = 'idle';                        // standing is standing, not a frozen step
       b.purified = true;                    // the authored veins run clean
+      // ...standing, solid, in full colour (owner, 2026-11-20: "the second appearance after
+      // acquiring the sword is the issue, its oversized and colors are pale"). `purified`
+      // alone reads as a guardian RISING out of its defeat: drawn at 15% and folded in a
+      // crouch for its first 0.7 s, and pureT never advances here (meet stops the update),
+      // so he stood the whole beat as a pale ghost. He is not rising; he is standing.
+      b.pureT = 9;
       if (typeof G.toast === 'function') G.toast(t((BREAK_SPOTS[G.roomId] || BREAK_SPOTS.A3).line));
     }
   } else if (S.ph === 'still') {

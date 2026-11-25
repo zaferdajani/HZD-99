@@ -77,6 +77,44 @@ So, for every correction he gives:
 
 Do not answer a correction with an explanation of why it was that way.
 
+## THE SEWER AND THE SHELL (owner, 2026-11-24)
+
+"Instead of caves in the next kingdom... One of the caves would be a sewer...
+just like in Super Mario, where you enter the sewer from an opening, with the
+same graphics that you created the gates for the second kingdom... you hold the
+door on the floor, the metallic door, which looks like a waffle... you open it
+up with a cracking metallic rusty sound, and you dive inside... you start from
+the top, falling on a platform that goes down... Imagine Ninja Turtles...
+Crocodile should give you shield out of his skin... bring back to that kingdom
+NPC to craft a shield... Putting the shield on will probably make you slower,
+but adds defense bonus... make going to the crocodile a quest."
+
+His answers when asked: the sewer is UNDERTOW's three caves; the smith is a
+new robot pipe-smith in the sewer; swimming not yet (decide later); the shield
+rides on her back like a shell.
+
+What it is (`js/sewer.js`, `tests/sewer.cjs`): the relay gallery's ring is a
+floor hatch she hauls open in her own art and drops through onto a lift down a
+shaft; Rivet the pipe-smith asks for MIREJAW's shed skin, MIREJAW gives it,
+Rivet forges the hide shell, and the tunnel to UNDERTOW opens. The shell slows
+her, turns blows from behind (heating like the brace) and takes a core off a
+heavy blow; Gear puts it on and takes it off. The sewer's enemies are the bats
+and hopper the caves already had — a new sewer species would need its whole
+move set first (the rule below).
+
+## A NEW SPECIES GETS ITS WHOLE MOVE SET (owner's rule, 2026-11-22)
+
+**"From now on, when you create a new species enemy, it all needs to have complete
+artwork concept, and then you adjust accordingly. So you have to have a template for
+each function: dying, hitting, defending, jumping, crouching, etc. So you have to see
+all the movements possible and create artwork for it. It's a rule."** The template and
+the procedure are `docs/SPECIES_MOVESET.md`; the record is `assets/movesets.json`;
+`tests/species-moveset.cjs` fails a species under the rule that lacks a function, shares
+a strip between two, or has a strip the fight never draws. Said the same day: **"The
+alligator should go on diagonal move, not like sliding, but like either swimming using
+its tail or legs... or to walk on the inclines"** — every strip that carries a body turns
+over by the distance it covers (`MJ_STRIDE`, `tests/mirejaw.cjs` NOTHING SLIDES).
+
 ## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
 
 **"All arts, videos, images, STRUCTURES should be created through

@@ -157,7 +157,10 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
         const id = q.shift();
         // AN ARENA HOLDS HER until its guardian is resolved
         const be = (ROOMS[id].ents || []).find(e => e[0] === 'boss');
-        if (be && !F[bossFlag(be[3])]) continue;
+        // (a guardian who is NOT HOME holds nothing: TALONHOST's hall stands
+        // empty until the throw is hers, js/conduits-road.js k2BossAway)
+        const away = be && typeof k2BossAway === 'function' && (G.save.flags = Object.assign({}, F), k2BossAway(be[3]));
+        if (be && !F[bossFlag(be[3])] && !away) continue;
         for (const to of crossings(id)) if (ROOMS[to] && !seen.has(to)) { seen.add(to); q.push(to); }
       }
       return seen;
@@ -186,6 +189,8 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       if (w === 'breakWindow') return breakWindow() && (!BREAK_SPOTS[room].meet || !!F.nfMeet);
       if (w === 'vault') return ['sigil1', 'sigil2', 'sigil3'].every(id => relicHas(id));
       if (w === 'allNodeRooms') return riddleRooms.every(id => R.has(id));
+      // TALONHOST is home only once the throw is hers (js/conduits-road.js)
+      if (w === 'talonHome') return !k2BossAway('brood');
       throw new Error('unknown predicate ' + w);
     };
     const ENT = Object.entries(SHEET.entities).map(([n, e]) => ({ n, re: new RegExp(e.re), known: e.known }));
@@ -387,25 +392,19 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       const a = side({ bossGlitch: 1 }), b = side({ bossGlitch: 1, vaultOpen: 1 });
       check('B5\'s east side does not walk around the three-sigil vault', !a.to && a.inside, JSON.stringify(a));
       check('...and opens with the vault', b.to === 'V1', b.to);
-      // VAULT SIGIL III lives in ONE place, the Foundry tower (owner, 2026-10-08)
-      const at3 = [];
-      for (const [id, def] of Object.entries(ROOMS))
-        for (const e of def.ents || []) if (e[0] === 'secret' && e[3] === 'sigil3') at3.push(id);
-      check('Vault Sigil III is placed once, in the Foundry tower (C1)', at3.length === 1 && at3[0] === 'C1', at3.join(','));
-      // ...and the door says where it lies to a player who walked past it
-      const knock = (relics) => {
-        fresh({ bossGlitch: 1, bossPrism: 1 }); G.save.relics = relics.slice();
-        loadRoom('B5'); G.state = 'PLAY'; G.toasts = []; G.trans = null;
-        const v = (G.statics || []).find(s => s.type === 'vault');
-        if (!v) return null;
-        doInteract(v);
-        return (G.toasts || []).map(x => x.text).join(' | ');
-      };
-      const where = t('vault_where3');
-      const miss = knock(['sigil1', 'sigil2']), held = knock(['sigil1', 'sigil3']);
-      check('the locked vault points a player missing Sigil III to the Foundry tower',
-        miss != null && miss.indexOf(where) >= 0 && held != null && held.indexOf(where) < 0,
-        'without: ' + miss + ' / with: ' + held);
+      // THE THREE SEALS ARE THE CONDUITS' FIGHTS (owner, 2026-11-21: "This mini
+      // boss will give you a piece of the puzzle"): the CARRIER's, MIREJAW's and
+      // UNDERTOW's; the Foundry's hidden seal and the Mind Nodes' belong to the
+      // hero's road only
+      const seals = Object.assign({}, K2_MINI_SIGIL);
+      check('the CARRIER and MIREJAW carry the first two seals', seals.carrier === 'sigil1' && seals.mirejaw === 'sigil2', JSON.stringify(seals));
+      fresh({ bossGlitch: 1, bossCarrier: 1 }); G.save.relics = []; G.roomId = 'GB1D';
+      SAGE_GIFT.GB1D();
+      check('...and UNDERTOW, purified, gives back the third', relicHas('sigil3'), (G.save.relics || []).join(','));
+      fresh({ bossGlitch: 1, crystal: 1 }); loadRoom('C1');
+      check('the robot world keeps no seal on the Foundry ledge', !(G.statics || []).some(s => s.type === 'secret' && s.extra === 'sigil3'));
+      fresh({ bossGlitch: 1, crystal: 1 }); G.save.relics = []; k2GiveSecondSword();
+      check('the purified Prowler gives the second sword', weaponOwned('dual'), weaponMode());
     }
 
     // 4.7 ERRANDS START WHEN THEY ARE GIVEN
@@ -464,19 +463,37 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
     // they are first USED — Ratchet's Volt Pack pitch, {HEAL} and {ATK}.
     {
       fresh({ 'on_A0B|ratchet': 1, ratchetRepaired: 1, opTold: 1, opPod: 1 }); loadRoom('A0B'); G.state = 'PLAY';
+      // (2026-11-19, "less to read": his line is short and the keys are on
+      // the Volt Pack's own card straight after it, so the whole exchange is
+      // read — his lines, then the card — and the keys must be in it)
       const r = G.statics.find(s => s.extra === 'ratchet');
+      const exchange = () => {
+        const said = []; let n = 0;
+        while (n++ < 12) {
+          if (G.dialog) { said.push(...(G.dialog.lines || [])); const cb = G.dialog.onEnd; G.dialog = null; G.state = 'PLAY'; if (cb) cb(); continue; }
+          if (typeof OVERLAY_Q !== 'undefined' && OVERLAY_Q.length) { OVERLAY_Q.shift().open(); continue; }
+          break;
+        }
+        // ...and the card the purchase in his shop then shows (opPackCard)
+        G.dialog = null; G.state = 'PLAY';
+        const card = opPackCard(); said.push(...((card && card.lines) || []));
+        G.dialog = null; G.state = 'PLAY'; if (typeof OVERLAY_Q !== 'undefined') OVERLAY_Q.length = 0;
+        return said.join(' ');
+      };
+      const snap = JSON.stringify(G.save);
       doInteract(r);
-      const kb = ((G.dialog && G.dialog.lines) || []).join(' ');
-      G.dialog = null; G.state = 'PLAY';
+      const kb = exchange();
+      G.save = JSON.parse(snap);
       const keyH = KEYB.HEAL.find(c => /^Key/.test(c)).replace('Key', '');
       const keyA = KEYB.ATK.find(c => /^Key/.test(c)).replace('Key', '');
+      const holds = k => new RegExp('\\bhold ' + k + '\\b', 'i').test(kb);
       check('Ratchet names the keyboard\'s own heal and attack keys and no placeholder survives',
-        kb.indexOf('{') < 0 && kb.indexOf('hold ' + keyH + ' ') >= 0 && kb.indexOf('hold ' + keyA + ' ') >= 0, kb.slice(0, 200));
+        kb.indexOf('{') < 0 && holds(keyH) && holds(keyA), kb.slice(0, 200));
       const wasOn = PAD.on, wasH = PAD.map.HEAL;
       PAD.on = true; PAD.map.HEAL = 3;
       doInteract(r);
-      const pad = ((G.dialog && G.dialog.lines) || []).join(' ');
-      G.dialog = null; G.state = 'PLAY';
+      const pad = exchange();
+      G.save = JSON.parse(snap);
       PAD.on = wasOn; PAD.map.HEAL = wasH;
       check('...and, on a remapped controller, the button she bound', pad.indexOf(padLabel(3)) >= 0, pad.slice(0, 200));
     }
@@ -487,14 +504,15 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       LANG = 'en';
       check('GLACIERE\'s title is not the sword\'s name', !/purifier/i.test(t('b_zero')), t('b_zero'));
       check('the Archives sage names GLACIERE, not a different "Archivist"', /GLACIERE/.test(t('d_sage').join(' ')) && !/Archivist/.test(t('d_sage').join(' ')));
-      const guardians = Object.keys(BSTAT).filter(k => !MINIS[k] && BSTAT[k].zone !== 'A' && k !== 'mother').length;
+      const guardians = Object.keys(BSTAT).filter(k => !MINIS[k] && !BSTAT[k].mini && BSTAT[k].zone !== 'A' && k !== 'mother').length;
       const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'];
       check('the free chapter counts the guardians that are actually left', new RegExp('\\b' + words[guardians] + ' more guardians', 'i').test(t('demo_end3')), guardians + ': ' + t('demo_end3'));
       check('Mono does not blame MOTHER for the order', !/voice called MOTHER/.test(t('d_mono').join(' ')));
       check('the Prowler was never infected, and nothing says it was', !/virus is destroyed/i.test(t('pure_prism')));
       check('Kerf never split a purifier in two', !/split|half of the|buried half/i.test(t('d_kerf').join(' ').replace('never half of anything', '')));
       const fin = [t('b_mother'), t('win2'), t('win2b'), t('pure_mother')].join(' ');
-      check('the finale cleanses and frees MOTHER — no "Null Core" is killed', !/Null Core/i.test(fin) && /free/i.test(t('win2')), fin.slice(0, 120));
+      // (the verb is PURIFY, never free — the ledger, owner 2026-11-21)
+      check('the finale purifies MOTHER — no "Null Core" is killed', !/Null Core/i.test(fin) && /purif/i.test(t('win2')) && !/\bfree/i.test(t('win2')), fin.slice(0, 120));
       check('...and is truthful about the Eye: exposed, not defeated', /Eye/.test(t('win2b')) && !/defeat|destroy/i.test(t('win2b')));
       check('marble, not crystal, in the quarry\'s own words', /marble/i.test(t('pl_hint')) && !/crystal/i.test(t('pl_hint')));
     }

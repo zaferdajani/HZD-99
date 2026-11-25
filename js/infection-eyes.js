@@ -201,6 +201,7 @@ function infEyeLay(e, k, x, y, tag) {
 // drawn into, in the current transform. For an atlas, `cell` is row*cols+col.
 function infEyeArt(c, key, cell, dx, dy, dw, dh, tag) {
   if (!INF_CUR || !INF_CUR_CLASS || !INF_S2W || typeof EYE_MAP === 'undefined') return;
+  if ((INF_CUR._blinkK || 0) > 0.5) return;            // the lid is down: the eye's light is out
   const M = EYE_MAP[key];
   if (!M) return;
   const pts = M.e[cell | 0];

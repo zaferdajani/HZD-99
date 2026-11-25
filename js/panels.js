@@ -57,7 +57,11 @@ const PANEL_SEQ = [
   // show an event after it ends." THE WAKE plays before the first step — right
   // after the difficulty is chosen, ahead of the waking itself (wakeStart
   // holds her until it ends). It is never room-triggered (`manual`).
-  { id: 'wake', title: 'pn_s_wake', room: 'W1', prefetch: ['W1'], manual: true,
+  // OFF THE ROOM (owner, 2026-11-19: "When there is a video no need for
+  // comic"): the opening film's last shot is her waking — eyes on, out of the
+  // corridor — and these pages told the same waking straight after it. `film`
+  // names what shows the beat; a sequence that has one is library only.
+  { id: 'wake', title: 'pn_s_wake', room: 'W1', prefetch: ['W1'], manual: true, film: 'intro8',
     event: 'new game: after the difficulty card, before the waking (wakeStart)',
     when: () => false,
     past: f => !!f.woke,
@@ -68,17 +72,18 @@ const PANEL_SEQ = [
       { ref: 'game: w_unplug', src: PANEL_GAME('w_unplug'), crop: [0, 0, 1600, 1600], cap: null, move: 'in', focus: [0.6, 0.4], hold: 1.8 },
       { ref: 'game: w_quiet', src: PANEL_GAME('w_quiet'), crop: [0, 0, 1600, 893], cap: 'pc_quiet', move: 'in', focus: [0.4, 0.45] },
     ] },
-  // ...and the door: going out of the bay, to the city, the moment she has.
-  { id: 'bay', title: 'pn_s_bay', room: 'W2', prefetch: ['W1', 'W2'],
-    event: 'out of the service bay door, first arrival on the road (W1 → W2)',
-    when: f => !!f.woke,
-    past: (f, s) => !!f.gateOpened || (!!f.woke && G.roomId !== 'W1'),
-    panels: [
-      { ref: 'game: d_walk', src: PANEL_GAME('d_walk'), crop: [0, 0, 1600, 679], cap: null, move: 'right', focus: [0.4, 0.6], hold: 2.0 },
-      { ref: 'game: d_door', src: PANEL_GAME('d_door'), crop: [0, 0, 1600, 679], cap: 'pc_door', move: 'in', focus: [0.5, 0.55] },
-      { ref: 'game: d_road', src: PANEL_GAME('d_road'), crop: [0, 0, 1600, 679], cap: 'pc_city', move: 'out', focus: [0.3, 0.5] },
-    ] },
-  { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'],
+  // NO PAGES ON THE ROAD (owner, 2026-11-19: "the comic that shows before the
+  // door, there's no need for it. You only show the comics when I enter the
+  // door, the first gate of the city."). The bay sequence — the service-bay
+  // door, the road, the silent city — played as she stepped out onto the road
+  // (W1 → W2), a minute before the gate pages told the same arrival. It is gone
+  // from the game; its three pictures stay in the archive
+  // (assets/source/manhua/ch1/game/retired-bay/). The id stays in PANEL_V1
+  // below, which records what old saves already knew.
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'], manual: true,
     event: 'gateOpened — through the gates, first arrival inside the city (W2 → A0)',
     when: f => !!f.gateOpened,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
@@ -106,7 +111,10 @@ const PANEL_SEQ = [
   // said. (The sequence keeps the id 'drawer' — it is a save key, G.save.panels
   // — but the picture was wrong: it had her at a waist-high drawer, and the
   // battery is in the toolbox on the den floor. Owner, 2026-11-15.)
-  { id: 'drawer', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'drawer', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'], manual: true,
     event: "his battery taken from the toolbox on the den floor (ratchetCell in hand), before the repair",
     when: f => !!f.opNote && !f.ratchetRepaired && typeof invCount === 'function' && invCount('ratchetCell') > 0,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet'] || f.pl_cshard || f.crystal),
@@ -115,7 +123,11 @@ const PANEL_SEQ = [
     ] },
   // AFTER the board: him waking, and what he tells her. (The letter and the
   // drawer used to play here, after the repair — the story told backwards.)
-  { id: 'ratchet', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
+  // Library only since 2026-11-19: its two panels (the spare cell, the marble
+  // that becomes the blade) are shown under the lines he says them with
+  // (LINE_SHOT, js/opening.js), so playing them again after was the same
+  // pictures twice in a minute.
+  { id: 'ratchet', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'], manual: true,
     event: "Ratchet's battery restored (ratchetRepaired / on_A0B|ratchet), after his wake talk and errand",
     when: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']) && panelsQuest('ratchet_forge') !== 'none',
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
@@ -129,7 +141,10 @@ const PANEL_SEQ = [
       { ref: 'game: r_cell', src: PANEL_GAME('r_cell'), crop: [0, 0, 1600, 893], cap: 'pc_r_cell', move: 'in', focus: [0.5, 0.45] },
       { ref: 'game: r_marble', src: PANEL_GAME('r_marble'), crop: [0, 0, 1600, 893], cap: 'pc_r_marble', move: 'in', focus: [0.5, 0.7] },
     ] },
-  { id: 'cave', title: 'pn_s_cave', room: 'CV1', prefetch: ['A5', 'CV1'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'cave', title: 'pn_s_cave', room: 'CV1', prefetch: ['A5', 'CV1'], manual: true,
     event: 'first entry into the marble cave (CV1), through the buried mouth under the hub',
     when: () => true,
     past: (f, s) => !!(s.visited && s.visited.CV1) || !!f.pl_cshard || !!f.crystal,
@@ -139,7 +154,10 @@ const PANEL_SEQ = [
       { ref: 'game: cv_dark', src: PANEL_GAME('cv_dark'), crop: [0, 0, 1600, 679], cap: null, move: 'in', focus: [0.5, 0.6] },
     ] },
   // the marble freed: why the burst matters, and that it is material, not a blade
-  { id: 'marble', title: 'pn_s_marble', room: 'CV3', prefetch: ['CV2', 'CV3'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'marble', title: 'pn_s_marble', room: 'CV3', prefetch: ['CV2', 'CV3'], manual: true,
     event: 'the raw marble freed from its host rock in CV3 (pl_cshard)',
     when: f => !!f.pl_cshard,
     past: f => !!f.crystal,
@@ -149,8 +167,10 @@ const PANEL_SEQ = [
       { ref: 'game: marble_a', src: PANEL_GAME('marble_a'), crop: PG_FULL, cap: 'pc_m_burst', move: 'in', focus: [0.6, 0.5] },
       { ref: 'game: marble_b', src: PANEL_GAME('marble_b'), crop: PG_FULL, cap: 'pc_m_freed', move: 'in', focus: [0.5, 0.45] },
     ] },
-  { id: 'forge', title: 'pn_s_forge', room: 'A0B', prefetch: ['A0B'],
-    event: 'the first sword forged from the raw marble (crystal), after the forge film and its card',
+  // Library only (owner, 2026-11-19: "When there is a video no need for
+  // comic"): the forge film (PURIFY_VID.gift) shows the forging.
+  { id: 'forge', title: 'pn_s_forge', room: 'A0B', prefetch: ['A0B'], manual: true, film: 'gift',
+    event: 'the first sword forged from the raw marble (crystal) — library only; its film is what plays',
     when: f => !!f.crystal,
     past: f => !!f.crystal,
     panels: [
@@ -159,7 +179,10 @@ const PANEL_SEQ = [
       { ref: 'game: f_blade', src: PANEL_GAME('f_blade'), crop: [0, 0, 1600, 2143], cap: null, move: 'out', focus: [0.5, 0.5] },
     ] },
   // the way to the first sage: the door that opens beside the stump she cut
-  { id: 'passage', title: 'pn_s_passage', room: 'GA1T', prefetch: ['CV3', 'GA1T'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'passage', title: 'pn_s_passage', room: 'GA1T', prefetch: ['CV3', 'GA1T'], manual: true,
     event: 'first arrival in the maintenance tunnel (GA1T) through the door beside the quarry',
     when: f => !!f.crystal,
     past: (f, s) => !!f.sageTame_GA1D || !!(s.visited && s.visited.GA1D),
@@ -185,7 +208,10 @@ const PANEL_SEQ = [
       { ref: 'game: m_stalk (his face)', src: PANEL_GAME('m_stalk'), crop: [650, 215, 900, 452], cap: 'pc_bored', move: 'in', focus: [0.5, 0.5] },
     ] },
   // the sage's sentence happening in front of her: he resists, the bell wins
-  { id: 'break', title: 'pn_s_break', room: 'A2', alsoRoom: 'A3', prefetch: ['A2', 'A3'],
+  // LIBRARY ONLY (owner, 2026-11-20, choosing which comics stay in the game:
+  // "It's not about oversaturating the game with images and videos. Certain
+  // key moments require videos or images"). The game itself shows this beat.
+  { id: 'break', title: 'pn_s_break', room: 'A2', alsoRoom: 'A3', prefetch: ['A2', 'A3'], manual: true,
     event: "NULLFANG's break (nfBreak): the purple goes out of him, then the bell writes the order back",
     when: f => !!f.nfBreak && !f.bossChime && !f.bossGlitch,
     past: f => !!(f.bossChime || f.bossGlitch),
@@ -224,7 +250,7 @@ const PANEL_SEQ = [
   // time"). The purification has a film, and these four pages told it again
   // straight after. `manual` keeps the scene in the library, where it is a
   // thing to go and read, and takes it off the room.
-  { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'], manual: true,
+  { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'], manual: true, film: 'glitch',
     event: 'NULLFANG purified (bossGlitch) — library only; its film is what plays',
     when: f => !!f.bossGlitch,
     past: f => !!f.bossGlitch,
@@ -256,7 +282,7 @@ const PANEL_SEQ = [
 const PANEL_ZOOM = 0.04;          // the most any crop is ever pushed or drifted
 const PANEL_XF = 0.45;            // cross-dissolve between panels
 const PANEL_TAP = 0.35;           // a press shorter than this is a confirm
-const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null };
+const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null, due: null };
 
 function panelsQuest(id) { return typeof qState === 'function' ? qState(id) : 'none'; }
 // the player's choice wins either way (an explicit OFF beats the OS setting);
@@ -360,7 +386,16 @@ function panelsTick(dt) {
   // an ARRIVAL is only the crossing itself: a room entered under a dialogue,
   // a repair or a film has already been shown, so whatever becomes due later
   // in it is an event and waits for panelsSafe like any other
-  if (PN.room !== G.roomId) { PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = G.state === 'PLAY'; }
+  if (PN.room !== G.roomId) {
+    // A BEAT DUE IN THE ROOM SHE LEFT is not lost: an event's pages wait for
+    // her to land, and a player who leaves the bell's room still in the air
+    // never did — the comic went with the room (campaign-ch1, 2026-11-19).
+    // It plays over the next doorway instead, which is where comics belong.
+    const S0 = PN.due && panelsState();
+    if (S0 && !S0.seen[PN.due] && !S0.past[PN.due]) panelsQueue(PN.due);
+    PN.due = null;
+    PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = G.state === 'PLAY';
+  }
   if (G.state !== 'PLAY') { PN.ready = 0; PN.arrival = false; return false; }
   const S = panelsState();
   // THE WAKE'S PAGES come before her first step: wakeStart left her held
@@ -368,7 +403,7 @@ function panelsTick(dt) {
   // a few seconds regardless, so a slow connection never strands her.
   if (G.wake && G.wake.pend && G.roomId === 'W1') {
     const w = panelsSeq('wake');
-    if (!w || S.seen.wake || S.past.wake) { G.wake.pend = false; return false; }
+    if (!w || w.film || S.seen.wake || S.past.wake) { G.wake.pend = false; return false; }
     panelsLoad(w); G.wake.pendT = (G.wake.pendT || 0) + dt;
     if (!panelsLoaded(w) && G.wake.pendT < 5) return false;
     return panelsStart('wake', { then: () => { if (G.wake) G.wake.pend = false; } });
@@ -397,7 +432,8 @@ function panelsTick(dt) {
   for (const s of PANEL_SEQ)
     if (!S.seen[s.id] && !S.past[s.id] && s.prefetch && s.prefetch.indexOf(G.roomId) >= 0) panelsLoad(s);
   const seq = panelsDue();
-  if (!seq) { PN.ready = 0; PN.arrival = false; return false; }
+  if (!seq) { PN.ready = 0; PN.arrival = false; PN.due = null; return false; }
+  PN.due = seq.id;
   panelsLoad(seq);
   if (PN.arrival) {
     // the crossing holds on its last frame while the pages arrive
@@ -451,6 +487,10 @@ function panelsStart(id, opts) {
     back: o.replay ? 'PANELLIST' : (G.state === 'PANELLIST' ? 'PANELLIST' : 'PLAY'), replay: !!o.replay,
     // what the story does next once the pages close (the waking, the letter read)
     then: o.replay ? null : (o.then || null) };
+  // (and it is no longer DUE anywhere: the doorway carry-over is for a beat
+  // she missed, never one already playing — or a fresh save would be handed it)
+  if (PN.due === id) PN.due = null;
+  { const qi = PN.queue.indexOf(id); if (qi >= 0) PN.queue.splice(qi, 1); }
   // SEEN AS IT BEGINS: a reload mid-sequence never shows it a second time —
   // it is in the replay list instead
   if (!S.seen[id]) { S.n = (S.n | 0) + 1; S.seen[id] = S.n; if (typeof persist === 'function') persist(); }

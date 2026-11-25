@@ -1,0 +1,115 @@
+{
+  "source": "assets/source/swamp/croc-takes/daze.mp4",
+  "frames": 12,
+  "cell": [
+    640,
+    300
+  ],
+  "times": [
+    1.02,
+    1.3709,
+    1.7218,
+    2.0727,
+    2.4236,
+    2.7745,
+    3.1255,
+    3.4764,
+    3.8273,
+    4.1782,
+    4.5291,
+    4.88
+  ],
+  "scale": 0.43261231281198004,
+  "threshold": 48,
+  "strictBorders": false,
+  "footRight": false,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 520x140px",
+  "rest": 0.1,
+  "anchor": 1.51,
+  "drift": 0.0,
+  "feet": [
+    [
+      -241.2,
+      97.6
+    ],
+    [
+      -249.4,
+      115.3
+    ],
+    [
+      -242.5,
+      115.3
+    ],
+    [
+      -246.8,
+      115.3
+    ],
+    [
+      -242.5,
+      256.8
+    ],
+    [
+      -245.9,
+      255.0
+    ],
+    [
+      -252.4,
+      251.6
+    ],
+    [
+      -253.7,
+      263.2
+    ],
+    [
+      -253.7,
+      261.5
+    ],
+    [
+      -253.7,
+      261.9
+    ],
+    [
+      -253.7,
+      262.4
+    ],
+    [
+      -253.7,
+      262.4
+    ]
+  ],
+  "grade": {
+    "reference": "assets/source/swamp/croc-takes/grade.json",
+    "takeMean": [
+      107.65,
+      94.72,
+      92.71
+    ],
+    "after": [
+      108.49,
+      96.67,
+      93.96
+    ],
+    "target": [
+      108.2,
+      96.2,
+      93.45
+    ],
+    "steady": [
+      1.026,
+      1.026,
+      1.014,
+      1.0,
+      0.998,
+      0.994,
+      0.998,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "reviewed": false,
+  "delivered": "resized to 200 px tall cells (as every MIREJAW strip)"
+}

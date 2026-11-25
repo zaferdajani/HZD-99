@@ -52,6 +52,13 @@ const AGENT_POSE = {
   // gathering: upright, both palms out and lit, the prop slung behind
   gather: { rate: 10, sp: -0.06, hd: -0.05, aF: 0.6, bF: 0.35, aB: -0.55, bB: -0.3, skW: 1.05,
     stH: 0, stX: 0.13, stY: 0.62, stA: -0.22, stG: 0.5, stP: 0, stZ: 0, tell: 1, glowH: 1 },
+  // STRUCK (the hit plates' poses, so the rig comes out of a blow from where the plate left it):
+  // the head snapped back, the spine bent away, the free arm flung behind, the prop tipped back
+  hit: { rate: 26, px: 0.06, hp: 0.47, sp: -0.38, hd: -0.55, aF: 0.35, bF: 0.4, aB: -1.0, bB: -0.25, f1x: -0.14, f1y: 0.03, k1: -0.1,
+    f2x: 0.15, k2: 0.15, skA: 0.25, skW: 1.12, stA: -0.32 },
+  // staggered: doubled round the middle, one knee gone, leaning on the planted prop
+  hitlow: { rate: 18, hp: 0.36, sp: 0.72, hd: 0.35, aF: 0.2, bF: 0.9, aB: 0.4, bB: 1.6, f1x: -0.17, k1: 0.55, f2x: 0.19, k2: -0.15,
+    skL: 0.36, skW: 1.22, stA: -0.06 },
   // spent: both hands on the planted prop, the head hung
   exhale: { rate: 7, hp: 0.44, sp: 0.42, hd: 0.5, aF: 0.25, bF: 1.0, aB: 0.35, bB: 0.95, f1x: -0.08, k1: 0.12, f2x: 0.1, k2: 0.1,
     skL: 0.43, skW: 1.08, stA: 0.1 },
@@ -86,7 +93,10 @@ const AGENT_RIG_PART_ORDER = ['head', 'torso', 'skirt', 'uarm', 'farm', 'leg', '
 //   0  plates only   (?rig=0, G.agentRig = 0)
 //   1  the rig only  (?rig=1, G.agentRig = 1)
 //   2  the mix       (the default wherever a rig is on disk)
-const AGENT_RIG_BIG = { coil: 1, lunge: 1, gather: 1, exhale: 1, lock: 1, pure: 1 };
+const AGENT_RIG_BIG = { coil: 1, lunge: 1, gather: 1, exhale: 1, lock: 1, pure: 1, hit: 1, hitlow: 1 };
+// a BLOW is not blended into: the body is in its struck picture on the frame it is struck
+// (a blend would still be travelling when the blow is over). The rig carries it back out.
+const AGENT_RIG_SNAP = { hit: 1, hitlow: 1 };
 // "reached": every one of these has covered HALF the way from where the body WAS to
 // where the move wants it (or is within the small figure beside it). Half, not all of it:
 // the moves are short — a lunge is 0.22 s, a wind-up 0.35 — and a plate that waited for the rig to
@@ -112,6 +122,8 @@ function agentRigName() {
 function agentRigMove(e) {
   if (e.tame) return Math.abs(e.vx || 0) > 12 ? 'walk' : 'pure';
   if (e.locked) return 'lock';
+  const hit = typeof sageHitPose === 'function' ? sageHitPose(e) : null;
+  if (hit) return hit === 'low' ? 'hitlow' : 'hit';
   if ((e.kbT || 0) > 0 || (e.stagT || 0) > 0) return 'exhale';
   if ((e.lungeT || 0) > 0) return 'lunge';
   if ((e.coilT || 0) > 0 || (e.sageReplantT || 0) > 0) return 'coil';
@@ -228,7 +240,7 @@ function agentRigDraw(c, e) {
     // ...EXCEPT pose to pose (wind-up -> lunge -> spent): that is a cut from one fired plate to the
     // next, as it always was. Looked at frame by frame, the rig's own lunge between two painted
     // poses was the worst twelve frames in the fight — a posed doll between two paintings.
-    else if (S.mixMove !== move) { S.mix = (big && S.mix >= 1 && AGENT_RIG_BIG[S.mixMove]) ? 1 : 0; S.from = Object.assign({}, S.prev || S.P); }
+    else if (S.mixMove !== move) { S.mix = (AGENT_RIG_SNAP[move] || (big && S.mix >= 1 && AGENT_RIG_BIG[S.mixMove])) ? 1 : 0; S.from = Object.assign({}, S.prev || S.P); }
     S.mixMove = move; S.prev = Object.assign({}, S.P);
     if (held && !jumped) {
       const F = S.from || S.P;

@@ -16,26 +16,26 @@ tell him anything is done.**
 
 | said | the rule | his words | held by |
 |---|---|---|---|
-| 5× | **Motion looks like the real animal or machine** — never a slideshow, a tic or a paper flip | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "why do you have 6 identical frames ?!!!!!" | `frames` `enemygait` `turn-roar` `agent-rig` · skill `creature-motion-combat` |
-| 4× | **No light, rim, halo, outline or ring round any body** | "Why still framed with light ?!!!" · "remove the ring" | `contrast` `fired-art` `no-rim-baked` `no-body-light` |
-| 4× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" | `shop-ask` `gear-how` `map-read` |
-| 4× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" | `fired-art` `artbible` `panels` `panel-continuity` |
-| 4× | **A door is an object that leads somewhere new; one ring to a frame, nothing standing in it** | "you end up with neon doors?" · "why two portals" · "pods... superimposed on doors which makes it hard to choose enter or rest" | `ring-gate` `ring-pads` `ring-wake` `pod-door` |
-| 3× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration | "No 90-degree elevation or walls in all game" · "these platforms are not organic" | `seam` `ring-pads` · skill `terrain-doors` |
-| 3× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" | `ring-pads` `gravehorn-ground` |
-| 2× | **No one move, repeated, beats a boss** — sweep every boss with the bot that does it | "hitting the rhino downward with a hit constantly is a easy hack" · "do not allow player to keep hitting rhino with an endless down hit" | `boss-skill` `gravehorn` `boss-ladder` |
-| 2× | **An enemy is HEARD over the score, on a phone; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" | `voice-heard` `whatplays` `media-container` |
-| 2× | **No place to hide from a boss** | "I can just simply hide where the crystal is" · "again, just like the rhino" | `gravehorn-ground` `alpha-run` `boss-skill` |
+| 15× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` · skill `creature-motion-combat` |
+| 10× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` |
+| 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
+| 6× | **A door is an object that leads somewhere new; one ring to a frame, nothing standing in it** | "you end up with neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` |
+| 6× | **An enemy is HEARD over the score, on a phone, as a real animal or a real material — recorded, never oscillators, never the same hit twice; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" · "why arent you looking for free libraries for voices ???" · "download from any library of a lion roar" | `voice-heard` `whatplays` `media-container` `hit-voices` `nf-phase2` |
+| 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
+| 5× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" | `seam` `ring-pads` `fired-art` · skill `terrain-doors` |
+| 4× | **No light, rim, halo, outline or ring round any body** | "Why still framed with light ?!!!" · "remove the ring" | `contrast` `fired-art` `no-rim-baked` `pet-motion` `purify-stage` `no-body-light` |
+| 4× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" · "four of its limbs is almost on the air" | `ring-pads` `gravehorn-ground` `stand-ground` |
+| 3× | **Few words to read — and a picture or film only at the key moments, never one per line** | "minimize all the text that we see" · "When I say pics I meant generated comics" · "Certain key moments require videos or images" | `text-budget` `campaign-ch1` |
+| 3× | **Do not waste the player's time** — and no comic where a film already tells it | "don't waste the player's time" · "When there is a video no need for comic" · "one shot instead of multiple steps" | `campaign-ch1` `panels` `opening-order` `tutor` |
+| 3× | **Do the whole job, and show it as it is: motion as a clip, never a sheet of stills; never recite what is left** | "You are not a kid that I need to keep monitoring." · "a series of duplicate images?" | no harness — check your report before sending it |
+| 3× | **All art, video and structures come from Higgsfield; the code is ours** — real sounds may come from public-domain or CC0 libraries, credited | "You are not good at it. You can create the code... but not the art." · "boss attk graphics so basic" | `artbible` `boss-vfx` · skills `art-bible` `rig-animation` |
 | 2× | **An enemy is big enough, and visibly alive or visibly down** | "This enemy is so small" · "its standing still !!!" | `cheetah-hunt` `fired-art` |
-| 2× | **A deck exists only where it is the way up, and it is a solid object** | "platforms that do not make any sense" · "so translucent" | `ring-pads` `fired-art` |
 | 2× | **Nothing opens or buys by surprise** | "And it happened again... suddenly the window opened" | `shop-ask` |
-| 2× | **All art, video and structures come from Higgsfield; the code is ours** | "You are not good at it. You can create the code... but not the art." | `artbible` · skills `art-bible` `rig-animation` |
-| 2× | **Do the whole job; never recite what is left** | "You are not a kid that I need to keep monitoring." | no harness — check your report before sending it |
+| 2× | **A kingdom is played, not walked through** — two mini-bosses that each give a piece, its agent, then its sage; the six sages stay, bosses are added | "There is no game in the second kingdom" · "we do not change sages, but we add other bosses" | `ch2-road` `story-order` `mirejaw` |
+| 2× | **Lives are hard to get: one for each sage, one dear spare at Ratchet** | "extra lives should be only rewarded when you defeat a sage" · "Lives should not be easy to obtain" | `lives` |
 | 1× | **The verb is PURIFY, never free; the robed ones are AGENTS, never sages** | "it should be purifying, not freeing" · "this is not a sage" | `pure-gift` `panels` |
 | 1× | **Turning the phone always brings the game up** — test it on a phone, upright first | "User stuck on rotate with nothing" | `rotate` |
 | 1× | **What looks sharp cuts: the hit is the drawn shape, coming and going** | "his flying horn is not hurting me when toutching them" | `gravehorn` `sharp` |
-| 1× | **Do not waste the player's time** | "don't waste the player's time" | `campaign-ch1` |
-| 1× | **Every boss after the rhino is harder than him, and the kingdom climbs; its attacks are generated effects, never shapes drawn in code** | "all the next ones needs to be harder, especially the agent" · "does not have moves" · "Why is the boss attk graphics so basic?" | `boss-ladder` `boss-vfx` |
 
 **When he corrects something — every time:**
 
@@ -83,8 +83,8 @@ looking for. I'm looking for your honest description."
   Built pages (`index.html`, `odyssey.html`) are never hand-merged: rebuild.
 - **Standing deployment authorization** (2026-09-07): completed, verified
   updates may be published to `main` and mirrored to `odyssey`.
-- **Live: https://zaferdajani.github.io/HZD-99/** — the only URL to quote, and
-  the one a deploy is checked against.
+- **Live: https://zaferdajani.github.io/HZD-99/** — the only URL to quote and
+  to check a deploy against.
 - **Story**: `docs/STORY_CANON.md` overrides older story text.
 - **The studio is VibeSolutions**: one constant, `STUDIO`, in `js/game.js` and
   `build.cjs`; never an i18n key (`tests/brand.cjs`).
@@ -98,14 +98,14 @@ looking for. I'm looking for your honest description."
 ## Commands
 
 ```bash
-node build.cjs                 # the whole build. Emits index.html + odyssey.html
-node tests/serve.cjs &         # the tests need the repo served on :8220
-node tests/run.cjs             # every harness (see tests/run.cjs for the list)
+node build.cjs                 # the whole build: index.html + odyssey.html
+node tests/serve.cjs &         # tests need the repo on :8220
+node tests/run.cjs             # every harness (listed in it)
 node tests/run.cjs saw wake    # or just some
 npm run app:pack               # assemble www/ for the native shell
 ```
 
-Three things that will bite, every time:
+Three things that bite, every time:
 
 - `build.cjs` **concatenates** `js/*.js` into one script. Two files declaring
   the same `const` is a black page. `node --check js/<file>.js`, then build.
@@ -129,5 +129,4 @@ Three things that will bite, every time:
 | know exactly what an order of his says, and why | `docs/OWNER_ORDERS.md` |
 | know the branch protocol's history, the session fleet, kingdoms | `docs/SESSION_FLEET.md` |
 
-These were sections of this file until 2026-11-17 and were moved, unedited, so
-that this file is short enough to be read first. Nothing was deleted.
+Moved out unedited on 2026-11-17 so this file stays short. Nothing was deleted.

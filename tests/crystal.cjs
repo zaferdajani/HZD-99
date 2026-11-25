@@ -172,7 +172,8 @@ const { chromium } = require('playwright');
         // and the den): find THE door to the grotto, the same lookup gateDoors does
         const door = (id, to) => [].concat(GATE_ROOM[id] || []).find(d => d && d.to === to);
         const lair = door(a, g2), back = door(g2, a);
-        return !!(lair && (lair.need === f || lair.lock === f) && back && ROOMS[g2] && ROOMS[g2].cave && MAPPOS[g2]);
+        // (marked: a cave, or in the robot world the sewer under the Conduits, `grotto` — js/sewer.js)
+        return !!(lair && (lair.need === f || lair.lock === f) && back && ROOMS[g2] && (ROOMS[g2].cave || ROOMS[g2].grotto) && MAPPOS[g2]);
       });
 
     // ---- the aura sense ------------------------------------------------

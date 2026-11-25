@@ -23,7 +23,7 @@ const check = (name, ok, detail) => {
   await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
   const r = await page.evaluate(() => {
     const out = {};
-    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1; sv.flags.heal = 1;
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1; sv.flags.heal = 1; sv.flags.crystal = 1;   // the brace is the blade's (no block before the sword, 2026-11-20)
     startGame(sv); loadRoom('A1'); G.wake = null; G.state = 'PLAY'; G.dialog = null; G.enemies = []; G.boss = null;
     const floor = () => { player.y = (G.roomDef.h - 2) * TILE - player.h; player.vy = 0; player.on = true; };
     const settle = () => { player.iT = 0; player.vx = 0; player.hurtPoseT = 0; player.guardHeat = 0; player.guardBreakT = 0; floor(); };

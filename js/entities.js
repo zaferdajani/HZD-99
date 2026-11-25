@@ -39,7 +39,10 @@ function crestSwingMul(k) {
 //   and then the ones after it pool what they kept — at 3, 6, 10 and 15.
 // Each purification says the count and how many more to the next gift, which
 // is the whole point: the reason to do the next one is on the screen.
-const PURE_GIFTS = [[1, 'core'], [3, 'scrap', 120], [6, 'core'], [10, 'scrap', 260], [15, 'core']];
+// NO LIVES FROM THE LADDER (owner, 2026-11-20: "Getting extra lives should be
+// only rewarded when you defeat a sage. Not everywhere."). It pays scrap now;
+// a life is a sage's, and Ratchet's one dear spare (sageLife, js/braid.js).
+const PURE_GIFTS = [[1, 'scrap', 40], [3, 'scrap', 80], [6, 'scrap', 120], [10, 'scrap', 180], [15, 'scrap', 240]];
 function pureNext(n) { for (const g of PURE_GIFTS) if (g[0] > n) return g[0]; return 0; }
 function pureGift(n) {
   const g = PURE_GIFTS.find(q => q[0] === n);
@@ -48,7 +51,7 @@ function pureGift(n) {
     else { G.save.scrap += g[2]; }
     G.save.iq = (G.save.iq || 0) + 4;
     const nx = pureNext(n);
-    const body = (g[1] === 'core' ? t(n === 1 ? 'pure_firstd' : 'pure_cored') : t('pure_scrapd').replace('%s', String(g[2])))
+    const body = (g[1] === 'core' ? t(n === 1 ? 'pure_firstd' : 'pure_cored') : t(n === 1 ? 'pure_first_scrapd' : 'pure_scrapd').replace('%s', String(g[2])))
       + '  ' + (nx ? t('pure_next').replace('%n', String(n)).replace('%m', String(nx)) : t('pure_all').replace('%n', String(n)));
     if (typeof showItem === 'function') showItem(t(n === 1 ? 'pure_first' : g[1] === 'core' ? 'pure_core' : 'pure_scrap'), body);
     sfx('chargeReady');
@@ -68,9 +71,87 @@ function pureGift(n) {
 // their own clang.
 // NULLFANG's prowl and run, by gear (p1 prowl 165 -> 180, run 285 -> 300 on
 // 2026-11-14; the fury's own gear 2026-11-16)
+// HIS DASH IS HIS SIGNATURE (owner, 2026-11-20: "his fight should be epic as i
+// described with dash attack as signature"). The crouch-and-dash — the red, curved,
+// low lunge that ends in a slash, the move he gives her when he is purified — is
+// what the fight is built round now, not one of two coin-flip outcomes of a crouch:
+//   - it is the FIRST thing he does: the first coil of the fight is always the dash;
+//   - in phase two it CHAINS: dash, slash, crouch again (a shorter red tell, never
+//     under 0.42 s) and dash again — and below a quarter of his health, three;
+//   - only the END of a chain is the opening: he lands the last slash spent, flank
+//     heaving, for long enough to make her chain of blows count. In the middle of
+//     one, the answer is to be out of the line (jump it, or dash through it).
+// A chain is a sentence the player learns: it always runs to its count, the last
+// link always looks different (it is struck hardest and he stays down), and the
+// next dash cannot start a new chain straight away (lastMove 'lunge'). Between links
+// he takes one breath on his feet (0.3 s, a blow's worth: the openings doctrine);
+// the end of a chain is 0.2 s down plus the standing idle after it (~0.75 s, under the gift line).
+const NF_DASH = { coil2: 0.48, coil3: 0.42, link: 0.3, spentEnd: 0.2 };
+function nfDashChainStart(b) {
+  if (b.dashLeft > 0) return;                       // a link inside a running chain
+  b.dashOpened = true;
+  b.dashLeft = b.phase === 2 ? (b.hp <= b.hpMax * 0.25 ? 2 : 1) : 0;   // links AFTER this one
+  b.dashLink = 0;
+}
+function nfDashChainNext(b, adist) {
+  if (b.dashLeft > 0 && !player.dead) {
+    // AGAIN — after a breath: a third of a second on his feet (one blow's opening,
+    // the doctrine's floor), then straight back down into the red crouch. The
+    // crouch's own replant turns him if she got behind him; he never snaps round.
+    b.dashLeft--; b.dashLink = (b.dashLink || 0) + 1;
+    b.st = 'recover'; b.t = NF_DASH.link; b.vx = 0; b.dashNext = true;
+    b.landAt = b.anim || 0;
+    return;
+  }
+  const chained = (b.dashLink || 0) > 0;
+  b.dashLink = 0; b.dashLeft = 0; b.dashNext = false;
+  if (!chained) {
+    // one dash, then the short opening it always had
+    b.st = 'idle'; b.t = b.fury ? rnd(0.3, 0.45) : b.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52);
+    return;
+  }
+  // SPENT: the end of the chain. He stays down a beat longer, and it is announced,
+  // because she has earned it — but it is not a gift (that is the null crash's)
+  b.st = 'recover'; b.t = NF_DASH.spentEnd; b.vx = 0; b.landAt = b.anim || 0;
+  b.pounced2 = true;     // and the phase-two leap-again does not spend the opening for him
+  cam.shake = Math.max(cam.shake, 10); G.hitStop = Math.max(G.hitStop || 0, 0.08);
+  if (typeof padRumble === 'function') padRumble(0.7, 0.5, 200);
+  for (let i = 0; i < 12; i++) addPart(b.cx() + rnd(-b.w * 0.6, b.w * 0.6), b.y + b.h - 4, rnd(-170, 170), rnd(-120, -30), rnd(0.35, 0.6), '#cdbd9c', rnd(2.5, 4.5), 200, false);
+}
+// the next link: out of the breath, down into the red crouch
+function nfDashLink(b) {
+  b.dashNext = false;
+  b.lunging = true; b.coilDur = b.dashLeft > 0 ? NF_DASH.coil2 : NF_DASH.coil3;
+  b.st = 'crouch'; b.t = b.coilDur; b.vx = 0; b.coilTick = 0; b.coilFlashed = false; b.replanted = false;
+  b.lastMove = 'lunge'; b.turnStreak = 0;
+  if (typeof fx === 'function') b.coilFx = fx('gather', b.cx(), b.y + b.h - 34, { rx: 150, ry: 120, dur: b.t, col: '#ff4a3a', hot: '#fff6df', follow: b, power: 1.1 });
+  beastSound('coil');
+}
+// HE RISES ON HIS HIND LEGS (owner, 2026-11-21: "Maybe they rise up a little bit on and stand
+// on two legs, on the two back legs ... find out how real lions attack"). A lion squaring up
+// to a rival rears, head high, and swats with both forepaws, then drops its weight onto them.
+// Filmed on his own body over a real-lion motion reference (assets/source/beast/
+// studio-2026-11-21). Phase two only, close in, in front of him, never twice running:
+//   rearwarn  the rise (the tell, 0.6 s — the head goes up, the forelegs leave the ground)
+//   rear      two swats high in front, then both paws slammed down in front of him
+//   rearspent low on all fours after the slam — the opening — then the prowl
+// The answer: be out of his reach when he rises (or behind him). Swats reach high: a jump
+// over them is not an answer, which is what makes it his and not the swipe.
+const NF_REAR = { warn: 0.6, active: 0.75, swats: [0.3, 0.55], slam: 0.7, spent: 0.55, swatReach: 132, slamReach: 160, cd: 6 };   // swats and slam on the take's own frames (2.9 s, 3.55 s, 3.96 s)
+function nfRearReady(b, adist, dist) {
+  return b.kind === 'glitch' && b.phase === 2 && !!b.rageSeen && adist < 190 && adist > 40
+    && (Math.sign(dist) || b.face) === b.face && (b.rearCD || 0) <= 0 && b.lastMove !== 'rear'
+    && typeof player !== 'undefined' && Math.abs((player.y + player.h) - (b.y + b.h)) < 64   // on his own floor: the swats and the slam reach her there
+    && typeof MEDIA_RAW !== 'undefined' && !!(MEDIA_RAW.beastStudioRear && MEDIA_RAW.beastStudioRear.naturalWidth);
+}
+function nfRearStart(b) {
+  b.st = 'rearwarn'; b.t = NF_REAR.warn; b.vx = 0; b.lastMove = 'rear'; b.turnStreak = 0; b.rearCD = NF_REAR.cd; b.rearSlammed = false;
+  beastSound('coil');
+}
 function nfPace(b, running) { return running ? (b.fury ? 330 : 300) : (b.fury ? 240 : b.phase === 2 ? 210 : 180); }
 function foeHitSound(e, big) {
-  if (big) return 'bosshit';
+  // (each guardian rings in its own metal: audio.js HIT_BANK)
+  if (big) return e && e.kind ? 'bosshit_' + e.kind : 'bosshit';
   if (!e) return 'hit';
   if (typeof isCheetah === 'function' && isCheetah(e)) return 'hit_cat';
   if (typeof isWolf === 'function' && isWolf(e)) return 'hit_wolf';
@@ -1618,6 +1699,19 @@ const HERO_IMPATIENT_BEATS = (() => {
   b.push([2, Math.max(0.2, FIDGET_BOUT - beatsLength(b))]);
   return b;
 })();
+// THE FIDGET IS NOT A POSE-SHEET STILL (owner, 2026-11-20: "hero keeps
+// glitching when standing into just like twitching"). When a bout of fidgeting
+// began before its filmed take had arrived, the frame fell through to the old
+// pose sheet's idle cell — a different drawing of her, held for the bout or
+// until the file landed, then snapped back: a twitch. Like the impatient take
+// above it, the fidget plays only once it is here; until then she keeps
+// breathing on her own idle, and the take is asked for at once.
+function heroFidgetReady() {
+  const F = typeof HERO_FIDGET !== 'undefined' ? HERO_FIDGET : null, im = F && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[F.key];
+  if (im && im.complete && im.naturalWidth) return true;
+  if (F && typeof mediaFetch === 'function') mediaFetch(F.key, true);
+  return false;
+}
 function heroImpatientReady() {
   const P = HERO_IMPATIENT, im = P && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[P.key];
   if (im && im.complete && im.naturalWidth) return true;
@@ -2084,7 +2178,7 @@ class Player {
     this.dashTrailT = 0;                                 // afterimage spawn metronome
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
-  speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
+  speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1) * (typeof swShellSpeedK === 'function' ? swShellSpeedK() : 1); }
   // weaponAtk is the tier she is HOLDING (js/weapons.js): the one multiplier
   // that makes an earned sword worth earning. Every other move reads dmg(), so
   // the combo, finisher, burst, hurricane and throw all inherit it from here.
@@ -2351,6 +2445,9 @@ class Player {
       // had left held down; it was measuring her WALKING.) For the beat hurt()
       // names, the throw keeps its flight and her stick cannot cancel it.
       const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : (this.flungT > 0 || this.knockT > 0) ? 420 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
+      // (a shove is a skid until she stops or takes the stick back: heroState)
+      if (this.knockT > 0) this._shoved = true;
+      else if (dir !== 0 || Math.abs(this.vx) <= 12 || !this.on) this._shoved = false;
       if (dir !== 0 && !healing && !(this.flungT > 0) && !(this.knockT > 0)) {
         // TURN BOOST: reversing bites harder than accelerating. Pressing away
         // from current speed is always a correction the player already wants
@@ -2672,7 +2769,7 @@ class Player {
     this.guardBreakT = Math.max(0, (this.guardBreakT || 0) - dt);
     this.guardHeat = Math.max(0, (this.guardHeat || 0) - dt);
     const wasGuard = this.guardT > 0;
-    this.guardT = (inD('GUARD') && this.on && !this.swingVis && this.dashT <= 0
+    this.guardT = (inD('GUARD') && (typeof guardUnlocked !== 'function' || guardUnlocked()) && this.on && !this.swingVis && this.dashT <= 0
       && this.chargeT <= 0.05 && this.healT <= 0 && this.guardBreakT <= 0) ? 1 : 0;
     // the perfect-guard window and the counter it opens (js/parry.js)
     if (typeof parryGuardStep === 'function') parryGuardStep(this, dt, wasGuard);
@@ -3573,6 +3670,10 @@ class Player {
       burst(pcx + faceDir * 12, this.y + this.h * 0.45, 16, '#ffd76a', 260, 0.45, 160, 2.6, true);
     }
     if (guarded) d = Math.max(1, Math.round(d * (1 - GUARD_REDUCTION)));
+    // THE HIDE SHELL on her back (js/sewer.js): a blow from behind rings off
+    // it (it heats like the brace), and a heavy one comes through lighter
+    if (typeof swShellTurn === 'function' && swShellTurn(this, fromX, src)) return;
+    if (typeof swShellCut === 'function') d = swShellCut(d);
     if (relicHas('aegis') && !G.save.usedAegis) {
       G.save.usedAegis = true;
       this.iT = 1.2;
@@ -3729,6 +3830,13 @@ class Player {
       }
     }
     if (this.skidT > 0) return 'skid';
+    // SHOVED, SHE SKIDS — she does not walk (owner, 2026-11-20: "when the hero
+    // comes out of the gate to face the alpha, it glitches into multiple moves
+    // by its own"). The Alpha's howl throws her back a step (js/ripple.js), and
+    // the speed it gave her read as a walk: a few frames of stride she never
+    // asked for, sometimes backwards. A body carried by a blow or a wave slides
+    // on its feet, braced, until it stops.
+    if (((this.knockT || 0) > 0 || this._shoved) && Math.abs(this.vx) > 12 && !(this.flungT > 0)) return 'skid';
     if (this.landT > 0 && Math.abs(this.vx) <= 34) return 'land';
     // one core left and standing still: the carriage sags. Moving cancels it —
     // a limp that survives a sprint reads as a bug, not as damage.
@@ -4024,8 +4132,16 @@ class Player {
     // Keep the supplied expressive idle in every idle mood. A mood changes
     // only the eye lights; it must not swap the entire body for an old still.
     const I = HERO_IDLE;
-    const clip = heroIdleClip(this.idleT || 0);
-    if (I && I.cells && st === 'idle' && this.on && !clip.fidget) {
+    // (asked for well before the first bout: standing a second and a half is enough)
+    if ((this.idleT || 0) > 1.5 && st === 'idle') heroFidgetReady();
+    let clip = heroIdleClip(this.idleT || 0);
+    // (a fidget whose take is not here yet stays on the idle: heroFidgetReady)
+    if (clip.fidget && !clip.imp && !heroFidgetReady()) clip = { fidget: false, cell: beatCell(HERO_IDLE_BEATS, this.idleT || 0) };
+    // (and through the coyote frames: off a lip for a frame or two she is still
+    // STANDING — heroState keeps 'idle' there — and the idle that draws standing
+    // has to be the same picture, or the old pose-sheet still flashes in: the
+    // twitch the owner saw "in certain areas", which were lips and bumps)
+    if (I && I.cells && st === 'idle' && (this.on || this.coyote > 0) && !clip.fidget) {
       const cell = clip.cell;
       const h = HERO_DH * (I.k || 1), flip = this.faceVis < 0;
       if (drawHeroMotionCell(this, c, I.key, cell, I.cells, 0, HERO_FLOOR, h, flip)) {
@@ -4064,6 +4180,11 @@ class Player {
     }
     const T = HERO_TRANS[st];
     if (!T || !T.cells) return false;
+    // BLOWN BACK: a shove (the howl's wave, a blow's throw) is the skid take's
+    // third cell held — leaning back from the push, arms out, feet sliding —
+    // not its turnaround, which starts from a run
+    if (st === 'skid' && !(this.skidT > 0))
+      return drawHeroMotionCell(this, c, T.key, 2, T.cells, 0, HERO_FLOOR, HERO_DH * T.k, false);
     const t = T.t(this), t0 = T.t0(this);
     if (!(t > 0) || !(t0 > 0)) return false;
     const p = clamp(1 - t / t0, 0, 0.999);
@@ -4081,7 +4202,9 @@ class Player {
   drawRoboCharge(c) {
     if (this.dead || this.hurtPoseT > 0 || this.dashT > 0 || this.swingVis ||
         !this.on || Math.abs(this.vx)>34 || this.chargeT <= .08 || G.boomer) return false;
-    const mode=weaponMode(G.save);
+    let mode=weaponMode(G.save);
+    // the purify gesture is the SWORD's: she draws it for it even if she fought with her claws
+    if(G.state==='PURIFY'&&mode==='claws'&&typeof weaponOwned==='function'&&weaponOwned('single',G.save))mode=weaponOwned('dual',G.save)?'dual':'single';
     if(mode==='joined')return false;
     const S=HERO_WEAPON_CHARGES[mode] || (this._chargeArtCount>0 && this._chargeArtCount%2===0 ? SWING_STRIP.burstLegacy : SWING_STRIP.burst);
     const count=mode==='single'||mode==='dual'?3:6;
@@ -4756,6 +4879,8 @@ class Player {
     // OUTSIDE the guard and draw either way.
     // (the cell that draws her this frame is remembered — whichever drawer it
     // came through, a stride or a swing — so a dash can leave HER behind it)
+    // the hide shell on her back goes behind her body (js/sewer.js)
+    if (typeof swShellOverlay === 'function') swShellOverlay(c, this._echoPose);
     HERO_ECHO.rec = true; HERO_ECHO.last = null;
     const _plate = this.drawRoboPlate(c, run);
     HERO_ECHO.rec = false; this._echoPose = HERO_ECHO.last;
@@ -5851,7 +5976,9 @@ class Player {
     // (ART_BIBLE §0.0); no shadowBlur (measured +10 ms/frame elsewhere); no
     // allocation in the draw path — every random is hash2 of a time slot, so a
     // replayed frame draws the same storm (tests/drawclock.cjs).
-    if (this.chargeT > 0.02 && !(typeof G !== 'undefined' && G.artProbe)) {
+    // (not in the purify scene: there her charge is the PURIFY gesture, and the storm round
+    // her body smothered her — owner 2026-11-21 on that scene; the scene's own motes carry it)
+    if (this.chargeT > 0.02 && !(typeof G !== 'undefined' && (G.artProbe || G.state === 'PURIFY'))) {
       const ck = clamp(this.chargeT / 0.6, 0, 1);
       const cok = this.chargeOk !== false;
       const now = performance.now() / 1000;
@@ -8263,6 +8390,14 @@ class Enemy {
   update(dt) {
     if (this.disabled) {
       this.vx = 0; this.vy += 900 * dt; moveEnt(this, dt);
+      // A BOUND BODY'S CLOCK STILL RUNS (owner, 2026-11-19, of the cheetahs:
+      // "when they die, they should fall down the floor in a kneeling way, not
+      // standing still"). The fold that plays from the blow that binds it is
+      // clocked on `anim` from `_fallAt` (wolves.js), and so is the breath it
+      // lies there with — and this branch returned before `anim` moved, so the
+      // fold sat on its first cell, the cat STANDING, for as long as she looked.
+      // The fold art was fired and wired on 11-17 and never once played.
+      this.anim += dt;
       if (this.cleanseT > 0) {
         const near = player && Math.abs(player.x + player.w / 2 - this.x - this.w / 2) < rescueReach(this)
           && Math.abs(player.y + player.h / 2 - this.y - this.h / 2) < 60;
@@ -9647,10 +9782,11 @@ class Enemy {
     if (this.disabled || this.rescued) {
       // A broken square is an exposed binding; a complete circle is a cure.
       // Shape as well as colour makes the state legible without audio.
-      c.save(); c.strokeStyle = this.rescued ? '#b9f3ff' : '#ffd685'; c.lineWidth = 2;
+      // (the cured one wears no circle over its head: a halo is a ring round
+      // a body, which the ledger refuses. It is told by its calm walk.)
+      c.save(); c.strokeStyle = '#ffd685'; c.lineWidth = 2;
       c.beginPath();
-      if (this.rescued) c.arc(cx, this.y - 12, 5, 0, Math.PI * 2);
-      else { c.moveTo(cx - 5, this.y - 9); c.lineTo(cx - 5, this.y - 17); c.lineTo(cx + 5, this.y - 17); c.lineTo(cx + 5, this.y - 9); }
+      if (!this.rescued) { c.moveTo(cx - 5, this.y - 9); c.lineTo(cx - 5, this.y - 17); c.lineTo(cx + 5, this.y - 17); c.lineTo(cx + 5, this.y - 9); }
       c.stroke();
       // ONE SHE CAN FREE SAYS SO, FROM ACROSS THE ROOM. The bracket above is
       // ten pixels of amber, and it was the only sign there was: with the
@@ -9776,7 +9912,7 @@ class Enemy {
     // chevron for quick, a bar for armoured, a dot for the one that goes off.
     // Colour alone would fail roughly one man in twelve, so the shape carries
     // the same information.
-    if (this.traits && this.traits.length && !this.dead) {
+    if (this.traits && this.traits.length && !this.dead && !this.rescued) {   // a cured one is no threat to read, and wears no ring
       c.save();
       this.traits.forEach((tr, ti) => {
         const T = TRAITS[tr]; if (!T) return;
@@ -11727,7 +11863,9 @@ function bossFork(b) {
 // already carried one; the guardians say it here rather than having it inferred
 // from a lair id that a kingdom session is free to move.
 const BSTAT = Object.assign({
-  glitch: { w: 84, h: 56, hp: 220, dazeAt: 5, zone: 'A' },
+  // (harder, owner 2026-11-20: "fighting Nelfang was so much easier than the
+  // first boss ... make Nelfang a little bit more harder" — was 220 hp)
+  glitch: { w: 84, h: 56, hp: 300, dazeAt: 6, zone: 'A' },
   brood: { w: 96, h: 64, hp: 320, dazeAt: 6, dazeSpan: 3.2, zone: 'B' },
   // `tell` overrides the warning size footprint would derive (see
   // Boss.tellCue). FURNACE CHOIR is tall and narrow, so its footprint reads
@@ -11752,6 +11890,11 @@ const BSTAT = Object.assign({
   // blade comes after. 150 measured as a phase spent in ONE hornless window by
   // the chapter-one autopilot; at 220 a phase takes three or four openings.
   horn: { w: 176, h: 120, hp: 220, dazeAt: 6, dazeSpan: 2.6, zone: 'A', tell: 'tellbig' },
+  // MIREJAW (js/mirejaw.js), the swamp's crocodile: a mini-boss of the Conduits
+  // but not one of the Eye's constructs, so not in MINIS. A long body on the
+  // ground; a hide only its weak points get through, so its number is lower
+  // than its fight.
+  mirejaw: { w: 300, h: 64, hp: 240, dazeAt: 6, dazeSpan: 2.4, zone: 'B', mini: 1 },
 // ...and the Eye's constructs join the same table, so every piece of machinery
 // that already works on a boss — the hurt flash, the health bar, the telegraph
 // wash, the artbible harness — works on them without a second code path. They
@@ -12123,7 +12266,7 @@ function sageStruck(e, dm, x, y) {
 const SAGE_GIFT = {
   GA1D: () => invAdd('batt'),                                    // a cell, kept safe
   GA2D: () => { invAdd('kit'); G.save.scrap += 80; },            // what a pack values
-  GB1D: () => { G.save.iq += 25; },                              // it teaches
+  GB1D: () => { G.save.iq += 25; if (typeof k2Robo === 'function' && k2Robo()) G.grantRelic('sigil3'); },   // it teaches — and gives back the vault's last seal (conduits-road.js)
   GC1D: () => { G.save.scrap += 200; },                          // weight of metal
   GD1D: () => { G.save.scrap += 150; G.save.iq += 10; },         // the Archives hoard
   GX1D: () => { G.save.scrap += 120; G.save.iq += 15; },         // tribute to the sword
@@ -12136,7 +12279,7 @@ function sageTame(e) {
   G.save.flags[key] = 1;
   // the duel track resolves: the chamber goes back to its zone's own quiet
   // (the zone key is what loadRoom itself plays for a non-boss room)
-  if (e.duelMus && typeof setMusic === 'function' && G.roomDef) setMusic(G.roomDef.zone);
+  if (e.duelMus && typeof setMusic === 'function' && G.roomDef) setMusic(G.roomDef.mus || G.roomDef.zone);
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
   // A RESCUE, NOT A KILL (owner, 2026-10-09: "The Sage is rescued, not killed.
   // Cleansing must look and read differently from destroying an enemy"). No
@@ -12165,6 +12308,15 @@ function sageTame(e) {
     const ds = t(ik + 'd') === ik + 'd' ? t('sg_tamedd') : t(ik + 'd');
     if (typeof showItem === 'function') showItem(nm, ds);
     if (typeof iqNudge === 'function') iqNudge();
+    // THE MAP IS HANDED OVER, SEEN (owner, 2026-11-20: "this agent should give
+    // me the map after purifying him, which he did not ... and I still don't
+    // know how to access the map. It should be simpler and more direct"): when
+    // this purification is what unlocks it, the chart flies from the agent to
+    // the map button, and the button pulses — with an arrow on it — until she
+    // opens it once (drawMapGive / drawMapButton, js/game.js)
+    if (typeof mapUnlocked === 'function' && mapUnlocked() && !G.save.flags.mapSeen) {
+      G.save.flags.mapSeen = 1; G.mapGive = { t: 0, wx: cx, wy: cy }; G.mapBtnNew = 1; G.mapPointT = 9;
+    }
   }
   // THE RULE, FOR SAGES TOO: "defeating a boss or a sage always reveals a
   // cave." Chamber sages are already inside theirs; a future SURFACE sage
@@ -12979,6 +13131,8 @@ class Boss {
     if (this.meet) return;
     // GRAVEHORN runs his own machine end to end (js/gravehorn.js): no fork, no
     // midpoint, no purification — he is the Eye's soldier, not a guardian.
+    // MIREJAW runs his own machine end to end (js/mirejaw.js), as GRAVEHORN does
+    if (this.kind === 'mirejaw') { mjStep(this, dt); return; }
     if (this.kind === 'horn') {
       // A STAGGER FROM OUTSIDE HIS OWN MACHINE (the Song, a weakness) holds
       // him where he stands, as it holds every guardian — none of his own
@@ -13069,6 +13223,11 @@ class Boss {
           addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
             rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
         const floorY2 = 15 * TILE - this.h;
+        // THE ALPHA BOWS FIRST, its pack behind it (js/packcall.js)
+        if (this.kind === 'alpha' && this.bowT == null && typeof alphaBowBegin === 'function') alphaBowBegin(this);
+        if (this.kind === 'alpha' && typeof alphaBowStep === 'function' && alphaBowStep(this, dt)) {
+          // (its own beat owns the frame)
+        } else
         if (this.kind === 'glitch' || this.kind === 'atlas' || this.kind === 'alpha') {
           if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
           let mv = 0;
@@ -13223,7 +13382,19 @@ class Boss {
         cam.shake = Math.max(cam.shake, 11);
         this.roarBuzzT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
-        if (typeof roarWave === 'function')
+        // NULLFANG'S WAKE IS AN EVENT (owner, 2026-11-20: "more dramatic and
+        // more epic instead of just standing there ... intimidating"): his roar
+        // goes through the room as the crest's did — the picture bends as the
+        // note passes, the frame stops for a breath, the floor's dust goes up
+        // and she is shoved back a step (no damage: a roar is not a blow)
+        if (this.kind === 'glitch' && typeof shockRipple === 'function') {
+          shockRipple(this.cx() + (this.face || -1) * 30, this.cy() - this.h * 0.35,
+            { R: 700, dur: 1.1, amp: 28, width: 66, col: '#b06aff', fronts: 3, gap: 0.12, push: 170, nudge: 7, pulse: 0, light: 0.45 });
+          G.hitStop = Math.max(G.hitStop || 0, 0.08);
+          cam.shake = Math.max(cam.shake, 15);
+          for (let i = 0; i < 22; i++)
+            addPart(this.cx() + rnd(-this.w, this.w), this.y + this.h - 4, rnd(-200, 200), rnd(-230, -60), 0.6, '#9c8f78', 3, 320, true);
+        } else if (typeof roarWave === 'function')
           roarWave(this.cx(), this.cy() - this.h * 0.35,
             { glitch: '#b48cff', brood: '#ff5f6d', zero: '#a5d8ff',
               atlas: '#ff9a5a', prism: '#37ffd0', alpha: '#ffc24a' }[this.kind] || '#e05aff');   // atlas: molten, not reward gold (owner, 2026-10-12)
@@ -13297,6 +13468,8 @@ class Boss {
     // each boss up the chain is natively faster and more relentless
     const spd = DF().espd * (this.attackSpeed || BOSS_AGGRO[this.kind] || 1);
     this.windT -= dt; this.overdriveT -= dt;
+    if (this.rearCD > 0) this.rearCD -= dt;
+    if (this.nullHold > 0) this.nullHold -= dt;
     // every boss looks where it is going, even the ones that do not walk
     // GLACIERE owns facing in her state handler: a committed charge keeps
     // facing along its velocity even after the player crosses behind it.
@@ -13382,7 +13555,7 @@ class Boss {
             this.st = 'daze'; this.replanted = false;
             if (this.coilFx) { this.coilFx.cut = 1; this.coilFx = null; }
             // phase two shrugs it off faster — the same read, a smaller prize
-            this.dazeDur = this.phase === 2 ? 1.25 : 1.7;
+            this.dazeDur = this.phase === 2 ? 1.05 : 1.4;   // (harder, 2026-11-20: was 1.25 / 1.7)
             this.t = this.dazeDur;
             this.vx = 0; this.swiped = false; this.swiped2 = false;
             // the break is an EVENT and gets announced on every channel the
@@ -13446,14 +13619,26 @@ class Boss {
             // flashed between the standing lion and the rising paw, before
             // every swipe in the fight. Same decision, same priority (the null
             // field and the ambush still go first), one frame sooner.
-            const nullDue = !this.nullUsed && this.hp <= this.hpMax * 0.5;
-            if (!nullDue && this.ambushCD > 0 && adist < 130 && this.swipeCD <= 0) {
+            const nullDue = !this.nullUsed && this.hp <= this.hpMax * 0.5 && !(this.nullHold > 0) && !this.breakRoar;
+            if (!nullDue && nfRearReady(this, adist, dist)) nfRearStart(this);
+            else if (!nullDue && this.ambushCD > 0 && adist < 130 && this.swipeCD <= 0) {
               this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe'; this.turnStreak = 0;
               this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
-            } else if (inBand && this.lastMove !== 'pounce') {
-              this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0; this.turnStreak = 0; this.replanted = false;
-              this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
-              if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
+            } else if (inBand && (this.lastMove !== 'pounce' && this.lastMove !== 'lunge' || (this.lastMove === 'pounce' && chance(0.5)))) {
+              // HIS DASH (owner, 2026-11-20: "Nilfang should also have the skill
+              // of crouching and dash at me. And this would be the skill that he
+              // gives me ... a red after effect ... not so linear ... when he
+              // dashes at you, he slashes or bites"). Out of the same crouch, a
+              // shorter coil and then a LOW, curved lunge straight at her, red
+              // after-images streaming off him, that ends in a slash. The leap
+              // and the lunge share a tell on purpose: what he does out of it is
+              // the read, and the lunge's coil is shorter.
+              this.lunging = !this.dashOpened || this.lastMove === 'pounce' || chance(this.phase === 2 ? 0.55 : 0.45);
+              if (this.lunging) nfDashChainStart(this);
+              this.coilDur = this.lunging ? (this.phase === 2 ? 0.48 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
+              this.st = 'crouch'; this.t = this.coilDur; this.turnStreak = 0; this.replanted = false;
+              this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = this.lunging ? 'lunge' : 'pounce';
+              if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: this.lunging ? '#ff4a3a' : TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
             } else {
               this.st = adist > 520 ? 'run' : 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.32, 0.62);
             }
@@ -13473,7 +13658,7 @@ class Boss {
           const desired = this.face * pace * spd;
           this.vx += clamp(desired - this.vx, -1050 * dt, 1050 * dt);
           this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
-          if (!this.nullUsed && this.hp <= this.hpMax * 0.5) {
+          if (!this.nullUsed && this.hp <= this.hpMax * 0.5 && !(this.nullHold > 0) && !this.breakRoar) {
             // NULL GRAVITY: once per fight, below half health, the virus
             // overrides the room's gravity — the charge-up is the tell
             this.nullUsed = true;
@@ -13499,6 +13684,8 @@ class Boss {
               this.face = Math.sign(per[0][0] - this.cx()) || this.face;
             }
             this.ambushCD = rnd(this.phase === 2 ? 6 : 9, this.phase === 2 ? 9 : 12);
+          } else if (nfRearReady(this, adist, dist) && !(!this.nullUsed && this.hp <= this.hpMax * 0.5)) {
+            nfRearStart(this);
           } else if (adist < 130 && this.swipeCD <= 0) {
             // the same trap FURNACE's slam was in: gated on range alone, so a
             // player who stays in melee sees one telegraph and nothing else
@@ -13525,12 +13712,47 @@ class Boss {
             // crawling up from the paws, and the claws coming out. See
             // beastCoilFx. The difficulty is paid for on the other side: the
             // leap leads her now, and in phase two it lands and goes again.
-            this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0; this.turnStreak = 0; this.replanted = false;
-            this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
-            if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
+            // (or his DASH out of the same crouch: see the idle's entry above)
+            this.lunging = !this.dashOpened || this.lastMove === 'pounce' || (this.lastMove !== 'lunge' && chance(this.phase === 2 ? 0.55 : 0.45));
+            if (this.lunging) nfDashChainStart(this);
+            this.coilDur = this.lunging ? (this.phase === 2 ? 0.48 : 0.65) : (this.phase === 2 ? 0.9 : 1.0);
+            this.st = 'crouch'; this.t = this.coilDur; this.turnStreak = 0; this.replanted = false;
+            this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = this.lunging ? 'lunge' : 'pounce';
+            if (typeof fx === 'function') this.coilFx = fx('gather', this.cx(), this.y + this.h - 34, { rx: 150, ry: 120, dur: this.t, col: this.lunging ? '#ff4a3a' : TELL_COL, hot: '#fff6df', follow: this, power: 0.9 });
           }
           else if (this.t <= 0) this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
           }
+        } else if (this.st === 'rearwarn') {
+          // UP ON HIS HIND LEGS: the head goes up, the forelegs come off the ground — the tell
+          this.vx = 0; this.t -= dt; this.windT = 0.4;
+          if (this.t <= 0) { this.st = 'rear'; this.t = NF_REAR.active; this.rearHits = 0; }
+        } else if (this.st === 'rear') {
+          // two swats at the top, then the slam
+          this.vx = 0; this.t -= dt;
+          const el = NF_REAR.active - this.t, f = this.face || 1;
+          const swat = NF_REAR.swats.filter(x => el >= x).length;
+          while ((this.rearHits || 0) < swat) {
+            this.rearHits = (this.rearHits || 0) + 1;
+            const box = { x: f > 0 ? this.cx() + 6 : this.cx() - 6 - NF_REAR.swatReach, y: this.y - 70, w: NF_REAR.swatReach, h: this.h * 0.75 + 70 };
+            beastSound('swipe');
+            if (typeof fx === 'function') fx('slash', this.cx() + f * 60, this.y - 6, { rx: 96, ry: 90, dur: 0.26, flip: f < 0, power: 3.5, col: '#ff4a3a', hot: '#fff6df' });
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.rear'); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
+          }
+          if (!this.rearSlammed && el >= NF_REAR.slam) {
+            this.rearSlammed = true;
+            const box = { x: f > 0 ? this.cx() + 20 : this.cx() - 20 - NF_REAR.slamReach, y: this.y + this.h - 54, w: NF_REAR.slamReach, h: 62 };
+            beastSound('land'); cam.shake = Math.max(cam.shake, 10); G.hitStop = Math.max(G.hitStop || 0, 0.06);
+            if (typeof padRumble === 'function') padRumble(0.8, 0.5, 220);
+            const lx = this.cx() + f * 90, ly = this.y + this.h - 2;
+            if (typeof fx === 'function') { fx('ground', lx, ly, { rx: 200, ry: 32, dur: 0.5, col: '#ff4a3a', hot: '#fff6df', power: 1.3 }); fx('cracks', lx, ly + 3, { rx: 150, ry: 24, dur: 1.3, col: '#a0281e', hot: '#fff0e0', power: 1.1 }); }
+            for (let i = 0; i < 12; i++) addPart(lx + rnd(-60, 60), ly - 3, rnd(-200, 200), rnd(-170, -30), rnd(0.35, 0.6), '#b9a888', rnd(2.5, 4), 260, true);
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.rearslam'); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
+          }
+          if (this.t <= 0) { this.st = 'rearspent'; this.t = NF_REAR.spent; this.rearSlammed = false; this.landAt = this.anim || 0; }
+        } else if (this.st === 'rearspent') {
+          // down on all fours, low, after the slam: the opening, then he rises and goes on
+          this.vx = 0; this.t -= dt;
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(0.2, 0.35); }
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
           this.vx = 0; this.t -= dt; this.windT = 0.3;
@@ -13578,7 +13800,8 @@ class Boss {
             // out after the first and nothing has changed. Conditional, not
             // random: the same choice always gets the same lion.
             const stays = adist < 150 && (Math.sign(dist) || this.face) === this.face;
-            if (!this.swiped2 && (this.phase === 2 || stays)) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
+            if (this.dashSlash) { this.dashSlash = false; this.swiped2 = false; nfDashChainNext(this, adist); }
+            else if (!this.swiped2 && (this.phase === 2 || stays)) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
             else { this.swiped2 = false; this.st = 'idle'; this.t = this.fury ? rnd(0.3, 0.45) : this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.34, 0.52); }
           }
         } else if (this.st === 'crouch') {
@@ -13589,7 +13812,7 @@ class Boss {
             // tell half the room misses: the ladder climbs in pitch as the
             // spring winds, the pad shakes harder, and the last quarter second
             // trembles the camera so it lands even with the sound off.
-            const dur = this.phase === 2 ? 0.9 : 1.0;
+            const dur = this.coilDur || (this.phase === 2 ? 0.9 : 1.0);
             const k = 1 - Math.max(0, Math.min(1, this.t / dur));
             this.coilK = k;
             this.coilTick = (this.coilTick || 0) - dt;
@@ -13644,8 +13867,13 @@ class Boss {
             // phase two). Damage is still the LANDING box only, so the answer
             // is unchanged — do not be where it comes down — and the longer
             // flight gives the eye the arc to read the landing from.
-            const air = (this.phase === 2 ? 0.62 : 0.70) + Math.min(0.12, adist / 4000);
-            this.vx = clamp(lead / air, -760, 760) * spd;
+            // THE LUNGE flies low and fast — a curve a body-height high, not
+            // the leap's arc — and it aims at where she IS, closer than the leap
+            const air = this.lunging ? (this.phase === 2 ? 0.29 : 0.38) + Math.min(0.06, adist / 6000)
+              : (this.phase === 2 ? 0.62 : 0.70) + Math.min(0.12, adist / 4000);
+            this.lungeFly = !!this.lunging; this.lunging = false;
+            const lcap = this.lungeFly ? (this.phase === 2 ? 1400 : 1150) : 760;   // phase two: a faster dash
+            this.vx = clamp(lead / air, -lcap, lcap) * spd;
             this.vy = -2100 * air / 2;
             this.leapT0 = this.anim || 0;
             this.leapDuration = air;
@@ -13666,12 +13894,11 @@ class Boss {
                 Math.cos(a) * rnd(120, 300), Math.sin(a) * rnd(60, 220),
                 rnd(0.25, 0.45), i % 3 ? TELL_COL : '#fff6df', rnd(2.5, 4), 120, true);
             }
-            if (typeof roarWave === 'function')
-              roarWave(this.cx(), this.y + this.h - 10, TELL_COL);
-            if (typeof fx === 'function') {
-              fx('ground', this.cx() - this.face * 20, this.y + this.h - 2, { rx: 190, ry: 30, dur: 0.5, col: TELL_COL, hot: '#fff6df', power: 1.2 });
-              fx('flash', this.cx(), this.y + this.h - 30, { rx: 150, ry: 150, dur: 0.22, col: TELL_COL, hot: '#fffbe8' });
-            }
+            // (no rings off the launch: "No light, rim, halo, outline or ring
+            // round any body" — the ledger, 4x — and the owner on the same
+            // yellow circles round the Alpha, 2026-11-20: "those are so bad")
+            if (typeof fx === 'function')
+              fx('ground', this.cx() - this.face * 20, this.y + this.h - 2, { rx: 190, ry: 30, dur: 0.5, col: this.lungeFly ? '#ff4a3a' : TELL_COL, hot: '#fff6df', power: 1.2 });
             // launch kickback: the hind paws throw dirt out behind the leap
             for (let i = 0; i < 7; i++)
               addPart(this.cx() - this.face * rnd(10, 40), this.y + this.h - rnd(0, 6),
@@ -13696,7 +13923,7 @@ class Boss {
           }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
-            cam.shake = 11; beastSound('roar'); G.flash = Math.max(G.flash, 0.18);
+            cam.shake = 11; beastSound(this.roarBig ? 'roar_big' : 'roar'); G.flash = Math.max(G.flash, 0.18);
             this.roarBuzzT = 0.6;
             if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
             // the roar as pressure leaving the throat, both ways: it shoves from either side
@@ -13707,6 +13934,7 @@ class Boss {
             // roar that answers a broken binding is the big one: wider, longer,
             // and it throws her from further off.)
             const big = this.roarBig || 0; this.roarBig = 0;
+            if (big && this.kind === 'glitch') { this.rageSeen = true; this.nullHold = 4; }   // ...and the null field waits: two roars must not run into each other   // from this roar he burns red (beast.js, media.js rageArt)
             if (typeof shockRipple === 'function')
               shockRipple(this.cx() + this.face * 30, this.cy() - 10, big
                 ? { R: 820, dur: 1.2, amp: 32 + big * 4, width: 74, col: '#b06aff', fronts: 4, gap: 0.12, nudge: 8, pulse: 0.24 }
@@ -13842,7 +14070,9 @@ class Boss {
           // up: the settle is the opening (one hit, 300 ms and more), and the
           // swipe that follows has its whole tell. Staying to trade is a
           // choice now, and so is leaving.
-          if (this.t <= 0) {
+          if (this.t <= 0 && this.dashNext && !turning) { nfDashLink(this); }
+          else if (this.t <= 0 && this.dashNext) { /* the breath holds through his turn */ }
+          else if (this.t <= 0) {
             const chain = adist < 135 && (Math.sign(dist) || this.face) === this.face && !turning && this.swipeCD <= 0.5
               && !(!this.nullUsed && this.hp <= this.hpMax * 0.5) && !(this.nullSeq > 0);
             // AND IN PHASE TWO IT LEAPS AGAIN. She dodged the first pounce and
@@ -13950,11 +14180,28 @@ class Boss {
             this.nullSeq--;
             if (this.nullSeq > 0) { this.st = 'nullhop'; this.t = 0.16; }
             else { this.st = 'nullend'; this.t = 1.15; }
+          } else if (this.phase === 2 && !this.lungeFly && this.kind === 'glitch' && !player.dead) {
+            // THE LEAP GOES ON (owner, 2026-11-21: "He jumps and scratch, but this time he
+            // should dash forward also"). In phase two the leap lands into the scratch (its
+            // full tell), and out of the scratch, after a breath on his feet, the red crouch
+            // and the dash: one sentence — leap, scratch, dash — that ends spent.
+            this.landAt = this.anim || 0;
+            this.dashSlash = true; this.dashLeft = 1; this.dashLink = 0; this.dashOpened = true;
+            this.st = 'swipewarn'; this.t = 0.4; this.vx = 0; this.swiped = false; this.swiped2 = true;
+            this.lastMove = 'lunge';
           } else {
             // the punish window: long enough for the three-hit combo, not for
             // three of them
-            this.st = 'recover'; this.t = this.phase === 2 ? 0.26 : 0.36;
+            this.st = 'recover'; this.t = this.phase === 2 ? 0.24 : 0.32;
             this.landAt = this.anim || 0;      // drawBeast's touchdown squash
+            // ...and the lunge does not stop at the landing: it SLASHES out of
+            // it, a short wind-up straight into the swipe
+            if (this.lungeFly) {
+              this.lungeFly = false; this.dashSlash = true;
+              this.st = 'swipewarn'; this.t = 0.4; this.vx = 0; this.swiped = false; this.swiped2 = true;   // the paw rises a full tell (bosswindow floor): the dash is his signature now, so its slash is read often
+              // the slash goes along the dash's own line: a lion that has committed
+              // does not snap round on the frame it lands. Behind him, she dodged it.
+            }
           }
         }
         // (IT USED TO TURN ROUND AT A WALL HERE — `face *= -1` on any side contact,
@@ -15413,6 +15660,7 @@ class Boss {
     // GRAVEHORN goes down on his knees (phase one) or backs into the rock
     // (phase two) — never the fork, never a wreck (js/gravehorn.js ghDown)
     if (this.kind === 'horn') { ghDown(this); return; }
+    if (this.kind === 'mirejaw') { mjDown(this); return; }
     // THE BLOW THAT WOULD END IT asks the question instead. This is the path
     // every real kill actually takes — the claw, the shuriken, the Song and the
     // pounce all call die() the moment health hits zero — so the guardian has
@@ -15432,7 +15680,7 @@ class Boss {
       this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
       this.purified = true; this.pureT = 0; this.rewardPend = true;
       this.vx = 0; this.vy = 0;
-      if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
+      if (this.kind !== 'mother') setMusic(G.roomDef.mus || G.roomDef.zone); else stopMusic();
       G.dropScrap(this.cx(), this.cy(), bossScrap(this));
       // the film path owes the same sentence the cleanse path says: the
       // campaign run freed NULLFANG through his film and never read that he
@@ -15457,7 +15705,7 @@ class Boss {
       this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
       this.purified = true; this.pureT = 0.7; this.vx = 0; this.vy = 0;
       this.rewardPend = true;
-      setMusic(G.roomDef.zone);
+      setMusic(G.roomDef.mus || G.roomDef.zone);
       G.dropScrap(this.cx(), this.cy(), bossScrap(this));
       const pk = { glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
                    zero: 'pure_zero', prism: 'pure_prism' }[this.kind];
@@ -15476,7 +15724,7 @@ class Boss {
     G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);
     G.addRing(this.cx(), this.cy()); G.addRing(this.cx(), this.cy(), 60);
     G.impact = { t: 0.24, t0: 0.24, x: this.cx(), y: this.cy() };
-    if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
+    if (this.kind !== 'mother') setMusic(G.roomDef.mus || G.roomDef.zone); else stopMusic();
     G.dropScrap(this.cx(), this.cy(), bossScrap(this));
     // the reward dialog used to open HERE — freezing the collapse mid-fall
     // so the wreck stood still. Now the death scene plays to its finale
@@ -15519,7 +15767,7 @@ class Boss {
     // and her rest state already lives in that hue.
     //
     // So the floor is structural: any state whose NAME says a blow is coming
-    // gets light on the floor under it (the bloom that stood behind the animal was removed 2026-11-24),
+    // gets a rising amber bloom behind the animal and a hot ring at its feet,
     // for every guardian that exists and every guardian added later. It sits
     // BEHIND the body — a wash in front would be the pasted badge ART_BIBLE.md
     // §3.5 forbids — and it is a floor, not a ceiling: a guardian that lerps
@@ -15531,7 +15779,7 @@ class Boss {
     // the foot line that are not feet. Suppressing decoration for the probe is
     // honest; teaching the probe to guess which bright pixels are anatomy is
     // not. Nothing in the game ever sets it.)
-    if (!this.dead && !G.artProbe && this.st && TELL_ST.test(this.st)) {
+    if (!this.dead && !G.artProbe && this.kind !== 'mirejaw' && this.st && TELL_ST.test(this.st)) {   // (MIREJAW tells with the water itself: no light round a body)
       // ramp over the wind-up's own length, so the bloom grows as the blow
       // approaches instead of switching on
       const dur = Math.max(0.18, this._tellDur || this.t || 0.4);
@@ -15543,13 +15791,17 @@ class Boss {
       // for a faster enemy, which is backwards. The player's eye needs the same
       // signal whatever the thing's size, so small things get proportionally
       // more of it.
-      // THE BLOOM BEHIND THE BODY IS GONE (owner, four times: "Why still framed with light ?!!!" — and
-      // the lion's player found it round NULLFANG's every warning, 2026-11-24). A wind-up is said by
-      // the body, the sound, the floor under it and the attack's own generated effect (js/bossvfx.js)
-      // — never by light round the animal.
-      const bx = this.cx();
+      const bx = this.cx(), by = this.y + this.h * 0.55;
+      const R = Math.max(104, Math.max(this.w, this.h) * 1.5);
       c.save();
-      c.globalCompositeOperation = 'lighter';
+      // CHAKRA, NOT AN OVAL (owner, 2026-11-20: "so linear and not 3D ... make
+      // it aura-like or watery, fluid-like"): the amber rises off the body in
+      // tongues of light (fxgl.js drawChakra), as tall as the body is and a
+      // floor for the small ones, growing with the wind-up
+      // (the Alpha's burns in its own colours, as its howl does)
+      if (typeof drawChakra === 'function')
+        drawChakra(c, bx, this.y + this.h, Math.max(this.w, R * 0.6), Math.max(this.h, R * 0.55), this.kind === 'alpha' ? 0.35 + e * 0.75 : Math.min(1.2, 0.5 + e * 0.85),
+          this.kind === 'alpha' ? [255, 95, 138] : [255, 176, 64], this.anim || 0, this.vx || 0);
       // and the floor under it takes the light — the one place a wind-up is
       // always visible even when the animal itself is off the top of the screen.
       // THE FLOOR, not an ellipse at the foot line (owner, 2026-11-14: "looks
@@ -15562,6 +15814,7 @@ class Boss {
     // GRAVEHORN draws his own rig (js/gravehorn.js): his weight is in his legs,
     // not in the shared lean below
     if (!heroWorld && this.kind === 'horn' && typeof drawGravehorn === 'function') { drawGravehorn(c, this); c.restore(); return; }
+    if (this.kind === 'mirejaw' && typeof mjDraw === 'function') { mjDraw(c, this); c.restore(); return; }
     // A REACTION HAS TO HAPPEN IN THE CREATURE. Particles thrown around a
     // motionless body read as an effect played AT it; the bend is what turns a
     // poke into an answer. Rides inside the save above, so every early return

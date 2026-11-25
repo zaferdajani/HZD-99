@@ -96,7 +96,16 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
         const cells = [], t0 = cat.anim || 0;
         for (let i = 0; i <= 80; i++) { cat.anim = t0 + i / 60; cat._shownImg = null; cat.draw(x); cells.push(cat._shownImg === CHEETAH_ART.down.img ? cat._shownCell : -1); }
         out.cat = { room: where, disabled: !!cat.disabled, fall: CHEETAH_ART.down.fall, n: CHEETAH_ART.down.cells, first: cells[0], at: cells.findIndex(q => q === CHEETAH_ART.down.cells - 1) / 60,
-          monotone: cells.every((q, i) => i === 0 || q >= cells[i - 1]), distinct: Array.from(new Set(cells)).length, last: cells[cells.length - 1], unknown: cells.filter(q => q < 0).length }; } }
+          monotone: cells.every((q, i) => i === 0 || q >= cells[i - 1]), distinct: Array.from(new Set(cells)).length, last: cells[cells.length - 1], unknown: cells.filter(q => q < 0).length };
+        // ...and through the GAME'S OWN UPDATE, not a clock set by hand: the
+        // bound body's update returned before its animation clock moved, so in
+        // play the fold sat on its first cell — the cat standing — for good
+        // (owner, 2026-11-19: "they should fall down the floor in a kneeling way,
+        // not standing still"). Every cell above was right and none of it showed.
+        const a0 = cat.anim || 0; cat._fallAt = a0;
+        for (let i = 0; i < 60; i++) cat.update(1 / 60);
+        cat._shownImg = null; cat.draw(x);
+        out.cat.live = { clock: +((cat.anim || 0) - a0).toFixed(2), cell: cat._shownImg === CHEETAH_ART.down.img ? cat._shownCell : -1 }; } }
     // ---- E: the Oracle ------------------------------------------------------------
     { const T = NPC_TALL.mono; out.mono = { rest: T.rest, talk: T.talk };
       for (const k of [T.rest].concat(T.talk)) mediaFetch(k, 1);
@@ -137,6 +146,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('D  a cat she beats is bound, and its fold starts at the first cell', C.disabled === true && C.first === 0 && C.unknown === 0, C);
   check('   ...plays every cell in order, reaching the last in most of a second', C.monotone && C.distinct === C.n && C.at >= C.fall * 0.6 && C.at <= C.fall * 1.05, { cells: C.distinct + '/' + C.n, lastAt: C.at + ' s', fall: C.fall });
   check('   ...and then lies in the last', C.last === C.n - 1, C.last);
+  check('   ...and in play it gets there by itself: its clock runs while it is bound, and a second after the blow it is lying down',
+    !!C.live && C.live.clock >= 0.9 && C.live.cell === C.n - 1, C.live);
   const M = R.mono;
   check('E  unpowered, the Oracle rests on his own plate', M.unpowered === 'mono:' + M.rest, M.unpowered);
   check('   ...and speaking, he goes between his two talking plates', M.talk.every(k => M.talking.includes('mono:' + k)) && M.talking.every(k => M.talk.includes(k.slice(5))), M.talking);

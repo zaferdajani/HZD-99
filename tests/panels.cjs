@@ -108,7 +108,7 @@ async function tapKey(page, code) {
     const newSeq = await page.evaluate(() => {
       // 2026-10-11 (owner): the letter's pages play when it is READ, before the
       // repair; the drawer after the drawer; only his waking after the board
-      const want = { wake: ['w_cradle', 'w_eyes', 'w_unplug'], bay: ['d_door', 'd_road'], letter: ['letter', 'l_song', 'l_marble', 'l_cell'],
+      const want = { wake: ['w_cradle', 'w_eyes', 'w_unplug'], letter: ['letter', 'l_song', 'l_marble', 'l_cell'],
         drawer: ['toolbox'], ratchet: ['r_cell', 'r_marble'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
         break: ['break_a', 'break_b'], sage: ['sage_rev', 'sage_bell'], free: ['fight_a', 'fight_b'], ch2: ['hatch', 'ch2_a', 'ch2_b', 'ch2_c'] };
       const miss = [];
@@ -116,18 +116,33 @@ async function tapKey(page, code) {
       return miss;
     });
     check('the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map', !newSeq.length, newSeq.join(', '));
-    for (const [id, room, flags] of [['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
-      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }],
-      ['break', 'A3', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
+    // KEY MOMENTS ONLY (owner, 2026-11-20, choosing which stay: "It's not
+    // about oversaturating the game with images and videos. Certain key
+    // moments require videos or images"). The gate, the toolbox, the cave
+    // mouth, the marble, the maintenance door and NULLFANG's break are library
+    // pages now: at their own events, in their own rooms, nothing plays.
+    for (const [id, room, flags] of [['gate', 'A0', { woke: 1, gateOpened: 1 }],
+      ['drawer', 'A0B', { woke: 1, gateOpened: 1, opNote: 1 }],
+      ['cave', 'CV1', { woke: 1, gateOpened: 1 }],
+      ['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
+      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
       await stage(page, room, flags);
-      // a record made by this build: every sequence known, the others already
-      // seen, so the one under test is the only one owed
-      await page.evaluate(i => { const P = G.save.panels; P.k = {}; for (const s of PANEL_SEQ) { P.k[s.id] = 1; if (s.id !== i) P.seen[s.id] = 1; } }, id);
-      const fired = await waitFor(page, `G.state === 'PANELS' && G.panels.seq.id === '${id}'`, 8000);
-      check('the ' + id + ' panels play in ' + room + ' at their event', fired, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
-      await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
-      await waitFor(page, () => G.state === 'PLAY', 4000);
+      await page.evaluate(i => { const P = G.save.panels; P.k = {}; for (const s of PANEL_SEQ) { P.k[s.id] = 1; if (s.id !== i) P.seen[s.id] = 1; }
+        if (i === 'drawer' && typeof invAdd === 'function') invAdd('ratchetCell', 1); }, id);
+      await sleep(2500);
+      const st = await state(page);
+      check('the ' + id + ' pages are off the game: nothing plays in ' + room + ' at their event', st.st !== 'PANELS', JSON.stringify(st));
     }
+    // ...while a key moment still has its pages: the first agent purified
+    await stage(page, 'GA1D', { woke: 1, gateOpened: 1, crystal: 1, sageTame_GA1D: 1 });
+    await page.evaluate(() => { const P = G.save.panels; P.k = {}; for (const s of PANEL_SEQ) { P.k[s.id] = 1; if (s.id !== 'sage') P.seen[s.id] = 1; } });
+    const sageFired = await waitFor(page, `G.state === 'PANELS' && G.panels.seq.id === 'sage'`, 8000);
+    check('...and a key moment keeps its pages: the first agent purified (GA1D)', sageFired, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
+    await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
+    await waitFor(page, () => G.state === 'PLAY', 4000);
+    const inGame = await page.evaluate(() => PANEL_SEQ.filter(q => !q.manual).map(q => q.id));
+    check('...in all, chapter one plays five: the corridor, the agent, the bell, the teaser (and the letter, when she reads it)',
+      inGame.join() === 'meet,sage,chime,ch2', inGame.join());
     // an old save (no `k`): its ten original sequences keep their verdicts; the
     // new ones are judged by what it has already done
     const mig = await page.evaluate(() => {
@@ -149,21 +164,30 @@ async function tapKey(page, code) {
     });
     check('his letter and drawer are no longer told after the repair', !order.postHasLetter, JSON.stringify(order));
     check('the wake and the letter are played by their moments, not by a room watch', order.letterManual && order.wakeManual);
-    // the wake: a new game holds her, the pages open first, the waking follows
-    const w0 = await page.evaluate(() => {
+    // NO COMIC WHERE A FILM TELLS IT (owner, 2026-11-16 at the lion's pages,
+    // and 2026-11-19: "When there is a video no need for comic"). The opening
+    // film ends on her waking; the forge film is the forging; the lion's
+    // purification is its film. Their pages are library only, and a new game
+    // goes from the film straight to her first step.
+    const films = await page.evaluate(() => {
+      const filmed = PANEL_SEQ.filter(q => q.film).map(q => ({ id: q.id, film: q.film, manual: !!q.manual }));
       for (const k in keys) delete keys[k];
       const sv = newSave(1); sv.time = 99; startGame(sv); loadRoom('W1'); G.state = 'PLAY'; G.dialog = null;
-      return { pend: !!(G.wake && G.wake.pend) };
+      return { filmed, pend: !!(G.wake && G.wake.pend) };
     });
-    check('a new game holds the waking until its pages have played', w0.pend, JSON.stringify(w0));
-    const wFired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'wake', 9000);
-    check('the wake pages open before her first step', wFired, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
-    const wFirst = await page.evaluate(() => G.panels && G.panels.list[0].src);
-    check('...beginning in the cradle', /w_cradle/.test(wFirst || ''), wFirst);
-    await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
-    await waitFor(page, () => G.state === 'PLAY', 4000);
-    const w1 = await page.evaluate(() => ({ wake: !!G.wake, pend: !!(G.wake && G.wake.pend), st: G.state }));
-    check('...and when they close, the waking itself runs', w1.wake && !w1.pend && w1.st === 'PLAY', JSON.stringify(w1));
+    const want = { wake: 'intro8', forge: 'gift', free: 'glitch' };
+    check('every beat a film shows has its comic off the room (wake, forge, the lion)',
+      Object.keys(want).every(id => films.filmed.some(q => q.id === id && q.film === want[id] && q.manual))
+      && films.filmed.every(q => q.manual), JSON.stringify(films.filmed));
+    check('...a new game goes from the film to her first step, no wake pages', !films.pend, JSON.stringify(films));
+    await sleep(1500);
+    const w1 = await page.evaluate(() => ({ st: G.state, id: G.panels && G.panels.seq.id }));
+    check('...and none open while she wakes', w1.st !== 'PANELS', JSON.stringify(w1));
+    // the forge: the film plays, the forge's pages do not follow it
+    await stage(page, 'A0B', { woke: 1, gateOpened: 1, tut: 1, ratchetRepaired: 1, 'on_A0B|ratchet': 1, crystal: 1 });
+    await sleep(2000);
+    const fg = await state(page);
+    check('...and after the forge film, no forge pages', fg.st !== 'PANELS' || fg.id !== 'forge', JSON.stringify(fg));
     // the letter: reading it plays the pages; it is not typed out; then opNote
     await stage(page, 'A0B', { woke: 1, gateOpened: 1, tut: 1 });
     const l0 = await page.evaluate(() => {
@@ -189,20 +213,39 @@ async function tapKey(page, code) {
       draw = function () { if (G.state === 'PLAY' && G.roomId === r && !panelsCovering()) window.__unc++; return d0.apply(this, arguments); };
     }, room);
     const coverDone = () => page.evaluate(() => { draw = window.__draw0; return window.__unc; });
-    // a real crossing: she walks out of the service bay (W1) through its door
+    // NO PAGES ON THE ROAD (owner, 2026-11-19: "the comic that shows before the
+    // door, there's no need for it. You only show the comics when I enter the
+    // door, the first gate of the city"): walking out of the service bay onto
+    // the road plays nothing, and the first pages after the waking are the
+    // gate's, as she enters the city.
     await stage(page, 'W1', { woke: 1 });
     await page.evaluate(() => { G.save.panels.past.wake = 1; });
     await sleep(300);
-    await coverWatch('W2');
     await page.evaluate(() => { G.trans = { t: TRANS_DUR, to: 'W2', side: 'R', half: false }; });
-    const fired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'bay');
-    check('leaving the service bay plays the bay panels in W2', fired, await page.evaluate(() => G.state + ' ' + G.roomId + ' ' + (G.panels && G.panels.seq.id)));
+    await sleep(2600);
+    let s = await state(page);
+    const road = await page.evaluate(() => ({ room: G.roomId, seqs: PANEL_SEQ.filter(q => (q.room === 'W2' || q.room === 'W1') && !q.film).map(q => q.id), seen: Object.keys(G.save.panels.seen) }));
+    check('leaving the service bay onto the road plays no pages', s.st === 'PLAY' && road.room === 'W2' && road.seen.length === 0, JSON.stringify(Object.assign(s, road)));
+    check('...and no pages wait on the road at all (the waking is the film\'s)', road.seqs.length === 0, road.seqs.join());
+    // THE MACHINERY, ON A FIXTURE. The gate's pages are off the game (above),
+    // but they are the cleanest arrival in the chapter, so the crossing, the
+    // caption, the skip, the replay and the event timing are proven on them
+    // with their library flag lifted for this part of the test only.
+    await page.evaluate(() => { panelsSeq('gate').manual = false; });
+    // a crossing into the city, through the gate: the pages cover it
+    await stage(page, 'W2', { woke: 1, gateOpened: 1 });
+    await page.evaluate(() => { G.save.panels.past.wake = 1; });
+    await waitFor(page, () => panelsLoaded(panelsSeq('gate')), 8000);
+    await sleep(300);
+    await coverWatch('A0');
+    await page.evaluate(() => { G.trans = { t: TRANS_DUR, to: 'A0', side: 'R', half: false }; });
+    const fired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'gate');
+    check('fixture: a crossing plays pages that are due in the room it enters (A0)', fired, await page.evaluate(() => G.state + ' ' + G.roomId + ' ' + (G.panels && G.panels.seq.id)));
     const unc = await coverDone();
-    check('...over the crossing: not one frame of W2 is played before them', unc === 0, unc + ' frames');
+    check('...over the crossing: not one frame of A0 is played before them', unc === 0, unc + ' frames');
     const tr = await page.evaluate(() => ({ room: G.roomId, trans: !!G.trans }));
-    check('...and the crossing is finished by them, not resumed after', tr.room === 'W2' && !tr.trans, JSON.stringify(tr));
-    let s;
-    const seenSaved = await page.evaluate(() => !!JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).panels.seen.bay);
+    check('...and the crossing is finished by them, not resumed after', tr.room === 'A0' && !tr.trans, JSON.stringify(tr));
+    const seenSaved = await page.evaluate(() => !!JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).panels.seen.gate);
     check('it is marked seen (and saved) as it begins', seenSaved);
 
     // caption: reveal, confirm completes, separate confirm advances
@@ -229,15 +272,15 @@ async function tapKey(page, code) {
     const back = await waitFor(page, () => G.state === 'PLAY', 3000);
     check('holding the key skips the sequence back to play', back);
     // never again: revisit, and reload the saved game
-    await page.evaluate(() => { loadRoom('W1'); });
+    await page.evaluate(() => { loadRoom('W2'); });
     await sleep(300);
-    await page.evaluate(() => { loadRoom('W2'); G.state = 'PLAY'; player.on = true; });
+    await page.evaluate(() => { loadRoom('A0'); G.state = 'PLAY'; G.enemies = []; player.on = true; });
     await sleep(2200);
     s = await state(page);
     check('a revisit does not replay it', s.st === 'PLAY', JSON.stringify(s));
     await page.evaluate(() => {
       const sv = JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme)));
-      startGame(sv); loadRoom('W2'); G.wake = null; G.state = 'PLAY'; G.enemies = []; G.tut = null; G.tutorialLock = null; player.on = true;
+      startGame(sv); loadRoom('A0'); G.wake = null; G.state = 'PLAY'; G.enemies = []; G.tut = null; G.tutorialLock = null; player.on = true;
     });
     await sleep(2500);
     s = await state(page);
@@ -245,13 +288,13 @@ async function tapKey(page, code) {
 
     // replay: only what was seen
     const rows = await page.evaluate(() => panelsSeenList().map(q => q.id));
-    check('the replay list holds only the seen sequence', rows.length === 1 && rows[0] === 'bay', JSON.stringify(rows));
+    check('the replay list holds only the seen sequence', rows.length === 1 && rows[0] === 'gate', JSON.stringify(rows));
     const row = await page.evaluate(() => pauseItems().some(it => it.id === 'panels'));
     check('the pause menu offers Story panels once one is seen', row);
     await page.evaluate(() => { G.state = 'PANELLIST'; G.panelIdx = 0; });
     await tapKey(page, 'Enter');
     s = await state(page);
-    check('replay plays it again from the list', s.st === 'PANELS' && s.id === 'bay', JSON.stringify(s));
+    check('replay plays it again from the list', s.st === 'PANELS' && s.id === 'gate', JSON.stringify(s));
     await page.evaluate(() => { keys.Escape = true; keysP.Escape = true; });
     await sleep(1300);
     await page.evaluate(() => { delete keys.Escape; });
@@ -280,12 +323,13 @@ async function tapKey(page, code) {
     const tQuiet = await page.evaluate(() => { G.dialog = null; G.state = 'PLAY'; return G.time || performance.now() / 1000; });
     const gate = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'gate', 8000);
     const tOpen = await page.evaluate(() => G.time || performance.now() / 1000);
-    check('the gate panels play once the room is quiet (A0)', gate);
+    check('fixture: an event\'s pages play once the room is quiet (A0)', gate);
     // directly after the event: no settle, no walking about first
     check('...the moment it is quiet, not after a settle', tOpen - tQuiet < 0.45, (tOpen - tQuiet).toFixed(2) + ' s');
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
     await waitFor(page, () => G.state === 'PLAY', 2000);
 
+    await page.evaluate(() => { panelsSeq('gate').manual = true; });
     // a save that had passed the event before this build never gets a recap
     await page.evaluate(() => {
       const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { woke: 1, tut: 1, gateOpened: 1, ratchetRepaired: 1, crystal: 1 });
@@ -338,6 +382,13 @@ async function tapKey(page, code) {
     await page.evaluate(() => { G.save.panels.past.free = 1; if (G.save.visited) delete G.save.visited.B1; });
     await waitFor(page, () => panelsLoaded(panelsSeq('ch2')), 10000);
     await page.evaluate(() => {
+      // (the staging itself raises cards — the bell's evolution — that would
+      // re-open mid-climb and hold the crossing; they are not what is tested)
+      if (typeof OVERLAY_Q !== 'undefined') OVERLAY_Q.length = 0;
+      // (the climb holds JUMP, and a held key is also the skip: the pages can
+      // open and be skipped between two polls — so their start is recorded)
+      window.__tzStart = false; const ps0 = panelsStart;
+      panelsStart = function (id) { if (id === 'ch2' && G.roomId === 'B1') window.__tzStart = true; return ps0.apply(this, arguments); };
       G.dialog = null; G.state = 'PLAY'; G.enemies = []; G.projs = [];
       const g = G.grid, cols = [];
       if (g.tGap) for (let x = g.tGap[0]; x <= g.tGap[1]; x++) cols.push(x);
@@ -348,10 +399,10 @@ async function tapKey(page, code) {
     });
     const shaftTz = await waitFor(page, () => {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
-      return G.state === 'PANELS' && G.panels.seq.id === 'ch2';
+      return (G.state === 'PANELS' && G.panels.seq.id === 'ch2') || window.__tzStart;
     }, 6000);
     await page.evaluate(() => { for (const k in keys) keys[k] = 0; });
-    check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId));
+    check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId + ' seen=' + Object.keys(G.save.panels.seen).join(',') + ' past=' + Object.keys(G.save.panels.past).join(',') + ' q=' + PN.queue.join(',') + ' due=' + PN.due + ' bossGlitch=' + G.save.flags.bossGlitch));
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
     // ...she steers her own landing in a seamless shaft (owner, 2026-10-13),
     // toward the ledge beside the hatch, letting go once over it
@@ -367,6 +418,22 @@ async function tapKey(page, code) {
     }, 6000);
     const atB1 = await page.evaluate(() => ({ room: G.roomId, on: player.on, feet: Math.round(player.y + player.h), st: G.state }));
     check('...and when it closes, she can still steer onto B1\'s ledge', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
+    // A BEAT DUE IN A ROOM SHE LEAVES IS NOT LOST (2026-11-19): the bell falls,
+    // she is still in the air when she leaves A9 — the bell's pages play over
+    // the next doorway instead of never
+    await stage(page, 'A9', { bossChime: 1 });
+    const left = await page.evaluate(async () => {
+      if (G.panels) { G.panels = null; G.state = 'PLAY'; }
+      panelsLoad(panelsSeq('chime'));
+      player.on = false; G.boss = null;
+      for (let i = 0; i < 20; i++) panelsTick(1 / 60);
+      const inRoom = G.state;
+      loadRoom('A8'); G.state = 'PLAY'; G.trans = null; player.on = true;
+      for (let i = 0; i < 300 && G.state === 'PLAY'; i++) { panelsTick(1 / 30); await new Promise(r => setTimeout(r, 10)); }
+      return { inRoom, st: G.state, id: G.panels && G.panels.seq.id, room: G.roomId };
+    });
+    check('a comic due in a room she left in mid-air plays over the next doorway, not never', left.inRoom === 'PLAY' && left.st === 'PANELS' && left.id === 'chime', JSON.stringify(left));
+    await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } G.panels = null; G.state = 'PLAY'; });
     check('no page errors (desktop)', errs.length === 0, errs.slice(0, 2).join(' | '));
     await ctx.close();
 

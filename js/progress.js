@@ -86,7 +86,19 @@ function pgTermRead(room, which) {
 // chapter's own opening lessons (or a later chapter) own the answer.
 function progressGoal(f) {
   f = f || (G.save && G.save.flags) || {};
-  if (!pgRobo() || f.bossGlitch && f.ch2Climb) return null;
+  if (!pgRobo()) return null;
+  // CHAPTER TWO HAS A ROAD (owner, 2026-11-20: "the second one is super fast
+  // with nothing to play"). The sage's chamber (B4) was three rooms from the
+  // way in, and nothing named the kingdom's mini-boss up the relay climb or the
+  // agent who drowned its canals. Now the kingdom is played in order: the
+  // CARRIER first (its fall wakes a ring in the relay gallery, B6), then the
+  // agent UNDERTOW through it, and only then is TALONHOST's hall open
+  // (world.js B3, gate_brood_ward).
+  // ...AND THE ROAD IS LONGER NOW (owner, 2026-11-21): the CARRIER, the swamp's
+  // crocodile (across Bilge's raft), the agent, the vault their three seals
+  // open, the Prism Prowler who keeps the second sword — then the Foundry, and
+  // TALONHOST last (js/conduits-road.js k2Goal)
+  if (f.bossGlitch && f.ch2Climb) return typeof k2Goal === 'function' ? k2Goal(f) : null;
   if (!f['on_A0B|ratchet']) return null;               // the opening's lessons speak first
   if (!f.crystal) {
     if (G.save.bag && G.save.bag.cshard || f.pl_cshard && !f.crystal) return 'pg_goal_return';
@@ -243,14 +255,24 @@ function pgGoalRoom(key, f) {
   const ratchet = () => ['A3', 'A0B'].find(id => typeof npcPlaced !== 'function' || npcPlaced(id, 'ratchet')) || 'A3';
   switch (key) {
     case 'pg_goal_pack': case 'pg_goal_return': return ratchet();
-    case 'pg_goal_marble': return 'A5';                    // through the hatch (pgHatchPointer marks the hatch itself)
+    // THE MARBLE IS IN THE QUARRY, not under the hatch (owner, 2026-11-20:
+    // "Once I reach the gate and go inside, the arrow keeps directing me back to
+    // the gate entrance instead of through the cave to the actual place of the
+    // marble"). Naming A5 made every cave room route BACK to it. The route
+    // still goes down through the hatch (pgHatchPointer marks it in A2), then
+    // on through the caves to the stone.
+    case 'pg_goal_marble': return 'CV3';
     case 'pg_goal_quarry': case 'pg_goal_gravehorn': return 'CV3';
+    case 'pg_goal_cross': return 'A2';                     // east, to the crest where he meets her
     case 'pg_goal_sage': return 'GA1D';
     case 'pg_goal_chime': return 'A9';
     case 'pg_goal_lion': case 'pg_goal_east': return 'A4';
     case 'pg_goal_up': return 'B1';
+    case 'pg_goal_carrier': return 'B8';
+    case 'pg_goal_undertow': return 'GB1D';
+    case 'pg_goal_brood': return 'B4';
   }
-  return null;
+  return typeof k2GoalRoom === 'function' ? k2GoalRoom(key) : null;
 }
 const PG_ROUTE = { key: '', step: null };
 function pgRouteEdges(id) {
@@ -510,14 +532,8 @@ function drawCleanses(c) {
       const cw = q.w * 0.9;
       drawSoftShaft(c, cx, q.y - 260 * k, cw * 0.35, cx, q.y + q.h, cw * 1.2, '235,250,255', 0, colA * 1.3, false);
     }
-    // three slow white rings, the pulse going OUT and staying soft
-    for (let i = 0; i < 3; i++) {
-      const u = (q.t - i * 0.35) / 1.8;
-      if (u <= 0 || u >= 1) continue;
-      c.strokeStyle = 'rgba(225,245,255,' + ((1 - u) * 0.45 * k).toFixed(3) + ')';
-      c.lineWidth = (1 - u) * 3.5 + 1;
-      c.beginPath(); c.ellipse(cx, cy, R * (0.4 + u * 1.6), R * (0.32 + u * 1.25), 0, 0, 7); c.stroke();
-    }
+    // (no rings round the body: NO LIGHT ROUND A BODY, owner 2026-11-17,
+    // "remove the ring" — the column and the word tell it)
     c.restore();
     // ...and the word, so nobody reads the light as a death
     const la = Math.min(1, q.t / 0.35) * Math.max(0, Math.min(1, (3.4 - q.t) / 0.8));
@@ -808,4 +824,38 @@ TEXT_LAYERS.push({
     ring_dormant: '这道环沉睡着。守着此地的那位还没有唤醒它。', hz_back: '她被抛回了上一次站稳的安全地面。', pg_seam_high: '上面的石架上藏着东西。一跳够不着——等她学会在空中再跳一次时回来。' },
   ru: { pure_first: 'ПЕРВЫЙ ОЧИЩЕННЫЙ', pure_firstd: 'Он вспомнил, кем был — и где спрятал запасное. ЯДРО, и оно твоё навсегда: ещё одна жизнь.', pure_core: 'ЯДРО В ДАР', pure_cored: 'Очищенные поговорили между собой. Один из них сберёг ядро через всё это и хочет отдать его тебе.', pure_scrap: 'ЧТО ОНИ СБЕРЕГЛИ', pure_scrapd: 'Очищенные собрали то, что прятали от песни: %s лома.', pure_next: 'Очищено: %n. На %m они одарят снова.', pure_all: 'Очищено: %n. Каждый из них откликнется на твой зов.', gear_how: 'Применить: %k', gear_how_arm: 'Сменить костюм: %k', gear_how_wall: 'Применить: прыгни к стене и держи к ней; прыгни ещё раз, чтобы оттолкнуться.', bag_gear: 'Клинки, способности и клавиши для них: СНАРЯЖЕНИЕ — %k', gear_seeit: 'Теперь это в СНАРЯЖЕНИИ (%k), вместе с клавишей.', nf_break1: 'NULLFANG — путы рвутся. Теперь он быстрее.', nf_break2: 'NULLFANG — рвутся последние путы. Больше он не отдыхает.', map_locked: 'Карты этих земель пока нет. Съёмку хранит один из агентов Ока — очисти его, и карта твоя.', map_goal: 'Цель', shop_pick: 'ВЫБОР РАТЧЕТА', shop_browse: 'Посмотреть', shop_later: 'Не сейчас', shop_why_pack: 'У тебя ещё нет блока. Вольт-блок нужен первым — на нём работают и лечение, и разряд.', shop_why_cell: 'Вольт осталось мало. Одна ячейка зарядит тебя.', shop_why_buy: 'На твоём месте я бы взял: {item}. Тебе хватает, и это изменит твой бой.', shop_why_save: 'Пока тебе здесь ничего не по карману. Накопи ещё {n} лома на {item}.', shop_why_none: 'У тебя есть всё с моей полки. Сегодня покупать нечего.',
     ring_dormant: 'Кольцо спит. Тот, кто держит это место, ещё не разбудил его.', hz_back: 'Её отбросило на последнюю безопасную опору.', pg_seam_high: 'На полке наверху что-то припрятано. Одним прыжком не достать — вернись, когда научишься взбираться по воздуху.' },
+});
+
+// ---- lives are a sage's (owner, 2026-11-20), in five languages; both worlds ----
+TEXT_LAYERS.push({
+  en: {
+    s_volley: 'One More Horn-Star', s_volleyd: 'GRAVEHORN\'s suit fires one more star.', s_volley_wait: 'For the suit GRAVEHORN leaves.', s_volley_now: 'Your suit fires %n stars now.',
+    pure_first_scrapd: 'It remembers who it was, and where it hid its savings: %s scrap.',
+    sp_cache: 'A QUARRY CACHE', sp_cache_d: 'Someone hid this from the song: %s scrap.',
+    s_core_wait: 'Only after a sage falls. Ratchet has one spare.',
+    sage_life: 'A LIFE, EARNED', sage_lifed: 'A sage has fallen. One more core, for good.' },
+  ar: {
+    s_volley: 'نجمة قرن أخرى', s_volleyd: 'بدلة قَرن القبر تطلق نجمة إضافية.', s_volley_wait: 'للبدلة التي يتركها قَرن القبر.', s_volley_now: 'بدلتكِ تطلق %n نجوم الآن.',
+    pure_first_scrapd: 'تذكّر من كان، وأين خبّأ مدّخراته: %s خردة.',
+    sp_cache: 'مخبأ في المحجر', sp_cache_d: 'أحدهم خبّأ هذا عن الأغنية: %s خردة.',
+    s_core_wait: 'فقط بعد سقوط حكيم. لدى راتشيت واحدة احتياطية.',
+    sage_life: 'حياة مستحقّة', sage_lifed: 'سقط حكيم. نواة أخرى، إلى الأبد.' },
+  tr: {
+    s_volley: 'Bir Boynuz-Yıldız Daha', s_volleyd: 'MEZARBOYNUZ zırhı bir yıldız fazla atar.', s_volley_wait: 'MEZARBOYNUZ\'un bıraktığı zırh için.', s_volley_now: 'Zırhın artık %n yıldız atıyor.',
+    pure_first_scrapd: 'Kim olduğunu ve birikimini nereye sakladığını hatırlıyor: %s hurda.',
+    sp_cache: 'TAŞ OCAĞI ZULASI', sp_cache_d: 'Biri bunu şarkıdan saklamış: %s hurda.',
+    s_core_wait: 'Ancak bir bilge düşünce. Ratchet\'in bir yedeği var.',
+    sage_life: 'KAZANILMIŞ BİR CAN', sage_lifed: 'Bir bilge düştü. Kalıcı bir çekirdek daha.' },
+  zh: {
+    s_volley: '再多一枚角星', s_volleyd: '墓角的战甲多发射一枚星。', s_volley_wait: '给墓角留下的那套战甲用。', s_volley_now: '你的战甲现在发射 %n 枚星。',
+    pure_first_scrapd: '它想起了自己是谁，也想起了积蓄藏在哪里：%s 废料。',
+    sp_cache: '采石场的藏匿处', sp_cache_d: '有人把这些从歌声里藏了起来：%s 废料。',
+    s_core_wait: '要等一位贤者倒下。拉切特只有一枚备用。',
+    sage_life: '赢得的一条命', sage_lifed: '一位贤者倒下了。永久多一枚核心。' },
+  ru: {
+    s_volley: 'Ещё одна рог-звезда', s_volleyd: 'Доспех МОГИЛЬНОГО РОГА выпускает ещё одну звезду.', s_volley_wait: 'Для доспеха, что оставит МОГИЛЬНЫЙ РОГ.', s_volley_now: 'Теперь доспех выпускает звёзд: %n.',
+    pure_first_scrapd: 'Он вспомнил, кем был, и где спрятал запас: %s лома.',
+    sp_cache: 'ТАЙНИК В КАРЬЕРЕ', sp_cache_d: 'Кто-то спрятал это от песни: %s лома.',
+    s_core_wait: 'Только после падения мудреца. У Рэтчета одно запасное.',
+    sage_life: 'ЗАСЛУЖЕННАЯ ЖИЗНЬ', sage_lifed: 'Мудрец пал. Ещё одно ядро — навсегда.' },
 });

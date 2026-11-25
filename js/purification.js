@@ -6,11 +6,11 @@ const PURIFICATION_HOLD = 1.6;
 const PURIFICATION_MOVIES = {glitch:'assets/video/purify_glitch_ritual.mp4'};
 if(!isHero()) Object.assign(PURIFY_VID,PURIFICATION_MOVIES);
 const PURIFICATION_WORDS = {
- en: ['Free the guardian', 'Release, then hold E / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is free.'],
- ar: ['حرّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تحرّر الحارس.'],
- tr: ['Muhafızı kurtar', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız artık özgür.'],
- zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者重获自由。'],
- ru: ['Освободите стража', 'Отпустите, затем удерживайте E / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж свободен.']
+ en: ['Purify the guardian', 'Release, then hold E / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is purified.'],
+ ar: ['طهّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تطهّر الحارس.'],
+ tr: ['Muhafızı arındır', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız arındı.'],
+ zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者已被净化。'],
+ ru: ['Очистите стража', 'Отпустите, затем удерживайте E / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж очищен.']
 };
 function purificationPortrait() { return typeof TOUCH !== 'undefined' && TOUCH.enabled && window.innerHeight > window.innerWidth; }
 function purificationText(i) { return (PURIFICATION_WORDS[LANG] || PURIFICATION_WORDS.en)[i]; }
@@ -25,7 +25,7 @@ function purificationEnsureButton() {
  if (purificationButton) return;
  const b = document.createElement('button'); b.type = 'button'; b.hidden = true;
  b.id = 'purification-hold'; b.style.cssText = 'position:fixed;z-index:10000;border:2px solid #fff3ba;border-radius:16px;background:#172431;color:#fffbe5;font:600 16px sans-serif;touch-action:none;user-select:none;box-shadow:0 0 24px #f9e4a755;';
- b.setAttribute('aria-label', 'Hold to free the guardian');
+ b.setAttribute('aria-label', purificationText(1));
  b.addEventListener('pointerdown', e => { if (!G.purification || G.purification.phase !== 'hold') return; e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} purificationPointer = true; });
  for (const ev of ['pointerup','pointercancel','lostpointercapture']) b.addEventListener(ev, () => { purificationPointer = false; });
  b.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); purificationPointer = true; } });
@@ -42,6 +42,10 @@ function purificationBegin(b) {
  purificationEnsureButton();
  b.hp = 1; b.forkAsked = true; b.vx = b.vy = 0; b.st = 'winded'; b.stagT = 0;
  player.vx = player.vy = 0;
+ // SHE IS NOT STILL REELING (owner, 2026-11-21, the purify scene): her update stops in
+ // this state, so a blow taken just before he fell held her in the hurt picture,
+ // blinking white, for the whole scene. The fight is over; she stands clean.
+ player.hurtPoseT = 0; player.iT = 0; player.flinchT = 0;
  // die() may be called inside the active swing loop. Keep that frame's
  // object alive until it returns; expire it and clear on the next ritual tick.
  if(player.swing) player.swing.t=0;
@@ -60,15 +64,27 @@ function purificationBegin(b) {
  // and turned to him; only then does the hold open.
  const side = Math.sign(player.x + player.w/2 - b.cx()) || -1;
  const Wpx = G.roomDef.w * TILE, clampX = (x) => Math.max(TILE + 6, Math.min(Wpx - TILE - player.w - 6, x));
- let tx = clampX(b.cx() + side * (b.w/2 + 74) - player.w/2);
+ // (a blade's length from his DRAWN head, not his hit-box: the picture of a lion reaches
+ // far past the box, and at the box's edge she stood inside his face)
+ const gap = b.w/2 + 128;
+ let tx = clampX(b.cx() + side * gap - player.w/2);
  // (no room on her side of him — a wall: the other side, then)
- if (Math.abs(tx + player.w/2 - b.cx()) < b.w/2 + 40) tx = clampX(b.cx() - side * (b.w/2 + 74) - player.w/2);
+ if (Math.abs(tx + player.w/2 - b.cx()) < gap - 40) tx = clampX(b.cx() - side * gap - player.w/2);
  G.purification = { b, room:G.roomId, phase:'stage', hold:0, t:0, clock:0, armed:false, committed:false, motes:[], stage:{ tx, T:0, walked:0 } };
  const span=Math.abs(b.cx()-player.x)+b.w+180;
  cam.zoom=Math.min(worldZoom(),760/span);
- cam.x=(b.cx()+player.x+player.w/2)/2-480;cam.y=(b.cy()+player.y)/2-270;
+ cam.x=(b.cx()+player.x+player.w/2)/2-480;cam.y=(b.cy()+player.y)/2-270;purificationCamClamp();
  G.state = 'PURIFY'; purificationPointer = false; releaseInput();
  return true;
+}
+// THE FRAME STAYS IN THE ROOM (owner, 2026-11-21, of the purify scene: "the screen is
+// glitched"). The stage set the camera by hand with no bound, so pulling in on the two
+// of them by a wall showed past the room's edge: the wall's lit end as a bar down the
+// frame and whatever lies beyond. The same bound updateCam keeps (js/engine.js).
+function purificationCamClamp() {
+ const z=cam.zoom||1, ox=480*(1-1/z), oy=270*(1-1/z), rw=G.roomDef.w*TILE, rh=G.roomDef.h*TILE;
+ cam.x = rw<960/z ? (rw-960)/2 : clamp(cam.x,-ox,rw-960+ox);
+ cam.y = rh<540/z ? (rh-540)/2 : clamp(cam.y,-oy,rh-540+oy);
 }
 function purificationRestoreStage() {
  G.impact=null;G.flash=0;G.hitStop=0;cam.shake=0;
@@ -110,7 +126,18 @@ function updatePurification(dt) {
   // HE COMES DOWN and lies still
   const gb=floorUnder(b.cx(),b.y+b.h); let bDown=true;
   if(gb!=null){ if(b.y+b.h<gb-1){ b.y=Math.min(gb-b.h,b.y+760*dt); bDown=b.y+b.h>=gb-1; } else b.y=gb-b.h; }
-  b.vx=b.vy=0; b.st='winded'; b.stagT=Math.max(b.stagT||0,0.6);   // (stagT > 0 is his cowering-low plate: beast.js)
+  b.vx=b.vy=0;
+  // HE TURNS TO HER FIRST (owner, 2026-11-21: "The lion is giving me its back"). She is
+  // walked up on her own side of him, and a blow can leave him facing away: he plays his
+  // filmed turn (beast.js BEAST_TURN, faceVis is its clock) toward her, and only then
+  // goes low. The hold does not open until he faces her.
+  const toward=Math.sign(player.x+player.w/2-b.cx())||b.face||1;
+  if(!s.turned){
+   b.face=toward; const fv=b.faceVis==null?toward:b.faceVis;
+   if(Math.abs(fv-toward)>0.02){ b.st='idle'; b.stagT=0; b.faceVis=fv+clamp(toward-fv,-dt*3.8,dt*3.8); }
+   else { b.faceVis=toward; s.turned=true; }
+  }
+  if(s.turned){ b.face=toward; b.st='winded'; b.stagT=Math.max(b.stagT||0,0.6); }   // (stagT > 0 is his cowering-low plate: beast.js)
   // SHE WALKS to him — falls first, if the last blow was struck in the air
   const gp=floorUnder(player.x+player.w/2,player.y+player.h); let pDown=true;
   if(gp!=null){ if(player.y+player.h<gp-1){ player.y=Math.min(gp-player.h,player.y+760*dt); pDown=player.y+player.h>=gp-1; } else player.y=gp-player.h; }
@@ -122,11 +149,12 @@ function updatePurification(dt) {
    if(typeof heroStepLen==='function') player.stridePh=(player.stridePh||0)+dt*clamp(150/heroStepLen(150),0,11);
   }else if(pDown){
    player.vx=0; player.face=player.faceVis=Math.sign(b.cx()-player.x-player.w/2)||1;
-   if(bDown && s.T>0.45){ p.phase='hold'; p.t=0; p.hold=0; }
+   if(bDown && s.turned && s.T>0.45){ p.phase='hold'; p.t=0; p.hold=0; }
   }
   // the frame follows the two of them in
   const span=Math.abs(b.cx()-player.x)+b.w+180, z=Math.min(worldZoom(),760/span), k=Math.min(1,dt*5);
   cam.zoom+=(z-cam.zoom)*k; cam.x+=((b.cx()+player.x+player.w/2)/2-480-cam.x)*k; cam.y+=((b.cy()+player.y)/2-270-cam.y)*k;
+  purificationCamClamp();
   return;
  }
  if(p.phase==='hold'){
@@ -157,9 +185,10 @@ function drawPurificationWorld(ctx) {
   const xx=x+Math.cos(a)*r,yy=y+Math.sin(a)*r*.7;
   ctx.globalAlpha=k*ratio*.85;ctx.fillStyle='#ffffef';ctx.fillRect(xx,yy,1.8,1.8);
  }
- ctx.globalAlpha=1;ctx.strokeStyle='#fffef2';ctx.shadowColor='#fff8bf';ctx.shadowBlur=infEyeReduced()?0:18*ratio;ctx.lineWidth=4;
- ctx.beginPath();ctx.moveTo(x,h.y+15);ctx.lineTo(x,y-30*ratio);ctx.stroke();
- ctx.strokeStyle='#d0b56f';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-8,h.y+9);ctx.lineTo(x+8,h.y+9);ctx.stroke();
+ // (NO SWORD DRAWN HERE. A white line up from her hip with a gold bar across it stood in
+ // for the blade — a cross over her, owner 2026-11-21: "the sword looks like a cross". Her
+ // own sword is in her own picture: player.chargeT holds her charge pose, blade and all.)
+ ctx.globalAlpha=1;
  if(p.phase==='slash'){
   const t=Math.min(1,p.t/.48),ex=b.cx(),ey=b.cy();ctx.globalAlpha=Math.sin(t*Math.PI);ctx.lineWidth=3+12*Math.sin(t*Math.PI);
   ctx.strokeStyle='#fffef4';ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo((x+ex)/2,y-70,ex+35,ey+45);ctx.stroke();
@@ -175,7 +204,7 @@ function drawPurificationFilm(p) {
  h.x=90;h.y=190-h.h;h.face=h.faceVis=1;b.x=330;b.y=190-b.h;b.purified=t>6.5;
  h.draw(ctx);ctx.save();if(t>6.5)ctx.filter='sepia(1) saturate(1.8) brightness(1.08)';b.draw(ctx);ctx.restore();
  const sx=h.x+h.w/2+9,sy=h.y-26;
- ctx.strokeStyle='#fffceb';ctx.lineWidth=4;ctx.shadowBlur=16;ctx.shadowColor='#fff4c7';ctx.beginPath();ctx.moveTo(sx,h.y+16);ctx.lineTo(sx,sy-30);ctx.stroke();ctx.shadowBlur=0;
+ // (no drawn blade over her: her own charge pose holds the sword)
  if(t<2){for(let i=0;i<48;i++){const a=i*2.4,k=(i/48+t*.6)%1,r=130*(1-k);ctx.fillStyle='#fffdeb';ctx.fillRect(sx+Math.cos(a)*r,sy+Math.sin(a)*r,2,2);}}
  if(t>=2&&t<2.6){ctx.strokeStyle='#fff';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo(230,15,b.x+b.w,b.y+b.h);ctx.stroke();}
  for(let i=0;i<36;i++){
@@ -192,13 +221,14 @@ function drawPurification() {
  if(purificationPortrait()){purificationButtonHide();return;}
  if(p.phase==='film'||p.phase==='return'){drawPurificationFilm(p.phase==='return'?{...p,t:8.5}:p);if(p.phase==='return'){c.fillStyle='rgba(0,0,0,'+Math.min(1,p.t/.5)+')';c.fillRect(0,0,960,540);}return;}
  drawWorldFrame();
- c.fillStyle='rgba(0,0,0,.65)';c.fillRect(0,0,960,44);c.fillRect(0,452,960,88);
+ c.fillStyle='#04060a';c.fillRect(0,0,960,44);c.fillRect(0,452,960,88);   // cinema bars: solid, not a smear over the world
  if(p.phase==='hold'){
   const r=cv.getBoundingClientRect(),btn=purificationButton;
-  btn.hidden=false;btn.style.left=(r.left+r.width*.30)+'px';btn.style.top=(r.top+r.height*.80)+'px';btn.style.width=(r.width*.40)+'px';btn.style.height=Math.max(48,r.height*.12)+'px';
+  btn.hidden=false;btn.style.left=(r.left+r.width*.30)+'px';btn.style.top=(r.top+r.height*.845)+'px';btn.style.width=(r.width*.40)+'px';btn.style.height=Math.max(48,r.height*.12)+'px';
   btn.textContent=purificationText(p.hold?2:0)+' '+Math.round(p.hold/PURIFICATION_HOLD*100)+'%';btn.setAttribute('aria-label',purificationText(1));
-  ftxt(purificationText(1),480,410,15,'#fff3c9');
-  c.fillStyle='#d8c484';c.fillRect(290,425,380*p.hold/PURIFICATION_HOLD,3);
+  // (in the top bar, never over the two of them: the floor sits low in these rooms)
+  ftxt(purificationText(1),480,24,15,'#fff3c9');
+  c.fillStyle='#d8c484';c.fillRect(290,38,380*p.hold/PURIFICATION_HOLD,3);
  }
  if(p.phase==='impact'&&!infEyeReduced()){c.fillStyle='rgba(255,255,244,.75)';c.fillRect(0,0,960,540);}
  if(p.phase==='black'||p.phase==='return'){c.fillStyle='rgba(0,0,0,'+Math.min(1,p.t/.5)+')';c.fillRect(0,0,960,540);}

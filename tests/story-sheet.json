@@ -1,707 +1,809 @@
 {
-  "_": "The machine-readable story sheet. docs/STORY_SHEET.md is its human copy; tests/story-order.cjs reads THIS file and walks the real build against it. One row per story beat, in canon order (docs/STORY_CANON.md). requires = flags that must already be set when the beat becomes possible; sets = flags it sets; optional = a beat the route may legitimately skip (it is still checked whenever it does happen); key = for a standing line, the line the production selector must pick; when = the production predicate that decides the beat can happen inside its room (absent = being able to reach the room is enough); lines = i18n keys (or @dynamic selectors) the speaker says at that moment; introduces = names this beat presents for the first time. pointer = who or what sends the player there — never empty.",
-  "entities": {
-    "Mother": {
-      "re": "\\bMother\\b|MOTHER",
-      "known": []
-    },
-    "Ratchet": {
-      "re": "Ratchet",
-      "known": []
-    },
-    "Servo": {
-      "re": "Servo",
-      "known": [
-        "ratchetSpareGiven",
-        "on_A1|servo"
-      ]
-    },
-    "NULLFANG": {
-      "re": "NULLFANG",
-      "known": [
-        "nfMeet",
-        "chimeRevealed"
-      ]
-    },
-    "CHIME": {
-      "re": "CHIME",
-      "known": [
-        "chimeRevealed",
-        "bossChime"
-      ]
-    },
-    "GRAVEHORN": {
-      "re": "GRAVEHORN",
-      "known": [
-        "ghMet"
-      ]
-    },
-    "the Sage": {
-      "re": "\\bSage\\b",
-      "known": [
-        "crystal",
-        "sageTame_GA1D"
-      ]
-    },
-    "the Data Conduits": {
-      "re": "Data Conduits",
-      "known": [
-        "bossGlitch"
-      ]
-    },
-    "the Eye": {
-      "re": "\\bEye\\b",
-      "known": [
-        "bossLens",
-        "ghMet"
-      ]
-    },
-    "Mono": {
-      "re": "\\bMono\\b",
-      "known": [
-        "on_B3B|mono"
-      ]
-    },
-    "Kerf": {
-      "re": "\\bKerf\\b",
-      "known": [
-        "vaultOpen"
-      ]
-    },
-    "the Prowler": {
-      "re": "Prowler",
-      "known": [
-        "bossPrism"
-      ]
-    },
-    "GLACIERE": {
-      "re": "GLACIERE",
-      "known": [
-        "bossZero"
-      ]
-    },
-    "TALONHOST": {
-      "re": "TALONHOST",
-      "known": [
-        "bossBrood"
-      ]
-    }
+ "_": "The machine-readable story sheet. docs/STORY_SHEET.md is its human copy; tests/story-order.cjs reads THIS file and walks the real build against it. One row per story beat, in canon order (docs/STORY_CANON.md). requires = flags that must already be set when the beat becomes possible; sets = flags it sets; optional = a beat the route may legitimately skip (it is still checked whenever it does happen); key = for a standing line, the line the production selector must pick; when = the production predicate that decides the beat can happen inside its room (absent = being able to reach the room is enough); lines = i18n keys (or @dynamic selectors) the speaker says at that moment; introduces = names this beat presents for the first time. pointer = who or what sends the player there — never empty.",
+ "entities": {
+  "Mother": {
+   "re": "\\bMother\\b|MOTHER",
+   "known": []
   },
-  "beats": [
-    {
-      "id": "wake",
-      "room": "W1",
-      "requires": [],
-      "sets": [
-        "woke"
-      ],
-      "speaker": "none (tutorial chip)",
-      "knows": "Nothing. She wakes alone in a service cradle; sleep is why she missed the broadcast.",
-      "pointer": "Tutorial chip: Move — walk right toward the light (tut_move)",
-      "lines": []
-    },
-    {
-      "id": "gates",
-      "room": "W2",
-      "requires": [
-        "woke"
-      ],
-      "sets": [],
-      "speaker": "none (tutorial chip)",
-      "knows": "The city is standing and silent.",
-      "pointer": "Tutorial chip at the road's end: the gates — stand beneath them and press UP",
-      "lines": []
-    },
-    {
-      "id": "ratchet_note",
-      "room": "A0B",
-      "requires": [
-        "woke"
-      ],
-      "sets": [],
-      "speaker": "Ratchet (his letter)",
-      "knows": "Mother's song is infected; his marble slowed the virus; he removed his own battery; it is in the drawer.",
-      "pointer": "Tutorial chips past the gates: Ratchet's booth — the lit door ahead (op_booth); inside, Read the letter (op_note)",
-      "lines": [
-        "op_letter1",
-        "op_letter2",
-        "op_letter3"
-      ]
-    },
-    {
-      "id": "ratchet_wake",
-      "room": "A0B",
-      "requires": [
-        "woke"
-      ],
-      "sets": [
-        "on_A0B|ratchet",
-        "ratchetRepaired",
-        "ratchetSpareGiven"
-      ],
-      "speaker": "Ratchet",
-      "knows": "Mother's song was infected; his marble slowed it and could not stop it; he pulled his own battery; she was asleep in a recharge cradle, not immune; a big raw marble deposit lies under the meadow and he can forge a white sword that cuts the virus out; the spare cell is for Old Servo; the pod saves and recharges; the way down is the loose floor at the hub's west end (said when she asks again).",
-      "pointer": "His letter: the battery is in the drawer beside this chair (op_letter3); tutorial chips: Open the drawer, Restore his battery (op_drawer, op_repair)",
-      "lines": [
-        "op_r1",
-        "op_r2",
-        "op_r3",
-        "op_r4",
-        "op_r5",
-        "op_spared",
-        "op_r_pod",
-        "q_where_ratchet_forge"
-      ],
-      "introduces": [
-        "Servo"
-      ]
-    },
-    {
-      "id": "volt_pack",
-      "room": "A0B",
-      "requires": [
-        "on_A0B|ratchet"
-      ],
-      "sets": [
-        "heal"
-      ],
-      "when": "ratchetAwake",
-      "speaker": "Ratchet",
-      "knows": "The ring of charge cannot be spent yet; the Volt Pack wires healing and the Volt Burst, permanently; the burst is what cracks raw marble; it costs 12 scrap, which he pays her for the repair; scrap is what broken machines leave behind.",
-      "pointer": "After the pod: tutorial chip The Volt Pack — press E at Ratchet (op_pack); the counter opens on 'Volt Pack · permanent', marked BUY THIS FIRST",
-      "lines": [
-        "op_p1",
-        "op_p2",
-        "op_p3",
-        "op_p4",
-        "op_scrapd",
-        "i_packd"
-      ]
-    },
-    {
-      "id": "servo",
-      "room": "A1",
-      "requires": [
-        "ratchetSpareGiven"
-      ],
-      "sets": [
-        "on_A1|servo"
-      ],
-      "when": "spareCell",
-      "speaker": "Old Servo",
-      "knows": "He is Old Servo, keeper of the winding house; Ratchet's marble is under them, through the hub's loose floor; his gantry coil shook loose in the gantries above (60 scrap and 10 IQ to bring it back).",
-      "pointer": "Ratchet: 'this spare Power Cell is not for you. It's for Old Servo, out in the meadow' (op_r5); the card Spare Power Cell (op_spared); over him: 'Switched off · needs a Power Cell'",
-      "lines": [
-        "op_sv1",
-        "op_sv2",
-        "op_sv3"
-      ]
-    },
-    {
-      "id": "meeting",
-      "room": "A2",
-      "requires": [],
-      "sets": [
-        "nfMeet"
-      ],
-      "speaker": "NULLFANG (never speaks)",
-      "knows": "—",
-      "pointer": "The road itself: the hub is the only way east, and the guardian drops onto its crest unasked",
-      "lines": []
-    },
-    {
-      "id": "dent_before_forge",
-      "room": "A0B",
-      "requires": [
-        "nfMeet",
-        "on_A0B|ratchet"
-      ],
-      "sets": [],
-      "when": "ratchetSays",
-      "speaker": "Ratchet",
-      "knows": "The lion threw her; claws will not answer it; the marble comes first.",
-      "pointer": "Returning to the workshop after the corridor",
-      "lines": [
-        "@ratchetStanding"
-      ],
-      "key": "sl_ratchet_dent",
-      "optional": true
-    },
-    {
-      "id": "way_down",
-      "room": "A5",
-      "requires": [],
-      "sets": [],
-      "speaker": "the terminal under the hub",
-      "knows": "A sub-hatch was sealed after an anomalous signal.",
-      "pointer": "Ratchet: the loose floor at the hub's west end, strike straight down (q_where_ratchet_forge); the break_down hint over the loose rock",
-      "lines": [
-        "q_where_ratchet_forge"
-      ]
-    },
-    {
-      "id": "beacon",
-      "room": "CV2",
-      "requires": [],
-      "sets": [
-        "beacon"
-      ],
-      "speaker": "the Deaf System's log",
-      "knows": "The deaf survived the song underground and quarried this seam.",
-      "pointer": "The sound through the rock since the meadow, and the rubble that answers a strike",
-      "lines": []
-    },
-    {
-      "id": "gravehorn",
-      "room": "CV3",
-      "requires": [],
-      "sets": [
-        "ghMet",
-        "bossHorn"
-      ],
-      "speaker": "GRAVEHORN, First Soldier of the Eye",
-      "knows": "He is the Eye's own heavy trooper, posted on the raw marble: it stays buried. Beaten, he backs into the rock — it is not over, and the Eye sees her.",
-      "pointer": "The quarry road itself: the chalk arrows end in his cavern and he steps out of the dark at her; once he has spoken, the objective names him (op_o_gravehorn)",
-      "lines": [
-        "grv_intro",
-        "grv_phase2",
-        "grv_down",
-        "op_o_gravehorn"
-      ],
-      "introduces": [
-        "GRAVEHORN",
-        "the Eye"
-      ]
-    },
-    {
-      "id": "quarry",
-      "room": "CV3",
-      "requires": [
-        "heal",
-        "bossHorn"
-      ],
-      "sets": [
-        "pl_cshard"
-      ],
-      "when": "burst",
-      "speaker": "none (pl_hint)",
-      "knows": "Claws glance off raw marble; the charged burst frees it.",
-      "pointer": "Ratchet: raw marble in the caves beneath the meadow (q_ask_ratchet_forge); pl_hint at the stone",
-      "lines": [
-        "pl_hint"
-      ]
-    },
-    {
-      "id": "forge",
-      "room": "A0B",
-      "requires": [
-        "pl_cshard",
-        "on_A0B|ratchet"
-      ],
-      "sets": [
-        "crystal",
-        "ratchetCamp"
-      ],
-      "when": "forgeReady",
-      "speaker": "Ratchet",
-      "knows": "He shapes the marble into the PURIFIER, then moves his tools to the camp by the lion's enclosure.",
-      "pointer": "Ratchet's own errand: bring a piece back to my workshop (q_ask_ratchet_forge)",
-      "lines": [
-        "q_thanks_ratchet_forge",
-        "sl_ratchet_moving",
-        "i_crystald"
-      ]
-    },
-    {
-      "id": "forged_line",
-      "room": "A3",
-      "requires": [
-        "crystal",
-        "ratchetCamp"
-      ],
-      "sets": [],
-      "when": "ratchetSays",
-      "speaker": "Ratchet (at the camp)",
-      "knows": "The first Sage is behind the maintenance passage beside the quarry; clear their binding before the guardian.",
-      "pointer": "Ratchet himself, at the forge: 'Find me there' (sl_ratchet_moving)",
-      "lines": [
-        "@ratchetStanding"
-      ],
-      "introduces": [
-        "the Sage"
-      ],
-      "key": "sl_ratchet_forged"
-    },
-    {
-      "id": "alpha",
-      "room": "A10",
-      "requires": [
-        "crystal"
-      ],
-      "sets": [
-        "alpha",
-        "bossAlpha"
-      ],
-      "speaker": "THE ALPHA (no words)",
-      "knows": "Optional: the pack follows its guardian; the white blade releases it.",
-      "pointer": "Ratchet's optional errand at the forge (q_ask_alpha_pack); the den's marked entrance in the hub (alpha_den)",
-      "lines": []
-    },
-    {
-      "id": "first_sage",
-      "room": "GA1D",
-      "requires": [
-        "crystal"
-      ],
-      "sets": [
-        "sageTame_GA1D",
-        "chimeRevealed"
-      ],
-      "speaker": "The Meadow Sage",
-      "knows": "Its calling betrayed hidden survivors; NULLFANG resists; CHIME rewrites the order — or, in whatever order she arrives, that the bell is already silent or the lion already free.",
-      "pointer": "Ratchet: 'The maintenance passage beside the marble quarry leads to the first Sage' (sl_ratchet_forged); gh_sage at the lair door",
-      "lines": [
-        "@sageReveal"
-      ],
-      "introduces": [
-        "NULLFANG",
-        "CHIME"
-      ]
-    },
-    {
-      "id": "sage_line",
-      "room": "A3",
-      "requires": [
-        "sageTame_GA1D",
-        "ratchetCamp"
-      ],
-      "sets": [],
-      "when": "ratchetSays",
-      "speaker": "Ratchet (at the camp)",
-      "knows": "Word that the sage stood up clean.",
-      "pointer": "The camp is on the road back from the quarry to the lair",
-      "lines": [
-        "@ratchetStanding"
-      ],
-      "key": "sl_ratchet_sage",
-      "optional": true
-    },
-    {
-      "id": "chime",
-      "room": "A9",
-      "requires": [
-        "sageTame_GA1D"
-      ],
-      "sets": [
-        "bossChime"
-      ],
-      "speaker": "CHIME (no words)",
-      "knows": "It is an instrument with nobody in it; while it rings, NULLFANG's binding is rewritten.",
-      "pointer": "The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door; the climb itself is warded shut until the Sage is free (gate_chime_ward, ward_chime_fall)",
-      "lines": []
-    },
-    {
-      "id": "break",
-      "room": "A2",
-      "alt": "A3",
-      "requires": [
-        "sageTame_GA1D",
-        "nfMeet"
-      ],
-      "sets": [
-        "nfBreak"
-      ],
-      "when": "breakWindow",
-      "speaker": "NULLFANG (never speaks)",
-      "knows": "He resists; the bell writes the order back.",
-      "pointer": "The Meadow Sage's route: the climb rises out of the hub's west end, where he comes out; the camp's east end for a player who walks on",
-      "lines": [
-        "nf_break1",
-        "nf_break2"
-      ],
-      "optional": true
-    },
-    {
-      "id": "rematch_line",
-      "room": "A3",
-      "requires": [
-        "sageTame_GA1D",
-        "bossChime",
-        "nfMeet",
-        "ratchetCamp"
-      ],
-      "sets": [],
-      "when": "ratchetSays",
-      "speaker": "Ratchet (at the camp)",
-      "knows": "The lion is winnable now: go and put a dent in it.",
-      "pointer": "The camp is the last room before the lair",
-      "lines": [
-        "@ratchetStanding"
-      ],
-      "key": "sl_ratchet_rematch"
-    },
-    {
-      "id": "nullfang",
-      "room": "A4",
-      "requires": [
-        "crystal",
-        "sageTame_GA1D",
-        "bossChime",
-        "nfMeet"
-      ],
-      "sets": [
-        "bossGlitch"
-      ],
-      "speaker": "NULLFANG (never speaks)",
-      "knows": "—",
-      "pointer": "The Meadow Sage: 'return to his enclosure' (sg_rev4 / sg_rev_go); Ratchet at the camp (sl_ratchet_rematch)",
-      "lines": [
-        "b_glitch",
-        "pure_beast"
-      ]
-    },
-    {
-      "id": "conduits_line",
-      "room": "A3",
-      "requires": [
-        "bossGlitch",
-        "ratchetCamp"
-      ],
-      "sets": [],
-      "when": "ratchetSays",
-      "speaker": "Ratchet (at the camp)",
-      "knows": "The hatch above the camp unjammed when the lion was freed; the climb leads to the Data Conduits.",
-      "pointer": "conduits_open, said the moment NULLFANG is free",
-      "lines": [
-        "@ratchetStanding",
-        "conduits_open"
-      ],
-      "introduces": [
-        "the Data Conduits"
-      ],
-      "key": "sl_ratchet_conduits"
-    },
-    {
-      "id": "conduits",
-      "room": "B1",
-      "requires": [
-        "bossGlitch",
-        "crystal"
-      ],
-      "sets": [],
-      "speaker": "none",
-      "knows": "The second kingdom.",
-      "pointer": "Ratchet: 'That climb goes up into the Data Conduits' (sl_ratchet_conduits); conduits_open; gate_conduits whenever the hatch refuses",
-      "lines": [
-        "gate_conduits"
-      ]
-    },
-    {
-      "id": "mono",
-      "room": "B3B",
-      "requires": [
-        "bossGlitch"
-      ],
-      "sets": [
-        "on_B3B|mono"
-      ],
-      "speaker": "Mono",
-      "knows": "The order comes up from beneath the Archives in Mother's voice — her voice, not her command.",
-      "pointer": "The Oracle's parlour door, the only door on the conduit corridor (B3)",
-      "lines": [
-        "d_mono"
-      ],
-      "introduces": [
-        "Mono"
-      ]
-    },
-    {
-      "id": "talonhost",
-      "room": "B4",
-      "requires": [
-        "bossGlitch"
-      ],
-      "sets": [
-        "bossBrood"
-      ],
-      "speaker": "TALONHOST (no words)",
-      "knows": "—",
-      "pointer": "The conduit corridor runs east from the Oracle straight into her hall",
-      "lines": [
-        "b_brood"
-      ],
-      "introduces": [
-        "TALONHOST"
-      ]
-    },
-    {
-      "id": "prowler",
-      "room": "X1",
-      "requires": [
-        "bossGlitch",
-        "bossBrood",
-        "crystal"
-      ],
-      "sets": [
-        "bossPrism"
-      ],
-      "speaker": "the Prism Prowler (no words)",
-      "knows": "It was never infected; it guards the seam's second blade and stands down.",
-      "pointer": "Mono: 'Cracked walls hide old maintenance shafts. Strike them' — B5's breakable ceiling",
-      "lines": [
-        "pure_prism"
-      ],
-      "introduces": [
-        "the Prowler"
-      ],
-      "relics": [
-        "sigil1"
-      ]
-    },
-    {
-      "id": "sigil_foundry",
-      "room": "C1",
-      "requires": [
-        "bossGlitch",
-        "crystal"
-      ],
-      "sets": [],
-      "relics": [
-        "sigil3"
-      ],
-      "speaker": "none (a hidden seal)",
-      "knows": "The last seal of the old vault lies on a ledge in the Foundry tower.",
-      "pointer": "Patch-7 in the pour gallery: 'The walls hum near the old vault...'; the sealed vault itself, refused without it: 'The third seal was carried down into the Foundry tower.' (vault_where3)",
-      "lines": [
-        "rl_sigil3d"
-      ]
-    },
-    {
-      "id": "mind_nodes",
-      "room": "E1",
-      "requires": [
-        "bossZero",
-        "bossPrism"
-      ],
-      "sets": [],
-      "relics": [
-        "sigil2"
-      ],
-      "when": "allNodeRooms",
-      "speaker": "none (the last Mind Node)",
-      "knows": "Out-thinking every Mind Node earns the second seal.",
-      "pointer": "Every node is marked where it stands (rd_hint); Vault Sigil II says what it was for (rl_sigil2d)",
-      "lines": []
-    },
-    {
-      "id": "vault",
-      "room": "B5",
-      "requires": [
-        "bossPrism"
-      ],
-      "sets": [
-        "vaultOpen"
-      ],
-      "when": "vault",
-      "speaker": "none (the sealed vault)",
-      "knows": "Three sigils turn the vault; its side passage opens with it.",
-      "pointer": "Vault Sigil I: 'One of three seals of an old vault in the Conduits' (rl_sigil1d); vault_locked counts what is missing; gate_vault_side at the east side",
-      "lines": [
-        "vault_open",
-        "gate_vault_side",
-        "vault_where3"
-      ]
-    },
-    {
-      "id": "kerf",
-      "room": "V1B",
-      "requires": [
-        "vaultOpen"
-      ],
-      "sets": [],
-      "speaker": "Kerf",
-      "knows": "Her harvesters' marble is the stone Ratchet wears; she shaped the second edge; the Prowler keeps it, clean.",
-      "pointer": "Vault Sigil I: 'One of three seals of an old vault in the Conduits' (rl_sigil1d); the vault counts its sigils (vault_locked)",
-      "lines": [
-        "d_kerf"
-      ],
-      "introduces": [
-        "Kerf"
-      ]
-    },
-    {
-      "id": "furnace",
-      "room": "C3",
-      "requires": [
-        "bossGlitch"
-      ],
-      "sets": [
-        "bossAtlas"
-      ],
-      "speaker": "FURNACE CHOIR (no words)",
-      "knows": "—",
-      "pointer": "The Conduits' floor drops into the Foundry tower (B3 → C1)",
-      "lines": [
-        "b_atlas"
-      ]
-    },
-    {
-      "id": "archives_sage",
-      "room": "D1B",
-      "requires": [
-        "bossGlitch"
-      ],
-      "sets": [],
-      "speaker": "The Nine-Lives Sage",
-      "knows": "GLACIERE sleeps beyond the ice and guards the Kernel Key.",
-      "pointer": "The Foundry's floor opens onto the Archives (C2 → D1); the carrel is the only warm door",
-      "lines": [
-        "d_sage"
-      ],
-      "introduces": [
-        "GLACIERE"
-      ]
-    },
-    {
-      "id": "glaciere",
-      "room": "D3",
-      "requires": [
-        "bossGlitch"
-      ],
-      "sets": [
-        "bossZero"
-      ],
-      "speaker": "GLACIERE (no words)",
-      "knows": "—",
-      "pointer": "The Nine-Lives Sage: 'Beyond the ice sleeps GLACIERE' (d_sage)",
-      "lines": [
-        "b_zero"
-      ],
-      "introduces": [
-        "GLACIERE"
-      ]
-    },
-    {
-      "id": "mother",
-      "room": "E3",
-      "requires": [
-        "bossZero"
-      ],
-      "sets": [
-        "bossMother"
-      ],
-      "speaker": "MOTHER-V (her song)",
-      "knows": "She is the hijacked singer; the command burns out and she lives; the Eye that stole her voice remains, exposed.",
-      "pointer": "Mono: the order comes up beneath the Archives in Mother's voice (d_mono); GLACIERE's floor gives way to the Nest (D3 → E1)",
-      "lines": [
-        "b_mother",
-        "pure_mother",
-        "win2",
-        "win2b"
-      ],
-      "introduces": [
-        "the Eye"
-      ]
-    }
-  ]
+  "Ratchet": {
+   "re": "Ratchet",
+   "known": []
+  },
+  "Servo": {
+   "re": "Servo",
+   "known": [
+    "ratchetSpareGiven",
+    "on_A1|servo"
+   ]
+  },
+  "NULLFANG": {
+   "re": "NULLFANG",
+   "known": [
+    "nfMeet",
+    "chimeRevealed"
+   ]
+  },
+  "CHIME": {
+   "re": "CHIME",
+   "known": [
+    "chimeRevealed",
+    "bossChime"
+   ]
+  },
+  "GRAVEHORN": {
+   "re": "GRAVEHORN",
+   "known": [
+    "ghMet"
+   ]
+  },
+  "the Sage": {
+   "re": "\\bSage\\b",
+   "known": [
+    "crystal",
+    "sageTame_GA1D"
+   ]
+  },
+  "the Data Conduits": {
+   "re": "Data Conduits",
+   "known": [
+    "bossGlitch"
+   ]
+  },
+  "the Eye": {
+   "re": "\\bEye\\b",
+   "known": [
+    "bossLens",
+    "ghMet"
+   ]
+  },
+  "Mono": {
+   "re": "\\bMono\\b",
+   "known": [
+    "on_B3B|mono"
+   ]
+  },
+  "Kerf": {
+   "re": "\\bKerf\\b",
+   "known": [
+    "vaultOpen"
+   ]
+  },
+  "the Prowler": {
+   "re": "Prowler",
+   "known": [
+    "bossPrism"
+   ]
+  },
+  "GLACIERE": {
+   "re": "GLACIERE",
+   "known": [
+    "bossZero"
+   ]
+  },
+  "TALONHOST": {
+   "re": "TALONHOST",
+   "known": [
+    "bossBrood"
+   ]
+  }
+ },
+ "beats": [
+  {
+   "id": "wake",
+   "room": "W1",
+   "requires": [],
+   "sets": [
+    "woke"
+   ],
+   "speaker": "none (tutorial chip)",
+   "knows": "Nothing. She wakes alone in a service cradle; sleep is why she missed the broadcast.",
+   "pointer": "Tutorial chip: Move — walk right toward the light (tut_move)",
+   "lines": []
+  },
+  {
+   "id": "gates",
+   "room": "W2",
+   "requires": [
+    "woke"
+   ],
+   "sets": [],
+   "speaker": "none (tutorial chip)",
+   "knows": "The city is standing and silent.",
+   "pointer": "Tutorial chip at the road's end: the gates — stand beneath them and press UP",
+   "lines": []
+  },
+  {
+   "id": "ratchet_note",
+   "room": "A0B",
+   "requires": [
+    "woke"
+   ],
+   "sets": [],
+   "speaker": "Ratchet (his letter)",
+   "knows": "Mother's song is infected; his marble slowed the virus; he removed his own battery; it is in the drawer.",
+   "pointer": "Tutorial chips past the gates: Ratchet's booth — the lit door ahead (op_booth); inside, Read the letter (op_note)",
+   "lines": [
+    "op_letter1",
+    "op_letter2",
+    "op_letter3"
+   ]
+  },
+  {
+   "id": "ratchet_wake",
+   "room": "A0B",
+   "requires": [
+    "woke"
+   ],
+   "sets": [
+    "on_A0B|ratchet",
+    "ratchetRepaired",
+    "ratchetSpareGiven"
+   ],
+   "speaker": "Ratchet",
+   "knows": "Mother's song was infected; his marble slowed it and could not stop it; he pulled his own battery; she was asleep in a recharge cradle, not immune; a big raw marble deposit lies under the meadow and he can forge a white sword that cuts the virus out; the spare cell is for Old Servo; the pod saves and recharges; the way down is the loose floor at the hub's west end (said when she asks again).",
+   "pointer": "His letter: the battery is in the drawer beside this chair (op_letter3); tutorial chips: Open the drawer, Restore his battery (op_drawer, op_repair)",
+   "lines": [
+    "op_r1",
+    "op_r2",
+    "op_r3",
+    "op_r4",
+    "op_r5",
+    "op_spared",
+    "op_r_pod",
+    "q_where_ratchet_forge"
+   ],
+   "introduces": [
+    "Servo"
+   ]
+  },
+  {
+   "id": "volt_pack",
+   "room": "A0B",
+   "requires": [
+    "on_A0B|ratchet"
+   ],
+   "sets": [
+    "heal"
+   ],
+   "when": "ratchetAwake",
+   "speaker": "Ratchet",
+   "knows": "The ring of charge cannot be spent yet; the Volt Pack wires healing and the Volt Burst, permanently; the burst is what cracks raw marble; it costs 12 scrap, which he pays her for the repair; scrap is what broken machines leave behind.",
+   "pointer": "After the pod: tutorial chip The Volt Pack — press E at Ratchet (op_pack); the counter opens on 'Volt Pack · permanent', marked BUY THIS FIRST",
+   "lines": [
+    "op_p1",
+    "op_p2",
+    "op_p3",
+    "op_p4",
+    "op_scrapd",
+    "i_packd"
+   ]
+  },
+  {
+   "id": "servo",
+   "room": "A1",
+   "requires": [
+    "ratchetSpareGiven"
+   ],
+   "sets": [
+    "on_A1|servo"
+   ],
+   "when": "spareCell",
+   "speaker": "Old Servo",
+   "knows": "He is Old Servo, keeper of the winding house; Ratchet's marble is under them, through the hub's loose floor; his gantry coil shook loose in the gantries above (60 scrap and 10 IQ to bring it back).",
+   "pointer": "Ratchet: 'this spare Power Cell is not for you. It's for Old Servo, out in the meadow' (op_r5); the card Spare Power Cell (op_spared); over him: 'Switched off · needs a Power Cell'",
+   "lines": [
+    "op_sv1",
+    "op_sv2",
+    "op_sv3"
+   ]
+  },
+  {
+   "id": "meeting",
+   "room": "A2",
+   "requires": [],
+   "sets": [
+    "nfMeet"
+   ],
+   "speaker": "NULLFANG (never speaks)",
+   "knows": "—",
+   "pointer": "The road itself: the hub is the only way east, and the guardian drops onto its crest unasked",
+   "lines": []
+  },
+  {
+   "id": "dent_before_forge",
+   "room": "A0B",
+   "requires": [
+    "nfMeet",
+    "on_A0B|ratchet"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet",
+   "knows": "The lion threw her; claws will not answer it; the marble comes first.",
+   "pointer": "Returning to the workshop after the corridor",
+   "lines": [
+    "@ratchetStanding"
+   ],
+   "key": "sl_ratchet_dent",
+   "optional": true
+  },
+  {
+   "id": "way_down",
+   "room": "A5",
+   "requires": [],
+   "sets": [],
+   "speaker": "the terminal under the hub",
+   "knows": "A sub-hatch was sealed after an anomalous signal.",
+   "pointer": "Ratchet: the loose floor at the hub's west end, strike straight down (q_where_ratchet_forge); the break_down hint over the loose rock",
+   "lines": [
+    "q_where_ratchet_forge"
+   ]
+  },
+  {
+   "id": "beacon",
+   "room": "CV2",
+   "requires": [],
+   "sets": [
+    "beacon"
+   ],
+   "speaker": "the Deaf System's log",
+   "knows": "The deaf survived the song underground and quarried this seam.",
+   "pointer": "The sound through the rock since the meadow, and the rubble that answers a strike",
+   "lines": []
+  },
+  {
+   "id": "gravehorn",
+   "room": "CV3",
+   "requires": [],
+   "sets": [
+    "ghMet",
+    "bossHorn"
+   ],
+   "speaker": "GRAVEHORN, First Soldier of the Eye",
+   "knows": "He is the Eye's own heavy trooper, posted on the raw marble: it stays buried. Beaten, he backs into the rock — it is not over, and the Eye sees her.",
+   "pointer": "The quarry road itself: the chalk arrows end in his cavern and he steps out of the dark at her; once he has spoken, the objective names him (op_o_gravehorn)",
+   "lines": [
+    "grv_intro",
+    "grv_phase2",
+    "grv_down",
+    "op_o_gravehorn"
+   ],
+   "introduces": [
+    "GRAVEHORN",
+    "the Eye"
+   ]
+  },
+  {
+   "id": "quarry",
+   "room": "CV3",
+   "requires": [
+    "heal",
+    "bossHorn"
+   ],
+   "sets": [
+    "pl_cshard"
+   ],
+   "when": "burst",
+   "speaker": "none (pl_hint)",
+   "knows": "Claws glance off raw marble; the charged burst frees it.",
+   "pointer": "Ratchet: raw marble in the caves beneath the meadow (q_ask_ratchet_forge); pl_hint at the stone",
+   "lines": [
+    "pl_hint"
+   ]
+  },
+  {
+   "id": "forge",
+   "room": "A0B",
+   "requires": [
+    "pl_cshard",
+    "on_A0B|ratchet"
+   ],
+   "sets": [
+    "crystal",
+    "ratchetCamp"
+   ],
+   "when": "forgeReady",
+   "speaker": "Ratchet",
+   "knows": "He shapes the marble into the PURIFIER, then moves his tools to the camp by the lion's enclosure.",
+   "pointer": "Ratchet's own errand: bring a piece back to my workshop (q_ask_ratchet_forge)",
+   "lines": [
+    "q_thanks_ratchet_forge",
+    "sl_ratchet_moving",
+    "i_crystald"
+   ]
+  },
+  {
+   "id": "forged_line",
+   "room": "A3",
+   "requires": [
+    "crystal",
+    "ratchetCamp"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet (at the camp)",
+   "knows": "The first Sage is behind the maintenance passage beside the quarry; clear their binding before the guardian.",
+   "pointer": "Ratchet himself, at the forge: 'Find me there' (sl_ratchet_moving)",
+   "lines": [
+    "@ratchetStanding"
+   ],
+   "introduces": [
+    "the Sage"
+   ],
+   "key": "sl_ratchet_forged"
+  },
+  {
+   "id": "alpha",
+   "room": "A10",
+   "requires": [
+    "crystal"
+   ],
+   "sets": [
+    "alpha",
+    "bossAlpha"
+   ],
+   "speaker": "THE ALPHA (no words)",
+   "knows": "Optional: the pack follows its guardian; the white blade releases it.",
+   "pointer": "Ratchet's optional errand at the forge (q_ask_alpha_pack); the den's marked entrance in the hub (alpha_den)",
+   "lines": []
+  },
+  {
+   "id": "first_sage",
+   "room": "GA1D",
+   "requires": [
+    "crystal"
+   ],
+   "sets": [
+    "sageTame_GA1D",
+    "chimeRevealed"
+   ],
+   "speaker": "The Meadow Sage",
+   "knows": "Its calling betrayed hidden survivors; NULLFANG resists; CHIME rewrites the order — or, in whatever order she arrives, that the bell is already silent or the lion already free.",
+   "pointer": "Ratchet: 'The maintenance passage beside the marble quarry leads to the first Sage' (sl_ratchet_forged); gh_sage at the lair door",
+   "lines": [
+    "@sageReveal"
+   ],
+   "introduces": [
+    "NULLFANG",
+    "CHIME"
+   ]
+  },
+  {
+   "id": "sage_line",
+   "room": "A3",
+   "requires": [
+    "sageTame_GA1D",
+    "ratchetCamp"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet (at the camp)",
+   "knows": "Word that the sage stood up clean.",
+   "pointer": "The camp is on the road back from the quarry to the lair",
+   "lines": [
+    "@ratchetStanding"
+   ],
+   "key": "sl_ratchet_sage",
+   "optional": true
+  },
+  {
+   "id": "chime",
+   "room": "A9",
+   "requires": [
+    "sageTame_GA1D"
+   ],
+   "sets": [
+    "bossChime"
+   ],
+   "speaker": "CHIME (no words)",
+   "knows": "It is an instrument with nobody in it; while it rings, NULLFANG's binding is rewritten.",
+   "pointer": "The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door; the climb itself is warded shut until the Sage is free (gate_chime_ward, ward_chime_fall)",
+   "lines": []
+  },
+  {
+   "id": "break",
+   "room": "A2",
+   "alt": "A3",
+   "requires": [
+    "sageTame_GA1D",
+    "nfMeet"
+   ],
+   "sets": [
+    "nfBreak"
+   ],
+   "when": "breakWindow",
+   "speaker": "NULLFANG (never speaks)",
+   "knows": "He resists; the bell writes the order back.",
+   "pointer": "The Meadow Sage's route: the climb rises out of the hub's west end, where he comes out; the camp's east end for a player who walks on",
+   "lines": [
+    "nf_break1",
+    "nf_break2"
+   ],
+   "optional": true
+  },
+  {
+   "id": "rematch_line",
+   "room": "A3",
+   "requires": [
+    "sageTame_GA1D",
+    "bossChime",
+    "nfMeet",
+    "ratchetCamp"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet (at the camp)",
+   "knows": "The lion is winnable now: go and put a dent in it.",
+   "pointer": "The camp is the last room before the lair",
+   "lines": [
+    "@ratchetStanding"
+   ],
+   "key": "sl_ratchet_rematch"
+  },
+  {
+   "id": "nullfang",
+   "room": "A4",
+   "requires": [
+    "crystal",
+    "sageTame_GA1D",
+    "bossChime",
+    "nfMeet"
+   ],
+   "sets": [
+    "bossGlitch"
+   ],
+   "speaker": "NULLFANG (never speaks)",
+   "knows": "—",
+   "pointer": "The Meadow Sage: 'return to his enclosure' (sg_rev4 / sg_rev_go); Ratchet at the camp (sl_ratchet_rematch)",
+   "lines": [
+    "b_glitch",
+    "pure_beast"
+   ]
+  },
+  {
+   "id": "conduits_line",
+   "room": "A3",
+   "requires": [
+    "bossGlitch",
+    "ratchetCamp"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet (at the camp)",
+   "knows": "The hatch above the camp unjammed when the lion was freed; the climb leads to the Data Conduits.",
+   "pointer": "conduits_open, said the moment NULLFANG is free",
+   "lines": [
+    "@ratchetStanding",
+    "conduits_open"
+   ],
+   "introduces": [
+    "the Data Conduits"
+   ],
+   "key": "sl_ratchet_conduits"
+  },
+  {
+   "id": "conduits",
+   "room": "B1",
+   "requires": [
+    "bossGlitch",
+    "crystal"
+   ],
+   "sets": [],
+   "speaker": "none",
+   "knows": "The second kingdom.",
+   "pointer": "Ratchet: 'That climb goes up into the Data Conduits' (sl_ratchet_conduits); conduits_open; gate_conduits whenever the hatch refuses",
+   "lines": [
+    "gate_conduits"
+   ]
+  },
+  {
+   "id": "mono",
+   "room": "B3B",
+   "requires": [
+    "bossGlitch"
+   ],
+   "sets": [
+    "on_B3B|mono"
+   ],
+   "speaker": "Mono",
+   "knows": "The order comes up from beneath the Archives in Mother's voice — her voice, not her command.",
+   "pointer": "The Oracle's parlour door, the only door on the conduit corridor (B3)",
+   "lines": [
+    "d_mono"
+   ],
+   "introduces": [
+    "Mono"
+   ]
+  },
+  {
+   "id": "carrier",
+   "room": "B8",
+   "requires": [
+    "bossGlitch"
+   ],
+   "sets": [
+    "bossCarrier"
+   ],
+   "speaker": "CARRIER (no words)",
+   "knows": "It never finished its route; it carried the first of the vault's three seals.",
+   "pointer": "The goal line from the first conduit room on: 'Climb to the CARRIER's nest' (pg_goal_carrier); the arrow up the relay climb (B2 → B7 → B8)",
+   "lines": [],
+   "introduces": [],
+   "relics": [
+    "sigil1"
+   ]
+  },
+  {
+   "id": "rivet",
+   "room": "GB1",
+   "requires": [
+    "bossCarrier"
+   ],
+   "sets": [
+    "smithAsked"
+   ],
+   "speaker": "Rivet (the pipe-smith)",
+   "knows": "The cistern below holds something her thin plate will not survive; the swamp's crocodile sheds a hide he can forge into a shell.",
+   "pointer": "The CARRIER's fall frees the hatch in the relay gallery's floor (B6 -> GB1, she drops into the sewer); the goal line (pg_goal_sewer)",
+   "lines": [
+    "sw_smith_1",
+    "sw_smith_2",
+    "sw_smith_3"
+   ],
+   "introduces": [
+    "Rivet"
+   ]
+  },
+  {
+   "id": "ferry",
+   "room": "SW1",
+   "requires": [
+    "bossGlitch"
+   ],
+   "sets": [
+    "ferryPaid"
+   ],
+   "speaker": "Bilge",
+   "knows": "He drowned the data canals inside his own head; purified, he gives back the vault's last seal.",
+   "pointer": "The goal line after the CARRIER: 'Find a way across the swamp: the drain culvert off the long conduit' (pg_goal_ferry); the culvert in B2",
+   "lines": [
+    "k2_bilge_1",
+    "k2_bilge_2",
+    "k2_ferry_ask"
+   ],
+   "introduces": []
+  },
+  {
+   "id": "mirejaw",
+   "room": "SW3",
+   "requires": [
+    "bossGlitch",
+    "ferryPaid"
+   ],
+   "sets": [
+    "bossMirejaw"
+   ],
+   "relics": [
+    "sigil2"
+   ],
+   "speaker": "MIREJAW (no words)",
+   "knows": "The swamp's crocodile swallowed the vault's second seal.",
+   "pointer": "Bilge: 'Whatever you are after, it lives on the far bank' (k2_bilge_2); the goal line (pg_goal_mire); the reedbank's rotten boardwalk (SW2 -> SW3)",
+   "lines": [
+    "mini_mirejaw"
+   ],
+   "introduces": []
+  },
+  {
+   "id": "shell",
+   "room": "GB1",
+   "requires": [
+    "bossMirejaw",
+    "smithAsked"
+   ],
+   "sets": [
+    "shellMade"
+   ],
+   "speaker": "Rivet (the pipe-smith)",
+   "knows": "MIREJAW's shed skin makes a shell: it slows her and turns what comes from behind.",
+   "pointer": "MIREJAW's skin card ('Take it to Rivet in the sewer', sw_skind); the goal line (pg_goal_smith)",
+   "lines": [
+    "sw_smith_craft",
+    "sw_smith_after"
+   ],
+   "introduces": []
+  },
+  {
+   "id": "undertow",
+   "room": "GB1D",
+   "requires": [
+    "bossCarrier",
+    "shellMade"
+   ],
+   "sets": [
+    "sageTame_GB1D"
+   ],
+   "speaker": "UNDERTOW (the second kingdom's agent)",
+   "knows": "He drowned the data canals inside his own head; purified, he gives back the vault's last seal.",
+   "pointer": "Rivet opens the sewer tunnel once the shell is made (GB1 -> GB1T -> GB1D); the goal line (pg_goal_undertow)",
+   "lines": [],
+   "introduces": [],
+   "relics": [
+    "sigil3"
+   ]
+  },
+  {
+   "id": "vault",
+   "room": "B5",
+   "requires": [
+    "bossCarrier",
+    "bossMirejaw",
+    "sageTame_GB1D"
+   ],
+   "sets": [
+    "vaultOpen"
+   ],
+   "when": "vault",
+   "speaker": "none (the sealed vault)",
+   "knows": "Three sigils turn the vault; its side passage opens with it.",
+   "pointer": "The goal line once three seals are carried: 'Open the old vault' (pg_goal_vault); vault_locked counts what is missing",
+   "lines": [
+    "vault_open",
+    "gate_vault_side"
+   ]
+  },
+  {
+   "id": "kerf",
+   "room": "V1B",
+   "requires": [
+    "vaultOpen"
+   ],
+   "sets": [],
+   "speaker": "Kerf",
+   "knows": "Her harvesters' marble is the stone Ratchet wears; she shaped the second edge; the Prowler keeps it, clean.",
+   "pointer": "Vault Sigil I: 'One of three seals of an old vault in the Conduits' (rl_sigil1d); the vault counts its sigils (vault_locked)",
+   "lines": [
+    "d_kerf"
+   ],
+   "introduces": [
+    "Kerf"
+   ]
+  },
+  {
+   "id": "prowler",
+   "room": "X1",
+   "requires": [
+    "bossGlitch",
+    "vaultOpen",
+    "crystal"
+   ],
+   "sets": [
+    "bossPrism",
+    "crystal2"
+   ],
+   "speaker": "the Prism Prowler (no words)",
+   "knows": "It was never infected; it guards the seam's second blade, and purified it gives it back.",
+   "pointer": "Kerf: the second blade is in the cache above, the white cat keeps it (d_kerf); the goal line (pg_goal_prowler); the vault opens the climb from B5 (gate_cache_seal)",
+   "lines": [
+    "pure_prism"
+   ],
+   "introduces": [
+    "the Prowler"
+   ]
+  },
+  {
+   "id": "furnace",
+   "room": "C3",
+   "requires": [
+    "bossGlitch",
+    "bossPrism"
+   ],
+   "sets": [
+    "bossAtlas"
+   ],
+   "speaker": "FURNACE CHOIR (no words)",
+   "knows": "—",
+   "pointer": "The goal line (pg_goal_furnace); the Conduits' floor drops into the Foundry tower (B3 -> C1); the choir's hall opens to two blades (gate_furnace_swords)",
+   "lines": [
+    "b_atlas"
+   ]
+  },
+  {
+   "id": "connector",
+   "room": "C4",
+   "requires": [
+    "bossAtlas"
+   ],
+   "sets": [
+    "connector"
+   ],
+   "speaker": "none (the connector)",
+   "knows": "The two blades join, and the joined blade can be thrown.",
+   "pointer": "The goal line (pg_goal_connector)",
+   "lines": [],
+   "introduces": []
+  },
+  {
+   "id": "talonhost",
+   "room": "B4",
+   "requires": [
+    "bossGlitch",
+    "sageTame_GB1D",
+    "connector"
+   ],
+   "sets": [
+    "bossBrood"
+   ],
+   "speaker": "TALONHOST (no words)",
+   "knows": "—",
+   "pointer": "The goal line once the blade can be thrown: 'Throw at TALONHOST' (pg_goal_brood); the hall stood empty until then",
+   "lines": [
+    "b_brood"
+   ],
+   "introduces": [
+    "TALONHOST"
+   ],
+   "when": "talonHome"
+  },
+  {
+   "id": "archives_sage",
+   "room": "D1B",
+   "requires": [
+    "bossGlitch",
+    "bossBrood"
+   ],
+   "sets": [],
+   "speaker": "The Nine-Lives Sage",
+   "knows": "GLACIERE sleeps beyond the ice and guards the Kernel Key.",
+   "pointer": "The Foundry's floor opens onto the Archives once TALONHOST is purified (C2 -> D1, gate_archives_talon); the carrel is the only warm door",
+   "lines": [
+    "d_sage"
+   ],
+   "introduces": [
+    "GLACIERE"
+   ]
+  },
+  {
+   "id": "glaciere",
+   "room": "D3",
+   "requires": [
+    "bossGlitch",
+    "bossBrood"
+   ],
+   "sets": [
+    "bossZero"
+   ],
+   "speaker": "GLACIERE (no words)",
+   "knows": "—",
+   "pointer": "The Nine-Lives Sage: 'Beyond the ice sleeps GLACIERE' (d_sage)",
+   "lines": [
+    "b_zero"
+   ],
+   "introduces": [
+    "GLACIERE"
+   ]
+  },
+  {
+   "id": "mother",
+   "room": "E3",
+   "requires": [
+    "bossZero"
+   ],
+   "sets": [
+    "bossMother"
+   ],
+   "speaker": "MOTHER-V (her song)",
+   "knows": "She is the hijacked singer; the command burns out and she lives; the Eye that stole her voice remains, exposed.",
+   "pointer": "Mono: the order comes up beneath the Archives in Mother's voice (d_mono); GLACIERE's floor gives way to the Nest (D3 → E1)",
+   "lines": [
+    "b_mother",
+    "pure_mother",
+    "win2",
+    "win2b"
+   ],
+   "introduces": [
+    "the Eye"
+   ]
+  }
+ ]
 }

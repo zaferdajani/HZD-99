@@ -51,15 +51,12 @@ const { chromium } = require('playwright');
       need(npcLive(ratchet()) && invCount('ratchetCell') === 0 && invCount('batt') === 1,
         'restore his own battery and receive the distinct Servo spare');
       need(qState('ratchet_forge') === 'active' && !weaponOwned('single'), 'rescue activates stone quest without a sword');
-      need(!healUnlocked() && !burstUnlocked(), 'rescue does not grant bought abilities: '+JSON.stringify(G.save.flags));
-      // Traversal/salvage acquisition is tested separately; buy through the real shop.
-      bankScrap(200); G.state='SHOP'; G.shopIdx=SHOP.findIndex(s=>s.type!=='cell');
-      const budget = G.save.scrap;
-      keysP.Enter=true; updateShop(); delete keysP.Enter;
-      need(G.save.scrap === budget && !healUnlocked(), 'other purchases cannot consume the required pack budget');
-      G.shopIdx=SHOP.findIndex(s=>s.type==='cell');
-      keysP.Enter=true; updateShop(); delete keysP.Enter; dialog();
-      need(healUnlocked() && burstUnlocked(), 'purchase enables both pack abilities');
+      // (owner, 2026-11-20: "one shot instead of multiple steps" — Ratchet's thanks IS
+      // the Volt Pack, handed over on waking, js/opening.js; nothing else is given)
+      need(healUnlocked() && !weaponOwned('single'), 'rescue hands over the Volt Pack, and only that: '+JSON.stringify(G.save.flags));
+      // (the pack is no longer bought in the shop: it is his thanks, and it carries
+      // both of its abilities from the moment it is given)
+      need(healUnlocked() && burstUnlocked(), 'the gift enables both pack abilities');
       G.state = 'PLAY';
       doInteract(G.statics.find(s => s.type === 'bench'));
       for (let i = 0; i < 180; i++) tick();

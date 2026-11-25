@@ -34,11 +34,14 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     LANG = L0; G.toast = t0; window.showItem = s0; return out; });
   console.log('── pure-gift  — a purified machine gives something back, and says what the next one is worth');
   const S = R.steps, s = (n) => S[n - 1];
-  check('A  the first purification gives a core she keeps', s(1).dCores === 1 && s(1).card && s(1).card[0].length > 3, s(1));
+  // (LIVES ARE A SAGE'S, owner 2026-11-20: "Getting extra lives should be only
+  // rewarded when you defeat a sage. Not everywhere." The ladder pays scrap)
+  check('A  the first purification gives something back — scrap, never a life', s(1).dCores === 0 && s(1).dScrap > 0 && s(1).card && s(1).card[0].length > 3, s(1));
   check('B  the second says the count and how many to the next gift', s(2).dCores === 0 && !s(2).card && s(2).toast && /2/.test(s(2).toast) && /3/.test(s(2).toast), s(2).toast);
   check('   ...and every one still pays its scrap', S.every(q => q.dScrap >= 14), S.map(q => q.dScrap).join(','));
-  check('C  at three the purified pool their scrap', s(3).card && s(3).dScrap >= 120 && s(3).dCores === 0, { dScrap: s(3).dScrap, card: s(3).card && s(3).card[0] });
-  check('   ...and at six a second core', s(6).dCores === 1 && !!s(6).card, { dCores: s(6).dCores });
+  // (80 at three since 2026-11-20, owner: "things need to be more expensive because it is easy to get shards" — PURE_GIFTS)
+  check('C  at three the purified pool their scrap', s(3).card && s(3).dScrap >= 80 + 14 && s(3).dCores === 0, { dScrap: s(3).dScrap, card: s(3).card && s(3).card[0] });
+  check('   ...and at six more, still no life', s(6).dCores === 0 && !!s(6).card, { dCores: s(6).dCores });
   check('   ...each card names the next rung', [1, 3].every(n => /\d/.test(s(n).card[1])), [s(1).card[1], s(3).card[1]]);
   check('D  nothing pays twice', S.every(q => !q.twice && q.rescued) && R.count === 6, { count: R.count });
   const W = R.words, langs = Object.keys(W);

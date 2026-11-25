@@ -1216,6 +1216,43 @@ function sfx(n) {
   try { SFX_OUT = voiceBus(k); } catch (e) { SFX_OUT = null; }
   try { return sfxPlain(n); } finally { SFX_OUT = null; }
 }
+// A BLOW SOUNDS LIKE WHAT IT HIT, AND NEVER THE SAME TWICE RUNNING (owner,
+// 2026-11-20: "multiple metallic hitting sounds for more diversities in sounds
+// of attack hits for different enemies and bosses"). Each body's cue
+// (foeHitSound) has a bank of recorded impacts, three takes each, one picked at
+// random that is not the one just played, at a hair of pitch spread. Every
+// guardian rings in its own metal: the lion's heavy steel, the rhino's and
+// the Alpha's plate, the eagle's lighter steel, the ice and the prism glass,
+// the bell and the mothers' bronze. An agent is a body under a robe: it takes
+// a blow like one. [group, level]; the synthesised voice stays for animals
+// (the yelp, the spit) and for a recording that has not arrived yet.
+const HIT_BANK = {
+  hit: ['metal_light', 0.62], hit_housing: ['plate_medium', 0.7], hit_robe: ['punch_medium', 0.75],
+  hit_wolf: ['plate_light', 0.5, 1], hit_cat: ['tin_medium', 0.5, 1], hit_ice: ['glass_light', 0.6],
+  hit_soft: ['soft_medium', 0.55], hit_wing: ['generic_light', 0.6], hit_spark: ['metal_light', 0.55],
+  bosshit: ['metal_heavy', 0.75], bosshit_glitch: ['metal_heavy', 0.8], bosshit_horn: ['plate_heavy', 0.8],
+  bosshit_alpha: ['plate_heavy', 0.75], bosshit_brood: ['metal_medium', 0.75], bosshit_zero: ['glass_heavy', 0.7],
+  bosshit_prism: ['glass_medium', 0.7], bosshit_atlas: ['bell_heavy', 0.5], bosshit_mother: ['bell_heavy', 0.55],
+  bosshit_chime: ['bell_heavy', 0.55], bosshit_carrier: ['metal_medium', 0.7], bosshit_moth: ['plate_medium', 0.7],
+  bosshit_lattice: ['glass_medium', 0.65], bosshit_lens: ['metal_medium', 0.7], bosshit_sage: ['punch_heavy', 0.8],
+};
+const HIT_LAST = {};
+function hitBankPlay(n) {
+  const B = HIT_BANK[n]; if (!B) return false;
+  let i = Math.floor(Math.random() * 3);
+  if (i === HIT_LAST[B[0]]) i = (i + 1 + Math.floor(Math.random() * 2)) % 3;
+  const ok = playBuf('hk_' + B[0] + '_' + i, B[1], 0.92 + Math.random() * 0.16);
+  if (ok) HIT_LAST[B[0]] = i;
+  return ok && !B[2];        // B[2]: the animal's own voice still plays over it
+}
+// cue -> [recording, level, rate (randomised a hair above it, so a bite
+// heard twice in a row is not the same bite)]
+const ALPHA_VOICE = {
+  alpha_howl: ['al_howl', 0.95], alpha_howl_far: ['al_howl_far', 0.6], alpha_bark: ['al_bark', 0.8],
+  alpha_snap: ['al_snap', 0.75, 0.96], wolf_bite: ['al_bite', 0.7, 0.96], alpha_claw: ['al_claw', 0.7, 0.96],
+  alpha_leap: ['al_leap', 0.6, 0.96], alpha_rendwarn: ['al_growl', 0.8], alpha_furywarn: ['al_growl', 0.9, 0.9],
+  alpha_fury: ['al_fury', 0.95], alpha_rend: ['al_rend', 0.75, 0.96],
+};
 function sfxPlain(n) {
   if (!AC || MUTED || (typeof FOE_READ !== 'undefined' && FOE_READ.sil)) return;   // a rim's stencil pass is silent (js/foeread.js)
   if (narrativeAudioActive() && ['ui', 'ok', 'no', 'purr'].includes(n)) return;
@@ -1313,6 +1350,14 @@ function sfxPlain(n) {
   // vocabulary, because that is how the fights are built: every enemy speaks
   // tell/slam/phase/cast and the ROAR is the one word that is per-guardian —
   // picked by who is actually roaring, from the fight the player is in.
+  // THE ALPHA AND ITS PACK ARE ANIMALS (media.js al_*): the recorded wolf
+  // plays, and the oscillator line below is only what a phone hears in the
+  // moment before the file has arrived
+  { const A = ALPHA_VOICE[n]; if (A && playBuf(A[0], A[1], A[2] ? A[2] + Math.random() * 0.08 : 1)) return; }
+  if (n.indexOf('hit') === 0 || n.indexOf('bosshit') === 0) {
+    if (hitBankPlay(n)) return;
+    if (n.indexOf('bosshit_') === 0) n = 'bosshit';      // its synthesised clang, until the takes arrive
+  }
   if (n === 'tell' && playBuf('fz_tell', 0.4, 0.94 + Math.random() * 0.12)) return;
   if (n === 'tellmid' && playBuf('fz_tellmid', 0.45)) return;
   if (n === 'tellbig' && playBuf('fz_tellbig', 0.5)) return;
@@ -2155,6 +2200,31 @@ function sfxVoice(id) {
 // Nothing here can make a moment quieter: the caller keeps its own sfx('win')
 // or sfx('chargeReady'), so a sting that never loads costs the game nothing —
 // which is exactly what the decoded version promised and this one still keeps.
+// THE ROOM'S AIR (the swamp's frogs, the sewer's water): one looping stream at
+// a time, started by the room and stopped when she leaves it. Streamed through
+// <audio> for the same reason the stings are: a bed is long, and decoded it
+// would sit in memory as raw PCM for the whole session (tests/herofoley.cjs).
+let AMBNODE = null;
+function ambPlay(key, vol) {
+  if (AMBNODE && AMBNODE.key === key) { try { AMBNODE.el.volume = vol; } catch (e) {} return; }
+  ambStop();
+  if (MUTED) return;
+  const src = (typeof MEDIA_SRC !== 'undefined' && MEDIA_SRC.amb && MEDIA_SRC.amb[key]);
+  if (!src) return;
+  try {
+    const el = new Audio();
+    el.src = typeof audioSrc === 'function' ? audioSrc(src) : src;
+    el.loop = true; el.volume = vol; el.preload = 'auto';
+    AMBNODE = { key, el };
+    const pr = el.play();
+    if (pr && pr.catch) pr.catch(() => {});
+  } catch (e) {}
+}
+function ambStop() {
+  if (!AMBNODE) return;
+  try { AMBNODE.el.pause(); AMBNODE.el.src = ''; } catch (e) {}
+  AMBNODE = null;
+}
 let STINGNODE = null;
 function stingPlay(key, vol) {
   if (MUTED) return;
@@ -2672,6 +2742,13 @@ const RECORDED_TRACKS = {
   intro: [['mus_intro', 0.75], ['mus_title', 0.55]],
   A: [['mus_meadows', 0.55]], B: [['mus_conduits', 0.55]], C: [['mus_foundry', 0.55]],
   D: [['mus_archives', 0.55]], E: [['mus_nest', 0.55]], X: [['mus_cache', 0.55]],
+  // THE SILT MIRE has its own air (owner, 2026-11-21: "background, music,
+  // sound effects, creatures"): a room says `mus: 'swamp'` (js/world.js), and
+  // the crocodile in its wallow fights under its own cue
+  swamp: [['mus_swamp', 0.55], ['mus_conduits', 0.55]],
+  // ...and the sewer under the Conduits its own (js/sewer.js)
+  sewer: [['mus_sewer', 0.55], ['mus_conduits', 0.55]],
+  boss_mirejaw: [['mus_mirejaw', 0.6], ['mus_eye', 0.6], ['mus_boss', 0.6]],
   // THE FIGHTS GET THEIR OWN NAMES BACK.
   boss_glitch: [['mus_nullfang', 0.6], ['mus_boss', 0.6]],
   boss_brood: [['mus_talonhost', 0.6], ['mus_boss', 0.6]],
@@ -2707,7 +2784,7 @@ function pickRecorded(name) {
 // when a per-guardian slot has neither a recording nor a synth track of its own
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
-  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', boss_horn: 'boss',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', boss_horn: 'boss', boss_mirejaw: 'boss', swamp: 'B', sewer: 'B',
   // the sage duel has its OWN slot now: drop mus_sage.m4a into assets/music
   // (ART_QUEUE brief) and every chamber picks it up; until then the duels
   // borrow the guardian track through this fallback

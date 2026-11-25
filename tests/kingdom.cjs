@@ -59,7 +59,7 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
       for (const id of Object.keys(ROOMS)) if (id.startsWith('G' + Z) && !ids.includes(id)) ids.push(id);
       out.rooms = ids;
       const boot = (room, abil) => {
-        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.sawScrap = 1; sv.abil = abil || { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
+        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.sawScrap = 1; Object.assign(sv.flags, { crystal: 1, crystal2: 1, connector: 1 });   // (TALONHOST is home once the throw is hers) sv.abil = abil || { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
         startGame(sv); loadRoom(room); G.dialog = null; G.state = 'PLAY'; G.toasts = [];
         G.bossEntry = null; G.gateWalk = null; G.wake = null;
       };
@@ -249,6 +249,8 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           boot(id); G.enemies = []; if (G.boss) G.boss.st = 'dorm';
           // every door open, whatever the save says
           if (def.need) G.save.flags[def.need] = 1;
+          // ...a lock too (a door a fight opens: measured open, not dimmed and rusted shut)
+          if (def.lock) G.save.flags[def.lock] = 1;
           const wx = G.roomDef.w * TILE * def.at;
           player.x = wx - player.w / 2 - 140; player.y = (G.roomDef.h - 2) * TILE - player.h; player.vx = 0;
           // ...BUT NOT ON A HAZARD. C5's forge door stands past the pour hall's
@@ -262,7 +264,8 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           for (let i = 0; i < 30; i++) update(DT);
           // the plate this door would wear, if its family has one
           const dest = ROOMS[def.to];
-          const guard = dest && dest.cave && !G.roomDef.cave && def.to[0] === 'G';
+          // (a guardian's network that is not rock — the sewer — is marked `grotto`, as the game reads it)
+          const guard = dest && (dest.cave || dest.grotto) && !(G.roomDef.cave || G.roomDef.grotto) && def.to[0] === 'G' && !def.style;
           const integrated = def.gx != null && ROOM_VISTA[id] && !INTERIOR_FIT[ROOM_VISTA[id]] && (G.roomDef.cave || (dest && dest.cave));
           // A RING, wherever one stands (owner, 2026-11-15; ringGateFor in
           // js/game.js): the machine ring is the door's plate now, in front of
@@ -276,7 +279,8 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           const waitKey = key || ((G.roomDef.cave || (dest && dest.cave))
             ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone]
             : ({ booth: 'boothFront', oracle: 'oracleBooth', forge: 'forgeFront',
-                carrel: 'carrelFront', hollow: 'hollowFront', kerf: 'kerfFront' })[def.style]);
+                carrel: 'carrelFront', hollow: 'hollowFront', kerf: 'kerfFront',
+                culvert: 'culvertMouth', hatch: 'sewerHatch' })[def.style]);
           // WAIT FOR THE FULL TIER, NOT FOR THE FIRST PICTURE.
           //
           // mediaFetch(urgent) asks for TWO images: the quarter-scale stand-in

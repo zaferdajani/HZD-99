@@ -55,6 +55,15 @@ That happened, it was wrong, and it cost a session.
 
 ---
 
+## A new species: its WHOLE move set first (owner's rule, 2026-11-22)
+
+Every function of `docs/SPECIES_MOVESET.md` — idle, walk, run, turn, notice, crouch,
+each attack, jump, land, defend, hurt, daze, die, dead, its signature and its element —
+is fired as its own take before the fight is built, recorded in `assets/movesets.json`,
+and drawn by the fight (`tests/species-moveset.cjs`). Nothing is borrowed from another
+move's take; a refused take is recorded, never shipped. A strip that carries the body
+turns over by distance, never the clock.
+
 ## The workflow for any character work
 
 1. **Classify** (§1). If it needs a pose that is a continuous function of game

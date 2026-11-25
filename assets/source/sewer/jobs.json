@@ -1,0 +1,41 @@
+{
+ "provider": "Higgsfield",
+ "fired": "2026-11-24",
+ "why": "Owner, 2026-11-24: one of Kingdom 2's caves becomes a sewer (Ninja Turtles), entered Super-Mario-style through a floor hatch she holds and hauls open (rusty creak) and drops into; inside she falls onto a platform that goes down; a pipe-smith NPC forges a shield from MIREJAW's shed skin (slower, more defence). His answers: the sewer is UNDERTOW's caves; a new robot smith in the sewer; swimming not yet; the shield on her back like a shell.",
+ "stills": {
+  "model": "gpt_image_2_6",
+  "jobs": {
+   "bg_gallery": "7bc1920a",
+   "bg_tunnel": "88cc51b1",
+   "bg_cistern": "1ee98f50",
+   "smith (Rivet)": "5e5dd6d6",
+   "smith cut (remove_background)": "269eca42",
+   "skin (MIREJAW's shed skin)": "cb33cfd6",
+   "skin cut (remove_background)": "f65086c6",
+   "shell_side": "ad050620",
+   "shell_back": "0e690060",
+   "hatch (4 lid states; first try at 2048x512 failed)": "550f2d6a (failed: 4ec23554)",
+   "hatch cut (remove_background)": "57894224",
+   "hatch hero, single blade": "3d4075e6",
+   "hatch hero, claws": "3f9c48b4",
+   "hatch hero, two blades": "eceb117a",
+   "hatch hero, joined": "82ce115d"
+  },
+  "note": "job ids recorded by their first eight characters as they were noted at firing; the hero sheets embed her canon element"
+ },
+ "takes": {
+  "model": "kling3_0_turbo (start frame: smith cut)",
+  "jobs": { "smith_talk": "3d215dcb-3cca-4382-89ce-0afd3afbb413" }
+ },
+ "music": {
+  "model": "elevenlabs_music_v2_5 (120 s)",
+  "jobs": { "mus_sewer": "4d3f1e68-bd97-407c-934e-17b68ef7dbe0" },
+  "delivery": "seam cut 2 s in with a 2 s triangular crossfade of the head over the tail; loudnorm -17 LUFS, limiter at 0.7 (-2.4 dBTP after AAC); as fired in source/music/mus_sewer_asfired.mp3"
+ },
+ "delivery": {
+  "hero strips": "tools/stepstrip.cjs hatchhero_<w>.png --cell 320 --body 168 --floor 296 --frames 8 --feet (scraps under 4% of a cell removed), then tools/towebp.cjs 0.88",
+  "hatch": "tools/stepstrip.cjs hatch_cut.png --cell 384 --body 184 --floor 376 --frames 4 --feet",
+  "smith": "VP9 transcode, tools/vidstrip.cjs 16 cells of 320, scaled to 192",
+  "plates": "trimmed, seated on the cell floor, 256 (items) / 320 (smith), webp 0.88"
+ }
+}

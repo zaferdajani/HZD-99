@@ -227,7 +227,8 @@ const check = (name, ok, detail) => {
   check('...while a player who has NOT read it is still sent', r.a7.normalActive && r.a7.normalAsk.indexOf(r.a7.earlyLine) < 0);
   check('...even one who stood at the bottom of the shaft without reading the survey',
     r.a7.visitActive && r.a7.visitAsk.indexOf(r.a7.earlyLine) < 0, r.a7.visitAsk.slice(0, 90));
-  check('CV1: the pocket chest is a spare core, not scrap', r.cv1.chest && r.cv1.cores === 1 && r.cv1.full, JSON.stringify(r.cv1));
+  // (lives are a sage's, 2026-11-20: the pocket is a scrap cache now)
+  check('CV1: the pocket chest is a cache of scrap, not a life', r.cv1.chest && r.cv1.cores === 0, JSON.stringify(r.cv1));
   check('CV1B: reading the quarrymen\'s survey charts the quarry onto the map — and it is not a save point',
     r.cv1b.term && !r.cv1b.pod && r.cv1b.charted === 'CV1,CV1B,CV2,CV3' && r.cv1b.said && r.cv1b.map === true, JSON.stringify(r.cv1b));
   check('CV2: the beacon\'s log answers the call', r.cv2.beacon);

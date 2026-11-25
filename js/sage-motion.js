@@ -1,12 +1,22 @@
 // First-Sage choreography. Explicit simulation + existing authored artwork.
 // Other Sage networks keep their current behavior until individually reviewed.
 const SAGE_DUEL_REVISION='meadow-sage-20261113-r1';
+// HARDER, AND HIT LIKE A BODY (owner, 2026-11-20: "he was super easy to beat
+// ... Hitting him did not feel smooth or realistic as hitting a human ...
+// instead of hitting a metallic statue that gets pushed backward simply").
+// Half as much again to break (hpK), a quicker mind (step: a decision every
+// 0.7 s, not 0.9), a shorter breather after three denied lunges (0.8 s, not
+// 1.2), and below half health the chain is THREE lunges. A blow no longer
+// slides him across the floor as one rigid picture: it stops him where he
+// stands — a short stagger (hitStop), the step he gives taken in place.
 const SAGE_DUEL_PROFILE=Object.freeze({room:'GA1D',lunge:.22,replant:.18,
-  exhale:.70,ringRecovery:.55,deniedRecovery:1.20,ringSpeed:200,ringMax:250});
+  exhale:.70,ringRecovery:.55,deniedRecovery:.80,ringSpeed:200,ringMax:250,
+  hpK:1.5,step:.7,hitStop:.12,hitGive:.3,hitShow:.26,chainGap:.9});
 function sageDuelInit(e){
   if(e.kind!=='sage'||G.roomId!==SAGE_DUEL_PROFILE.room||(typeof isHero==='function'&&isHero()))return;
   e.sageDuel={home:G.roomId,phase:'idle',elapsed:0,duration:0,face:e.dir||1,
     ringOrigin:null,chain:0};e.sageReplantT=0;
+  e.hp=e.hpMax0=Math.round((e.hpMax0||e.hp)*SAGE_DUEL_PROFILE.hpK);
 }
 function sageDuelActive(e){return !!e.sageDuel&&e.sageDuel.home==='GA1D'&&e.kind==='sage';}
 function sageDuelEnter(e,phase,duration,face){
@@ -28,6 +38,15 @@ function sageDuelTick(e,dt){
   if(!sageDuelActive(e))return;
   const m=e.sageDuel,P=SAGE_DUEL_PROFILE;m.elapsed+=dt;
   if(e.tame||e.calm||e.locked||e.dead)return;
+  // a blow lands on a body: it gives a short step, where it stands
+  if(e.hitPoseT>0)e.hitPoseT-=dt;if(e._hitChainT>0)e._hitChainT-=dt;
+  // a NEW blow is the knock timer rising — from rest, or again while he still reels from the last
+  if(e.kbT>0&&(!e._kbHeld||e.kbT>(e._kbPrev||0)+1e-3)){e._kbHeld=1;e.vx*=P.hitGive;e.kbT=Math.min(e.kbT,P.hitStop);
+    // the picture of the blow is held a beat longer than the stop it gives (the eye needs
+    // ~0.25 s to read a body fold); the third blow of a quick chain doubles him over
+    e.hitPoseT=P.hitShow;e._hitChain=e._hitChainT>0?(e._hitChain||0)+1:1;e._hitChainT=P.chainGap;}
+  else if(!(e.kbT>0))e._kbHeld=0;
+  e._kbPrev=e.kbT>0?e.kbT:0;
   if(e.ringR!=null){
     e.ringR+=P.ringSpeed*dt;const o=sageRingOrigin(e),px=player.x+player.w/2;
     if(!player.dead&&player.on&&Math.abs(player.y+player.h-o.y)<24
@@ -61,7 +80,7 @@ function sageDuelStep(e,dt){
   if(e.sageReplantT>0){e.vx=0;e.sageReplantT=Math.max(0,e.sageReplantT-dt);moveEnt(e,dt);
     if(e.sageReplantT===0){e.vx=m.face*e.spd*2.2;e.lungeT=P.lunge;m.chain=2;sageDuelEnter(e,'lunge',P.lunge,m.face);}return;}
   if(e.coilT>0){e.vx=0;e.coilT=Math.max(0,e.coilT-dt);moveEnt(e,dt);
-    if(e.coilT===0){e.lunges=1;e.vx=m.face*e.spd*2.2;e.lungeT=P.lunge;m.chain=1;sageDuelEnter(e,'lunge',P.lunge,m.face);}return;}
+    if(e.coilT===0){e.lunges=e.hp<e.hpMax0*.5?2:1;e.vx=m.face*e.spd*2.2;e.lungeT=P.lunge;m.chain=1;sageDuelEnter(e,'lunge',P.lunge,m.face);}return;}
   if(e.gatherT>0){e.vx=0;e.gatherT=Math.max(0,e.gatherT-dt);moveEnt(e,dt);
     if(e.gatherT===0){e.ringR=20;m.ringOrigin={x:e.x+e.w/2,y:e.y+e.h};
       e.windedT=P.ringRecovery;sageDuelEnter(e,'ring-release',P.ringRecovery);
@@ -71,11 +90,19 @@ function sageDuelStep(e,dt){
   e.dir=face;m.face=face;moveEnt(e,dt);
   if((e.stepT-=dt)<=0&&!player.dead&&Math.abs(dx)<420){
     if(!e.duelMus){e.duelMus=1;if(typeof setMusic==='function')setMusic('sage');}
-    e.stepT=.9;
+    e.stepT=P.step;
     if(e.denied>=3){e.windedT=P.deniedRecovery;e.denied=0;e.vx=0;sageDuelEnter(e,'exhale',e.windedT);}
     else if(Math.abs(dx)<190&&chance(.65)){e.coilT=TELL_SWIPE;e.vx=0;sageDuelEnter(e,'coil',TELL_SWIPE,face);sfx('tellmid');}
     else if(chance(.5)){e.gatherT=TELL_HEAVY;e.vx=0;sageDuelEnter(e,'gather',TELL_HEAVY,face);sfx('tellmid');}
   }
+}
+// the blow it is taking, if any: 'high' (struck — the head goes back) or 'low' (staggered, or
+// the third blow of a quick chain — it doubles over). Read by the plates and the rig alike.
+function sageHitPose(e){
+  if(!e||e.tame||e.locked||e.dead)return null;
+  if(e.stagT>0)return 'low';
+  if(!(e.kbT>0||(e.hitPoseT>0&&!(e.coilT>0||e.lungeT>0||e.gatherT>0||e.sageReplantT>0))))return null;
+  return (e._hitChain||0)>=3?'low':'high';
 }
 function sageDuelPose(e){
   const m=e.sageDuel,face=m.face||e.dir||1;
@@ -86,6 +113,9 @@ function sageDuelPose(e){
   if(e.tame){if(Math.abs(e.vx)>12){pose.key='sageWalk8';pose.height=1.155;pose.strip=true;pose.cells=8;pose.cell=Math.floor((((e.walkD||0)/56)%1+1)%1*8);pose.flip=e.vx>0;pose.pure=true;}
     else{pose.key='sagePure';pose.height=.72;}return pose;}
   if(e.locked){pose.key='sageLock';pose.height=.66;return pose;}
+  // STRUCK LIKE A BODY (owner, 2026-11-20): an agent with its own pictures of a blow wears them
+  const hit=sageHitPose(e);
+  if(hit){const hk=hit==='low'?'sageHitLow':'sageHitHigh';if(agentKey(hk)!==hk){pose.key=hk;pose.height=1;return pose;}}
   if(e.kbT>0||e.stagT>0){pose.key='sageExhale';pose.height=1.07;pose.strip=true;pose.flip=face>0;return pose;}
   if(e.lungeT>0){pose.key='sageLunge';pose.height=1.05;pose.sy=.98+.02*ease;pose.lean=face*.035*(1-ease);return pose;}
   if(e.sageReplantT>0||e.coilT>0){pose.key='sageCoil';pose.height=.94;pose.sy=1-.035*ease;pose.lean=-face*.025*ease;
@@ -126,7 +156,7 @@ function sageDuelPose(e){
 // exhale always were.
 const AGENT_H = { Coil: 0.74, Lunge: 1.0, Lock: 0.86, Pure: 0.82 };
 const AGENT_ART = {
-  GA1D: { pre: 'agTally', hk: { Stand: 1.09, Walk8: 1.09, Exhale: 1.10, Lunge: 1.12, Gather: 1.03, Lock: 1.05, Pure: 1.12 } },
+  GA1D: { pre: 'agTally', hk: { Stand: 1.09, Walk8: 1.09, Exhale: 1.10, Lunge: 1.12, Gather: 1.03, Lock: 1.05, Pure: 1.12, HitHigh: 1.15, HitLow: 1.17 } },
   GA2D: { pre: 'agLeash', hk: { Pure: 1.07 } },
   GB1D: { pre: 'agUndertow', hk: {} },
   GC1D: { pre: 'agSlag', hk: { Lunge: 1.1 } },      // SLAGFATHER: the iron apron, the ladle

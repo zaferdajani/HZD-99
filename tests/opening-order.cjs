@@ -109,7 +109,7 @@ async function play(browser, mode) {
         key: p && tutHand(p), hold: G.tut ? G.tut.hold : 0,
         x: player.x + player.w / 2, on: player.on, cores: player.cores, max: player.maxCores(),
         volts: player.volts, scrap: G.save.scrap, iq: G.save.iq | 0,
-        dialog: G.dialog ? { name: G.dialog.name, line: G.dialog.lines[G.dialog.i], i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art, demo: G.dialog.demo } : null,
+        dialog: G.dialog ? { name: G.dialog.name, line: G.dialog.lines[G.dialog.i], i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art, demo: G.dialog.demo, shot: G.dialog.shots ? G.dialog.shots[G.dialog.i] : null } : null,
         pan: G.state === 'PANELS' && G.panels ? { id: G.panels.seq.id, i: G.panels.i, cap: (G.panels.list[G.panels.i] || {}).cap || null } : null,
         blk: !!(typeof player !== 'undefined' && player && player.bodyBlock) && (player.bodyBlock.kind || true),
         shopIdx: G.shopIdx, rech: !!G.recharge, wake: !!G.wake, cut: !!G.cut, gate: !!G.gateWalk, trans: !!G.trans,
@@ -159,7 +159,7 @@ async function play(browser, mode) {
       const dk = s.dialog.name + '|' + s.dialog.i + '|' + s.dialog.line;
       if (dk !== lastDialog) {
         lastDialog = dk;
-        R.dialogs.push({ step: s.step, room: s.room, name: s.dialog.name, line: s.dialog.line, art: s.dialog.art, demo: s.dialog.demo });
+        R.dialogs.push({ step: s.step, room: s.room, name: s.dialog.name, line: s.dialog.line, art: s.dialog.art, demo: s.dialog.demo, shot: s.dialog.shot });
         if (s.dialog.i === 0) await shot('dialog-' + (s.step || s.room));
       }
       // a reader's pace (js/overlay.js): a press inside 0.22 s of the last is a
@@ -383,32 +383,35 @@ async function play(browser, mode) {
       const expl = lines.slice(iWake, iSpare > iWake ? iSpare : iWake + 3).join(' ');
       // TWO LINES (owner, 2026-11-14: the booth in three beats). Who he is, and
       // the errand — and nothing else stands between the repair and the cell.
-      check('he wakes in two lines: who he is, and the errand — raw marble, a white sword',
-        iSpare - iWake === 2 && /infected/.test(expl) && /raw marble/.test(expl) && /white sword/.test(expl), (iSpare - iWake) + ' lines: ' + expl);
+      // SHORT LINES (owner, 2026-11-19: "minimize all the text"): the song's
+      // sickness is the letter's pages; he says only the marble and the sword.
+      // ...AND HIS THANKS IS THE VOLT PACK (owner, 2026-11-20: "he should give
+      // me the power cell instead of me having to go back outside, hit the
+      // machine, coming back inside ... one shot instead of multiple steps").
+      // Who he is, the errand, the pack and what its ring is for: four lines.
+      const wakeLines = lines.slice(iWake, iWake + 4).join(' ');
+      check('he wakes in four short lines: who he is, the errand (marble, a sword), and the Volt Pack he gives her, with its ring and its two uses',
+        /marble/.test(wakeLines) && /sword/.test(wakeLines) && /Volt Pack/.test(wakeLines) && /ring/.test(wakeLines) && /heal/.test(wakeLines) && /burst/.test(wakeLines)
+        && wakeLines.split(/\s+/).length <= 40, wakeLines);
       check('the spare Power Cell is handed over with a card that names Servo', iSpare > iWake && /Servo/.test(lines[iSpare]), lines[iSpare]);
-      const iPod = lines.findIndex(l => l === 'This pod saves your progress and recharges you. Use it before you leave.');
+      const iPod = lines.findIndex(l => /pod saves/.test(l));
       check('...and no further page sends her to the pod: its chip does', iPod < 0, iPod);
-      const iPack = lines.findIndex(l => /Volt Pack is what stops it/.test(l));
-      const iBit = lines.findIndex(l => /It bit back/.test(l));
+      const iPack = lines.findIndex(l => /Take my Volt Pack/.test(l));
       const podStep = R.stepLog.find(q => q.step === 'atk');
       check('the pod saves first: the save point is in the den before she is sent out to the winch', podStep && podStep.bench === 'A0B', podStep);
       check('...and the save is confirmed on screen', R.podBanner);
-      // NEED BEFORE TEACH: the pack is pitched only after the winch has bitten her
-      const sAtk = R.steps.indexOf('atk'), sPack = R.steps.indexOf('pack'), sHeal = R.steps.indexOf('heal');
-      check('the winch is struck, and bites, BEFORE the pack is offered — and the heal comes after it is bought',
-        sAtk >= 0 && sAtk < sPack && sPack < sHeal && R.winchBit, { steps: [sAtk, sPack, sHeal], bit: R.winchBit });
-      check('the pack is explained in two lines — what it does, what it costs — and then the counter opens',
-        iPack >= 0 && /12 scrap/.test(lines.slice(iPack, iPack + 2).join(' ')) && /hold/i.test(lines[iPack]), lines.slice(iPack, iPack + 2).join(' | '));
-      const iScrap = R.dialogs.findIndex(d => /^12 Scrap/.test(d.line || ''));
-      check('...with no card about money in the way', iScrap < 0, iScrap);
-      check('the counter opens on the Volt Pack, marked permanent, the rest locked until it is bought',
-        R.shopRow && R.shopRow.type === 'cell' && /permanent/.test(R.shopRow.name) && R.shopRow.others.every(Boolean), R.shopRow);
+      // ONE STEP: the pack is given on waking, over the pack at work; nothing
+      // sends her out to be bitten and back in to buy it
+      check('the Volt Pack is his gift on waking, said over the pack at work — before the spare cell, the pod and the winch',
+        iPack > iWake && iPack < iSpare && R.dialogs.some(d => d.line === lines[iPack] && d.shot === 'demo:pack'), lines[iPack]);
+      check('...no trip out to the winch and back: no counter opens, no "it bit you" pitch, nothing to pay',
+        !R.shopRow && lines.findIndex(l => /It bit you/.test(l)) < 0 && R.scrapAtShop == null, { shop: R.shopRow, scrapAtShop: R.scrapAtShop });
       const iCard = R.dialogs.findIndex(d => d.demo === 'pack');
-      check('...and the purchase card shows the two verbs with her controls', iCard > iPack && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
+      check('...and its card shows the two verbs with her controls', iCard > iPack && /hold F/i.test(lines[iCard]) && /hold X/i.test(lines[iCard]), lines[iCard]);
     }
     // (what the winch and the first machine threw out pays for it — or he makes up
     // the difference — and no scrap pile lying in a room is ever needed)
-    check(mode + ': the Volt Pack is always affordable, with no room scrap gathered', R.scrapAtShop >= 12 && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
+    check(mode + ': the Volt Pack costs her nothing, and no room scrap is gathered for it', R.scrapAtShop == null && R.pickups === 0, { scrapAtShop: R.scrapAtShop, pickups: R.pickups });
     if (R.monument) {
       const m = R.monument;
       check(mode + ': the monument is east of the booth door, within one screen, before the way out',
@@ -425,7 +428,7 @@ async function play(browser, mode) {
     if (mode === 'desktop') {
       check('Servo introduces himself, explains the way to the marble, and names the coil task and its reward',
         /Old Servo/.test(sl) && /loose floor/.test(sl) && /coil/.test(sl) && /60 scrap/.test(sl) && /10 IQ/.test(sl), S.lines);
-      check('...a repeat visit is not the intro again', S.repeat && !S.repeat.some(l => /keeper of this winding house/.test(l)), S.repeat);
+      check('...a repeat visit is not the intro again', S.repeat && !S.repeat.some(l => S.lines.indexOf(l) >= 0 && /Old Servo/.test(l)), S.repeat);
       check('...and the coil coming home is answered and paid', S.paid && S.paid.q === 'done' && S.paid.scrap === 60 && S.paid.spin, S.paid);
     }
     check(mode + ': the coil errand is taken', S.after && S.after.q === 'active');

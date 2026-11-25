@@ -21,6 +21,93 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2ce. BLOCKED ON CREDITS, 2026-11-20 — the owner's orders that need Higgsfield ✱ READY TO FIRE
+
+Higgsfield balance read **0.37 credits** (one 2k image costs 2; a 3-second
+sound effect costs 0.75). Everything below is decided; nothing below can be
+made until the balance is topped up. Fire in this order.
+
+1. **THE ALPHA'S VOICE — six sound effects** (owner: *"It sounds like I'm
+   listening to piano or electric, whatever, instead of an actual animalistic,
+   wolf-like howlings, attacks, vibes"*). Today every Alpha cue in
+   `js/audio.js` (`alpha_howl`, `alpha_howl_far`, `alpha_bark`, `alpha_snap`,
+   `alpha_claw`, `alpha_leap`, and the pack's `wolf_bite`) is oscillators.
+   Model `mirelo_text_to_audio` (0.75 per 3 s). Prompts, each "a real
+   recording, one large grey wolf, close microphone, dry, no music, no reverb
+   tail longer than half a second": a long rising pack-leader HOWL (3 s); the
+   same howl heard across a valley (3 s); a single deep warning BARK with a
+   growl under it (1.5 s); a snapping BITE with teeth clack (1 s); a
+   lunging SNARL with breath (1.5 s); paws on gravel, a heavy LEAP (1 s).
+   Wire through `playBuf('al_<cue>')` the way `beastSound` plays `nf_<cue>`,
+   the oscillator line kept only as the not-yet-loaded fallback; then
+   `node tools/faststart.cjs` is not needed (audio), but `tests/voice-heard`
+   must hear each over the score on a phone.
+2. **THE ALPHA'S BOW — the scene after the yield** — *STAGED 2026-11-20 with
+   the filmed art it already had (its yield take is a bow; the pack goes down
+   on its crouch held low — js/packcall.js, tests/alpha-bow.cjs). The takes
+   below would replace the pack's crouch with a true bow; optional.* (owner: *"After finishing
+   the alpha should step back, bow down to you as the new alpha ... other
+   small wolves will stand behind the alpha and bow to you too ... not as a
+   video, but as a gameplay"*). Two filmed strips from the approved Alpha
+   plate (`assets/source/beasts/alpha2/`) and the pack plate
+   (`assets/source/beasts/wolf2/green_plate.jpg`): `alBow` (12 cells: two
+   steps back, forelegs fold, head to the floor, held) and `wolfBow`
+   (8 cells, the same bow at the pack's size). Played in A10 by the yield
+   (Boss alpha `yield` state), three pack wolves arriving behind him.
+3. ✔ **FIRED AND SHIPPED 2026-11-20 — TALLYMAN STRUCK — hit-reaction plates** (two, not three: `agTallyHitHigh` on a blow, `agTallyHitLow` — doubled over with the knee gone, which covers the stagger — on a stagger or the third blow of a quick chain; the rig snaps to them and carries him out; tests/tallyman.cjs) (owner: *"create more artwork of
+   being hit instead of hitting a metallic statue that gets pushed backward
+   simply"*). Three plates from his own set (`agTally*`): struck high (head
+   snapped back, staff arm thrown wide), struck low (doubled over the
+   abacus), staggered (one knee buckling). Wired as `agTallyHit1..3`, chosen
+   by the blow's height, over the 0.12 s hit-stop the duel now has
+   (js/sage-motion.js `hitStop`). The code half shipped 2026-11-20.
+4. ✔ **FIRED AND SHIPPED 2026-11-20 — THE CITY GATE, TEXTURED** (re-fired from its own plate as composition reference: armour plate, rust, hinges, the light through the gap; the flat code-drawn leaves that were laid over the painted doors no longer draw once the painting is up; tests/city-gate.cjs) (owner: *"improve the city gate to give it
+   more texture ... make it stand out, not fading into the background"*):
+   re-fire the city gate plate with the cave gates' material brief.
+5. **NULLFANG, SECOND STAGE** (owner: *"when it came to the second stage, it
+   is so bad. His graphic is so bad"*): re-fire the phase-two plates from the
+   approved first-stage lion.
+
+## 2cd. RATCHET SAYS IT IN COMICS — nine single unlettered panels ✘ WITHDRAWN 2026-11-20 (owner: "It's not about oversaturating the game with images and videos. Certain key moments require videos or images, but that shouldn't be it for the whole [game], unless we're making it to look like a movie game") — do not fire. Chapter one's talk keeps two pictures (the marble comic on the goal, the Volt Pack demo on the first power); tests/text-budget.cjs counts them. Kept below as the record of what was briefed.
+
+The owner, on less reading: *"If there's a way to create small images, shots
+to explain what is happening with Ratchet, I would go there instead of typing
+it with a small text unreadable"* — then *"When I say pics I meant generated
+comics."* Every line Ratchet says in chapter one is shown over a drawn comic
+panel above the dialogue box (`drawDlgShot`, js/game.js; `OP_SHOT` and
+`LINE_SHOT`, js/opening.js). Three lines already have one and ship with it:
+"Bring me marble" and "Not with claws, bring me the marble first" (`r_marble`),
+"East: Old Servo" (`r_cell`). (The forge's thanks and the battery going home get none: their films tell
+them — "When there is a video no need for comic".) These nine are owed.
+
+**How to fire** (the method of `assets/source/manhua/ch1/game/toolbox-2026-11-15.json`):
+nano_banana_pro, 2k, 16:9, two takes each. Each prompt is `SCENE` below, then
+the CAST and STYLE paragraphs of `prompts.json` → `panels.drawer` word for
+word (elements: hero `467c8e08-8161-483f-a4cf-439875ff04e2`, Ratchet
+`795a5cd6-b404-4623-bcc9-2b32351d71ab`, den `44ecbf7f-0326-418f-9cc9-122391cad46f`,
+Servo `5549ba09-f898-4022-ab66-5686999059e0`, wolf `7aed7bd4-8738-4765-b953-d623eea6a359`,
+alpha `789ff708-5f77-4196-8bfd-5e180e1584d9`). Style reference: the shipped
+`toolbox` job `7a08eab6-57c6-4b18-82a6-afd0f09d3886` and `r_cell` job
+`b799521d-4e5d-4237-a6b9-178fc5a7ae09`, named as "style only". She carries NO
+sword in any of them (the blade is forged later). No light, rim, halo or ring
+round any body. Key to `assets/manhua/ch1/game/<name>.webp` at 1600 px, archive
+the as-fired takes beside the others, credit in `assets/CREDITS.md`, then add
+each to `OP_SHOT` / `LINE_SHOT` and run `node tests/run.cjs text-budget`.
+
+| panel | under the line | SCENE |
+|---|---|---|
+| `say_pod` | op_r_pod "My pod saves you and heals you." | The den's wall pod, an upright capsule with a glass front, lit cyan from inside; the small cat stands in it, eyes closed, and a crack across her chest plate is visibly closing, its edges drawn together by fine cyan threads. Ratchet, awake with blue eye-lights, stands beside it with one big hand on the pod's frame. |
+| `say_winch` | op_r_try "The winch outside is infected. Try your claws." | The street outside the den: a huge rusty yard winch whose hooked iron arm lies across the whole road, purple light pulsing in veins along it and a purple eye-light in its cab. The small cat, tiny in front of it, crouches with her claws out, ready. Ratchet's lit doorway behind her at the left. |
+| `say_pack` | op_p1 "It bit you? My Volt Pack stops it." | The den counter: Ratchet leans over it and holds out, in his open palm, a small compact charger box of brass and steel with one glowing cyan window and a short cable; the small cat looks up at it, a fresh scratch with a few sparks on her shoulder plate. |
+| `say_scrap` | op_p2 "Yours for 12 scrap." | The same counter: the small cat stands on a stool and tips a pawful of rusty scrap bits onto the wooden counter; Ratchet's big hand slides the charger box across to her. No sign, no letters, no numbers anywhere. |
+| `say_heal` | op_r_heal "Hold {HEAL} to heal." | The road: the small cat stands perfectly still, paws at her sides; the charger box is clicked into a port in her back between her shoulder discs and its cyan window glows; a cracked plate on her side closes as fine cyan threads draw it shut. |
+| `say_burst` | op_r_winch "Burst the winch with the pack." | THE RELEASE: the small cat throws both paws forward and a jagged burst of cyan-white current leaps from her claws into the purple-veined winch arm; the arm jerks up and lifts clear of the road, purple light breaking off it in shards. Motion lines only along the burst. |
+| `say_node` | op_r_node "Solve the monument past the winch." | Past the lifted winch on the street: a tall dark stone obelisk monument with a glowing cyan sigil carved in its face; the small cat reaches up and lays one paw on the sigil, and a few cyan nodes light around it like a puzzle waiting. |
+| `say_alpha` | q_ask_alpha_pack (the wolves' Alpha) | THE MEADOW DEN at dusk: the big robot wolf Alpha on a rock, head thrown back in a howl, purple light in its eyes and veins; around it the pack of robot wolves turn their purple eyes the same way. Small in the foreground, the cat watches from behind scrap. |
+| `say_camp` | sl_ratchet_moving "Find me at the camp by the lion." | The meadow road at evening: Ratchet walking away from us with his tools and canisters strapped high on his back, toward a small camp — a drum fire and a torn awning — beside the tall barred gate of a great enclosure. |
+
+---
+
 ## 2bv. THE CATS LIE DOWN, AND THE ORACLE STANDS ✔ FIRED AND WIRED 2026-11-17 (the Oracle's notice turn and a clean-keyed work take still to fire)
 
 **Fired 2026-11-17** (job ids in `assets/source/README.md`): the cat's fold —
@@ -3557,7 +3644,7 @@ done, and no two of these are the same shape.
 - `gate_deep.jpg` — a ringed organic iris of dull flesh in wet mineral,
   violet light only in the tendrils.
 
-**THE CITY GATE IS DELIBERATELY NOT RE-FIRED.** `gate_city.jpg` already
+**(Superseded 2026-11-20: the owner asked for it — re-fired, §2ce item 4.)** **THE CITY GATE IS DELIBERATELY NOT RE-FIRED.** `gate_city.jpg` already
 exists and is the one gate the standing order singles out as the huge epic
 multilayer monument. Re-rolling it would have been duplication, which the
 ledger forbids, so the sixth slot is spent and closed rather than filled.
@@ -6965,3 +7052,20 @@ The crossed arms and the tapping foot are a new strip.
   row. **Still open:** one strip per weapon tier with the blade on her back
   (today the armed costume crosses her arms without it), and the toe-tick cue
   (AUDIO_QUEUE A-TAP).
+
+## THE CONDUITS' ROAD — what is still owed (2026-11-21)
+
+Shipped: the Silt Mire (three paintings, the culvert, Bilge, the raft, the insects), MIREJAW on
+the lion engine (Kling 3.0 Turbo takes), the order NULLFANG → Prowler → FURNACE → TALONHOST →
+GLACIERE → MOTHER-V. Owed, in order:
+
+1. **The PRISM PROWLER on the lion engine** (the Conduits' sage now): a design still from
+   `prism_parts.webp` in the NULLFANG material, then takes over a real leopard/panther — stalk,
+   pounce, swipe, the light-split vanish, hurt, purify. ~8 takes × 10 credits (Kling 3.0 Turbo).
+2. **TALONHOST rebuilt to need the throw**: its breast plate turns blade, shards and grapple;
+   the joined blade's return pass strikes the engine on its back during its climb-out. Fight
+   code + takes of a real eagle's stoop and climb.
+3. ~~MIREJAW's death roll as its own take~~ — DELIVERED 2026-11-22 (Kling, second prompt: a
+   log roll, belly up and over), with the rest of his move set (docs/SPECIES_MOVESET.md).
+   The older species' gaps against that template are in `assets/movesets.json` (`missing`).
+4. **Bilge poling**: his loop sways; he should plant the pole and push.

@@ -97,7 +97,14 @@ function triNodeAnswer(ok) {
   burst(nd.st ? nd.st.x + 13 : 480, nd.st ? nd.st.y + 12 : 270, 24, '#b48cff', 260, 0.8, 100, 4, true);
   let all = true;
   for (let i = 0; i < NODES.length; i++) if (!G.save.flags[nodeKey(i)]) all = false;
-  if (all) G.grantRelic('sigil2');
+  // every node out-thought: the hero's world takes its vault seal from here;
+  // the robot world's seals are the Conduits' fights now (js/conduits-road.js),
+  // and the reward is a heavy handful of scrap instead
+  if (all && !G.save.flags.nodesAll) {
+    G.save.flags.nodesAll = 1;
+    if (typeof isHero === 'function' && isHero()) G.grantRelic('sigil2');
+    else { G.save.scrap += 300; G.toast('⬢ +300'); }
+  }
   persist();
 }
 // ===========================================================================
@@ -247,6 +254,13 @@ function triGen() {
     for (let i = 0; i < len; i++) TRI.memSeq.push(irnd(0, 3));
     TRI.memIn = 0; TRI.memPhase = 'show'; TRI.memShow = -1;
     TRI.memShowT = 0.35;
+    // A NEW QUESTION STARTS DARK (owner, 2026-11-19: "it starts with one
+    // virtual click on the top one ... it confuses the player to think there are
+    // 4 clicks. It only should show the actual clicks"). The press that answered
+    // the LAST question wrongly lit its node for a third of a second, and nothing
+    // counted that light down through the "get ready" card, so the retry's
+    // demonstration opened with it: one extra light ahead of the real ones.
+    TRI.memHit = null; TRI.memGo = 0;
     TRI.q = { hint: t('tt_q_mem') };
   }
 }
@@ -343,6 +357,7 @@ function triEatDirs() {
 // simply dropped, in the one place a child is most likely to be pressing early.
 // A press is held for a beat here too, and spent the moment input opens.
 let TRI_BUF = -1, TRI_BUF_T = 0;
+const MEM_GAP = 0.1;   // the dark between two notes of the memory lights, seconds
 function triBuffer(dt) { if (TRI_BUF >= 0) { TRI_BUF_T -= dt; if (TRI_BUF_T <= 0) TRI_BUF = -1; } }
 function triDir(n) {
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
@@ -410,9 +425,10 @@ function updateTrial(dt) {
         // taken as the FIRST answer, was nearly always wrong, and the node threw
         // her out. Owner, 2026-10-30: "if I press on any of the sequence that I
         // see, it automatically crashes and stops the game and go out of it."
-        // The press lights its own node so the player sees it was heard.
-        const echo = triDir(4);
-        if (echo >= 0) TRI.memHit = { i: echo, t: 0.3 };
+        // The press is spent and NOTHING lights: while the lights play, every
+        // light on screen is one of the sequence (owner, 2026-11-19 — a press
+        // lighting its own node during the demonstration read as an extra note).
+        triDir(4);
         TRI.memShowT -= dt;
         if (TRI.memShowT <= 0) {
           TRI.memShow++;
@@ -669,7 +685,10 @@ function drawTrial() {
     const hit = TRI.memHit && TRI.memHit.t > 0 ? TRI.memHit : null;
     for (let i = 0; i < 4; i++) {
       const [px2, py2] = pads[i];
-      const lit = TRI.memPhase === 'show' && TRI.memShow >= 0 && TRI.memSeq[TRI.memShow] === i;
+      // ...and each note goes dark for the last MEM_GAP of its time, so the same
+      // node twice running is two flashes. Without the gap 0-3-3 lit the bottom
+      // node once for twice as long, and a player counting lights counted two.
+      const lit = TRI.memPhase === 'show' && TRI.memShow >= 0 && TRI.memSeq[TRI.memShow] === i && TRI.memShowT > MEM_GAP;
       // the player's own press lights the node too, and fades over a third of a
       // second rather than for one frame — a flash you can miss is not feedback
       const own = hit && hit.i === i ? clamp(hit.t / 0.3, 0, 1) : 0;

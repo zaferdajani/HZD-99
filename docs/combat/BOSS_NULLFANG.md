@@ -302,3 +302,40 @@ Measured after the pass (`tests/openings.cjs`): `pounce>recover` worst 700 ms / 
 
 **A bug this pass shipped and then removed (2026-11-14).** `stalk` still carried a patrol's reflex — `face *= -1` on any side contact. While facing was re-aimed every frame it was overwritten before anyone saw it; once a turn became one committed pivot it was not. Standing in the meadow's dip (x 620, a tile below the arena floor) with her beyond it, every step was a side contact: the lion pivoted away, pivoted back, was counted as danced-around, and roared — 11 turns and 2 roars in 7 s, never coiling (`tests/lion-motion.cjs`, on build 4327eed76e82, which was live for under an hour). The line is gone: `lookAt()` owns its facing. The film that found it is `tools/lionfilm.cjs --attack`.
 
+## The dash is his signature (owner, 2026-11-20)
+
+*"his fight should be epic as i described with dash attc as signiture"*
+
+The crouch-and-dash (red gather, low curved lunge, red after-images, a slash out
+of the landing) is the move the fight is built round — the one he gives her
+when he is purified. `js/entities.js` `NF_DASH`, `nfDashChainStart`,
+`nfDashChainNext`, `nfDashLink`; held by `tests/nf-dash.cjs`.
+
+| | |
+|---|---|
+| opening move | the first coil of the fight is always the dash |
+| phase one | one dash, slash, then the standing idle (≈0.5 s opening) |
+| phase two | a CHAIN of two; below a quarter health, three |
+| between links | 0.3 s on his feet (a blow's opening), then a red crouch ≥ 0.42 s; a replant if she got behind him — he never snaps round |
+| the slash | a full 0.4 s tell (bosswindow floor), along the dash's own line |
+| chain end | announced (shake, hit-stop, dust), 0.2 s down + idle ≈ 0.75–0.85 s — the longer opening, under the 0.9 s gift line |
+| counters | jump the low lunge, dash through it, or be out of its line; hit him in the breaths and at the end |
+
+## Phase two, seen and heard (owner, 2026-11-21)
+
+*"I can only see one phase of nilfang ... It starts with a roar that you should download from
+any library of a lion roar. Makes him faster with his dashes. He jumps and scratch, but this time
+he should dash forward also ... stand on two legs ... its eyes need to blink."*
+
+| | |
+|---|---|
+| the break | at half health: the stagger, then a recorded lion's double roar (Freesound 69570, CC0) |
+| the look | from that roar every authored violet light on him burns red (media.js `rageArt`) |
+| the dash | phase two: red crouch 0.48 s (floor 0.42), flight 0.29 s, up to 1400 px/s (phase one 0.65 / 0.38 / 1150) |
+| the leap | phase two: leap → scratch (0.4 s tell) → a breath → red crouch → dash → spent |
+| the rear | phase two, close, on her floor, in front: rise 0.6 s (tell) → two high swats (reach 132) → two-paw slam (reach 160) → low crouch 0.55 s (the opening). Cooldown 6 s, never twice running. Counter: be out of reach, or behind him; the swats reach high, so jumping is not the answer. Filmed take `studio-rear` over a real-lion reference. |
+| the voice | the roar is one of three recorded takes, never the same twice running; the crouch is a recorded grunt |
+| the eyes | a blink every 1.8-3.5 s (sometimes twice), never in a wind-up: the eye's own pixels covered with the armour above it (assets/eyes.json positions) |
+
+Held by `tests/nf-phase2.cjs` and `tests/nf-dash.cjs`.
+

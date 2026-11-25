@@ -374,8 +374,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       'pressed at t=' + early.pressed + ' s; parries ' + early.parries + ', lost ' + early.lost);
     // THE PERFECT GUARD turns the same toss (js/parry.js): the brace raised in
     // the instant it lands, not held through the wind-up
-    const guardWith = async (raiseAt) => {
-      await page.evaluate(() => { T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40); G.boss.parries = 0; player.parryLockT = 0; T.go('tossprep', GH.tossTell); });
+    // (NO BLOCK BEFORE THE SWORD, owner 2026-11-20: "for now there is no block.
+    // But it's only claw." The brace is the blade's: tried with it, and without)
+    const guardWith = async (raiseAt, blade = false) => {
+      await page.evaluate((blade) => { T.stage(Object.assign({ ghMet: 1, ghParryTold: 1 }, blade ? { crystal: 1 } : {})); T.arena(700, 700 - 150 - 40); G.boss.parries = 0; player.parryLockT = 0; T.go('tossprep', GH.tossTell); }, blade);
       const c0 = (await S()).cores;
       let raised = null, upAtToss = null;
       const t0 = Date.now();
@@ -395,10 +397,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // A loaded machine can deliver the toss's first frames before the keydown
     // is seen; that run never raised the brace in time and did not test the
     // parry at all, so it is run again (at most four times) rather than counted.
-    let pg;
-    for (let a = 0; a < 4; a++) { pg = await guardWith(0.05); pg.tries = a + 1; if (pg.upAtToss) break; }
-    check('a brace raised as the toss lands turns it too: he staggers, she takes nothing, the counter opens',
-      pg.parries === 1 && pg.st === 'stagger' && pg.lost === 0 && pg.counter, JSON.stringify(pg));
+    // (he is fought before the blade exists — owning it means he is gone — so
+    // the brace's own parry is proven in tests/guard.cjs, with the blade)
+    const pc = await guardWith(0.05, false);
+    check('no brace before the sword: GUARD as the toss lands does nothing, and the toss lands',
+      pc.parries === 0 && pc.lost >= 1, JSON.stringify(pc));
     const hg = await guardWith(0.6);
     check('...a brace held through the wind-up only blocks: no clash', hg.parries === 0, JSON.stringify(hg));
     // the stagger is an opening
@@ -497,8 +500,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         const h0 = player.hurt; player.hurt = function (d, fx2, s2) { src.push(s2); return h0.apply(this, arguments); };
         for (let i = 0; i < 90; i++) { for (const k in keys) keys[k] = 0; if (jump && b.st === 'buck' && player.on) { keysP.Space = 1; } if (jump) keys.Space = 1; update(1 / 60); seen = Math.max(seen, (b.shocks || []).length); if (after == null && seen && b.st !== 'buck' && b.st !== 'buckprep') after = b.st; }
         player.hurt = h0; return { lost: c0 - player.cores, seen, after, src: src.join(',') }; };
-      out.stood = run(false); out.jumped = run(true); return out; });
-    check('struck from above he bucks, and a shock runs the floor both ways: standing beside him is hit', shock.stood.seen === 2 && shock.stood.lost >= 1 && /horn\.quake/.test(shock.stood.src), JSON.stringify(shock.stood));
+      // PHASE ONE: the floor behind and beside him is hers (owner, 2026-11-20:
+      // "The first phase, you can hit it and from the back without being hit back")
+      b.phase = 1; out.p1 = run(false);
+      b.phase = 2; out.stood = run(false); out.jumped = run(true); return out; });
+    check('phase one: struck from above he still bucks, but no shock runs the floor — standing beside him is safe', shock.p1.seen === 0 && shock.p1.lost === 0, JSON.stringify(shock.p1));
+    check('phase two: struck from above he bucks, and a shock runs the floor both ways: standing beside him is hit', shock.stood.seen === 2 && shock.stood.lost >= 1 && /horn\.quake/.test(shock.stood.src), JSON.stringify(shock.stood));
     check('...it is low: jumping it clears it', shock.jumped.lost === 0, JSON.stringify(shock.jumped));
     check('...and the buck is an answer, not an opening: he is choosing his next blow, not recovering', shock.stood.after && shock.stood.after !== 'recover', shock.stood.after);
     const hl = moves.openings['missile (hornless)'];
@@ -562,6 +569,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await waitFor(s => s.st === 'kickrecover', 2000);
     const kb = await S();
     check('the kick connects behind: a core, and she is driven away', kb.cores === c0 - 1 && kb.px > 950, 'lost ' + (c0 - kb.cores) + ', at ' + Math.round(kb.px));
+    // THE HIT IS THE HOOVES (owner, 2026-11-20: "the back hit is reaching too
+    // far. It's not proportionate to the actual leg distance. And I don't see
+    // his legs hitting backward"): mid-kick the hind hooves are off the floor
+    // and behind the rump, and the hit reaches no further than a hoof past them
+    const hk = await page.evaluate(() => { const b = G.boss; b.st = 'kick'; b.t = GH.kick * 0.55; b._el = GH.kick * 0.45; b.kickHit = true;
+      const hv = ghHoofWorld(b), m = -(b.face || -1), cx = b.cx(), fy = b.y + b.h;
+      const back = hv.slice(2).map(h => ({ behind: Math.round((h.x - cx) * m), up: Math.round(fy - h.y) }));
+      return { back }; });
+    check('...mid-kick both hind hooves are thrown back past the rump and up off the floor', hk.back.every(h => h.behind > 110 && h.up > 30), JSON.stringify(hk));
+    check('...and the hit reaches no further than a hoof past them (was a fixed box to 184 px)', hk.back.every(h => h.behind < 160), JSON.stringify(hk));
     // the phase-two charge is faster and chained, and only the last leg opens
     await page.evaluate(() => { T.arena(900, 520, { phase: 2 }); player.iT = 99; player.y -= 170; G.boss.chainLeg = 1; T.rec(); T.go('chargewarn', GH.chargeTell); window._vmax = 0;
       const f = () => { const b = G.boss; if (!b) return; if (b.st === 'rush') window._vmax = Math.max(window._vmax, Math.abs(b.vx)); if (T.recOn) requestAnimationFrame(f); }; requestAnimationFrame(f); });

@@ -36,10 +36,50 @@ function opStepId() {
 }
 function opFill(line) { return typeof ctlFill === 'function' ? ctlFill(line) : line; }
 // one dialogue window; `keys` may name arrays (a page each) or single lines
+// A LINE MAY CARRY A SHOT (owner, 2026-11-19: "if there's a way to create
+// small images, shots to explain what is happening with Ratchet, I would go
+// there instead of typing it"). OP_SHOT names the picture each key's line is
+// said over — a game picture, a comic panel, or a moving demo — drawn above
+// the dialogue box (js/game.js, DIALOG). A key with no shot says its line as
+// before. The pictures are the authored ones the game already has.
+// KEY MOMENTS ONLY (owner, 2026-11-20: "It's not about oversaturating the
+// game with images and videos. Certain key moments require videos or images,
+// but that shouldn't be it for the whole [game], unless we're making it to
+// look like a movie game"). Two of his lines carry a picture in all of
+// chapter one: the one that sets the chapter's goal, and the one that hands
+// her her first power. Every other line is just said. tests/text-budget.cjs
+// counts them; a third needs the owner's word.
+const OP_SHOT = {
+  op_r2: PANEL_GAME('r_marble'),       // "bring me marble": the stone under the meadow becoming the blade
+  op_gift1: 'demo:pack',               // "take my Volt Pack": what the pack does, moving
+};
+// ...and a line that names something on her own screen points at it: the
+// charge ring under her cores, which her hits fill and the pack spends
+const OP_POINT = { op_gift2: 'ring' };
+// The same pictures, found by the line itself however its dialogue opened.
+const LINE_SHOT = {
+  op_r2: PANEL_GAME('r_marble'),
+};
+const LINE_SHOT_BY = { lang: null, map: null };
+function lineShot(line) {
+  if (typeof line !== 'string') return null;
+  if (LINE_SHOT_BY.lang !== LANG || !LINE_SHOT_BY.map) {
+    const m = new Map();
+    for (const k in LINE_SHOT) for (const l of [].concat(t(k))) if (typeof l === 'string' && l.trim()) m.set(l.trim(), LINE_SHOT[k]);
+    LINE_SHOT_BY.lang = LANG; LINE_SHOT_BY.map = m;
+  }
+  return LINE_SHOT_BY.map.get(line.trim()) || null;
+}
 function opSay(name, keys, npc, onEnd) {
-  const lines = [];
-  for (const k of keys) lines.push(...[].concat(t(k)));
-  G.dialog = { name, lines: lines.map(opFill), i: 0, npc: npc || undefined, onEnd: onEnd || null };
+  const lines = [], shots = [], points = [];
+  for (const k of keys) for (const l of [].concat(t(k))) { lines.push(l); shots.push(OP_SHOT[k] || null); points.push(OP_POINT[k] || null); }
+  G.dialog = { name, lines: lines.map(opFill), i: 0, npc: npc || undefined, onEnd: onEnd || null,
+    shots: shots.some(Boolean) ? shots : undefined, points: points.some(Boolean) ? points : undefined };
+  for (const sh of shots) {
+    if (!sh || /^demo:/.test(sh)) continue;
+    if (/^assets\//.test(sh)) { if (typeof panelsImg === 'function') panelsImg(sh); }
+    else if (typeof mediaFetch === 'function') mediaFetch(sh, 1);
+  }
   G.state = 'DIALOG';
   if (npc && typeof npcSay === 'function') npcSay(npc, 0); else sfx('ui');
 }
@@ -160,11 +200,26 @@ function opRatchetRestored(s) {
 // back and asks (opRatchet, flags.opLore).
 function opExplain(s) {
   const f = G.save.flags;
-  opSay(t('n_ratchet'), ['op_r1', 'op_r2'], 'ratchet', () => {
+  // HIS THANKS IS THE VOLT PACK (owner, 2026-11-20: "When I gave Ratchet his
+  // battery back as a gift, he should give me the power cell instead of me
+  // having to go back outside, hit the machine, coming back inside, get the
+  // power volt ... one shot instead of multiple steps"). It used to be sold
+  // after the winch had bitten her: out, strike, bitten, back in, pitch, shop,
+  // card. Now he hands it over on waking, and says in one line what it does
+  // and where its charge is: the ring under her cores, which her hits fill.
+  // The lessons that were the purchase ('atk', 'pack') finish themselves.
+  const gift = !f.heal;
+  const keys = gift ? ['op_r1', 'op_r2', 'op_gift1', 'op_gift2'] : ['op_r1', 'op_r2'];
+  opSay(t('n_ratchet'), keys, 'ratchet', () => {
     f.opTold = 1;
     // the errand is given here, so the goal line names it from now on
     if (typeof qState === 'function' && qState('ratchet_forge') === 'none') qSet('ratchet_forge', 'active');
+    if (gift) {
+      f.heal = 1; f.pack = 1; f.tutBuy = 1;
+      if (player && typeof player.voltMax === 'function') player.volts = player.voltMax();
+    }
     persist();
+    if (gift) opPackCard();
     if (!f.ratchetSpareGiven) {
       f.ratchetSpareGiven = 1;
       invAdd('batt');

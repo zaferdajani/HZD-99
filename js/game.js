@@ -169,10 +169,17 @@ const SHOP = [
   // everything"). A shelf she can clear is not a shop, it is a pickup. Every
   // permanent line costs about half again what it did: one kingdom's scrap now
   // buys one or two of these, and which one is a decision.
-  { id: 'claws', type: 'crest', cost: 340 }, { id: 'over', type: 'crest', cost: 360 },
-  { id: 'plate', type: 'crest', cost: 460 }, { id: 'siphon', type: 'crest', cost: 320 },
-  { id: 'sprint', type: 'crest', cost: 280 },
-  { id: 'slot', type: 'slot', cost: 620 }, { id: 'core', type: 'core', cost: 800 },
+  // ...AND DEARER AGAIN (owner, 2026-11-20: "things need to be more expensive
+  // because it is easy to get shards in the game"): chapter one pays about 700,
+  // and every line is about 1.6x what it was — one crest a kingdom, if that.
+  { id: 'claws', type: 'crest', cost: 540 }, { id: 'over', type: 'crest', cost: 580 },
+  { id: 'plate', type: 'crest', cost: 740 }, { id: 'siphon', type: 'crest', cost: 520 },
+  { id: 'sprint', type: 'crest', cost: 450 },
+  { id: 'slot', type: 'slot', cost: 990 }, { id: 'core', type: 'core', cost: 1600 },
+  // ONE MORE HORN-STAR (owner, 2026-11-20: "shooting one ... can be upgraded at
+  // the shop into becoming shooting 2 and 3 and 4. Until it reaches the
+  // maximum"). GRAVEHORN's suit fires one; each upgrade adds one, up to four.
+  { id: 'volley', type: 'volley', get cost() { return SHOP_VOLLEY[Math.min(SHOP_VOLLEY.length - 1, shardLevel() - 1)]; } },
 ];
 const BENCH_ROOMS = ['A3', 'B3', 'D2', 'E2'];   // (D2: the archive's pod is at ZERO's door now — world.js, SAVE POINTS ARE FOR CRITICAL PLACES)
 
@@ -189,12 +196,21 @@ const G = {
   // for the halo (default: the room's own glow); seed salts the rim sparks so
   // two rings born in one frame do not spin in lockstep. Position-derived, so
   // it costs no randomness and a replayed frame draws the same ring.
-  addRing(x, y, r0, col) { this.rings.push({ x, y, r: r0 || 12, a: 0.85, a0: 0.85, col: col || null, seed: ((x * 7 + y * 13) | 0) & 0x7fffffff }); },
+  // NO RING ROUND ANY BODY (the ledger, 4x; owner 2026-11-21 on the purify scene, the
+  // teal circle round NULLFANG). Sixteen callers fired an expanding ring of light centred
+  // on a body — a blow, a parry, a roar, a death. The call stays so they need not change;
+  // it draws nothing. The impact is carried by the ripple, the cracks, the shake and sound.
+  addRing() {},
   // nothing speaks over the first meeting (manga-direction §6: the silence IS the beat)
   // A STORY LINE IS NOT A TOAST (js/overlay.js storyToast): the sentences the
   // story turns on become cards she acknowledges; the rest live long enough to
   // be read, and inside a menu they are said where the menu can show them.
   toast(text) {
+    // AN EMPTY LINE IS NO TOAST (js/text-lite.js): a narration the screen
+    // already shows was shortened to nothing, and a toast with a leftover
+    // number ("  +10 IQ") is trimmed rather than drawn with its gap
+    text = String(text == null ? '' : text).trim();
+    if (!text) return;
     if (this.meet) return;
     if (typeof storyToast === 'function' && storyToast(text)) return;
     if (typeof menuMsgSet === 'function') menuMsgSet(text);
@@ -324,20 +340,34 @@ const G = {
       this.save.flags.alpha = 1;
       this.save.quests = this.save.quests || {}; this.save.quests.alpha_pack = 'done';
       invAdd('batt');
-      showItem(t('alpha_won'), t('alpha_wond'));
+      // THE PACK ANSWERS HER (owner, 2026-11-20): the yield gives her the arm
+      // that calls one of its wolves (js/packcall.js) — one card says both
+      this.save.arms = this.save.arms || [];
+      if (!isHero() && !this.save.arms.includes('pack')) { this.save.arms.push('pack'); this.save.armIdx = this.save.arms.length; }
+      {
+        const card = showItem(t('alpha_won'), t('alpha_wond') + (isHero() ? '' : '  —  ' + t('arm_how')));
+        if (card && !isHero() && typeof loadoutTagCard === 'function') loadoutTagCard(card, 'arm', 'pack');
+      }
       this.save.scrap += 60;
       // its own cue, and it is the only one in the game that resolves major
       if (typeof setMusic === 'function') setMusic('alphaTame');
       persist();
       return;
     }
-    if (typeof MINIS !== 'undefined' && MINIS[kind]) {
+    if ((typeof MINIS !== 'undefined' && MINIS[kind]) || kind === 'mirejaw') {
       invAdd('batt');
-      showItem(t('i_batt'), t('i_battd'));
+      // the crocodile's card is his shed skin, for the pipe-smith (js/sewer.js)
+      if (!(kind === 'mirejaw' && typeof swSkinDrop === 'function' && swSkinDrop())) showItem(t('i_batt'), t('i_battd'));
       this.save.scrap += 40;
+      // A MINI-BOSS GIVES A PIECE OF WHAT THE SAGE NEEDS (owner, 2026-11-21:
+      // "This mini boss will give you a piece of the puzzle"). In the Conduits
+      // the pieces are the vault's three seals: the CARRIER's, the swamp
+      // crocodile's (swallowed), and the agent UNDERTOW's (SAGE_GIFT GB1D).
+      // The vault is the way to the kingdom's sage (js/conduits-road.js).
+      if (typeof K2_MINI_SIGIL !== 'undefined' && K2_MINI_SIGIL[kind] && !isHero()) this.grantRelic(K2_MINI_SIGIL[kind]);
       // 'room' was never a real track key — resolve to the zone's own theme,
       // which is exactly what loadRoom plays for a non-boss room
-      if (typeof setMusic === 'function') setMusic(G.roomDef ? G.roomDef.zone : 'A');
+      if (typeof setMusic === 'function') setMusic(G.roomDef ? (G.roomDef.mus || G.roomDef.zone) : 'A');
       return;
     }
     const grants = { glitch: 'dash', brood: 'djump', atlas: 'emp', zero: 'key' };
@@ -353,7 +383,11 @@ const G = {
     showItem(t('i_batt'), t('i_battd'));
     // …and the suit it was wearing. This is the Mega Man X loop: the thing that
     // beat you becomes the thing that beats the next one.
-    const arm = ARM_BY_BOSS[kind];
+    // (the robot world: the volley is GRAVEHORN's now — owner, 2026-11-20,
+    // "shooting ninja stars ... that's an extra skill that I should not be
+    // getting from Nelfang ... Maybe the rhino" — ghGone gives it; NULLFANG
+    // teaches the dash and only the dash)
+    const arm = (kind === 'glitch' && !isHero()) ? null : ARM_BY_BOSS[kind];
     if (arm) {
       if (!this.save.arms) this.save.arms = [];
       if (!this.save.arms.includes(arm)) {
@@ -368,7 +402,12 @@ const G = {
       this.save.relics.push(tr);
       this.toast(t('rl_' + tr) + ' — ' + t('rl_' + tr + 'd'));
     }
-    if (kind === 'prism') this.grantRelic('sigil1');
+    // THE SECOND SWORD IS THE SECOND SAGE'S GIFT (owner, 2026-11-21: "getting
+    // the second sword should probably happen while beating the second sage").
+    // The Prowler kept Kerf's second edge clean; purified, it hands it over.
+    // The hero's world keeps its old road (the seal, then the blade up the shaft).
+    if (kind === 'prism' && isHero()) this.grantRelic('sigil1');
+    if (kind === 'prism' && !isHero() && typeof k2GiveSecondSword === 'function') k2GiveSecondSword();
     if (kind === 'prism') {
       const def = ROOMS.X1.ents.find(e => e[0] === 'chest');
       spawnStatic('chest', def[1], def[2], def[3], 'ch_X1_' + ROOMS.X1.ents.indexOf(def));
@@ -923,11 +962,19 @@ function drawTinker(c, s, talking) {
   // he works while she is not standing over him. The moment she is close he
   // has looked up — which is what makes walking into the den feel like
   // interrupting somebody rather than approaching a shop fixture.
-  const working = inDen && !talking && !near;
-  r.t -= dt; r.tic -= dt;
+  // ...AND AT THE CAMP TOO, AND SLOWER (owner, 2026-11-20, seeing him the
+  // second time: "his movement is so fast. It looks like glitching instead of
+  // actually moving. It needs to be smooth, slow, chill, doing his thing
+  // outside of his room"). Outside the den he used to stand cutting between
+  // held plates every second, with a twitch every few: now he works his loop
+  // at a gentler pace, and the twitch belongs to the den alone.
+  const camp = !inDen;
+  const working = !talking && !near;
+  if (camp && !r.campReady) { r.campReady = 1; mediaFetch('ratchetLoop'); }
+  r.t -= dt; if (!camp) r.tic -= dt;
   // the job's own clock, and it only runs while he is working: a task that
   // keeps advancing behind a tic comes back mid-stroke in the wrong stage
-  if (working) tinkerTask(r, dt);
+  if (working) tinkerTask(r, camp ? dt * 0.55 : dt);
   if (working) r.vent -= dt;                             // he only cooks while he works
   const locked = r.pose === 'tic' || r.pose === 'vent';  // these two run to the end
   if (locked) {
@@ -1198,7 +1245,7 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   // npc was 32x40 — a head shorter than the player's own 60px plate, and the
   // owner's read of the first one he ever met was "very small, easy to miss".
   // The machine folk stand at her scale now.
-  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
+  const sizes = { swsmith: [56, 72], ferry: [56, 64], k2pole: [30, 30], item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
   const [w, h] = sizes[type];
   // `room` is stamped at spawn rather than read from G.roomId at use time,
   // because npcKey() must stay stable for a static that outlives a room change
@@ -1240,7 +1287,10 @@ function loadRoom(id) {
   surfCurve = null; surfRoom = null;   // the surface curve belongs to the room
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
+  if (typeof k2RoomLoaded === 'function') k2RoomLoaded(id);   // the swamp's raft and its insects (conduits-road.js)
+  if (typeof swRoomLoaded === 'function') swRoomLoaded(id);   // the sewer's lift and its air (sewer.js)
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
+  G.packWolf = null;   // a called wolf stays in the room it was called to
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   // An attack belongs to the room where it began. Do not carry a damaging
   // hurricane, buffered strike or half-charged release through a doorway.
@@ -1265,6 +1315,10 @@ function loadRoom(id) {
     // the rig popping into the take a second later
     if (G.boss && G.boss.kind === 'glitch' && typeof BEAST_STRIPS !== 'undefined'
         && typeof mediaFetch === 'function') for (const k of BEAST_STRIPS) mediaFetch(k);
+    // ...and his voice: the recorded lion is asked for with his art, so the first roar of the
+    // fight is the real one and not the stand-in a not-yet-loaded sound falls back to
+    if (G.boss && G.boss.kind === 'glitch' && typeof NF_LION !== 'undefined' && typeof mediaAudio === 'function')
+      for (const bank of Object.values(NF_LION)) for (const k of bank) mediaAudio(k);
   }, 0);
   parts.length = 0;
   const def = ROOMS[id];
@@ -1344,6 +1398,9 @@ function loadRoom(id) {
       // and rope, and a powered blade on a rail does not belong in it
       if (!(typeof isHero === 'function' && isHero())) G.saws.push(new SawRig(tx, ty, extra));
     } else if (kind === 'boss') {
+      // TALONHOST IS NOT HOME until she can throw (js/conduits-road.js): the
+      // eagle's hall in the Conduits stands empty on the way to the vault
+      if (typeof k2BossAway === 'function' && k2BossAway(extra)) return;
       if (!G.save.flags['boss' + extra.charAt(0).toUpperCase() + extra.slice(1)])
         G.boss = new Boss(extra, tx * TILE, ty * TILE);
     } else if (kind === 'chest') {
@@ -1359,12 +1416,16 @@ function loadRoom(id) {
     } else if (kind === 'riddle') {
       spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
+      // (the Foundry's hidden seal belongs to the hero's road; in the robot
+      // world the Conduits' own fights carry all three — js/conduits-road.js)
+      if (extra === 'sigil3' && !isHero()) return;
       if (!(extra === 'connector' && isHero()) && !G.save.flags['sr_' + extra]) spawnStatic('secret', tx, ty, extra);
     } else if (kind === 'pillar') {
       // the crystal pillar is quarried once per save — the shard in the bag
       // IS the pillar now, and a pillar that regrew would un-tell the story
       if (!G.save.flags['pl_' + (extra || 'cshard')]) spawnStatic('pillar', tx, ty, extra || 'cshard');
     } else {
+      if (kind === 'k2pole' && typeof k2PoleLive === 'function' && !k2PoleLive()) return;
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
@@ -1477,7 +1538,7 @@ function loadRoom(id) {
     G.bossEntry = { t: 0, dur: 2.3 };
     setMusic('boss_' + G.boss.kind);
   } else {
-    setMusic(def.zone);
+    setMusic(def.mus || def.zone);
   }
   // named for the kingdom the room lies in, not its palette (world.js zoneLabelKey)
   { const zk = typeof zoneLabelKey === 'function' ? zoneLabelKey(id) : 'z_' + def.zone;
@@ -1570,6 +1631,9 @@ function startGame(save) {
   G.save = save;
   if (typeof qualRestore === 'function') qualRestore();  // the player's own call outranks the guess
   applyTheme();
+  if (typeof bossOrderApply === 'function') bossOrderApply();     // the world's own sage order (types.js)
+  if (typeof k2Migrate === 'function') k2Migrate(save);           // the Conduits' new road (conduits-road.js)
+  if (typeof sewerApply === 'function') sewerApply(save);         // UNDERTOW's caves are a sewer in this world (sewer.js)
   // no saved bench may stand inside a place the story has not opened yet
   // (js/progress.js) — a hand-edited or pre-gate save wakes at the camp
   if (typeof progressBenchGuard === 'function') progressBenchGuard(save);
@@ -1801,7 +1865,7 @@ function meetStep(dt) {
     b.x += b.vx * dt; b.y += b.vy * dt; b.vy += 900 * dt;
     if (b.x > W + 40 || M.t > 1.6) {
       G.boss = null; G.meet = null;
-      setMusic(G.roomDef.zone);
+      setMusic(G.roomDef.mus || G.roomDef.zone);
       persist();
       // the hatch has just come into being behind her (progress.js pgHubSealed):
       // say where, once, while she is still looking east after the lion
@@ -2735,6 +2799,8 @@ function forgeCrystal() {
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
   if (!s) return;
+  if (typeof k2Interact === 'function' && k2Interact(s)) return;   // Bilge's ferry (conduits-road.js)
+  if (typeof swInteract === 'function' && swInteract(s)) return;   // Rivet the pipe-smith (sewer.js)
   if (s.type === 'rescue') {
     const e = s.target;
     if (!e || !e.disabled || e.cleanseT > 0) return;
@@ -3012,10 +3078,10 @@ function doInteract(s) {
     sfx('chest');
     if (s.extra === 'slot') { G.save.slots++; showItem(t('s_slot'), t('s_slotd')); }
     else if (s.extra === 'core') {
-      // a spare core in a quarry pocket (CV1): the first cave pays in health
-      G.save.coresMax = (G.save.coresMax || 4) + 1;
-      if (player) player.cores = player.maxCores();
-      showItem(t('sp_core'), t('sp_core_d'));
+      // a cache in a quarry pocket: scrap now, not a life (owner, 2026-11-20:
+      // "Getting extra lives should be only rewarded when you defeat a sage")
+      G.save.scrap = (G.save.scrap || 0) + 80;
+      showItem(t('sp_cache'), t('sp_cache_d').replace('%s', '80'));
     }
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
     else if (s.extra.indexOf('it:') === 0) {
@@ -3079,7 +3145,8 @@ function doInteract(s) {
     } else {
       // the third seal is the one a player can walk past — it is the only one
       // not handed over by a fight or a puzzle — so the door says where it lies
-      G.toast(t('vault_locked') + '  ' + have + '/3' + (relicHas('sigil3') ? '' : '  ' + t('vault_where3')));
+      // (robot world: the goal arrow names the fight that still holds a seal)
+      G.toast(t('vault_locked') + '  ' + have + '/3' + (relicHas('sigil3') || !isHero() ? '' : '  ' + t('vault_where3')));
       sfx('no');
     }
   }
@@ -3251,6 +3318,8 @@ function update(dt) {
         }
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
+      if (typeof k2Update === 'function') k2Update(dt);   // the swamp: raft, water, insects (conduits-road.js)
+      if (typeof swUpdate === 'function') swUpdate(dt);   // the sewer: lift, channels (sewer.js)
       if (!(typeof isHero === 'function' && isHero())) ceilWeather(dt, G.roomDef.zone);
       sawHum(dt);
       updateTutor(dt);
@@ -3283,6 +3352,7 @@ function update(dt) {
       if (typeof updateGateWalk === 'function') updateGateWalk(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
+      if (typeof packStep === 'function') packStep(dt);       // her called wolf (js/packcall.js)
       for (const p of G.projs) if (!p.dead) p.update(dt);
       G.projs = G.projs.filter(p => !p.dead);
       if (typeof crescentStep === 'function') crescentStep(dt);
@@ -3406,6 +3476,7 @@ function update(dt) {
   else if (G.state === 'CREST') updateCrest();
   else if (G.state === 'FILMS') updateFilms();
   else if (G.state === 'SHOP') updateShop();
+  else if (G.state === 'FERRY') k2FerryUpdate();
   else if (G.state === 'SKILLS') updateSkills();
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'TRIAL') updateTrial(dt);
@@ -3977,7 +4048,7 @@ function shopPick() {
   const f = G.save.flags || {}, cell = SHOP.find(q => q.type === 'cell');
   if (cell && !f.heal) return { it: cell, why: 'shop_why_pack' };
   if (cell && player && player.volts < player.voltMax() * 0.5 && G.save.scrap >= shopCost(cell)) return { it: cell, why: 'shop_why_cell' };
-  const open = SHOP.filter(q => q.type !== 'cell' && !shopSold(q));
+  const open = SHOP.filter(q => q.type !== 'cell' && !shopSold(q) && (q.type !== 'core' || shopCoreOpen()) && (q.type !== 'volley' || shopVolleyOpen()));
   if (!open.length) return null;
   const rank = (q) => { const i = SHOP_PICK_ORDER.indexOf(q.id); return i < 0 ? 99 : i; };
   const can = open.filter(q => G.save.scrap >= shopCost(q)).sort((a, b) => rank(a) - rank(b) || a.cost - b.cost);
@@ -4015,6 +4086,12 @@ function updateShop() {
       G.toast(t('story_pack_first')); sfx('no'); return;
     }
     if (shopSold(it)) { sfx('no'); return; }
+    // ONE DEAR LIFE, AND NOT ALWAYS (owner, 2026-11-20: "You might be able to
+    // purchase one life from Ratchet with a higher price, like a very high
+    // price, but shouldn't be available all the time"): on his shelf only once
+    // a sage has fallen, once, at 1200
+    if (it.type === 'core' && !shopCoreOpen()) { G.toast(t('s_core_wait')); sfx('no'); return; }
+    if (it.type === 'volley' && !shopVolleyOpen()) { G.toast(t('s_volley_wait')); sfx('no'); return; }
     const cost = Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1));
     if (G.save.scrap < cost) { G.toast(t('poor')); sfx('no'); return; }
     G.save.scrap -= cost; sfx('buy');
@@ -4043,11 +4120,17 @@ function updateShop() {
     }
     if (it.type === 'crest') grantCrest(it.id);
     else if (it.type === 'slot') { G.save.slots++; G.save.shop[it.id] = 1; showItem(t('s_slot'), t('s_slotd')); }
+    else if (it.type === 'volley') { G.save.shardLv = shardLevel() + 1; showItem(t('s_volley'), t('s_volley_now').replace('%n', String(G.save.shardLv))); }
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
 }
+const SHOP_VOLLEY = [600, 900, 1300];          // to 2, to 3, to 4 stars
+function shardLevel() { return Math.max(1, Math.min(4, (G.save && G.save.shardLv) | 0 || 1)); }
+function shopVolleyOpen() { return !isHero() && !!(G.save && G.save.arms && G.save.arms.includes('shard')); }
+function shopCoreOpen() { return !!(G.save && G.save.flags && (G.save.flags.sageLives | 0) > 0); }
 function shopSold(it) {
   if (it.type === 'cell') return false;          // a consumable is never sold out
+  if (it.type === 'volley') return shardLevel() >= 4;
   return it.type === 'crest' ? G.save.crests.indexOf(it.id) >= 0 : !!G.save.shop[it.id];
 }
 function effSlots() { return G.save.slots + (G.save.skills && G.save.skills.indexOf('mind') >= 0 ? 1 : 0); }
@@ -8541,6 +8624,26 @@ function groundColumnAt(worldX) {
   return [y, t];
 }
 
+// A BODY STANDS ON THE GROUND UNDER ITS FEET (owner, 2026-11-21, of MIREJAW:
+// "when it stands on the platform is leveled and... four of its limbs is almost
+// on the air"). A plate is drawn level and seated by its centre, so on a hump or
+// a slope the paws at either end hang over the curve or sink into it. This gives
+// the pitch and the drop that put both ends on their own ground: the line through
+// the ground under the front feet and under the back feet, pitched no steeper than
+// `tiltMax`, lowered or raised so no foot is in the ground, and held up only as far
+// as the belly (`belly` px over the foot line) needs to clear a crest between.
+// Null when the body is not standing (airborne, or no ground under it).
+function groundSeat(cx, footY, xA, xB, tiltMax, belly) {
+  const g = x => { const gc = groundColumnAt(x); return gc ? Math.min(gc[0], gc[1]) : null; };
+  const gm = g(cx); if (gm == null || Math.abs(gm - footY) > 4) return null;   // standing means ON it (the resolver puts the feet on it exactly)
+  const ya = g(xA), yb = g(xB); if (ya == null || yb == null) return null;
+  const L = xA < xB ? [xA, ya] : [xB, yb], R = xA < xB ? [xB, yb] : [xA, ya];
+  const tilt = clamp(Math.atan2(R[1] - L[1], R[0] - L[0]), -tiltMax, tiltMax), sl = Math.tan(tilt);
+  let y = Math.min(L[1] - sl * (L[0] - cx), R[1] - sl * (R[0] - cx));
+  for (let x = L[0] + 8; x < R[0]; x += 8) { const gy = g(x); if (gy != null) y = Math.min(y, gy + belly - sl * (x - cx)); }
+  return { tilt, dy: y - footY };
+}
+
 function* slabSilhouetteSteps(x) {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return;
@@ -10481,15 +10584,10 @@ function drawCaveMouth(cx2, gy, P, k, buried) {
   sh.addColorStop(0, '#1a2129'); sh.addColorStop(0.5, '#12171e'); sh.addColorStop(1, '#0b0f14');
   c.fillStyle = sh;
   rim(MW + 62, MH + 52, gy); c.fill();
-  // moss line riding the outer lip
-  c.strokeStyle = 'rgba(110,160,90,0.35)'; c.lineWidth = 3;
-  rim(MW + 60, MH + 50, gy); c.stroke();
-  // ...and the kingdom's own light catching one shoulder — the rim light
-  // that makes the mound read as a BODY standing in the room
-  c.save(); c.globalCompositeOperation = 'lighter';
-  c.strokeStyle = P.glow; c.lineWidth = 2.2; c.globalAlpha = 0.22;
-  rim(MW + 56, MH + 46, gy); c.stroke();
-  c.restore();
+  // (NO LINE ROUND IT. A moss stroke and a lit rim stroke used to ride the
+  // lip — a green outline drawn in light round the mouth, which the ledger
+  // refuses for any object: "Why still framed with light ?!!!". The rock's
+  // own filled layers below carry its shape.)
   // 2 — the mid rim: a darker collar inside the shoulder
   const md = c.createLinearGradient(0, gy - MH - 30, 0, gy);
   md.addColorStop(0, '#10151b'); md.addColorStop(1, '#080b0f');
@@ -11616,6 +11714,12 @@ function drawKerfStone(cx2, gy, P, k) {
 const GATE_STORY = {
   CV3: { at: 36 / 56, to: 'GA1T', ax: 0.5, lock: 'crystal', lockLine: 'ring_dormant' },
   GA1T: { at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' },
+  // CHAPTER TWO'S ROAD (progress.js): the relay gallery's floor carries a ring,
+  // dark until the CARRIER falls, down to UNDERTOW's tunnel — and back
+  // ...a floor HATCH into the sewer since 2026-11-24 (js/sewer.js): she hauls
+  // it open and drops into the gallery's shaft; the way back out is the
+  // gallery's own ring to the hall
+  B6: { at: 26 / 32, to: 'GB1', style: 'hatch', lock: 'bossCarrier', lockLine: 'sw_hatch_rusted' },
 };
 // ---------------------------------------------------------------------------
 // A RING IS WOKEN, NOT POPPED IN (owner, 2026-11-16: "if you're going to show
@@ -11639,6 +11743,9 @@ function ringWakeKey(def, room) { return 'rw_' + (room || G.roomId) + '>' + def.
 // dark although its lock is open: it has not been woken yet
 function ringAsleep(def) {
   if (!def || !def.lock || gateLocked(def)) return false;
+  // only a RING wakes (ringWakeStep): a hatch or a culvert with a lock simply
+  // opens when its flag is set — asleep, it would refuse her forever
+  if (typeof ringGateFor === 'function' && !ringGateFor(def)) return false;
   if (G.save && G.save.flags && G.save.flags[ringWakeKey(def)]) return false;
   const w = G.ringWake;
   return !(w && w.def === def && w.t >= RING_WAKE.lit);
@@ -11706,7 +11813,21 @@ function ringWakeStep(dt) {
   }
 }
 function gateLocked(def) {
+  if (def && gateFightSealed(def)) return true;
   return !!(def && def.lock && !(G.save && G.save.flags && G.save.flags[def.lock]));
+}
+// NO RUNNING FROM A FIGHT (owner, 2026-11-20: "When I'm in the alpha chamber,
+// the gate should deactivate once I'm inside ... so that I wouldn't run away
+// from the alpha"). While a boss in this room is fighting — met, awake, not
+// beaten and not purified — every ring in the room is asleep, and they wake
+// the moment it falls. Every boss room, not only the den: a boss is beaten by
+// fighting it (CLAUDE.md, the ledger), and a door out is a place to hide.
+function gateFightSealed(def) {
+  if (typeof bossActive !== 'function' || !bossActive() || G.boss.purified || G.boss.tamed) return false;
+  // (a guardian the save already counts as beaten is not a fight)
+  const k = G.boss.kind, won = k === 'alpha' ? 'alpha' : 'boss' + k.charAt(0).toUpperCase() + k.slice(1);
+  if (G.save && G.save.flags && G.save.flags[won]) return false;
+  return gateDoorsAll(G.roomId).indexOf(def) >= 0;
 }
 function gateDoorsAll(id) {
   const room = id == null ? G.roomId : id;
@@ -11730,6 +11851,12 @@ function gateDoorsAll(id) {
     }
     if (room === 'CV3') doors.push(GATE_STORY.CV3);
     if (room === 'GA1T') doors.push(GATE_STORY.GA1T);
+    // ...and chapter two's: the gallery's ring is the road to UNDERTOW and back
+    // until the eagle falls, when the hall's own ring (B4) leads into that
+    // network and this one would lead nowhere new
+    if (!(G.save.flags && G.save.flags.bossBrood)) {
+      if (room === 'B6') doors.push(GATE_STORY.B6);
+    }
   }
   return doors;
 }
@@ -11845,7 +11972,7 @@ function gateDoorNear(def) {
   if (def.style) return true;                       // booth, shrine, forge, carrel, hollow
   if (ringGateFor(def)) return true;                // a ring is an object she walks up to
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
-  return !!((G.roomDef && G.roomDef.cave) || (dest && dest.cave));   // and cave mouths
+  return !!((G.roomDef && (G.roomDef.cave || G.roomDef.grotto)) || (dest && (dest.cave || dest.grotto)));   // and cave mouths (and the sewer's grotto doors, js/sewer.js)
 }
 // EVERY DOOR IS A MACHINE RING (owner, 2026-11-15, on the outline arches this
 // replaces: "You have all the tools to build up awesome doors, and you end up
@@ -11888,9 +12015,10 @@ function ringGateFor(def) {
   if (def.style === 'den' || G.roomId === 'A10') return 'ringDen';
   if (def.style) return null;
   if ((G.roomId === 'CV3' && def.to === 'GA1T') || (G.roomId === 'GA1T' && def.to === 'CV3')) return 'ringQuarry';
-  if (G.roomDef.cave) return 'ringCave';
+  // (inside a guardian's network the way out is a ring — the sewer too, js/sewer.js)
+  if (G.roomDef.cave || G.roomDef.grotto) return 'ringCave';
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
-  if (!(dest && dest.cave)) return null;
+  if (!(dest && (dest.cave || dest.grotto))) return null;
   if (def.to[0] === 'G' && GATE_PLATE_BY_ZONE[G.roomDef.zone]) return null;
   return G.roomDef.zone === 'A' ? 'ringMeadow' : 'ringCave';
 }
@@ -12075,8 +12203,10 @@ function drawGateDoor(P, def, nearPlane) {
     // the ring itself and not the ring against the mouth standing in for it)
     if (G.artProbe) return;
   }
-  const guardDoor = dest && dest.cave && !(G.roomDef && G.roomDef.cave)
-    && def.to && def.to[0] === 'G';
+  // (a guardian's network that is not rock — the sewer, js/sewer.js — says so with `grotto`)
+  // (a door with a look of its own — the sewer's hatch — keeps it)
+  const guardDoor = dest && (dest.cave || dest.grotto) && !(G.roomDef && (G.roomDef.cave || G.roomDef.grotto))
+    && def.to && def.to[0] === 'G' && !def.style;
   const gzp = guardDoor && GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
   const gzim = gzp && scenePlate(gzp);
   // THE MEASUREMENT HOOK. tests/kingdom.cjs asks what share of a door is its
@@ -12103,7 +12233,7 @@ function drawGateDoor(P, def, nearPlane) {
     return;
   }
   // cave on EITHER side of the passage: it is a mouth, not a door
-  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) {
+  if ((G.roomDef && (G.roomDef.cave || G.roomDef.grotto)) || (dest && (dest.cave || dest.grotto))) {
     // The dedicated room painting already contains this exact opening.
     // Drawing a second mouth over it creates the pasted-on layer reported by
     // the owner. Rubble and the interaction remain at its shared world anchor.
@@ -12120,6 +12250,10 @@ function drawGateDoor(P, def, nearPlane) {
   // plate, so it fell through to the city monument's bones drawn at a third
   // strength in the far plane and graded to the wall behind them. A den is a
   // hole in rock — the kingdom's own fired mouth, in the near plane.
+  // THE CONDUITS' DOOR IS A DRAIN (js/conduits-road.js): a culvert, not a mouth
+  if (def.style === 'culvert' && typeof k2DrawCulvert === 'function' && k2DrawCulvert(ds, gy, k, def)) return;
+  // ...and the sewer's is a hatch in the floor (js/sewer.js)
+  if (def.style === 'hatch' && typeof swDrawHatch === 'function' && swDrawHatch(ds, gy, k, def)) return;
   if (def.style === 'den') { drawCaveMouth(ds, gy, P, k, false); structBeacon(ds, gy, 200, 272, k, 1); return; }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
@@ -12161,6 +12295,14 @@ function drawGateDoor(P, def, nearPlane) {
       return;
     }
   }
+  // THE PAINTED CITY GATE IS THE GATE (owner, 2026-11-20: "improve the city gate to
+  // give it more texture ... make it stand out, not fading into the background"). The
+  // leaves below are flat code-drawn panels laid over the painting's own doors; the
+  // re-fired gate_city plate (Higgsfield, armour plate, rust, hinges, the light through
+  // the gap) is the structure, so once it is up nothing is drawn over it — the same rule
+  // the cave mouths keep. The procedural monument stays only as the stand-in while the
+  // painting is still in flight.
+  if (G.roomId === 'W2' && G._vistaRoom === 'W2' && MEDIA_RAW[ROOM_VISTA.W2] && MEDIA_RAW[ROOM_VISTA.W2].naturalWidth) return;
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a
@@ -12515,6 +12657,8 @@ function gateHere() {
   const px = player.x + player.w / 2;
   let best = null, bd = 90;
   for (const d of gateDoors()) {
+    // (a floor hatch is reached only from the floor it is in — js/sewer.js)
+    if (d.style === 'hatch' && typeof swHatchReach === 'function' && !swHatchReach(d)) continue;
     const dx = Math.abs(px - gateWorldX(d));
     if (dx < bd) { bd = dx; best = d; }
   }
@@ -12571,7 +12715,10 @@ function gateEnter() {
     ax0: player.x, axTo: gapX,
     align: Math.abs(need) < 6 ? 1 : 0,
     alignT: 0, alignDur: Math.min(0.45, Math.abs(need) / GATE_STEP_VX),
+    stepKey: gateStepKey(G2),
   };
+  if (G.gateWalk.stepKey && typeof mediaFetch === 'function') mediaFetch(G.gateWalk.stepKey, 1);
+  if (G2.style === 'hatch' && typeof swHatchBegin === 'function') swHatchBegin(G.gateWalk);
   // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
   // the only place in the game she is seen from behind, and the four plates that
   // do it are lazy-loaded like everything else — requested at draw time they
@@ -12689,6 +12836,35 @@ const GATE_CLIP_ARMED = {
   dual:   { key: 'heroGateDual',   cells: 8, turn: 4, turnFrac: 0.2 },
   joined: { key: 'heroGateJoined', cells: 8, turn: 4, turnFrac: 0.2 },
 };
+// SHE STEPS UP INTO A DOOR THAT STANDS ABOVE THE GROUND (owner, 2026-11-21:
+// "when it faces the background, it raises a leg and it jumps, or it jumps
+// inside of it... raises a leg and climbs like a ladder or an elevated object,
+// or it hops inside of it, which is also cute"). A machine ring's opening starts
+// at its sill, about half her height up, and the swamp's culvert is a pipe
+// mouth: she CLIMBS over a ring's sill — knee up, hands on it, hauled up, on top,
+// walking on — and HOPS into the pipe with both feet. Drawn from behind, one
+// sheet per weapon tier (assets/source/hero/gate-step/), cut by
+// tools/stepstrip.cjs KEEPING the height she gains (movestrip would seat every
+// cell on one floor and flatten the step). Cells 0-5 the step, 6-7 her stride
+// on top. Ratchet's den door is no ring and keeps its run (the owner asked for
+// that one fast); the Wolf King's fanged ring is a ring, and she climbs it.
+const GATE_STEP = {
+  climb: { claws: 'heroClimbBare', single: 'heroClimbSingle', dual: 'heroClimbDual', joined: 'heroClimbJoined' },
+  hop:   { claws: 'heroHopBare',   single: 'heroHopSingle',   dual: 'heroHopDual',   joined: 'heroHopJoined' },
+};
+const GATE_STEP_CELLS = 8, GATE_STEP_END = 0.62, GATE_STEP_WALK = 1.4;
+function gateStepKind(def) {
+  if (!def) return null;
+  if (def.style === 'culvert') return 'hop';
+  return (typeof ringGateFor === 'function' && ringGateFor(def)) ? 'climb' : null;
+}
+function gateStepKey(def) {
+  const kind = gateStepKind(def); if (!kind) return null;
+  const w = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
+  return GATE_STEP[kind][w] || GATE_STEP[kind].claws;
+}
+// a step takes a little longer than a run through: the climb is the shot
+function gateWalkDur(g) { return g && g.stepKey ? GATE_STEP_WALK : GATE_WALK; }
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
@@ -12736,6 +12912,7 @@ function updateGateWalk(dt) {
     }
     return;
   }
+  if (g.hatch && typeof swHatchStep === 'function') { swHatchStep(g, dt); return; }
   // SHE DOES NOT TURN UNTIL THERE IS A BACK TO TURN. Holding the first moments
   // of the shot at the door costs nothing — she is standing there anyway, drawn
   // the way she always is — and it buys the plates the fraction of a second they
@@ -12752,7 +12929,7 @@ function updateGateWalk(dt) {
     if (g.turn < 1) return;
   }
   g.t += dt;
-  if (g.t >= GATE_WALK) {
+  if (g.t >= gateWalkDur(g)) {
     G.gateWalk = null;
     loadRoom(g.to);
     // AND SHE COMES OUT OF THE OTHER SIDE OF THE GATE. loadRoom keeps whatever
@@ -12848,6 +13025,7 @@ function gateTurnCell(dir, tp) {
 }
 function drawGateWalk() {
   const g = G.gateWalk; if (!g || g.align < 1) return;   // beat one is her own body
+  if (g.hatch && typeof swHatchDrawHer === 'function') { swHatchDrawHer(g); return; }
   // ---- beat two: the turn. She stands in the doorway at full size and her
   // body comes around through the authored angles. Nothing recedes yet — the
   // clock (g.t) is still at zero — so the recede below starts exactly where
@@ -12894,7 +13072,7 @@ function drawGateWalk() {
     }
     return;
   }
-  const k = clamp(g.t / GATE_WALK, 0, 1);
+  const k = clamp(g.t / gateWalkDur(g), 0, 1);
   // she walks into the gap and away: position lerps toward the vanishing point
   // in SCREEN space, scale falls off, and the last third fades to black so the
   // room change lands on darkness rather than on a cut
@@ -12902,7 +13080,10 @@ function drawGateWalk() {
   // tenth eases her into the stride; after that the pace is CONSTANT — no
   // smoothstep rush through the middle — and she simply gets smaller the
   // deeper she goes, until the dark takes her.
-  const e = k < 0.1 ? (k * k) / 0.1 * 0.5 + k * 0.5 : k;
+  let e = k < 0.1 ? (k * k) / 0.1 * 0.5 + k * 0.5 : k;
+  // a raised door: she climbs (or hops) AT the door, and only then goes on in
+  const stepIm = g.stepKey ? gateBackImg(g.stepKey) : null;
+  if (stepIm) e = k < GATE_STEP_END ? 0.1 * k / GATE_STEP_END : 0.1 + 0.9 * (k - GATE_STEP_END) / (1 - GATE_STEP_END);
   const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
   const tg = gateTarget(g.def);
   const tx = tg.x, ty = tg.y;
@@ -13000,6 +13181,20 @@ function drawGateWalk() {
     const dh=92*sc/ratio;
     c.drawImage(departure,col*cw,0,cw,departure.naturalHeight,x-dh/2,y-dh,dh,dh);
     G.gateBackKey='heroDeparture';
+  } else if (stepIm) {
+    // her walk clip's own turn cells first (unless the doorway already turned
+    // her), then the step, then her stride on top of it
+    const turned = !armed && !!gateBackImg('heroDeparture');
+    const tf = (clipIm && !turned) ? CLIPU.turnFrac * 0.6 : 0;
+    let src = stepIm, n = GATE_STEP_CELLS, cell;
+    if (k < tf) { src = clipIm; n = CLIPU.cells; cell = Math.min(CLIPU.turn - 1, Math.floor(k / tf * CLIPU.turn)); }
+    else if (k < GATE_STEP_END) cell = Math.min(5, Math.floor((k - tf) / (GATE_STEP_END - tf) * 6));
+    else cell = 6 + (Math.floor(trav / 26) % 2);
+    const cw = src.naturalWidth / n;
+    const dh = 92 * sc, dw = dh * (cw / src.naturalHeight);
+    c.drawImage(src, cell * cw, 0, cw, src.naturalHeight, x - dw / 2, y - dh, dw, dh);
+    G.gateBackKey = src === stepIm ? g.stepKey : CLIPU.key;
+    G.gateStepCell = src === stepIm ? cell : -1;
   } else if (clipIm) {
     const nBack = CLIPU.cells - CLIPU.turn;
     // the run turns its legs over faster, so its stride counter is shorter
@@ -13018,15 +13213,15 @@ function drawGateWalk() {
   // what the shot actually drew her as, for tests/opening.cjs — "she turned her
   // back" is the whole point of this function and it is not readable from the
   // outside otherwise
-  if (!clipIm && !departure) G.gateBackKey = im ? want : '';
-  if (im && !departure) {
+  if (!clipIm && !departure && !stepIm) G.gateBackKey = im ? want : '';
+  if (im && !departure && !stepIm) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
     // the gait's vertical, off the same stride counter as the frames. The clip
     // does NOT get this: it carries its own vertical, and a second synthetic bob
     // over an authored cycle is the thing tests/gait.cjs forbids for the run.
     const rise = -Math.abs(Math.sin((trav / 26) * Math.PI)) * 2.2 * sc;
     c.drawImage(im, x - dw / 2, y - dh + rise, dw, dh);
-  } else if (!clipIm && !departure && player) {
+  } else if (!clipIm && !departure && !stepIm && player) {
     // Neither back plate decoded. Her live body is all that is left — but it is
     // driven at WALK speed, not the old 210, so that at worst the shot reads as
     // someone walking off rather than sprinting sideways into a wall.
@@ -13069,7 +13264,7 @@ function wakeStart() {
   // ... before the game plays"). She is held here; panelsTick opens them on
   // the first playing frame and lets the waking run when they close.
   // (never in the Forge: the owner's editor opens straight into the world)
-  if (fault && !(typeof window !== 'undefined' && window.EDITOR) && typeof panelsSeq === 'function' && panelsSeq('wake')) {
+  if (fault && !(typeof window !== 'undefined' && window.EDITOR) && typeof panelsSeq === 'function' && panelsSeq('wake') && !panelsSeq('wake').film) {
     const S = typeof panelsState === 'function' ? panelsState() : null;
     if (S && !S.seen.wake && !S.past.wake) { G.wake.pend = true; return; }
   }
@@ -13294,6 +13489,8 @@ function drawStatics(P) {
   for (const pr of (ROOM_PROPS[G.roomId] || []))
     if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
   for (const s of G.statics) {
+    if (typeof k2DrawStatic === 'function' && k2DrawStatic(s)) continue;   // Bilge and his pole (conduits-road.js)
+    if (typeof swDrawStatic === 'function' && swDrawStatic(s)) continue;   // Rivet (sewer.js)
     const bob = Math.sin(performance.now() / 500 + s.t) * 3;
     if (s.type === 'bench' && typeof isHero === 'function' && isHero()) {
       // FOUNTAIN OF LIFE (hero world) — a marble spring of glowing elixir
@@ -13958,7 +14155,7 @@ function drawStatics(P) {
   // instruction, and the press it names would be refused anyway
   if (G.near && G.state === 'PLAY' && !G.recharge && (typeof tutAllows !== 'function' || tutAllows('INT'))) {
     const s = G.near;
-    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : t('open');
+    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : (typeof k2NearLabel === 'function' && k2NearLabel(s)) || (typeof swNearLabel === 'function' && swNearLabel(s)) || t('open');
     // "{INT} — Talk": the label names this player's own interact control —
     // and what the press will actually DO (a switched-off Servo is woken)
     const ol = typeof opNearLabel === 'function' ? opNearLabel(s) : null;
@@ -14174,6 +14371,12 @@ function drawRings(c) {
   }
 }
 function drawSeals(P) {
+  // A BOSS ROOM'S EXITS ARE SHUT WITHOUT A NEON BAR (owner, 2026-11-21: "the screen is
+  // glitched" — a flat teal strip pulsing down the room's edge, all fight long). The
+  // fight seal is the rule that holds them (gateFightSealed, the edge that does not
+  // take her); nothing is painted over the world for it.
+  return;
+  // eslint-disable-next-line no-unreachable
   if (!bossActive()) return;
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   const pu = 0.5 + Math.sin(performance.now() / 200) * 0.3;
@@ -14240,7 +14443,25 @@ function mapUnlocked() {
   for (const k in (G.save && G.save.visited) || {}) { if (++n >= 2) return true; }
   return false;
 }
-function mapBtnRect() { return { x: 846, y: 22, w: 92, h: 28 }; }
+function mapBtnRect() { return { x: 826, y: 22, w: 112, h: 30 }; }
+// the chart flying from the agent's hands to the button that opens it
+function drawMapGive() {
+  const M = G.mapGive;
+  if (!M || G.state !== 'PLAY') return;
+  M.t += 1 / 60;
+  const T = 1.1, k = Math.min(1, M.t / T), e = 1 - Math.pow(1 - k, 3);
+  const sx0 = typeof worldScreenX === 'function' ? worldScreenX(M.wx) : M.wx - cam.x;
+  const sy0 = typeof worldScreenY === 'function' ? worldScreenY(M.wy) : M.wy - cam.y;
+  const r = mapBtnRect(), touch = typeof TOUCH !== 'undefined' && TOUCH.enabled;
+  const x1 = touch ? 60 : r.x + r.w / 2, y1 = touch ? 110 : r.y + r.h / 2;
+  const x = sx0 + (x1 - sx0) * e, y = sy0 + (y1 - sy0) * e - Math.sin(Math.PI * k) * 90, sc = 1.6 - 0.8 * e;
+  c.save(); c.translate(x, y); c.scale(sc, sc);
+  c.fillStyle = '#e9dcb8'; c.strokeStyle = '#5b4a2a'; c.lineWidth = 2;
+  rr(c, -16, -12, 32, 24, 4); c.fill(); c.stroke();
+  ftxt('▦', 0, 1, 16, '#5b4a2a', 'center');
+  c.restore();
+  if (k >= 1) { G.mapGive = null; if (typeof sfx === 'function') sfx('pick'); }
+}
 function braidBtnRect() { return { x: 846, y: 56, w: 92, h: 28 }; }
 function drawMapButton() {
   if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
@@ -14258,7 +14479,10 @@ function drawMapButton() {
   c.strokeStyle = nw ? 'rgba(120,240,255,' + (0.5 + pu * 0.5) + ')' : 'rgba(120,200,230,0.45)';
   c.lineWidth = nw ? 2 : 1.3;
   rr(c, r.x, r.y, r.w, r.h, 7); c.stroke();
-  ftxt('▦ ' + t('map_btn'), r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  // the button says the key that opens it, so the button teaches the key
+  const mk = typeof ctlName === 'function' ? ctlName('MAP') : 'M';
+  ftxt('▦ ' + t('map_btn') + '  ' + mk, r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  if (nw && (G.mapPointT || 0) > 0 && !G.mapGive) { G.mapPointT -= 1 / 60; c.restore(); drawHudPointer(r.x + r.w / 2 - 20, r.y + r.h / 2); c.save(); }
   // and the multiverse itself, once she has actually forked one
   const b2 = braid();
   if (b2 && b2.led.length) {
@@ -14405,7 +14629,11 @@ const TUT_OLD_IDS = ['move', 'out', 'jump', 'gate', 'atk', 'kill', 'coin', 'buy'
 // Some lessons need the world to change before they make any sense.
 function tutEnter(st) {
   if (!st || !player) return;
-  if (st.id === 'heal' && player.cores >= player.maxCores()) {
+  // (the robot world: the pack is Ratchet's gift on waking, owner 2026-11-20,
+  // "one shot instead of multiple steps" — she is whole, the card has said what
+  // the pack does, and the first real hurt is what teaches the mend. Only
+  // NOSTOS, whose hero heals from birth, still stages the surge.)
+  if (st.id === 'heal' && player.cores >= player.maxCores() && typeof isHero === 'function' && isHero()) {
     // THE FIRST SURGE, ON PURPOSE. Repair cannot be taught to somebody at full
     // health: the button does nothing, and a lesson whose demonstration is a
     // no-op lands as noise. So the pack's first surge bites once — scripted,
@@ -14858,13 +15086,85 @@ function drawTutor() {
   // the hint names controls as {ATK}/{INT}/{UP}…, filled with THIS player's own
   // binding (ctlFill) — the chip and the dialogue speak the same controls
   const fill = typeof ctlFill === 'function' ? ctlFill : (x => x);
-  tutCard(px, py, tutHand(prompt), t(prompt.label), fill(t(prompt.hint)), learned, Math.max(0, T.hold / 0.7));
+  // THE BUTTON AND ITS NAME, NOT A SENTENCE (owner, 2026-11-19: "minimize all
+  // the text that we see while keeping the scenario understandable"). The
+  // sentence under the name said where to go — which the marker in the world
+  // already says — and which button to press — which the key box already
+  // shows. In the robot world the chip is the key and two or three words; a
+  // HOLD is a ring that fills round the key, not the word "hold" in a line.
+  const lite = !(typeof isHero === 'function' && isHero());
+  // (only while the chip asks for the held button itself — not the door or the walk the step sends her through first)
+  const holdStep = (st.id === 'heal' && prompt.action === 'HEAL') || (st.id === 'burst' && prompt.action === 'ATK');
+  tutCard(px, py, tutHand(prompt), t(prompt.label), lite ? '' : fill(t(prompt.hint)), learned, Math.max(0, T.hold / 0.7), lite && holdStep);
+}
+// A PICTURE ABOVE THE WORDS. One per line at most, looked up by the line's
+// index (d.shots, aligned with d.lines — js/overlay.js dlgClean keeps them
+// aligned when an empty line is dropped). 'demo:<id>' plays a demonstration
+// (js/riddles.js), 'assets/...' is a comic panel, anything else a media key.
+// Not drawn until the picture is here: a frame with nothing in it is noise.
+// A LINE THAT NAMES SOMETHING ON HER SCREEN POINTS AT IT: a bobbing arrow
+// and a breathing outline round the HUD element (the charge ring), so "your
+// ring" is never a guess at which of the things in the corner he means
+function drawHudPointer(x, y) {
+  const tt = performance.now() / 1000, bob = Math.sin(tt * 5) * 5, pu = 0.55 + Math.sin(tt * 4) * 0.45;
+  c.save();
+  c.strokeStyle = 'rgba(255,215,106,' + (0.5 + pu * 0.5).toFixed(3) + ')'; c.lineWidth = 3;
+  c.beginPath(); c.arc(x, y, 25 + pu * 3, 0, Math.PI * 2); c.stroke();
+  // the arrow, from below-right, pointing up-left at it
+  const ax = x + 46 + bob, ay = y + 46 + bob;
+  c.translate(ax, ay); c.rotate(-Math.PI * 0.75);
+  c.fillStyle = '#ffd76a'; c.strokeStyle = 'rgba(20,14,4,0.85)'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(18, 0); c.lineTo(2, -11); c.lineTo(2, -4); c.lineTo(-16, -4); c.lineTo(-16, 4); c.lineTo(2, 4); c.lineTo(2, 11); c.closePath();
+  c.stroke(); c.fill();
+  c.restore();
+  G.hudPoint = { x, y };
+}
+const DLG_SHOT_W = 248, DLG_SHOT_H = 140;
+// a drawn comic panel is shown bigger, in a comic panel's own frame
+const DLG_COMIC_W = 384, DLG_COMIC_H = 216;
+function drawDlgShot(d, x, boxY) {
+  const sh = d && ((d.shots && d.shots[d.i]) || (d.lines && typeof lineShot === 'function' && lineShot(d.lines[d.i])));
+  if (!sh) { G.dlgShot = null; return; }
+  const comic = /^assets\/manhua\//.test(sh);
+  const w = comic ? DLG_COMIC_W : DLG_SHOT_W, h = comic ? DLG_COMIC_H : DLG_SHOT_H, y = boxY - h - 10;
+  if (x > 140) x = 820 - w;   // right-to-left: against the box's right edge
+  let im = null, demo = null;
+  if (/^demo:/.test(sh)) demo = sh.slice(5);
+  else if (/^assets\//.test(sh)) { const r = typeof panelsImg === 'function' ? panelsImg(sh) : null; im = r && r.ok ? r.im : null; }
+  else { if (typeof mediaFetch === 'function') mediaFetch(sh); const m = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[sh]; im = m && m.naturalWidth ? m : null; }
+  if (!im && !(demo && typeof demoScript === 'function' && demoScript(demo))) { G.dlgShot = null; return; }
+  c.save();
+  if (comic) {
+    // the page's gutter and ink line: the panel, edge to edge, cropped to fill
+    c.fillStyle = '#f4efe4'; c.fillRect(x, y, w, h);
+    const iw = w - 8, ih = h - 8, sc = Math.max(iw / im.naturalWidth, ih / im.naturalHeight);
+    const sw = iw / sc, shh = ih / sc;
+    c.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - shh) / 2, sw, shh, x + 4, y + 4, iw, ih);
+    c.strokeStyle = '#111'; c.lineWidth = 2; c.strokeRect(x + 4, y + 4, iw, ih);
+    c.restore();
+    G.dlgShot = { key: sh, x, y, w, h, comic: true };
+    return;
+  }
+  c.fillStyle = 'rgba(6,14,20,0.94)'; rr(c, x, y, w, h, 10); c.fill();
+  c.strokeStyle = 'rgba(200,215,225,0.35)'; c.lineWidth = 1.5; rr(c, x, y, w, h, 10); c.stroke();
+  if (demo) drawSkillDemo(c, x + 8, y + 6, w - 16, h - 12, demo, performance.now() / 1000);
+  else {
+    // contained, never stretched or cropped: the picture is the explanation
+    const sc = Math.min((w - 16) / im.naturalWidth, (h - 12) / im.naturalHeight);
+    const iw = im.naturalWidth * sc, ih = im.naturalHeight * sc;
+    c.save(); rr(c, x + 4, y + 4, w - 8, h - 8, 8); c.clip();
+    c.drawImage(im, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
+    c.restore();
+  }
+  c.restore();
+  G.dlgShot = { key: sh, x, y, w, h };
 }
 // one card, used by the waking floor and by every power she is handed after it
-function tutCard(px, py, key, label, hint, learned, fade) {
+function tutCard(px, py, key, label, hint, learned, fade, hold) {
   const touch = typeof TOUCH !== 'undefined' && TOUCH.enabled;
   const keySize = touch ? 26 : 20, titleSize = touch ? 27 : 22, helpSize = touch ? 22 : 16;
-  const height = touch ? 88 : 70;
+  const oneLine = !hint;
+  const height = oneLine ? (touch ? 72 : 58) : (touch ? 88 : 70);
   c.save();
   c.font = '700 ' + keySize + 'px "Segoe UI", Tahoma, sans-serif';
   const kw = Math.min(240, c.measureText(key).width + 28);
@@ -14888,11 +15188,25 @@ function tutCard(px, py, key, label, hint, learned, fade) {
   const maxText = w - kw - 44;
   c.font = '600 ' + titleSize + 'px "Segoe UI", Tahoma, sans-serif';
   const labelSize = Math.min(titleSize, titleSize * maxText / Math.max(1,c.measureText(label).width));
-  ftxt(learned ? '\u2713 ' + label : label, textX, y + (touch ? 35 : 29), labelSize,
+  ftxt(learned ? '\u2713 ' + label : label, textX, oneLine ? y + height / 2 + labelSize * 0.34 : y + (touch ? 35 : 29), labelSize,
     learned ? '#bff5d2' : '#f3f5f6', align, null, '600');
-  c.font = '700 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
-  const hintSize = Math.min(helpSize, helpSize * maxText / Math.max(1,c.measureText(hint).width));
-  ftxt(hint, textX, y + (touch ? 65 : 53), hintSize, '#c8d5db', align);
+  if (!oneLine) {
+    c.font = '700 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
+    const hintSize = Math.min(helpSize, helpSize * maxText / Math.max(1,c.measureText(hint).width));
+    ftxt(hint, textX, y + (touch ? 65 : 53), hintSize, '#c8d5db', align);
+  }
+  // HOLD, SHOWN: a ring round the key that fills over a second and empties,
+  // the way the press itself charges — a child reads it as "keep it down"
+  if (hold && !learned) {
+    const kx = keyX + kw / 2, ky = y + height / 2, R = Math.max(kw, height - 32) * 0.5 + 7;
+    const ph = (performance.now() / 1100) % 1;
+    c.lineWidth = 3.5; c.lineCap = 'round';
+    c.strokeStyle = 'rgba(143,246,255,0.22)';
+    c.beginPath(); c.ellipse(kx, ky, R, (height - 32) / 2 + 7, 0, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = '#8ff6ff';
+    c.beginPath(); c.ellipse(kx, ky, R, (height - 32) / 2 + 7, 0, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, ph * 1.25)); c.stroke();
+  }
+  G.tutChipHold = !!(hold && !learned);
   c.restore();
 }
 // ===========================================================================
@@ -15650,6 +15964,7 @@ function drawWorldFrame() {
   if (G.boss) foeDraw(c, G.boss);
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
+  if (typeof drawPackWolf === 'function') drawPackWolf(c);
   for (const p of G.projs) p.draw(c);
   if (typeof drawCrescents === 'function') drawCrescents(c);      // the single blade's charged cut (js/entities.js)
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
@@ -15907,7 +16222,8 @@ function drawWorldFrame() {
     // to be put back.
     if (player.iT > 0 && Math.floor(player.iT * 18) % 2 === 0) c.globalAlpha = 0.4;
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
-    if(!(typeof drawRatchetReleaseHero==='function'&&drawRatchetReleaseHero(c)))player.draw(c);
+    // (in MIREJAW's jaws she is drawn by him, under his teeth: js/mirejaw.js mjHoldsHer)
+    if(!(typeof drawRatchetReleaseHero==='function'&&drawRatchetReleaseHero(c))&&!(typeof mjHoldsHer==='function'&&mjHoldsHer()))player.draw(c);
     if (typeof drawPurificationWorld === 'function') drawPurificationWorld(c);
     c.globalAlpha = 1;
     if (typeof drawHeroHitFlash === 'function') drawHeroHitFlash(c, player);   // struck: her body lights (js/combat-stats.js)
@@ -15917,6 +16233,11 @@ function drawWorldFrame() {
     if (typeof drawParryFx === 'function') drawParryFx(c, player);  // the clash and the counter's cross-cut
     if (typeof drawHitShapes === 'function') drawHitShapes(c);      // the Forge's SHAPES overlay (js/hitshape.js)
     c.restore();
+  }
+  // THE WATER goes over everything standing in it (js/conduits-road.js): a
+  // body below the line is under the surface, which is what makes it water
+  if (typeof k2DrawFront === 'function') {
+    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); k2DrawFront(c); if (typeof swDrawFront === 'function') swDrawFront(c); c.restore();
   }
   // ...and the edge of the world OVER her, so the last few pixels of her feet
   // pass behind it. See the fringe block above: this draw order is the effect.
@@ -17578,6 +17899,7 @@ function draw(tms) {
   if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js
   if (typeof drawOpeningHUD === 'function') drawOpeningHUD();
   drawMapButton();
+  drawMapGive();
   if (typeof drawSoundChip === 'function') drawSoundChip(tsec);
   if (typeof drawSaveFeedback === 'function') drawSaveFeedback();
   // THE PUSH. The frame she left is held and slid off the edge she left by, so
@@ -17712,6 +18034,10 @@ function draw(tms) {
     const bh = Math.max(note ? 96 : 118, (note ? 40 : 62) + gh + body.length * lh + 26);
     const by = 504 - bh;                           // grows upward, foot stays put
     dimPanel(140, by, 680, bh);
+    // THE SHOT this line is said over (js/opening.js OP_SHOT): a small framed
+    // picture standing on the box, over the speaker's side
+    if (typeof drawDlgShot === 'function') drawDlgShot(d, rtl ? 820 - DLG_SHOT_W : 140, by);
+    if (d.points && d.points[d.i] === 'ring') drawHudPointer(38, 66);
     // 64×64 portrait bust — face acting the sprite is too small to carry
     if (!note) {
       let expr = 'neutral';
@@ -17834,6 +18160,8 @@ function draw(tms) {
     drawPanelList();
   } else if (st === 'SHOP') {
     drawShop();
+  } else if (st === 'FERRY') {
+    k2FerryDraw();
   } else if (st === 'SKILLS') {
     drawSkills();
   } else if (st === 'RELICS') {
@@ -19343,8 +19671,10 @@ function drawShop() {
     // THE PACK IS NOT A REFILL. Until it is bought the first row is the Volt
     // Pack — permanent, marked, and the only thing on the list she can buy;
     // after it, the same row is the refill it always was (js/opening.js).
-    const row = typeof opShopRow === 'function' ? opShopRow(it, y, sel) : null;
+    let row = typeof opShopRow === 'function' ? opShopRow(it, y, sel) : null;
     if (row) { name = row.name; desc = row.desc; }
+    if (it.type === 'core' && !sold && !shopCoreOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_core_wait'); }
+    if (it.type === 'volley' && !sold && !shopVolleyOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_volley_wait'); }
     const col = row && row.locked ? '#56626e' : sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
     // WHICH SYSTEM IS THIS LINE? A crest — and the port width a crest sits
     // in — wears the crest's diamond (js/loadout.js): dashed while it is on

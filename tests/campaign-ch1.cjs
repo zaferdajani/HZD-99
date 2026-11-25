@@ -65,8 +65,11 @@ const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 // NULLFANG's purification off the room on 2026-11-16 — "You've already showed
 // the video with the scene where I purified it" — and it is library-only now.
 // The purification's film is what plays, and the lion mission waits it out.)
-const REQUIRED_PANELS = ['wake', 'bay', 'gate', 'letter', 'drawer', 'ratchet', 'meet',
-  'cave', 'marble', 'forge', 'passage', 'sage', 'break', 'chime', 'ch2'];
+// (2026-11-19, "When there is a video no need for comic": the wake and the
+// forge are told by their films, and Ratchet's two panels by his own lines)
+// (2026-11-20, the owner choosing the key moments: the gate, the toolbox, the
+// cave mouth, the marble, the maintenance door and the break are library pages)
+const REQUIRED_PANELS = ['letter', 'meet', 'sage', 'chime', 'ch2'];
 
 function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {
   const seen = Array.from(panelsSeen || []);
@@ -381,7 +384,7 @@ async function snap() {
       canBurst: typeof burstUnlocked === 'function' && G.save ? burstUnlocked() : false,
       burstVolts: typeof BURST_VOLTS === 'number' ? BURST_VOLTS : 66, healCost: P && P.healCost ? P.healCost() : 33,
       dialog: G.dialog ? { name: G.dialog.name || '', line: G.dialog.lines[G.dialog.i] || '', i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art || null, demo: G.dialog.demo || null } : null,
-      tut: st ? { id: st.id, i: G.tut.i, hold: G.tut.hold || 0, action: tp && tp.action, tx: tp && tp.target && tp.target.x, hint: tp ? ctlFill(t(tp.hint)) : '', label: tp && tp.label ? t(tp.label) : '' } : null,
+      tut: st ? { id: st.id, i: G.tut.i, hold: G.tut.hold || 0, action: tp && tp.action, tx: tp && tp.target && tp.target.x, hint: tp && typeof isHero === 'function' && isHero() ? ctlFill(t(tp.hint)) : '', label: tp && tp.label ? t(tp.label) : '' } : null,
       goal, toasts: (G.toasts || []).map(q => q.text),
       near: G.near ? { type: G.near.type, extra: G.near.extra || null } : null,
       en, boss: B ? { k: B.kind, x: Math.round(B.x), y: Math.round(B.y), w: B.w, h: B.h, hp: B.hp, max: B.maxHp || B.hp0 || null, st: B.st, dead: !!B.dead, tame: !!B.tame, meet: !!B.meet, face: B.face, t: B.t, wind: B.windT || 0, cx: B.cx ? B.cx() : B.x + B.w / 2, cy: B.cy ? B.cy() : B.y + B.h / 2, vx: B.vx || 0, vy: B.vy || 0, on: !!B.on, purified: !!(B.purified || B.freed), hide: B.hideK == null ? 1 : B.hideK, turned: B.turnedT || 0, shocks: (B.nfShocks || []).map(q => [Math.round(q.x), q.dir]), orbs: (B.nfOrbs || []).map(q => [Math.round(q.x), Math.round(q.y), Math.round(q.vx)]),
@@ -972,8 +975,8 @@ mission('sage', s => s.flags.includes('sageTame_GA1D'), async s => {
 });
 // 6. CHIME — the bell on the climb above the meadow (A8 -> A9)
 mission('chime', s => s.flags.includes('bossChime'), async s => {
-  // NULLFANG's break plays on the road (A2 west / A3 east): watch it, and its pages
-  if (s.flags.includes('nfBreak') && (s.room === 'A2' || s.room === 'A3') && !(R.pansSeen && R.pansSeen.has('break'))) { await linger(s, 'break', 20000); return; }
+  // (NULLFANG's break has no pages in the game since 2026-11-20 — the owner
+  // chose the key moments — so there is nothing to wait for on the road)
   if (!(await readyFor(s, 'A3', 'A9'))) return;
   if (s.room !== 'A9') { await travel(s, 'A9'); return; }
   await bossFight(s);

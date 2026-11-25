@@ -196,6 +196,10 @@ function gearRows(save) {
     const worn = typeof activeArm === 'function' ? activeArm() : null;
     for (const arm of ownedArms()) rows.push(row('arm:' + arm.id, 'arm_' + arm.id, 'arm_' + arm.id + 'd', true, false, !!(worn && worn.id === arm.id), 'gear_coreslot'));
   }
+  // THE HIDE SHELL Rivet forged from MIREJAW's skin (js/sewer.js): Enter puts
+  // it on her back or takes it off — slower in it, safer from behind
+  if (save.flags && save.flags.shellOwned && !(typeof isHero === 'function' && isHero()))
+    rows.push(row('shell', 'sw_shell', 'sw_shelld', true, false, !!save.flags.shellOn, 'sw_backslot'));
   return rows;
 }
 // THE KEY THAT USES IT, said on the part itself — in the words of whatever she
@@ -232,6 +236,7 @@ function gearActivate() {
     G.save.armIdx = r.installed ? 0 : Math.max(0, at); persist(); sfx('ok');
     return;
   }
+  if (r.id === 'shell') { G.save.flags.shellOn = r.installed ? 0 : 1; persist(); sfx('ok'); return; }
   if (r.fixed) { G.toast(t('gear_fixed')); sfx('ui'); return; }
   const eq = G.save.equip, at = eq.indexOf(r.id);
   if (at >= 0) eq.splice(at, 1);

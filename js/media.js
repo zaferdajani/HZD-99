@@ -23,6 +23,7 @@ const MEDIA_SRC = {
     beastStudioLeap: 'assets/characters/beast/studio-pounce.webp',
     beastStudioRoar: 'assets/characters/beast/studio-roar.webp',
     beastRearSwipe: 'assets/characters/beast/studio-rake.webp',
+    beastStudioRear: 'assets/characters/beast/studio-rear.webp',   // up on his hind legs, two swats, the slam (2026-11-21)
     beastHurt: 'assets/characters/beast/studio-hurt.webp',
     // the turn (a planted pivot through the front, LEFT to RIGHT) and the
     // standing idle — filmed 2026-11-13 from the same standing frame
@@ -206,6 +207,8 @@ const MEDIA_SRC = {
     agTallyGather: 'assets/characters/agents/tally/gather.webp',
     agTallyLock: 'assets/characters/agents/tally/lock.webp',
     agTallyPure: 'assets/characters/agents/tally/pure.webp',
+    agTallyHitHigh: 'assets/characters/agents/tally/hithigh.webp',   // struck: head snapped back, arm flung
+    agTallyHitLow: 'assets/characters/agents/tally/hitlow.webp',     // staggered: doubled round the abacus, a knee gone
     agLeashStand: 'assets/characters/agents/leash/stand.webp',
     agLeashWalk8: 'assets/characters/agents/leash/walk8.webp',
     agLeashExhale: 'assets/characters/agents/leash/exhale.webp',
@@ -425,6 +428,47 @@ const MEDIA_SRC = {
     // swing's own progress, so the energy has its own cadence over the same
     // window. See HERO_BURST_FX in js/entities.js.
     swingBurstFx: 'assets/characters/hero/swing/burst_fx.webp',
+    // THE SILT MIRE (js/conduits-road.js, js/mirejaw.js; owner, 2026-11-21):
+    // its three paintings, the drain culvert that is its door, Bilge and his
+    // raft, the insects, and MIREJAW's filmed takes (assets/source/swamp/)
+    swampFar: 'assets/backgrounds/swamp_far.jpg',
+    swampWallow: 'assets/backgrounds/swamp_wallow.jpg',
+    swampOutfall: 'assets/backgrounds/swamp_outfall.jpg',
+    culvertMouth: 'assets/characters/swamp/culvert.webp',
+    // THE SEWER (js/sewer.js; owner, 2026-11-24): its three paintings, the floor
+    // hatch, Rivet the pipe-smith, MIREJAW's shed skin and the shell made of it
+    sewerGallery: 'assets/backgrounds/sewer_gallery.jpg',
+    sewerTunnel: 'assets/backgrounds/sewer_tunnel.jpg',
+    sewerCistern: 'assets/backgrounds/sewer_cistern.jpg',
+    sewerHatch: 'assets/characters/sewer/hatch.webp',
+    sewerSmithTalk: 'assets/characters/sewer/smith_talk.webp',
+    sewerSmith: 'assets/characters/sewer/smith.webp',
+    sewerSkin: 'assets/characters/sewer/skin.webp',
+    sewerShellSide: 'assets/characters/sewer/shell_side.webp',
+    sewerShellBack: 'assets/characters/sewer/shell_back.webp',
+    raftPlate: 'assets/characters/swamp/raft.webp',
+    bilgePole: 'assets/characters/swamp/bilge_pole.webp',
+    bilgeTalk: 'assets/characters/swamp/bilge_talk.webp',
+    dragonfly: 'assets/characters/swamp/dragonfly.webp',
+    mosquito: 'assets/characters/swamp/mosquito.webp',
+    mjIdle: 'assets/characters/croc/idle.webp',
+    mjWalk: 'assets/characters/croc/walk.webp',
+    mjSwim: 'assets/characters/croc/swim.webp',
+    mjBite: 'assets/characters/croc/bite.webp',
+    mjLeap: 'assets/characters/croc/leap.webp',
+    mjRoll: 'assets/characters/croc/roll.webp',
+    // the rest of his move set (docs/SPECIES_MOVESET.md, assets/movesets.json)
+    mjRun: 'assets/characters/croc/run.webp', mjTurn: 'assets/characters/croc/turn.webp',
+    mjNotice: 'assets/characters/croc/notice.webp', mjCrouch: 'assets/characters/croc/crouch.webp',
+    mjLand: 'assets/characters/croc/land.webp', mjGape: 'assets/characters/croc/gape.webp',
+    mjDaze: 'assets/characters/croc/daze.webp',
+    // HER, caught at the waist in his jaws and spun in the death roll (per weapon tier)
+    heroHeldBare: 'assets/characters/hero/held_roll_bare.webp', heroHeldSingle: 'assets/characters/hero/held_roll_single.webp',
+    heroHeldDual: 'assets/characters/hero/held_roll_dual.webp', heroHeldJoined: 'assets/characters/hero/held_roll_joined.webp',
+    mjTail: 'assets/characters/croc/tailslam.webp',
+    mjBellow: 'assets/characters/croc/bellow.webp',
+    mjHurt: 'assets/characters/croc/hurt.webp',
+    mjDown: 'assets/characters/croc/down.webp',
     servoLoop: 'assets/characters/npc/servo/work_loop.webp',
     monoLoop: 'assets/characters/npc/mono/work_loop.webp',
     // the Oracle's plates (ART_QUEUE §2bv): powered down, and a talking pair
@@ -510,6 +554,14 @@ const MEDIA_SRC = {
     heroGateSingle: 'assets/characters/hero/gate_walk_single.webp',
     heroGateDual:   'assets/characters/hero/gate_walk_dual.webp',
     heroGateJoined: 'assets/characters/hero/gate_walk_joined.webp',
+    // the step up into a raised door, from behind, per weapon tier (js/game.js GATE_STEP)
+    heroClimbBare: 'assets/characters/hero/gate_climb_bare.webp', heroClimbSingle: 'assets/characters/hero/gate_climb_single.webp',
+    heroClimbDual: 'assets/characters/hero/gate_climb_dual.webp', heroClimbJoined: 'assets/characters/hero/gate_climb_joined.webp',
+    // SHE OPENS THE SEWER HATCH (js/sewer.js): crouch, haul, push it over, hop, drop
+    heroHatchBare: 'assets/characters/hero/hatch_bare.webp', heroHatchSingle: 'assets/characters/hero/hatch_single.webp',
+    heroHatchDual: 'assets/characters/hero/hatch_dual.webp', heroHatchJoined: 'assets/characters/hero/hatch_joined.webp',
+    heroHopBare: 'assets/characters/hero/gate_hop_bare.webp', heroHopSingle: 'assets/characters/hero/gate_hop_single.webp',
+    heroHopDual: 'assets/characters/hero/gate_hop_dual.webp', heroHopJoined: 'assets/characters/hero/gate_hop_joined.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',
@@ -613,11 +665,80 @@ const MEDIA_SRC = {
   // sound effect in the game put together, for a quote that plays at a tier-up
   // and at a guardian's death and is never heard twice in a row. They are NOT
   // in `audio` below on purpose: loadMedia decodes everything in that map.
+  // A ROOM'S AIR: long recorded beds, STREAMED and looped by ambPlay (audio.js),
+  // never decoded — forty-odd seconds held as PCM is megabytes a room
+  amb: {
+    k2_amb: 'assets/sfx/swamp/k2_amb.ogg',
+    sw_amb: 'assets/sfx/sewer/sw_amb.ogg',
+  },
   sting: {
     hz_evosting: 'assets/sfx/hz_evosting.ogg',
     hz_winsting: 'assets/sfx/hz_winsting.ogg',
   },
   audio: {
+    // THE ALPHA'S OWN VOICE (owner, 2026-11-20: "It sounds like I'm listening
+    // to piano or electric ... instead of an actual animalistic, wolf-like
+    // howlings"). The howl and the far howl are real wolves — public-domain
+    // National Park Service recordings (Denali; Yellowstone, a pack) — and the
+    // rest are generated wolf recordings (Higgsfield). assets/source/audio/alpha.
+    // STRUCK METAL, MANY VOICES (owner, 2026-11-20: "multiple metallic hitting
+    // sounds for more diversities ... for different enemies and bosses"): three
+    // takes of each body's impact, CC0 (Kenney, Impact Sounds) — audio.js HIT_BANK
+    hk_metal_light_0: 'assets/sfx/hits/metal_light_0.ogg',
+    hk_metal_light_1: 'assets/sfx/hits/metal_light_1.ogg',
+    hk_metal_light_2: 'assets/sfx/hits/metal_light_2.ogg',
+    hk_metal_medium_0: 'assets/sfx/hits/metal_medium_0.ogg',
+    hk_metal_medium_1: 'assets/sfx/hits/metal_medium_1.ogg',
+    hk_metal_medium_2: 'assets/sfx/hits/metal_medium_2.ogg',
+    hk_metal_heavy_0: 'assets/sfx/hits/metal_heavy_0.ogg',
+    hk_metal_heavy_1: 'assets/sfx/hits/metal_heavy_1.ogg',
+    hk_metal_heavy_2: 'assets/sfx/hits/metal_heavy_2.ogg',
+    hk_plate_light_0: 'assets/sfx/hits/plate_light_0.ogg',
+    hk_plate_light_1: 'assets/sfx/hits/plate_light_1.ogg',
+    hk_plate_light_2: 'assets/sfx/hits/plate_light_2.ogg',
+    hk_plate_medium_0: 'assets/sfx/hits/plate_medium_0.ogg',
+    hk_plate_medium_1: 'assets/sfx/hits/plate_medium_1.ogg',
+    hk_plate_medium_2: 'assets/sfx/hits/plate_medium_2.ogg',
+    hk_plate_heavy_0: 'assets/sfx/hits/plate_heavy_0.ogg',
+    hk_plate_heavy_1: 'assets/sfx/hits/plate_heavy_1.ogg',
+    hk_plate_heavy_2: 'assets/sfx/hits/plate_heavy_2.ogg',
+    hk_tin_medium_0: 'assets/sfx/hits/tin_medium_0.ogg',
+    hk_tin_medium_1: 'assets/sfx/hits/tin_medium_1.ogg',
+    hk_tin_medium_2: 'assets/sfx/hits/tin_medium_2.ogg',
+    hk_punch_medium_0: 'assets/sfx/hits/punch_medium_0.ogg',
+    hk_punch_medium_1: 'assets/sfx/hits/punch_medium_1.ogg',
+    hk_punch_medium_2: 'assets/sfx/hits/punch_medium_2.ogg',
+    hk_punch_heavy_0: 'assets/sfx/hits/punch_heavy_0.ogg',
+    hk_punch_heavy_1: 'assets/sfx/hits/punch_heavy_1.ogg',
+    hk_punch_heavy_2: 'assets/sfx/hits/punch_heavy_2.ogg',
+    hk_glass_light_0: 'assets/sfx/hits/glass_light_0.ogg',
+    hk_glass_light_1: 'assets/sfx/hits/glass_light_1.ogg',
+    hk_glass_light_2: 'assets/sfx/hits/glass_light_2.ogg',
+    hk_glass_medium_0: 'assets/sfx/hits/glass_medium_0.ogg',
+    hk_glass_medium_1: 'assets/sfx/hits/glass_medium_1.ogg',
+    hk_glass_medium_2: 'assets/sfx/hits/glass_medium_2.ogg',
+    hk_glass_heavy_0: 'assets/sfx/hits/glass_heavy_0.ogg',
+    hk_glass_heavy_1: 'assets/sfx/hits/glass_heavy_1.ogg',
+    hk_glass_heavy_2: 'assets/sfx/hits/glass_heavy_2.ogg',
+    hk_soft_medium_0: 'assets/sfx/hits/soft_medium_0.ogg',
+    hk_soft_medium_1: 'assets/sfx/hits/soft_medium_1.ogg',
+    hk_soft_medium_2: 'assets/sfx/hits/soft_medium_2.ogg',
+    hk_bell_heavy_0: 'assets/sfx/hits/bell_heavy_0.ogg',
+    hk_bell_heavy_1: 'assets/sfx/hits/bell_heavy_1.ogg',
+    hk_bell_heavy_2: 'assets/sfx/hits/bell_heavy_2.ogg',
+    hk_generic_light_0: 'assets/sfx/hits/generic_light_0.ogg',
+    hk_generic_light_1: 'assets/sfx/hits/generic_light_1.ogg',
+    hk_generic_light_2: 'assets/sfx/hits/generic_light_2.ogg',
+    al_howl: 'assets/sfx/alpha/howl.ogg',
+    al_howl_far: 'assets/sfx/alpha/howl_far.ogg',
+    al_bark: 'assets/sfx/alpha/bark.ogg',
+    al_snap: 'assets/sfx/alpha/snap.ogg',
+    al_bite: 'assets/sfx/alpha/bite.ogg',
+    al_claw: 'assets/sfx/alpha/claw.ogg',
+    al_leap: 'assets/sfx/alpha/leap.ogg',
+    al_growl: 'assets/sfx/alpha/growl.ogg',
+    al_fury: 'assets/sfx/alpha/fury.ogg',
+    al_rend: 'assets/sfx/alpha/rend.ogg',
     nf_step: 'assets/sfx/nullfang/step.ogg',
     nf_coil: 'assets/sfx/nullfang/coil.ogg',
     nf_leap: 'assets/sfx/nullfang/leap.ogg',
@@ -628,6 +749,26 @@ const MEDIA_SRC = {
     nf_arrive: 'assets/sfx/nullfang/arrive.ogg',
     nf_awake: 'assets/sfx/nullfang/awake.ogg',
     nf_breath: 'assets/sfx/nullfang/breath.ogg',
+    // A REAL LION (owner, 2026-11-21: "a roar that you should download from any library of
+    // a lion roar"). One wild bout, recorded in the field (Freesound 69570, CC0): three of its
+    // full roars, the pair of them that opens his second phase, and three of its closing grunts.
+    // the swamp and its crocodile: real recordings, CC0 / US public domain
+    // (assets/CREDITS.md) — an Everglades alligator, a film-library hiss
+    mj_bellow: 'assets/sfx/swamp/mj_bellow.ogg', mj_growl: 'assets/sfx/swamp/mj_growl.ogg',
+    mj_hiss: 'assets/sfx/swamp/mj_hiss.ogg', mj_snap: 'assets/sfx/swamp/mj_snap.ogg',
+    mj_splash: 'assets/sfx/swamp/mj_splash.ogg', mj_slap: 'assets/sfx/swamp/mj_slap.ogg',
+    k2_mosq: 'assets/sfx/swamp/k2_mosq.ogg',
+    k2_punt: 'assets/sfx/swamp/k2_punt.ogg', k2_splash: 'assets/sfx/swamp/k2_splash.ogg',
+    // the sewer: a manhole scrape under a rusty gate's groan, a steel door's
+    // slam, storm-drain water (Freesound, CC0 — assets/CREDITS.md)
+    sw_creak: 'assets/sfx/sewer/sw_creak.ogg', sw_clang: 'assets/sfx/sewer/sw_clang.ogg',
+    nf_lroar1: 'assets/sfx/nullfang/lion/roar1.ogg',
+    nf_lroar2: 'assets/sfx/nullfang/lion/roar2.ogg',
+    nf_lroar3: 'assets/sfx/nullfang/lion/roar3.ogg',
+    nf_lroar_big: 'assets/sfx/nullfang/lion/roar_big.ogg',
+    nf_lgrunt1: 'assets/sfx/nullfang/lion/grunt1.ogg',
+    nf_lgrunt2: 'assets/sfx/nullfang/lion/grunt2.ogg',
+    nf_lgrunt3: 'assets/sfx/nullfang/lion/grunt3.ogg',
 
     hz_swing1: 'assets/sfx/hz_swing1.ogg',
     hz_swing2: 'assets/sfx/hz_swing2.ogg',
@@ -1501,6 +1642,34 @@ function pureArt(im) {
   PURE_ART.set(im, out);
   return out;
 }
+// HIS SECOND PHASE IS SEEN (owner, 2026-11-21: "I can only see one phase of nilfang").
+// From the roar that opens it, every authored violet light on NULLFANG — eyes, veins,
+// joints — burns the red of his dash: the same body, enraged. A recolour of the art's own
+// pixels (as pureArt washes them teal when he is purified), cached once per sheet.
+const RAGE_ART = new WeakMap();
+function rageArt(im) {
+  if (!im || !(im.naturalWidth || im.width)) return im;
+  const hit = RAGE_ART.get(im); if (hit) return hit;
+  let out = im;
+  try {
+    const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+    const id = x.getImageData(0, 0, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (d[i + 3] && b > 80 && b > g * 1.35 && r > g * 1.05) {
+        const v = Math.max(r, b);
+        d[i] = Math.min(255, v * 1.05); d[i + 1] = v * 0.26; d[i + 2] = v * 0.2;
+      }
+    }
+    x.putImageData(id, 0, 0);
+    cv.naturalWidth = w; cv.naturalHeight = h;
+    out = cv;
+  } catch (err) { out = im; }
+  RAGE_ART.set(im, out);
+  return out;
+}
 function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   // URGENT: a strip is asked for the frame it is needed, and a body that
   // waits a quarter-megabyte for its run cycle on a phone connection draws
@@ -1510,7 +1679,7 @@ function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   mediaFetch(key, 1);
   const raw = MEDIA_RAW[key];
   if (!raw || !raw.naturalWidth || !heroSheetCompatible(key, raw)) return false;
-  const im = pure ? pureArt(raw) : raw;
+  const im = pure === 'rage' ? rageArt(raw) : pure ? pureArt(raw) : raw;
   // what drew the body, for the diag panel: the owner's "nothing changed"
   // is answered by a screenshot that names the strip and the cell
   if (typeof G !== 'undefined') G.lastStrip = key + ':' + (((cell % cells) + cells) % cells);

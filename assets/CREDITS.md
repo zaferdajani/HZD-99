@@ -106,6 +106,8 @@ plate can be traced back to the generation it came from.
 | `characters/beast/*.webp`, `source/beast/takes/*.mp4` | Higgsfield, Seedance 2.5 | NULLFANG's move strips: the `studio-*` takes (2026-10-04) and the first-take `fall`, cut by `tools/vidstrip.cjs`; the takes archived in `source/beast/`. The rest of the first-take set (ART_QUEUE §2ax) was retired 2026-10-09; its `stalk` strip is kept as a scale reference at `source/beast/stalk.webp` |
 | `characters/hero/gait/*`, `hero/idle.webp`, `hero/hurt.webp`, `hero/swing/uppercut.webp`, `source/hero/takes2/*.mp4`, `source/hero/rig/*` | Higgsfield — Seedance 2.5, Meshy multi_image_to_3d / 3d_rigging | HZD-99's filmed move strips (ART_QUEUE §2aw): takes started from her own painted plates; the rigged model and its clips archived for the record |
 | `characters/hero/idle.webp`, `hero/gait/walk|run.webp`, `hero/fidget.webp`, `hero/heal.webp`, `hero/heal_fx.webp`, `hero/death.webp`, `hero/hurt.webp`, `hero/trans_{air,land,skid,dash,wall,takeoff}.webp`, `hero/gate_walk.webp`, `hero/gate_run.webp`, `hero/gate_walk_{single,dual,joined}.webp`, `hero/swing/{claw_1,claw_2,burst,burst_fx}.webp` (claw_2 and burst are 2026-09-18 delivery outputs pinned by tests/hero-delivery.cjs; SWING_STRIP draws claw_1/uppercut/claw_charge for those blows), `source/hero/delivered/*` | OpenAI GPT Image, prompted and reviewed by the owner | HZD-99's DRAWN animation sheets (2026-09-15/16). Generated outside this repo to the briefs in `docs/ART_PROMPTS_GPT.md` and handed over as finished sheets; every one is archived unaltered in `source/hero/delivered/` and cut into strips here by `tools/sheetslice.cjs` + `tools/movestrip.cjs` (bodies) or `tools/fxstrip.cjs` (effects). These supersede the filmed and Higgsfield-painted versions of the same moves, which stay on disk as the record |
+| `characters/hero/gate_{climb,hop}_{bare,single,dual,joined}.webp`, `source/hero/gate-step/*` | Higgsfield, GPT Image 2.6 | HER STEP UP INTO A RAISED DOOR (2026-11-21): seen from behind she climbs over a machine ring's sill or hops into the swamp's culvert, one sheet per weapon tier, redrawn from her delivered walk-away sheets; cut by `tools/stepstrip.cjs` keeping the height she gains. Job ids and the refused sheet in `source/hero/gate-step/jobs.json` |
+| `characters/hero/held_roll_{bare,single,dual,joined}.webp`, `source/hero/held-roll/*` | Higgsfield, GPT Image 2.6 | HER IN MIREJAW'S JAWS (2026-11-22): caught at the waist and spun round in his death roll, one sheet per weapon tier, from her delivered hurt sheet; keyed by `tools/keyheld.py`, cut by `tools/stepstrip.cjs --center`. Job ids in `source/hero/held-roll/jobs.json` |
 | `characters/hero/*`, `characters/hzd_8yaw*.webp` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element; restyled 2026-09-03 into the corridor film's painted look (ART_QUEUE §2am), every plate archived in `source/hero/style_d/` |
 | `characters/gear/jetpack.webp` | Higgsfield | the back-jet gear (§1c) |
 | `characters/{kiln,rime,snare}/*.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) |
@@ -201,8 +203,69 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 
 `manhua/ch1/game/{passage_a,cv_mouth,cv_walk,d_door,d_walk,f_blade,f_strike,fight_a,break_a,f_walk,m_down,s_ring,sage_rev,s_cell,s_cleanse}.webp` were re-fired 2026-11-17 (Higgsfield GPT Image 2.6) so the hero, NULLFANG and TALLYMAN are on model; masters, the refused panels and job ids in `source/manhua/refire-2026-11/`. **Generated with Higgsfield.**
 
+`manhua/ch1/game/{d_walk,d_door,d_road}.webp` — the road pages, which played as she stepped out of the service bay — were taken out of the game 2026-11-19 on the owner's word (comics only from the city gate on) and moved, unchanged, to `source/manhua/ch1/game/retired-bay/`.
+
 `characters/agents/{slag,redact,lapid,pupil}/*.webp` — the other four of the Eye's agents (SLAGFATHER, REDACTOR, LAPIDARY, PUPIL), eight states each (2026-11-17): stills by Higgsfield GPT Image 2.6, walks filmed with Higgsfield Kling 4.0 Flash from each agent's own stand plate; masters, job ids and the cut in `source/agents/`. **Generated with Higgsfield.**
 
 `characters/agents/tally/rig/*.webp` — TALLYMAN's body as seven separate parts for the rig (2026-11-17, Higgsfield GPT Image 2.6 against his own stand plate; master `source/agents/tally/parts_asfired.webp`, cut by `tools/agentparts.cjs`). **Generated with Higgsfield.**
+`characters/beast/studio-rear.webp` — NULLFANG rearing on his hind legs, two swats and the slam (2026-11-21, Higgsfield Seedance 2.5 from his own standing frame over a generated real-lion motion reference; masters and jobs in `source/beast/studio-2026-11-21/`, cut by `tools/lion-studio.py`). **Generated with Higgsfield.**
+`sfx/nullfang/lion/{roar1,roar2,roar3,roar_big,grunt1,grunt2,grunt3}.ogg` — NULLFANG's voice: cut from **"Lion loud.mp3" by Bidone** (Freesound 69570, a field recording of a lion's roar bout), **CC0 1.0** — https://freesound.org/s/69570/ . Master in `source/audio/lion/` with the CC0 compilation "G12-47-Lions Roaring" by craigsmith (Freesound 437980), kept as an alternate. Real recordings, not generated.
+`backgrounds/gate_city.jpg` re-fired 2026-11-20 — the city gate in armour plate, rust and hydraulic hinges, its own old plate as the composition reference (Higgsfield GPT Image 2.6, job `f2147536-ce5b-4e5c-a7dd-3a76b12c8f64`; master `source/gates/gate_city_asfired.jpg`). **Generated with Higgsfield.**
+`characters/agents/tally/hit{high,low}.webp` — TALLYMAN struck and staggered (2026-11-20, Higgsfield GPT Image 2.6 against his own stand plate; masters `source/agents/tally/hit{high,low}_asfired.jpg`, cut by `tools/plate.cjs`). **Generated with Higgsfield.**
+
+## The Alpha's voice and the struck-metal hits — 2026-11-20
+
+`sfx/alpha/howl.ogg` — a real wolf: National Park Service recording, Denali National Park
+(`nps.gov/subjects/sound/sounds-wolf.htm`, `nri-WolfDENA.mp3`), a work of the U.S. Government,
+public domain. Cut and level-normalised; master `source/audio/alpha/nps_wolf_dena.mp3`.
+
+`sfx/alpha/howl_far.ogg` — real wolves: National Park Service recording, Yellowstone National Park,
+25 December 2013 (`yell-YELLWolvesDec252013.mp3`, the park's sound library), public domain. Cut,
+low-passed and normalised; master `source/audio/alpha/nps_yell-YELLWolvesDec252013.mp3`.
+
+`sfx/alpha/{bark,snap,bite,claw,leap,growl,fury,rend}.ogg` — generated wolf foley (Higgsfield,
+Mirelo text-to-audio), declared as generated; masters `source/audio/alpha/hf_*.mp3`.
+
+`sfx/hits/*.ogg` — 45 impacts (metal, plate, tin, glass, bell, punch, soft, generic; three takes
+each) from **Impact Sounds** by Kenney (www.kenney.nl), CC0 1.0 — no attribution required, given
+anyway. Licence: `source/audio/kenney-impact/License.txt`.
+
+## The Silt Mire — Kingdom 2's swamp (2026-11-21)
+
+| file | source | notes |
+|---|---|---|
+| `backgrounds/swamp_far.jpg`, `swamp_wallow.jpg`, `swamp_outfall.jpg` | Higgsfield, GPT Image 2.6 | the Mire's three paintings, fired against `gate_conduits.jpg` and `cave_mouth_a.jpg` as style references only; as-fired in `source/swamp/2026-11-21/` |
+| `characters/swamp/culvert.webp`, `raft.webp`, `dragonfly.webp`, `mosquito.webp`, `bilge.webp` | Higgsfield, GPT Image 2.6 | the drain culvert (the kingdom's door), Bilge's raft, the insects, and Bilge the robot frog ferryman; keyed by `tools/plate.cjs` |
+| `characters/swamp/bilge_pole.webp`, `bilge_talk.webp` | Higgsfield, Kling 3.0 Turbo | Bilge's two loops, filmed from his plate, cut by `tools/vidstrip.cjs`; takes in `source/swamp/croc-takes/` |
+| `characters/croc/*.webp` | Higgsfield, GPT Image 2.6 (design) + Kling 3.0 Turbo (takes) | MIREJAW, the swamp crocodile: the design fired against NULLFANG's start frame for material only, then eleven filmed takes of it performing a real crocodile's high walk, swim, crushing bite, leaping strike, tail slam, bellow, hurt and collapse; cut by `tools/lion-studio.py` (cell 640x300, envelope 520x140, one grade). His whole move set (2026-11-22, `docs/SPECIES_MOVESET.md`): run, turn, notice, crouch, land, threat gape, daze and the death roll are each their own take (the first roll, a twist, and a rise that stood still were refused); every job in `source/swamp/jobs.json` |
+| `music/mus_swamp.m4a`, `mus_mirejaw.m4a` | Higgsfield, Sonilo | the Mire's zone loop and the crocodile's fight cue, mastered to −17 / −15 LUFS; as-fired in `source/music/` |
+| `sfx/swamp/mj_bellow.ogg` | **U.S. National Park Service**, "Alligator" (American alligator, Everglades National Park) — https://www.nps.gov/subjects/sound/sounds-alligator.htm | **public domain** (U.S. federal work). MIREJAW's phase-two bellow |
+| `sfx/swamp/mj_growl.ogg` | **"G12-01-Alligator Growl" by craigsmith** — https://freesound.org/people/craigsmith/sounds/437933/ | **CC0 1.0** |
+| `sfx/swamp/mj_hiss.ogg` | **"S27-21 Alligator hiss twice" by craigsmith** — https://freesound.org/people/craigsmith/sounds/675513/ | **CC0 1.0**. His warning |
+| `sfx/swamp/mj_snap.ogg` | **"Jaw or teeth bite at air" by Wigglesworth** — https://freesound.org/people/Wigglesworth/sounds/830093/ layered under **"Rock Splash" by Fission9** — https://freesound.org/people/Fission9/sounds/583348/ | both **CC0 1.0**. No free recording of a crocodile's jaws exists; this is real teeth over a real heavy splash, layered, not synthesized |
+| `sfx/swamp/mj_splash.ogg` | **"5 meters dive" by bruno.auzet** — https://freesound.org/people/bruno.auzet/sounds/529794/ | **CC0 1.0**. The eruption out of the water |
+| `sfx/swamp/k2_splash.ogg` | **"Rock Splash" by Fission9** — https://freesound.org/people/Fission9/sounds/583348/ | **CC0 1.0**. Her falling in |
+| `sfx/swamp/mj_slap.ogg` | **"water splashes big hand slaps spray and wave" by kyles** — https://freesound.org/people/kyles/sounds/637974/ | **CC0 1.0**. The tail slam |
+| `sfx/swamp/k2_amb.ogg` | **"Froggy Swamp at Night" by flumpytripod** — https://freesound.org/people/flumpytripod/sounds/828795/ | **CC0 1.0**. Frogs and crickets under the score |
+| `sfx/swamp/k2_mosq.ogg` | **"Mosquito, buzzing around bathroom" by TRP** — https://freesound.org/people/TRP/sounds/717891/ | **CC0 1.0** |
+| `sfx/swamp/k2_punt.ogg` | **"Punting on Cam water lapping 2" by itinerantmonk108** — https://freesound.org/people/itinerantmonk108/sounds/700576/ | **CC0 1.0**. The raft's pole |
+
+Masters (the public preview MP3s) and `SOURCES.json` with every page and licence are in `source/audio/swamp/`. Real recordings, never oscillators.
+
+## The sewer — UNDERTOW's caves in the robot world (2026-11-24)
+
+| file | source | what |
+|---|---|---|
+| `backgrounds/sewer_gallery.jpg`, `sewer_tunnel.jpg`, `sewer_cistern.jpg` | Higgsfield, GPT Image 2.6 | the sewer's three paintings; as-fired in `source/sewer/2026-11-24/` |
+| `characters/sewer/hatch.webp` | Higgsfield, GPT Image 2.6 (background removed by Higgsfield) | the rusty floor hatch in four states, closed to thrown open; cut by `tools/stepstrip.cjs` |
+| `characters/hero/hatch_{bare,single,dual,joined}.webp` | Higgsfield, GPT Image 2.6 | HER, OPENING IT: crouch, strain, lift, push, look, hop, air, drop — one sheet per blade, from her canon element; cut by `tools/stepstrip.cjs --feet` |
+| `characters/sewer/smith.webp`, `smith_talk.webp` | Higgsfield, GPT Image 2.6 (design) + Kling 3.0 Turbo (take) | Rivet the pipe-smith, and his loop cut by `tools/vidstrip.cjs`; take in `source/sewer/takes/` |
+| `characters/sewer/skin.webp`, `shell_side.webp`, `shell_back.webp` | Higgsfield, GPT Image 2.6 | MIREJAW's shed skin and the hide shell made of it |
+| `music/mus_sewer.m4a` | Higgsfield, ElevenLabs Music v2.5 | the sewer's zone loop, mastered to −17 LUFS; as-fired in `source/music/mus_sewer_asfired.mp3` |
+| `sfx/sewer/sw_creak.ogg` | **"gate big rusty metal door garage open heavy creak rattle" by kyles** — https://freesound.org/people/kyles/sounds/637583/ layered over **"Manhole Cover Moving" by WolfpackBrickfilms** — https://freesound.org/people/WolfpackBrickfilms/sounds/708772/ | both **CC0 1.0**. The hatch's groan and scrape |
+| `sfx/sewer/sw_clang.ogg` | **"door metal big heavy close kinda slam thud echo offmic" by kyles** — https://freesound.org/people/kyles/sounds/406197/ | **CC0 1.0**. The lid falling open; Rivet's hammer |
+| `sfx/sewer/sw_amb.ogg` | **"StormSewer" by klangfabrik** — https://freesound.org/people/klangfabrik/sounds/123721/ | **CC0 1.0**. Water running through the tunnels under the score |
+
+Masters (the public preview MP3s), the alternates and `SOURCES.json` with every page and licence are in `source/audio/sewer/`. Real recordings, never oscillators.
 
 `fx/boss/*.webp` — the bosses' attack effects (2026-11-24): frames of original Higgsfield Seedance 2.0 Mini clips generated on black for this game (masters, briefs and job ids in `source/vfx/boss-2026-11-24/`), cut by `tools/vfxstrip.py`. AI-generated; no third-party footage or game assets were used.

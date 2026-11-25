@@ -314,7 +314,8 @@ const args = process.argv.slice(2), htmlAt = args.indexOf('--html'), html = html
       check('the landing cracks the ground and sends a wave along it', ['ground', 'cracks', 'flash'].every(n => (R.fx.landing || []).includes(n)), JSON.stringify(R.fx.landing));
       check('drawing never advances an effect or a ring', R.fx.drawPure === true && R.fx.drawn >= 2, R.fx.drawn + ' quads');
       check('the art probe hides the layer', R.fx.probeDrawn === 0);
-      check('with no GPU layer the Canvas rings still draw', R.fx.legacy && R.fx.legacy.on === false && !R.fx.legacy.err && R.fx.rings >= 1, JSON.stringify(R.fx.legacy));
+      // (no ring is ever made — "no light, rim, halo, outline or ring round any body", the ledger)
+    check('with no GPU layer the Canvas fallback still draws, and no ring is made round a body', R.fx.legacy && R.fx.legacy.on === false && !R.fx.legacy.err && R.fx.rings === 0, JSON.stringify(R.fx.legacy) + ' rings ' + R.fx.rings);
     }
     check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
   } finally { await browser.close(); }

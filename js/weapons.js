@@ -24,6 +24,14 @@ function migrateWeapons(save) {
   if (!weaponOwned(save.weaponMode, save)) save.weaponMode = bestWeaponMode(save);
   return save;
 }
+// NO BLOCK BEFORE THE SWORD (owner, 2026-11-20: "Later on, when there is a
+// sword, you can add block, but for now there is no block. But it's only
+// claw."). The guard — and the parry it opens — comes with the first blade.
+// NOSTOS's hero carries hers from the start.
+function guardUnlocked(save = G.save) {
+  if (typeof isHero === 'function' && isHero()) return true;
+  return weaponOwned('single', save);           // the first blade, held or not
+}
 function weaponMode(save = G.save) {
   if (!save) return 'claws';
   // Read-only: callers rendering a frame must not mutate or migrate a save.

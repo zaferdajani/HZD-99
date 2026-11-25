@@ -46,6 +46,8 @@ p.add_argument('--make-grade', help='write the reference look (armour statistics
 p.add_argument('--grade', help='reference look to match this take to')
 p.add_argument('--regrade-strip', type=int, metavar='CELLS', help='SOURCE is a delivered strip of this many cells, not a take: match its grade to --grade (cell 0 is its rest frame) and write OUTPUT. For a take whose keying cannot be reproduced from the master.')
 p.add_argument('--min-coverage', type=float, default=.5, help='smallest cell as a share of the largest; a turn through the front legitimately halves the silhouette')
+p.add_argument('--envelope', default='320x210', help='standing-frame envelope WxH in px (the crocodile is long: 520x140)')
+p.add_argument('--cell', default='448x256', help='cell WxH in px')
 p.add_argument('--drift', action='store_true', help='remove the linear horizontal drift between the first and last cell (a turn filmed off-centre ends where it began)')
 args = p.parse_args()
 
@@ -182,7 +184,8 @@ if args.make_grade:
     ref = dict(source=args.source, frames=args.frames, span=[args.start, args.end], **look_many([frame(float(t))[0] for t in grade_times]))
     Path(args.make_grade).write_text(json.dumps(ref, indent=2) + '\n')
     print(json.dumps(ref)); raise SystemExit
-scale = min(210 / (rb[3] - rb[1]), 320 / (rb[2] - rb[0]))
+ENV_W, ENV_H = (int(v) for v in args.envelope.split('x'))
+scale = min(ENV_H / (rb[3] - rb[1]), ENV_W / (rb[2] - rb[0]))
 times = np.array([float(t) for t in args.times.split(',')]) if args.times \
     else np.linspace(args.start + .02, args.end - .02, args.frames)
 args.frames = len(times)
@@ -219,7 +222,7 @@ if args.grade:
     graded = dict(reference=args.grade, takeMean=own['mean'], after=look_many([im for im, _ in sampled])['mean'], target=ref['mean'],
                   steady=[round(float(g), 3) for g in steady])
 center = (min(b[0] - d for (_, b), d in zip(sampled, shift)) + max(b[2] - d for (_, b), d in zip(sampled, shift))) / 2
-cw, ch = 448, 256
+cw, ch = (int(v) for v in args.cell.split('x'))
 anchor = ((rb[0] + rb[2]) / 2 - center) * scale
 feet = []
 for (im, b), d in zip(sampled, shift):
@@ -243,7 +246,7 @@ metadata = dict(source=args.source, frames=args.frames, cell=[cw, ch],
     times=[round(float(t), 4) for t in times], scale=scale,
     threshold=args.threshold, strictBorders=args.strict_borders, footRight=args.foot_right,
     rootMotion='vertical removed; simulation supplies trajectory',
-    reference='standing envelope: 320x210px', rest=args.rest,
+    reference='standing envelope: ' + args.envelope + 'px', rest=args.rest,
     anchor=round(float(anchor), 2), drift=round(float(drift * scale), 2), feet=feet, grade=graded, reviewed=False)
 out.with_suffix('.motion.json').write_text(json.dumps(metadata, indent=2) + '\n')
 print(json.dumps(dict(output=str(out), bytes=out.stat().st_size, **metadata)))

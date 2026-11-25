@@ -1,0 +1,114 @@
+{
+  "source": "assets/source/swamp/croc-takes/idle.mp4",
+  "frames": 12,
+  "cell": [
+    640,
+    300
+  ],
+  "times": [
+    0.12,
+    0.5527,
+    0.9855,
+    1.4182,
+    1.8509,
+    2.2836,
+    2.7164,
+    3.1491,
+    3.5818,
+    4.0145,
+    4.4473,
+    4.88
+  ],
+  "scale": 0.28602860286028603,
+  "threshold": 48,
+  "strictBorders": false,
+  "footRight": false,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 520x140px",
+  "rest": 0.1,
+  "anchor": -4.0,
+  "drift": 0.0,
+  "feet": [
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ],
+    [
+      -225.4,
+      113.8
+    ]
+  ],
+  "grade": {
+    "reference": "assets/source/swamp/croc-takes/grade.json",
+    "takeMean": [
+      108.57,
+      96.53,
+      93.76
+    ],
+    "after": [
+      108.38,
+      96.26,
+      93.37
+    ],
+    "target": [
+      108.2,
+      96.2,
+      93.45
+    ],
+    "steady": [
+      1.025,
+      1.012,
+      1.012,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.991
+    ]
+  },
+  "reviewed": false
+}
