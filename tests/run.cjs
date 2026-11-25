@@ -196,6 +196,7 @@ const SUITE = [
   ['fight-seal', 'no running from a fight: every boss room\'s rings sleep while the boss fights and wake when it is purified; the howl\'s shove is a braced skid, never a walk she did not ask for'],
   ['pack-call', 'the pack answers her: the Alpha\'s yield puts THE PACK on her wheel; cast, one wolf comes in on its feet, hunts and bites what hunts her for ten seconds, never touches her, and lopes off'],
   ['alpha-bow', 'the yielded Alpha backs off with its face to her and bows (its filmed yield); three of the pack come in behind it, face her and go down together; once per save'],
+  ['wolf-mount', 'THE WOLF MOUNT: Ratchet\'s THE PACK, LONGER only by asking; the Tinker\'s harness in the Foundry (her wolf downs three machines) teaches the ride; on its back she runs faster and leaps higher, claws with the drawn reach, lunges, howls a short stagger (recorded); blows drain the wolf, and spent it sets her on her feet and lopes off'],
   ['tallyman', 'TALLYMAN is a fight: half as much again to break, a quicker mind, three lunges below half health, and a blow stops him where he stands instead of sliding him'],
   ['hero-still', 'standing still she is one drawing: the frames off a lip and a fidget whose take is not here both stay on her filmed idle, never the old pose-sheet still'],
   ['ch2-road', 'chapter two is played in order: the CARRIER, then the gallery ring it wakes down to UNDERTOW, then TALONHOST\'s hall; the arrow leads each step; a loading ring draws no stand-in'],
