@@ -1,28 +1,30 @@
 // NO LIGHT ROUND A BODY — the ledger's row, said four times ("Why still framed with light ?!!!",
-// "remove the ring"), and found again 2026-11-24 by the player who fought NULLFANG: every boss's
-// wind-up had an amber bloom drawn BEHIND the animal (a 104+ px radial round its middle), and every
-// roar threw three stroked rings and a throat flash centred on the one roaring.
+// "remove the ring"). Found again 2026-11-24 by the player who fought NULLFANG: every roar threw
+// three stroked rings and a throat flash centred on the one roaring, and the Wolf King stood pillars
+// of light out of his back and flashed light round his head as he bit and howled.
 //
-// Measured, not asserted: each boss after the rhino (and the rhino) is drawn at rest and in its
-// wind-ups, twice — the whole drawing, and with G.artProbe on (the body alone: the probe turns off
-// decoration). Light that appears in the whole drawing within a band round the body's own box, above
-// its feet, and that was not there at rest, is light round the body. A wind-up may raise its own
-// amber ON its body (ART_BIBLE §3.5) and light the floor under it; it may not wrap the body in light.
-//   A  no wind-up adds a ring of light round the body (under 2% of the body's own area, net of rest)
+// THE WIND-UP IS THE EXCEPTION, BY HIS OWN ORDER: owner, 2026-11-20, of the wind-up's oval — "make it
+// aura-like or watery, fluid-like ... think like it's chakra or something from an anime" — so a
+// wind-up rises in chakra (js/fxgl.js drawChakra) and this harness does not judge wind-ups.
+//
+// Measured, not asserted: each boss is drawn at rest and in its STRIKES, twice — the whole drawing,
+// and with G.artProbe on (the body alone). Light in the whole drawing within a band round the body's
+// own box, above its feet, that was not there at rest, is light round the body.
+//   A  no strike adds light round the body (under 2% of the body's own area, net of rest)
 //   B  a roar draws no ring: ROARFX stays empty and no ring is added round the boss
 //   C  no page errors
 const { chromium } = require('playwright');
 const PORT = process.env.TEST_PORT || 8220;
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') + n + (d != null ? '  ' + (typeof d === 'string' ? d : JSON.stringify(d)) : '')); if (!ok) bad++; };
 const BOSSES = [
-  { room: 'CV3', name: 'GRAVEHORN', tells: ['hornprep', 'chargewarn', 'tossprep', 'kickprep', 'buckprep'] },
-  { room: 'A4', name: 'NULLFANG', tells: ['swipewarn', 'crouch', 'rakewarn', 'rearwarn', 'spitwarn', 'bitewarn'] },
-  { room: 'A10', name: 'the Wolf King', tells: ['rendwarn', 'furywarn', 'skywarn', 'bitewarn', 'clawwarn'] },
-  { room: 'A9', name: 'CHIME', tells: ['warn'] },
+  { room: 'CV3', name: 'GRAVEHORN', tells: ['hornfire', 'rush', 'toss', 'kick', 'buck'] },
+  { room: 'A4', name: 'NULLFANG', tells: ['swipe', 'rake', 'rear', 'bite', 'pounce'] },
+  { room: 'A10', name: 'the Wolf King', tells: ['rend', 'sky', 'claw', 'bite'] },
+  { room: 'A9', name: 'CHIME', tells: ['ring', 'note'] },
 ];
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
-  console.log('── no-body-light — a wind-up and a roar put no light round the body');
+  console.log('── no-body-light — a strike and a roar put no light round the body (a wind-up wears its chakra, by order)');
   const errs = [];
   for (const B of BOSSES) {
     const page = await browser.newPage({ viewport: { width: 960, height: 540 }, serviceWorkers: 'block' });
@@ -66,7 +68,7 @@ const BOSSES = [
     }, { room: B.room, tells: B.tells });
     if (R.none) { check(B.name + ': the boss is in ' + B.room, false); await page.close(); continue; }
     const worst = Object.entries(R.tells).map(([st, s]) => [st, s.ring - R.rest.ring, s.n]).sort((a, b) => b[1] - a[1])[0];
-    check('A  ' + B.name + ': no wind-up adds light round the body', Object.values(R.tells).every(s => s.ring - R.rest.ring <= Math.max(200, R.rest.n * 0.02)),
+    check('A  ' + B.name + ': no strike adds light round the body', Object.values(R.tells).every(s => s.ring - R.rest.ring <= Math.max(200, R.rest.n * 0.02)),
       'worst ' + worst[0] + ': +' + worst[1] + ' px round a ' + R.rest.n + ' px body (rest ' + R.rest.ring + ')');
     check('B  ' + B.name + ': a roar draws no ring round the one roaring', R.roarfx === 0 && R.rings === 0, { ROARFX: R.roarfx, rings: R.rings });
     await page.close();
