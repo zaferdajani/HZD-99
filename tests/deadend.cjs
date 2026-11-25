@@ -43,6 +43,12 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
     const gates = [];
     for (const room in GATE_ROOM)
       for (const def of gateDoorsAll(room)) gates.push([room, def.to]);
+    // ...and the STORY's doors (GATE_STORY: the agent's ring off the quarry, the gallery's hatch,
+    // NULLFANG's door to Kingdom 2 and its far side) — a door the story adds is as much a way in.
+    // (The keeper's grotto was found only through A4's old ring until 2026-11-25, when that ring
+    // became the door to Kingdom 2; its own way in has always been the quarry's.)
+    if (typeof GATE_STORY !== 'undefined')
+      for (const room in GATE_STORY) gates.push([room, GATE_STORY[room].to]);
     return { R: out, gates };
   });
   await browser.close();

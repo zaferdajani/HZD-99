@@ -375,49 +375,37 @@ async function tapKey(page, code) {
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
     await waitFor(page, () => G.state === 'PLAY', 2000);
 
-    // ...and over the REAL way up: she jumps through the camp's hatch, the
-    // teaser opens over the shaft, and when it closes the climb still carries
-    // her onto B1's ledge — the pages pause the crossing, they do not break it
-    await stage(page, 'A3', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ch2Climb: 1 });
+    // ...and over the REAL way in: she walks east off the frontier road (A14, past NULLFANG's door —
+    // the robot story's only road into the Conduits since 2026-11-25, js/k2door.js), the teaser opens
+    // over the crossing, and when it closes she is standing in B1 — the pages pause the crossing,
+    // they do not break it
+    await stage(page, 'A14', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ch2Climb: 1, 'rw_A4>A14': 1 });
     await page.evaluate(() => { G.save.panels.past.free = 1; if (G.save.visited) delete G.save.visited.B1; });
     await waitFor(page, () => panelsLoaded(panelsSeq('ch2')), 10000);
     await page.evaluate(() => {
-      // (the staging itself raises cards — the bell's evolution — that would
-      // re-open mid-climb and hold the crossing; they are not what is tested)
+      // (the staging itself raises cards that would re-open mid-walk and hold the crossing; they
+      // are not what is tested)
       if (typeof OVERLAY_Q !== 'undefined') OVERLAY_Q.length = 0;
-      // (the climb holds JUMP, and a held key is also the skip: the pages can
-      // open and be skipped between two polls — so their start is recorded)
       window.__tzStart = false; const ps0 = panelsStart;
       panelsStart = function (id) { if (id === 'ch2' && G.roomId === 'B1') window.__tzStart = true; return ps0.apply(this, arguments); };
       G.dialog = null; G.state = 'PLAY'; G.enemies = []; G.projs = [];
-      const g = G.grid, cols = [];
-      if (g.tGap) for (let x = g.tGap[0]; x <= g.tGap[1]; x++) cols.push(x);
-      else for (let x = 1; x < G.roomDef.w - 1; x++) if (g[0][x] === '.') cols.push(x);
-      const cx = cols[Math.floor(cols.length / 2)];
-      player.x = cx * TILE + (TILE - player.w) / 2; player.y = TILE + 2; player.vx = 0; player.vy = -760; player.on = false; player.iT = 99;
-      keys[KEYB.JUMP[0]] = 1;
+      player.x = (G.roomDef.w - 3) * TILE; player.y = 13 * TILE; player.vx = 0; player.vy = 0; player.iT = 99;
+      keys[KEYB.RIGHT[0]] = 1;
     });
     const shaftTz = await waitFor(page, () => {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
       return (G.state === 'PANELS' && G.panels.seq.id === 'ch2') || window.__tzStart;
     }, 6000);
     await page.evaluate(() => { for (const k in keys) keys[k] = 0; });
-    check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId + ' seen=' + Object.keys(G.save.panels.seen).join(',') + ' past=' + Object.keys(G.save.panels.past).join(',') + ' q=' + PN.queue.join(',') + ' due=' + PN.due + ' bossGlitch=' + G.save.flags.bossGlitch));
+    check('walking east off the frontier road opens the teaser over the crossing', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId + ' seen=' + Object.keys(G.save.panels.seen).join(',') + ' past=' + Object.keys(G.save.panels.past).join(',') + ' q=' + PN.queue.join(',') + ' due=' + PN.due + ' bossGlitch=' + G.save.flags.bossGlitch));
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
-    // ...she steers her own landing in a seamless shaft (owner, 2026-10-13),
-    // toward the ledge beside the hatch, letting go once over it
     const landed = await waitFor(page, () => {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
       G.enemies = []; if (player) player.iT = 99;
-      if (G.state === 'PLAY' && G.roomId === 'B1' && !player.on) {
-        if (window.__tx == null) { const led = topLedge('B1', player.x, player.y, 1, true); window.__tx = led ? led.x1 : player.x; }
-        const d = Math.sign(window.__tx - player.x), go = Math.abs(window.__tx - player.x) > 4;
-        keys[KEYB.LEFT[0]] = go && d < 0 ? 1 : 0; keys[KEYB.RIGHT[0]] = go && d > 0 ? 1 : 0;
-      } else { keys[KEYB.LEFT[0]] = 0; keys[KEYB.RIGHT[0]] = 0; }
-      return G.state === 'PLAY' && G.roomId === 'B1' && !G.climb && player.on;
+      return G.state === 'PLAY' && G.roomId === 'B1' && player.on;
     }, 6000);
     const atB1 = await page.evaluate(() => ({ room: G.roomId, on: player.on, feet: Math.round(player.y + player.h), st: G.state }));
-    check('...and when it closes, she can still steer onto B1\'s ledge', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
+    check('...and when it closes, she is standing in B1', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
     // A BEAT DUE IN A ROOM SHE LEAVES IS NOT LOST (2026-11-19): the bell falls,
     // she is still in the air when she leaves A9 — the bell's pages play over
     // the next doorway instead of never

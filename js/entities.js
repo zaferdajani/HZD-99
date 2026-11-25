@@ -13329,7 +13329,12 @@ class Boss {
         if (this.kind === 'glitch' || this.kind === 'atlas' || this.kind === 'alpha') {
           if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
           let mv = 0;
-          if (settled && Math.abs(pd) > 96) { mv = clamp(pd, -70, 70); this.x += mv * dt; }
+          // (a door it has been sent to wake leads it, at its own prowl: js/game.js ringWakeStep)
+          if (this.wakeTo != null) {
+            const dd = this.wakeTo - this.cx();
+            if (Math.abs(dd) > 6) { mv = Math.sign(dd) * Math.min(this.wakeV || 175, Math.abs(dd) / Math.max(dt, 1e-3)); this.x += mv * dt; this.face = Math.sign(dd); }
+          } else if (settled && Math.abs(pd) > 96) { mv = clamp(pd, -70, 70); this.x += mv * dt; }
+          if (this.wakeFace && !mv) this.face = this.wakeFace;
           this.petWalk = mv !== 0;
           this.vx = mv;
           if (this.kind === 'glitch' || this.kind === 'alpha') {

@@ -1268,6 +1268,9 @@ function loadRoom(id) {
   if(typeof ratchetReleaseFinish==='function')ratchetReleaseFinish(false);
   if (typeof purificationCancel === 'function') purificationCancel();
   infEyeClearAll();                 // no smoke follows her through a door, a respawn or a load
+  // (a door's wake belongs to its room: it does not follow her out, nor does the camera's hold on it)
+  if (G.ringWake) G.ringWake = null;
+  if (typeof cam !== 'undefined' && cam) cam.peek = null;
   repairClose(false);
   settlePendingBossReward();
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
@@ -1884,16 +1887,21 @@ function meetStep(dt) {
 // ===========================================================================
 // THE DEMO BOUNDARY — where the free version stops, and says so properly.
 //
-// THE SHAPE OF THE DECISION. The free web build is the shop window: it opens
-// on any phone from any maker with no download and no account, which is the one
-// distribution advantage this game has and the app stores cannot match. What it
-// is NOT is the place anyone can be charged. So the free version ends, and the
-// end has to feel like a chapter closing rather than the game breaking.
+// THE WEB IS NEVER STOPPED (owner, 2026-11-25): "as long as we're on the web app, all people
+// who access the web are actually testers. So even if it shows it's a paid version or buy it or
+// whatever, which will direct users later on for the full version, depending on their platform,
+// still users on the link can access the second kingdom and all other kingdoms freely." So the
+// boundary can only ever close on a STORE build — the packaged phone app or the desktop shell —
+// whose save has no entitlement. The web page, http or https, walks on through every kingdom,
+// whatever DEMO_OFFER says. (Until 2026-11-25 this was the other way round: the web was the demo
+// and a package was the bought copy.)
+//
+// When it does close, the end has to feel like a chapter closing rather than the game breaking.
 //
 // WHERE IT ENDS is derived, never listed. Any exit that leaves DEMO_ZONE is the
-// boundary — which today is exactly one door, A3 going up into B1, and which
-// stays correct if the world is ever re-plumbed. A hard-coded room id would be
-// a second copy of the map that somebody has to remember to update.
+// boundary — which today is exactly one edge, the frontier road's east edge (A14 -> B1), past
+// NULLFANG's door — and which stays correct if the world is ever re-plumbed. A hard-coded room
+// id would be a second copy of the map that somebody has to remember to update.
 //
 // The player gets the whole first kingdom to that point: waking in the cradle,
 // the walk to the gates, the first machine folk, the purifier, the Alpha and
@@ -1901,28 +1909,31 @@ function meetStep(dt) {
 // this a chapter and not a wall. Stopping mid-corridor would read as a fault.
 //
 // ONE BUILD STILL, and that is deliberate (RULE ONE). This is not a demo BUILD;
-// it is the same file everywhere, deciding at run time. A packaged app — the
-// Steam shell, the phone app — is by definition the bought copy and is never
-// the demo. The web page is, until a save says otherwise.
+// it is the same file everywhere, deciding at run time (demoStore: Capacitor, file:, capacitor:,
+// or the desktop shell's app:).
 //
-// `G.save.full` is the hook the Steam link will hang off later: whatever proves
-// a purchase eventually sets that flag and the same page becomes the whole
-// game. Nothing here needs to change when it does.
+// `G.save.full` is the hook each store's entitlement will hang off later: whatever proves a
+// purchase on that platform sets that flag and the same package becomes the whole game.
 //
 // AND IT IS OFF UNTIL THE OWNER SWITCHES IT ON. Flipping DEMO_OFFER to true is
 // a product decision with a store page behind it, not a code change, so the
 // default cannot be the one that quietly truncates a game that is already live.
 const DEMO_ZONE = 'A';
-const DEMO_OFFER = false;
+// (a `let` so a harness can throw the switch both ways; nothing in the game assigns it)
+let DEMO_OFFER = false;
 // Where the full game is sold. Empty until there is a page to point at — the
 // screen then says the game continues without offering a link that 404s.
 const DEMO_URL = '';
+// a store build: the packaged phone app, or the desktop shell
+function demoStore() {
+  return (typeof window !== 'undefined') &&
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
+}
+// stop at the threshold: ONLY a store build, with the offer on and no entitlement on the save
 function demoOn() {
   if (!DEMO_OFFER) return false;
-  const packaged = (typeof window !== 'undefined') &&
-    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
-  if (packaged) return false;
-  if (G.save && G.save.full) return false;
+  if (!demoStore()) return false;                     // the web: everyone on the link is a tester
+  if (G.save && G.save.full) return false;            // bought on that platform
   return true;
 }
 // Does stepping through this door leave the free chapter?
@@ -1943,6 +1954,51 @@ function demoStop(side) {
   player.lastSafe = { x: player.x, y: player.y };
   G.state = 'MORE'; G.moreIdx = 0;
   sfx('ui');
+}
+// THE END OF THE FIRST KINGDOM (owner, 2026-11-25: "You can show it as end of, okay, or
+// something catchy for the first kingdom. And moving on to the next one. The quest is still
+// going. And then it shows the payment or whatever gate or the message."). The first time she
+// reaches the threshold out of the free kingdom (the frontier road's east edge, A14 -> B1; in
+// NOSTOS its own climb), once per save: a card on the dimmed world, the demo end screen's look —
+// the kingdom is purified, the quest goes on. Few words, no comic, nothing drawn round anything;
+// any button after half a second skips it and it closes itself at K1_END.T. THEN the gate: on a
+// store build without the game, with the offer on, the end-of-chapter screen (demoStop: get the
+// game / stay); anywhere else she walks on through the edge she was crossing. On the web with the
+// offer on, the card carries one more line, once: the game goes on here, free for testers.
+const K1_END = Object.freeze({ min: 0.5, T: 3.6 });
+function k1EndDue(dest) {
+  const a = ROOMS[G.roomId], b = ROOMS[dest];
+  return !!(a && b && G.save && G.save.flags && a.zone === DEMO_ZONE && b.zone !== DEMO_ZONE && !G.save.flags.k1End
+    && !(G.save.visited && G.save.visited[dest]));       // (a save already past it is not told again)
+}
+function k1EndShow(side, dest) {
+  G.k1End = { t: 0, side, dest, tester: !!DEMO_OFFER && !demoStore() };
+  G.state = 'KEND';
+  sfx('ok');
+}
+function updateK1End(dt) {
+  const k = G.k1End;
+  if (!k) { G.state = 'PLAY'; return; }
+  k.t += dt;
+  const skip = k.t > K1_END.min && (inP('OK') || inP('ATK') || inP('JUMP') || inP('BACK'));
+  if (!skip && k.t < K1_END.T) return;
+  G.save.flags.k1End = 1; persist();
+  G.k1End = null; G.state = 'PLAY';
+  // ...then the gate, on a store build without the game; anywhere else she is still in the
+  // doorway she was crossing, and the next frame carries her through it
+  if (demoWall(k.dest)) demoStop(k.side);
+}
+function drawK1End() {
+  const k = G.k1End; if (!k) return;
+  drawWorldFrame();
+  const a = Math.min(1, k.t / 0.35);
+  c.fillStyle = 'rgba(3,7,12,' + (0.86 * a).toFixed(3) + ')'; c.fillRect(0, 0, 960, 540);
+  c.save(); c.globalAlpha = a;
+  ftxt(t('k1_end1'), 480, 228, 40, '#aef7d8');
+  c.globalAlpha = Math.max(0, Math.min(1, (k.t - 0.6) / 0.4));
+  ftxt(t('k1_end2'), 480, 290, 21, '#cfe3ef');
+  if (k.tester) ftxt(t('k1_end_web'), 480, 336, 16, '#8aa2b5');
+  c.restore();
 }
 // ONE GEOMETRY, used by the drawing AND by touch. Written out separately they
 // drift, and a screen whose buttons are somewhere other than where they are
@@ -2068,6 +2124,7 @@ function checkTransitions() {
     if (!G.storyGateAt || G.save.time - G.storyGateAt > 4) {G.toast(storyHint);G.storyGateAt=G.save.time||0.001;}
     return;
   }
+  if (k1EndDue(dest)) { k1EndShow(side, dest); return; }
   if (demoWall(dest)) { demoStop(side); return; }
   // THE WAY UP ENDS ON A LEDGE OR IT DOES NOT HAPPEN (owner's rule). Rising
   // into the room above, she is carried onto the nearest floor she can stand
@@ -3501,6 +3558,7 @@ function update(dt) {
     if (inP('OK') || inP('ATK') || inP('BACK') || G.introT > 12.4) { G.state = 'PLAY'; sfx('ok'); }
   }
   else if (G.state === 'MORE') updateMore();
+  else if (G.state === 'KEND') updateK1End(dt);
   else if (G.state === 'WIN') { if (inP('OK')) { G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); } }
   else if (G.state === 'GAMEOVER') {
     if (inP('OK')) { wipeSave(G.save && G.save.theme); G.save = null; G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); }
@@ -9708,9 +9766,13 @@ const ROOM_PROP = {
 //
 // The colour is read from the destination zone's own palette rather than typed
 // in, so a kingdom re-themed later re-lights its own frontier for free.
+// AND IN THE ROBOT STORY THERE IS NONE NOW (owner, 2026-11-25: "instead of going up into the
+// sky, into the light, which means you will remove the light from the screen before it"). The
+// climb over the camp it fell down is NOSTOS's alone (js/world.js storyExits), and the robot
+// story leaves the Meadows through NULLFANG's door (js/k2door.js). The table stays for a room
+// that ever earns one again; tests/demo.cjs holds A3 dark.
 const FRONTIER = {
   // room: the ceiling opening in tiles, and which kingdom is on the other side
-  A3: { tx0: 25, tx1: 29, zone: 'B' },
 };
 // LIGHT SCATTERS; IT HAS NO EDGE (owner, 2026-10-16: "any light beam that is
 // coming like this from the sky downward should be scattered, should be blended
@@ -11767,6 +11829,12 @@ const GATE_STORY = {
   // it open and drops into the gallery's shaft; the way back out is the
   // gallery's own ring to the hall
   B6: { at: 26 / 32, to: 'GB1', style: 'hatch', lock: 'bossCarrier', lockLine: 'sw_hatch_rusted' },
+  // THE DOOR TO KINGDOM 2 (owner, 2026-11-25; js/k2door.js). A Conduits ring — cables wound round
+  // its band, the second kingdom's own make — standing in NULLFANG's arena where the meadow ring to
+  // the keeper's grotto stood, grown over with metal vines until he is purified and roars them off
+  // it. It leads to the frontier road (A14), whose east edge is Kingdom 2. Robot story only.
+  A4: { at: 0.23, to: 'A14', ax: 0.07, style: 'k2', lock: 'bossGlitch', lockLine: 'k2_door_vines' },
+  A14: { at: 0.07, to: 'A4', ax: 0.23, style: 'k2' },
 };
 // ---------------------------------------------------------------------------
 // A RING IS WOKEN, NOT POPPED IN (owner, 2026-11-16: "if you're going to show
@@ -11793,15 +11861,19 @@ function ringAsleep(def) {
   // only a RING wakes (ringWakeStep): a hatch or a culvert with a lock simply
   // opens when its flag is set — asleep, it would refuse her forever
   if (typeof ringGateFor === 'function' && !ringGateFor(def)) return false;
+  // (in NOSTOS no ring wakes — ringWakeStep — so none sleeps)
+  if (typeof isHero === 'function' && isHero()) return false;
   if (G.save && G.save.flags && G.save.flags[ringWakeKey(def)]) return false;
   const w = G.ringWake;
-  return !(w && w.def === def && w.t >= RING_WAKE.lit);
+  const RW = w && w.vines && typeof K2_WAKE !== 'undefined' ? K2_WAKE : RING_WAKE;
+  return !(w && w.def === def && w.t >= RW.lit);
 }
 // how far up its field has come, 0..1 (1 for any ring that is simply awake)
 function ringWakeLevel(def) {
   const w = G.ringWake;
   if (!w || w.def !== def) return 1;
-  return clamp((w.t - RING_WAKE.lit) / RING_WAKE.rise, 0, 1);
+  const RW = w.vines && typeof K2_WAKE !== 'undefined' ? K2_WAKE : RING_WAKE;
+  return clamp((w.t - RW.lit) / RW.rise, 0, 1);
 }
 function ringWakeStep(dt) {
   if (typeof isHero === 'function' && isHero()) return;
@@ -11812,51 +11884,70 @@ function ringWakeStep(dt) {
     for (const d of gateDoors()) {
       if (!ringAsleep(d) || !ringGateFor(d)) continue;
       const gx = gateWorldX(d);
-      if (Math.abs(player.x + player.w / 2 - gx) > RING_WAKE.see || !player.on) continue;
+      // (the vine door is woken from anywhere in his arena: the moment he is free, he goes to it)
+      const see = d.style === 'k2' ? Infinity : RING_WAKE.see;
+      if (Math.abs(player.x + player.w / 2 - gx) > see || !player.on) continue;
       // (never with something hostile at her shoulder: her controls are about
       // to be held for two and a half seconds, and that is not a moment to be
       // bitten in. It waits until the ground round her is quiet.)
       if ((G.enemies || []).some(e => e && !e.dead && !e.calm && !e.disabled && !e.tame && !e.rescued && Math.abs((e.x + e.w / 2) - (player.x + player.w / 2)) < 340 && Math.abs(e.y - player.y) < 220)) continue;
       // the one she freed, if it is still standing in the room
       const b = G.boss && !G.boss.meet && (G.boss.purified || G.boss.tame || G.boss.st === 'purified') ? G.boss : null;
-      G.ringWake = { def: d, t: 0, x: gx, by: b, st0: b ? b.st : null, roared: false, lit: false };
+      G.ringWake = { def: d, t: 0, x: gx, by: b, st0: b ? b.st : null, roared: false, lit: false, vines: d.style === 'k2' };
       player.vx = 0;
       return;
     }
     return;
   }
+  // THE VINE DOOR TAKES LONGER: he walks the arena to it, and the metal is torn off before the
+  // field can wake (js/k2door.js K2_WAKE)
+  const RW = w.vines && typeof K2_WAKE !== 'undefined' ? K2_WAKE : RING_WAKE;
   w.t += dt;
+  // (the frame holds on the door, with her and him at its side)
+  if (w.vines) cam.peek = w.x + (player.x + player.w / 2 - w.x) * 0.3;
   // her controls are held while it happens, and she looks at it
-  if (w.t < RING_WAKE.T - 0.25) { player.stunT = Math.max(player.stunT || 0, 0.12); player.face = Math.sign(w.x - (player.x + player.w / 2)) || player.face; }
+  if (w.t < RW.T - 0.25) { player.stunT = Math.max(player.stunT || 0, 0.12); player.face = Math.sign(w.x - (player.x + player.w / 2)) || player.face; }
   player.iT = Math.max(player.iT || 0, 0.2);          // ...and nothing can hurt her while they are
   const b = w.by;
-  if (b && !b.dead) {
+  // (a guardian already freed is her pet: its own step walks it, on its own stride — js/entities.js
+  // the pets — so it is STEERED to the door, never carried: a body moved without its gait slides)
+  const pet = !!(b && b.dead && b.purified);
+  if (b && (!b.dead || pet)) {
     // it goes to its ring and stands off the lip, facing it
     const want = w.x + (b.cx() < w.x ? -1 : 1) * (b.w * 0.5 + 96);
     const d = want - b.cx();
-    if (w.t < RING_WAKE.walk && Math.abs(d) > 6) { b.x += Math.sign(d) * Math.min(Math.abs(d), RING_WAKE.walkV * dt); b.face = Math.sign(d) || b.face; }
+    if (pet) { b.wakeTo = w.t < RW.walk ? want : null; b.wakeV = RW.walkV; b.wakeFace = Math.sign(w.x - b.cx()) || b.face; }
+    else if (w.t < RW.walk && Math.abs(d) > 6) { b.x += Math.sign(d) * Math.min(Math.abs(d), RW.walkV * dt); b.face = Math.sign(d) || b.face; }
     else b.face = Math.sign(w.x - b.cx()) || b.face;
-    if (b.faceVis != null) b.faceVis = b.face;
+    if (b.faceVis != null && !pet) b.faceVis = b.face;
   }
-  if (!w.roared && w.t >= RING_WAKE.walk) {
+  if (!w.roared && w.t >= RW.walk) {
     w.roared = true;
-    const sx = b && !b.dead ? b.cx() : w.x, sy = b && !b.dead ? b.cy() - 10 : (G.roomDef.h - 2) * TILE - 130;
-    if (b && !b.dead) { if (b.kind === 'glitch' && typeof beastSound === 'function') beastSound('roar'); else sfx(b.kind === 'alpha' ? 'alpha_howl' : 'roar'); }
+    // ...and the vines come off the door under it, and the trees either side bend out of its way
+    if (w.vines && typeof k2VinesTear === 'function') k2VinesTear(w.def, b && !b.dead ? b.cx() : player.x + player.w / 2);
+    const there = b && (!b.dead || pet);
+    const sx = there ? b.cx() : w.x, sy = there ? b.cy() - 10 : (G.roomDef.h - 2) * TILE - 130;
+    if (there) { if (b.kind === 'glitch' && typeof beastSound === 'function') beastSound('roar'); else sfx(b.kind === 'alpha' ? 'alpha_howl' : 'roar'); }
     else sfx('tellbig');
+    // ...the freed lion's roar is his own filmed take (js/beast.js: a pet's roar act)
+    if (pet) { b.petAct = 'roar'; b.petT = b.petT0 = 1.5; }
     cam.shake = Math.max(cam.shake, b ? 7 : 3);
-    if (typeof roarWave === 'function') roarWave(sx, sy, '#ffffff');
+    // (no ring of light round the one roaring at the vine door: the ledger, tests/no-body-light.cjs)
+    if (!w.vines && typeof roarWave === 'function') roarWave(sx, sy, '#ffffff');
   }
-  if (!w.lit && w.t >= RING_WAKE.lit) {
+  if (!w.lit && w.t >= RW.lit) {
     w.lit = true;
     const fy = (G.roomDef.h - 2) * TILE - RING_H * 0.5;
-    G.flash = Math.max(G.flash, 0.22); cam.shake = Math.max(cam.shake, 5); sfx('lumen'); sfx('chargedHit');
+    if (!w.vines) G.flash = Math.max(G.flash, 0.22);   // (no white-out at the vine door: the ledger)
+    cam.shake = Math.max(cam.shake, 5); sfx('lumen'); sfx('chargedHit');
     if (typeof shockRipple === 'function') shockRipple(w.x, fy, { R: 300, dur: 0.8, amp: 14, width: 44, col: '#bfe9ff', fronts: 2, nudge: 2 });
     burst(w.x, fy, 26, '#ffffff', 300, 0.7, 0, 3, true);
     if (typeof padRumble === 'function') padRumble(0.7, 0.5, 500);
   }
-  if (w.t >= RING_WAKE.T) {
+  if (w.t >= RW.T) {
     if (G.save && G.save.flags) { G.save.flags[ringWakeKey(w.def)] = 1; if (typeof persist === 'function') persist(); }
-    G.ringWake = null;
+    if (b) { b.wakeTo = null; b.wakeFace = null; }
+    G.ringWake = null; cam.peek = null;
   }
 }
 function gateLocked(def) {
@@ -11879,7 +11970,12 @@ function gateFightSealed(def) {
 function gateDoorsAll(id) {
   const room = id == null ? G.roomId : id;
   const g = GATE_ROOM[room];
-  const doors = !g ? [] : (Array.isArray(g) ? g.slice() : [g]);
+  let doors = !g ? [] : (Array.isArray(g) ? g.slice() : [g]);
+  // THE ROBOT STORY LEAVES THE MEADOWS THROUGH NULLFANG'S DOOR (owner, 2026-11-25): in his arena
+  // the one door is the door to Kingdom 2, and the frontier road has its way back to it. Every
+  // robot save, old or new — the climb over the camp is gone for all of them (js/world.js
+  // storyExits), so this is the only road on.
+  if (typeof GATE_STORY !== 'undefined' && !isHero() && (room === 'A4' || room === 'A14')) return [GATE_STORY[room]];
   // An existing floor anchor in the quarry connects to the tunnel's central
   // maintenance landing. The guardian's reward is never a prerequisite.
   if (!isHero() && G.save && G.save.storyVersion >= 2) {
@@ -12052,6 +12148,9 @@ const RING_GATE = {
   ringDen:    { cx: 0.4969, top: 0.2328, bot: 0.8469, rx: 0.2984, mid: 0.5344, floor: 0.9875, col: [255, 116, 66] },
   ringMeadow: { cx: 0.4977, top: 0.1688, bot: 0.8750, rx: 0.2945, mid: 0.4547, floor: 0.9766, col: [118, 236, 214] },
   ringQuarry: { cx: 0.4977, top: 0.1719, bot: 0.8469, rx: 0.2930, mid: 0.4500, floor: 0.9766, col: [150, 214, 255] },
+  // the Conduits' own (2026-11-25): cables wound round the band, knotted at the crown — the door
+  // to Kingdom 2 in NULLFANG's arena and its far side (GATE_STORY A4 / A14, js/k2door.js)
+  ringConduit: { cx: 0.4969, top: 0.1578, bot: 0.8516, rx: 0.3172, mid: 0.4688, floor: 0.9719, col: [96, 214, 255] },
 };
 const RING_H = 236;              // world px, sill to crown: the opening is about three of her tall
 const RING_GOLD = [255, 206, 96];
@@ -12060,6 +12159,7 @@ const RING_GOLD = [255, 206, 96];
 function ringGateFor(def) {
   if (!def || !G.roomDef || G.roomId === 'W2') return null;
   if (def.style === 'den' || G.roomId === 'A10') return 'ringDen';
+  if (def.style === 'k2') return 'ringConduit';
   if (def.style) return null;
   if ((G.roomId === 'CV3' && def.to === 'GA1T') || (G.roomId === 'GA1T' && def.to === 'CV3')) return 'ringQuarry';
   // (inside a guardian's network the way out is a ring — the sewer too, js/sewer.js)
@@ -12244,7 +12344,11 @@ function drawGateDoor(P, def, nearPlane) {
       for (const ox of [-34, 0, 34]) { const col = groundColumnAt(wx + ox); if (col && col.length) low = Math.max(low, Math.min.apply(null, col)); }
       if (low > -Infinity) ry = low;
     }
-    if (drawRingGate(ds, ry, ringKey, def, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)) || gateLocked(def) || ringAsleep(def))) return;
+    if (drawRingGate(ds, ry, ringKey, def, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)) || gateLocked(def) || ringAsleep(def))) {
+      // (the door to Kingdom 2 wears its vines until NULLFANG roars them off: js/k2door.js)
+      if (def.style === 'k2' && typeof k2VinesDraw === 'function') k2VinesDraw(def, ds, ry);
+      return;
+    }
     // (the measurement hook, as for the guardian gates below: under G.artProbe
     // a ring whose plate is missing draws NOTHING, so tests/kingdom.cjs measures
     // the ring itself and not the ring against the mouth standing in for it)
@@ -17843,6 +17947,7 @@ function draw(tms) {
     ftxt(t('intro_skip'), 480, 512, 13, '#546b7d');
     return;
   }
+  if (st === 'KEND') { drawK1End(); return; }
   if (st === 'MORE') {
     // the world stays behind it, dimmed. She is standing in the doorway she
     // cannot go through yet, and the screen should read as her looking at it

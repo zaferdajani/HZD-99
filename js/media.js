@@ -191,6 +191,9 @@ const MEDIA_SRC = {
     ringDen: 'assets/backgrounds/ring_den.webp',
     ringMeadow: 'assets/backgrounds/ring_meadow.webp',
     ringQuarry: 'assets/backgrounds/ring_quarry.webp',
+    // the door to Kingdom 2 (js/k2door.js): the Conduits' own ring, and the vines grown over it
+    ringConduit: 'assets/backgrounds/ring_conduit.webp',
+    ringConduitVines: 'assets/backgrounds/ring_conduit_vines.webp',
     // CAVE MOUTHS (§2f) — irregular rock openings, never doors, one material
     // family per grotto network, all sharing one composition so one anchor
     // rule covers the family.

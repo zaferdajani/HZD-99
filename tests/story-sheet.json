@@ -504,7 +504,7 @@
    "sets": [],
    "when": "ratchetSays",
    "speaker": "Ratchet (at the camp)",
-   "knows": "The hatch above the camp unjammed when the lion was freed; the climb leads to the Data Conduits.",
+   "knows": "The lion's door in his arena is grown over until he is freed and roars it open; beyond it the frontier road leads to the Data Conduits.",
    "pointer": "conduits_open, said the moment NULLFANG is free",
    "lines": [
     "@ratchetStanding",
@@ -525,9 +525,11 @@
    "sets": [],
    "speaker": "none",
    "knows": "The second kingdom.",
-   "pointer": "Ratchet: 'That climb goes up into the Data Conduits' (sl_ratchet_conduits); conduits_open; gate_conduits whenever the hatch refuses",
+   "pointer": "Ratchet: 'His door leads to the Conduits' (sl_ratchet_conduits); conduits_open; k2_door_vines whenever the grown-over door refuses; the end-of-kingdom card (k1_end1/k1_end2) at the frontier road's east edge",
    "lines": [
-    "gate_conduits"
+    "k2_door_vines",
+    "k1_end1",
+    "k1_end2"
    ]
   },
   {

@@ -407,6 +407,31 @@ function caveCarve(g, seedStr, o) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// ONE ROOM, TWO STORIES. The robot story and NOSTOS (the hero world) walk the same rooms, and
+// almost everywhere they agree. Where they do not, a room says so: `themed: 1` builds it once per
+// world (buildRoom keys its cache by the world), and its exits are a GETTER that answers for the
+// world being played — so every reader of `exits` (the crossings, the route arrow, the map, the
+// preloader, the harnesses) sees the right map without knowing there are two.
+//
+// The first place they part (owner, 2026-11-25): the robot story no longer leaves the Meadows
+// "up into the sky, into the light" over the camp — its way out is the door NULLFANG opens in
+// his own arena (A4 -> A14 -> B1). NOSTOS keeps the climb it was built with.
+// ---------------------------------------------------------------------------
+function storyHero() { return typeof isHero === 'function' && isHero(); }
+// (defined on the room AFTER the table is built: a getter spread into a literal is copied as
+// its value at load, which would freeze whichever world happened to be loading)
+function storyExits(id, hero) {
+  const d = ROOMS[id], robo = d.exits;
+  d.themed = 1;
+  Object.defineProperty(d, 'exits', {
+    get() { return storyHero() ? hero : robo; },
+    // (the room editor writes exits back; a written room keeps what it was given)
+    set(v) { Object.defineProperty(this, 'exits', { value: v, writable: true, configurable: true, enumerable: true }); },
+    configurable: true, enumerable: true,
+  });
+}
+
 // ents: [kind, tileX, tileYFeetOn, extra?, condFlag?]
 const ROOMS = {
   // ============ THE WAKING FLOOR ============
@@ -933,8 +958,11 @@ const ROOMS = {
   // the story's gate (plan §4.2): the Conduits open once NULLFANG is free —
   // which needs the forged blade, the Meadow Sage and the silenced bell — so
   // nobody leaves the Meadows having skipped its chapter. Robot story only.
-  A3: { zone: 'A', sky: 1, w: 52, h: 17,
-    exits: { L: 'A2', R: 'A4', T: { to: 'B1', flag: 'bossGlitch', blade: 1, robo: 1, why: 'gate_conduits' }, B: 'A12' },
+  // THE CAMP. In NOSTOS the climb above it is still the way into the Conduits; in the robot
+  // story it is gone — no ledges up, no hole in the sky, no light falling through it (owner,
+  // 2026-11-25: "instead of going up into the sky, into the light ... remove the light from the
+  // screen before it"). Her way out of the Meadows is NULLFANG's door (A4, js/k2door.js).
+  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A2', R: 'A4', B: 'A12' },   // (+ NOSTOS's climb: storyExits below)
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet'], ['scrap', 40, 15, 14]],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -948,12 +976,13 @@ const ROOMS = {
       // vault she can only cross once NULLFANG has given her the dash. A B
       // crossing keeps her x, so A12's ceiling opening is these two columns.
       rect(g, 10, 15, 11, 16, 'B');
-      // THE CLIMB TO THE CONDUITS DOES NOT MOVE. B1's shaft comes down at
+      // THE CLIMB TO THE CONDUITS (NOSTOS only). B1's shaft comes down at
       // 25-28 and a T crossing keeps her x, so this ceiling opening and that
-      // shaft are the same four columns — the frontier light falls through it
-      // (ROOM_PROP / THE FRONTIER) and both ends have to agree.
-      hline(g, 18, 21, 12, '='); hline(g, 23, 26, 9, '='); hline(g, 19, 22, 6, '='); hline(g, 25, 28, 3, '=');
-      rect(g, 25, 0, 28, 0, '.'); // ceiling opening to B1
+      // shaft are the same four columns, and both ends have to agree.
+      if (storyHero()) {
+        hline(g, 18, 21, 12, '='); hline(g, 23, 26, 9, '='); hline(g, 19, 22, 6, '='); hline(g, 25, 28, 3, '=');
+        rect(g, 25, 0, 28, 0, '.'); // ceiling opening to B1
+      }
       // EAST OF THE CLIMB, the road on to the Glitch — the last stretch of
       // meadow before the kingdom's own guardian, and the only thing on it is
       // the yard: a long swell she comes over, and scrap on the far side of it
@@ -969,18 +998,18 @@ const ROOMS = {
   // None under a ledge, none on the hulk's slope. [tile x of the foot, scale, plate, mirrored];
   // coverBack: the meadow beyond, on parallax behind the level [.., parallax].
   A4: { zone: 'A', sky: 1, w: 44, h: 17, exits: { L: 'A3' },
-    cover: [[3.3, 0.72, 'b', 1], [6.6, 0.95, 'c', 0], [15.2, 0.55, 'd', 1], [19.6, 0.7, 'e', 0], [23.5, 0.88, 'a', 0], [27.9, 0.78, 'e', 1], [35.7, 0.8, 'a', 1]],
+    cover: [[3.3, 0.72, 'b', 1], [6.6, 0.95, 'c', 0], [15.2, 0.55, 'd', 1], [20.6, 0.7, 'e', 0], [23.5, 0.88, 'a', 0], [27.9, 0.78, 'e', 1], [35.7, 0.8, 'a', 1]],
     coverBack: [[9.5, 0.62, 'a', 0, 0.9], [13.8, 0.9, 'c', 1, 0.9], [17.5, 0.7, 'b', 1, 0.9], [25.8, 0.7, 'd', 1, 0.9], [30.5, 0.6, 'e', 0, 0.9], [42.5, 0.7, 'a', 1, 0.9]],
     ents: [['boss', 24, 15, 'glitch']],
     build(g) {
       frame(g); seamL(g);
       // the same arena rule as the Alpha's den: the fight's ground is flat and
-      // the room's shoulders carry the furniture. The grotto that opens when
-      // the Glitch falls stands at 0.14 of the room (tile 6), so the west end
-      // stays clear for it, and the room ENDS on a hulk rather than running
+      // the room's shoulders carry the furniture. The door to Kingdom 2 stands at
+      // 0.23 of the room (js/game.js GATE_ROOM A4, js/k2door.js), between the tall
+      // tree and the low thicket that frame it, and the room ENDS on a hulk rather than running
       // out into a bare frame column — there is no exit that way, and a dead
       // end should look like something stopped there.
-      hline(g, 12, 16, 11, '='); hline(g, 30, 34, 11, '=');
+      hline(g, 14, 18, 11, '='); hline(g, 30, 34, 11, '=');   // (the west one clear of the door's ring, 2026-11-25)
       hull(g, 36, 42, 2, 91);
     } },
   A5: { zone: 'A', w: 48, h: 17, exits: { T: 'A2', B: 'A7' },
@@ -1014,7 +1043,9 @@ const ROOMS = {
   // question. Solution shape: wait below the tower lip through the vent,
   // then climb and punish the open vents (0.9 s, two hits); failure mode:
   // climbing during the charge meets the wave with nowhere to land.
-  B1: { zone: 'B', w: 32, h: 17, exits: { B: 'A3', R: 'B2', T: 'B6' },
+  // (the robot story walks in from the WEST, out of the frontier road A14; NOSTOS climbs in
+  // from A3 under it — storyExits above)
+  B1: { zone: 'B', w: 32, h: 17, exits: { L: 'A14', R: 'B2', T: 'B6' },   // (NOSTOS's: storyExits below)
     ents: [['flier', 15, 6], ['surge', 5, 12], ['scrap', 22, 12, 10]],
     build(g) {
       frame(g);
@@ -1023,8 +1054,10 @@ const ROOMS = {
                                             // gives everywhere else: a hulk
                                             // bitten at both ends, not a box
       hline(g, 11, 18, 15, '^');            // spike gap (needs dash)
-      rect(g, 25, 12, 28, 16, '.');         // shaft down to A3
-      hline(g, 25, 28, 12, '=');
+      if (storyHero()) {
+        rect(g, 25, 12, 28, 16, '.');       // shaft down to A3
+        hline(g, 25, 28, 12, '=');
+      } else seamL(g);                      // the robot story walks in from A14
       rect(g, 29, 8, 31, 11, '.');          // exit R (upper level) — carved to
                                             // the EDGE: it used to stop at col
                                             // 29, leaving the frame sealed
@@ -1797,6 +1830,30 @@ const ROOMS = {
       hull(g, 36, 42, 2, 145);
       hline(g, 31, 34, 11, '=');
     } },
+  // THE FRONTIER ROAD — out of the Meadows, into the Conduits (owner, 2026-11-25: "Going to the
+  // door will give me an entrance to a place where I will have to use my dash to reach the second
+  // kingdom"). Behind NULLFANG's door (A4, js/k2door.js), the last of the meadow's ground broken
+  // by two pits of spikes the width of A12's — twelve tiles, 384 px, where a run-up jump carries
+  // 317 (tests/secrets.cjs) — so the dash he has just given her is what crosses them, twice.
+  // Open sky, no ceiling and nothing alive over the pits: the claw finds nothing to pull on.
+  // Its east edge is the threshold of Kingdom 2 (B1), and the free chapter's last step:
+  // js/game.js THE DEMO BOUNDARY stops a player there when the offer is on. Robot story only.
+  A14: { zone: 'A', sky: 1, w: 56, h: 17, exits: { R: 'B1' },
+    ents: [['scrap', 26, 13, 30], ['scrap', 50, 15, 20]],
+    build(g) {
+      frame(g); seamR(g);
+      // the door she came out of stands on the level at the west end (0.07); a spoil heap behind it
+      mound(g, 1, 2, 1, 171);
+      // the first pit, a lip of spoil at its edge to leave from
+      mound(g, 6, 11, 1, 173);
+      rect(g, 12, 15, 23, 15, '.'); hline(g, 12, 23, 16, '^');
+      // the shelf between them: a fallen hulk with scrap on its back
+      hull(g, 24, 31, 2, 175);
+      // the second pit, the same width
+      rect(g, 32, 15, 43, 15, '.'); hline(g, 32, 43, 16, '^');
+      // the far bank rises to the Conduits' threshold and levels off at its edge
+      mound(g, 44, 50, 2, 177);
+    } },
   A13: { zone: 'A', w: 30, h: 21, exits: { R: 'A6' },
     // THE DEAF SYSTEM'S POCKET under the vent climb (docs/DEAF_SYSTEM.md): a
     // terminal that tells the story of the deaf, a coin's worth of their
@@ -2093,6 +2150,11 @@ const ROOMS = {
 };
 
 // map screen layout: [gridX, gridY, wCells, hCells]
+// THE TWO STORIES' MAPS PART HERE (storyExits above): NOSTOS climbs from the camp into B1; the
+// robot story reaches B1 along the frontier road from NULLFANG's door
+storyExits('A3', { L: 'A2', R: 'A4', T: { to: 'B1', flag: 'bossGlitch', blade: 1, robo: 1, why: 'gate_conduits' }, B: 'A12' });
+storyExits('B1', { B: 'A3', R: 'B2', T: 'B6' });
+
 const MAPPOS = {
   // KINGDOM 1 IS RE-LAID because its rooms are no longer one screen each. A map
   // cell used to mean "a room" and every meadow room was about 1.07 x 1.01
@@ -2123,7 +2185,7 @@ const MAPPOS = {
   W1: [-7.25, 3, 1, 1], W2: [-6.25, 3, 2, 1], A0: [-4.25, 3, 2, 1], A0B: [-4.25, 2, 1, 1], A1: [-2.25, 3, 2, 1],
   A2: [-0.25, 3, 3, 1], A10: [1, 0, 2, 1], A10R: [-1, -1, 2, 1], A3: [2.75, 3, 2, 1], A4: [4.75, 3, 1, 1],
   A5: [-0.25, 4, 2, 1], A6: [-2, 2, 1, 1], A7: [0, 5, 1, 2], A8: [0, 2, 1, 1], A9: [0, 1, 1, 1],
-  A11: [-1, 1, 1, 1], A12: [3, 4, 1, 1], A13: [-3, 2, 1, 1],
+  A11: [-1, 1, 1, 1], A12: [3, 4, 1, 1], A13: [-3, 2, 1, 1], A14: [1, 2, 2, 1],
   CV1: [-6, 5, 2, 1], CV1B: [-6, 6, 1, 1], CV2: [-4, 5, 2, 1], CV3: [-2, 5, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [10, 2, 1, 1], V2: [5, 4, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
@@ -2321,8 +2383,11 @@ for (const id in ROOMS) {
   d.ents = (d.ents || []).map((e) => [e[0], e[1], e[2] + d.air].concat(e.slice(3)));
 }
 
+function gridKey(id) { const d = ROOMS[id]; return d && d.themed ? id + (storyHero() ? '|h' : '|r') : id; }
+function gridDrop(id) { delete gridCache[id]; delete gridCache[id + '|h']; delete gridCache[id + '|r']; }
 function buildRoom(id) {
-  if (gridCache[id]) return gridCache[id];
+  const key = gridKey(id);
+  if (gridCache[key]) return gridCache[key];
   const def = ROOMS[id];
   const air = def.air | 0;
   const g = mk(def.w, def.h);
@@ -2341,7 +2406,7 @@ function buildRoom(id) {
   // sky rooms lose the lid after everything else is built, so the pass sees
   // the authored ceiling opening before erasing it — pack rooms included
   if (def.sky) { skyLid(g); skyUnder(g, def, id); }
-  gridCache[id] = g;
+  gridCache[key] = g;
   return g;
 }
 // A RING STANDS ON A LEVELLED PAD (owner, 2026-11-16, of the den ring on its

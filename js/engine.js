@@ -802,7 +802,9 @@ function updateCam(px, py, rw, rh, dt) {
   cam.lookDir=vdir;
   const lookWant=snap?0:(cam.lookHold>=LOOK_HOLD?vdir*LOOK_SPAN*540/z:0);
   cam.look=snap?0:lerp(cam.look||0,lookWant,1-Math.exp(-step*(lookWant?4.5:7)));
-  const tx=boundX(px-480+cam.lead);
+  // (a staged moment may hold the frame on a point of the room for a beat: cam.peek, a world x —
+  // the door NULLFANG wakes, js/k2door.js — and lets it go again; the ease below carries it)
+  const tx=boundX(cam.peek!=null?cam.peek-480:px-480+cam.lead);
   const ty=boundY(aimY-(robo?270+112/z:300)+fall+cam.look);
   cam.x=snap?tx:lerp(cam.x,tx,1-Math.exp(-step*11));
   cam.y=snap?ty:lerp(cam.y,ty,1-Math.exp(-step*9));

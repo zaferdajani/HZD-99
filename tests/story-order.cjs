@@ -113,6 +113,9 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
           if (U[ty] && (U[ty][tx] === 'B' || U[ty][tx] === 'v')) G.save.broken[up + ':' + tx + ',' + ty] = 1;
       }
       const W = def.w * TILE, H = def.h * TILE;
+      // (the end-of-kingdom card stands in the doorway out of the Meadows the first time and closes
+      // itself — tests/k2-door.cjs plays it; the walker asks what can be REACHED, so it takes it as read)
+      const k1Keep = G.save.flags.k1End; G.save.flags.k1End = 1;
       for (const side of Object.keys(def.exits || {})) {
         G.trans = null; player.vx = 0; player.vy = 0; player.lastSafe = { x: 40, y: 40 };
         if (side === 'L') { player.x = -player.w - 4; player.y = (def.h - 4) * TILE; }
@@ -135,6 +138,7 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       }
       window.vlinkHandover = realHand;
       G.save.broken = brokeKeep;
+      if (k1Keep) G.save.flags.k1End = k1Keep; else delete G.save.flags.k1End;
       G.trans = null;
       for (const d of gateDoorsAll(id)) {
         G.gateWalk = null;
@@ -299,29 +303,32 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       localStorage.removeItem(key); localStorage.removeItem(saveKeyFor('hero'));
     }
 
-    // 4.2 THE CONDUITS GATE, through the real crossing
+    // 4.2 THE CONDUITS GATE: NULLFANG'S DOOR, through the real crossing (owner, 2026-11-25: the door in
+    // his arena, grown over until he is free and roars the vines off it, leads to the second kingdom
+    // "instead of going up into the sky" over the camp — js/k2door.js)
     {
-      const up = (flags) => {
-        fresh(flags); loadRoom('A3'); G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.gateWhyAt = 0;
-        const gap = G.grid.tGap;
-        player.x = ((gap[0] + gap[1] + 1) / 2) * TILE - player.w / 2; player.y = -player.h - 6; player.vy = -300;
-        G.trans = null; checkTransitions();
-        // the first refusal is a CARD she acknowledges (js/overlay.js storyNote,
-        // owner 2026-10-09: important instructions stay until acknowledged);
-        // later bumps are toasts — either one says why
-        const said = (G.toasts || []).map(x => x.text)
-          .concat(G.dialog && G.dialog.note ? G.dialog.lines : []).join(' | ');
-        // an open shaft is crossed by the silent handover (VERTICAL LINKS): the
-        // room really changes, with no G.trans cut — count either as crossing
-        return { to: (G.trans && G.trans.to) || (G.roomId !== 'A3' ? G.roomId : null), said };
+      const door = (flags) => {
+        fresh(flags); loadRoom('A4'); G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.gateWhyAt = 0;
+        const d = gateDoors()[0];
+        return { d: d && d.to, locked: d ? gateLocked(d) : null, vines: d ? k2VinesOn(d) : null, asleep: d ? ringAsleep(d) : null, line: d && d.lockLine };
       };
-      const a = up({ crystal: 1, sageTame_GA1D: 1, bossChime: 1 });
-      check('the climb to the Conduits refuses before NULLFANG is free', !a.to, a.to);
-      check('...and says why, in the player\'s language', a.said.indexOf(t('gate_conduits').slice(0, 20)) >= 0, a.said.slice(0, 120));
-      const b = up({ bossGlitch: 1 });
-      check('...and still refuses a save that never forged the blade', !b.to, b.to);
-      const c = up({ bossGlitch: 1, crystal: 1 });
-      check('...and opens once the lion is free and the blade forged', c.to === 'B1', c.to);
+      const a = door({ crystal: 1, sageTame_GA1D: 1, bossChime: 1 });
+      check('the way to the Conduits is NULLFANG\'s door, shut and grown over before he is free', a.d === 'A14' && a.locked && a.vines, JSON.stringify(a));
+      check('...and it says why, in the player\'s language', !!a.line && t(a.line) !== a.line && t(a.line).length > 3, a.line + ': ' + t(a.line));
+      const b = door({ bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1 });
+      check('...freed, he still has to wake it: the vines hold until he roars them off', !b.locked && b.asleep && b.vines, JSON.stringify(b));
+      const c = door({ bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, 'rw_A4>A14': 1 });
+      check('...woken, the vines are gone and the door is open', !c.locked && !c.asleep && !c.vines, JSON.stringify(c));
+      // ...and the road beyond it reaches the Conduits across its east edge
+      fresh({ bossGlitch: 1, crystal: 1, 'rw_A4>A14': 1 }); loadRoom('A14'); G.dialog = null; G.state = 'PLAY';
+      player.x = G.roomDef.w * TILE + 4; player.y = 13 * TILE; player.vx = 200; G.trans = null; checkTransitions();
+      // (the first time, the end-of-kingdom card stands in the doorway; it closes itself, and she walks on —
+      // tests/k2-door.cjs plays it)
+      if (G.state === 'KEND') { G.k1End.t = K1_END.T + 0.1; updateK1End(0); if (G.state === 'PLAY') checkTransitions(); }
+      const to =(G.trans && G.trans.to) || (G.roomId !== 'A14' ? G.roomId : null);
+      check('...and the frontier road beyond it crosses into the Conduits (B1)', to === 'B1', to);
+      fresh({ bossGlitch: 1, crystal: 1 });
+      check('...while the camp has no way up any more (the climb is NOSTOS\'s only)', !(ROOMS.A3.exits || {}).T, JSON.stringify(ROOMS.A3.exits));
     }
 
     // 4.3 THE BLADE FOR TAMING, and the ledger stays exact
@@ -374,7 +381,7 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
         [K({ nfMeet: 1 }), K({ nfMeet: 1, crystal: 1 })].join(','));
       check('...he does once the sage is free and the bell silent',
         K({ nfMeet: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1 }) === 'sl_ratchet_rematch');
-      check('...and after the lion, he points up to the Conduits', K({ bossGlitch: 1, crystal: 1 }) === 'sl_ratchet_conduits');
+      check('...and after the lion, he points to the lion\'s door and the Conduits beyond it', K({ bossGlitch: 1, crystal: 1 }) === 'sl_ratchet_conduits');
       const bell = t('sg_rev4');
       check('the first sage says "silence that bell" only while the bell still rings',
         sageRevealLines({}).indexOf(bell) >= 0 && sageRevealLines({ bossChime: 1 }).indexOf(bell) < 0

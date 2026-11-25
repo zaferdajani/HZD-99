@@ -16,7 +16,8 @@ let hero = false;
 const ctx = vm.createContext({ console, Math, Set,
   isHero: () => hero, persist: noop, burst: noop, sfx: noop, npcSay: noop,
   clamp: (v, a, b) => Math.max(a, Math.min(b, v)),
-  bossActive: () => false, demoWall: () => false, standingTier: () => 0,
+  bossActive: () => false, demoWall: () => false, k1EndDue: () => false,   // (the end-of-kingdom card: tests/k2-door.cjs)
+  standingTier: () => 0,
   t: key => key.startsWith('d_') ? ['Greeting'] : key,
   cam: { shake: 0 }, PURIFY_VID: {}, NPC_AWAKE: new Set(),
   TRANS_DUR: 0.4, transHeld: false, transCv: null, transSnap: null,

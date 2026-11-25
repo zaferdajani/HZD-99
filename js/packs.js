@@ -49,7 +49,7 @@ function packApply(def) {
       // the grid is data, but buildRoom wants a builder — stamp the rows
       build(g) { for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) g[y][x] = rows[y][x]; },
     };
-    delete gridCache[id];                       // a re-applied pack re-stamps
+    if (typeof gridDrop === "function") gridDrop(id); else delete gridCache[id];   // a re-applied pack re-stamps
     MAPPOS[id] = (def.map && def.map[id]) || [0, 0, 1, 1];
   }
   // "npcBody": {"keeper": "servo"} — a custom NPC identity wearing an existing
