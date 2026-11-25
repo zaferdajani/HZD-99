@@ -2,7 +2,7 @@
 //
 // "Plant a visible, unreachable prize in the first rooms. One ledge with
 // something on it that needs a later ability." A deck over the road in A0, the
-// first room past the gates, with a lit chest (a core) on it.
+// first room past the gates, with a lit chest on it (a cache of scrap since 2026-11-20: a life is a sage's).
 //
 // Both halves are played with her real body through the real update:
 //   WITHOUT the double jump — every running and standing jump from the road
@@ -83,10 +83,10 @@ const { chromium } = require('playwright');
     const sx = (c.x + c.w / 2 - cam.x - 480) * z + 480, sy = (c.y + c.h / 2 - cam.y - 270) * z + 270;
     out.seen = { sx: Math.round(sx), sy: Math.round(sy), opened: !!c.opened };
     // and taking it pays the core
-    fresh({ djump: 1 }); const c2 = chest(); const cores0 = player.maxCores();
+    fresh({ djump: 1 }); const c2 = chest(); const cores0 = player.maxCores(), scrap0 = G.save.scrap || 0;
     player.x = c2.x; player.y = c2.y + c2.h - player.h; player.vy = 0; for (let i = 0; i < 20; i++) step();
     doInteract(c2); for (let i = 0; i < 10; i++) step();
-    out.pay = { before: cores0, after: player.maxCores(), opened: !!c2.opened };
+    out.pay = { before: cores0, after: player.maxCores(), opened: !!c2.opened, scrap: (G.save.scrap || 0) - scrap0 };
     return out;
   });
 
@@ -95,7 +95,9 @@ const { chromium } = require('playwright');
   check('...and not by a hair: the best of them is a clear miss', r.closest >= 24 && r.closest < 200, 'closest feet came within ' + r.closest + 'px of the deck top');
   check('with the double jump she is standing on it', r.withJets.length > 0, r.withJets.join(' '));
   check('from the road beneath, the chest is in the frame', r.seen.sx > 60 && r.seen.sx < 900 && r.seen.sy >= 24 && r.seen.sy < 500 && !r.seen.opened, JSON.stringify(r.seen));
-  check('...and it is worth coming back for: a whole core', r.pay.opened && r.pay.after === r.pay.before + 1, JSON.stringify(r.pay));
+  // a cache, not a life (owner, 2026-11-20: "Getting extra lives should be only rewarded when you
+  // defeat a sage" — js/game.js, the 'core' chest): it pays its scrap, and never a core
+  check('...and it is worth coming back for: its cache of scrap, and never a life', r.pay.opened && r.pay.scrap >= 80 && r.pay.after === r.pay.before, JSON.stringify(r.pay));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.join(', ')); process.exit(1); }
