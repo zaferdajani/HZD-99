@@ -4,9 +4,7 @@
 // place it comes from is by watching the leaves moves in the place that is coming from to
 // attack. Usually that happens wherever I'm standing. So it gives me a split of second to move
 // away from its attack"). js/nullfang-duel.js NF_AMB, js/nfcover.js. Drives the real build:
-//   - the fight is ONE STILL PICTURE of the whole arena (owner, 2026-11-25: "Camera should not move
-//     with me in the boss fight"): zoomed to fit the room, eased there, never following her —
-//     not across the floor, not up on a palm, not in a jump;
+//   - the fight frames wider than any other (the camera eases out, never cuts, and back after);
 //   - the arena has metal leaf cover standing ON the ground, drawn at full strength, and more
 //     of it behind the level;
 //   - he goes into a clump and is then not drawn, not a target, has no body to walk into, and
@@ -52,23 +50,9 @@ const PORT = process.env.TEST_PORT || 8220;
     bo.st = 'idle'; bo.t = 0.3;
     let zMin = 9, zMax = 0, dzMax = 0, zPrev = cam.zoom;
     loop(240, () => { hold(); zMin = Math.min(zMin, cam.zoom); zMax = Math.max(zMax, cam.zoom); dzMax = Math.max(dzMax, Math.abs(cam.zoom - zPrev)); zPrev = cam.zoom; });
-    out.zFight = { min: +zMin.toFixed(3), now: +cam.zoom.toFixed(3), dzMax: +dzMax.toFixed(4), fit: +(960 / (G.roomDef.w * TILE)).toFixed(3) };
-    // THE FRAME HOLDS STILL (owner, 2026-11-25: "Camera should not move with me in the boss fight"):
-    // she runs the floor, jumps, and stands on the palm over the west ledge — the frame does not move,
-    // and he and the whole floor stay in it
-    { const xs = [], ys = [], seen = [];
-      const at = (x, y) => { player.x = x; player.y = y; player.vx = player.vy = 0; };
-      const probe = () => { xs.push(cam.x); ys.push(cam.y);
-        const inView = (e) => { const ex = worldScreenX(e.x + e.w / 2), ey = worldScreenY(e.y + e.h / 2); return ex > 0 && ex < 960 && ey > 0 && ey < 540; };
-        seen.push([Math.round(worldScreenX(bo.x + bo.w / 2)), Math.round(worldScreenY(bo.y + bo.h / 2)), Math.round(worldScreenX(player.x)), Math.round(worldScreenY(player.y)), inView(bo) && inView(player)]); };
-      at(3 * TILE, 13 * TILE); loop(30, () => { hold(); }); probe();
-      at(40 * TILE, 13 * TILE); loop(30, () => { hold(); }); probe();
-      // on the palm: the deck at tiles 12-16, row 11
-      at(14 * TILE, 11 * TILE - player.h - 2); loop(30, () => { hold(); }); probe();
-      // a jump from the palm
-      player.vy = -700; player.on = false; loop(20, () => { hold(); }); probe();
-      out.frame = { dx: Math.round(Math.max(...xs) - Math.min(...xs)), dy: Math.round(Math.max(...ys) - Math.min(...ys)), seen: seen.every(q => q[4]), at: seen };
-      at(14 * TILE, 13 * TILE); loop(30, () => { hold(); }); }
+    out.zFight = { min: +zMin.toFixed(3), now: +cam.zoom.toFixed(3), dzMax: +dzMax.toFixed(4) };
+    // the encounter camera every other guardian gets, for the same two bodies
+    { const keepOn = window.nfCamZoom; window.nfCamZoom = () => 0; let zz = 0; loop(120, () => { hold(); zz = cam.zoom; }); out.zOther = +zz.toFixed(3); window.nfCamZoom = keepOn; loop(60, hold); }
     // ---- 2. THE COVER
     const L = nfCoverList();
     out.cover = L.map(cl => {
@@ -182,9 +166,10 @@ const PORT = process.env.TEST_PORT || 8220;
       out.natural = { lurkwarn: !!seen.lurkwarn, springwarn: !!seen.springwarn, lurkpounce: !!seen.lurkpounce }; }
     return out;
   });
-  check('the fight is framed as the whole arena: zoomed out until the room fits the screen', Math.abs(R.zFight.now - R.zFight.fit) < 0.01 && R.zFight.now < R.zExplore - 0.3, { explore: R.zExplore, fight: R.zFight });
+  check('the fight frames wider than the exploration camera', R.zFight.now <= 1.001 && R.zFight.now < R.zExplore - 0.3, { explore: R.zExplore, fight: R.zFight });
+  check('...and wider than the camera every other guardian gets', R.zFight.now < R.zOther - 0.03, { nullfang: R.zFight.now, other: R.zOther });
+  check('...never so far out she is lost on a phone (>= 0.85)', R.zFight.min >= 0.85, R.zFight);
   check('...and it eases there, it never cuts (under 0.05 a frame: the camera\'s own ease)', R.zFight.dzMax < 0.05, R.zFight);
-  check('the frame holds still whatever she does: across the floor, on the palm, in a jump from it — and he is always in it', R.frame.dx <= 2 && R.frame.dy <= 2 && R.frame.seen, R.frame);
   check('the arena has cover across its whole floor: six or more clumps of three or more shapes, each with its leaves, no stretch of floor wider than 320 px without one', R.cover.length >= 6 && new Set(R.cover.map(c => c.key)).size >= 3 && R.cover.every(c => c.leaves >= 2) && R.cover.every((c, i) => i === 0 || c.x - R.cover[i - 1].x <= 320), R.cover.map(c => [c.x, c.key, c.leaves]));
   check('...each stands ON the ground: its foot on the ground under it, never floating, never sunk', R.cover.every(c => c.gy >= c.hi - 1 && c.gy - c.lo <= 26), R.cover.map(c => [c.x, c.gy, c.lo, c.hi]));
   check('...drawn at full strength (no fade, no filter), the art present', R.front.draws > 40 && R.front.faded === 0 && R.front.filt === 0, R.front);

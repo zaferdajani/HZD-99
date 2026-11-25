@@ -72,8 +72,7 @@ function purificationBegin(b) {
  if (Math.abs(tx + player.w/2 - b.cx()) < gap - 40) tx = clampX(b.cx() - side * gap - player.w/2);
  G.purification = { b, room:G.roomId, phase:'stage', hold:0, t:0, clock:0, armed:false, committed:false, motes:[], stage:{ tx, T:0, walked:0 } };
  const span=Math.abs(b.cx()-player.x)+b.w+180;
- // (its own close framing — the two of them — not the fight's whole-arena picture it comes out of: js/engine.js bossFit)
- cam.zoom=purificationZoom(span);
+ cam.zoom=Math.min(worldZoom(),760/span);
  cam.x=(b.cx()+player.x+player.w/2)/2-480;cam.y=(b.cy()+player.y)/2-270;purificationCamClamp();
  G.state = 'PURIFY'; purificationPointer = false; releaseInput();
  return true;
@@ -82,11 +81,6 @@ function purificationBegin(b) {
 // glitched"). The stage set the camera by hand with no bound, so pulling in on the two
 // of them by a wall showed past the room's edge: the wall's lit end as a bar down the
 // frame and whatever lies beyond. The same bound updateCam keeps (js/engine.js).
-function purificationZoom(span) {
-  if ((typeof isHero === 'function' && isHero()) || (typeof window !== 'undefined' && window.EDITOR)) return 1;
-  const base = typeof PRESENTATION !== 'undefined' ? PRESENTATION.explorationZoom : 1;
-  return Math.max(1.05, Math.min(base, 760 / span));
-}
 function purificationCamClamp() {
  const z=cam.zoom||1, ox=480*(1-1/z), oy=270*(1-1/z), rw=G.roomDef.w*TILE, rh=G.roomDef.h*TILE;
  cam.x = rw<960/z ? (rw-960)/2 : clamp(cam.x,-ox,rw-960+ox);
@@ -158,7 +152,7 @@ function updatePurification(dt) {
    if(bDown && s.turned && s.T>0.45){ p.phase='hold'; p.t=0; p.hold=0; }
   }
   // the frame follows the two of them in
-  const span=Math.abs(b.cx()-player.x)+b.w+180, z=purificationZoom(span), k=Math.min(1,dt*5);
+  const span=Math.abs(b.cx()-player.x)+b.w+180, z=Math.min(worldZoom(),760/span), k=Math.min(1,dt*5);
   cam.zoom+=(z-cam.zoom)*k; cam.x+=((b.cx()+player.x+player.w/2)/2-480-cam.x)*k; cam.y+=((b.cy()+player.y)/2-270-cam.y)*k;
   purificationCamClamp();
   return;
