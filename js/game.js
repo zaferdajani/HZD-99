@@ -365,6 +365,10 @@ const G = {
       // crocodile's (swallowed), and the agent UNDERTOW's (SAGE_GIFT GB1D).
       // The vault is the way to the kingdom's sage (js/conduits-road.js).
       if (typeof K2_MINI_SIGIL !== 'undefined' && K2_MINI_SIGIL[kind] && !isHero()) this.grantRelic(K2_MINI_SIGIL[kind]);
+      // THE BELL'S LAST NOTE NAMES ITS KEEPER (owner, 2026-11-25: "build the suspense about the agent,
+      // hint about the agent from all of the mini bosses"): GRAVEHORN warned of the Eye's hand in this
+      // kingdom; the bell, falling silent, says whose it is and where — and the ring beside the quarry wakes
+      if (kind === 'chime' && typeof revisedStory === 'function' && revisedStory() && !this.save.flags.sageTame_GA1D) G.toast(t('chime_keeper'));
       // 'room' was never a real track key — resolve to the zone's own theme,
       // which is exactly what loadRoom plays for a non-boss room
       if (typeof setMusic === 'function') setMusic(G.roomDef ? (G.roomDef.mus || G.roomDef.zone) : 'A');
@@ -375,10 +379,6 @@ const G = {
     // WHO POINTS HER ON. The lion was the Meadows' gate (world.js A3's climb):
     // the moment it is free, the world says where the road now goes.
     if (kind === 'glitch' && typeof revisedStory === 'function' && revisedStory()) G.toast(t('conduits_open'));
-    // THE BELL'S LAST NOTE NAMES ITS KEEPER (owner, 2026-11-25: "build the suspense about the agent,
-    // hint about the agent from all of the mini bosses"): GRAVEHORN warned of the Eye's hand in this
-    // kingdom; the bell, falling silent, says whose it is and where — and the ring beside the quarry wakes
-    if (kind === 'chime' && typeof revisedStory === 'function' && revisedStory() && !this.save.flags.sageTame_GA1D) G.toast(t('chime_keeper'));
     // THE CELL. Every guardian was built around one, and it comes out when the
     // guardian stops. NULLFANG's is the one that opens the shop — which is why
     // the trader is standing in the room next door and why he has been dark
@@ -3286,6 +3286,7 @@ function update(dt) {
       }
       if (typeof updateRoarFX === 'function') updateRoarFX(dt);
       if (typeof updateBossVfx === 'function') updateBossVfx(dt);
+      if (typeof updateInsects === 'function') updateInsects(dt);   // the small life of the place (js/insects.js)
       // THE CACHE GATE: the floor entrance stays open until she is truly
       // inside — on her feet, clear of the hole — and only then does the
       // hardlight bridge snap across behind her and seal the arena
@@ -15854,6 +15855,7 @@ function drawWorldFrame() {
   drawLair();                       // behind the level — see the LAIR table
   drawRoomProp();                   // the cradle, the gates — see ROOM_PROP
   drawFlora();                      // ...and what grows in it — see FLORA
+  if (typeof drawInsects === 'function') drawInsects(c);   // ...and what flies in it (js/insects.js)
   // (a zone's platform objects that landed AFTER this room's tile layer was
   // rendered: the layer is a cache, and the cache was painted with the old deck)
   { const PO = platObjSet();

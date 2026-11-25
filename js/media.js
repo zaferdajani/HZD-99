@@ -608,6 +608,10 @@ const MEDIA_SRC = {
     // drawn as columns that bend when a body walks through them (js/grass.js)
     grassMeadow: 'assets/fx/grass/grass_meadow.webp',
     grassFrond: 'assets/fx/grass/grass_frond.webp',
+    // THE SMALL LIFE: one generated picture per insect (js/insects.js; masters in assets/source/insects/)
+    bugButterfly: 'assets/fx/insects/butterfly.webp',
+    bugDragonfly: 'assets/fx/insects/dragonfly.webp',
+    bugMoth: 'assets/fx/insects/moth.webp',
     // the bosses' attacks, generated and drawn as light (js/bossvfx.js, tools/vfxstrip.py)
     bvfx_agent_bolt: 'assets/fx/boss/agent_bolt.webp',
     bvfx_agent_burst: 'assets/fx/boss/agent_burst.webp',

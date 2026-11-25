@@ -248,6 +248,19 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       ['forge', 'chime', 'first_sage', 'nullfang', 'conduits'].map(id => route.order.indexOf(id)).every((v, i, a) => v >= 0 && (!i || v > a[i - 1])),
       route.order.join(' > '));
 
+    // THE MINI-BOSSES SPEAK OF THE AGENT (owner, 2026-11-25: "hint about the agent from all of the
+    // mini bosses that talks about the agent that controls this kingdom"): GRAVEHORN, beaten, warns of
+    // the Eye's hand; the bell's fall names TALLYMAN — said through the real death of CHIME
+    {
+      const sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { woke: 1, tut: 1, crystal: 1, 'on_A0B|ratchet': 1 });
+      startGame(sv); loadRoom('A9'); G.state = 'PLAY'; G.dialog = null;
+      const said = [], was = G.toast; G.toast = (m) => { said.push(m); };
+      try { G.onBossDead('chime'); } finally { G.toast = was; }
+      LANG = 'en';
+      check('the bell, silenced, names the agent: "' + t('chime_keeper') + '"', said.includes(t('chime_keeper')) && /TALLYMAN/.test(t('chime_keeper')), said.join(' | '));
+      check('GRAVEHORN, beaten, warns of the Eye\'s hand in this kingdom', /hand/.test([].concat(t('grv_down')).join(' ')) && /kingdom/.test([].concat(t('grv_down')).join(' ')), [].concat(t('grv_down')).join(' / '));
+    }
+
     // ---- 4. THE LOOPHOLES, ONE BY ONE ------------------------------------
     // 4.1 SAVE MIGRATION: an old save is brought onto the current story on load
     {

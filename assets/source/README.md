@@ -674,3 +674,11 @@ describe it.
   "find free library for the grass instead of these green lines". `tools/grasstint.py` tints it
   into `fx/grass/grass_meadow.webp` and `fx/grass/grass_frond.webp` (512 x 128); `js/grass.js`
   draws it in columns that bend under her and under anything that walks in it.
+
+## `insects/` — the small life of a place (2026-11-25)
+
+- `butterfly.jpg`, `moth.png`, `dragonfly.jpg` — one Higgsfield image each (gpt_image_2_6), a small
+  machine insect seen from above on black. The owner: "add insects proper to the place ...
+  butterflies ... dragonflies near swamps ... They are not NPCs ... And they're small."
+  `tools/bugcut.py` keys and cuts them into `fx/insects/*.webp` (48 px tall at most); `js/insects.js`
+  flies them — butterflies over the meadows, dragonflies over the swamp, moths in caves and the Nest.
