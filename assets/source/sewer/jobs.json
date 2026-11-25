@@ -25,11 +25,15 @@
  },
  "takes": {
   "model": "kling3_0_turbo (start frame: smith cut)",
-  "jobs": { "smith_talk": "3d215dcb-3cca-4382-89ce-0afd3afbb413" }
+  "jobs": {
+   "smith_talk": "3d215dcb-3cca-4382-89ce-0afd3afbb413"
+  }
  },
  "music": {
   "model": "elevenlabs_music_v2_5 (120 s)",
-  "jobs": { "mus_sewer": "4d3f1e68-bd97-407c-934e-17b68ef7dbe0" },
+  "jobs": {
+   "mus_sewer": "4d3f1e68-bd97-407c-934e-17b68ef7dbe0"
+  },
   "delivery": "seam cut 2 s in with a 2 s triangular crossfade of the head over the tail; loudnorm -17 LUFS, limiter at 0.7 (-2.4 dBTP after AAC); as fired in source/music/mus_sewer_asfired.mp3"
  },
  "delivery": {
@@ -37,5 +41,19 @@
   "hatch": "tools/stepstrip.cjs hatch_cut.png --cell 384 --body 184 --floor 376 --frames 4 --feet",
   "smith": "VP9 transcode, tools/vidstrip.cjs 16 cells of 320, scaled to 192",
   "plates": "trimmed, seated on the cell floor, 256 (items) / 320 (smith), webp 0.88"
+ },
+ "hole_2026_11_25": {
+  "why": "Owner, 2026-11-25: the floor where she jumps in should show like a hole in the ground, as if something broke the floor. The hatch is now a sunk grate in a smashed slab with the shaft cut down below it.",
+  "model": "gpt_image_2_6 (21:9)",
+  "references": {
+   "floor_reference.png (the gallery floor, rendered from the build)": "b27ef7b5-e465-4b42-9d64-6ca9f0edbcb1",
+   "the first hatch sheet as fired": "ef8cfc7b-5153-41aa-a68b-50238f07ae62"
+  },
+  "jobs": {
+   "a (no references: a round lid, refused)": "b1eb9c6d-957a-49d2-8344-78db5f782549",
+   "b (the square grate in the floor; too little broken, warm glow)": "412e096d-a893-4f9e-afaf-dadcd0d8a529",
+   "c (shipped: b edited, floor smashed round it, flat black)": "f62796c9-6862-44fe-a771-846d14b17a32"
+  },
+  "delivery": "four 336-px cells; the black above the slab keyed by a flood from the top (nothing below the slab touched), the slab faded out at both sides and the bottom so it melts into the real floor; drawn with its row 296 (the slab back edge) on the floor line at 0.8 vertical scale (js/sewer.js SW_HATCH)"
  }
 }

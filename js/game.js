@@ -12232,7 +12232,10 @@ function drawGateDoor(P, def, nearPlane) {
     return;
   }
   // cave on EITHER side of the passage: it is a mouth, not a door
-  if ((G.roomDef && (G.roomDef.cave || G.roomDef.grotto)) || (dest && (dest.cave || dest.grotto))) {
+  // (a sewer room counts as a cave here only for a plain door: the hatch into
+  // it has its own picture, and a mouth drawn in its place hid it)
+  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)
+      || (!def.style && ((G.roomDef && G.roomDef.grotto) || (dest && dest.grotto)))) {
     // The dedicated room painting already contains this exact opening.
     // Drawing a second mouth over it creates the pasted-on layer reported by
     // the owner. Rubble and the interaction remain at its shared world anchor.

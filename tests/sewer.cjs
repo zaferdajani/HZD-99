@@ -64,18 +64,34 @@ console.log('── sewer — the hatch, the drop, Rivet, the skin and the shell
     sounds.length = 0;
     out.entered = gateEnter();
     const cells = [], lids = [], keys = new Set(); let tWalk = 0, sawFace = new Set();
+    // what the door pass actually DREW, frame by frame (G._hatchRect): the lid
+    // the player saw, and whether the hatch was on screen at all
+    let beatFrames = 0, hatchDrawn = 0, hole = null;
+    G._hatchRect = null;
     await run(200, () => {
-      const g = G.gateWalk;
+      const g = G.gateWalk, hr = G._hatchRect; G._hatchRect = null;
       if (g && g.hatch) {
         tWalk += 1 / 60;
-        if (g.align >= 1) {
+        if (g.align >= 1 && g.ht < SW_HATCH.fadeAt) {
+          beatFrames++; if (hr) hatchDrawn++;
+          if (hr && hr.cell === 0 && !hole) {
+            // the closed hatch's INK above and below the floor line, as drawn
+            const im = MEDIA_IMG.sewerHatch, cw = im.naturalWidth / 4, ch = im.naturalHeight;
+            const cv2 = document.createElement('canvas'); cv2.width = cw; cv2.height = ch;
+            const x2 = cv2.getContext('2d'); x2.drawImage(im, 0, 0, cw, ch, 0, 0, cw, ch);
+            const a = x2.getImageData(0, 0, cw, ch).data; let top = ch, bot = 0;
+            for (let y = 0; y < ch; y++) for (let x = cw * 0.3 | 0; x < cw * 0.7; x++) if (a[(y * cw + x) * 4 + 3] > 60) { if (y < top) top = y; if (y > bot) bot = y; }
+            const k = hr.h / ch, floorRow = (hr.gy - hr.y) / k;
+            hole = { above: +((floorRow - top) * k).toFixed(1), below: +((bot - floorRow) * k).toFixed(1) };
+          }
           if (G.gateStepCell >= 0 && cells[cells.length - 1] !== G.gateStepCell) cells.push(G.gateStepCell);
-          const l = swLidCell(g.ht); if (lids[lids.length - 1] !== l) lids.push(l);
+          const l = hr ? hr.cell : -1; if (lids[lids.length - 1] !== l) lids.push(l);
           if (G.gateBackKey) keys.add(G.gateBackKey);
           sawFace.add(player.face);
         }
       }
     });
+    out.drawn = { beatFrames, hatchDrawn }; out.hole = hole;
     out.cells = cells; out.lids = lids; out.keys = [...keys]; out.faces = [...sawFace]; out.tWalk = +tWalk.toFixed(2);
     out.sounds = { creak: sounds.includes('sw_creak'), clang: sounds.includes('sw_clang') };
     out.unhurt = player.cores === cores0;
@@ -180,7 +196,9 @@ G.rescue = null; player.cores = player.maxCores();
   check('from a ledge above it the hatch cannot be opened (she stands on the floor it is in)', R.fromLedge === false);
   check('her four hatch strips (one per blade) are named, on disk, eight cells each', R.strips.every(Boolean), JSON.stringify(R.strips));
   check('she opens it in her own art: all eight cells, in order (crouch, strain, lift, push, look, hop, air, drop)', R.cells.join() === '0,1,2,3,4,5,6,7', R.cells.join(' ') + ' ' + R.keys.join(','));
-  check('the lid follows her hands: closed, cracked, raised, thrown open', R.lids.join() === '0,1,2,3', R.lids.join(' '));
+  check('the hatch is on screen through the whole opening (it was once drawn over by a cave mouth)', R.drawn.beatFrames > 60 && R.drawn.hatchDrawn === R.drawn.beatFrames, JSON.stringify(R.drawn));
+  check('the lid the player SEES follows her hands: closed, cracked, raised, thrown open', R.lids.join() === '0,1,2,3', R.lids.join(' '));
+  check('it is a hole IN the floor (owner, 2026-11-25): closed, the broken slab and shaft hang below the floor line, little stands above it', R.hole && R.hole.below > 2.5 * R.hole.above && R.hole.below > 80, JSON.stringify(R.hole));
   check('coming from the east she opens it from the east, facing it the whole time (her strip mirrored, never a flip)', R.faces.length === 1 && R.faces[0] === -1, R.faces.join());
   check('it creaks as it lifts and clangs as it falls open (recorded, CC0)', R.sounds.creak && R.sounds.clang, JSON.stringify(R.sounds));
   check('nothing bites her while her controls are held', R.unhurt);
