@@ -32,7 +32,12 @@
 //      floor bare and then grassed the moment she stood on it — while the room
 //      below grew a band of grass along its own top row, INSIDE the slab under
 //      the room above. Both sides must show the floor's blades, and no blade
-//      may grow on the seam line itself.
+//      may grow on the seam line itself. A landing on a palm's crown is the
+//      exception that proves it: since the owner's order of 2026-11-25 ("for
+//      hanging platforms ... It's just a straight line instead of an actual
+//      standing place") a ledge is a small metal palm and grows NO lawn, so
+//      there the verge must be bare from both sides — a lawn on either side is
+//      the straight green line come back.
 //   4. THE PLATE STILL DOES ITS JOB, in every chapter-one room that has one:
 //      its crest crosses her ankles (at least 15 px above the walk line, the
 //      rule tests/gait.cjs holds) and it ends at the walk line.
@@ -223,7 +228,7 @@ const TAG = process.env.SEAM_LOOK_TAG || '';
       if (Math.abs(a[i] - b[i]) > 14 || Math.abs(a[i + 1] - b[i + 1]) > 14 || Math.abs(a[i + 2] - b[i + 2]) > 14) n++;
     return n / (a.length / 3);
   };
-  const judge = (tag, app, arr) => {
+  const judge = (tag, app, arr, palm) => {
     if (app.err || arr.err) { check(tag + ': both views measurable', false, app.err || arr.err); return; }
     const ok1 = app.cover > 0.2 && arr.cover > 0.2;
     const ratio = arr.lum / Math.max(1, app.lum);
@@ -238,8 +243,9 @@ const TAG = process.env.SEAM_LOOK_TAG || '';
     // the blades on its edge: the same verge from both sides, give or take
     // the lighting — and the floor HAS one, or there is nothing to compare
     const ga = app.grass, gr = arr.grass;
-    check(tag + ': the grass on its edge is there from both sides', gr >= 0.03 && ga >= gr * 0.4 && gr >= ga * 0.4,
-      'blades own ' + (ga * 100).toFixed(0) + '% of the verge seen across the seam, ' + (gr * 100).toFixed(0) + '% standing on it');
+    const gmsg = 'blades own ' + (ga * 100).toFixed(0) + '% of the verge seen across the seam, ' + (gr * 100).toFixed(0) + '% standing on it';
+    if (palm) check(tag + ": she lands on a palm's crown, and it grows no lawn from either side (the straight green line)", ga <= 0.02 && gr <= 0.02, gmsg);
+    else check(tag + ': the grass on its edge is there from both sides', gr >= 0.03 && ga >= gr * 0.4 && gr >= ga * 0.4, gmsg);
     const sg = Math.max(app.seam || 0, arr.seam || 0);
     check(tag + ': nothing grows inside the slab between the two rooms', sg <= 0.02,
       'blades on the seam line: ' + (app.seam == null ? 'off screen' : (app.seam * 100).toFixed(0) + '%') + ' from the room left, ' +
@@ -308,7 +314,10 @@ const TAG = process.env.SEAM_LOOK_TAG || '';
       S.step(300, () => G.roomId === lo && player.on);
       S.step(20);
       if (G.roomId !== lo || !player.on) return { err: 'did not land in ' + lo + ' (in ' + G.roomId + ')' };
-      return { fx: player.x + player.w / 2, feet: player.y + player.h };
+      // a deck tile under her feet in a room whose ledges are palms: a crown
+      const ftx = Math.floor((player.x + player.w / 2) / TILE), fty = Math.floor((player.y + player.h + 2) / TILE);
+      const palm = !!(G.grid[fty] && G.grid[fty][ftx] === '=' && typeof platObjSet === 'function' && platObjSet() && platObjSet().palm);
+      return { fx: player.x + player.w / 2, feet: player.y + player.h, palm };
     }, [lo, up]);
     if (d.err) { check('down ' + up + ' -> ' + lo, false, d.err); continue; }
     const arr = await page.evaluate(([lo, d]) => __sl.view(lo, d, 0, 0, 0), [lo, d]);
@@ -319,7 +328,7 @@ const TAG = process.env.SEAM_LOOK_TAG || '';
       return S.view(lo, d, L.ox, L.oy, G.roomDef.h * TILE);
     }, [lo, up, d]);
     await shot(up + '-' + lo + '-down-approach');
-    judge('down ' + up + ' -> ' + lo, app, arr);
+    judge('down ' + up + ' -> ' + lo, app, arr, d.palm);
   }
 
   // ---- 3. the plate itself, in every chapter-one room that draws one ---------

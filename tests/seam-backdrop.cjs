@@ -38,7 +38,10 @@ const { chromium } = require('playwright');
       await page.waitForFunction(() => typeof startGame === 'function');
       const r = await page.evaluate(async ({ control }) => {
         window.requestAnimationFrame = () => 0;
-        const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, crystal: 1, pl_cshard: 1, beacon: 1, bossHorn: 1, ghMet: 1, gateOpened: 1 });
+        // (nfBreak: since the story order of 2026-11-25 — the forge, the bell, the agent, NULLFANG —
+        // the lion's break plays in the meadow once she has the marble; it is a staged story beat with
+        // its own typed caption, not the seam, so it has played already in the save this measures)
+        const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, 'on_A0B|ratchet': 1, ratchetRepaired: 1, heal: 1, nfMeet: 1, rubbleA5: 1, crystal: 1, pl_cshard: 1, beacon: 1, bossHorn: 1, ghMet: 1, gateOpened: 1, nfBreak: 1 });
         sv.broken = { 'A2:12,15': 1, 'A2:13,15': 1, 'A2:14,15': 1, 'A2:12,16': 1, 'A2:13,16': 1, 'A2:14,16': 1 }; startGame(sv);
         loadRoom('A2'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = null; G.enemies = [];
         const cv = document.querySelector('canvas'), x = cv.getContext('2d');
