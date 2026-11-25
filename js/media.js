@@ -604,6 +604,10 @@ const MEDIA_SRC = {
     // HZD-99's claw arc, painted as glowing light on pure black so it can be
     // composited additively with no alpha channel to cut
     slashFx: 'assets/fx/slash.webp',
+    // THE GRASS: a CC0 painted card (para, OpenGameArt), tinted per kingdom by tools/grasstint.py,
+    // drawn as columns that bend when a body walks through them (js/grass.js)
+    grassMeadow: 'assets/fx/grass/grass_meadow.webp',
+    grassFrond: 'assets/fx/grass/grass_frond.webp',
     // the bosses' attacks, generated and drawn as light (js/bossvfx.js, tools/vfxstrip.py)
     bvfx_agent_bolt: 'assets/fx/boss/agent_bolt.webp',
     bvfx_agent_burst: 'assets/fx/boss/agent_burst.webp',

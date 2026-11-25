@@ -84,6 +84,10 @@ function manifest() {
     if (!fs.existsSync(abs)) continue;
     const size = fs.statSync(abs).size;
     if (SKIP.has(key)) { skipped++; continue; }
+    // (the bosses' effect strips, js/bossvfx.js: light added over the scene, fetched when a fight
+    // begins. A quarter-size stand-in of a flash buys nothing, and two of them were what pushed the
+    // tier over its 2 MB on 2026-11-25)
+    if (/^bvfx_/.test(key)) { skipped++; continue; }
     if (size < MIN_BYTES) { small++; continue; }
     const b64 = fs.readFileSync(abs).toString('base64');
     // MIME BY EXTENSION, AND WEBP IS ONE OF THEM NOW. The shipped art tier

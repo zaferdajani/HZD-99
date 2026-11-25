@@ -24,7 +24,8 @@
 // body's feet still pass behind the grass — the depth trick the fringe was built for.
 const GRASS_ART = { grass: 'grassMeadow', frond: 'grassFrond' };
 const GRASS_H0 = 24;                // the card's nominal drawn height, px (its source scale)
-const GRASS = { room: null, cols: [], key: null, collect: null, t: 0, last: 0, ready: false };
+const GRASS_CROP = 0.8;             // the part of the card's height that is drawn (from its tips)
+const GRASS = { room: null, cols: [], key: null, collect: null, t: 0, last: 0, ready: false, wait: null };
 
 function grassImg(key) {
   if (!key) return null;
@@ -40,17 +41,19 @@ function grassColW() { return (typeof QUAL !== 'undefined' && !QUAL.glow) ? 14 :
 // a seam) they are painted standing still into the fringe canvas `x`.
 function grassTile(x, X, Y, tx, ty, kind, groundY) {
   const key = GRASS_ART[kind]; const im = grassImg(key);
-  if (!im) return false;
+  if (!im) { if (GRASS.collect) GRASS.wait = key; return false; }
   const cw = grassColW(), n = Math.max(1, Math.round(TILE / cw)), w = TILE / n;
   for (let j = 0; j < n; j++) {
     const cx = X + j * w, mid = cx + w / 2;
-    const gY = groundY(mid);
     // the height walks along the ground (a verge, not a hedge): long low swells, and here and there
     // a tuft half again as tall — continuous, so neighbouring columns never step
     const sw = Math.sin(mid * 0.031) * 0.5 + Math.sin(mid * 0.0113 + 1.7) * 0.5;
     const tuft = Math.max(0, Math.sin(mid * 0.072 + ty * 1.3) - 0.72) * 2.2;
     const h = GRASS_H0 * (0.62 + 0.3 * (sw * 0.5 + 0.5) + tuft * 0.5);
-    const col = { x: cx, y: gY + 4, w, h, a: 0, v: 0 };
+    // its foot follows the ground's own slope between its two edges, so neighbouring columns join
+    // along the drawn coastline instead of standing as a staircase of flat-bottomed blocks
+    const gA = groundY(cx), gB = groundY(cx + w);
+    const col = { x: cx, y: gA + 5, s: (gB - gA) / w, w, h, a: 0, v: 0 };
     if (GRASS.collect) GRASS.collect.push(col);
     else grassDrawCol(x, im, col, 0, null);
   }
@@ -60,13 +63,16 @@ function grassTile(x, X, Y, tx, ty, kind, groundY) {
 
 // a column, bent by `a` (radians, + leans right), rooted at (col.x, col.y)
 function grassDrawCol(c, im, col, a, M) {
-  const iw = im.naturalWidth, ih = im.naturalHeight, k = ih / GRASS_H0;
+  // (the card's lowest fifth is a solid mat of stems: it is left out, and the root sinks into the
+  // ground instead, so what stands above the coastline is blades, not a carpet edge)
+  const iw = im.naturalWidth, ih = im.naturalHeight * GRASS_CROP, k = im.naturalHeight / GRASS_H0;
   const sw = col.w * k;
   let sx = (col.x * k) % iw; if (sx < 0) sx += iw;
   const h = col.h * (1 - Math.min(0.25, a * a * 0.5));    // a bent blade is shorter than a standing one
   const sk = -Math.tan(a);                                // x' = x + sk*y, y up is negative
-  if (M) c.setTransform(M.a, M.b, M.a * sk + M.c, M.b * sk + M.d, M.a * col.x + M.c * col.y + M.e, M.b * col.x + M.d * col.y + M.f);
-  else { c.save(); c.transform(1, 0, sk, 1, col.x, col.y); }
+  const sl = col.s || 0;                                  // x' = x + sk*y, y' = y + sl*x
+  if (M) c.setTransform(M.a + M.c * sl, M.b + M.d * sl, M.a * sk + M.c, M.b * sk + M.d, M.a * col.x + M.c * col.y + M.e, M.b * col.x + M.d * col.y + M.f);
+  else { c.save(); c.transform(1, sl, sk, 1, col.x, col.y); }
   // (the card is seamless: a column that runs off its right edge takes the rest from its left)
   const dw = col.w + 0.8;
   if (sx + sw <= iw) c.drawImage(im, sx, 0, sw, ih, 0, -h, dw, h);
@@ -79,11 +85,17 @@ function grassDrawCol(c, im, col, a, M) {
 }
 
 // paintFringe is about to be run for the current room: the columns it finds are this room's
-function grassBegin() { GRASS.collect = []; GRASS.key = null; }
+function grassBegin() { GRASS.collect = []; GRASS.key = null; GRASS.wait = null; }
 function grassEnd() {
   GRASS.cols = GRASS.collect || []; GRASS.collect = null;
   GRASS.cols.sort((p, q) => p.x - q.x);
   GRASS.room = G.roomId; GRASS.ready = GRASS.cols.length > 0;
+}
+
+// the room was built while its grass was still on its way: rebuild once it lands
+function grassWants() {
+  if (!GRASS.wait || GRASS.room !== G.roomId || !grassImg(GRASS.wait)) return false;
+  GRASS.wait = null; return true;
 }
 
 // what walks in the grass: her, every walker on the ground, the boss

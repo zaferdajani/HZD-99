@@ -269,3 +269,5 @@ Masters (the public preview MP3s) and `SOURCES.json` with every page and licence
 Masters (the public preview MP3s), the alternates and `SOURCES.json` with every page and licence are in `source/audio/sewer/`. Real recordings, never oscillators.
 
 `fx/boss/*.webp` — the bosses' attack effects (2026-11-24): frames of original Higgsfield Seedance 2.0 Mini clips generated on black for this game (masters, briefs and job ids in `source/vfx/boss-2026-11-24/`), cut by `tools/vfxstrip.py`. AI-generated; no third-party footage or game assets were used.
+
+`fx/grass/grass_meadow.webp`, `fx/grass/grass_frond.webp` — the grass (2026-11-25): "grass blades alpha card texture (side view)" (`vegetation_grass_card_03.png`) by **para**, OpenGameArt, https://opengameart.org/content/grass-blades-alpha-card-texture-side-view — **CC0** (public domain). The owner asked for a free library's grass. Archived unchanged in `source/grass/`; tinted to the meadow's yellow-green and the Nest's violet and halved by `tools/grasstint.py`; drawn as bending columns by `js/grass.js`.

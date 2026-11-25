@@ -666,3 +666,11 @@ describe it.
   basic?" — they had been circles and strokes drawn in code. The flash frames the generator opens
   some clips with (a white field) are left out of the sample times, and the staff slash uses only
   its first, crescent cells: its later cells close into a whole circle, a ring round the agent.
+
+## `grass/` — the grass, from a free library (2026-11-25)
+
+- `vegetation_grass_card_03.png` — "grass blades alpha card texture (side view)" by para,
+  OpenGameArt, CC0, kept exactly as downloaded (1024 x 256, seamless, on alpha). The owner:
+  "find free library for the grass instead of these green lines". `tools/grasstint.py` tints it
+  into `fx/grass/grass_meadow.webp` and `fx/grass/grass_frond.webp` (512 x 128); `js/grass.js`
+  draws it in columns that bend under her and under anything that walks in it.

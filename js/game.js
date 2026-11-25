@@ -5416,7 +5416,9 @@ function buildFringe() {
   if (!fringeCv || fringeCv.width !== W || fringeCv.height !== H) {
     fringeCv = document.createElement('canvas'); fringeCv.width = W; fringeCv.height = H;
   }
-  paintFringe(fringeCv.getContext('2d'), W, H);
+  if (typeof grassBegin === 'function') grassBegin();
+  try { paintFringe(fringeCv.getContext('2d'), W, H); }
+  finally { if (typeof grassEnd === 'function') grassEnd(); }
   fringeDirty = false;
 }
 // THE LID A ROOM'S TOP ROW WEARS. Past the top edge the grid says nothing, so
@@ -5470,6 +5472,13 @@ function paintFringe(x, W, H) {
     const up = ty === 0 ? fringeLid(tx) : tileAt(tx, ty - 1);
     if (solid(up) || up === '^' || up === 'v') continue;   // buried, or wearing a hazard
     const X = tx * TILE, Y = ty * TILE;
+    // THE GRASS IS A PAINTED CARD NOW, AND IT BENDS (owner, 2026-11-25: "find free library for the
+    // grass instead of these green lines ... grass that can move with the characters"): js/grass.js.
+    // The blades below stay as what grows until its picture has arrived.
+    if ((kind === 'grass' || kind === 'frond') && typeof grassTile === 'function' && grassTile(x, X, Y, tx, ty, kind, (wx) => {
+      const cy = curveY(wx);
+      return (cy != null && Math.abs(cy - Y) < TILE * 1.5) ? cy + 2 : Y + (typeof fbm1 === 'function' ? Math.round(fbm1(wx, 641) * 10) : 0);
+    })) continue;
     for (let i = 0; i < per; i++) {
       const r1 = hash2(tx * 7 + i, ty * 13 + 1), r2 = hash2(tx * 3 + i, ty * 11 + 5);
       const bx = X + (i + 0.5) * (TILE / per) + (r1 - 0.5) * (TILE / per) * 0.8;
@@ -5630,8 +5639,10 @@ function drawFringe() {
   // greenery and measure exactly the pixels the grass owns
   if (G.fringeProbe) return;
   if (typeof QUAL !== 'undefined' && QUAL.ceil <= 0) return;
+  if (typeof grassWants === 'function' && grassWants()) fringeDirty = true;   // its picture has just arrived
   if (fringeDirty) buildFringe();
   if (fringeCv) c.drawImage(fringeCv, 0, 0);
+  if (typeof drawGrass === 'function') drawGrass(c);    // the grass that bends (js/grass.js)
 }
 const STRATA = { C: 'strataLava', D: 'strataIceB', E: 'strataRubble' };
 const STRATA_TW = 512, STRATA_TH = 160;         // both multiples of TILE

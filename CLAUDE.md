@@ -21,14 +21,14 @@ tell him anything is done.**
 | 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
 | 6× | **A door is an object that leads somewhere new; one ring to a frame, nothing standing in it** | "you end up with neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` |
 | 6× | **An enemy is HEARD over the score, on a phone, as a real animal or a real material — recorded, never oscillators, never the same hit twice; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" · "why arent you looking for free libraries for voices ???" · "download from any library of a lion roar" | `voice-heard` `whatplays` `media-container` `hit-voices` `nf-phase2` |
+| 6× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass is painted and bends under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" | `seam` `ring-pads` `fired-art` `grass` · skill `terrain-doors` |
 | 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
-| 5× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" | `seam` `ring-pads` `fired-art` · skill `terrain-doors` |
 | 4× | **No light, rim, halo, outline or ring round any body** | "Why still framed with light ?!!!" · "remove the ring" | `contrast` `fired-art` `no-rim-baked` `pet-motion` `purify-stage` `no-body-light` |
 | 4× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" · "four of its limbs is almost on the air" | `ring-pads` `gravehorn-ground` `stand-ground` |
 | 3× | **Few words to read — and a picture or film only at the key moments, never one per line** | "minimize all the text that we see" · "When I say pics I meant generated comics" · "Certain key moments require videos or images" | `text-budget` `campaign-ch1` |
 | 3× | **Do not waste the player's time** — and no comic where a film already tells it | "don't waste the player's time" · "When there is a video no need for comic" · "one shot instead of multiple steps" | `campaign-ch1` `panels` `opening-order` `tutor` |
 | 3× | **Do the whole job, and show it as it is: motion as a clip, never a sheet of stills; never recite what is left** | "You are not a kid that I need to keep monitoring." · "a series of duplicate images?" | no harness — check your report before sending it |
-| 3× | **All art, video and structures come from Higgsfield; the code is ours** — real sounds may come from public-domain or CC0 libraries, credited | "You are not good at it. You can create the code... but not the art." · "boss attk graphics so basic" | `artbible` `boss-vfx` · skills `art-bible` `rig-animation` |
+| 3× | **All art, video and structures come from Higgsfield; the code is ours** — real sounds, and art he asks for, may come from CC0 libraries, credited | "You are not good at it. You can create the code... but not the art." · "boss attk graphics so basic" | `artbible` `boss-vfx` · skills `art-bible` `rig-animation` |
 | 2× | **An enemy is big enough, and visibly alive or visibly down** | "This enemy is so small" · "its standing still !!!" | `cheetah-hunt` `fired-art` |
 | 2× | **Nothing opens or buys by surprise** | "And it happened again... suddenly the window opened" | `shop-ask` |
 | 2× | **A kingdom is played, not walked through** — two mini-bosses that each give a piece, its agent, then its sage; the six sages stay, bosses are added | "There is no game in the second kingdom" · "we do not change sages, but we add other bosses" | `ch2-road` `story-order` `mirejaw` |
@@ -80,7 +80,7 @@ looking for. I'm looking for your honest description."
 - **One branch**: `claude/clawbyte-repo-migration-byhyl8`. Fetch before work.
   Verify, then push it and mirror the same commit to `main` (production) and
   `odyssey`. Never force-push, never branch, never reset another author's work.
-  Built pages (`index.html`, `odyssey.html`) are never hand-merged: rebuild.
+  Built pages are never hand-merged: rebuild.
 - **Standing deployment authorization** (2026-09-07): completed, verified
   updates may be published to `main` and mirrored to `odyssey`.
 - **Live: https://zaferdajani.github.io/HZD-99/** — the only URL to quote and
@@ -98,10 +98,10 @@ looking for. I'm looking for your honest description."
 ## Commands
 
 ```bash
-node build.cjs                 # the whole build: index.html + odyssey.html
+node build.cjs                 # the whole build
 node tests/serve.cjs &         # tests need the repo on :8220
 node tests/run.cjs             # every harness (listed in it)
-node tests/run.cjs saw wake    # or just some
+node tests/run.cjs saw wake    # some
 npm run app:pack               # assemble www/ for the native shell
 ```
 
@@ -112,7 +112,7 @@ Three things that bite, every time:
 - **Nothing in code may name a file that is not on disk.** After art changes:
   `node tools/lowres.cjs`, `node tools/roomassets.cjs` (served), then build.
   After a new track or film: `node tools/faststart.cjs` (phones need a plain MP4).
-  After a new plate: `node tools/defringe.cjs --check` (models paint a cyan rim by habit).
+  After a new plate: `node tools/defringe.cjs --check` (models paint a cyan rim).
 - **Never edit sources or rebuild in a tree a harness run is using**, and run
   the suite in batches: the container restarts under long runs.
 
@@ -129,4 +129,4 @@ Three things that bite, every time:
 | know exactly what an order of his says, and why | `docs/OWNER_ORDERS.md` |
 | know the branch protocol's history, the session fleet, kingdoms | `docs/SESSION_FLEET.md` |
 
-Moved out unedited on 2026-11-17 so this file stays short. Nothing was deleted.
+Moved out unedited on 2026-11-17; nothing was deleted.
