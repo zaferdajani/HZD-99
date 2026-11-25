@@ -14,6 +14,11 @@
 //   - standing still at it is punished; a player who reads it (a human's 250 ms, then running
 //     from the clump) is not hit, from every clump;
 //   - the burst hurts with the body that is drawn (re-measured off the art);
+//   - THE BURST IS DRAWN AS ONE (owner, 2026-11-25: "use whatever art we have to create whatever
+//     missing from Nilfang. Burst art"): the clump opens round his forequarters as he breaks out,
+//     the leaf tips he goes through are torn off and thrown the way he went (on the scenery's own
+//     dice), they come down and are gone in seconds; and going in, he goes DOWN into the leaves —
+//     never a fade;
 //   - an opening follows it; the move comes in a real fight, and so does the perch dive;
 //   - no page errors.
 const { chromium } = require('playwright');
@@ -122,6 +127,34 @@ const PORT = process.env.TEST_PORT || 8220;
     // ---- 4. THE BURST'S BOX IS ITS DRAWN BODY
     nfMeasureLeapBox(); await new Promise(r => setTimeout(r, 1500));   // a loaded sheet is not a decoded one (js/media.js)
     out.leapNow = nfMeasureLeapBox(); out.leapTable = NF_LEAP_BOX;
+    // ---- 4b. THE BURST, DRAWN: the clump opens round him, torn leaves fly his way; going in is not a fade
+    { const cl = L[1]; G.enemies = []; NFC.torn.length = 0;
+      const side = cl.x < G.roomDef.w * TILE / 2 ? 1 : -1, hx = cl.x + side * 120;
+      player.x = hx - player.w / 2; player.y = nfCoverGround(hx) - player.h - 1;
+      bo.x = cl.x - bo.w / 2; bo.y = cl.gy - bo.h; bo.coverAt = 1; bo.coverFade = 0; nfEnter(bo, 'lurkwarn', 0.02);
+      const R0 = Math.random; let rnd = 0; Math.random = function () { rnd++; return R0(); };
+      const OD = window.nfCoverDrawOpen; let opened = 0; window.nfCoverDrawOpen = function () { opened++; return OD.apply(this, arguments); };
+      const cv = document.createElement('canvas'); cv.width = 960; cv.height = 540; const q = cv.getContext('2d');
+      let torn = 0, dirOk = 0, f0 = 0;
+      for (let f = 0; f < 60 * 4; f++) {
+        hold(); T += 1000 / 60; mainLoop(T);
+        if (bo.st === 'lurkpounce' && !f0) { f0 = f; rnd = 0; }
+        q.setTransform(1, 0, 0, 1, 0, 0); q.translate(-camSX(), -camSY());
+        const n0 = NFC.torn.length; nfCoverDrawFront(q);
+        if (f0 && f === f0 + 1) { torn = NFC.torn.length; const face = bo.face || 1; dirOk = NFC.torn.filter(t => Math.sign(t.vx) === face).length; }
+      }
+      window.nfCoverDrawOpen = OD;
+      const rndInTear = (() => { let k = 0; Math.random = function () { k++; return R0(); }; nfCoverTear(cl, 1); Math.random = R0; return k; })();
+      Math.random = R0; NFC.torn.length = 0;
+      out.burstArt = { opened, torn, dirOk, left: NFC.torn.length, rndInTear };
+      // going in: the body at the start of its drop is drawn at full strength, and lower than it stands
+      const draws = (fade) => { bo.st = 'lurk'; bo.coverAt = 1; bo.x = cl.x - bo.w / 2; bo.y = cl.gy - bo.h; bo.coverFade = fade;
+        const D = q.drawImage.bind(q); let big = null;
+        q.drawImage = function () { const n = arguments.length, w = arguments[n - 2], h = arguments[n - 1]; if (!big || w * h > big.a) big = { a: w * h, alpha: q.globalAlpha, y: q.getTransform().f + (n >= 9 ? arguments[6] : arguments[2]) * q.getTransform().d }; return D.apply(q, arguments); };
+        q.setTransform(1, 0, 0, 1, 0, 0); q.clearRect(0, 0, 960, 540); q.translate(480 - bo.cx(), 400 - (bo.y + bo.h)); bo.draw(q); q.drawImage = D; return big; };
+      const a = draws(NF_AMB.fade * 0.99), b = draws(NF_AMB.fade * 0.2);
+      out.goIn = { start: a && +a.alpha.toFixed(2), late: b && +b.alpha.toFixed(2), drop: a && b ? Math.round(b.y - a.y) : null };
+      nfEnter(bo, 'idle', 0.3); bo.coverAt = null; bo.coverFade = 0; }
     // ---- 5. IN A REAL FIGHT: she holds 250 px off him for 100 s; the leaves and the perch both come
     { bo.st = 'idle'; bo.t = 0.3; bo.ambushCD = null; bo.coverCD = null; bo.hp = bo.hpMax; const seen = {};
       for (let f = 0; f < 60 * 100; f++) { hold(); const d = player.x + player.w / 2 - bo.cx(); if (Math.abs(d) < 220 || Math.abs(d) > 300) { const want = bo.cx() + (d >= 0 ? 260 : -260); player.x = clamp(want, 40, G.roomDef.w * TILE - 60) - player.w / 2; }
@@ -152,6 +185,11 @@ const PORT = process.env.TEST_PORT || 8220;
   check('walking into the clump he hides in hurts no one (no body there)', R.walkIn.length === 0, R.walkIn);
   const leapOk = R.leapNow && R.leapNow.length === R.leapTable.length && R.leapNow.every((q, i) => q && q.every((v, j) => Math.abs(v - R.leapTable[i][j]) <= 6));
   check('the burst hurts with the body that is drawn (NF_LEAP_BOX re-measured off the art)', leapOk, leapOk ? null : { now: R.leapNow, table: R.leapTable });
+  const BA = R.burstArt;
+  check('the burst is drawn as one: the clump opens round him as he breaks out', BA.opened >= 5, BA);
+  check('...the leaf tips he goes through are torn off and thrown the way he went', BA.torn >= 6 && BA.dirOk >= BA.torn * 0.8, BA);
+  check('...they come down and are gone within seconds, and they draw on their own dice', BA.left === 0 && BA.rndInTear === 0, BA);
+  check('going in, he goes DOWN into the leaves at full strength, never a fade', R.goIn.start === 1 && R.goIn.late === 1 && R.goIn.drop >= 20, R.goIn);
   check('in a real fight the ambush comes, and the perch dive still does', R.natural.lurkwarn && R.natural.lurkpounce && R.natural.springwarn, R.natural);
   check('no page errors', errs.length === 0, errs.slice(0, 3));
   await br.close();

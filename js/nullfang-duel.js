@@ -106,7 +106,7 @@ const NF_AMB = Object.freeze({
   reach: 440,                    // the farthest the burst carries from the clump
   land: [0.32, 0.28, 0.26],      // the opening after it, by phase (and the turn after it, when she is behind him: under 0.9 s together, tests/openings.cjs)
   after: 0.15,                   // ...and straight back to work
-  fade: 0.18,                    // the body sinks into the leaves this long as he goes in
+  fade: 0.3,                     // the body goes down into the leaves this long as he goes in
   first: [4, 6], every: [[8, 11], [6, 9]],   // its clock: the first, then by phase
 });
 // the states he is DOING something in: a blow into them is turned, and the
@@ -594,8 +594,15 @@ if (typeof BEAST_STRIP !== 'undefined') Object.assign(BEAST_STRIP, {
     // in the leaves he is not there to draw: the clump shows where he is, or nothing does
     if (nfHidden(this) && !(this.coverFade > 0)) { try { nfDuelDraw(c2, this); } catch (_) {} return; }
     if (nfHidden(this)) {
-      // ...and the moment he goes in, the body sinks into the leaves rather than blinking out
-      c2.save(); c2.globalAlpha *= Math.max(0, this.coverFade / NF_AMB.fade);
+      // ...and the moment he goes in, the body goes DOWN into the leaves rather than blinking out
+      // or fading (the owner, 2026-11-25: the leaves are "not faded" objects, and nor is he): his
+      // landing crouch drops below the clump's leaves, flattening as it goes, cut at the ground he
+      // is standing on, so what is left of him at the end is behind the leaves and under the grass
+      const cl = this.coverAt != null && typeof nfCoverList === 'function' ? nfCoverList()[this.coverAt] : null;
+      const k = clamp(1 - this.coverFade / NF_AMB.fade, 0, 1), e = k * k * (3 - 2 * k), foot = this.y + this.h;
+      c2.save();
+      c2.beginPath(); c2.rect(this.x - 400, (cl ? cl.gy : foot) - 1200, this.w + 800, 1200 + 2); c2.clip();
+      c2.translate(this.cx(), foot); c2.scale(1, 1 - 0.35 * e); c2.translate(-this.cx(), -foot + this.h * 0.95 * e);
       try { D.call(this, c2, ...rest); } finally { c2.restore(); }
       try { nfDuelDraw(c2, this); } catch (_) {}
       return;

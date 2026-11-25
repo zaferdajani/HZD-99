@@ -42,7 +42,10 @@ const NF_COVER = Object.freeze({
   // springs: angle and bend of a leaf, the plate's sway (px at the crown)
   kA: 55, dA: 5.5, kB: 40, dB: 4.2, kS: 30, dS: 4,
 });
-const NFC = { room: null, list: [], back: [], last: 0, t: 0, rustleSnd: 0 };
+const NFC = { room: null, list: [], back: [], last: 0, t: 0, rustleSnd: 0, torn: [], cv: null };
+// the scenery's own dice (the boss ladder seeds Math.random: a torn leaf must not change his next move)
+let NFC_SEED = 0x2545f491;
+function nfcRnd(a, b) { NFC_SEED = (NFC_SEED * 1664525 + 1013904223) >>> 0; return a + (NFC_SEED / 4294967296) * (b - a); }
 function nfCoverOn() { return !(typeof isHero === 'function' && isHero()) && !!(G.roomDef && G.roomDef.cover); }
 function nfCoverGround(x) {
   const gc = typeof groundColumnAt === 'function' ? groundColumnAt(x) : null;
@@ -50,7 +53,7 @@ function nfCoverGround(x) {
   return (G.roomDef.h - 2) * TILE;
 }
 function nfCoverBuild() {
-  NFC.room = G.roomId; NFC.list = []; NFC.back = [];
+  NFC.room = G.roomId; NFC.list = []; NFC.back = []; NFC.torn.length = 0;
   if (!nfCoverOn()) return;
   const mk = (row, back) => {
     const [tx, s, pk, flip, par] = row, P = NF_COVER.plate[pk] || NF_COVER.plate.a, x = tx * TILE, w = NF_COVER.W * s, h = w * P[1];
@@ -93,7 +96,92 @@ function nfCoverBurst(cl, dir) {
     L.tv += side * 6.5 + dir * 3; L.bv += side * 7 + dir * 4;
   }
   cl.sv += dir * 420;
+  nfCoverTear(cl, dir);
   nfCoverRustleSound(1);
+}
+// ---- HIS BURST, IN METAL -------------------------------------------------------------------
+// ART_QUEUE asked for a filmed take of him bursting out of the leaves (~30 credits the account did
+// not have). The owner, 2026-11-25: "Try to use whatever art we have to create whatever missing
+// from Nilfang. Burst art." So it is built from art already in the game: his body is the leap's
+// flight (js/beast.js, the filmed take), and what he breaks is the clump's own six cut leaves —
+//   - the fronds in front of his forequarters OPEN round them as he goes through (a soft-edged
+//     opening in the clump that travels with his head, nfCoverDrawFront), so his head and paws come
+//     out through the leaves while his haunches are still behind them;
+//   - the leaf tips his claws went through are TORN OFF and thrown the way he went: a crop of the
+//     tip of a real leaf, turning end over end and edge-on and back (a flat sheet of metal falling),
+//     slowed by the air, and settling into the grass, where it sinks out of sight.
+// No light, rim or outline on any of it (ledger); drawn at full strength with the clumps.
+const NF_TEAR = Object.freeze({ n: 11, g: 980, fall: 210, life: 2.6 });
+function nfCoverTear(cl, dir) {
+  const C = NF_COVER;
+  for (let i = 0; i < NF_TEAR.n; i++) {
+    const li = (i * 5 + 3) % C.leaf.length, a = nfcRnd(0.45, 0.7);
+    const len = cl.h * nfcRnd(0.14, 0.26);
+    NFC.torn.push({
+      li, a, b: Math.min(1, a + nfcRnd(0.22, 0.34)), len, wd: len * C.leaf[li].ar * nfcRnd(1.6, 2.4),
+      x: cl.x + dir * cl.w * nfcRnd(-0.05, 0.3), y: cl.gy - nfcRnd(30, 150),
+      vx: dir * nfcRnd(180, 560), vy: nfcRnd(-380, -60), rot: nfcRnd(-1.2, 1.2), vr: dir * nfcRnd(4, 11),
+      tum: nfcRnd(0, 6.3), vt: nfcRnd(7, 15), sway: nfcRnd(0, 6.3), flip: nfcRnd(0, 1) < 0.5 ? -1 : 1,
+      t: 0, down: 0, teeth: [0, 1, 2, 3, 4, 5, 6].map(() => nfcRnd(0.04, 0.3)),
+    });
+  }
+  if (NFC.torn.length > 40) NFC.torn.splice(0, NFC.torn.length - 40);
+}
+function nfCoverTornStep(dt) {
+  for (let i = NFC.torn.length - 1; i >= 0; i--) {
+    const q = NFC.torn[i]; q.t += dt;
+    if (q.down > 0) { q.down += dt; if (q.down > 0.9) NFC.torn.splice(i, 1); continue; }
+    q.vy += NF_TEAR.g * dt;
+    if (q.vy > NF_TEAR.fall) q.vy += (NF_TEAR.fall - q.vy) * Math.min(1, 5 * dt);    // a sheet falls slowly
+    q.vx *= Math.max(0, 1 - 1.6 * dt);
+    q.sway += dt * 5;
+    q.x += (q.vx + Math.sin(q.sway) * 40 * Math.min(1, q.t)) * dt; q.y += q.vy * dt;
+    q.rot += q.vr * dt; q.vr *= Math.max(0, 1 - 0.8 * dt); q.tum += q.vt * dt;
+    const gy = nfCoverGround(q.x) - 3;
+    if (q.y >= gy && q.vy > 0) { q.y = gy; q.down = 0.001; q.vy = 0; q.vx = 0; }
+    if (q.t > NF_TEAR.life) NFC.torn.splice(i, 1);
+  }
+}
+function nfCoverTornDraw(c) {
+  const C = NF_COVER;
+  for (const q of NFC.torn) {
+    const im = MEDIA_IMG[C.leaf[q.li].key]; if (!im || !im.naturalWidth) continue;
+    const iw = im.naturalWidth, ih = im.naturalHeight, sy = ih * (1 - q.b), sh = ih * (q.b - q.a);
+    // settled: it lies flat in the grass and sinks into it
+    const lie = q.down > 0, sink = lie ? Math.min(1, q.down / 0.9) : 0;
+    c.save(); c.translate(q.x, q.y + sink * 6);
+    c.rotate(lie ? (q.rot > 0 ? 1.45 : -1.45) : q.rot);
+    c.scale(q.flip, lie ? 0.35 * (1 - sink) + 0.02 : Math.max(0.14, Math.abs(Math.cos(q.tum))));
+    // where the claws went through, the metal is torn, not cut: a ragged edge across its root
+    const hw = q.wd / 2, hl = q.len / 2, n = q.teeth.length;
+    c.beginPath(); c.moveTo(-hw - 2, -hl - 2); c.lineTo(hw + 2, -hl - 2);
+    for (let k = 0; k < n; k++) c.lineTo(hw - (2 * hw) * k / (n - 1), hl - q.teeth[k] * q.len);
+    c.closePath(); c.clip();
+    c.drawImage(im, 0, sy, iw, sh, -hw, -hl, q.wd, q.len);
+    c.restore();
+  }
+}
+// the clump he is breaking out of, with the fronds in front of his head and paws opened round them
+function nfCoverDrawOpen(c, im, cl, b) {
+  const pad = 24, w = Math.ceil(cl.w + pad * 2), h = Math.ceil(cl.h + pad * 2), ox = cl.x - cl.w / 2 - pad, oy = cl.gy - cl.h - pad;
+  const cv = NFC.cv || (NFC.cv = document.createElement('canvas'));
+  if (cv.width < w || cv.height < h) { cv.width = Math.max(cv.width, w); cv.height = Math.max(cv.height, h); }
+  const q = cv.getContext('2d');
+  q.setTransform(1, 0, 0, 1, 0, 0); q.globalCompositeOperation = 'source-over'; q.globalAlpha = 1;
+  q.clearRect(0, 0, w, h);
+  q.translate(-ox, -oy);
+  nfCoverPlate(q, im, cl, cl.rust);
+  for (const L of cl.leaves) nfCoverLeaf(q, cl, L);
+  // the opening: round his forequarters, soft at its edge (leaves bent aside, not cut)
+  const f = b.face || 1, box = typeof nfBurstBox === 'function' ? nfBurstBox(b) : { x: b.x, y: b.y, w: b.w, h: b.h };
+  const hx = box.x + box.w * (f > 0 ? 0.7 : 0.3), hy = box.y + box.h * 0.5, rx = box.w * 0.42, ry = box.h * 0.85;
+  q.globalCompositeOperation = 'destination-out';
+  q.translate(hx, hy); q.scale(1, ry / rx);
+  const g = q.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.62, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  q.fillStyle = g; q.beginPath(); q.arc(0, 0, rx, 0, Math.PI * 2); q.fill();
+  q.setTransform(1, 0, 0, 1, 0, 0); q.globalCompositeOperation = 'source-over';
+  c.drawImage(cv, 0, 0, w, h, ox, oy, w, h);
 }
 // the meadow's own recordings, scraped fast and layered: a clump of metal leaves shaking
 function nfCoverRustleSound(v) {
@@ -190,13 +278,19 @@ function nfCoverClock() {
 // the clumps IN the room: after the grade, before her (js/game.js drawWorldFrame)
 function nfCoverDrawFront(c) {
   if (!nfCoverList().length) return;
-  nfCoverStep(nfCoverClock());
+  const dt = nfCoverClock();
+  nfCoverStep(dt); nfCoverTornStep(dt);
+  // he is breaking out of one of them (the first half-second of the burst)
+  const b = G.boss && !G.boss.dead && G.boss.kind === 'glitch' && G.boss.st === 'lurkpounce' && (G.boss.ambT || 0) < 0.5 ? G.boss : null;
+  const out = b && b.coverAt != null ? NFC.list[b.coverAt] : null;
   for (const cl of NFC.list) {
     const im = MEDIA_IMG[cl.key];
     if (!im || !im.naturalWidth) continue;
+    if (cl === out) { nfCoverDrawOpen(c, im, cl, b); continue; }
     nfCoverPlate(c, im, cl, cl.rust);
     for (const L of cl.leaves) nfCoverLeaf(c, cl, L);
   }
+  nfCoverTornDraw(c);
 }
 // ...and the meadow beyond, behind the level on parallax (js/game.js, after the flora)
 function nfCoverDrawBack(c) {

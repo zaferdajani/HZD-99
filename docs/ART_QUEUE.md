@@ -7072,6 +7072,14 @@ GLACIERE → MOTHER-V. Owed, in order:
 
 ## NULLFANG'S AMBUSH FROM THE LEAVES — what is still owed (2026-11-25)
 
+**Built from the art we have, the same day** (owner: "Try to use whatever art we have to create
+whatever missing from Nilfang. Burst art."): the burst now opens the clump round his forequarters
+as he breaks out, tears the tips off the clump's own cut leaves and throws them the way he went
+(tumbling, settling into the grass), and going in he drops low behind the leaves instead of fading
+(`js/nfcover.js` nfCoverTear / nfCoverDrawOpen, `js/nullfang-duel.js` Boss.draw;
+`tests/nf-ambush.cjs` holds it). His body in the burst is still the leap's flight cells: the two
+filmed takes below would replace that body, not the leaves.
+
 The cover itself LANDED (metal banana clumps and six leaves, `assets/source/nfcover/`,
 `js/nfcover.js`). What his going in and coming out still borrow:
 
