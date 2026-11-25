@@ -1224,7 +1224,7 @@ async function lionFight(s, b) {
     else if (cornered) { K.add(toward); if (ad < 200) jump(); }
     else { if (ad < 270 && since > 0.05) jump(); K.add(away); } }
   else if (st === 'rakewarn' || st === 'rake') { if (!front && ad < 160) { if (ad < 80) jump(); K.add(away); } else cut(); }
-  else if (st === 'rearwarn' || st === 'rear') K.add(away);
+  else if (st === 'rearwarn' || st === 'rear' || st === 'swatwarn' || st === 'swat') K.add(away);
   else if (st === 'bitewarn' || st === 'bite') { if (front && ad < 330) { jump(); K.add(toward); } else if (!front && ad < 150) cut(); }
   else if (st === 'bitestop') cut();
   else if (st === 'spitwarn') keep(240, 400);

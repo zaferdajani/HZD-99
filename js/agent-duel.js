@@ -29,7 +29,7 @@
 // Every wind-up is 0.40 s or more (the kingdom-1 floor). The flash is light on the floor, embers,
 // sparks and sound — never a glow round its body (the ledger, four times).
 const AGENT_DUEL = Object.freeze({
-  beat1: 0.85, beat2: 0.6,
+  beat1: 0.7, beat2: 0.55,          // (a decision every 0.7 s: the owner's 2026-11-20 order, js/sage-motion.js SAGE_DUEL_PROFILE.step)
   coil: 0.5, lunge: 0.22, replant: 0.18, lastcoil: 0.42, exh1: 0.7, exh2: 0.55,
   tick1: 0.2, tick2: 0.12, volRec: 0.5, beadR: 7, beadT: 0.75, spread1: 90, spread2: 80, wave2: 0.3,
   sight: 0.5, sightTrack: 0.3, markDelay: 0.7, markW: 56, markH: 170, sightRec: 0.5, markGap: 110,
@@ -38,8 +38,9 @@ const AGENT_DUEL = Object.freeze({
   plumb: 0.42, sweep: 0.2, sweepR: 140, sweepRec: 0.5, aaCd: 2.2,
   spinprep: 0.4, spin: 0.25, spinR: 100, spinRec: 0.5, greed: 2, idleGreed: 2, idleWin: 1.2,
   spinCd: 2.0, hug: 0.6, backstep: 0.3, bsDist: 170,
-  unbind: 1.2, armAct: 0.08, armIdle: 0.15, denied: 1.0, p2: 0.6,
-  hpMul: 1.33,                     // over its untraited base: by here she carries the Purifier (x1.3), so its health is too
+  unbind: 1.2, armAct: 0.08, armIdle: 0.15, denied: 0.8, p2: 0.5,
+  // (its health is SAGE_DUEL_PROFILE.hpK, half as much again as an agent off the duel — the owner's
+  // 2026-11-20 order, applied by sage-motion.js's own init, which this one runs first)
 });
 // the chapter-one agent's chamber. The later agents keep their own profiles (js/sage-motion.js, and
 // tests/sage-motion.cjs guards that none is silently given this one); each gets its own duel in turn
@@ -93,24 +94,30 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
     }
     if (set('windedT')) S(e, 'exhale', e.windedT);
     else if (set('lungeT')) { const v = e.vx; S(e, 'lunge', e.lungeT); e.vx = v; if (e.lunges == null) e.lunges = 0; }
-    else if (set('coilT')) { S(e, 'coil', e.coilT); if (e.lunges == null) e.lunges = 1; }
+    else if (set('coilT')) { S(e, 'coil', e.coilT); e.lunges = e.hp <= e.hpMax0 * T.p2 ? 2 : 1; }
     else if (set('gatherT')) { S(e, 'gather', e.gatherT); e.rings = 1; }
     else if (set('sageReplantT')) S(e, 'replant', e.sageReplantT);
     if (set('ringR')) { const rr = e.rr = e.rr || []; if (rr.length) rr[rr.length - 1].r = e.ringR; }
     for (const k of LEG) if (e[k] != null && e[k] !== x[k] && !(e[k] > 0) && k !== 'ringR') e[k] = x[k] || 0;
+  }
+  function markStruck(e) {
+    const P = typeof SAGE_DUEL_PROFILE !== 'undefined' ? SAGE_DUEL_PROFILE : { hitShow: 0.26, chainGap: 0.9 };
+    e.hitPoseT = P.hitShow; e._hitChain = e._hitChainT > 0 ? (e._hitChain || 0) + 1 : 1; e._hitChainT = P.chainGap;
   }
   // ONE STRENGTH: the traits a common machine rolls are taken off, once
   function normalize(e) {
     if (e._agentNorm) return; e._agentNorm = 1;
     let th = 1, ts = 1;
     for (const tr of e.traits || []) if (typeof TRAITS !== 'undefined' && TRAITS[tr]) { th *= TRAITS[tr].hp || 1; ts *= TRAITS[tr].spd || 1; }
-    e.traits = []; e.hpMax0 = e.hp = Math.round(e.hpMax0 / th * T.hpMul); e.spd /= ts;
+    e.traits = []; e.spd /= ts;   // (its health stays as the duel's init made it: tests/tallyman.cjs)
   }
 
   // ---- the duel ----
+  const _init = sageDuelInit;
   sageDuelInit = function (e) {
     if (e.kind !== 'sage' || !AGENT_DUEL_ROOMS[G.roomId] || (typeof isHero === 'function' && isHero())) return;
-    e.sageDuel = { home: G.roomId, phase: 'idle', elapsed: 0, duration: 0, face: e.dir || 1, ringOrigin: null, chain: 0 };
+    _init(e);
+    if (!e.sageDuel) e.sageDuel = { home: G.roomId, phase: 'idle', elapsed: 0, duration: 0, face: e.dir || 1, ringOrigin: null, chain: 0 };
     e.sageReplantT = 0;
     // every picture of it, asked for now: the first lunge used to find its plate not yet arrived and
     // drew the procedural stand-in (a dark disc on a stick) for the length of the strike
@@ -122,7 +129,7 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
 
   // ---- the rig poses the duel's own state ----
   const _rm = agentRigMove;
-  agentRigMove = function (e) { if (e.tame || e.locked || !e.tSt || !sageDuelActive(e) || forced(e)) return _rm(e); return AGENT_POSE[e.tSt] ? e.tSt : _rm(e); };
+  agentRigMove = function (e) { if (e.tame || e.locked || !e.tSt || !sageDuelActive(e) || forced(e) || (typeof sageHitPose === 'function' && sageHitPose(e))) return _rm(e); return AGENT_POSE[e.tSt] ? e.tSt : _rm(e); };
 
   // ---- no stun-lock: a blow does not knock a duelling agent back ----
   const _ak = attackKnock;
@@ -154,6 +161,7 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
         if (typeof sfx === 'function') sfx('block');
       }
       dm = dm * k; if (dm <= 0) return 0;
+      if (k >= 1) markStruck(e);
     }
     return _ss(e, dm, x, y);
   };
@@ -165,6 +173,10 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
     if (e.tame || e.calm || e.locked || e.dead) { e.beads = []; e.marks = []; e.waves = []; e.rr = []; e.ringR = null; e.sageReplantT = 0; return; }
     if (!e.tSt) { e.tSt = 'stand'; e.tT = 0; e.tAge = 0; e.hideK = T.armIdle; }
     importLegacy(e);
+    // STRUCK LIKE A BODY (owner, 2026-11-20; js/sage-motion.js sageHitPose): a blow that lands is
+    // drawn on him — struck, and on the third of a quick chain doubled over — and gives no slide
+    if (e.hitPoseT > 0) e.hitPoseT -= dt; if (e._hitChainT > 0) e._hitChainT -= dt;
+    if ((e.kbT || 0) > 0) markStruck(e);
     e.kbT = 0; e.stagT = 0; e.ringR = null;
     const pcx = player.x + player.w / 2, py = player.y + player.h;
     for (const r of (e.rr = e.rr || [])) {
@@ -369,7 +381,7 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
   };
   const _pose = sageDuelPose;
   sageDuelPose = function (e) {
-    if (!e.tSt || e.tame || e.locked || forced(e)) return _pose(e);
+    if (!e.tSt || e.tame || e.locked || forced(e) || (typeof sageHitPose === 'function' && sageHitPose(e))) return _pose(e);
     const k = PLATE_OF[e.tSt];
     const keep = { coilT: e.coilT, lungeT: e.lungeT, gatherT: e.gatherT, windedT: e.windedT, sageReplantT: e.sageReplantT };
     e.coilT = k === 'coil' ? 1 : 0; e.lungeT = k === 'lunge' ? 1 : 0; e.gatherT = k === 'gather' ? 1 : 0; e.windedT = k === 'exhale' ? 1 : 0; e.sageReplantT = 0;

@@ -41,7 +41,7 @@ module.exports = { boss: 'glitch', bot: `(bo, P, ctx) => {
     keys[away] = 1; return;
   }
   if (st === 'rakewarn' || st === 'rake') { if (!front && ad < 160) { if (ad < 80) jump(); keys[away] = 1; } else cut(); return; }
-  if (st === 'rearwarn' || st === 'rear') { keys[away] = 1; return; }
+  if (st === 'rearwarn' || st === 'rear' || st === 'swatwarn' || st === 'swat') { keys[away] = 1; return; }
   if (st === 'bitewarn' || st === 'bite') { if (front && ad < 330) { jump(); keys[toward] = 1; } else if (!front && ad < 150) cut(); return; }
   if (st === 'bitestop') { cut(); return; }
   if (st === 'spitwarn') { hold(240, 400); return; }

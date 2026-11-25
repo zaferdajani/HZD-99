@@ -81,11 +81,11 @@ const NF_DUEL = Object.freeze({
 // the states he is DOING something in: a blow into them is turned, and the
 // break is not taken out of them
 const NF_ACT = { swipewarn: 1, swipe: 1, crouch: 1, pounce: 1, roar: 1, springwarn: 1, spring: 1, perch: 1,
-  dive: 1, nullcharge: 1, nullhop: 1, stalk: 1, run: 1, rakewarn: 1, rake: 1, rearwarn: 1, rear: 1,
+  dive: 1, nullcharge: 1, nullhop: 1, stalk: 1, run: 1, rakewarn: 1, rake: 1, rearwarn: 1, rear: 1, swatwarn: 1, swat: 1,
   spitwarn: 1, bitewarn: 1, bite: 1 };
 // the moves this file owns: the entities switch does not know them, and they
 // run here, before it
-const NF_OWN = { rakewarn: 1, rake: 1, rearwarn: 1, rear: 1, spitwarn: 1, bitewarn: 1, bite: 1, bitestop: 1 };
+const NF_OWN = { rakewarn: 1, rake: 1, swatwarn: 1, swat: 1, spitwarn: 1, bitewarn: 1, bite: 1, bitestop: 1 };
 function nfDuelOn(b) {
   return !!b && b.kind === 'glitch' && !b.meet && !(typeof isHero === 'function' && isHero());
 }
@@ -178,13 +178,13 @@ function nfOwnStep(b, dt, dist, adist) {
       if (aabb(box, player)) nfHurt(b, 'rake');
     }
     if (b.t <= 0) { nfEnter(b, 'idle', nfRand(N.rest[0], N.rest[1])); b.openIdle = true; }
-  } else if (b.st === 'rearwarn') {
+  } else if (b.st === 'swatwarn') {
     if (chance(0.5)) addPart(b.cx() + rnd(-30, 30), b.y + b.h - 2, rnd(-20, 20), rnd(-160, -80), 0.35, '#b9a888', 2.4, 120, false);
     if (b.t <= 0) {
-      nfEnter(b, 'rear', N.rearT); b.hitDone = false; b.vy = -N.rearHop; b.rearY = b.y;
+      nfEnter(b, 'swat', N.rearT); b.hitDone = false; b.vy = -N.rearHop; b.rearY = b.y;
       beastSound('leap'); cam.shake = Math.max(cam.shake, 4);
     }
-  } else if (b.st === 'rear') {
+  } else if (b.st === 'swat') {
     if (!b.hitDone && b.t <= N.rearT - 0.08) {
       b.hitDone = true;
       const box = { x: b.cx() - N.rearBox[0], y: b.rearY - N.rearBox[1], w: 2 * N.rearBox[0], h: N.rearBox[1] + 10 };
@@ -193,7 +193,7 @@ function nfOwnStep(b, dt, dist, adist) {
       if (typeof bossVfx === 'function' && !G.artProbe) bossVfx('nf_claw', b.cx(), b.rearY - N.rearBox[1] * 0.5, { h: N.rearBox[0] * 1.6, rot: -Math.PI / 2, flip: f < 0 });
       for (let i = 0; i < 10; i++) addPart(b.cx() + rnd(-60, 60), b.rearY + rnd(-10, 10), rnd(-40, 40), rnd(-320, -160), 0.4, i % 3 ? '#b9a888' : '#d68cff', 2.6, 300, i % 3 === 0);
       beastSound('swipe');
-      if (aabb(box, player)) nfHurt(b, 'rear');
+      if (aabb(box, player)) nfHurt(b, 'swat');
     }
     if (b.t <= 0 && b.on !== false) { nfEnter(b, 'idle', nfRand(N.rest[0], N.rest[1])); b.openIdle = true; beastSound('land'); }
     else if (b.t <= -0.6) { nfEnter(b, 'idle', nfRand(N.rest[0], N.rest[1])); b.openIdle = true; }
@@ -261,7 +261,7 @@ function nfChoose(b, pre, dist, adist) {
   const rested = !(b.st === 'idle' && b.openIdle && b.t > 0);
   if (!free) return false;
   const above = player.y + player.h < b.y - 4 && adist < N.rearBox[0] + 20;
-  if (rested && above && b.rearCD <= 0) { nfEnter(b, 'rearwarn', N.rear); b.vx = 0; b.rearCD = N.rearCD; b.turnStreak = 0; b.lastMove = 'rear'; return true; }
+  if (rested && above && b.rearCD <= 0) { nfEnter(b, 'swatwarn', N.rear); b.vx = 0; b.rearCD = N.rearCD; b.turnStreak = 0; b.lastMove = 'swat'; return true; }
   if (rested && !front && adist < 140 && b.rakeCD <= 0 && player.on) {
     b.face = Math.sign(dist) || -f;      // the turn begins: the filmed turn is the tell
     nfEnter(b, 'rakewarn', N.rake); b.vx = 0; b.rakeCD = N.rakeCD; b.turnStreak = 0; b.lastMove = 'rake'; return true;
@@ -370,8 +370,10 @@ if (typeof BEAST_STRIP !== 'undefined') Object.assign(BEAST_STRIP, {
   // landed and the clock has not, the paw is cocked on the new side
   rakewarn: { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 10, to: 14 },
   rake:     { key: 'beastStudioSwipe', cells: 24, k: 1, ax: 29.9, from: 15, to: 23 },
-  rearwarn: { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1, from: 0, to: 7 },
-  rear:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 14 },
+  // (the SWAT — the paws up at her over his back — is not the phase-two REAR-UP, js/entities.js
+  // rearwarn/rear/rearspent and its own filmed take, beastStudioRear: the two are separate moves)
+  swatwarn: { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1, from: 0, to: 7 },
+  swat:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 14 },
   spitwarn: { key: 'beastStudioRoar', cells: 30, k: 1, ax: 3.1, from: 0, to: 19 },
   bitewarn: { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 0, to: 10 },
   bite:     { key: 'beastStudioLeap', cells: 30, k: 1, ax: 25.7, from: 11, to: 18 },
