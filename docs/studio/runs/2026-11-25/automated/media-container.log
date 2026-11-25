@@ -1,0 +1,11 @@
+
+── media-container  — no shipped track or film is a fragmented MP4 and every one carries its index before its data, so a phone player starts it at once, seeks it and loops it; every track the game can ask for is on disk in that form
+── media-container — a track starts at once, seeks and loops on every player
+ok   A  no shipped track or film is a fragmented MP4  238 files
+ok   B  ...and every one carries its index before its data  []
+ok   C  every track the game can ask for is on disk in that form  []
+
+OK — 238 tracks and films, all plain and index-first
+   (media-container: 0.1 s)
+
+all 1 harnesses ran

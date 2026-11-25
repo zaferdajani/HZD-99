@@ -1,0 +1,6 @@
+
+── aactier-provenance-contract  — the phone AAC tier is checked by source/output bytes, never by unreliable checkout mtimes
+AAC provenance contract: PASS — clean-checkout validation uses committed bytes, not mtimes
+   (aactier-provenance-contract: 0.1 s)
+
+all 1 harnesses ran

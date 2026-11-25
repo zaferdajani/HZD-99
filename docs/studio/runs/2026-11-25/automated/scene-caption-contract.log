@@ -1,0 +1,6 @@
+
+── scene-caption-contract  — visible-three scene captions preserve unread story text in FIFO order
+PASS scene captions retain unread lines and promote queued text in FIFO order
+   (scene-caption-contract: 0.1 s)
+
+all 1 harnesses ran
