@@ -79,7 +79,7 @@ const { chromium } = require('playwright');
         FOE_PIG.on = false; const washed = stat(frame()); FOE_PIG.on = true;
         const again = stat(frame());
         out.pig = { n: art.n, art: art.rgb.map(Math.round), kept: kept.rgb.map(Math.round), washed: washed.rgb.map(Math.round),
-          keptMean: +kept.mean.toFixed(1), washedMean: +washed.mean.toFixed(1), keptP05: +kept.p05.toFixed(1), washedP05: +washed.p05.toFixed(1),
+          keptMean: +kept.mean.toFixed(1), washedMean: +washed.mean.toFixed(1), keptP05: +kept.p05.toFixed(1), washedP05: +washed.p05.toFixed(1), artP05: +art.p05.toFixed(1),
           lights: +Math.abs(kept.mean - noLights.mean).toFixed(2), bloom: +Math.abs(kept.mean - noBloom.mean).toFixed(2), stable: Math.abs(again.mean - kept.mean) < 0.5,
           washedLights: null };
         FOE_PIG.on = false; const wl = without('drawLights'); FOE_PIG.on = true;
@@ -130,11 +130,14 @@ const { chromium } = require('playwright');
           const c3 = document.createElement('canvas'); c3.width = W; c3.height = H; const x3 = c3.getContext('2d'); x3.drawImage(FXGL.cv, 0, 0);
           const d = x3.getImageData(0, 0, W, H).data;
           let above = 0, below = 0, far = 0, tot = 0;
+          // the band is 6.8 px of WORLD (6 canvas px at the 0.88 his fight was framed at when this was set):
+          // his fight is now the whole arena (0.68), and a band fixed in canvas px would be a thicker slice of ground
+          const band = 6.8 * Math.abs(T.d);
           for (let px = 0; px < W; px += 2) {
             const wx = (px - T.e) / T.a, sy = fxSurfaceY(wx, rec.y, 90); if (isNaN(sy)) continue;
             const sp = T.d * sy + T.f;
             for (let py = 0; py < H; py++) { const i = (py * W + px) * 4, v = d[i] + d[i + 1] + d[i + 2] + d[i + 3]; if (!v) continue;
-              tot += v; if (py < sp - 6) above += v; else if (py > sp + 6) below += v;
+              tot += v; if (py < sp - band) above += v; else if (py > sp + band) below += v;
               if (Math.abs(py - sp) > Math.abs(T.d) * 80) far += v; }
           }
           return { drawn: FXGL.drawn, tot, above: tot ? +(above / tot).toFixed(3) : null, below: tot ? +(below / tot).toFixed(3) : null, far: tot ? +(far / tot).toFixed(3) : null };
@@ -174,7 +177,10 @@ const { chromium } = require('playwright');
     // rim the lit-through body measures 75.1, and the gap closed from the far
     // side. The kept body did not move (72.7). So it is held where it was when
     // this was green — no lighter than 76 — and never lighter than lit-through.
-    check('its shadows stay shadows', P.keptP05 <= 76 && P.keptP05 <= P.washedP05, 'darkest twentieth ' + P.keptP05 + ' kept, ' + P.washedP05 + ' lit through');
+    // ...measured against the art's own darks at the same size: 76 was 36.3 over the authored darkest
+    // twentieth (39.7) at the framing it was set at, and drawn smaller (his fight is the whole arena now,
+    // 0.68) the art's own darks blend with their neighbours and rise with it (43.2 authored, 77.5 kept)
+    check('its shadows stay shadows', P.keptP05 <= P.artP05 + 36.3 && P.keptP05 <= P.washedP05, 'darkest twentieth ' + P.keptP05 + ' kept, ' + P.washedP05 + ' lit through, ' + P.artP05 + ' authored at this size');
     check('its ivory stays ivory, not the meadow\'s green', P.kept[0] >= P.kept[1] && P.washed[1] > P.washed[0], 'rgb ' + P.kept.join(',') + ' kept, ' + P.washed.join(',') + ' lit through, ' + P.art.join(',') + ' authored');
     check('keeping it is stable from frame to frame', P.stable === true);
     check('an effect drawn over the body still lights it', P.fxOver >= 6, '+' + P.fxOver + ' luminance under a flash');
@@ -185,7 +191,7 @@ const { chromium } = require('playwright');
     check('...the surface a body stands on, not a flat line', R.prof.span >= 10 && R.prof.worst <= 1, 'span ' + R.prof.span + ' px, worst ' + R.prof.worst + ' px off the heightfield');
     check('...and only ground effects are', R.prof.other === true);
     check('the cracks are drawn', R.cracksLight.drawn >= 1 && R.cracksLight.tot > 0, JSON.stringify(R.cracksLight));
-    check('...IN the ground: almost none of their light is in the air', R.cracksLight.above != null && R.cracksLight.above <= 0.08 && R.cracksLight.below >= 0.25, (R.cracksLight.above * 100).toFixed(1) + '% more than 6 px above the surface, ' + (R.cracksLight.below * 100).toFixed(1) + '% more than 6 px into it');
+    check('...IN the ground: almost none of their light is in the air', R.cracksLight.above != null && R.cracksLight.above <= 0.08 && R.cracksLight.below >= 0.25, (R.cracksLight.above * 100).toFixed(1) + '% more than 6.8 px (of world) above the surface, ' + (R.cracksLight.below * 100).toFixed(1) + '% more than 6.8 px into it');
     check('the wave is drawn', R.waveLight.drawn >= 1 && R.waveLight.tot > 0, JSON.stringify(R.waveLight));
     check('...ON the ground: almost none of it is under the surface', R.waveLight.below != null && R.waveLight.below <= 0.08, (R.waveLight.below * 100).toFixed(1) + '% more than 6 px under the surface, ' + (R.waveLight.above * 100).toFixed(1) + '% more than 6 px above it');
     check('neither floats away from the terrain', R.cracksLight.far <= 0.01 && R.waveLight.far <= 0.01, 'cracks ' + R.cracksLight.far + ', wave ' + R.waveLight.far + ' further than 80 px from the surface');
