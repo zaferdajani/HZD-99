@@ -1235,6 +1235,11 @@ const HIT_BANK = {
   bosshit_prism: ['glass_medium', 0.7], bosshit_atlas: ['bell_heavy', 0.5], bosshit_mother: ['bell_heavy', 0.55],
   bosshit_chime: ['bell_heavy', 0.55], bosshit_carrier: ['metal_medium', 0.7], bosshit_moth: ['plate_medium', 0.7],
   bosshit_lattice: ['glass_medium', 0.65], bosshit_lens: ['metal_medium', 0.7], bosshit_sage: ['punch_heavy', 0.8],
+  // A MACHINE THAT HAS SEEN HER SAYS SO (js/sight.js), in what it is made of:
+  // the armoured walker sets its plate down hard, the melt slaps, the small
+  // fliers tick, the rest clank. The same recorded takes, never twice running.
+  notice_guard: ['plate_heavy', 0.85], notice_blob: ['soft_medium', 0.6],
+  notice_light: ['metal_light', 0.5], notice: ['metal_medium', 0.6],
 };
 const HIT_LAST = {};
 function hitBankPlay(n) {

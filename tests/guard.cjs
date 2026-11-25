@@ -100,6 +100,7 @@ const check = (name, ok, detail) => {
       await reset();
       const fy = player.y + player.h;
       const e = new Enemy(kind, player.x + player.w + 34, fy - EKIND[kind].h);
+      e.x = player.x + player.w + 34;   // its near edge 34 px off, whatever its size (the shield-walker is built bigger about its middle)
       e.dir = -1; e.iq = 0.2; e.iqT = 99; e.windedT = 0; e.coilT = 0.12; e.lungeT = 0; e.atkCD = 9;
       G.enemies = [e];
       const c0 = player.cores, hp0 = e.hp;
