@@ -1887,16 +1887,21 @@ function meetStep(dt) {
 // ===========================================================================
 // THE DEMO BOUNDARY — where the free version stops, and says so properly.
 //
-// THE SHAPE OF THE DECISION. The free web build is the shop window: it opens
-// on any phone from any maker with no download and no account, which is the one
-// distribution advantage this game has and the app stores cannot match. What it
-// is NOT is the place anyone can be charged. So the free version ends, and the
-// end has to feel like a chapter closing rather than the game breaking.
+// THE WEB IS NEVER STOPPED (owner, 2026-11-25): "as long as we're on the web app, all people
+// who access the web are actually testers. So even if it shows it's a paid version or buy it or
+// whatever, which will direct users later on for the full version, depending on their platform,
+// still users on the link can access the second kingdom and all other kingdoms freely." So the
+// boundary can only ever close on a STORE build — the packaged phone app or the desktop shell —
+// whose save has no entitlement. The web page, http or https, walks on through every kingdom,
+// whatever DEMO_OFFER says. (Until 2026-11-25 this was the other way round: the web was the demo
+// and a package was the bought copy.)
+//
+// When it does close, the end has to feel like a chapter closing rather than the game breaking.
 //
 // WHERE IT ENDS is derived, never listed. Any exit that leaves DEMO_ZONE is the
-// boundary — which today is exactly one door, A3 going up into B1, and which
-// stays correct if the world is ever re-plumbed. A hard-coded room id would be
-// a second copy of the map that somebody has to remember to update.
+// boundary — which today is exactly one edge, the frontier road's east edge (A14 -> B1), past
+// NULLFANG's door — and which stays correct if the world is ever re-plumbed. A hard-coded room
+// id would be a second copy of the map that somebody has to remember to update.
 //
 // The player gets the whole first kingdom to that point: waking in the cradle,
 // the walk to the gates, the first machine folk, the purifier, the Alpha and
@@ -1904,28 +1909,31 @@ function meetStep(dt) {
 // this a chapter and not a wall. Stopping mid-corridor would read as a fault.
 //
 // ONE BUILD STILL, and that is deliberate (RULE ONE). This is not a demo BUILD;
-// it is the same file everywhere, deciding at run time. A packaged app — the
-// Steam shell, the phone app — is by definition the bought copy and is never
-// the demo. The web page is, until a save says otherwise.
+// it is the same file everywhere, deciding at run time (demoStore: Capacitor, file:, capacitor:,
+// or the desktop shell's app:).
 //
-// `G.save.full` is the hook the Steam link will hang off later: whatever proves
-// a purchase eventually sets that flag and the same page becomes the whole
-// game. Nothing here needs to change when it does.
+// `G.save.full` is the hook each store's entitlement will hang off later: whatever proves a
+// purchase on that platform sets that flag and the same package becomes the whole game.
 //
 // AND IT IS OFF UNTIL THE OWNER SWITCHES IT ON. Flipping DEMO_OFFER to true is
 // a product decision with a store page behind it, not a code change, so the
 // default cannot be the one that quietly truncates a game that is already live.
 const DEMO_ZONE = 'A';
-const DEMO_OFFER = false;
+// (a `let` so a harness can throw the switch both ways; nothing in the game assigns it)
+let DEMO_OFFER = false;
 // Where the full game is sold. Empty until there is a page to point at — the
 // screen then says the game continues without offering a link that 404s.
 const DEMO_URL = '';
+// a store build: the packaged phone app, or the desktop shell
+function demoStore() {
+  return (typeof window !== 'undefined') &&
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
+}
+// stop at the threshold: ONLY a store build, with the offer on and no entitlement on the save
 function demoOn() {
   if (!DEMO_OFFER) return false;
-  const packaged = (typeof window !== 'undefined') &&
-    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
-  if (packaged) return false;
-  if (G.save && G.save.full) return false;
+  if (!demoStore()) return false;                     // the web: everyone on the link is a tester
+  if (G.save && G.save.full) return false;            // bought on that platform
   return true;
 }
 // Does stepping through this door leave the free chapter?
@@ -1946,6 +1954,51 @@ function demoStop(side) {
   player.lastSafe = { x: player.x, y: player.y };
   G.state = 'MORE'; G.moreIdx = 0;
   sfx('ui');
+}
+// THE END OF THE FIRST KINGDOM (owner, 2026-11-25: "You can show it as end of, okay, or
+// something catchy for the first kingdom. And moving on to the next one. The quest is still
+// going. And then it shows the payment or whatever gate or the message."). The first time she
+// reaches the threshold out of the free kingdom (the frontier road's east edge, A14 -> B1; in
+// NOSTOS its own climb), once per save: a card on the dimmed world, the demo end screen's look —
+// the kingdom is purified, the quest goes on. Few words, no comic, nothing drawn round anything;
+// any button after half a second skips it and it closes itself at K1_END.T. THEN the gate: on a
+// store build without the game, with the offer on, the end-of-chapter screen (demoStop: get the
+// game / stay); anywhere else she walks on through the edge she was crossing. On the web with the
+// offer on, the card carries one more line, once: the game goes on here, free for testers.
+const K1_END = Object.freeze({ min: 0.5, T: 3.6 });
+function k1EndDue(dest) {
+  const a = ROOMS[G.roomId], b = ROOMS[dest];
+  return !!(a && b && G.save && G.save.flags && a.zone === DEMO_ZONE && b.zone !== DEMO_ZONE && !G.save.flags.k1End
+    && !(G.save.visited && G.save.visited[dest]));       // (a save already past it is not told again)
+}
+function k1EndShow(side, dest) {
+  G.k1End = { t: 0, side, dest, tester: !!DEMO_OFFER && !demoStore() };
+  G.state = 'KEND';
+  sfx('ok');
+}
+function updateK1End(dt) {
+  const k = G.k1End;
+  if (!k) { G.state = 'PLAY'; return; }
+  k.t += dt;
+  const skip = k.t > K1_END.min && (inP('OK') || inP('ATK') || inP('JUMP') || inP('BACK'));
+  if (!skip && k.t < K1_END.T) return;
+  G.save.flags.k1End = 1; persist();
+  G.k1End = null; G.state = 'PLAY';
+  // ...then the gate, on a store build without the game; anywhere else she is still in the
+  // doorway she was crossing, and the next frame carries her through it
+  if (demoWall(k.dest)) demoStop(k.side);
+}
+function drawK1End() {
+  const k = G.k1End; if (!k) return;
+  drawWorldFrame();
+  const a = Math.min(1, k.t / 0.35);
+  c.fillStyle = 'rgba(3,7,12,' + (0.86 * a).toFixed(3) + ')'; c.fillRect(0, 0, 960, 540);
+  c.save(); c.globalAlpha = a;
+  ftxt(t('k1_end1'), 480, 228, 40, '#aef7d8');
+  c.globalAlpha = Math.max(0, Math.min(1, (k.t - 0.6) / 0.4));
+  ftxt(t('k1_end2'), 480, 290, 21, '#cfe3ef');
+  if (k.tester) ftxt(t('k1_end_web'), 480, 336, 16, '#8aa2b5');
+  c.restore();
 }
 // ONE GEOMETRY, used by the drawing AND by touch. Written out separately they
 // drift, and a screen whose buttons are somewhere other than where they are
@@ -2071,6 +2124,7 @@ function checkTransitions() {
     if (!G.storyGateAt || G.save.time - G.storyGateAt > 4) {G.toast(storyHint);G.storyGateAt=G.save.time||0.001;}
     return;
   }
+  if (k1EndDue(dest)) { k1EndShow(side, dest); return; }
   if (demoWall(dest)) { demoStop(side); return; }
   // THE WAY UP ENDS ON A LEDGE OR IT DOES NOT HAPPEN (owner's rule). Rising
   // into the room above, she is carried onto the nearest floor she can stand
@@ -3504,6 +3558,7 @@ function update(dt) {
     if (inP('OK') || inP('ATK') || inP('BACK') || G.introT > 12.4) { G.state = 'PLAY'; sfx('ok'); }
   }
   else if (G.state === 'MORE') updateMore();
+  else if (G.state === 'KEND') updateK1End(dt);
   else if (G.state === 'WIN') { if (inP('OK')) { G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); } }
   else if (G.state === 'GAMEOVER') {
     if (inP('OK')) { wipeSave(G.save && G.save.theme); G.save = null; G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); }
@@ -11891,7 +11946,7 @@ function gateDoorsAll(id) {
   // the one door is the door to Kingdom 2, and the frontier road has its way back to it. Every
   // robot save, old or new — the climb over the camp is gone for all of them (js/world.js
   // storyExits), so this is the only road on.
-  if (!isHero() && (room === 'A4' || room === 'A14')) return [GATE_STORY[room]];
+  if (typeof GATE_STORY !== 'undefined' && !isHero() && (room === 'A4' || room === 'A14')) return [GATE_STORY[room]];
   // An existing floor anchor in the quarry connects to the tunnel's central
   // maintenance landing. The guardian's reward is never a prerequisite.
   if (!isHero() && G.save && G.save.storyVersion >= 2) {
@@ -17863,6 +17918,7 @@ function draw(tms) {
     ftxt(t('intro_skip'), 480, 512, 13, '#546b7d');
     return;
   }
+  if (st === 'KEND') { drawK1End(); return; }
   if (st === 'MORE') {
     // the world stays behind it, dimmed. She is standing in the doorway she
     // cannot go through yet, and the screen should read as her looking at it

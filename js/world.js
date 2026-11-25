@@ -998,7 +998,7 @@ const ROOMS = {
   // None under a ledge, none on the hulk's slope. [tile x of the foot, scale, plate, mirrored];
   // coverBack: the meadow beyond, on parallax behind the level [.., parallax].
   A4: { zone: 'A', sky: 1, w: 44, h: 17, exits: { L: 'A3' },
-    cover: [[3.3, 0.72, 'b', 1], [5.6, 0.95, 'c', 0], [15.2, 0.55, 'd', 1], [20.6, 0.7, 'e', 0], [23.5, 0.88, 'a', 0], [27.9, 0.78, 'e', 1], [35.7, 0.8, 'a', 1]],
+    cover: [[3.3, 0.72, 'b', 1], [6.6, 0.95, 'c', 0], [15.2, 0.55, 'd', 1], [20.6, 0.7, 'e', 0], [23.5, 0.88, 'a', 0], [27.9, 0.78, 'e', 1], [35.7, 0.8, 'a', 1]],
     coverBack: [[9.5, 0.62, 'a', 0, 0.9], [13.8, 0.9, 'c', 1, 0.9], [17.5, 0.7, 'b', 1, 0.9], [25.8, 0.7, 'd', 1, 0.9], [30.5, 0.6, 'e', 0, 0.9], [42.5, 0.7, 'a', 1, 0.9]],
     ents: [['boss', 24, 15, 'glitch']],
     build(g) {
