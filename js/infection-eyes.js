@@ -211,6 +211,11 @@ function infEyeArt(c, key, cell, dx, dy, dw, dh, tag) {
 }
 
 // ---- the simulation side -----------------------------------------------------
+// the smoke's own dice: scenery never draws from the game's Math.random, or whether a body's eye
+// smoked this frame would change which move a boss makes next (the seeded fights measured exactly
+// that when MIREJAW's eye was wired: his roll stopped coming in the same seeds)
+let INF_SEED = 0x2545f491;
+function infRnd() { INF_SEED = (INF_SEED * 1664525 + 1013904223) >>> 0; return INF_SEED / 4294967296; }
 function infEyeSpawn(owner, x, y, purple, young) {
   const cap = infEyeCap();
   let i;
@@ -221,12 +226,12 @@ function infEyeSpawn(owner, x, y, purple, young) {
   }
   INF_X[i] = x; INF_Y[i] = y; INF_Y0[i] = y;
   // a thread, not a spray: almost no initial velocity, a slow rise, a curl
-  INF_VX[i] = (Math.random() - 0.5) * 6;
-  INF_VY[i] = -9 - Math.random() * 8;
+  INF_VX[i] = (infRnd() - 0.5) * 6;
+  INF_VY[i] = -9 - infRnd() * 8;
   INF_AGE[i] = young || 0;
-  INF_LIFE[i] = INF_EYE_LIFE * (0.75 + Math.random() * 0.5);
-  INF_PH[i] = Math.random() * 6.283;
-  INF_SZ[i] = 0.8 + Math.random() * 0.5;
+  INF_LIFE[i] = INF_EYE_LIFE * (0.75 + infRnd() * 0.5);
+  INF_PH[i] = infRnd() * 6.283;
+  INF_SZ[i] = 0.8 + infRnd() * 0.5;
   INF_PURP[i] = purple ? 1 : 0;
   INF_OWN[i] = owner;
   // a running count per body, so a harness can ask "was anything born after

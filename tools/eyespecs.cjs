@@ -198,6 +198,15 @@ module.exports = [
     '356,414': [0.824, 0.633, 0.926, 0.669], '583,635': [0.905, 0.27], '210,2': [0.78, 0.25],
     '506,2': [0.82, 0.22], '695,2': [0.76, 0.24], '2,2': [0.575, 0.56, 0.66, 0.56], '330,2': [0.713, 0.44],
     '396,165': [0.751, 0.408], '2,835': [0.08, 0.62] } },
+  // ---- MIREJAW (Silt Mire mini-boss, js/mirejaw.js MJ_ART): a crocodile in profile, nose LEFT,
+  // its eye a violet lamp on the brow behind the snout; the other violet lamps run down his flank
+  // and legs, so the eye is the lamp nearest the snout in the head's upper half. The roll turns him
+  // belly-up and the turn swings the head across him: neither has an entry (the cells there take
+  // nothing, as the wolf's roll does), and a cell with no lit eye takes its neighbour's (fill).
+  ...[['mjIdle', 12], ['mjWalk', 16], ['mjSwim', 14], ['mjRun', 14], ['mjNotice', 12], ['mjCrouch', 12],
+      ['mjLand', 10], ['mjGape', 16], ['mjDaze', 12], ['mjHurt', 10], ['mjBite', 16], ['mjLeap', 14],
+      ['mjTail', 12], ['mjBellow', 14], ['mjDown', 12]].map(([k, n]) =>
+    ({ key: k, cells: n, col: 'purple', rule: 'front', region: [0, 0, 0.3, 0.5], fill: true })),
   // ---- the NOSTOS creatures (hero world) ---------------------------------------
   // pixel-art NOSTOS creatures: the eye is a single cyan pixel cluster, too
   // small for the detector at their size — placed, and the cells between the

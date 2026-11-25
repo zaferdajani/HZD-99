@@ -112,6 +112,9 @@ const { chromium } = require('playwright');
       // holds the simulation; the eyes are what is measured, not the entrance
       G.bossEntry = null; if (G.state !== 'PLAY') G.state = 'PLAY';
       if (dx) { body.x += dx; body.vx = dx * 60; body.faceVis = body.dir = dx < 0 ? -1 : 1; } else body.vx = 0;
+      // MIREJAW's own step owns where he is (js/mirejaw.js: mj.wx, and his box is rebuilt from it
+      // every frame), so he is moved there: the same travel, in the coordinate his drawing reads
+      if (dx && body.mj) { body.mj.wx += dx; body.mj.face = dx < 0 ? -1 : 1; }
       body.anim = (body.anim || 0) + 1 / 60;
       update(1 / 60);
       draw(performance.now());
