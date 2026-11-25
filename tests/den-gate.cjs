@@ -207,10 +207,11 @@ const check = (name, ok, detail) => {
       out.grottoAfter = gateDoors().some(x => x.to === 'A4');
       if (doneCh) G.save.flags.sageTame_GA1D = doneCh;
     }
-    // ---- 8. THE END OF CHAPTER ONE: the climb above the camp, once the lion
-    // is free, closes the chapter — and queues NO comic on the ledges (owner,
-    // 2026-10-12: never in the middle of play). The teaser belongs to the
-    // crossing into B1.
+    // ---- 8. THE END OF CHAPTER ONE: through the lion's door, once he is free
+    // (owner, 2026-11-25: the door in his arena, not the climb over the camp) —
+    // walking out onto the frontier road beyond it (A14) closes the chapter, and
+    // queues NO comic there (owner, 2026-10-12: never in the middle of play). The
+    // teaser belongs to the crossing into B1.
     {
       fresh({ bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ratchetCamp: 1 });
       // the hook QUEUES the teaser sequence (it waits for a safe moment); it
@@ -220,10 +221,9 @@ const check = (name, ok, detail) => {
       window.panelsQueue = (id) => calls.push(id);
       loadRoom('A3'); quiet();
       stand(12); for (let i = 0; i < 20; i++) progressTick(1 / 60);
-      const early = calls.length;
-      player.x = 26 * TILE; player.y = 4 * TILE; player.vy = -200;
-      progressTick(1 / 60); progressTick(1 / 60);
-      player.y = 5 * TILE; progressTick(1 / 60);
+      const early = calls.length + (G.save.flags.ch2Climb ? 100 : 0);   // (the camp no longer closes it)
+      loadRoom('A14'); quiet();
+      stand(6); progressTick(1 / 60); progressTick(1 / 60);
       window.panelsQueue = real;
       // the save's panel record exists from her first step in a real run, so
       // B1 is judged by it — not re-judged as "already visited" on arrival
@@ -277,13 +277,13 @@ const check = (name, ok, detail) => {
   check('...nor can the break\'s', r.brk.staged && r.brk.dealt === 0 && !r.brk.dead && r.brk.hp && !r.brk.glitch, JSON.stringify(r.brk));
   check('with the blade, the Sage and the bell, she walks east into the lair and NULLFANG wakes',
     r.opened.inA4 && r.opened.fight && r.opened.boss === 'glitch', JSON.stringify(r.opened));
-  check('the climb above the camp after the lion closes the chapter and queues no comic mid-room; the teaser is B1\'s doorway',
-    r.teaser.calls.length === 0 && r.teaser.flag && r.teaser.b1 === 'ch2', JSON.stringify(r.teaser));
+  check('through the lion\'s door after the lion, the frontier road closes the chapter and queues no comic mid-room; the teaser is B1\'s doorway',
+    r.teaser.early === 0 && r.teaser.calls.length === 0 && r.teaser.flag && r.teaser.b1 === 'ch2', JSON.stringify(r.teaser));
   // before the first meeting there is no hatch to name (progress.js pgHubSealed):
   // the line sends her east, and the meeting turns it into the dig
   const want = ['pg_goal_pack', 'pg_goal_cross', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_chime', 'pg_goal_sage',
     'pg_goal_east', 'pg_goal_lion', 'pg_goal_up'];
-  check('the chapter\'s goal follows the owner\'s order: pack, east to the first meeting, marble, quarry, Ratchet, CHIME, the agent, the enclosure, NULLFANG, up',
+  check('the chapter\'s goal follows the owner\'s order: pack, east to the first meeting, marble, quarry, Ratchet, CHIME, the agent, the enclosure, NULLFANG, through his door',
     JSON.stringify(r.goals) === JSON.stringify(want), r.goals.join(' > '));
   check('...in all five languages', !r.goalLangs.length, r.goalLangs.join(','));
   if (errs.length) check('no page errors', false, errs.slice(0, 3).join(' | '));

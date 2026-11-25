@@ -45,8 +45,8 @@ const check = (name, ok, detail) => {
   // doors that leave the free zone may be closed; every other door in the whole
   // world must stay open, including all the ones inside it.
   const doors = await page.evaluate(() => {
-    // DEMO_OFFER is a const, so the switch is simulated by replacing the
-    // predicate — which also proves demoWall() asks it rather than re-deciding
+    // the switch is simulated by replacing the predicate (as if this were a store build without
+    // the game, the only place it can close) — which also proves demoWall() asks it
     const real = demoOn;
     demoOn = () => true;
     const inside = [], closed = [], leaked = [];
@@ -132,23 +132,63 @@ const check = (name, ok, detail) => {
         reach.rooms + ' of ' + reach.all + ' rooms free ('
         + Math.round(reach.rooms / reach.all * 100) + '%)');
 
-  // ---- 3. A BOUGHT COPY IS NEVER THE DEMO ---------------------------------
-  const flagWorks = await page.evaluate(() => {
-    // demoOn() reads DEMO_OFFER, which is a const — so the purchase flag is
-    // checked directly rather than by flipping the switch
-    const src = String(demoOn);
-    return /G\.save\.full/.test(src) && /Capacitor/.test(src);
+  // ---- 3. THE WEB IS NEVER STOPPED; A STORE BUILD ONLY WITHOUT THE GAME ---
+  // The owner, 2026-11-25: "as long as we're on the web app, all people who access the web are
+  // actually testers ... still users on the link can access the second kingdom and all other
+  // kingdoms freely." So this throws the real switch both ways (DEMO_OFFER is a `let` for this),
+  // walks her through the real threshold edge (A14 -> B1, through checkTransitions) and asks
+  // where she ends up: on this page (the web), with the offer OFF and ON, she walks into the
+  // Conduits; on a simulated store build (window.Capacitor present) with the offer on and no
+  // entitlement she is stopped; with G.save.full she is not. (Until 2026-11-25 this section only
+  // read demoOn()'s source for two words; it was the web that was the demo then.)
+  const store = await page.evaluate(() => {
+    const keepOffer = DEMO_OFFER, keepCap = window.Capacitor, keepFull = G.save.full;
+    // the first crossing of a save: the end-of-kingdom card comes first (owner, 2026-11-25), closes
+    // itself, and THEN the gate decides; `again` is a later crossing, after the card was seen
+    const cross = (again) => {
+      if (!again) { delete G.save.flags.k1End; if (G.save.visited) delete G.save.visited.B1; }
+      loadRoom('A14'); G.state = 'PLAY'; G.dialog = null; G.trans = null;
+      player.x = G.roomDef.w * TILE + 4; player.y = 13 * TILE; player.vx = 200;
+      checkTransitions();
+      const seq = [];
+      if (G.state === 'KEND') {
+        seq.push(G.k1End.tester ? 'card+note' : 'card');
+        G.k1End.t = K1_END.T + 0.1; updateK1End(0);
+        if (G.state === 'PLAY') checkTransitions();
+      }
+      const st = G.state, to = (G.trans && G.trans.to) || (G.roomId !== 'A14' ? G.roomId : null);
+      G.state = 'PLAY'; G.trans = null;
+      seq.push(st === 'MORE' ? 'stopped' : (to || 'nowhere'));
+      return seq.join('>');
+    };
+    const out = {};
+    G.save.full = false;
+    DEMO_OFFER = false; out.webOff = cross();
+    DEMO_OFFER = true;  out.webOn = cross(); out.webOnAgain = cross(true);
+    window.Capacitor = {};
+    DEMO_OFFER = false; out.storeOff = cross();
+    DEMO_OFFER = true;  out.storeOn = cross(); out.storeOnAgain = cross(true);
+    G.save.full = true; out.storeFull = cross();
+    DEMO_OFFER = keepOffer; G.save.full = keepFull;
+    if (keepCap === undefined) delete window.Capacitor; else window.Capacitor = keepCap;
+    return out;
   });
-  check('a bought copy and a packaged app are never the demo', flagWorks,
-        'demoOn() checks both the purchase flag and the package');
+  check('the web is never stopped at the threshold: offer off (the end-of-kingdom card, then on)', store.webOff === 'card>B1', store.webOff);
+  check('...and offer ON: the card with its one tester note, then on (everyone on the link is a tester)', store.webOn === 'card+note>B1', store.webOn);
+  check('...and the next time, straight on', store.webOnAgain === 'B1', store.webOnAgain);
+  check('a store build without the game, offer off: the card, then on', store.storeOff === 'card>B1', store.storeOff);
+  check('a store build without the game, offer ON: the card FIRST, then stopped at the threshold', store.storeOn === 'card>stopped', store.storeOn);
+  check('...and the next time, the gate alone (the card is once per save)', store.storeOnAgain === 'stopped', store.storeOnAgain);
+  check('...and a store build with the game (G.save.full): the card, then on', store.storeFull === 'card>B1', store.storeFull);
 
   // ---- 4. IT DOES NOT TRAP HER --------------------------------------------
+  // (the threshold is the frontier road's east edge since 2026-11-25: NULLFANG's door -> A14 -> B1)
   const trap = await page.evaluate(async () => {
-    loadRoom('A3');
-    const H = G.roomDef.h * TILE;
-    player.x = 300; player.y = -30; player.vy = -400;   // through the top door
-    demoStop('T');
-    const inRoom = player.y > 0 && player.y < H;
+    loadRoom('A14');
+    const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+    player.x = W + 6; player.y = 13 * TILE; player.vx = 300;   // through the east edge
+    demoStop('R');
+    const inRoom = player.x > 0 && player.x + player.w < W && player.y > 0 && player.y < H;
     const st = G.state;
     // close the screen the way a player would, then run a moment of real game
     G.state = 'PLAY';
@@ -195,130 +235,37 @@ const check = (name, ok, detail) => {
   check('the ending screen has words in every language', !lang.missing.length,
         lang.langs.join(', ') + (lang.missing.length ? ' — missing ' + lang.missing.slice(0, 4) : ''));
 
-  // ---- 7. THE FRONTIER ----------------------------------------------------
-  // The ending screen asks the player to want five more kingdoms. The light
-  // falling through A3's ceiling is the only evidence it offers that there ARE
-  // any, so it has to be (a) pointing at a door that exists, (b) coming out of
-  // a hole that exists, and (c) actually visible — the first version of this
-  // was drawn correctly at alphas so low that probing the live frame found it
-  // adding about 14 to a channel. Present, and invisible. Hence a MEASUREMENT
-  // rather than "the code runs".
-  const front = await page.evaluate(() => {
-    const out = { table: [] };
-    for (const id in FRONTIER) {
-      const F = FRONTIER[id], R = ROOMS[id];
-      const exits = Object.values((R && R.exits) || {}).map(d => (typeof d === 'object' ? d.to : d));
-      const leadsThere = exits.some(to => ROOMS[to] && ROOMS[to].zone === F.zone);
-      // ...and the opening it shines through is a real gap in the room's roof
-      const was = G.roomId;
-      loadRoom(id);
-      let open = 0;
-      for (let tx = F.tx0; tx < F.tx1; tx++) if (G.grid[0][tx] === '.') open++;
-      out.table.push({ id, zone: F.zone, leadsThere, open, want: F.tx1 - F.tx0 });
-      loadRoom(was);
-    }
-    return out;
-  });
-  check('every frontier points at a kingdom the room really connects to',
-        front.table.every(r => r.leadsThere),
-        front.table.map(r => r.id + '->' + r.zone).join(', '));
-  check('...and shines through a real hole in that room\'s roof',
-        front.table.every(r => r.open === r.want),
-        front.table.map(r => r.id + ' ' + r.open + '/' + r.want + ' tiles open').join(', '));
-
-  const lit = await page.evaluate(() => {
+  // ---- 7. NO LIGHT OVER THE CAMP ------------------------------------------
+  // There used to be a shaft of the Conduits' cyan falling through a hole in A3's sky, over the
+  // climb out of the Meadows. The owner, 2026-11-25: the robot story reaches the second kingdom
+  // through the door NULLFANG opens in his arena, "instead of going up into the sky, into the
+  // light, which means you will remove the light from the screen before it". So this measures
+  // the opposite of what it measured before, the same way: the frame over the old climb, drawn
+  // with the frontier code and with it switched off, must be the SAME frame — no light is added.
+  // And the climb itself is gone from the robot story: no way up, no ledges up to it.
+  const dark = await page.evaluate(() => {
     loadRoom('A3'); G.state = 'PLAY'; G.toasts = []; G.card = null; G.zoneToast = null;
-    const F = FRONTIER.A3;
     player.x = 26 * TILE; player.y = 14 * TILE; player.vx = 0; player.vy = 0;
     updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
-    // Measure the frontier, not a foreground actor covering its landing point.
-    // Keep the camera framed at the beam while moving the cast out of the probe.
-    player.x=18*TILE;G.enemies=[];G.statics=[];G.parts=[];G.projs=[];
+    player.x = 18 * TILE; G.enemies = []; G.statics = []; G.parts = []; G.projs = [];
     const x = cv.getContext('2d');
-    const rd = (sx, sy) => {
-      // The scene is projected after drawing; probe the beam's screen position.
-      sx = worldScreenX(sx + camSX()); sy = worldScreenY(sy + camSY());
-      const d = x.getImageData(Math.round(sx * cv.width / 960), Math.round(sy * cv.height / 540), 1, 1).data;
-      return [d[0], d[1], d[2]];
-    };
-    // the middle of the shaft, and the same height well outside it
-    const cxr = (F.tx0 + F.tx1) / 2 * TILE - camSX();
-    // where the beam actually lands, read from the same expression that draws
-    // it rather than eyeballed off a screenshot — the first version of this
-    // sampled 46 px above the pool and reported it missing
-    const support = groundColumnAt((F.tx0 + F.tx1) / 2 * TILE);
-    const landY = (support ? support[0] : G.roomDef.h * TILE * 0.86) - camSY();
-    // THE POOL IS READ AS A PATCH, NOT A PIXEL. One sample at the landing point
-    // is a coin toss: the pool is an ellipse about a tile tall whose alpha
-    // breathes, the camera settles a few pixels differently per run, and the
-    // backdrop under it is lazily fetched art. All three move the one pixel in
-    // and out of the glow, which is why this check passed and failed on the same
-    // build within a minute of itself. Averaging the patch the pool actually
-    // covers measures the pool instead of the luck.
-    const rdBox = (sx, sy, w, h) => {
-      sx = worldScreenX(sx + camSX()); sy = worldScreenY(sy + camSY());
-      const kx = cv.width / 960, ky = cv.height / 540;
-      const x0 = Math.max(0, Math.round((sx - w / 2) * kx)), y0 = Math.max(0, Math.round((sy - h / 2) * ky));
-      const ww = Math.max(1, Math.round(w * kx)), hh = Math.max(1, Math.round(h * ky));
-      const d = x.getImageData(x0, y0, ww, hh).data;
-      let r = 0, g = 0, bl = 0;
-      for (let q = 0; q < ww * hh; q++) { r += d[q * 4]; g += d[q * 4 + 1]; bl += d[q * 4 + 2]; }
-      return [r / (ww * hh), g / (ww * hh), bl / (ww * hh)];
-    };
-    const shot = () => {
-      draw(performance.now());
-      return { in: rd(cxr, 150), out: rd(cxr - 300, 150), land: rdBox(cxr, landY, 120, 28) };
-    };
-    // Compare the same breathing-light instant and deterministic particles.
-    const realNow=performance.now,realRand=Math.random;
-    performance.now=()=>0;Math.random=()=>0.5;
-    const on = shot();
-    const keep = FRONTIER.A3; delete FRONTIER.A3;
-    const off = shot();
-    FRONTIER.A3 = keep;
-    G.artProbe = 1;
-    const probed = shot();
-    G.artProbe = 0;
-    // ...and the probe is judged over the whole breathing cycle, at the phase
-    // where the pool is strongest. Frozen at one instant the light can be at the
-    // bottom of its breath, where there is nothing for the probe to remove and
-    // "the probe did not dim it" is indistinguishable from "it was not lit".
-    let minimumGain=Infinity, poolBest=0;
-    for(const ms of [0,2000,4000,8000,12000,16000,24000]) {
-      performance.now=()=>ms;
-      const a=shot();delete FRONTIER.A3;const b=shot();FRONTIER.A3=keep;
-      minimumGain=Math.min(minimumGain,a.in.reduce((n,v,i)=>n+v-b.in[i],0)/3);
-      G.artProbe = 1; const pr = shot(); G.artProbe = 0;
-      const drop = (a.land[0]+a.land[1]+a.land[2])/3 - (pr.land[0]+pr.land[1]+pr.land[2])/3;
-      if (drop > poolBest) poolBest = drop;
-    }
-    performance.now=realNow;Math.random=realRand;
-    return { on, off, probed, minimumGain, poolBest, cxr: Math.round(cxr) };
+    const box = () => { const d = x.getImageData(0, 0, cv.width, Math.round(cv.height * 0.8)).data; let s = 0; for (let i = 0; i < d.length; i += 16) s += d[i] + d[i + 1] + d[i + 2]; return s; };
+    const realNow = performance.now, realRand = Math.random;
+    performance.now = () => 0; Math.random = () => 0.5;
+    draw(0); const on = box();
+    const keep = window.drawFrontier; window.drawFrontier = function () {};
+    draw(0); const off = box();
+    window.drawFrontier = keep;
+    performance.now = realNow; Math.random = realRand;
+    const ex = ROOMS.A3.exits || {};
+    let ledges = 0;
+    for (const y of [3, 6, 9]) for (let tx = 18; tx <= 28; tx++) if (G.grid[y][tx] === '=') ledges++;
+    return { frontier: Object.keys(FRONTIER), diff: Math.abs(on - off), up: !!ex.T, ledges };
   });
-  const lum = (p) => (p[0] + p[1] + p[2]) / 3;
-  const gain = lum(lit.on.in) - lum(lit.off.in);
-  const blueGain = (lit.on.in[2] - lit.off.in[2]) - (lit.on.in[0] - lit.off.in[0]);
-  check('the light is actually visible in the frame', gain > 30,
-        'shaft adds ' + Math.round(gain) + ' brightness (' + lit.off.in.join(',')
-        + ' -> ' + lit.on.in.join(',') + ')');
-  check('the frontier stays readable through its breathing cycle',lit.minimumGain>30,
-        'minimum gain '+lit.minimumGain.toFixed(1)+' across seven light phases');
-  check('...and it is the NEXT kingdom\'s colour, not this one\'s', blueGain > 12,
-        'blue gains ' + Math.round(blueGain) + ' more than red');
-  // A SHAFT IS A LOCAL THING. Comparing absolute brightness inside the beam
-  // against a point beside it does not test that — the backdrop is painted, and
-  // the spot 300 px to the left is a lit building. What has to be true is that
-  // the LIGHT WE ADDED is local: switching the frontier off must change the
-  // pixel inside the beam and leave the one outside it alone.
-  const gainOut = lum(lit.on.out) - lum(lit.off.out);
-  check('...and it is the shaft, not the whole room getting brighter',
-        gain > gainOut * 3 + 10,
-        'adds ' + Math.round(gain) + ' inside the beam, ' + Math.round(gainOut) + ' beside it');
-  check('the pool on the floor obeys the art probe',
-        lit.poolBest > 1,
-        'the probe takes ' + lit.poolBest.toFixed(2) + ' luminance off the landing patch at the '
-        + 'brightest phase of the breath (one-instant reading: probe '
-        + lum(lit.probed.land).toFixed(1) + ' vs normal ' + lum(lit.on.land).toFixed(1) + ')');
+  check('no light is drawn over the camp: the frame is the same with the frontier code and without it',
+        dark.diff === 0 && dark.frontier.indexOf('A3') < 0, 'difference ' + dark.diff + ', frontier rooms [' + dark.frontier.join(',') + ']');
+  check('...and the climb over the camp is gone from the robot story: no way up, no ledges up to it',
+        !dark.up && dark.ledges === 0, 'way up ' + dark.up + ', ledges ' + dark.ledges);
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();

@@ -221,28 +221,30 @@ const check = (name, ok, detail) => {
       out.blocked = { room: G.roomId, minCentre: Math.round(minY) };
     }
     // ---- 4b. a CLOSED story gate is not a seamless shaft ----------------------
-    // A3 -> B1 waits on NULLFANG and the blade. With the gate shut, the room
+    // A8 -> A9 (the climb to the bell) waits on the blade. With the gate shut, the room
     // above must be neither a handover nor a floor: rising through the hole
-    // ends back in A3, never standing on B1's floor outside both rooms.
+    // ends back in A8, never standing on A9's floor outside both rooms.
+    // (It was A3 -> B1 until 2026-11-25; in the robot story that climb is gone — NULLFANG's
+    // door is the way to the Conduits, js/k2door.js — and A8's is the story gate on a shaft.)
     {
-      const keep = { g: G.save.flags.bossGlitch, c: G.save.flags.crystal, v: G.save.visited && G.save.visited.B1 };
-      G.save.flags.bossGlitch = 0; G.save.flags.crystal = 0; if (G.save.visited) delete G.save.visited.B1;
-      loadRoom('A3'); G.state = 'PLAY'; G.enemies = []; G.boss = null;
+      const keep = { g: G.save.flags.bossGlitch, c: G.save.flags.crystal, ch: G.save.flags.bossChime, v: G.save.visited && G.save.visited.A9 };
+      G.save.flags.bossGlitch = 0; G.save.flags.crystal = 0; G.save.flags.bossChime = 0; if (G.save.visited) delete G.save.visited.A9;
+      loadRoom('A8'); G.state = 'PLAY'; G.enemies = []; G.boss = null;
       const L = G.vlink && G.vlink.T;
       const seam = !!vlinkSeamless('T');
       let solidAbove = 0;
-      if (L) for (let x = 0; x < ROOMS.A3.w; x++) for (let y = -6; y < 0; y++) { const ch = vlinkTile(x, y); if (ch === '#' || ch === 'B') solidAbove++; }
+      if (L) for (let x = 0; x < ROOMS.A8.w; x++) for (let y = -6; y < 0; y++) { const ch = vlinkTile(x, y); if (ch === '#' || ch === 'B') solidAbove++; }
       const g = G.grid; let cx = -1;
-      for (let x = 1; x < ROOMS.A3.w - 1; x++) if (g[0][x] === '.') { cx = x; break; }
-      let room = 'A3', minY = 1e9, stood = false;
+      for (let x = 1; x < ROOMS.A8.w - 1; x++) if (g[0][x] === '.') { cx = x; break; }
+      let room = 'A8', minY = 1e9, stood = false;
       if (cx >= 0) {
         player.x = cx * TILE + 4; player.y = TILE + 2; player.vy = -1100; player.on = false; player.iT = 99;
         step(90, () => { G.enemies = []; minY = Math.min(minY, player.y); if (player.on && player.y < 0) stood = true; return false; });
         room = G.roomId;
       }
       out.gate = { link: !!L, seam, solidAbove, room, stood, opening: cx };
-      G.save.flags.bossGlitch = keep.g; G.save.flags.crystal = keep.c; if (keep.v && G.save.visited) G.save.visited.B1 = keep.v;
-      loadRoom('A3');
+      G.save.flags.bossGlitch = keep.g; G.save.flags.crystal = keep.c; G.save.flags.bossChime = keep.ch; if (keep.v && G.save.visited) G.save.visited.A9 = keep.v;
+      loadRoom('A8');
       out.gate.openSeam = !!vlinkSeamless('T');
     }
     // ---- 5. the room above is drawn -------------------------------------------
@@ -277,7 +279,7 @@ const check = (name, ok, detail) => {
   });
 
   // ---- report -----------------------------------------------------------------
-  check('every way up in the world is listed', r.count === 27, r.count + ' T exits');   // (+ the Mire: SW2 -> SW4, and the two drops' holes, SW5 -> SW1, SW3 -> SW2)
+  check('every way up in the world is listed', r.count === 26, r.count + ' T exits');   // (+ the Mire: SW2 -> SW4, and the two drops' holes, SW5 -> SW1, SW3 -> SW2; - A3 -> B1, NOSTOS's only since 2026-11-25)
   for (const row of r.table) {
     const tag = row.id + ' -> ' + row.up;
     check(tag + ': a ledge from every column she can rise through',
@@ -309,8 +311,8 @@ const check = (name, ok, detail) => {
   }
   check('an uncut hatch overhead is a ceiling, not a door', r.blocked.room === 'A7' && r.blocked.minCentre >= -2,
     'still in ' + r.blocked.room + ', centre never above ' + r.blocked.minCentre);
-  check('a closed story gate (A3 -> B1) is no seamless shaft and no floor above',
-    r.gate && r.gate.link && !r.gate.seam && r.gate.solidAbove === 0 && r.gate.room === 'A3' && !r.gate.stood && r.gate.openSeam,
+  check('a closed story gate (A8 -> A9) is no seamless shaft and no floor above',
+    r.gate && r.gate.link && !r.gate.seam && r.gate.solidAbove === 0 && r.gate.room === 'A8' && !r.gate.stood && r.gate.openSeam,
     r.gate ? ('seamless ' + r.gate.seam + ', solid tiles above ' + r.gate.solidAbove + ', ended in ' + r.gate.room +
       (r.gate.stood ? ', STOOD ABOVE THE FRAME' : '') + ', seamless once open ' + r.gate.openSeam) : 'not run');
   check('the room above is drawn above the room', r.drawn.differs && r.drawn.camY < 0,
