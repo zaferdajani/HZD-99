@@ -26,10 +26,10 @@ const FIGHTS = [
     // bite: they hurt, and their wind-ups are wind-ups — counting them as OPEN time
     // measured his own attacks as gifts he handed her. bitestop, after the bite, is
     // a real opening and stays OPEN.)
-    hurt: ['swipe', 'pounce', 'dive', 'rake', 'rear', 'swat', 'bite'],
+    hurt: ['swipe', 'pounce', 'dive', 'rake', 'swat', 'bite'],
     // the roar cannot hurt her (it shoves and summons; its floor shocks travel on
     // their own), so it is OPEN time
-    tell: ['swipewarn', 'crouch', 'springwarn', 'nullcharge', 'perch', 'nullhop', 'rakewarn', 'rearwarn', 'swatwarn', 'bitewarn', 'spitwarn'],
+    tell: ['swipewarn', 'crouch', 'springwarn', 'nullcharge', 'perch', 'nullhop', 'rakewarn', 'swatwarn', 'bitewarn', 'spitwarn'],
     // a move whose opening is allowed past 900: the once-per-fight set piece
     gift: ['pounce>nullend'],
     // the null field's own chain: pounce, hop, pounce, hop, pounce -> nullend. The

@@ -424,7 +424,7 @@ async function worldGraph() {
       const d = ROOMS[id], ex = d.exits || {}, links = [];
       for (const k of ['L', 'R', 'T', 'B']) if (ex[k]) links.push({ via: k, to: typeof ex[k] === 'object' ? ex[k].to : ex[k], flag: typeof ex[k] === 'object' ? (ex[k].flag || null) : null, or: typeof ex[k] === 'object' ? (ex[k].or || null) : null });
       let ds = []; try { ds = gateDoorsAll(id); } catch (e) { }
-      for (const g of ds) links.push({ via: 'door', to: g.to, need: g.need || null, at: g.at });
+      for (const g of ds) links.push({ via: 'door', to: g.to, need: g.need || g.lock || null, at: g.at });   // a locked ring is a closed door (A4's waits for NULLFANG)
       out[id] = links;
     }
     return out;
