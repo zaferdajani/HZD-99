@@ -657,6 +657,7 @@ const MEDIA_SRC = {
     platforms: 'assets/tiles/platforms.webp',
     // PLATFORMS AS OBJECTS (ART_QUEUE §2bt): three whole decks a zone, cut by tools/platobj.cjs
     platObjA: 'assets/tiles/platobj_a.webp',
+    platPalmA: 'assets/tiles/platpalm_a.webp',   // the meadow's ledges: small metal palms (tools/palmcut.py)
     platObjX: 'assets/tiles/platobj_x.webp',
     platObjB: 'assets/tiles/platobj_b.webp',
     strataRubble: 'assets/backgrounds/strata_rubble.jpg',

@@ -706,3 +706,13 @@ describe it.
   98264269; the arena's `clump_a` given for MATERIAL only): a tall weeping tree, a low wide thicket,
   a bent broken clump. The owner: "you only added two trees ... adding more different shapes of
   trees ... that covers the whole space". Split into `characters/cover/clump_c/d/e.webp`.
+
+## `platforms/palms_a.webp` — the meadow's ledges as small metal palms (2026-11-25)
+
+- Three small metal palms on one sheet (GPT Image 2.6, high, 2K, transparent; job f03d9fbf; the
+  arena's `nfcover/clump_a` given for MATERIAL only): narrow, medium and wide crowns, each level on
+  top so a body can stand on it, on a short ringed trunk. The owner: "for hanging platforms, change
+  its shape. It's just a straight line instead of an actual standing place. It can be like a small
+  palm that we can jump on". `tools/palmcut.py` cuts and measures them into `tiles/platpalm_a.webp`
+  (crown top, crown bottom, trunk centre and width, foot); `js/game.js` drawPlatPalm stands one or
+  more on every meadow ledge, trunks down to the ground.

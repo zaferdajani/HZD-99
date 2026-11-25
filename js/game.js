@@ -5529,9 +5529,13 @@ function paintFringe(x, W, H) {
     return isNaN(v) ? null : v;
   };
   const solid = ch => ch === '#' || ch === '=' || ch === 'B';
+  // a ledge that is a palm's crown grows no lawn on top (js/game.js drawPlatPalm): a strip of grass
+  // along it was the straight line again
+  const PS = typeof platObjSet === 'function' ? platObjSet() : null, palmDecks = !!(PS && PS.palm);
   for (let ty = 0; ty < g.length; ty++) for (let tx = 0; tx < g[0].length; tx++) {
     const ch = tileAt(tx, ty);
     if (!solid(ch)) continue;
+    if (ch === '=' && palmDecks) continue;
     const up = ty === 0 ? fringeLid(tx) : tileAt(tx, ty - 1);
     if (solid(up) || up === '^' || up === 'v') continue;   // buried, or wearing a hazard
     const X = tx * TILE, Y = ty * TILE;
@@ -7727,7 +7731,17 @@ function drawDeck(cx2, X, Y, RW, DH, variant) {
 // one is the long one three-sliced. Zones without a set keep the old deck.
 const PLAT_OBJ_SLAB = 22;
 const PLAT_OBJ = {
-  A: { key: 'platObjA', p: [{ x: 2, y: 2, w: 155, h: 79, top: 19, slab: 44 }, { x: 2, y: 83, w: 345, h: 78, top: 18, slab: 42 }, { x: 2, y: 163, w: 546, h: 82, top: 20, slab: 44 }] },
+  // THE MEADOW'S LEDGES ARE SMALL PALMS (owner, 2026-11-25: "for hanging platforms, change its shape.
+  // It's just a straight line instead of an actual standing place. It can be like a small palm that we
+  // can jump on, or a small tree that we can jump on"). Three metal palms, narrow, medium and wide
+  // crown, level on top (assets/source/platforms/palms_a.webp, Higgsfield, cut by tools/palmcut.py):
+  // `top` the row her feet stand on, `cb` the crown's bottom (only trunk below it), `tx0`/`tx1` the
+  // trunk's centre under the crown and at its foot, `tw` its width, `foot` its last row. A run is one
+  // palm, or two or three side by side with their crowns touching, and every trunk goes down to the
+  // ground under it (drawPlatPalm). (The wreck-deck slab, platobj_a, was the line he refused.)
+  A: { key: 'platPalmA', palm: [{ x: 2, y: 2, w: 162, h: 270, top: 3, cb: 110, tx0: 82.3, tx1: 85.5, tw: 54, foot: 269 },
+    { x: 2, y: 274, w: 277, h: 270, top: 3, cb: 122, tx0: 139.1, tx1: 147.0, tw: 53, foot: 269 },
+    { x: 2, y: 546, w: 420, h: 271, top: 3, cb: 132, tx0: 216.2, tx1: 191.5, tw: 51, foot: 270 }] },
   X: { key: 'platObjX', p: [{ x: 2, y: 2, w: 142, h: 80, top: 14, slab: 44 }, { x: 2, y: 84, w: 349, h: 85, top: 14, slab: 44 }, { x: 2, y: 171, w: 534, h: 95, top: 16, slab: 47 }] },
   B: { key: 'platObjB', p: [{ x: 2, y: 2, w: 151, h: 48, top: 0, slab: 44 }, { x: 2, y: 52, w: 306, h: 48, top: 0, slab: 43 }, { x: 2, y: 102, w: 434, h: 48, top: 0, slab: 43 }] },
 };
@@ -7742,8 +7756,75 @@ function platObjReady(S) {
   const im = MEDIA_IMG[S.key];
   return !!(im && im.naturalWidth);
 }
+// the crown's thickness a palm ledge is drawn at, and the most palms one run is split into
+const PLAT_PALM = { crown: 50, most: 4, sink: 6, reach: 9 };
+// the ground under x, below row ty (the first solid tile down, on the surface curve where it is there)
+function platGroundBelow(x, ty) {
+  const g = G.grid, tc = Math.floor(x / TILE);
+  if (!g || tc < 0 || tc >= g[0].length) return null;
+  const H = g.length;
+  for (let yy = ty + 1; yy < H; yy++) {
+    const ch = g[yy][tc];
+    if (ch === '#' || ch === 'B') {
+      const gc = typeof groundColumnAt === 'function' ? groundColumnAt(x) : null;
+      const gy = gc ? Math.min(gc[0], gc[1]) : NaN;
+      return (gy > yy * TILE - TILE - 2 && gy < yy * TILE + TILE) ? gy : yy * TILE;
+    }
+  }
+  return null;
+}
+// one run of the meadow's ledge, X..X+RW, her feet at Y: palms side by side, crowns touching
+function drawPlatPalm(p2, S, X, Y, RW, ty) {
+  const im = MEDIA_IMG[S.key];
+  let best = null;
+  for (const P of S.palm) for (let n = 1; n <= PLAT_PALM.most; n++) {
+    const k = (RW / n) / P.w, th = (P.cb - P.top) * k;
+    const cost = Math.abs(th - PLAT_PALM.crown) + (n - 1) * 6;
+    if (!best || cost < best.cost) best = { P, n, k, cost };
+  }
+  const { P, n, k } = best, out = [];
+  for (let i = 0; i < n; i++) {
+    const cx = X + (i + 0.5) * RW / n, x0 = cx - P.w * k / 2;
+    const top = Y - P.top * k;
+    // THE TRUNK goes down to the ground under it: never a tree hanging in the air
+    const tx = x0 + P.tx1 * k, yT = top + (P.cb - 6) * k;
+    const gy = platGroundBelow(tx, ty);
+    const nat = (P.foot - P.cb + 6) * k;
+    // (over a drop with no ground in the room, it is a broken palm: its trunk snapped off short,
+    // the break ragged — never a whole tree hanging in the air)
+    const stump = gy == null;
+    const L = !stump ? gy + PLAT_PALM.sink - yT : nat * 0.45;
+    const sx = Math.max(0, Math.min(P.tx0, P.tx1) - P.tw), sw = Math.min(P.w - sx, Math.abs(P.tx0 - P.tx1) + P.tw * 2);
+    const sy = P.y + P.cb - 6, sh = P.foot - P.cb + 6;
+    if (stump && L > 4) {
+      p2.save(); p2.beginPath();
+      const bx0 = x0 + sx * k, bw = sw * k, yb = yT + L;
+      p2.moveTo(bx0 - 2, yT - 2); p2.lineTo(bx0 + bw + 2, yT - 2);
+      for (let j = 0; j <= 6; j++) p2.lineTo(bx0 + bw - bw * j / 6, yb - ((j * 7 + 3) % 5) * 0.06 * L);
+      p2.closePath(); p2.clip();
+      p2.drawImage(im, P.x + sx, sy, sw, sh * 0.45, bx0, yT, bw, L);
+      p2.restore();
+    } else if (L > 4) {
+      if (L <= nat * 1.9) p2.drawImage(im, P.x + sx, sy, sw, sh, x0 + sx * k, yT, sw * k, L);
+      else {
+        // a long way down: its foot at its own height, the ringed trunk repeated above it
+        const fh = sh * 0.35, footD = fh * k, mid = sh - fh, midD = mid * k;
+        p2.drawImage(im, P.x + sx, sy + mid, sw, fh, x0 + sx * k, yT + L - footD, sw * k, footD);
+        let yy = yT + L - footD;
+        while (yy > yT + 0.5) { const d = Math.min(midD, yy - yT); p2.drawImage(im, P.x + sx, sy + mid - d / k, sw, d / k, x0 + sx * k, yy - d, sw * k, d); yy -= d; }
+      }
+    }
+    // THE CROWN, over its trunk: its level top on the line her feet stand on
+    p2.drawImage(im, P.x, P.y, P.w, P.cb, x0, top, P.w * k, P.cb * k);
+    out.push({ x0, x1: x0 + P.w * k, top: Y, cb: top + P.cb * k, tx, gy, trunkTop: yT, trunkBot: yT + Math.max(0, L) });
+  }
+  // (what was drawn, per room — a neighbour is baked ahead of her under its own id: tests/palm-ledges.cjs)
+  if (typeof G !== 'undefined') { const pp = G.palmProbe || (G.palmProbe = {}); (pp[G.roomId] = pp[G.roomId] || []).push({ X, RW, Y, ty, palms: out }); }
+  return out;
+}
 // one run, X..X+RW with its walking surface at Y
-function drawPlatObj(p2, S, X, Y, RW) {
+function drawPlatObj(p2, S, X, Y, RW, ty) {
+  if (S.palm) return drawPlatPalm(p2, S, X, Y, RW, ty);
   const im = MEDIA_IMG[S.key];
   let P = S.p[0], best = 1e9;
   for (const q of S.p) { const d = Math.abs(q.slab * RW / q.w - PLAT_OBJ_SLAB); if (d < best) { best = d; P = q; } }
@@ -7775,8 +7856,10 @@ function drawPlatObj(p2, S, X, Y, RW) {
 function platObjFinish(x) {
   const PO = platObjSet();
   if (!platObjReady(PO) || !G.grid) return;
+  if (G.palmProbe) G.palmProbe[G.roomId] = [];
   const g = G.grid, W = g[0].length, H = g.length;
   const solidCh = (ch) => ch === '#' || ch === 'B' || ch === '=';
+  const runs = [];
   for (let ty = 0; ty < H; ty++) {
     let tx = 0;
     while (tx < W) {
@@ -7797,10 +7880,13 @@ function platObjFinish(x) {
       let ys = [];
       if (typeof groundColumnAt === 'function') for (let px = X + 6; px < X + RW; px += 12) { const gc = groundColumnAt(px); if (gc) ys.push(Math.min(gc[0], gc[1])); }
       ys = ys.filter(v => v > Y - 20 && v <= Y + 2).sort((a, b) => a - b);
-      drawPlatObj(x, PO, X, ys.length ? ys[ys.length >> 1] : Y, RW);
+      runs.push([X, ys.length ? ys[ys.length >> 1] : Y, RW, ty]);
       tx = e + 1;
     }
   }
+  // ...and only when every run is cleared are they drawn: a palm's trunk passes behind the ledges
+  // under it, and clearing those after it was drawn cut its trunk in pieces
+  for (const r of runs) drawPlatObj(x, PO, r[0], r[1], r[2], r[3]);
 }
 let platCv = null, platCvKey = '';
 function drawPlatformRuns() {
