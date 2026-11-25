@@ -18,9 +18,9 @@ tell him anything is done.**
 |---|---|---|---|
 | 17× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" · "watching the leaves moves" · "scenes are cut one after the other" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` `nf-ambush` `filmflow` · skill `creature-motion-combat` |
 | 12× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" · "a place where the lion goes inside and hide" · "you only added two trees" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` `nf-ambush` |
+| 8× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass painted, edgeless, bending under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" · "squares stuck together" · "just a straight line" | `seam` `ring-pads` `fired-art` `grass` `palm-ledges` · skill `terrain-doors` |
 | 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
 | 7× | **A door is an object that leads somewhere new; in a floor, a hole in broken ground; one ring to a frame, nothing in it** | "neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" · "a hole in the ground" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` `sewer` |
-| 7× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass painted, edgeless, bending under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" · "squares stuck together" | `seam` `ring-pads` `fired-art` `grass` · skill `terrain-doors` |
 | 6× | **An enemy is HEARD over the score, on a phone, as a real animal or a real material — recorded, never oscillators, never the same hit twice; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" · "why arent you looking for free libraries for voices ???" · "download from any library of a lion roar" | `voice-heard` `whatplays` `media-container` `hit-voices` `nf-phase2` |
 | 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
 | 5× | **No light, rim, halo, outline or ring round any body; no comic devices over the fight** (white-out, action lines) | "Why still framed with light ?!!!" · "remove the ring" · "more like a comic effect than an actual game effect" | `contrast` `fired-art` `no-rim-baked` `pet-motion` `purify-stage` `no-body-light` `no-comic-fx` |
@@ -80,7 +80,7 @@ you're selling" · "I'm looking for your honest description."
   Built pages are never hand-merged: rebuild.
 - **Standing deployment authorization** (2026-09-07): completed, verified
   updates may be published to `main` and mirrored to `odyssey`.
-- **Live: https://zaferdajani.github.io/HZD-99/** — the only URL to quote and check.
+- **Live:** https://zaferdajani.github.io/HZD-99/ — the only URL to quote.
 - **Story**: `docs/STORY_CANON.md` overrides older text. **Studio**: VibeSolutions,
   one constant `STUDIO` (js/game.js, build.cjs), never an i18n key.
 - **Art**: through Higgsfield; archived in `assets/source/` in the same commit;
@@ -100,7 +100,7 @@ node tests/run.cjs saw wake    # some
 npm run app:pack               # assemble www/ for the native shell
 ```
 
-Three things that bite:
+What bites:
 
 - `build.cjs` **concatenates** `js/*.js`: two files declaring one `const` is a
   black page. `node --check js/<file>.js`, then build.
@@ -118,7 +118,7 @@ Three things that bite:
 | change a room, platform, door, gate or ceiling | skill `terrain-doors` |
 | edit `js/` or `tools/`, or find where something lives | skill `engine-map` |
 | add an asset, or change how one reaches a device | skill `platform-delivery`, `docs/DELIVERY.md` |
-| touch a character's art, or generate anything | skills `art-bible`, `art-prompts`; `ART_BIBLE.md` |
+| touch character art, or generate | skills `art-bible`, `art-prompts`; `ART_BIBLE.md` |
 | give a character a new move | skill `rig-animation` |
 | build or tune a fight | skills `combat-design`, `boss-movegen`, `boss-openings`, `boss-patterns` |
 | know what an order of his says, and why | `docs/OWNER_ORDERS.md` |

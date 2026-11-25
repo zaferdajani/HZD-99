@@ -3,7 +3,7 @@
 // can jump on, or a small tree that we can jump on, something like that. Because it's these old
 // platforms in this situation is out of character."
 // Measured on the baked terrain layer itself (pixels, not tables), in NULLFANG's arena A4 and in
-// A1, A2 and A3:
+// A1, A2 and A8 (A3's climb is gone since the door to Kingdom 2):
 //   A  every one-way run ('=') in the room is drawn as palms (js/game.js drawPlatPalm), none as the
 //      old wreck-deck slab (platObjA is never drawn)
 //   B  the crown's top is where her feet stand: the first solid row over the middle of the run is
@@ -31,7 +31,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     const D0 = CanvasRenderingContext2D.prototype.drawImage; let slab = 0;
     CanvasRenderingContext2D.prototype.drawImage = function (im) { if (im && MEDIA_IMG.platObjA && im === MEDIA_IMG.platObjA) slab++; return D0.apply(this, arguments); };
     const out = {};
-    for (const room of ['A4', 'A1', 'A2', 'A3']) {
+    for (const room of ['A4', 'A1', 'A2', 'A8']) {   // (A3's climb is gone since the door to Kingdom 2, 2026-11-25: A8 stands in for it)
       G.palmProbe = {};
       loadRoom(room); G.state = 'PLAY'; G.dialog = null;
       let T = performance.now();
@@ -77,7 +77,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     return { rooms: out, slab };
   });
   const rooms = Object.entries(R.rooms);
-  check('A  every ledge run in A4, A1, A2, A3 is drawn as palms, and the old slab never', rooms.every(([, r]) => r.got === r.want && r.want > 0) && R.slab === 0, { rooms: Object.fromEntries(rooms.map(([k, r]) => [k, r.got + '/' + r.want])), slab: R.slab });
+  check('A  every ledge run in A4, A1, A2, A8 is drawn as palms, and the old slab never', rooms.every(([, r]) => r.got === r.want && r.want > 0) && R.slab === 0, { rooms: Object.fromEntries(rooms.map(([k, r]) => [k, r.got + '/' + r.want])), slab: R.slab });
   check('B  the crown\'s top is where her feet stand (within 4 px)', rooms.every(([, r]) => r.topOff <= 4), Object.fromEntries(rooms.map(([k, r]) => [k, r.topOff])));
   check('C  the crown spans the run (solid across >= 90%)', rooms.every(([, r]) => r.span >= 0.9), Object.fromEntries(rooms.map(([k, r]) => [k, r.span])));
   check('D  every trunk reaches the ground (>= 95% solid down it, foot within 8 px of the ground)', rooms.every(([, r]) => r.trunk >= 0.95 && r.foot <= 8), Object.fromEntries(rooms.map(([k, r]) => [k, { trunk: r.trunk, foot: r.foot }])));
