@@ -194,6 +194,10 @@ function hurtBoxOf(e) {
     return { x: cx2 - w / 2, y: e.y + e.h / 2 - h / 2, w, h };
   }
   if (e.kind === 'horn' && typeof ghHurtBox === 'function') return ghHurtBox(e);   // GRAVEHORN: barrel, head and horns
+  if (e.kind === 'guard') {             // THE ARMOURED WALKER: its whole drawn height, plate to crown
+    const w = e.w * 1.2, h = e.h * 1.8; // (assets/bodybox.json: drawn 113 wide, 124 tall on its 90 x 66)
+    return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
+  }
   if (e.kind === 'zero') {              // GLACIERE: the drawn unicorn, horn to tail
     const w = e.w * 1.5, h = e.h * 1.9;
     return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
@@ -255,7 +259,10 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty, move) {
   if (e.guard) {
     const ecx = e.x + e.w / 2, dir = e.dir || 1;
     const fromFront = (Math.sign(x - ecx) || dir) === dir;
-    const fromAbove = y < e.y + e.h * 0.3;
+    // (above the plate means above the drawn plate: the armoured walker is
+    // drawn taller than its body, and its plate is as tall as it is drawn)
+    const hbG = hurtBoxOf(e);
+    const fromAbove = y < hbG.y + hbG.h * 0.3;
     if (fromFront && !fromAbove) {
       burst(x, y, 7, '#cfe0f0', 190, 0.3, 60, 2.2, true);
       if (typeof sfx === 'function') sfx('bosshit');

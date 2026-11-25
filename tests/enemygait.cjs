@@ -337,9 +337,12 @@ const { chromium } = require('playwright');
     const out = {};
     for (const kind of ['guard']) {
       const e = mk(kind);
-      e.walkD = 37; e.anim = 1.0; const a = shot(e);
+      // (distances in its own strides: a body built bigger — the shield-walker,
+      // sizeK — takes a longer step, js/sight.js / GUARD)
+      const sk = e.sizeK || 1;
+      e.walkD = 37 * sk; e.anim = 1.0; const a = shot(e);
       e.anim = 4.3; const b = shot(e);
-      e.anim = 1.0; e.walkD = 49; const d = shot(e);
+      e.anim = 1.0; e.walkD = 49 * sk; const d = shot(e);
       out[kind] = { sameDistOtherTime: diff(a, b), otherDistSameTime: diff(a, d), lit: a.filter((v, i) => i % 4 === 3 && v > 40).length };
     }
     // standing still stands still: no distance, the clock running

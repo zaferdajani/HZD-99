@@ -80,7 +80,8 @@ function wolfFrame(e, dt) {
   if (e.kind === 'hopper' && !e.dead && !e.disabled && typeof player !== 'undefined' && player
       && !(typeof packTamed === 'function' && packTamed())) {
     const near = !player.dead && Math.abs(player.x + player.w / 2 - e.x - e.w / 2) < 380
-      && Math.abs(player.y + player.h / 2 - e.y - e.h / 2) < WOLF_HUNT.loseY;
+      && Math.abs(player.y + player.h / 2 - e.y - e.h / 2) < WOLF_HUNT.loseY
+      && (typeof foeLOS !== 'function' || foeLOS(e, dt, player.x + player.w / 2, player.y + player.h / 2, e.x + e.w / 2));
     if (near && !e.hunt) {
       e.hunt = 1;
       if (!((e.snarlCD || 0) > 0) && e.on !== false && !((e.crouchT || 0) > 0)) {
@@ -145,7 +146,9 @@ function huntGround(e, want, reach) {
 function wolfHunt(e, dt, px, py, cx, cy) {
   if (!wolfHunter(e) || player.dead) { e.hunt = 0; e.huntHold = false; return 0; }
   const H = WOLF_HUNT, dx = px - cx, ad = Math.abs(dx), dy = Math.abs(py - cy);
-  const sees = e.hunt ? (ad < H.lose && dy < H.loseY) : (ad < H.see && dy < H.seeY);
+  // ...and never through rock: the hunt sees along the open air (js/sight.js)
+  const sees = (e.hunt ? (ad < H.lose && dy < H.loseY) : (ad < H.see && dy < H.seeY))
+    && (typeof foeLOS !== 'function' || foeLOS(e, dt, px, py, cx));
   if (!e.hunt) {
     if (!sees) { e.huntHold = false; return 0; }
     e.hunt = 1; e.lostT = 0;

@@ -159,3 +159,32 @@ hips sunk 42 % of leg height on folded legs, weight rocked back 0.16 rad;
 |---|---|---|---|
 | The open-window ring (plate down) | `TELL_COL` amber, pulsing on the wall clock | pale plate steel `#e4f0fb`, on the simulation clock, off under `G.artProbe` | **registry §2, hard rule 1**: amber is on screen only while something winds up. This ring says the opposite ("open — hit it now"), and the bible's hue law measured the guard's recovery at 24.5 % amber against a 7.6 % rest |
 
+
+**The armoured walker (2026-11-25, owner: "I don't want this small hero. This
+should be a big one. It looks like an armored one that walks. Seeing me should
+activate it, make it come to me").** Built `GUARD.size` (3.0) times its measured
+30×22 the way a cave cat is built `CAT_SIZE` times a crawler (`sizeK`: body,
+walls from `assets/bodybox.json`, hurt box and drawing together). Its hurt box
+is its whole drawn height (`hurtBoxOf`, js/types.js), and "from above" means
+above the drawn plate. It looks before it comes (js/sight.js). Measured by
+`tests/enemy-sight.cjs` and `tests/foescale.cjs`.
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| body | 30×22 | **90×66** | drawn ~126 px against her ~71 (0.77× → ~1.8×) |
+| hurt box | the body | **108×119**, feet-anchored | a blow on the drawn body lands |
+| hp | 44 | **90** | an armoured body; the longer window pays for it |
+| patrol speed | 52 | **38** px/s | heavy and deliberate; 1.4× that when it comes for her |
+| stride | 48 px a cycle | **144** px a cycle | its step is its size's, or its feet skate |
+| tell (`coilT`) | 350 (`TELL_FAST`) | **500** (`TELL_SWIPE`, `tellmid`) | a heavy body's wind-up is longer, never shorter |
+| bash | spd×4.2 for 220+iq×60 ms (~50 px) | spd×4.2×**2** (~80 px) | the reach of a body three times the size |
+| winded | max(500, 750 − iq×220) | **+200 ms** | the window grows with the hp |
+| armed band | 160 × 70 px | **210 × 90** | out from its wider front and taller middle |
+| the open-window ring round the body | pale steel ring | **removed** | the ledger: no ring round any body. The opening is the plate coming down and the body slumping (`ATLAS_POSE.winded`) |
+| the drawn stand-in plate beside it | a 6 px bar, always | **only while its art is not in** | the fired body holds its own plate as tall as it is; the bar was a stub at its shins |
+| awareness | none: it walked its beat until she was inside 160 px | **sees** her in front of it inside 300 px, not through rock; turns, stands 0.7 s and sets its plate down (`notice_guard`, a recorded plate take); comes along the ground, holding at an edge or a wall; forgets her 3 s after losing her | the owner's order |
+
+Art: the turntable (`npc_6yaw` row 6, 300×390 cells) and the walk strip
+(`guard_walk8`, 192 px cells) are drawn DOWN at this size (~126 and ~125 px),
+so nothing blurs. What it lacks is a fired plate-lowered / winded take: the open
+window is read from the puppet's slump only (docs/ART_QUEUE.md).

@@ -50,7 +50,8 @@ const check = (name, ok, detail) => {
     const ecx = e.x + e.w / 2, ecy = e.y + e.h / 2;
     let hp = e.hp; dealDmg(e, 20, null, ecx - 20, ecy, true); out.frontDenied = hp - e.hp;
     hp = e.hp; dealDmg(e, 20, null, ecx + 20, ecy, true); out.behindLanded = hp - e.hp;
-    hp = e.hp; dealDmg(e, 20, null, ecx - 4, e.y - 6, true); out.aboveLanded = hp - e.hp;
+    // (above its DRAWN plate: the shield-walker is drawn taller than its body, hurtBoxOf)
+    hp = e.hp; dealDmg(e, 20, null, ecx - 4, hurtBoxOf(e).y - 6, true); out.aboveLanded = hp - e.hp;
     // the window after its lunge, at full cunning
     e.iq = 1; e.lungeT = 0.01; e.windedT = 0; e.coilT = 0; e.hp = 100;
     player.x = ecx - 300; floor();

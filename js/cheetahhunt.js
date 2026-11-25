@@ -107,7 +107,9 @@ function catHunt(e, dt, px, py, cx, cy) {
     if (e.skidT <= 0) { e.vx = 0; e.dir = Math.sign(dx) || e.dir; e.landT = 0; }
     return 2;
   }
-  const sees = e.hunt ? (ad < H.lose && dy < H.loseY) : (ad < H.see && dy < H.seeY);
+  // ...and never through rock: the hunt sees along the open air (js/sight.js)
+  const sees = (e.hunt ? (ad < H.lose && dy < H.loseY) : (ad < H.see && dy < H.seeY))
+    && (typeof foeLOS !== 'function' || foeLOS(e, dt, px, py, cx));
   if (!e.hunt) {
     if (!sees) { e.huntHold = false; return 0; }
     e.hunt = 1; e.lostT = 0; e.frozeT = 0; e.dir = Math.sign(dx) || e.dir || 1;

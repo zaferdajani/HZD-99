@@ -62,8 +62,9 @@ function solidBox(e) {
   const T = (typeof window !== 'undefined' && window.BODY_BOX && !(typeof isHero === 'function' && isHero()))
     ? window.BODY_BOX[((typeof Boss !== 'undefined' && e instanceof Boss) ? 'boss:' : '') + e.kind] : null;
   // only for the hurt box that was measured: a body that resizes itself is its own box
-  // (...or the measured kind scaled whole — a cave cat, sizeK — whose art grew with it)
-  const sk = e.sizeK || 1;
+  // (...or the measured kind scaled whole — a cave cat, sizeK — whose art grew with it;
+  // a kind measured AT its built size — the shield-walker — is its own row as it stands)
+  const sk = T && T.w === e.w && T.h === e.h ? 1 : (e.sizeK || 1);
   if (T && Math.round(T.w * sk) === e.w && Math.round(T.h * sk) === e.h) {
     half += clamp((Math.min(T.l, T.r) * sk - half) * 0.75, 0, SOLID.pad);
     top += clamp((T.top * sk - e.h) * 0.6, 0, SOLID.lift);

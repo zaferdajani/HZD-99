@@ -335,6 +335,7 @@ const SUITE = [
   ['soar',      'Volt Soar: UP + claw on the ground, six tiles straight up, to the first ceiling, cutting what she passes'],
   ['shopscale', 'a shop door has no depth, a gate and a cave do'],
   ['foescale',  'every machine reads in the hero\'s weight class'],
+  ['enemy-sight', 'they see her before they come: each walker roams while she is unseen and comes for her along the ground once she is in its sight (a turn, a beat, a sound), never through a wall and never off a ledge, and gives up when she is gone; a flier homes in, a turret only aims, the pack\'s wolf loses the wall; the shield-walker is at least twice her height in its box and 1.6 of her drawn, standing on the ground in every room it is put in', { timeout: 300000 }],
   ['contrast',  'nothing is drawn round a hostile body — no rim, no halo, no keyline (owner, 2026-11-16: "why still framed with light") — and the share of each silhouette that reads off its room is measured and printed, room by room', { timeout: 420000 }],
   ['foelevel',  'a machine\'s level is its kingdom plus the run, and it spends it'],
   ['scrapmoves','kingdom A picks the floor up — and never on a fresh save'],

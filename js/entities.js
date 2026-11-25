@@ -870,6 +870,13 @@ function ledgeTurn(e, dir) {
 function groundAhead(e, dir) {
   const ax = dir > 0 ? e.x + e.w + 3 : e.x - 3;
   const feet = e.y + e.h;
+  // A BED OF SPIKES IS NOT GROUND TO WALK ON. The heightfield lays its surface
+  // over a spike tile as it does over rock, so the probe below read the Nest's
+  // spike beds as floor and walked its machines into them: E2's walker died on
+  // its own island's edge inside a second of the room loading, every visit,
+  // before she ever saw it (measured 2026-11-25, before and after it grew).
+  const sp = tileAt(Math.floor(ax / TILE), Math.floor((feet + 2) / TILE));
+  if (sp === '^' || sp === 'v') return false;
   if (typeof groundColumnAt === 'function') {
     const gc = groundColumnAt(ax);
     // gc[0] < gc[1] is the proof that a solid tile is holding this surface up
@@ -8125,9 +8132,30 @@ function emberTell(x, y, rate, dt) {
   addPart(x + rnd(-5, 5), y + rnd(-2, 2), rnd(-18, 18), rnd(10, 60), 0.34,
     chance(0.45) ? '#ffe2a8' : '#ff9430', 2, 260, true);
 }
+// THE MEADOW'S SHIELD-WALKER IS BIG (owner, 2026-11-25, looking at it in A2:
+// "I don't want this small hero. This should be a big one. It looks like an
+// armored one that walks... this one needs to be bigger"). It drew 0.77 of
+// her height — a figure her own size holding a plate, which read as another
+// small hero. It stands about 1.8 of her now (tests/foescale.cjs, tests/enemy-sight.cjs):
+//   size     body, walls, hurt box and drawing together, about its own middle and
+//            its own feet (90 x 66 body; drawn ~126 px against her ~71)
+//   lungeK   the shield-bash covers ground in proportion: × the crawler's lunge
+//   coil     the wind-up of a heavy body is the longer tell, never a shorter one
+//   winded   ...and the bash costs it longer to recover from: the opening grows
+//   notice   px: the band its wind-up is armed in, out from its wider front
+//   noticeY  px: and its taller middle
+// (coil is TELL_SWIPE's 0.5 s, written out: that constant is declared further
+// down this file and a top-level const cannot read it before its line runs)
+const GUARD = { size: 3.0, lungeK: 2.0, coil: 0.5, winded: 0.2, notice: 210, noticeY: 90 };
 const EKIND = {
   crawler: { w: 28, h: 20, hp: 30, spd: 62 },
-  guard: { w: 30, h: 22, hp: 44, spd: 52 },
+  // THE ARMOURED WALKER. These are its numbers at the size it was MEASURED at
+  // (assets/bodybox.json); it is built GUARD.size times this (Enemy's
+  // constructor, as a cave cat is built CAT_SIZE times a crawler), so the
+  // table the walls are read from still describes it. hp 44 -> 90 and patrol
+  // 52 -> 38 px/s (owner, 2026-11-25: "a big one... an armored one that walks"):
+  // heavy and deliberate, not quick. GUARD below holds the rest.
+  guard: { w: 30, h: 22, hp: 90, spd: 38 },
   flier: { w: 26, h: 22, hp: 24, spd: 120 },
   turret: { w: 28, h: 30, hp: 45, spd: 0 },
   hopper: { w: 26, h: 24, hp: 36, spd: 180 },
@@ -8285,6 +8313,12 @@ class Enemy {
     if (typeof isCheetah === 'function' && typeof CAT_SIZE === 'number' && isCheetah(this)) {
       this.sizeK = CAT_SIZE;
       this.w = Math.round(k.w * CAT_SIZE); this.h = Math.round(k.h * CAT_SIZE);
+      this.x -= (this.w - k.w) / 2; this.y -= this.h - k.h;
+    }
+    // ...and the shield-walker GUARD.size times its measured self, the same way
+    if (kind === 'guard') {
+      this.sizeK = GUARD.size;
+      this.w = Math.round(k.w * GUARD.size); this.h = Math.round(k.h * GUARD.size);
       this.x -= (this.w - k.w) / 2; this.y -= this.h - k.h;
     }
     this.hypnoT = 0; this.stagT = 0; this.faceVis = 1;
@@ -8519,6 +8553,7 @@ class Enemy {
       // cheapest way there is to teach patience before a boss demands it.
       case 'guard':
       case 'crawler': {
+        let chase = 0;                    // js/sight.js: 2 the alert beat, 1 coming
         this.vy += 2000 * dt;
         crossrefStep(this, dt, px, cx);   // the Archives guard's filing sweep
         // KINGDOM X — FACET (crawler@X, cost 2). The lance is ticked at the
@@ -8552,7 +8587,7 @@ class Enemy {
           }
         } else if (this.lungeT > 0) {                        // committed
           this.lungeT -= dt;
-          this.vx = this.dir * this.spd * 4.2;
+          this.vx = this.dir * this.spd * 4.2 * (this.kind === 'guard' ? GUARD.lungeK : 1);
           // the lunge is written in one frame, so the picture commits with it
           // (a clever one tracks her through the coil, and a wall it hits
           // mid-commit sends it back the other way)
@@ -8596,7 +8631,8 @@ class Enemy {
           // 2026-09-19). before → after: 0.55−0.22·iq (min 0.33) → max(0.5,
           // 0.75−0.22·iq).
           if (this.lungeT <= 0) {
-            this.windedT = Math.max(0.5, 0.75 - this.iq * 0.22); this.vx = 0;
+            this.windedT = Math.max(0.5, 0.75 - this.iq * 0.22)
+              + (this.kind === 'guard' ? GUARD.winded : 0); this.vx = 0;
             this.shear();
           }
         } else if (this.windedT > 0) {                      // the punish window
@@ -8658,14 +8694,24 @@ class Enemy {
           const cat = typeof catHunt === 'function' && catHunter(this);
           let hunting = cat ? catHunt(this, dt, px, py, cx, cy)
             : typeof wolfHunt === 'function' ? wolfHunt(this, dt, px, py, cx, cy) : 0;
-          if (!hunting) enemyGait(this, this.dir * this.spd, dt);
+          // ...and EVERYTHING ELSE LOOKS (js/sight.js): it walks its beat until
+          // it sees her, turns and stands a beat, then comes along the ground
+          // (2 = the beat, when nothing arms; 1 = coming)
+          chase = 0;
+          if (!hunting) {
+            const aw = typeof foeAware === 'function' ? foeAware(this, dt, px, py, cx, 0) : 0;
+            if (aw) chase = foeChase(this, dt, px, cx, aw);
+            else enemyGait(this, this.dir * this.spd, dt);
+          }
+          const big = this.kind === 'guard';
           // IT NOTICES HER. Requiring it to already be facing the right way
           // meant it ignored anyone who walked up behind it — which is most of
           // the time, since she moves five times faster than it patrols. It
           // TURNS to face her first and lunges on the following pass, so the
           // turn itself becomes part of the warning.
-          if (!player.dead && hunting !== 2
-              && Math.abs(px - cx) < (hunting ? (cat ? catReach(this) : wolfReach(this)) : 160) && Math.abs(py - cy) < 70
+          if (!player.dead && hunting !== 2 && chase !== 2
+              && Math.abs(px - cx) < (hunting ? (cat ? catReach(this) : wolfReach(this)) : big ? GUARD.notice : 160)
+              && Math.abs(py - cy) < (big ? GUARD.noticeY : 70)
               && (this.atkCD -= attackDt) <= 0) {
             const want = Math.sign(px - cx) || this.dir;
             if (want !== this.dir) { this.dir = want; this.atkCD = 0.28 - this.iq * 0.14; }
@@ -8684,11 +8730,12 @@ class Enemy {
               // never both be held — one row is crawler@A and the other
               // crawler@X — but the tell is written to take either.)
               const fac = this.hasMove('facet');
-              this.coilT = (drag || fac) ? TELL_SWIPE : TELL_FAST;
+              // (the armoured walker's bash is a heavy body's: TELL_SWIPE too)
+              this.coilT = (drag || fac) ? TELL_SWIPE : big ? GUARD.coil : TELL_FAST;
               this.dragT = drag ? TELL_SWIPE : 0; this.drag0 = 0;
               this.facetT = fac ? TELL_SWIPE : 0; this.facet0 = 0;
               this.atkCD = rnd(2.2 - this.iq * 1.1, 3.4 - this.iq * 1.6);
-              this.vx = 0; sfx((drag || fac) ? 'tellmid' : 'tell');
+              this.vx = 0; sfx((drag || fac || big) ? 'tellmid' : 'tell');
               // BOTH CHANNELS for the Cache too: the seam crystal rings under
               // the tell blip, so the crawler that owns its own back is told
               // apart from the one that does not without having to see it.
@@ -8703,7 +8750,11 @@ class Enemy {
           }
         }
         const col = moveEnt(this, dt);
-        if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
+        // (one that is coming for her holds at a wall or an edge facing her
+        // — foeChase — rather than being turned round by it)
+        const coming = (this.aware || 0) > 0 && this.lungeT <= 0;
+        if (coming) { /* its face stays on her */ }
+        else if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
         // (a wolf on a hunt keeps its own watch on the edge and holds there, nose
         // on her: the patrol's turn-round is for a machine with nowhere to be)
         else if (col.d && this.lungeT <= 0 && !this.hunt && ledgeTurn(this, this.dir)) this.dir *= -1;
@@ -8719,8 +8770,13 @@ class Enemy {
       // turret (which punishes approaching) to make a room out of two enemies.
       case 'blob': {
         // the breath still sets the pace; the gait decides how it gets there,
-        // so a ledge or a wall is a stop and a roll the other way, not a slide
-        enemyGait(this, this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4), dt);
+        // so a ledge or a wall is a stop and a roll the other way, not a slide.
+        // Once it has SEEN her it rolls at her instead (js/sight.js), on the
+        // same breath, holding at an edge or a wall it cannot get over.
+        const breath = 0.6 + Math.sin(this.anim * 4) * 0.4;
+        const bAw = typeof foeAware === 'function' ? foeAware(this, dt, px, py, cx, 0) : 0;
+        if (bAw) foeChase(this, dt, px, cx, bAw, breath);
+        else enemyGait(this, this.dir * this.spd * breath, dt);
         this.vy += 2000 * dt;
         this.dripT = (this.dripT || rnd(0.6, 1.4)) - dt;
         // THE DRIP HAS A TELL, AND THE TELL IS THE BODY.
@@ -8779,7 +8835,8 @@ class Enemy {
         // whether or not the body is still dripping
         if (this.hasMove('thornbed')) thornStep(this, dt);
         const col = moveEnt(this, dt);
-        if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
+        if ((this.aware || 0) > 0) { /* coming for her: foeChase holds it at the wall or edge */ }
+        else if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
         else if (col.d && ledgeTurn(this, this.dir)) this.dir *= -1;
         break;
       }
@@ -8795,7 +8852,18 @@ class Enemy {
         if (this.drops && this.drops.length) conduitDrops(this, dt);
         if (this.packetCD == null) this.packetCD = rnd(1.2, 2.6);
         else if (this.packetCD > 0) this.packetCD -= dt;
-        const near = dist2(cx, cy, px, py) < 340 * 340 && !player.dead;
+        // IT HUNTS ONCE IT HAS SEEN HER (js/sight.js), not whenever she is
+        // inside a circle: no wall between them, and a beat in the air first
+        // in which it turns to her and holds (the alert) before it comes in.
+        const fAw = player.dead || typeof foeAware !== 'function' ? (player.dead ? 0 : 2) : foeAware(this, dt, px, py, cx, 1);
+        const near = fAw === 2 && dist2(cx, cy, px, py) < 340 * 340 && !player.dead;
+        if (fAw === 1 && !this.perched && !(this.diveT > 0) && !(this.holdT > 0) && !(this.riseT > 0) && !(this.packetT > 0)) {
+          this.faceT = Math.sign(px - cx) || this.faceT || 1;
+          const ka = smoothK(FLY_K.hold, dt);
+          this.vx = lerp(this.vx, 0, ka); this.vy = lerp(this.vy, 0, ka);
+          moveEnt(this, dt);
+          break;
+        }
         // she came close: whatever it was doing on its rounds, it is off the
         // perch and hunting now
         if (near && (this.perchT > 0 || this.perched)) {
@@ -8873,7 +8941,10 @@ class Enemy {
         // the moment it started climbing home. Nothing here runs for a bat
         // that did not buy the move.
         glintStep(this, dt);
-        const near = Math.abs(px - cx) < 150 + this.iq * 70 && py > cy - 20 && !player.dead;
+        // ...and only once it has SEEN her through the open cave (js/sight.js):
+        // the rock it hangs in is not a window
+        const bAw = typeof foeAware !== 'function' ? 2 : foeAware(this, dt, px, py, cx, 1);
+        const near = Math.abs(px - cx) < 150 + this.iq * 70 && py > cy - 20 && !player.dead && bAw === 2;
         if (this.hang) {
           this.vx = 0; this.vy = 0;
           if (this.holdT > 0) {                     // the shiver — wings rustle
@@ -9010,6 +9081,10 @@ class Enemy {
       case 'turret': {
         // sweep → LOCK (the red light is the tell) → fire
         this.t -= dt;
+        // IT LOOKS before it locks (js/sight.js): seen, the barrel comes off
+        // its sweep and round onto her for a beat (enemyYaw reads `aware`),
+        // and only then may it lock. It has no feet: aiming IS its coming.
+        const seesHer = typeof foeAware !== 'function' || foeAware(this, dt, px, py, cx, 1) === 2;
         blotStep(this, dt);                // REDACT's struck-out floor
         // KINGDOM B — THE METERED TRAIN (FOE_MOVES['turret@B'], 'train'). Once
         // the first packet is away the rest of the train runs on its own gap,
@@ -9066,7 +9141,7 @@ class Enemy {
               this.burst = 0; this.t = 2.0 / DF().espd;
             }
           }
-        } else if (this.t <= 0 && !player.dead && dist2(cx, cy, px, py) < 440 * 440) {
+        } else if (this.t <= 0 && !player.dead && seesHer && dist2(cx, cy, px, py) < 440 * 440) {
           // the train PAYS for declaring its count with a longer warning
           this.lockT = this.lock0 = this.hasMove('train') ? CONDUIT_TRAIN_LOCK : 0.55;
           sfx('ui');
@@ -9222,8 +9297,15 @@ class Enemy {
             if (this.rakeT > 0) { this.loaded = 1; this.rake0 = 1; this.rakeT = 0; }
           }
           this.t -= dt;
+          // it leaps at what it has SEEN (js/sight.js): the pack's and the
+          // cats' leapers keep their own notice and only lose the wall; any
+          // other leaper looks, turns, stands its beat, then comes
+          const beast = (typeof isWolf === 'function' && isWolf(this)) || (typeof isCheetah === 'function' && isCheetah(this));
+          const hSees = typeof foeAware !== 'function' ? true
+            : beast ? foeLOS(this, dt, px, py, cx) : foeAware(this, dt, px, py, cx, 0) === 2;
           // it faces its prey while gathering — so the leap goes nose-first
-          this.dir = Math.sign(px - cx) || this.dir || 1;
+          // (one that has not seen her yet is not facing anything in particular)
+          if (beast || (this.aware || 0) > 0) this.dir = Math.sign(px - cx) || this.dir || 1;
           // ...and a CAT does not stand like furniture until then: it paces its
           // ground with its eyes on her, and comes in if she hangs back
           // (js/cheetahhunt.js). The walk is over a beat before it gathers, so
@@ -9233,7 +9315,7 @@ class Enemy {
           // through the gait, backward as a back-step whose stride runs in
           // reverse (no slide: tests/enemygait, tests/cheetah-hunt).
           if (typeof catPace === 'function' && typeof isCheetah === 'function' && isCheetah(this)) catPace(this, dt, px, cx);
-          if (this.t <= 0 && !player.dead && Math.abs(px - cx) < 380) {
+          if (this.t <= 0 && !player.dead && hSees && Math.abs(px - cx) < 380) {
             // THE CROUCH. It used to launch on the frame a random timer hit
             // zero — it faced you first, but facing is not a warning. Now it
             // gathers for TELL_FAST with a cue, and the leap is a thing you
@@ -9386,7 +9468,9 @@ class Enemy {
           break;
         }
         // idle: latched, humming, watching its band
-        if (!player.dead && Math.abs(px - cx) < 230 && Math.abs(py - cy) < 90
+        // ...once it has SEEN her: not through a wall (js/sight.js). Plumbed in,
+        // it has no feet to come with and no face to turn: its charge is its beat
+        if (!player.dead && (typeof foeAware !== 'function' || foeAware(this, dt, px, py, cx, 1) > 0) && Math.abs(px - cx) < 230 && Math.abs(py - cy) < 90
             && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_SWIPE;       // zone-B floor: the tell never shortens
           this.atkCD = rnd(2.4 - this.iq * 0.8, 3.6 - this.iq * 1.2);
@@ -9463,7 +9547,9 @@ class Enemy {
         }
         // idle: plumbed in, breathing embers, watching its patch — the band
         // reaches UP, because the lane it closes does
-        if (!player.dead && Math.abs(px - cx) < 210 && py > cy - 190 && py < cy + 70
+        // ...once it has SEEN her: not through a wall (js/sight.js). Plumbed in,
+        // it has no feet to come with and no face to turn: its charge is its beat
+        if (!player.dead && (typeof foeAware !== 'function' || foeAware(this, dt, px, py, cx, 1) > 0) && Math.abs(px - cx) < 210 && py > cy - 190 && py < cy + 70
             && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_SWIPE;       // the kingdom floor: the tell never shortens
           this.atkCD = rnd(2.2 - this.iq * 0.7, 3.4 - this.iq * 1.1);
@@ -9541,7 +9627,9 @@ class Enemy {
         }
         // idle: bolted in, breathing cold, watching its patch — the band is
         // a little wider than the widest circle, so the first read is free
-        if (!player.dead && Math.abs(px - cx) < 240 && Math.abs(py - cy) < 150
+        // ...once it has SEEN her: not through a wall (js/sight.js). Plumbed in,
+        // it has no feet to come with and no face to turn: its charge is its beat
+        if (!player.dead && (typeof foeAware !== 'function' || foeAware(this, dt, px, py, cx, 1) > 0) && Math.abs(px - cx) < 240 && Math.abs(py - cy) < 150
             && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_HEAVY;       // the kingdom floor: the tell never shortens
           this.ringR = 0;
@@ -9644,7 +9732,9 @@ class Enemy {
         // idle: rooted, pulsing on the broadcast, watching its patch — the
         // band is a little wider than the longest reach, so the first read
         // is free
-        if (!player.dead && Math.abs(px - cx) < 250 && Math.abs(py - cy) < 130
+        // ...once it has SEEN her: not through a wall (js/sight.js). Plumbed in,
+        // it has no feet to come with and no face to turn: its charge is its beat
+        if (!player.dead && (typeof foeAware !== 'function' || foeAware(this, dt, px, py, cx, 1) > 0) && Math.abs(px - cx) < 250 && Math.abs(py - cy) < 130
             && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_HEAVY;       // the kingdom floor: the tell never shortens
           // cunning buys REACH and GRIP: a longer line and a harder pull
@@ -9928,27 +10018,25 @@ class Enemy {
       });
       c.restore(); c.globalAlpha = 1;
     }
-    // the plate: up means wait, down means now
-    if (this.kind === 'guard' && !this.dead) {
-      const up = !!this.guard;
+    // the plate: up means wait, down means now — drawn HERE only while the
+    // walker's own art is not in (the stand-in body below). The fired body
+    // carries its plate in its arms, as tall as it is, and a second plate
+    // drawn beside the first one was a pale stub at its shins once the body
+    // grew (owner, 2026-11-25). The window used to be told by a ring drawn
+    // round the whole body too, which the ledger refuses (no ring round any
+    // body): the opening is the plate coming down and the body slumping over
+    // it (enemyAtlasPose 'winded').
+    if (this.kind === 'guard' && !this.dead
+        && !(typeof atlasOf === 'function' && atlasOf('guard') && atlasReady(atlasOf('guard')))) {
+      const up = !!this.guard, sk = this.sizeK || 1;
       c.save();
       c.translate(cx + this.dir * (this.w * 0.52), this.y + this.h * 0.5);
+      if (!up) c.rotate(this.dir * 0.5);              // lowered: it hangs off the arm
       c.globalAlpha = up ? 0.95 : 0.35;
       c.fillStyle = up ? '#9fb3c8' : '#5b6a7a';
-      rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.fill();
+      rr(c, -3 * sk, -this.h * 0.5, 6 * sk, this.h, 2 * sk); c.fill();
       c.strokeStyle = up ? '#dfeaf6' : 'rgba(190,210,230,0.4)'; c.lineWidth = 1.2;
-      rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.stroke();
-      if (!up && !G.artProbe) {                     // the window, made obvious
-        // (a ring of decoration round the body, so off under G.artProbe like
-        // the wind-up ring; and on the simulation clock, not the wall's)
-        c.globalAlpha = 0.5 + Math.sin((this.anim || 0) * 11.1) * 0.3;
-        // NOT the telegraph amber. Registry §2's first hard rule: #ffc24a is on
-        // screen only while something is winding up — and this ring is the
-        // OPPOSITE message, "it is open, hit it now". Drawn in the plate's own
-        // pale steel, so it reads as the plate's absence, not as a warning.
-        c.strokeStyle = '#e4f0fb'; c.lineWidth = 2;
-        c.beginPath(); c.arc(-this.dir * this.w * 0.52, 0, this.w * 0.75, 0, 7); c.stroke();
-      }
+      rr(c, -3 * sk, -this.h * 0.5, 6 * sk, this.h, 2 * sk); c.stroke();
       c.restore(); c.globalAlpha = 1;
     }
     // ===================================================================
@@ -10628,7 +10716,7 @@ class Enemy {
           yawScan: enemyYaw(this),
           // the gait's clock is the floor it has covered (moveEnt's walkD),
           // and the state it is in has a pose of its own (enemyAtlasPose)
-          dist: this.walkD || 0,
+          dist: (this.walkD || 0) / (this.sizeK || 1),   // (a bigger body's stride, as drawRosterWalk)
           pose: enemyAtlasPose(this),
         })) return;
     c.save();
@@ -11317,22 +11405,29 @@ function drawEnemyTell(c, e, cx) {
   if (!((e.coilT || 0) > 0 || (e.holdT || 0) > 0 || (e.crouchT || 0) > 0 || lock)) return;
   const w = Math.max(e.coilT || 0, e.holdT || 0, e.crouchT || 0, lock);
   const k = 1 - clamp(w / TELL_FAST, 0, 1);
+  // (the armoured walker is drawn taller than its body: its tell is centred
+  // on the body that is drawn, not on the lower half of it)
+  const tb = e.kind === 'guard' && typeof hurtBoxOf === 'function' ? hurtBoxOf(e) : e;
+  const tcy = tb.y + tb.h / 2;
   c.save();
   c.globalAlpha = 0.30 + k * 0.5;
-  c.strokeStyle = TELL_COL; c.lineWidth = 2 + k * 1.4;
-  c.setLineDash([5, 5]); c.lineDashOffset = -(e.anim || 0) * 1000 / 55;
+  // (a body built bigger wears a heavier line, or its warning thins out
+  // against it: sizeK, the shield-walker)
+  const tk = Math.sqrt(e.sizeK || 1);
+  c.strokeStyle = TELL_COL; c.lineWidth = (2 + k * 1.4) * tk;
+  c.setLineDash([5 * tk, 5 * tk]); c.lineDashOffset = -(e.anim || 0) * 1000 / 55;
   c.beginPath();
-  c.arc(cx, e.y + e.h / 2, e.w * 0.72 + 10 - k * 6, 0, 7);
+  c.arc(cx, tcy, e.w * 0.72 + 10 - k * 6, 0, 7);
   c.stroke(); c.setLineDash([]);
   // a wedge pointing where it is about to go — motion, not just colour
   const dx = (e.coilT || e.crouchT) ? e.dir : 0, dy = e.holdT ? 1 : 0;
   if (dx || dy) {
     c.globalAlpha = 0.5 + k * 0.5; c.fillStyle = TELL_COL;
-    const ox = cx + dx * (e.w * 0.9 + k * 10), oy = e.y + e.h / 2 + dy * (e.h * 0.9 + k * 10);
+    const ox = cx + dx * (e.w * 0.9 + k * 10), oy = tcy + dy * (e.h * 0.9 + k * 10);
     c.beginPath();
-    c.moveTo(ox + dy * 7 + dx * 7, oy + dx * 7 + dy * 7);
-    c.lineTo(ox - dy * 7 - dx * 0, oy - dx * 7 - dy * 0);
-    c.lineTo(ox + dx * 13 + dy * 0, oy + dy * 13 + dx * 0);
+    c.moveTo(ox + (dy * 7 + dx * 7) * tk, oy + (dx * 7 + dy * 7) * tk);
+    c.lineTo(ox - dy * 7 * tk, oy - dx * 7 * tk);
+    c.lineTo(ox + dx * 13 * tk, oy + dy * 13 * tk);
     c.closePath(); c.fill();
   }
   c.restore(); c.globalAlpha = 1;
@@ -11445,7 +11540,9 @@ function enemyYaw(e) {
       // motion. While it LOCKS, and through the kick after the shot, it stops
       // sweeping and turns its barrel square onto her: the stop and the turn
       // are part of the tell, and the beam leaves the muzzle it is drawn from.
-      if ((e.lockT || 0) > 0 || (e.kickT || 0) > 0 || (e.trainT || 0) > 0) {
+      // ...and from the moment it has SEEN her (js/sight.js) it stops its sweep
+      // and keeps the barrel on her: a turret's way of coming for her
+      if ((e.lockT || 0) > 0 || (e.kickT || 0) > 0 || (e.trainT || 0) > 0 || (e.aware || 0) > 0) {
         const pd = (typeof player !== 'undefined' && player)
           ? (Math.sign(player.x + player.w / 2 - (e.x + e.w / 2)) || 1) : 1;
         return S(yawColF(pd), 0);
@@ -11493,7 +11590,9 @@ function drawRosterWalk(c, e, cx) {
   if (e.kind === 'guard' && e.plateShed) return false;
   // the drip and its rebound are deformation of the turntable body
   if (e.kind === 'blob' && ((e.drip0 || 0) > 0 || (e.blobReb || 0) > 0)) return false;
-  const cyc = ((((e.walkD || 0) / (2 * ATLAS_STRIDE)) % 1) + 1) % 1;
+  // (a body built bigger strides further: the shield-walker's step is its own
+  // size's, or its feet would skate GUARD.size times slower than the ground)
+  const cyc = ((((e.walkD || 0) / (2 * ATLAS_STRIDE * (e.sizeK || 1))) % 1) + 1) % 1;
   const cell = Math.floor(cyc * S.cells);
   mediaFetch(S.img, 1);
   const raw = MEDIA_RAW[S.img];
