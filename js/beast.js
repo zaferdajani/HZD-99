@@ -1153,11 +1153,19 @@ const BEAST_STRIP_PX = 280 / 210;
 const BEAST_STRIDE = 165 * 16 / 14;   // px of prowl per full 16-cell stride (see beastStrip)
 // Animation is simulation state. Rendering may be skipped, repeated for a
 // capture, or run twice between fixed steps; none may advance a paw or a tell.
+// a state's entry cue, wherever the change is first seen: the wake sets 'intro' and returns
+// before the step reaches beastMotionEnd, so the next step's begin is the first to see it
+// (and the lion woke in silence: tests/meet.cjs 'one distinct awakening')
+function beastEnterCue(b) {
+  if (b.st === 'crouch') beastSound('coil');
+  if (b.st === 'intro') beastSound('awake');
+}
 function beastMotionBegin(b) {
   if (b._motionState !== b.st) {
     b._motionState = b.st;
     b._motionDuration = Math.max(0.05, b.t || 0);
     b._motionElapsed = 0;
+    beastEnterCue(b);
   }
   b._motionX = b.x;
   b._motionBefore = b.st;
@@ -1178,8 +1186,7 @@ function beastMotionEnd(b, dt) {
     b._motionState = b.st;
     b._motionDuration = Math.max(0.05, b.t || 0);
     b._motionElapsed = 0;
-    if (b.st === 'crouch') beastSound('coil');
-    if (b.st === 'intro') beastSound('awake');
+    beastEnterCue(b);
   } else b._motionElapsed = (b._motionElapsed || 0) + dt;
   if (((b._motionBefore === 'stalk' || b._motionBefore === 'run') && !b.dead && b.stagT <= 0) || (b.purified && b.petWalk)) {
     const distance = Math.abs(b.x - b._motionX);

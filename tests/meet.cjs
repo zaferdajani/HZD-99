@@ -101,6 +101,9 @@ const { chromium } = require('playwright');
 
   const a4 = await page.evaluate(() => {
     G.save.flags.nfMeet = 1; loadRoom('A4'); G.dialog = null; G.state = 'PLAY'; G.toasts = [];
+    // the comic page the meeting earned (js/panels.js, carried to the next doorway) is read
+    // first — it opens on the way in and holds the world; this measures the arena after it
+    if (typeof PN !== 'undefined') { PN.due = null; PN.queue.length = 0; }
     const b = G.boss; const out = { sounds: [], toast: null };
     const sfx0 = window.sfx; window.sfx = (k) => { out.sounds.push(k); return sfx0(k); };
     const creature0 = window.beastSound; window.beastSound = k => { out.sounds.push('nf_' + k); return creature0(k); };
@@ -110,10 +113,14 @@ const { chromium } = require('playwright');
     out.intro = b.st === 'intro';
     out.toast = (G.toasts || []).map(t => t.text || t.msg || JSON.stringify(t)).join('|');
     out.marks = braid().marks || {};
+    out.line = t('nf_rematch');
     return out;
   });
   check('A4 wakes as the rematch: one distinct awakening', a4.intro && a4.sounds.filter(k => k === 'nf_awake').length === 1 && !a4.sounds.includes('nf_arrive'), a4.sounds.join(','));
-  check('...says it remembers', /remembers|corridor|الممرّ/i.test(a4.toast), a4.toast);
+  // the line 'It remembers the corridor.' was taken off the screen with the rest of chapter
+  // one's words (js/text-lite.js, 2026-11-19, owner: "minimize all the text that we see"): the
+  // rematch is told by its own awakening and the Braid, and no line is put back over it
+  check('...told without a line on the screen (the awakening says it)', a4.toast === '' && a4.line === '', a4.toast || '(none)');
   check('...and the Braid marks the rematch', a4.marks.rematch === 'A4');
   check('no page errors', errs.length === 0, errs.join(' | '));
   await browser.close();
