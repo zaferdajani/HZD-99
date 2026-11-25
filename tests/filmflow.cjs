@@ -32,7 +32,7 @@ const check = (name, ok, detail) => {
   await page.mouse.click(8, 8);
   const r = await page.evaluate(async () => {
     G.afterCine = 'DIFF'; startCine();
-    const shots = [], black = [], frozen = [], gaps = [];
+    const shots = [], black = [], frozen = [], gaps = [], xf = {};
     let lastKind = null, endAt = null, t0 = performance.now();
     while (performance.now() - t0 < 160000) {
       await new Promise(k => requestAnimationFrame(k));
@@ -41,6 +41,8 @@ const check = (name, ok, detail) => {
       if (!ct) { if (G.state !== 'CUT') break; continue; }
       const v = ct.v;
       if (ct.kind !== lastKind) { shots.push(ct.kind); lastKind = ct.kind; }
+      // both moving at once: the dissolve
+      if (shots.length > 1 && ct.ph === 'play' && ct.prevV && !ct.prevV.paused && ct.v && !ct.v.paused && ct.t < (ct.diss || 0)) xf[ct.kind] = Math.max(xf[ct.kind] || 0, ct.t);
       // a frame of black between two shots (the first shot fades in from the
       // title, which is not a gap between shots)
       if (shots.length > 1 && (ct.ph === 'in' || (ct.ph === 'hold' && !ct.keep))) black.push(ct.kind + ':' + ct.ph);
@@ -51,7 +53,7 @@ const check = (name, ok, detail) => {
       const last = !(G.reel && G.reel.length);
       if (!last && (ct.capHold || 0) > 0) frozen.push(ct.kind + ':' + ct.capHold.toFixed(2));
     }
-    return { shots, black, frozen, gaps, film: typeof INTRO_FILM !== 'undefined' ? INTRO_FILM.length : -1 };
+    return { shots, black, frozen, gaps, xf, film: typeof INTRO_FILM !== 'undefined' ? INTRO_FILM.length : -1 };
   });
   console.log('  shots: ' + r.shots.join(' '));
   check('all eight shots play', r.shots.length >= 8, r.shots.length + ' / 8');
@@ -61,6 +63,9 @@ const check = (name, ok, detail) => {
   const worst = cuts.reduce((m, g) => Math.max(m, g[1]), 0);
   check('the picture never stops between shots for more than 0.25 s', worst <= 0.25,
     'worst ' + worst.toFixed(2) + ' s  ' + JSON.stringify(cuts));
+  const hard = r.shots.slice(1).filter(k => !((r.xf[k] || 0) >= 0.8));
+  check('every change of shot is a dissolve of 0.8 s or more, both shots moving (never a cut)', r.shots.length >= 8 && hard.length === 0,
+    JSON.stringify(Object.fromEntries(r.shots.slice(1).map(k => [k, +(r.xf[k] || 0).toFixed(2)]))));
   check('no shot but the last freezes on its caption', r.frozen.length === 0, r.frozen.slice(0, 4).join(', '));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();

@@ -8,7 +8,7 @@
 
 **"Why do you not remember what I told you and improve?"** — the owner, 2026-11-17.
 
-No session remembers the one before it. This list is the memory: each line is
+No session remembers the one before. This list is the memory: each line is
 something he has ALREADY corrected, in his words, and how often. A high count is
 how tired he is of that mistake.
 **Read it before you start, and check your work against every line before you
@@ -16,8 +16,8 @@ tell him anything is done.**
 
 | said | the rule | his words | held by |
 |---|---|---|---|
-| 16× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" · "watching the leaves moves" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` `nf-ambush` · skill `creature-motion-combat` |
-| 11× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" · "a place where the lion goes inside and hide" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` `nf-ambush` |
+| 17× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" · "watching the leaves moves" · "scenes are cut one after the other" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` `nf-ambush` `filmflow` · skill `creature-motion-combat` |
+| 12× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" · "a place where the lion goes inside and hide" · "you only added two trees" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` `nf-ambush` |
 | 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
 | 7× | **A door is an object that leads somewhere new; in a floor, a hole in broken ground; one ring to a frame, nothing in it** | "neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" · "a hole in the ground" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` `sewer` |
 | 7× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass painted, edgeless, bending under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" · "squares stuck together" | `seam` `ring-pads` `fired-art` `grass` · skill `terrain-doors` |
@@ -109,11 +109,11 @@ Three things that bite:
   After a new track or film: `node tools/faststart.cjs` (phones need a plain MP4).
   After a new plate: `node tools/defringe.cjs --check` (cyan rims).
 - **Never edit sources or rebuild in a tree a harness run is using**; run the
-  suite in batches (long runs restart the container).
+  suite in batches.
 
 ## Where the rest is — read it when the work touches it
 
-| when you are about to | read |
+| before you | read |
 |---|---|
 | change a room, platform, door, gate or ceiling | skill `terrain-doors` |
 | edit `js/` or `tools/`, or find where something lives | skill `engine-map` |
@@ -124,4 +124,3 @@ Three things that bite:
 | know what an order of his says, and why | `docs/OWNER_ORDERS.md` |
 | know the branch history, the session fleet | `docs/SESSION_FLEET.md` |
 
-Moved out unedited 2026-11-17.

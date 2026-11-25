@@ -6,9 +6,11 @@ ctx.window=ctx;
 vm.runInContext(fs.readFileSync('js/i18n.js','utf8'),ctx);
 vm.runInContext(fs.readFileSync('js/story-opening.js','utf8'),ctx);
 assert.match(ctx.openingGateHint('A4'),/raw marble/);
-ctx.G.save.flags.crystal=1;assert.match(ctx.openingGateHint('A4'),/agent of the Eye/);   // (canon, 2026-11-16: the robed one is the Eye's agent, not a sage's keeper)
-ctx.G.save.flags.sageTame_GA1D=1;assert.match(ctx.openingGateHint('A4'),/CHIME/);
-ctx.G.save.flags.bossChime=1;assert.equal(ctx.openingGateHint('A4'),'');
+// (canon, 2026-11-25: the forge, then CHIME, then the agent right before NULLFANG — owner: "It should be
+// right before Nilfang"; 2026-11-16: the robed one is the Eye's agent, not a sage's keeper)
+ctx.G.save.flags.crystal=1;assert.match(ctx.openingGateHint('A4'),/CHIME/);
+ctx.G.save.flags.bossChime=1;assert.match(ctx.openingGateHint('A4'),/agent of the Eye/);
+ctx.G.save.flags.sageTame_GA1D=1;assert.equal(ctx.openingGateHint('A4'),'');
 ctx.G.save.flags={};assert.equal(ctx.openingGateHint('A2'),'','early encounter and return routes remain open');
 ctx.G.save.flags.bossGlitch=1;assert.equal(ctx.openingGateHint('A4'),'','completed old encounter stays accessible');
 delete ctx.G.save.storyVersion;assert.equal(ctx.openingGateHint('A4'),'','legacy saves keep their route');

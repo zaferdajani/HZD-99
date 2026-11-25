@@ -5988,7 +5988,9 @@ function startPurifyCut(kind) {
   } catch (e) { snap = null; }
   G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false, held: 0,
     authoredOutro: PURIFY_VID[kind] === 'assets/video/purify_glitch_ritual.mp4' };
-  try { v.currentTime = 0; } catch (e) {}
+  // (a clip already at its start is not sought again: a seek drops it out of "ready" for a beat,
+  // and mid-reel that beat turned the dissolve between two moving shots into a hold on a still)
+  try { if (v.currentTime > 0.01) v.currentTime = 0; } catch (e) {}
   G.state = 'CUT';
   filmSee(kind);
   return true;
@@ -6009,7 +6011,9 @@ function startEndingReel() {
 function endPurifyCut() {
   const ct = G.cut;
   if (!ct) { G.state = 'PLAY'; return; }
-  try { ct.v.pause(); } catch (e) {}
+  // (handing over mid-reel, the outgoing shot keeps playing under the dissolve: drawCut, ct.prevV)
+  if (!ct.handover) { try { ct.v.pause(); } catch (e) {} }
+  if (ct.prevV) { try { ct.prevV.pause(); } catch (e) {} }
   G.cut = null;
   if(ct.purificationRitual && !ct.ran && !ct.skipped && G.boss){
     G.purification={b:G.boss,room:G.roomId,phase:'film',hold:1.6,t:0,clock:0,armed:false,committed:false,recovery:true};
@@ -6043,7 +6047,8 @@ function endPurifyCut() {
         // every pair of shots that were already loaded
         const pv = purifyPre[k];
         if (purifyReady(k) || (pv && pv.readyState >= 3)) {
-          G.cut.ph = 'play'; G.cut.t = 0; G.cut.diss = 0.5;
+          G.cut.ph = 'play'; G.cut.t = 0; G.cut.diss = CUT_XF;
+          if (ct.handover) G.cut.prevV = ct.v;              // still moving: dissolved under the new shot
           const pr = G.cut.v.play();
           if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
         } else {
@@ -6051,6 +6056,7 @@ function endPurifyCut() {
           // shot's final frame stays up (drawCut, ct.keep) until this one can
           // play, then dissolves over it
           G.cut.ph = 'hold'; G.cut.t = 0; G.cut.keep = true;
+          if (ct.handover) G.cut.prevV = ct.v;              // the outgoing shot keeps moving while this one readies
         }
         return;
       }
@@ -6107,6 +6113,11 @@ function introSoundTap() {
 // spend the story, short enough that a player who has seen it twice is not
 // held hostage by it.
 const CUT_SKIP_HOLD = 0.8;
+// THE SHOTS FADE INTO EACH OTHER (owner, 2026-11-25: "at the beginning in the story, the scenes are
+// cut one after the other instead of fading into each other, which is what's supposed to happen").
+// The next shot starts while this one still has CUT_XF seconds to run, and the two are dissolved
+// with BOTH moving — the outgoing picture is never a frozen still and there is never black between.
+const CUT_XF = 1.1;
 function updateCut(dt) {
   const ct = G.cut;
   if (!ct) { G.state = 'PLAY'; return; }
@@ -6169,11 +6180,12 @@ function updateCut(dt) {
       const pr = v.play();
       if (pr && pr.catch) pr.catch(() => { if (G.cut === ct) ct.failed = true; });
       ct.ph = 'play'; ct.t = 0;
-      if (ct.keep) { ct.diss = 0.5; ct.keep = false; }
+      if (ct.keep) { ct.diss = CUT_XF; ct.keep = false; }
     }
     return;
   }
   if (ct.ph === 'play') {
+    if (ct.prevV && ct.t >= (ct.diss || CUT_XF)) { try { ct.prevV.pause(); } catch (e) {} ct.prevV = null; }
     // THE CAPTION RIDES THE CLIP, AND HOLDS ITS LAST FRAME UNTIL READ. A clip
     // shorter than its sentence used to take the sentence with it; now a page
     // that has had its reading time turns by itself, a tap reveals or turns,
@@ -6197,6 +6209,12 @@ function updateCut(dt) {
     // before the rewind has necessarily taken effect. Giving the clip a beat to
     // actually start costs nothing and removes a whole class of "the film
     // played for one frame".
+    // the next shot comes in under the last second of this one, if it is ready to move
+    if (G.reel && G.reel.length && ct.patient && !ct.skipped && ct.ran && !ct.handover
+        && v.duration && isFinite(v.duration) && ct.t > CUT_XF + 0.3 && v.currentTime >= v.duration - CUT_XF) {
+      const nk = G.reel[0], nv = purifyPre[nk];
+      if (nv && (purifyReady(nk) || nv.readyState >= 3)) { ct.handover = true; endPurifyCut(); return; }
+    }
     const started = ct.t > 0.25;
     const dead = ct.failed || (v.error != null)
       || (started && v.ended === true)
@@ -6247,10 +6265,14 @@ function drawCut() {
     }
     return;
   }
-  if (ct.ph === 'hold' && ct.keep && ct.snap) {
-    // mid-reel, the next shot still buffering: hold the frame the last one
-    // ended on rather than going dark between two shots of one film
-    try { c.drawImage(ct.snap, 0, 0, 960, 540); } catch (e) {}
+  if (ct.ph === 'hold' && ct.keep && (ct.snap || ct.prevV)) {
+    // mid-reel, the next shot still buffering: the last one plays on (or holds the frame it ended
+    // on) rather than going dark between two shots of one film
+    const pv = ct.prevV;
+    if (pv && pv.videoWidth) {
+      const k0 = Math.min(960 / pv.videoWidth, 540 / pv.videoHeight), w0 = pv.videoWidth * k0, h0 = pv.videoHeight * k0;
+      try { c.drawImage(pv, (960 - w0) / 2, (540 - h0) / 2, w0, h0); } catch (e) {}
+    } else { try { c.drawImage(ct.snap, 0, 0, 960, 540); } catch (e) {} }
     return;
   }
   if (ct.ph === 'hold') {
@@ -6270,8 +6292,15 @@ function drawCut() {
   // THE SHOT BEFORE THIS ONE, still there, going out as this one comes in.
   // Without it the reel fades to black between every shot, and eight shots
   // separated by black is a slideshow no matter how good the shots are.
-  if (ct.snap && ct.ph === 'play' && ct.t < fadeIn) {
-    c.save(); c.globalAlpha = 1 - ct.t / fadeIn;
+  // (Mid-reel the outgoing shot stays at full strength, STILL MOVING (ct.prevV), and the new one
+  // comes up over it: a dissolve that never dips. Out of the game into a film, the frozen frame
+  // the room ended on goes out as the film comes in, as before.)
+  const pv = ct.prevV;
+  if (pv && pv.videoWidth && ct.ph === 'play' && ct.t < fadeIn) {
+    const k0 = Math.min(960 / pv.videoWidth, 540 / pv.videoHeight), w0 = pv.videoWidth * k0, h0 = pv.videoHeight * k0;
+    try { c.drawImage(pv, (960 - w0) / 2, (540 - h0) / 2, w0, h0); } catch (e) {}
+  } else if (ct.snap && ct.ph === 'play' && ct.t < fadeIn) {
+    c.save(); c.globalAlpha = ct.diss ? 1 : 1 - ct.t / fadeIn;
     try { c.drawImage(ct.snap, 0, 0, 960, 540); } catch (e) {}
     c.restore();
   }
@@ -6286,7 +6315,7 @@ function drawCut() {
     c.restore();
     // THE MEMORY REVEAL: it does not cut in, it surfaces — a bloom of its own
     // light over the first half second, then a soft vignette holds it there
-    if (ct.ph === 'play' && ct.t < 0.5) {
+    if (ct.ph === 'play' && ct.t < 0.5 && !ct.diss) {    // (not on a shot dissolving in: a flash there reads as the cut)
       const b = 1 - ct.t / 0.5;
       c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = b * 0.5;
       try { c.drawImage(v, x0 - w * 0.012 * b, y0 - h * 0.012 * b, w * (1 + 0.024 * b), h * (1 + 0.024 * b)); } catch (e) {}
