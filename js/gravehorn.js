@@ -56,8 +56,11 @@ const GH = {
   // ...and the heave comes DOWN: a shock runs the floor both ways from his feet,
   // so the ground beside him is no place to land after striking his back
   quakeV: 560, quakeLife: 0.55, quakeH: 40, quakeW: 46, buckAfter: 0.16,
-  // HIS HIDE: a blow thrown into a wind-up or a strike turns on the plate
-  hide: 0.5,
+  // HIS HIDE: a blow thrown into a wind-up or a strike turns on the plate. 0.4 since 2026-11-24
+  // (was 0.5): the button-masher reached 35/329 three runs in ten, and on one seed took him to the
+  // purification at 1 HP — one blow of margin is not "no one move, repeated, beats a boss". At 0.4
+  // it dies ten in ten, the closest at 42/329; a player who strikes his openings loses nothing.
+  hide: 0.4,
 };
 // the rig, in px. Facing LEFT (the guardian convention): local -x is forward,
 // the origin is the floor under the collider's centre, +y is down.
@@ -418,8 +421,10 @@ function ghPose(b) {
       break;
     }
     case 'hornprep': {
-      P.hr = 0.16 + 0.34 * Math.pow(k, 0.6) + Math.sin(an * 42) * 0.05 * k;   // the head drops and shakes
-      P.bx = 4 * e; P.glowB = Math.pow(k, 0.6); if (b.phase === 2) P.glowS = P.glowB; P.tell = Math.pow(k, 0.6);
+      // the head drops and shakes. Deeper since 2026-11-24 (0.5, was 0.34; forward 8 px, was 4): the
+      // wind-up is said by the BODY — a glow round him had been lending it its shape in the harness
+      P.hr = 0.16 + 0.5 * Math.pow(k, 0.6) + Math.sin(an * 42) * 0.05 * k;
+      P.bx = 8 * e; P.by += 4 * e; P.glowB = Math.pow(k, 0.6); if (b.phase === 2) P.glowS = P.glowB; P.tell = Math.pow(k, 0.6);
       P.steam = k;
       break;
     }
@@ -441,7 +446,9 @@ function ghPose(b) {
       P.eye = 1 + (b.t < 0.16 ? 1.5 : 0);
       break;
     }
-    case 'rush': P.hr = 0.52 + Math.sin(an * 22) * 0.03; P.by += 8; P.br = -0.035; break;
+    // the rush throws his weight forward over the horn (br -0.07, was -0.035: the scraping wind-up
+    // and the run were one shape once the glow that lit the wind-up was gone, 2026-11-24)
+    case 'rush': P.hr = 0.6 + Math.sin(an * 22) * 0.03; P.by += 10; P.br = -0.07; break;
     case 'skid': P.hr = 0.3; P.br = 0.08 * (1 - k); P.by += 4; break;
     case 'wallslam': P.hr = -0.3; P.br = 0.12; P.bx = 6; break;
     case 'stunned': case 'daze': P.hr = 0.38 + Math.sin(an * 6) * 0.12; P.stars = true; P.eye = 0.4 + 0.3 * Math.abs(Math.sin(an * 9)); P.by += 4; break;

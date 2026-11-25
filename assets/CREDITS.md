@@ -204,3 +204,5 @@ Recovered single/dual/joined weapon actions, claw variants, recharge and aerial 
 `characters/agents/{slag,redact,lapid,pupil}/*.webp` — the other four of the Eye's agents (SLAGFATHER, REDACTOR, LAPIDARY, PUPIL), eight states each (2026-11-17): stills by Higgsfield GPT Image 2.6, walks filmed with Higgsfield Kling 4.0 Flash from each agent's own stand plate; masters, job ids and the cut in `source/agents/`. **Generated with Higgsfield.**
 
 `characters/agents/tally/rig/*.webp` — TALLYMAN's body as seven separate parts for the rig (2026-11-17, Higgsfield GPT Image 2.6 against his own stand plate; master `source/agents/tally/parts_asfired.webp`, cut by `tools/agentparts.cjs`). **Generated with Higgsfield.**
+
+`fx/boss/*.webp` — the bosses' attack effects (2026-11-24): frames of original Higgsfield Seedance 2.0 Mini clips generated on black for this game (masters, briefs and job ids in `source/vfx/boss-2026-11-24/`), cut by `tools/vfxstrip.py`. AI-generated; no third-party footage or game assets were used.

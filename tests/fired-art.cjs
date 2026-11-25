@@ -35,8 +35,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     fresh({ bossGlitch: 1, alpha: 1, bossHorn: 1 });
     out.agents = {};
     const POSE = { Stand: {}, Walk8: { vx: -60, walkD: 30 }, Exhale: { windedT: 0.5 }, Coil: { coilT: 0.2 }, Lunge: { lungeT: 0.1 }, Gather: { gatherT: 0.3 }, Lock: { locked: true }, Pure: { tame: 1, calm: true } };
-    const shoot = (e, st, duel) => { const keep = {}; for (const k of ['vx', 'walkD', 'coilT', 'lungeT', 'gatherT', 'windedT', 'locked', 'tame', 'calm', 'sageDuel', 'kbT', 'stagT']) keep[k] = e[k];
-      Object.assign(e, { vx: 0, coilT: 0, lungeT: 0, gatherT: 0, windedT: 0, locked: false, tame: 0, calm: false, kbT: 0, stagT: 0 }, POSE[st]); if (!duel) e.sageDuel = null;
+    const shoot = (e, st, duel) => { const keep = {}; for (const k of ['vx', 'walkD', 'coilT', 'lungeT', 'gatherT', 'windedT', 'locked', 'tame', 'calm', 'sageDuel', 'kbT', 'stagT', 'tSt', '_ex']) keep[k] = e[k];
+      Object.assign(e, { vx: 0, coilT: 0, lungeT: 0, gatherT: 0, windedT: 0, locked: false, tame: 0, calm: false, kbT: 0, stagT: 0, tSt: undefined, _ex: undefined }, POSE[st]);   // (tSt: the duel's own state, js/agent-duel.js — the timers name the pose here) if (!duel) e.sageDuel = null;
       const o = Object.assign(document.createElement('canvas'), { width: 420, height: 320 }), x = o.getContext('2d'); x.setTransform(1, 0, 0, 1, 210 - (e.x + e.w / 2), 280 - (e.y + e.h));
       G.artProbe = 1; G.sageMotion = null; try { e.draw(x); } finally { G.artProbe = 0; }
       const art = duel && G.sageMotion ? G.sageMotion.art : null;

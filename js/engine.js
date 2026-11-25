@@ -580,9 +580,17 @@ const ROARFX = [];
 // A roar passes one colour and gets a halo of the same; the supercharge passes
 // a white edge over the kingdom's own light, so the same wave reads as hers in
 // every zone without the callers each inventing a palette.
+// A ROAR IS PRESSURE LEAVING THE THROAT, NOT A RING DRAWN ROUND THE ONE WHO ROARS. It was three
+// stroked rings and a throat flash centred on the body — light round a body, which the owner has
+// refused four times ("Why still framed with light ?!!!", "remove the ring"); the lion's player
+// found it round NULLFANG's every roar (2026-11-24). It is now what the Wolf King's howl already
+// was (tests/alpha-kit.cjs): the room itself bends with the wave (js/ripple.js shockRipple, a
+// distortion of the picture, no light), and the pressure is a cone of the roar's colour leaving
+// each side. ROARFX stays, and stays empty, for whatever reads it.
 function roarWave(x, y, col, halo) {
-  for (let i = 0; i < 3; i++) ROARFX.push({ x, y, t: -i * 0.12, col, halo: halo || col, seed: (i * 5 + 3) });
-  ROARFX.push({ x, y, t: 0, col, halo: halo || col, flash: true });
+  if (typeof fx === 'function') for (const sd of [1, -1])
+    fx('cone', x + sd * 24, y, { rx: 260, ry: 190, dur: 0.7, flip: sd < 0, col: halo || col, hot: '#ffffff', power: 0.9 });
+  if (typeof shockRipple === 'function') shockRipple(x, y, { R: 420, dur: 0.7, amp: 14, width: 48, col: halo || col, fronts: 2, gap: 0.14, nudge: 3 });
 }
 function updateRoarFX(dt) {
   for (let i = ROARFX.length - 1; i >= 0; i--) {

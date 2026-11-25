@@ -44,10 +44,17 @@ try{const p=await browser.newPage({viewport:{width:960,height:540},serviceWorker
  e=stage();e.lungeT=.01;e.lunges=0;e.vx=e.spd*2.2;player.iT=999;e.update(1/30);
  check('second strike stops before displaying recovery',e.windedT>=.69&&e.vx===0&&e.lungeT===0,{winded:e.windedT,vx:e.vx});
  e=stage();e.gatherT=.01;player.iT=999;e.update(1/30);
- check('ring release has an explicit non-attacking recovery',e.ringR!=null&&e.windedT>=.54&&e.vx===0,{radius:e.ringR,recovery:e.windedT});
+ // (the duel's own recovery, never under the 0.45 s a player needs to punish it: the boss ladder,
+ // 2026-11-24, shortened the openings after the rhino on purpose — js/agent-duel.js AGENT_DUEL.ringRec)
+ const ringRec=typeof AGENT_DUEL!=='undefined'?Math.max(.45,AGENT_DUEL.ringRec-.01):.54;
+ check('ring release has an explicit non-attacking recovery',e.ringR!=null&&e.windedT>=ringRec&&e.vx===0,{radius:e.ringR,recovery:e.windedT,need:ringRec});
  const origin={x:e.x+e.w/2,y:e.y+e.h};e.x+=100;e.ringR=80;player.x=origin.x+80-player.w/2;player.y=origin.y-player.h;player.on=true;player.iT=0;player.cores=5;e.windedT=.4;
  let centers=[];const el=ctx.ellipse;ctx.ellipse=function(x,y,rx,...args){if(Math.abs(rx-e.ringR)<.01)centers.push({x,y});return el.call(this,x,y,rx,...args)};
- try{drawSage(ctx,e);}finally{ctx.ellipse=el;}
+ // (since 2026-11-24 the ring is drawn as two generated fire crests running the floor both ways from where
+ // it was released — js/bossvfx.js — and never as a ring round the agent: the centre is between them)
+ const fronts=[];const dl=typeof drawBossVfxLoop==='function'?drawBossVfxLoop:null;if(dl)drawBossVfxLoop=function(c,n,t,x,y,...r){if(n==='agent_wave')fronts.push({x,y});return dl.call(this,c,n,t,x,y,...r)};
+ try{drawSage(ctx,e);}finally{ctx.ellipse=el;if(dl)drawBossVfxLoop=dl;}
+ if(!centers.length&&fronts.length===2&&Math.abs(Math.abs(fronts[0].x-fronts[1].x)-2*e.ringR)<.5)centers.push({x:(fronts[0].x+fronts[1].x)/2,y:fronts[0].y-2});
  check('the ring drawing stays at its release location',centers.length&&Math.abs(centers[0].x-origin.x)<.1&&Math.abs(centers[0].y-origin.y)<.1,{origin,centers});
  e.update(1/60);check('ring collision agrees with that release location',player.cores<5,{cores:player.cores});
  e=stage();e.gatherT=.01;player.iT=999;e.update(1/30);const o={x:e.x+e.w/2,y:e.y+e.h};e.ringR=80;player.x=o.x+80-player.w/2;player.y=o.y-player.h-60;player.on=true;player.iT=0;player.cores=5;e.update(1/60);

@@ -629,3 +629,14 @@ describe it.
 
 - `work_loop_keyed.webp` — the Oracle's filmed work loop exactly as it was keyed (16 cells, 320 px): the dark inside of the cable shroud went with the plate, so the lower body is loose strands. `tools/shroudback.cjs` derives the shipped `assets/characters/npc/mono/work_loop.webp` from it by filling the robe behind the art (2026-11-16). A take keyed with its interior intact is queued (ART_QUEUE §2bv).
 - `resting_asfired.webp`, `talk_1_asfired.webp`, `talk_2_asfired.webp` — the Oracle powered down, and his talking pair (2026-11-17, GPT Image 2.6 against a cell of his own work loop; jobs `9e601989-075b-4c9c-b2c8-5d0bfc71042c`, `d6e096d8-3dd8-49c9-b565-c50ee7cd12d6`, `b131109b-c7ce-44da-94e3-7acdb8869cc0`). Cut with `tools/plate.cjs` at ONE scale (`PLATE_SCALE=0.314 PLATE_ANCHOR=x`) so a raised hand does not shrink the body: `characters/npc/mono/{resting,talk_1,talk_2}.webp`.
+
+## `vfx/boss-2026-11-24/` — the bosses' attacks, as generated effects (2026-11-24)
+
+- Thirteen Seedance 2.0 Mini clips on black (archived re-encoded at CRF 30, no audio), their job ids and
+  briefs in `jobs.json`, and `strips.json`, the exact sample times and crops `tools/vfxstrip.py` cut
+  them at into `fx/boss/*.webp`. The agent's ember bolt, burst, fire pillar, staff slash and fire
+  wave; NULLFANG's floor shock, null bolt, claw rake and glitch burst; the Wolf King's bite and
+  landing; CHIME's ice shard and shatter. Owner, 2026-11-24: "Why is the boss attk graphics so
+  basic?" — they had been circles and strokes drawn in code. The flash frames the generator opens
+  some clips with (a white field) are left out of the sample times, and the staff slash uses only
+  its first, crescent cells: its later cells close into a whole circle, a ring round the agent.

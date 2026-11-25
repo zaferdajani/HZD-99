@@ -32,7 +32,7 @@ const { chromium } = require('playwright');
       // marked as made and the crowd-answers are kept quiet.)
       b.called = 1;
       const heard = [], fxs = [], rips = []; const sfxWas = sfx, fxWas = fx, srWas = shockRipple;
-      sfx = (n) => { heard.push(n); }; fx = (k, x, y, o) => { fxs.push(k); return fxWas(k, x, y, o); };
+      sfx = (n) => { heard.push(n); }; fx = (k, x, y, o) => { fxs.push(k); return fxWas(k, x, y, o); }; var bvWas = typeof bossVfx === 'function' ? bossVfx : null; if (bvWas) bossVfx = (n, x, y, o) => { fxs.push('vfx:' + n); return bvWas(n, x, y, o); };
       shockRipple = (x, y, o) => { rips.push(Object.assign({}, o)); return srWas(x, y, o); };
       // settle it on its floor, with her far away and untouchable
       for (let i = 0; i < 30; i++) { player.iT = 9; b.st = 'rest'; b.t = 0.4; update(1 / 60); }
@@ -73,7 +73,7 @@ const { chromium } = require('playwright');
         return { lost: c1 - player.cores, far }; };
       out.jumped = await air(220, true);
       out.beyond = await air(420, false);
-      sfx = sfxWas; fx = fxWas; return out;
+      sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; return out;
     })()`));
     check('A. the middle distance takes turns: the leap, then the rend', A.order.join(',') === 'coil,rendwarn,coil,rendwarn', A.order.join(' > '));
     check('   the rend is warned for TELL_SWIPE, aimed at her, in its own voice', Math.abs(A.warn - A.TELL_SWIPE) <= 0.04 && A.toward && A.heard.length === 2, A.warn.toFixed(3) + ' s (' + A.TELL_SWIPE + '); heard ' + A.heard.join(','));
@@ -99,7 +99,7 @@ const { chromium } = require('playwright');
       run(300, (i) => { if (b.st === 'furywarn') { warn++; put(150); } if (b.fury && fired < 0) fired = i;
         if (fired >= 0) { far = Math.max(far, (player.x - x0) * side); if (++n > 50) return false; } });
       out.warn = warn / 60; out.TELL_HEAVY = TELL_HEAVY; out.thrown = far; out.cores = c0 - player.cores; out.fury = !!b.fury;
-      out.heard = ['alpha_furywarn', 'alpha_fury'].filter(n => heard.includes(n)); out.fx = ['pillar', 'gather'].filter(k => fxs.includes(k));
+      out.heard = ['alpha_furywarn', 'alpha_fury'].filter(n => heard.includes(n)); out.fx = ['gather'].filter(k => fxs.includes(k)); out.onBody = ['pillar', 'flash'].filter(k => fxs.includes(k));
       out.waves = rips.length; out.rings = ROARFX.length;
       // it rests after it, and it never happens twice
       let rest = 0, again = 0; run(400, () => { player.iT = 9; if (b.st === 'rest') rest = Math.max(rest, b.t); if (b.st === 'furywarn') again++; });
@@ -107,13 +107,15 @@ const { chromium } = require('playwright');
       // and from then on it burns: embers, and ghosts when it moves fast
       const p0 = parts.length; b.st = 'leap'; b.vx = 400; b.vy = -300; b.t = 1; run(12, () => { player.iT = 9; });
       out.ghosts = (b.ghosts || []).length;
-      sfx = sfxWas; fx = fxWas; return out;
+      sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; return out;
     })()`));
     check('B. above half health there is no fury', B.fury && B.warn > 0 && B.during === 'roarwarn', 'state while above half: ' + B.during);
     check('   at half the midpoint stagger is still hers, and the blow in progress is finished first', !B.cut && B.sawRoar && B.stag >= 1.3, 'staggered ' + B.stag.toFixed(2) + ' s, then ' + (B.sawRoar ? 'the roar, then ' : '') + B.st);
     check('   it is warned for TELL_HEAVY, in its own voice', Math.abs(B.warn - B.TELL_HEAVY) <= 0.05 && B.heard.length === 2, B.warn.toFixed(3) + ' s (' + B.TELL_HEAVY + '); heard ' + B.heard.join(','));
     check('   the roar THROWS her and does not hurt her', B.thrown >= 60 && B.cores === 0, 'thrown ' + B.thrown.toFixed(0) + ' px, cores lost ' + B.cores);
-    check('   ...with the light of it, and a wave through the room instead of drawn rings', B.fx.length === 2 && B.waves >= 2 && B.rings === 0, B.fx.join(',') + '; ' + B.waves + ' waves, ' + B.rings + ' stroked rings');
+    // (2026-11-24: no pillar of light out of him and no flash round him — the ledger, light round a body.
+    // The fury is the light gathering, the room bending, the floor cracking)
+    check('   ...with the light of it, and a wave through the room instead of drawn rings — and no light round him', B.fx.length === 1 && B.onBody.length === 0 && B.waves >= 2 && B.rings === 0, B.fx.join(',') + '; on his body: ' + (B.onBody.join(',') || 'nothing') + '; ' + B.waves + ' waves, ' + B.rings + ' stroked rings');
     check('   it rests afterwards, and it happens once', B.rest >= 0.5 && B.again === 0, 'rest ' + B.rest.toFixed(2) + ' s, again ' + B.again);
     check('   from then on it leaves its ghosts behind it when it moves fast', B.ghosts >= 2, B.ghosts + ' ghosts in a leap');
 
@@ -137,7 +139,7 @@ const { chromium } = require('playwright');
       out.air = leap(true, hang(95));          // fury, the same place, in the air
       out.far = leap(true, stand(175));        // fury, past the quake's reach
       out.heard = heard.includes('alpha_quake'); out.fx = ['ground', 'cracks'].filter(k => fxs.includes(k)); out.reach = ALPHA_FX.quake;
-      sfx = sfxWas; fx = fxWas; return out;
+      sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; return out;
     })()`));
     check('C. without the fury a landed leap shakes nothing', C.plain.end === 'turn' && C.plain.lost === 0 && C.plain.mark == null, 'ended ' + C.plain.end + ', cores lost ' + C.plain.lost);
     check('   a fury leap that lands takes a core from a girl standing inside ' + C.reach + ' px of it', C.near.end === 'turn' && C.near.lost === 1 && C.near.quake === 1 && C.heard && C.fx.length === 2, 'ended ' + C.near.end + ', cores ' + C.near.lost + ', quake logged ' + C.near.quake);
@@ -158,13 +160,13 @@ const { chromium } = require('playwright');
       G.enemies = G.enemies.filter(e => e === b);
       out.howl = move(2, false, 380);    // far, alt -> true with room in the pack: the howl
       out.pack = G.enemies.filter(e => e !== b).map(e => ({ hunt: e.hunt, snarl: e.snarlT > 0 }));
-      sfx = sfxWas; fx = fxWas; return out;
+      sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; return out;
     })()`));
     check('D. the claw draws its arc and has its own sound', /claw/.test(D.claw.st) && /slash/.test(D.claw.fx) && /alpha_claw/.test(D.claw.heard), D.claw.st + ' | fx ' + D.claw.fx + ' | ' + D.claw.heard);
-    check('   the bite flashes at the jaw and snaps', /bite/.test(D.bite.st) && /flash/.test(D.bite.fx) && /alpha_snap/.test(D.bite.heard), D.bite.st + ' | fx ' + D.bite.fx + ' | ' + D.bite.heard);
+    check('   the bite snaps its generated jaws in front of the muzzle (no flash on its head)', /bite/.test(D.bite.st) && /vfx:alpha_bite/.test(D.bite.fx) && !/flash/.test(D.bite.fx) && /alpha_snap/.test(D.bite.heard), D.bite.st + ' | fx ' + D.bite.fx + ' | ' + D.bite.heard);
     check('   the roar goes through the ground it stands on, and its wave ends where its stun does', /roar/.test(D.roar.st) && /ground/.test(D.roar.fx) && /alpha_bark/.test(D.roar.heard)
       && D.roar.waves.length >= 1 && D.roar.waves.every(w => w.R <= 262) && D.roar.rings === 0, D.roar.st + ' | fx ' + D.roar.fx + ' | waves ' + D.roar.waves.map(w => w.R).join(','));
-    check('   the howl raises its pillar, and the pack it calls arrives hunting', /howl/.test(D.howl.st) && /pillar/.test(D.howl.fx) && D.pack.length >= 1 && D.pack.every(p => p.hunt), D.howl.st + ' | fx ' + D.howl.fx + ' | ' + D.pack.length + ' wolves');
+    check('   the howl goes through the room (no pillar of light out of him), and the pack it calls arrives hunting', /howl/.test(D.howl.st) && !/pillar|flash/.test(D.howl.fx) && D.howl.waves.length >= 2 && D.pack.length >= 1 && D.pack.every(p => p.hunt), D.howl.st + ' | fx ' + D.howl.fx + ' | ' + D.howl.waves.length + ' waves | ' + D.pack.length + ' wolves');
     check('   ...and the howl is a wave through the room, not rings drawn on it', D.howl.waves.length >= 2 && D.howl.waves.some(w => w.push > 0) && D.howl.rings === 0, D.howl.waves.length + ' waves, ' + D.howl.rings + ' stroked rings');
 
     // ---- E. THE HOWL'S WAVE -------------------------------------------------------
@@ -186,7 +188,7 @@ const { chromium } = require('playwright');
         G.artProbe = 0; G.save.opts.reduceMotion = false;
         return { fired, bent, bentMax, nudged, shook, live, pushed: far, lost: c0 - player.cores, left: RIPPLES.length }; };
       const out = { plain: howl({}), calm: howl({ calm: 1 }), probe: howl({ probe: 1 }) };
-      sfx = sfxWas; fx = fxWas; shockRipple = srWas; return out;
+      sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; shockRipple = srWas; return out;
     })()`));
     check('E. the howl bends the picture as it passes, for most of a second and a half', E.plain.fired >= 0 && E.plain.bent >= 60 && E.plain.bentMax >= 16, E.plain.bent + ' frames bent, up to ' + E.plain.bentMax + ' sub-rings in one frame');
     check('   it pushes her back one step and costs her nothing', E.plain.pushed >= 12 && E.plain.pushed <= 60 && E.plain.lost === 0, 'pushed ' + E.plain.pushed.toFixed(0) + ' px, cores lost ' + E.plain.lost);

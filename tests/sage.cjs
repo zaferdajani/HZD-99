@@ -55,11 +55,14 @@ const { chromium } = require('playwright');
     // ---- claws: down to the floor, never past it ------------------------
     delete G.save.flags.crystal; delete G.save.flags.crystal2; G.boomer = null;
     const floor = Math.round(sg.hpMax0 * 0.3);
-    for (let i = 0; i < 60; i++) dealDmg(sg, 20, null, sg.x, sg.y, true);
+    // (every blow in its OPENING: since the boss ladder, 2026-11-24, a blow anywhere else is turned
+    // on the staff — js/agent-duel.js. What is measured here is the floor, not the rate)
+    const opening = () => { if (typeof AGENT_DUEL !== 'undefined' && !sg.locked) { sg.tSt = 'exhale'; sg.tT = 0.5; sg.openHits = 0; sg.hideK = 1; } };
+    for (let i = 0; i < 60; i++) { opening(); dealDmg(sg, 20, null, sg.x, sg.y, true); }
     out.clawFloor = sg.hp === floor || (sg.hp >= floor && sg.hp <= sg.hpMax0 * 0.46);
     out.locks = !!sg.locked;
     const hpBefore = sg.hp;
-    dealDmg(sg, 50, null, sg.x, sg.y, true);   // still bare-clawed
+    opening(); dealDmg(sg, 50, null, sg.x, sg.y, true);   // still bare-clawed
     out.clawGlances = sg.hp >= hpBefore && !sg.tame;
 
     // ---- crystal: purity fills, full purity tames -----------------------

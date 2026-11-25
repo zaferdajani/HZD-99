@@ -1284,7 +1284,8 @@ function beastTurnState(b) {
   if (b.dead || b.stagT > 0) return null;
   const to = b.face || 1, fv = b.faceVis == null ? to : b.faceVis;
   if (Math.abs(to - fv) < 0.02) return null;
-  if (!/^(idle|stalk|run|perch|recover|crouch|springwarn|nullhop)$/.test(b.st) && !b.purified) return null;
+  // rakewarn: NULLFANG's turning rake (js/nullfang-duel.js) — the filmed turn is its tell
+  if (!/^(idle|stalk|run|perch|recover|crouch|springwarn|nullhop|rakewarn)$/.test(b.st) && !b.purified) return null;
   const im = (typeof MEDIA_RAW !== 'undefined') && MEDIA_RAW[BEAST_TURN.key];
   if (!im || !im.naturalWidth) { if (typeof mediaFetch === 'function') mediaFetch(BEAST_TURN.key, true); return null; }
   if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return null;

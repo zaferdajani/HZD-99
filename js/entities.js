@@ -2958,7 +2958,7 @@ class Player {
           // (measured). The count is a MEMORY now (POGO_MEMORY): it clears only
           // when she has left his back alone that long. And the fade ends at
           // nothing — the third one inside it rings off the plate.
-          const bounce = this.swing.ay > 0.5 && e instanceof Boss;
+          const bounce = this.swing.ay > 0.5 && (e instanceof Boss || e.kind === 'sage');   // (the agent too: the gauntlet's pogo bot broke it untouched)
           const fade = bounce ? POGO_FADE[Math.min(this.pogoN || 0, POGO_FADE.length - 1)] : 1;
           if (bounce) { this.pogoN = (this.pogoN || 0) + 1; this.pogoMemT = POGO_MEMORY; e.plungedT = 0.7; }
           if (bounce && fade <= 0) {
@@ -2982,7 +2982,14 @@ class Player {
               if (this.on) this.vy = -ATTACKS.risecut.lift, this.on = false;
             }
           }
-          this.gainVolts(11);
+          // A BLOW PAYS FOR A HEAL ONLY WHEN IT WAS EARNED (the gauntlet, 2026-11-24: "trade a hit, heal
+          // inside its invulnerability, trade again" beat every guardian, the rhino included — a turned
+          // blow paid 11 volts like a clean one, and a heal of 33 fit inside the 1.3 s she is untouchable
+          // after being hit). A blow thrown while she is still invulnerable from a hit pays nothing, and
+          // neither does a blow a guardian's plate turned: only a blow into an opening buys a heal.
+          if (!((this.iT || 0) > 0.25 && (e instanceof Boss || e.kind === 'sage'))
+              && !((e instanceof Boss || e.kind === 'sage') && (e.turnedT || 0) > 0.2))
+            this.gainVolts(11);
           // IMPACT, WEIGHTED. One flat freeze for every hit makes a finisher land
           // like a jab. Hit-stop, shake and rumble now all scale with what the
           // blow actually was, so the third hit of a combo reads as the third hit.
@@ -6126,6 +6133,8 @@ class Proj {
     if (this.glcFx === 'lance') return 44;
     if (this.glcFx === 'shard') return 8;
     if (this.feather) return Math.abs(this.vx) + Math.abs(this.vy) > 460 ? 13 : 4;
+    // a generated shard (js/bossvfx.js) is drawn ~2.4 r from its middle to its point
+    if (this.vfx === 'chime_shard') return this.r * 1.4;
     return 0;
   }
   boxes() {
@@ -6144,7 +6153,9 @@ class Proj {
     const bump = shotSweep(sx, sy, this.x, this.y);
     if (bump) {
       this.x = bump.x; this.y = bump.y;
-      this.dead = true; burst(this.x, this.y, 6, this.color, 130, 0.3, 400, 2, true); return;
+      this.dead = true; burst(this.x, this.y, 6, this.color, 130, 0.3, 400, 2, true);
+      if (this.vfxEnd && typeof bossVfx === 'function' && !G.artProbe) bossVfx(this.vfxEnd, this.x, this.y, { h: this.r * 12 });
+      return;
     }
     if (this.friendly) {
       const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
@@ -6190,6 +6201,7 @@ class Proj {
     } else if (!player.dead && this.touches(player)) {
       this.dead = true;
       player.hurt(DF().edmg, this.x);
+      if (this.vfxEnd && typeof bossVfx === 'function' && !G.artProbe) bossVfx(this.vfxEnd, this.x, this.y, { h: this.r * 12 });
       if (this.frost) {                          // Archivist beam: frozen joints
         player.slowT = Math.max(player.slowT, 2);
         burst(this.x, this.y, 12, '#bfe8ff', 180, 0.5, 100, 2.5, true);
@@ -6201,6 +6213,9 @@ class Proj {
     if (this.feather && typeof drawFeather === 'function' && drawFeather(c, this)) return;
     // GLACIERE's void lance and ice shards wear hers
     if (this.glcFx && typeof drawGlcProj === 'function' && drawGlcProj(c, this)) return;
+    // a boss's shot that wears a generated strip (js/bossvfx.js): nose first along its flight
+    if (this.vfx && typeof drawBossVfxLoop === 'function'
+      && drawBossVfxLoop(c, this.vfx, (G.time || 0) + this.x * 0.013, this.x, this.y, this.r * 5.2, false, Math.atan2(this.vy, this.vx), 1)) return;
     c.shadowColor = this.color; c.shadowBlur = 12; c.fillStyle = this.color;
     c.beginPath(); c.arc(this.x, this.y, this.r, 0, 7); c.fill();
     c.shadowBlur = 0;
@@ -11429,12 +11444,24 @@ const BOSS_SELF_STAG = { nullend: 1, cffloor: 1, daze: 1 };
 // unease is the point, and it is the reason they are procedural geometry and
 // light rather than authored creatures (ART_BIBLE.md §1, class E).
 const MINIS = {
-  chime:  { w: 44, h: 58, hp: 130, zone: 'A', col: '#9fe8ff', acc: '#eefcff' },
-  carrier:{ w: 52, h: 46, hp: 165, zone: 'B', col: '#57a8ff', acc: '#cfe6ff' },
-  moth:   { w: 60, h: 48, hp: 200, zone: 'C', col: '#ffab4a', acc: '#ffe6b8' },
-  lattice:{ w: 50, h: 62, hp: 235, zone: 'D', col: '#bfeaff', acc: '#ffffff' },
-  lens:   { w: 46, h: 46, hp: 270, zone: 'X', col: '#ff7ad1', acc: '#ffd9f2' },
+  // (owner, 2026-11-24: every boss after the rhino is harder than the rhino. Measured: CHIME died
+  // in about ten blows. Health ×1.5 for all five — the later ones were scaled from it.)
+  chime:  { w: 44, h: 58, hp: 220, zone: 'A', col: '#9fe8ff', acc: '#eefcff' },
+  carrier:{ w: 52, h: 46, hp: 250, zone: 'B', col: '#57a8ff', acc: '#cfe6ff' },
+  moth:   { w: 60, h: 48, hp: 300, zone: 'C', col: '#ffab4a', acc: '#ffe6b8' },
+  lattice:{ w: 50, h: 62, hp: 350, zone: 'D', col: '#bfeaff', acc: '#ffffff' },
+  lens:   { w: 46, h: 46, hp: 400, zone: 'X', col: '#ff7ad1', acc: '#ffd9f2' },
 };
+// THE CONSTRUCTS' FIGHT RULES (the gauntlet, 2026-11-24: CHIME was open the whole fight and a
+// button-masher killed it in five seconds). Their wind-up is the kingdom-1 floor and over it; they
+// are plated while they act and open only while they rest; and a player who lands three blows in a
+// breath gets the PEAL — the far move at once, faster, with more of it. (The rest stays 0.6 s: at 0.5
+// CHIME, which stands on the road before NULLFANG, measured as hard as he is — and the kingdom climbs.)
+const MINI_TELL = 0.45, MINI_HIDE = 0.12, MINI_REST = 0.60;
+const MINI_GREED = { n: 3, win: 1.1, tell: 0.45, spd: 1.15 };
+// CHIME stands on the road (A9, before NULLFANG): its plate is thinner, so a player who has not yet
+// learned its rests still wears it down — the chapter's playthrough measured it a wall at 0.12
+const MINI_HIDE_OF = { chime: 0.16 };
 function isMini(b) { return !!(b && MINIS[b.kind]); }
 // TWO AUTHORED PLATES EACH, and the reason there are two is the silhouette law.
 //
@@ -11510,6 +11537,11 @@ function miniStripCell(b) {
 function drawMini(c, b, cx, cy) {
   const M = MINIS[b.kind], A = MINI_ART[b.kind], t = b.anim || 0;
   const warn = /warn$/.test(b.st || '');
+  // NOTHING ROUND THE BODY (the owner, four times: "Why still framed with light ?!!!"). A radial
+  // wash used to sit behind every construct, brighter on the wind-up. The wind-up is read off the
+  // FLOOR under it now, where the note will fall — light on the ground, never a glow round a body.
+  if (warn && !G.artProbe && !b.dead && typeof tellFloorLight === 'function')
+    tellFloorLight(c, cx, cy + b.h * 0.5, Math.max(40, b.w), Math.pow(clamp(1 - (b.t || 0) / Math.max(0.01, b.windT || MINI_TELL), 0, 1), 0.62));
   c.save();
   c.translate(cx, cy);
   // the filmed move, when its strip is here: the death take holds its last
@@ -11518,14 +11550,6 @@ function drawMini(c, b, cx, cy) {
   const sim = pick && MEDIA_RAW[pick.S.key];
   if (pick && sim && sim.naturalWidth) {
     if (b.dead) c.globalAlpha *= clamp((b.deathAnimT || 0) / 0.35, 0, 1);
-    {
-      const R = Math.max(b.w, b.h) * 1.7;
-      const g = c.createRadialGradient(0, 0, 0, 0, 0, R);
-      g.addColorStop(0, M.col); g.addColorStop(1, 'rgba(0,0,0,0)');
-      c.save(); c.globalCompositeOperation = 'lighter';
-      c.globalAlpha *= (warn ? 0.26 : 0.14) * (0.85 + 0.15 * Math.sin(t * 6));
-      c.fillStyle = g; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.restore();
-    }
     const S = pick.S, H = b.h * CHIME_STRIP_H * S.k;
     const bob = Math.sin(t * (A.fly ? 3.1 : 1.6)) * (A.fly ? 4 : 1.6);
     const lean = clamp((b.vx || 0) / 900, -0.22, 0.22) * (A.fly ? 1 : 0.4);
@@ -11545,15 +11569,6 @@ function drawMini(c, b, cx, cy) {
     return;
   }
   if (b.dead) c.globalAlpha *= Math.max(0, 1 - (1.6 - (b.deathAnimT || 0)) / 1.6);
-  // the wash behind it, which is what the wind-up is read from at a glance
-  {
-    const R = Math.max(b.w, b.h) * 1.7;
-    const g = c.createRadialGradient(0, 0, 0, 0, 0, R);
-    g.addColorStop(0, M.col); g.addColorStop(1, 'rgba(0,0,0,0)');
-    c.save(); c.globalCompositeOperation = 'lighter';
-    c.globalAlpha = (warn ? 0.26 : 0.14) * (0.85 + 0.15 * Math.sin(t * 6));
-    c.fillStyle = g; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.restore();
-  }
   const im = MEDIA_IMG[warn ? A.warn : A.rest];
   if (im && im.naturalWidth) {
     // scaled to the hitbox by HEIGHT and drawn about its centre. The wind-up
@@ -11614,6 +11629,12 @@ const MINI_KIT = {
 // WHAT EACH COMMITTED MOVE ACTUALLY DOES. Split out of the state machine so the
 // machine stays readable — the machine is about WHEN, this is about WHAT.
 function miniFire(b, st, K) {
+  const n0 = G.projs.length;
+  miniFire0(b, st, K);
+  // CHIME's notes are generated ice shards that shatter where they strike (js/bossvfx.js)
+  if (b.kind === 'chime') for (let i = n0; i < G.projs.length; i++) { const q = G.projs[i]; if (!q.friendly) { q.vfx = 'chime_shard'; q.vfxEnd = 'chime_burst'; } }
+}
+function miniFire0(b, st, K) {
   const col = MINIS[b.kind].col;
   const cx = b.cx(), cy = b.cy();
   // Player has no cx()/cy() — only Boss does. Writing player.cy() crashed every
@@ -13520,10 +13541,16 @@ class Boss {
             this.swiped = true;
             this._slashT = .18;
             const f = this.face || 1;
-            const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
+            // THE CLAW ARC DRAWN IS THE BOX THAT HITS (owner: "what looks sharp cuts"). In
+            // NULLFANG's duel (js/nullfang-duel.js) the paw reaches cx+150, and the arc is drawn
+            // to cx+150 (rx 123: the shader's outer claw sits at 0.865 rx, centred cx+44)
+            const duel = typeof nfDuelOn === 'function' && nfDuelOn(this), SW = duel ? NF_DUEL.swipeBox : 108;
+            const box = { x: this.cx() + (f > 0 ? 6 : -6 - SW), y: this.y - 24, w: SW, h: this.h + 28 };
             burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
             // four claws through the air, exactly over the box they strike
-            if (typeof fx === 'function') fx('slash', this.cx() + f * 44, this.cy() - 4, { rx: 104, ry: 96, dur: 0.3, flip: f < 0, power: 4, col: '#b06aff', hot: '#f4e6ff' });
+            if (typeof fx === 'function') fx('slash', this.cx() + f * 44, this.cy() - 4, { rx: duel ? 123 : 104, ry: duel ? 112 : 96, dur: 0.3, flip: f < 0, power: 4, col: '#b06aff', hot: '#f4e6ff' });
+            // ...and the generated claws over the same box (js/bossvfx.js)
+            if (duel && typeof bossVfx === 'function' && !G.artProbe) bossVfx('nf_claw', box.x + box.w / 2, box.y + box.h / 2, { h: SW * 1.2, flip: f > 0 });
             beastSound('swipe');
             if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
           }
@@ -13672,11 +13699,9 @@ class Boss {
             cam.shake = 11; beastSound('roar'); G.flash = Math.max(G.flash, 0.18);
             this.roarBuzzT = 0.6;
             if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
-            if (typeof roarWave === 'function') roarWave(this.cx() + this.face * 30, this.cy() - 10, '#b48cff');
             // the roar as pressure leaving the throat, both ways: it shoves from either side
             if (typeof fx === 'function') for (const sd of [1, -1])
               fx('cone', this.cx() + sd * 30, this.cy() - 12, { rx: 300, ry: 220, dur: 0.75, flip: sd < 0, col: '#b48cff', hot: '#ffffff', power: sd === this.face ? 1.2 : 0.8 });
-            if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
             // ("The roaring was not intimidating." It shook the camera and drew
             // two cones. The picture itself bows to it now — ripple.js — and the
             // roar that answers a broken binding is the big one: wider, longer,
@@ -13801,8 +13826,8 @@ class Boss {
               addPart(this.cx() + rnd(-20, 20), this.y + this.h - 6,
                 rnd(-240, 240), rnd(-260, -140), 0.5, '#8a8a96', 2.5, 700, true);
             const box = { x: this.cx() - 92, y: this.y - 8, w: 184, h: this.h + 22 };
-            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
-            if (this.phase === 2 && typeof G.addRing === 'function') G.addRing(this.cx(), this.y + this.h - 8);
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.dive'); this.denied = (this.denied || 0) + 1; this.hitSince = true; }   // (st is already 'recover' here: it was labelled glitch.recover)
+            if (this.phase === 2 && typeof bossVfx === 'function') bossVfx('nf_burst', this.cx(), this.y + this.h - 30, { s: 1.1 });
           }
         } else if (this.st === 'recover') {
           // a beat of stillness after the landing — your window
@@ -14167,7 +14192,6 @@ class Boss {
           if (!this.bcCried && this.t <= 1.1) {
             this.bcCried = true; sfx('roar'); cam.shake = 7;
             this.cabV = (this.cabV || 0) - 1.1;   // the screech throws her back
-            if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy());
           }
           if (chance(0.4)) addPart(this.cx() + rnd(-20, 20), this.y + this.h - 8,
             rnd(-40, 40), rnd(-30, 60), 0.3, '#ff4c5c', 2.5, 0, true);
@@ -14973,32 +14997,49 @@ class Boss {
         // measured 60-98% motionless. The state machine decides intent; the
         // block after it always runs.
         if (this.st === 'idle' || this.st === 'rest') {
-          if (this.t <= 0) {
+          // GREED: three blows landed inside a breath, and it answers at once — the far move, faster
+          if (this.miniGreed) {
+            this.miniGreed = false; this.miniPeal = true;
+            this.st = K.far + 'warn'; this.t = MINI_GREED.tell;
+          } else if (this.t <= 0) {
             // alternate the two moves rather than rolling for them: a coin
             // flip between attacks is what combat-design calls unlearnable,
             // and it is why NULLFANG's double swipe was fixed
             this.miniAlt = !this.miniAlt;
             const far = adist > K.near;
             this.st = (far ? K.far : (this.miniAlt ? K.close : K.far)) + 'warn';
-            this.t = TELL_FAST;
+            this.t = MINI_TELL;
           }
         } else if (/warn$/.test(this.st)) {
           // every wind-up is named <move>warn, so TELL_ST fires its sound and
           // Boss.draw paints the amber — no per-construct telegraph code
-          this.windT = TELL_FAST;
+          this.windT = this.miniPeal ? MINI_GREED.tell : MINI_TELL;
           if (this.t <= 0) {
             this.st = this.st.replace(/warn$/, '');
             this.t = K.dur; this.fired = false; this.lunged = false;
           }
         } else {
-          if (!this.fired) { this.fired = true; miniFire(this, this.st, K); }
+          if (!this.fired) {
+            this.fired = true; const n0 = G.projs.length; miniFire(this, this.st, K);
+            // the peal: what it threw goes faster, and it throws four more in the gaps
+            if (this.miniPeal) { this.miniPeal = false;
+              for (let i = n0; i < G.projs.length; i++) { const q = G.projs[i]; if (!q.friendly) { q.vx *= MINI_GREED.spd; q.vy *= MINI_GREED.spd; } }
+              for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + Math.PI / 8 + (this.anim || 0); this.shoot(Math.cos(a) * 207, Math.sin(a) * 207, 6); }
+              cam.shake = Math.max(cam.shake, 4); }
+          }
           if (this.st === 'lunge' && !this.lunged) {
             this.lunged = true; this.vx = this.face * K.lungeV; if (K.fly) this.vy = 0;
           }
           if (this.st === 'lunge' && !player.dead && player.iT <= 0 && aabb(hurtBoxOf(this), player))
             player.hurt(DF().edmg, this.cx(), this.kind + '.lunge');
-          if (this.t <= 0) { this.lunged = false; this.st = 'rest'; this.t = bossRest(this, 0.55); }
+          if (this.t <= 0) { this.lunged = false; this.st = 'rest'; this.t = bossRest(this, MINI_REST); }
         }
+        // PLATED WHILE IT ACTS: a blow into a wind-up or a strike is turned; its rest is the opening
+        this.hideK = (this.st === 'rest' || this.st === 'idle') ? 1 : (MINI_HIDE_OF[this.kind] || MINI_HIDE);
+        // ...and three blows landed inside a breath wake it (counted off what actually came off its health)
+        if (this.miniHp != null && this.hp < this.miniHp - 0.5) { this.miniHits = (this.miniHits || []).filter(q => this.anim - q < MINI_GREED.win); this.miniHits.push(this.anim);
+          if (this.miniHits.length >= MINI_GREED.n && (this.st === 'rest' || this.st === 'idle')) { this.miniHits = []; this.miniGreed = true; if (typeof sfx === 'function') sfx('tellmid'); } }
+        this.miniHp = this.hp;
         // ---- AND WHERE IT IS -------------------------------------------
         // It is NEVER parked. A construct that holds a station between moves is
         // a turret with a wind-up, which is the complaint the guardians were
@@ -15041,7 +15082,7 @@ class Boss {
       burst(this.cx(), this.cy(), 14, '#ffffff', 200, 0.5, 0, 3, true);
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro'
-      && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx());
+      && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
     } finally {
       if (lionMotion) beastMotionEnd(this, dt);
       if (this.kind === 'alpha') alphaMotionEnd(this, dt);
@@ -15478,7 +15519,7 @@ class Boss {
     // and her rest state already lives in that hue.
     //
     // So the floor is structural: any state whose NAME says a blow is coming
-    // gets a rising amber bloom behind the animal and a hot ring at its feet,
+    // gets light on the floor under it (the bloom that stood behind the animal was removed 2026-11-24),
     // for every guardian that exists and every guardian added later. It sits
     // BEHIND the body — a wash in front would be the pasted badge ART_BIBLE.md
     // §3.5 forbids — and it is a floor, not a ceiling: a guardian that lerps
@@ -15502,17 +15543,13 @@ class Boss {
       // for a faster enemy, which is backwards. The player's eye needs the same
       // signal whatever the thing's size, so small things get proportionally
       // more of it.
-      const bx = this.cx(), by = this.y + this.h * 0.55;
-      const R = Math.max(104, Math.max(this.w, this.h) * 1.5);
+      // THE BLOOM BEHIND THE BODY IS GONE (owner, four times: "Why still framed with light ?!!!" — and
+      // the lion's player found it round NULLFANG's every warning, 2026-11-24). A wind-up is said by
+      // the body, the sound, the floor under it and the attack's own generated effect (js/bossvfx.js)
+      // — never by light round the animal.
+      const bx = this.cx();
       c.save();
       c.globalCompositeOperation = 'lighter';
-      const gg = c.createRadialGradient(bx, by, 4, bx, by, R);
-      const al = 0.16 + e * 0.30 + Math.sin((this.anim || 0) * 14) * 0.04 * e;
-      gg.addColorStop(0, 'rgba(255,232,168,' + Math.min(0.7, al) + ')');
-      gg.addColorStop(0.42, 'rgba(255,194,74,' + al * 0.6 + ')');
-      gg.addColorStop(1, 'rgba(255,150,40,0)');
-      c.fillStyle = gg;
-      c.beginPath(); c.ellipse(bx, by, R, R * 0.86, 0, 0, 7); c.fill();
       // and the floor under it takes the light — the one place a wind-up is
       // always visible even when the animal itself is off the top of the screen.
       // THE FLOOR, not an ellipse at the foot line (owner, 2026-11-14: "looks

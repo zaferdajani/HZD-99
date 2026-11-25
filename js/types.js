@@ -239,7 +239,9 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty, move) {
   // thrown INTO an attack lands, but turned — and 0 for the instant it is
   // springing clear. It says so: pale grit off the plate instead of the hit's
   // own gold, so a player can see which of her blows were worth throwing.
+  let turned = false;
   if (e.hideK != null && e.hideK < 1 && e.st !== 'daze' && !e.dead) {
+    turned = true;
     if (e.hideK <= 0) { burst(x, y, 4, '#cfe0f0', 150, 0.2, 0, 2, true); return 0; }
     dm = Math.max(1, Math.round(dm * e.hideK));
     burst(x, y, 7, '#cfe0f0', 210, 0.26, 120, 2.2, true);
@@ -285,7 +287,9 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty, move) {
   // Opting in is per-boss (`dazeAt`), the state change is REQUESTED here and
   // taken by the boss's own update — damage code must not reach into a state
   // machine, or the boss can be yanked out of a committed move mid-frame.
-  if (e.dazeAt && !e.dead && (e.dazeCD || 0) <= 0 && e.st !== 'daze') {
+  // (a guardian with `dazeWhole` — NULLFANG's duel — counts only the blows that
+  // landed whole: a blow turned on its hide is not pressing an advantage)
+  if (e.dazeAt && !e.dead && (e.dazeCD || 0) <= 0 && e.st !== 'daze' && !(turned && e.dazeWhole)) {
     e.dazeHits = ((e.dazeWin || 0) > 0 ? (e.dazeHits || 0) : 0) + 1;
     // a guardian's own span when it has one (BSTAT.dazeSpan): the fliers are
     // only in reach during their recoveries, so their group is two punishes

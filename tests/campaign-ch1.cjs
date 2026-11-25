@@ -344,7 +344,7 @@ async function snap() {
     const en = (G.enemies || []).filter(e => e && !e.dead).map(e => ({ k: e.kind || (e.constructor && e.constructor.name), x: Math.round(e.x), y: Math.round(e.y), w: e.w, h: e.h, hp: e.hp, mech: e.mechanism || null,
       calm: !!(e.tame || e.friendly || e.freed || e.calm || e.disabled || e.ally), st: e.st || e.state || null, wt: e.windT || 0,
       sg: e.kind === 'sage' ? { coil: e.coilT || 0, lunge: e.lungeT || 0, winded: e.windedT || 0, gather: e.gatherT || 0, ring: e.ringR == null ? null : e.ringR, locked: !!e.locked, tame: !!e.tame, pure: e.pureM || 0, vx: e.vx || 0 } : null }));
-    const projs = (G.projs || []).filter(q => q && !q.dead && !q.friendly).slice(0, 24).map(q => ({ x: Math.round(q.x), y: Math.round(q.y), vx: Math.round(q.vx || 0), vy: Math.round(q.vy || 0) }));
+    const projs = (G.projs || []).filter(q => q && !q.dead && !q.friendly).slice(0, 24).map(q => ({ x: Math.round(q.x), y: Math.round(q.y), vx: Math.round(q.vx || 0), vy: Math.round(q.vy || 0), r: q.r || 6, g: q.grav || 0 }));
     const B = G.boss;
     let goal = null; try { goal = typeof opGoalKey === 'function' && opGoalKey() ? ctlFill(t(opGoalKey())) : null; } catch (e) { }
     let doors = [];
@@ -384,7 +384,7 @@ async function snap() {
       tut: st ? { id: st.id, i: G.tut.i, hold: G.tut.hold || 0, action: tp && tp.action, tx: tp && tp.target && tp.target.x, hint: tp ? ctlFill(t(tp.hint)) : '', label: tp && tp.label ? t(tp.label) : '' } : null,
       goal, toasts: (G.toasts || []).map(q => q.text),
       near: G.near ? { type: G.near.type, extra: G.near.extra || null } : null,
-      en, boss: B ? { k: B.kind, x: Math.round(B.x), y: Math.round(B.y), w: B.w, h: B.h, hp: B.hp, max: B.maxHp || B.hp0 || null, st: B.st, dead: !!B.dead, tame: !!B.tame, meet: !!B.meet, face: B.face, t: B.t, wind: B.windT || 0, cx: B.cx ? B.cx() : B.x + B.w / 2, cy: B.cy ? B.cy() : B.y + B.h / 2, vx: B.vx || 0, vy: B.vy || 0, on: !!B.on, purified: !!(B.purified || B.freed),
+      en, boss: B ? { k: B.kind, x: Math.round(B.x), y: Math.round(B.y), w: B.w, h: B.h, hp: B.hp, max: B.maxHp || B.hp0 || null, st: B.st, dead: !!B.dead, tame: !!B.tame, meet: !!B.meet, face: B.face, t: B.t, wind: B.windT || 0, cx: B.cx ? B.cx() : B.x + B.w / 2, cy: B.cy ? B.cy() : B.y + B.h / 2, vx: B.vx || 0, vy: B.vy || 0, on: !!B.on, purified: !!(B.purified || B.freed), hide: B.hideK == null ? 1 : B.hideK, turned: B.turnedT || 0, shocks: (B.nfShocks || []).map(q => [Math.round(q.x), q.dir]), orbs: (B.nfOrbs || []).map(q => [Math.round(q.x), Math.round(q.y), Math.round(q.vx)]),
         // GRAVEHORN's horns in the air and the rocks over the floor: what is on screen
         gh: B.kind === 'horn' && B.missiles ? { phase: B.phase, big: B.hornBig !== false, small: B.hornSmall !== false,
           m: B.missiles.map(m => ({ x: Math.round(m.x), y: Math.round(m.y), vx: Math.round(m.vx), vy: Math.round(m.vy), ph: m.ph, locked: !!m.locked })),
@@ -1147,49 +1147,95 @@ async function sageFight(s, e) {
 // CHIME: a flying construct that hovers above and beside her and sings notes.
 // Get under it, jump, strike upward; step out of its aimed fan.
 async function chimeFight(s, b) {
-  const px = s.p.x + 12, py = s.p.y + PH / 2;
-  const dx = b.cx - px, dy = b.cy - py, dir = dx > 0 ? 1 : -1;
-  const reach = 165 + Math.max(b.w, b.h) / 2 - 12, d = Math.hypot(dx, dy);
-  bLog(s, 'CHIME st=' + b.st + ' hp=' + b.hp + ' dx=' + Math.round(dx) + ' dy=' + Math.round(dy));
+  // CHIME, read the way a careful player reads it (the boss ladder's own CHIME player,
+  // tests/gauntlet/bots/chime_skilled.cjs, ported to the keyboard): get beside and under it, jump and
+  // strike — and before every press, try each way she could move for the next half second against
+  // every note in the air and its own body, and take the one that is hit last. It is plated while it
+  // acts and open while it rests; the notes are what end a run, not its plate.
+  const P = s.p, px = P.x + PW / 2, py = P.y + PH / 2;
+  const d = b.cx - px, adx = Math.abs(d), sy = b.cy;
+  bLog(s, 'CHIME st=' + b.st + ' hp=' + b.hp + ' dx=' + Math.round(d) + ' dy=' + Math.round(sy - py));
   if (b.st === 'dorm') { await approach(s, b.cx); return; }
-  // a note close and coming at her: hop it
-  const near = s.projs.find(q => Math.hypot(q.x - px, q.y - py) < 70 && ((q.x - px) * q.vx < 0 || (q.y - py) * q.vy < 0));
-  if (near && s.p.on) { if (pitAhead(s, -dir)) { await hold(['Space']); } else await hold([dir > 0 ? 'ArrowLeft' : 'ArrowRight', 'Space']); await sleep(220); await hold([]); return; }
-  if (!s.p.on) { await hold([]); await sleep(30); return; }
-  // IT HOVERS OUT OF CLAW REACH, AND THE VOLT BURST REACHES 165 PX: when it
-  // drifts inside that circle, charge and let go (the pack's own lesson)
-  if (s.canBurst && s.p.volts >= s.burstVolts && d < reach) {
-    log('CHIME in burst range (' + Math.round(d) + ' px): Volt Burst');
-    await hold([]); await page.keyboard.down('KeyX'); await sleep(Math.round(0.68 / Math.max(0.3, RATE) * 1000)); await page.keyboard.up('KeyX'); await sleep(150);
-    return;
+  let dir = 0, jump = false, swing = false;
+  if (adx > 40) dir = Math.sign(d);
+  if (adx < 120 && P.on && sy < py - 20) jump = true;
+  if (adx < 130 && Math.abs(sy - py) < 120) swing = true;
+  const G2 = 2100, JV = 920, floor = P.on ? P.y : (s.chimeFloor || P.y); if (P.on) s.chimeFloor = P.y;
+  const path = (dx, jp, t) => { const x = P.x + dx * 340 * t; let y;
+    if (P.on && jp) y = P.y - (JV * t - 0.5 * G2 * t * t); else if (!P.on) y = P.y + (P.vy || 0) * t + 0.5 * G2 * t * t; else y = P.y;
+    if ((!P.on || jp) && y > floor) y = floor; return { x, y }; };
+  const hits = (dx, jp) => { let worst = 9;
+    for (let k = 0; k <= 15; k++) { const t = k / 30, q0 = path(dx, jp, t);
+      for (const q of s.projs) { const qx = q.x + q.vx * t, qy = q.y + q.vy * t + 0.5 * (q.g || 0) * t * t, m = (q.r || 6) + 10;
+        if (qx > q0.x - m && qx < q0.x + PW + m && qy > q0.y - m && qy < q0.y + PH + m) worst = Math.min(worst, t); } }
+    for (let k = 0; k <= 9; k++) { const t = k / 30, q0 = path(dx, jp, t), bx = b.x + (b.vx || 0) * t, by = b.y + (b.vy || 0) * t;
+      if (q0.x < bx + b.w + 2 && q0.x + PW > bx - 2 && q0.y < by + b.h + 2 && q0.y + PH > by - 2) worst = Math.min(worst, t + 0.05); }
+    return worst; };
+  if (hits(dir, jump) < 9) {
+    let best = null, bt = -1;
+    for (const o of [[dir, false], [-dir || 1, false], [0, false], [dir, true], [-dir || 1, true], [1, true], [-1, true], [1, false], [-1, false]]) {
+      const t = hits(o[0], o[1]); if (t > bt) { bt = t; best = o; } }
+    dir = best[0]; jump = best[1]; swing = false;
   }
-  // otherwise a running jump at it, striking at the top
-  if (Math.abs(dx) < 170 && dy > -215) {
-    await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft', 'Space']);
-    await sleep(Math.round(0.26 / Math.max(0.3, RATE) * 1000)); await tap('KeyX', 40);
-    await sleep(Math.round(0.12 / Math.max(0.3, RATE) * 1000)); await tap('KeyX', 40);
-    await hold([]); await sleep(120); return;
-  }
-  await approach(s, b.cx - dir * 110, 160);
+  // the drop shaft in A9 (cols 11-14): never walk into it — jump it
+  if (dir && P.on && pitAhead(s, dir)) jump = true;
+  const keys = [];
+  if (dir > 0) keys.push('ArrowRight'); else if (dir < 0) keys.push('ArrowLeft');
+  if (jump || (!P.on && (P.vy || 0) < 0 && sy < py - 40)) keys.push('Space');
+  if (swing && sy < py - 50 && adx < 60) keys.push('ArrowUp');
+  await hold(keys);
+  if (swing) await tap('KeyX', 30);
+  await sleep(Math.round(0.05 / Math.max(0.3, RATE) * 1000));
 }
-// NULLFANG (docs/combat/BOSS_NULLFANG.md): swipewarn -> swipe (step out of
-// 108 px, punish the recovery), crouch -> pounce (move laterally), roar (be
-// past 250 px), perch -> dive (move). The Purifier frees him at zero.
+// NULLFANG, read the way the boss ladder's careful player reads him (tests/gauntlet/bots/
+// glitch_skilled.cjs, ported to the keyboard, 2026-11-25): he is plated while he acts and in his neutral;
+// his openings are the break, the recovery, the end of the null field, the stop after the bite and the
+// first instant after a move. Everything else is spacing: out of the swipe, under the bite, away from the
+// rear-up, over the floor shocks, aside from the bolts.
+const NFC = { last: '', prev: '', enter: 0, cross: 0, crossDir: null, disc: false };
 async function lionFight(s, b) {
-  const px = s.p.x + 12, bx = b.cx, dir = bx > px ? 1 : -1, dist = Math.abs(bx - px) - b.w / 2;
+  const P = s.p, pc = P.x + PW / 2, d = b.cx - pc, ad = Math.abs(d), dir = d > 0 ? 1 : -1;
+  const toward = dir > 0 ? 'ArrowRight' : 'ArrowLeft', away = dir > 0 ? 'ArrowLeft' : 'ArrowRight';
+  const front = (Math.sign(-d) || 1) === (b.face || 1);
+  const RW = (s.w || 40) * TL, cornered = dir > 0 ? P.x < 200 : P.x + PW > RW - 200;
   const st = b.st || '';
-  bLog(s, 'NULLFANG st=' + st + ' hp=' + b.hp + ' dist=' + Math.round(dist));
-  const away = dir > 0 ? 'ArrowLeft' : 'ArrowRight', toward = dir > 0 ? 'ArrowRight' : 'ArrowLeft';
-  if (/swipewarn/.test(st)) { if (dist < 120) await backOff(s, -dir); else { await hold([]); await sleep(40); } return; }
-  if (/crouch|perch/.test(st)) { await hold([away, 'Space']); await sleep(260); await hold([toward]); await sleep(120); await hold([]); return; }
-  if (/pounce|dive/.test(st)) { await backOff(s, -dir, 60); return; }
-  if (/roar|nullcharge/.test(st)) { if (dist < 260) await backOff(s, -dir); else { await hold([]); await sleep(40); } return; }
-  // after a swipe, or idle/stalking: close in and strike twice, then leave
-  if (dist > 34) { await approach(s, bx); return; }
-  await hold([]);
-  if (s.p.face !== dir) await tap(toward, 25);
-  await tap('KeyX', 40); await sleep(150); await tap('KeyX', 40); await sleep(150);
-  await hold([away]); await sleep(180); await hold([]);
+  bLog(s, 'NULLFANG st=' + st + ' hp=' + b.hp + ' dist=' + Math.round(ad));
+  const K = new Set(); let strike = false, jumpNow = false;
+  const jump = () => { jumpNow = true; };
+  const cut = () => { if (ad < 72) { K.add(away); return; } if (ad > 150) K.add(toward); else if ((P.face || 1) !== dir) K.add(toward); if (ad < 205 && (P.face || 1) === dir) strike = true; };
+  const keep = (lo, hi) => {
+    if (NFC.cross > 0 || (cornered && ad < hi + 20 && /idle|recover|stalk|run|daze|nullend/.test(st))) { NFC.cross = NFC.cross > 0 ? NFC.cross - 1 : 8; K.add(NFC.crossDir || (NFC.crossDir = toward)); if (ad < 200) jump(); if (NFC.cross <= 0) NFC.crossDir = null; return; }
+    if (cornered && ad < lo) { if ((P.face || 1) !== dir) K.add(toward); if (ad < 205) strike = true; return; }
+    if (ad < lo) K.add(away); else if (ad > hi) K.add(toward); };
+  for (const w of (b.shocks || [])) { const dx = w[0] - pc; if (Math.sign(dx) !== w[1] && Math.abs(dx) < 80) jump(); }
+  for (const o of (b.orbs || [])) { const dx = o[0] - pc; if (Math.abs(dx) < 90) K.add(dx > 0 ? 'ArrowLeft' : 'ArrowRight'); }
+  NFC.disc = NFC.disc || (b.hide < 1 && b.turned > 0);
+  const now = Date.now(); if (st !== NFC.last) { NFC.enter = now; NFC.prev = NFC.last; NFC.last = st; }
+  const since = (now - NFC.enter) / 1000 * RATE;
+  if (st === 'pounce' || st === 'dive' || st === 'nullhop') { if (ad < 330) jump(); K.add(away); }
+  else if (st === 'perch') { if ((b.t || 1) < 0.34 && ad < 220) { jump(); K.add(away); } else keep(150, 260); }
+  else if (st === 'spring' || st === 'springwarn') keep(150, 260);
+  else if (st === 'crouch') { if (!front && ad < 150 && !NFC.disc) cut(); else keep(230, 300); }
+  else if (st === 'swipewarn' || st === 'swipe') {
+    if (!front && ad < 150 && !NFC.disc) cut();
+    else if (cornered) { K.add(toward); if (ad < 200) jump(); }
+    else { if (ad < 270 && since > 0.05) jump(); K.add(away); } }
+  else if (st === 'rakewarn' || st === 'rake') { if (!front && ad < 160) { if (ad < 80) jump(); K.add(away); } else cut(); }
+  else if (st === 'rearwarn' || st === 'rear') K.add(away);
+  else if (st === 'bitewarn' || st === 'bite') { if (front && ad < 330) { jump(); K.add(toward); } else if (!front && ad < 150) cut(); }
+  else if (st === 'bitestop') cut();
+  else if (st === 'spitwarn') keep(240, 400);
+  else if (st === 'roar') { if (since < 0.25 && ad < 200 && !NFC.disc) cut(); else keep(260, 420); }
+  else {
+    const open = st === 'daze' || st === 'recover' || st === 'nullend' || (st === 'nullcharge' && !NFC.disc) || st === 'winded'
+      || (st === 'idle' && /swipe|rake|rear|recover|pounce|spitwarn|nullend|daze/.test(NFC.prev) && since < 0.22);
+    if (open) cut(); else { keep(240, 270); if (ad < 210 && !NFC.disc) strike = true; }
+  }
+  if (K.has('ArrowLeft') && K.has('ArrowRight')) K.delete(toward);
+  if (jumpNow) K.add('Space');
+  await hold([...K]);
+  if (strike) await tap('KeyX', 30);
+  await sleep(Math.round((jumpNow ? 0.16 : 0.05) / Math.max(0.3, RATE) * 1000));
 }
 // GRAVEHORN (docs/combat/BOSS_GRAVEHORN.md), played the way the doc says it
 // is answered, with the keyboard only:

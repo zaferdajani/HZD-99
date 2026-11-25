@@ -1,0 +1,2 @@
+// MASH: walks at it and presses attack 12x a second. Never dodges. (react: irrelevant, reads only position)
+module.exports = { boss: 'alpha', bot: `(bo, P, ctx) => { const s = ctx.seen; const dx = s.cx - (P.x + P.w/2); keys[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = Math.abs(dx) > 60 ? 1 : 0; if (Math.abs(dx) < 60 && Math.sign(dx) !== P.face) keys[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = 1; if (Math.abs(dx) < 110 && ctx.frame % 5 === 0) { keysP.KeyX = 1; keys.KeyX = 1; } }` };
