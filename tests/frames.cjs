@@ -346,12 +346,14 @@ const check = (name, ok, detail) => {
     // state falls through, which is what lets the art land one piece at a time
     // ...the gait loops and the standing loop are fired now (§2aw), so they
     // are unplugged for this question the way the air strip is above
-    const gaitSave = HERO_GAIT, idleSave = HERO_IDLE;
-    HERO_GAIT = null; HERO_IDLE = null;
+    // ...and so is the skid take, whose third cell is HELD with no clock while a shove blows
+    // her back (2026-11-20, js/entities.js drawRoboTrans 'BLOWN BACK'): fired art, unplugged here
+    const gaitSave = HERO_GAIT, idleSave = HERO_IDLE, skidSave = HERO_TRANS.skid;
+    HERO_GAIT = null; HERO_IDLE = null; delete HERO_TRANS.skid;
     let fellThrough = true;
     for (const st of ['idle', 'run_a', 'rise', 'apex', 'fall', 'land', 'skid', 'dash'])
       if (player.drawRoboTrans(document.querySelector('canvas').getContext('2d'), st)) fellThrough = false;
-    HERO_GAIT = gaitSave; HERO_IDLE = idleSave;
+    HERO_GAIT = gaitSave; HERO_IDLE = idleSave; if (skidSave) HERO_TRANS.skid = skidSave;
     // ...and the two the mechanism checks borrowed. They stay unplugged through
     // the fall-through question above, which is the whole point of it, and come
     // back the moment it is answered — this used to leave them gone for the rest

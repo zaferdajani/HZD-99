@@ -564,6 +564,9 @@ function mjDraw(c, b) {
   const holding = st === 'roll' && M.held && key === 'mjRoll' && mjHoldsHer();
   if (b.hurtT > 0 && M.clink > 0) c.filter = 'brightness(1.25)';
   c.drawImage(im, (Math.max(0, i) % n) * cw, 0, cw, ch, -W / 2, -H, W, H);
+  // the Eye looks out through his brow lamp (assets/eyes.json, tools/eyespecs.cjs), and the
+  // infection's smoke is born there as he moves; the roll and the turn have no anchor
+  if (typeof infEyeArt === 'function') infEyeArt(c, key, M.drawCell, -W / 2, -H, W, H);
   if (holding) {
     // her, over him at the front of his jaws, and then the band of his snout across
     // her waist drawn again on top: his teeth close over her middle, the rest of her

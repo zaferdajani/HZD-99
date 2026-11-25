@@ -123,6 +123,10 @@
     }
     const ready = () => typeof startGame === 'function' && typeof ROOMS !== 'undefined'
                         && typeof G !== 'undefined' && !!G.toast;
+    // never start the run while the page's script is still being read: build.cjs joins every
+    // js/ file into one, this one is read before sewer.js, and a remembered key reaches here with
+    // nothing awaited — startGame then met sewer.js's rooms before they existed
+    await new Promise((r) => setTimeout(r, 0));
     for (let i = 0; i < 600 && !ready(); i++) await new Promise((r) => requestAnimationFrame(r));
     if (!ready()) return;
     if (!ok) return refuse('warp refused — this browser has no Forge key');

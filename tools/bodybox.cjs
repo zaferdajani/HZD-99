@@ -40,17 +40,26 @@ async function measure(url) {
       const W = 640, H = 520, cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
       const x = cvs.getContext('2d', { willReadFrequently: true });
       const seen = {}, want = [];
+      // (the whole save is put back afterwards: a room loaded with the blade may write flags of its own)
+      const withBlade = (fn) => { const was = JSON.stringify(G.save); const f = G.save.flags;
+        f.crystal = f.crystal2 = f.connector = 1; try { fn(); } finally { const w = JSON.parse(was); for (const k of Object.keys(G.save)) delete G.save[k]; Object.assign(G.save, w); } };
       for (const id of Object.keys(ROOMS)) {
         try { loadRoom(id); } catch (e) { continue; }
+        // a guardian not home until something is hers (TALONHOST waits for the joined blade,
+        // js/conduits-road.js k2BossAway) is measured as she will meet it: with the blade
+        let blade = 0;
+        if (!G.boss && (ROOMS[id].ents || []).some(e => e[0] === 'boss')) {
+          blade = 1; withBlade(() => { try { loadRoom(id); } catch (e) {} });
+        }
         G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.gateWalk = G.bossEntry = null;
         for (const e of [...G.enemies, G.boss].filter(Boolean)) {
           const key = (e === G.boss ? 'boss:' : '') + e.kind;
-          if (seen[key]) continue; seen[key] = 1; want.push({ key, id, boss: e === G.boss });
+          if (seen[key]) continue; seen[key] = 1; want.push({ key, id, boss: e === G.boss, blade });
         }
       }
       const out = {};
       for (const w of want) {
-        loadRoom(w.id);
+        if (w.blade) withBlade(() => loadRoom(w.id)); else loadRoom(w.id);
         G.state = 'PLAY'; G.wake = G.dialog = G.cut = G.trans = G.meet = G.gateWalk = G.bossEntry = null;
         const e = w.boss ? G.boss : G.enemies.find(q => q.kind === w.key);
         if (!e) continue;

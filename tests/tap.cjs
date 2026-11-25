@@ -153,6 +153,12 @@ const { chromium } = require('playwright');
   // Measured off the layout the game actually builds, with the tolerance the
   // hit test adds (9 px) counted on both sides.
   const col = await page.evaluate(() => {
+    // the map is hers once the first agent is purified (owner, 2026-11-16, js/game.js
+    // mapUnlocked): before that its button is not in the column at all, so it is measured
+    // with the chart in her hands, and hidden without it
+    const f = G.save.flags, had = f.sageTame_GA1D;
+    f.sageTame_GA1D = 0; const hiddenBefore = typeof revisedStory === 'function' && revisedStory() ? !tLayout().corners.find(b => b.code === 'VMAP').show() : true;
+    f.sageTame_GA1D = 1;
     const L = tLayout();
     const vis = L.corners.filter(b => b.show());
     const pairs = [];
@@ -161,8 +167,10 @@ const { chromium } = require('playwright');
       pairs.push({ a: a.code, b: b.code, gap: +(Math.hypot(a.x - b.x, a.y - b.y) - (a.r + 9) - (b.r + 9)).toFixed(1) });
     }
     const map = vis.find(b => b.code === 'VMAP');
-    return { pairs, mapBiggest: !!map && vis.every(b => b.r <= map.r), codes: vis.map(b => b.code) };
+    if (had == null) delete f.sageTame_GA1D; else f.sageTame_GA1D = had;
+    return { pairs, mapBiggest: !!map && vis.every(b => b.r <= map.r), codes: vis.map(b => b.code), hiddenBefore };
   });
+  check('...and before the chart is hers there is no map button to press', col.hiddenBefore, true);
   check('no two corner buttons share a touch', col.pairs.filter(p => p.gap < 0).map(p => p.a + '/' + p.b + ' ' + p.gap), []);
   check('the map is the biggest corner button', col.mapBiggest, true);
   check('the crest button is off the HUD column (it lives under Pause)', col.codes.includes('VCREST'), false);

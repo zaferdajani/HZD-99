@@ -111,6 +111,9 @@ const SAMPLES = [0.1, 0.5, 0.9];
       if (!room) return { kind: g.kind, err: 'no room places it' };
       const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
       startGame(sv); loadRoom(room); G.state = 'PLAY'; G.bossEntry = null;
+      // a guardian not home until something is hers (TALONHOST waits for the joined blade,
+      // js/conduits-road.js k2BossAway) is staged as she will meet it: with the blade
+      if (!G.boss) { const s2 = newSave(1); s2.time = 99; Object.assign(s2.flags, { tut: 1, woke: 1, crystal: 1, crystal2: 1, connector: 1 }); startGame(s2); loadRoom(room); G.state = 'PLAY'; G.bossEntry = null; }
       const body = G.boss;
       if (!body) return { kind: g.kind, room, err: 'no boss in ' + room };
       body.update = function () {};               // the harness owns its state

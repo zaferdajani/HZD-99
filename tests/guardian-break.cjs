@@ -82,7 +82,11 @@ const { chromium } = require('playwright');
         for (let i = 0; i < 3000 && G.break && G.break.ph !== 'still'; i++) update(1 / 60);
         for (let i = 0; i < 30; i++) update(1 / 60);
         const cv = document.querySelector('canvas'), ctx = cv.getContext('2d');
-        const snap = () => { G.flash = 0; draw(); return ctx.getImageData(0, 0, cv.width, cv.height).data; };
+        // THE SAME FRAME, twice: the clock is held for both pictures, or the grass, the smoke and
+        // every breath move between them (two unflagged frames differed by ~5400 pixels, a third
+        // of them purple-ward) and the flag's own change drowns in the room's motion
+        const T0 = performance.now(), realNow = performance.now;
+        const snap = () => { G.flash = 0; performance.now = () => T0; try { draw(T0); } finally { performance.now = realNow; } return ctx.getImageData(0, 0, cv.width, cv.height).data; };
         if (G.boss) {
           G.boss.purified = true; const A = snap();
           G.boss.purified = false; const B = snap();
