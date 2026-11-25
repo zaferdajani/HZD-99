@@ -208,3 +208,45 @@ chasing a deploy that had in fact succeeded.
   burst from move first, a split second of warning.
 - **Insects:** butterflies, dragonflies by the swamp, moths in caves — small, flying away, not
   interactive, for a richer world.
+- **NULLFANG's burst and cover.** *"Try to use whatever art we have to create whatever missing
+  from Nilfang. Burst art."* (built from the clump's own leaves: they open round him and tear) ·
+  *"you only added two trees. So nilfang will either go to one or the other ... adding more
+  different shapes of trees ... that covers the whole space"* (seven clumps, five shapes).
+- **The door to Kingdom 2, and the paid game.** *"cover the door with leaves and plants that stick
+  to it, just like the climbing plants. That when I free Nilfang, it simply removes it. It does a
+  move like a roar ... And the trees will just respond and create an opening ... we can let
+  whatever Nilfang gives give it to me right now, while this door leads to the second kingdom,
+  which I will provide for users for payments. Now, the first kingdom will be free testing. If
+  they want to go to the second kingdom, they will have to buy the full game ... instead of going
+  up into the sky, into the light, which means you will remove the light from the screen before
+  it ... Going to the door will give me an entrance to a place where I will have to use my dash to
+  reach the second kingdom. And this door should look different than the ones before and similar
+  to the ones within the second kingdom. To make the story connected."*
+
+## THE WOLF MOUNT — ordered 2026-11-25, NOT TO START BEFORE "after next Friday, 9 p.m."
+
+The owner: *"the logic of alpha wolf that gives me the ability to summon wolves. Improving this
+skill by spending shards at certain NPCs should allow me to later on mount the wolf ... I can use
+the wolf when it's summoned as mounted and fight with it. Hits will reduce the wolf's hit until
+it's tired and depleted. That's when the wolf will run back away, will retire and leave you back
+to fight. Mounting a wolf should give me extra abilities, have its own artwork, have its own
+abilities and fun to play with. I should be able to use it to defeat certain enemies ... maybe
+Kingdom 3 or 4, I should be needing this, where I find an NPC that tells me about the secret of
+mounting wolves through a certain task that allows me to learn it when I finish the task ...
+Maybe not in the next kingdom, make it in the one after that. Keep it recorded when you do the
+kingdom adjustments. Try to create the artwork yourself if you can, from whatever you have. This
+adjustment should start after next Friday, 9 p.m. so that we wouldn't consume the remaining of
+the tokens that I have"* · *"While mounted, I should also be able to use dash as a skill and
+create skills that I can use using the wolf, such as scratch, jumping, howling. Maybe that will
+stun the enemy a little bit."*
+
+What it is, so the kingdom work keeps room for it:
+- **Unlock path:** the Alpha's summon (already hers) → upgraded with shards at chosen NPCs → the
+  MOUNT itself is learned in **Kingdom 3** (not 2): an NPC there tells the secret and sets a task;
+  finishing the task teaches it. The task is still to be designed — record the NPC and the task
+  in that kingdom's plan when it is built.
+- **Mounted:** she rides the summoned wolf and fights from it. The wolf has its own health: hits
+  wear it down until it is spent; then it runs off and leaves her on foot. Its own art (from the
+  wolf art we have where possible), its own moves: **dash** (her dash, mounted), **scratch**,
+  **jump**, **howl** (a short stun). Some later enemies are built to need it.
+- **When:** not before the date above. Do not start it in a session before then.
