@@ -15427,7 +15427,10 @@ class Boss {
       burst(this.cx(), this.cy(), 14, '#ffffff', 200, 0.5, 0, 3, true);
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro'
-      && this.st !== 'lsvanish' && this.st !== 'arcstorm' && !(typeof nfHidden === 'function' && nfHidden(this))) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
+      && this.st !== 'lsvanish' && this.st !== 'arcstorm' && !(typeof nfHidden === 'function' && nfHidden(this)) && !(this.kind === 'glitch' && this.st === 'lurkpounce')) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
+      // (NULLFANG's burst from the leaves hurts with its drawn body only, js/nullfang-duel.js nfBurstBox:
+      // the plain box sits in the clump while the drawn lion is still coming out of it — ledger, the hit
+      // is the drawn shape)
     } finally {
       if (lionMotion) beastMotionEnd(this, dt);
       if (this.kind === 'alpha') alphaMotionEnd(this, dt);

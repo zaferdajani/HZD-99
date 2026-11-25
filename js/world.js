@@ -962,13 +962,15 @@ const ROOMS = {
       hull(g, 46, 50, 1, 85);
     } },
   // THE COVER (owner, 2026-11-25, js/nfcover.js): metal banana clumps standing on the fight's
-  // floor, which NULLFANG goes into and bursts out of (js/nullfang-duel.js NF_AMB) — one at
-  // the west seam, one between the two ledges, one under the hulk's shoulder; none under a ledge, none
-  // over the ring. [tile x of the foot, scale, plate, mirrored]; coverBack: the meadow beyond,
-  // on parallax behind the level [.., parallax].
+  // floor, which NULLFANG goes into and bursts out of (js/nullfang-duel.js NF_AMB). Six of them,
+  // of five shapes, across the whole floor (owner, 2026-11-25: "you only added two trees. So
+  // nilfang will either go to one or the other ... adding more different shapes of trees ... that
+  // covers the whole space"): no stretch of the fight's ground is more than a few strides from one.
+  // None under a ledge, none on the hulk's slope. [tile x of the foot, scale, plate, mirrored];
+  // coverBack: the meadow beyond, on parallax behind the level [.., parallax].
   A4: { zone: 'A', sky: 1, w: 44, h: 17, exits: { L: 'A3' },
-    cover: [[3.3, 0.72, 'b', 1], [23.5, 0.88, 'a', 0], [35.7, 0.8, 'a', 1]],
-    coverBack: [[9.5, 0.62, 'a', 0, 0.9], [17.5, 0.7, 'b', 1, 0.9], [30.5, 0.6, 'b', 0, 0.9], [42.5, 0.7, 'a', 1, 0.9]],
+    cover: [[3.3, 0.72, 'b', 1], [6.6, 0.95, 'c', 0], [15.2, 0.55, 'd', 1], [19.6, 0.7, 'e', 0], [23.5, 0.88, 'a', 0], [27.9, 0.78, 'e', 1], [35.7, 0.8, 'a', 1]],
+    coverBack: [[9.5, 0.62, 'a', 0, 0.9], [13.8, 0.9, 'c', 1, 0.9], [17.5, 0.7, 'b', 1, 0.9], [25.8, 0.7, 'd', 1, 0.9], [30.5, 0.6, 'e', 0, 0.9], [42.5, 0.7, 'a', 1, 0.9]],
     ents: [['boss', 24, 15, 'glitch']],
     build(g) {
       frame(g); seamL(g);

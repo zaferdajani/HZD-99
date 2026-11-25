@@ -8,6 +8,10 @@ real alpha) are trimmed, scaled and measured, nothing more.
                     into cover.json (fractions of the cut), which the rig bends about
   clump_a.webp   -> assets/characters/cover/clump_a.webp    the clump IN the arena
   clump_b.webp   -> assets/characters/cover/clump_b.webp    the clumps behind it
+  plants_c.webp  -> assets/characters/cover/clump_c/d/e.webp three more shapes for the arena
+                    (owner, 2026-11-25: "adding more different shapes of trees ... that covers
+                    the whole space"): c the tall weeping tree, d the low wide thicket, e the
+                    bent, broken clump — one sheet, split into its three plants left to right
 
   python3 tools/nfcover.py
 """
@@ -73,6 +77,26 @@ for name in ('clump_a', 'clump_b'):
     a = np.array(im)[:, :, 3] > 40
     cols = np.nonzero(a.any(axis=0))[0]
     # the trunks' foot: the solid span of the bottom tenth (the scrap heap it stands on)
+    base = a[int(im.size[1] * 0.9):].any(axis=0)
+    bx = np.nonzero(base)[0]
+    save(im, name + '.webp')
+    meta['clumps'][name] = {'w': im.size[0], 'h': im.size[1],
+                            'base': [round(bx.min() / im.size[0], 4), round(bx.max() / im.size[0], 4)]}
+sheet = Image.open(SRC / 'plants_c.webp').convert('RGBA')
+al = np.array(sheet)[:, :, 3] > 24
+lab, n = ndimage.label(ndimage.binary_closing(al, iterations=4))
+sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+big = sorted(range(1, n + 1), key=lambda k: -sizes[k - 1])[:3]
+objs = ndimage.find_objects(lab)
+for name, k in zip(('clump_c', 'clump_d', 'clump_e'), sorted(big, key=lambda k: objs[k - 1][1].start)):
+    ys, xs = objs[k - 1]
+    crop = np.array(sheet)[ys, xs].copy()
+    crop[:, :, 3] = np.where(lab[ys, xs] == k, crop[:, :, 3], 0)   # only this plant
+    im = trim(Image.fromarray(crop))
+    w, h = im.size
+    W = round(CLUMP_W * min(1, 1.25 * w / max(w, h)))              # the tall one keeps its height
+    im = im.resize((W, round(h * W / w)), Image.LANCZOS)
+    a = np.array(im)[:, :, 3] > 40
     base = a[int(im.size[1] * 0.9):].any(axis=0)
     bx = np.nonzero(base)[0]
     save(im, name + '.webp')

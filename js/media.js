@@ -136,6 +136,9 @@ const MEDIA_SRC = {
     // leaves the rig hangs in front of them (tools/nfcover.py, from assets/source/nfcover/)
     coverClumpA: 'assets/characters/cover/clump_a.webp',
     coverClumpB: 'assets/characters/cover/clump_b.webp',
+    coverClumpC: 'assets/characters/cover/clump_c.webp',   // the tall weeping tree
+    coverClumpD: 'assets/characters/cover/clump_d.webp',   // the low wide thicket
+    coverClumpE: 'assets/characters/cover/clump_e.webp',   // the bent, broken clump
     coverLeaf0: 'assets/characters/cover/leaf0.webp',
     coverLeaf1: 'assets/characters/cover/leaf1.webp',
     coverLeaf2: 'assets/characters/cover/leaf2.webp',

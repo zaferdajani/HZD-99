@@ -416,6 +416,9 @@ function nfAmbChoose(b, dist, adist) {
   const L = nfCoverList();
   if (!L.length || !(b.coverCD <= 0)) return false;
   if (!(b.st === 'stalk' || b.st === 'run' || (b.st === 'idle' && !b.openIdle && b.t <= 0))) return false;
+  // the perch dive keeps its turn (nfChoose): with cover across the whole floor (2026-11-25) a clump
+  // is always in reach, and the leaves would take every chance the dive's clock ever got
+  if (b.ambushCD != null && b.ambushCD <= 0 && b.ambushCD > -1e8) return false;
   if (!b.nullUsed && b.hp <= b.hpMax * 0.5) return false;      // the null field goes first
   let k = 0;
   for (let i = 1; i < L.length; i++) if (Math.abs(L[i].x - b.cx()) < Math.abs(L[k].x - b.cx())) k = i;
@@ -444,6 +447,12 @@ function nfChoose(b, pre, dist, adist) {
       nfEnter(b, 'rakewarn', N.rake); b.vx = 0; b.rakeCD = N.rakeCD; b.turnStreak = 0; b.lastMove = 'rake'; return true;
     }
   }
+  // THE PERCH DIVE, when its clock is due, goes before the leaves and the swipe: it is chosen in his
+  // prowl (js/entities.js), so the prowl is let run this frame, or a free body is put into it
+  // (only at her on her feet: at her in the air the dive lands under her, out of her reach)
+  const diveDue = b.ambushCD != null && b.ambushCD <= 0 && b.ambushCD > -1e8 && (b.nullUsed || b.hp > b.hpMax * 0.5) && player.on;
+  if (diveDue && (b.st === 'stalk' || b.st === 'run')) return false;
+  if (diveDue && b.st === 'idle' && !b.openIdle && b.t <= 0.05) { b.st = 'stalk'; b.t = 0.02; return true; }
   // the leaves, on the ambush clock (NF_AMB)
   if (nfAmbChoose(b, dist, adist)) return true;
   // the rest after a move is the opening, and nothing cuts it short — not from
@@ -496,6 +505,7 @@ function nfDuelUpdate(U, b, dt) {
   b.spitCD -= dt; b.rakeCD -= dt; b.rearCD -= dt;
   if (b.coverCD == null) b.coverCD = nfRand(NF_AMB.first[0], NF_AMB.first[1]);
   if (!/^(cover|lurk)/.test(b.st)) b.coverCD -= dt;
+  else if (b.ambushCD != null && b.ambushCD < 1e8) b.ambushCD -= dt;     // the dive's clock runs while he hides
   if (b.dead || b.purified || b.st === 'dorm' || b.st === 'intro' || b.hp <= 0) return U.call(b, dt);
   const pre = { phase: b.phase, fury: b.fury, st: b.st, t: b.t, roared: b.roared, on: b.on };
   // a break asked for by a blow into something he is doing is refused

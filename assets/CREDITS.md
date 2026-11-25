@@ -75,6 +75,7 @@ plate can be traced back to the generation it came from.
 | Files | Generated | Notes |
 |---|---|---|
 | `characters/cover/clump_a.webp`, `clump_b.webp`, `leaf0-5.webp`, `source/nfcover/*` | Higgsfield, GPT Image 2.6 | NULLFANG's cover (2026-11-25): metal banana clumps and six single leaves, fired on transparent backgrounds against the meadow flora plate for material only; cut by `tools/nfcover.py`; jobs 1b8c70e7, 0e0fd4ee (clumps), b3f629ec, e4350f32 (leaves; the second sheet archived, not shipped) |
+| `characters/cover/clump_c.webp`, `clump_d.webp`, `clump_e.webp`, `source/nfcover/plants_c.webp` | Higgsfield, GPT Image 2.6 | three more shapes of NULLFANG's cover (2026-11-25): a tall weeping tree, a low wide thicket, a bent broken clump — one sheet on a transparent background, the arena's first clump given for material only; split by `tools/nfcover.py`; job 98264269 |
 | `backgrounds/booth_front.png` | Higgsfield, Seedream 4.5 | Ratchet's kiosk (ART_QUEUE §2g); matted with Higgsfield `remove_background` |
 | `backgrounds/kerf_front.webp`, `source/kingdomX/kerf_front.png` | Higgsfield, GPT Image 2.5 | THE KERF — the Cutter's cloven stone, kingdom X's structure (ART_QUEUE §2aq); fired 2026-09-29 to the written brief, keyed with `tools/blackkey.cjs` |
 | `backgrounds/kerf_interior.jpg`, `source/kingdomX/kerf_interior.png` | Higgsfield, GPT Image 2.5 | V1B, the inside of the Kerf (ART_QUEUE §2aq): the cutting jig, the sawn back wall and the crystal that is the room's only light |

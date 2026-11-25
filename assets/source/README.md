@@ -694,3 +694,7 @@ describe it.
   where the lion goes inside and hide". `tools/nfcover.py` trims, scales and measures them into
   `characters/cover/` (the leaves' stalk foot in `cover.json`); `js/nfcover.js` draws them, the
   leaves on springs, bent band by band.
+- `plants_c.webp` — three more shapes on one sheet (GPT Image 2.6, high, 2K, transparent; job
+  98264269; the arena's `clump_a` given for MATERIAL only): a tall weeping tree, a low wide thicket,
+  a bent broken clump. The owner: "you only added two trees ... adding more different shapes of
+  trees ... that covers the whole space". Split into `characters/cover/clump_c/d/e.webp`.

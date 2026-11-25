@@ -44,7 +44,7 @@ const PORT = process.env.TEST_PORT || 8220;
     const bo = G.boss; bo.meet = false;
     player.x = 14 * TILE; player.y = 14 * TILE - player.h;
     bo.st = 'dorm';
-    const hold = () => { player.iT = 99; player.hp = 999; player.dead = false; };
+    const hold = () => { player.iT = 99; player.hp = 999; player.dead = false; player.cores = player.maxCores(); };
     loop(60, hold);
     out.zExplore = +cam.zoom.toFixed(3);
     bo.st = 'idle'; bo.t = 0.3;
@@ -58,7 +58,7 @@ const PORT = process.env.TEST_PORT || 8220;
     out.cover = L.map(cl => {
       let lo = 1e9, hi = -1e9;
       for (let x = cl.x - cl.w * 0.3; x <= cl.x + cl.w * 0.3; x += 8) { const g = nfCoverGround(x); lo = Math.min(lo, g); hi = Math.max(hi, g); }
-      return { x: Math.round(cl.x), gy: Math.round(cl.gy), lo: Math.round(lo), hi: Math.round(hi), w: Math.round(cl.w), h: Math.round(cl.h), leaves: cl.leaves.length };
+      return { key: cl.key, x: Math.round(cl.x), gy: Math.round(cl.gy), lo: Math.round(lo), hi: Math.round(hi), w: Math.round(cl.w), h: Math.round(cl.h), leaves: cl.leaves.length };
     });
     out.back = NFC.back.length;
     // drawn at full strength: every draw of the front pass at alpha 1, no filter, art present
@@ -71,12 +71,14 @@ const PORT = process.env.TEST_PORT || 8220;
     player.hurt = function (d, x, src) { hurts.push(String(src || '')); return PH.apply(this, arguments); };
     const run = (k, react) => {
       const cl = L[k]; G.enemies = []; G.projs = [];
-      // she stands beside clump k, a body-length off its middle, on the open side
-      const side = cl.x < G.roomDef.w * TILE / 2 ? 1 : -1;
-      const hx = cl.x + side * 70;
+      // she stands beside clump k, off its middle toward the wider gap, nearer it than any other
+      // (seven clumps across the floor since 2026-11-25: a fixed body-length could be nearer the next)
+      const gapL = k > 0 ? cl.x - L[k - 1].x : cl.x, gapR = k < L.length - 1 ? L[k + 1].x - cl.x : G.roomDef.w * TILE - cl.x;
+      const side = gapR >= gapL ? 1 : -1;
+      const hx = cl.x + side * Math.min(70, 0.4 * Math.max(gapL, gapR));
       player.x = hx - player.w / 2; player.y = nfCoverGround(hx) - player.h - 1; player.vx = 0; player.vy = 0; player.dead = false; player.hp = player.hpMax || 99;
       // he starts a stride from the clump nearest... himself, which need not be hers
-      const from = L[(k + 1) % L.length];
+      const from = L[(k + 3) % L.length];
       bo.x = from.x + 160 * (from.x < cl.x ? 1 : -1) - bo.w / 2; bo.y = nfCoverGround(bo.cx()) - bo.h; bo.vx = bo.vy = 0;
       bo.st = 'stalk'; bo.t = 0.4; bo.coverCD = 0; bo.ambushCD = 99; bo.hp = bo.hpMax; bo.stagT = 0; bo.faceVis = bo.face;
       const r = { k, seq: [], hidden: 0, hiddenMax: 0, run: 0, targeted: 0, bodyHurt: 0, dmg: 0, tell: 0, tellAt: null, from: null, at: null, hurtBy: [], landOpen: 0, frames: 0 };
@@ -91,7 +93,9 @@ const PORT = process.env.TEST_PORT || 8220;
         else { keys.ArrowLeft = keys.ArrowRight = 0; }
         if (!react) { player.vx = 0; }
         // open to the first blow of the ambush, and only that one: what hits her first is the answer
-        player.iT = /lurk|cover/.test(bo.st) && !hurts.length ? 0 : 99; player.hp = 999; player.dead = false;
+        // (standing still, from the shake on: next to a clump his leap INTO it can land on her first,
+        // which is fair in play but would hide the burst this measures)
+        player.iT = (react ? /lurk|cover/ : /lurkwarn|lurkpounce/).test(bo.st) && !hurts.length ? 0 : 99; player.hp = 999; player.dead = false; player.cores = player.maxCores();   // (fourteen runs of hits would kill her)
         T += 1000 / 60; mainLoop(T);
         const st = bo.st;
         if (st !== st0) { r.seq.push(st); st0 = st;
@@ -166,7 +170,7 @@ const PORT = process.env.TEST_PORT || 8220;
   check('...and wider than the camera every other guardian gets', R.zFight.now < R.zOther - 0.03, { nullfang: R.zFight.now, other: R.zOther });
   check('...never so far out she is lost on a phone (>= 0.85)', R.zFight.min >= 0.85, R.zFight);
   check('...and it eases there, it never cuts (under 0.05 a frame: the camera\'s own ease)', R.zFight.dzMax < 0.05, R.zFight);
-  check('the arena has three clumps of metal leaves, each with its leaves', R.cover.length >= 3 && R.cover.every(c => c.leaves >= 3), R.cover);
+  check('the arena has cover across its whole floor: six or more clumps of three or more shapes, each with its leaves, no stretch of floor wider than 320 px without one', R.cover.length >= 6 && new Set(R.cover.map(c => c.key)).size >= 3 && R.cover.every(c => c.leaves >= 2) && R.cover.every((c, i) => i === 0 || c.x - R.cover[i - 1].x <= 320), R.cover.map(c => [c.x, c.key, c.leaves]));
   check('...each stands ON the ground: its foot on the ground under it, never floating, never sunk', R.cover.every(c => c.gy >= c.hi - 1 && c.gy - c.lo <= 26), R.cover.map(c => [c.x, c.gy, c.lo, c.hi]));
   check('...drawn at full strength (no fade, no filter), the art present', R.front.draws > 40 && R.front.faded === 0 && R.front.filt === 0, R.front);
   check('...and more of them in the meadow behind the level', R.back >= 2, R.back);

@@ -28,7 +28,13 @@
 // ===========================================================================
 const NF_COVER = Object.freeze({
   W: 290,                                        // a clump's width at scale 1, world px
-  plate: { a: ['coverClumpA', 539 / 760], b: ['coverClumpB', 522 / 760] },
+  // each plate: [media key, height/width, width at scale 1 (else W), the leaves hung in front (else slots)]
+  // c, d, e (owner, 2026-11-25: "more different shapes of trees ... that covers the whole space"):
+  // the tall weeping tree, the low wide thicket, the bent and broken clump
+  plate: { a: ['coverClumpA', 539 / 760], b: ['coverClumpB', 522 / 760],
+           c: ['coverClumpC', 800 / 371, 140, [[1, -0.12, 0.05, -0.38, 0.4, 0], [4, 0.13, 0.04, 0.34, 0.38, 1]]],
+           d: ['coverClumpD', 339 / 640, 320, [[0, -0.26, 0.1, -0.75, 0.8, 0], [5, 0.04, 0.12, 0.08, 0.9, 0], [3, 0.27, 0.1, 0.7, 0.82, 1]]],
+           e: ['coverClumpE', 767 / 640, 230, [[2, -0.06, 0.14, -0.32, 0.55, 0], [5, 0.16, 0.12, 0.42, 0.5, 1]]] },
   // the six cut leaves: the stalk foot as a fraction of the cut's width, and its aspect
   leaf: [{ key: 'coverLeaf0', fx: 0.5065, ar: 102 / 360 }, { key: 'coverLeaf1', fx: 0.4789, ar: 91 / 360 },
          { key: 'coverLeaf2', fx: 0.1992, ar: 146 / 360 }, { key: 'coverLeaf3', fx: 0.1607, ar: 211 / 360 },
@@ -56,18 +62,18 @@ function nfCoverBuild() {
   NFC.room = G.roomId; NFC.list = []; NFC.back = []; NFC.torn.length = 0;
   if (!nfCoverOn()) return;
   const mk = (row, back) => {
-    const [tx, s, pk, flip, par] = row, P = NF_COVER.plate[pk] || NF_COVER.plate.a, x = tx * TILE, w = NF_COVER.W * s, h = w * P[1];
+    const [tx, s, pk, flip, par] = row, P = NF_COVER.plate[pk] || NF_COVER.plate.a, x = tx * TILE, w = (P[2] || NF_COVER.W) * s, h = w * P[1];
     // its foot is the ground under it — the lowest of its middle, so no part of the heap floats
     let gy = -1e9;
     for (let q = -0.3; q <= 0.3001; q += 0.05) gy = Math.max(gy, nfCoverGround(x + q * w));
     return { x, gy, s, w, h, key: P[0], flip: !!flip, par: par || 1, ph: tx * 1.37,
              sw: 0, sv: 0, rust: 0, rustT: 0, rust0: 0,
-             leaves: back ? [] : NF_COVER.slots.map((q, i) => ({ q, th: 0, tv: 0, be: 0, bv: 0, ph: tx + i * 2.1 })) };
+             leaves: back ? [] : (P[3] || NF_COVER.slots).map((q, i) => ({ q, th: 0, tv: 0, be: 0, bv: 0, ph: tx + i * 2.1 })) };
   };
   for (const row of G.roomDef.cover || []) NFC.list.push(mk(row, false));
   for (const row of G.roomDef.coverBack || []) NFC.back.push(mk(row, true));
   if (typeof mediaFetch === 'function') {
-    for (const k of ['coverClumpA', 'coverClumpB']) mediaFetch(k, true);
+    for (const k of ['coverClumpA', 'coverClumpB', 'coverClumpC', 'coverClumpD', 'coverClumpE']) mediaFetch(k, true);
     for (const L of NF_COVER.leaf) mediaFetch(L.key, true);
   }
 }
