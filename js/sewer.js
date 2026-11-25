@@ -127,9 +127,17 @@ const SW_HATCH = {
   at: [0, 0.30, 0.62, 0.92, 1.24, 1.52, 1.72, 1.92],
   creakAt: 0.30, clangAt: 1.26, fadeAt: 2.02,
   stand: 50,                  // she stands this far left of the hole's middle (px)
-  rimW: 112,                  // the frame's width on the floor (px)
-  squash: 0.74,               // the plate is seen from above: flattened onto the floor
-  lip: 14,                    // the front rim's height over the floor line: she drops behind it
+  // THE HATCH IS A HOLE IN BROKEN FLOOR (owner, 2026-11-25: "the floor where
+  // the hero jumps in should show like a hole in the ground... as if there's
+  // something broken in the ground"). The plate is a stretch of smashed slab
+  // with the grate sunk in it and the shaft cut down below: its floor row
+  // goes on the game's floor line, the shaft hangs into the ground, and the
+  // slab's sides fade into the real floor (assets/source/sewer/2026-11-25/).
+  rimW: 118,                  // the grate frame's width on the floor (px)
+  artRim: 206,                // ...its width in the plate's 336-px cell
+  artFloor: 296,              // the plate's walking line: the slab's back edge (row of its 576), so the grate lies BELOW it, in the pit
+  flat: 0.8,                  // the plate looks down more steeply than the game does: a little flatter
+  lip: -12,                   // her drop is clipped this far BELOW the floor line: into the mouth
   dh: 97.4,                   // her strip's cell drawn so her body is her own height (70 px)
   floor: 296 / 320,           // her strip's floor row
   key: { claws: 'heroHatchBare', single: 'heroHatchSingle', dual: 'heroHatchDual', joined: 'heroHatchJoined' },
@@ -200,14 +208,13 @@ function swDrawHatch(ds, gy, k, def) {
   // (the lid lifting: the hatch shivers while she strains at it)
   const strain = g && g.align >= 1 && swHatchCell(g.ht || 0) === 1 ? Math.sin(performance.now() / 18) * 0.8 : 0;
   const cw = im.naturalWidth / 4, ch = im.naturalHeight;
-  // the cell is 384 square; the frame's rim is 217 of it across, its front
-  // edge on row 376 — drawn so the rim is rimW wide and the front edge sits
-  // on the floor line
-  const sx = SW_HATCH.rimW / 217, dw = cw * sx, dh = ch * sx * SW_HATCH.squash;
+  // the plate's walking line on the floor line; the hole and its shaft below it
+  const sx = SW_HATCH.rimW / SW_HATCH.artRim, sy = sx * SW_HATCH.flat, dw = cw * sx, dh = ch * sy;
   const dormant = gateLocked(def);
   c.save();
   if (dormant) c.filter = 'brightness(0.7) saturate(0.75)';
-  c.drawImage(im, cell * cw, 0, cw, ch, ds - dw / 2 + strain, gy - dh * (376 / 384) + 2, dw, dh);
+  c.drawImage(im, cell * cw, 0, cw, ch, ds - dw / 2 + strain, gy - SW_HATCH.artFloor * sy, dw, dh);
+  if (typeof G !== 'undefined') G._hatchRect = { x: ds - dw / 2, y: gy - SW_HATCH.artFloor * sy, w: dw, h: dh, gy, cell };
   c.restore();
   return true;
 }

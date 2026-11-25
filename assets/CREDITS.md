@@ -257,7 +257,7 @@ Masters (the public preview MP3s) and `SOURCES.json` with every page and licence
 | file | source | what |
 |---|---|---|
 | `backgrounds/sewer_gallery.jpg`, `sewer_tunnel.jpg`, `sewer_cistern.jpg` | Higgsfield, GPT Image 2.6 | the sewer's three paintings; as-fired in `source/sewer/2026-11-24/` |
-| `characters/sewer/hatch.webp` | Higgsfield, GPT Image 2.6 (background removed by Higgsfield) | the rusty floor hatch in four states, closed to thrown open; cut by `tools/stepstrip.cjs` |
+| `characters/sewer/hatch.webp` | Higgsfield, GPT Image 2.6 | the rusty floor hatch in four states, closed to thrown open, sunk in a smashed stretch of floor with the shaft cut down below (2026-11-25; the first, standing sheet is kept in `source/sewer/2026-11-24/`); as fired in `source/sewer/2026-11-25/` |
 | `characters/hero/hatch_{bare,single,dual,joined}.webp` | Higgsfield, GPT Image 2.6 | HER, OPENING IT: crouch, strain, lift, push, look, hop, air, drop — one sheet per blade, from her canon element; cut by `tools/stepstrip.cjs --feet` |
 | `characters/sewer/smith.webp`, `smith_talk.webp` | Higgsfield, GPT Image 2.6 (design) + Kling 3.0 Turbo (take) | Rivet the pipe-smith, and his loop cut by `tools/vidstrip.cjs`; take in `source/sewer/takes/` |
 | `characters/sewer/skin.webp`, `shell_side.webp`, `shell_back.webp` | Higgsfield, GPT Image 2.6 | MIREJAW's shed skin and the hide shell made of it |

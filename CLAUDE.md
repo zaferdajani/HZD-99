@@ -19,7 +19,7 @@ tell him anything is done.**
 | 15× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` · skill `creature-motion-combat` |
 | 10× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` |
 | 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
-| 6× | **A door is an object that leads somewhere new; one ring to a frame, nothing standing in it** | "you end up with neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` |
+| 7× | **A door is an object that leads somewhere new; in a floor, a hole in broken ground; one ring to a frame, nothing in it** | "neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" · "a hole in the ground" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` `sewer` |
 | 6× | **An enemy is HEARD over the score, on a phone, as a real animal or a real material — recorded, never oscillators, never the same hit twice; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" · "why arent you looking for free libraries for voices ???" · "download from any library of a lion roar" | `voice-heard` `whatplays` `media-container` `hit-voices` `nf-phase2` |
 | 6× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass is painted and bends under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" | `seam` `ring-pads` `fired-art` `grass` · skill `terrain-doors` |
 | 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
@@ -40,12 +40,12 @@ tell him anything is done.**
 **When he corrects something — every time:**
 
 1. **Fix what he pointed at.**
-2. **Sweep.** Find every other place in the game that breaks the same rule
+2. **Sweep.** Find every other place that breaks the same rule
    (other enemies, rooms, kingdoms, the comic, NOSTOS) and fix those in the same
    change. Do not ask him about anything a line above already decides.
 3. **Put it in this table.** A new mistake is a new row with his words. A
    mistake that is ALREADY a row gets its count raised and his new words added:
-   that is the signal that the last fix was too narrow.
+   the signal that the last fix was too narrow.
 4. **Give it a harness** that fails if it comes back, and name it in the row.
 5. **Tell him what the sweep found**, in a line or two. Never answer a
    correction by explaining why it was that way.
@@ -55,7 +55,7 @@ Keep this table short. A row leaves it only when he says so.
 
 ## How he wants to be answered (2026-11-17)
 
-He asked for this directly, more than once in one evening: **"Be honest."** ·
+He asked more than once in one evening: **"Be honest."** ·
 "I'm simply not convinced on what you're selling" · "this is not what I'm
 looking for. I'm looking for your honest description."
 
@@ -129,4 +129,4 @@ Three things that bite, every time:
 | know exactly what an order of his says, and why | `docs/OWNER_ORDERS.md` |
 | know the branch protocol's history, the session fleet, kingdoms | `docs/SESSION_FLEET.md` |
 
-Moved out unedited on 2026-11-17; nothing was deleted.
+Moved out unedited 2026-11-17; nothing deleted.
