@@ -54,7 +54,9 @@ const { chromium } = require('playwright');
         const g0 = gy(x); if (g0 == null || g0 < B.y + B.h - 140) continue;
         for (const fv of [-1, 1]) {
           B.st = 'idle'; B.vy = 0; B.face = B.faceVis = fv; B.x = x - B.w / 2; B.y = g0 - B.h; B._seatT = 0; B._seatY = 0;
-          for (let i = 0; i < 40; i++) { cx2.save(); drawBeast(cx2, B); cx2.restore(); }
+          // (his seat settles on his own clock, B.anim, which the game's update advances between
+          // drawn frames: two thirds of a second of it here, drawn every 1/60)
+          for (let i = 0; i < 40; i++) { B.anim = (B.anim || 0) + 1 / 60; cx2.save(); drawBeast(cx2, B); cx2.restore(); }
           const sgn = fv < 0 ? 1 : -1, cx = x, foot = g0 + B._seatY, sl = Math.tan(B._seatT);
           for (const px of [cx - sgn * 93 * Sk, cx + sgn * 54 * Sk]) {
             const g = gy(px); if (g == null) continue; const y = foot + sl * (px - cx);

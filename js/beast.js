@@ -1556,8 +1556,17 @@ function drawBeast(c, b) {
       const seat = (typeof groundSeat === 'function' && b.st !== 'pounce' && b.st !== 'dive' && b.st !== 'spring')
         ? groundSeat(cx, footY, fx, hx, 0.5, 80 * k) : null;
       const tT = seat ? seat.tilt : 0, dT = seat ? seat.dy : 0;
-      b._seatT = (b._seatT || 0) + (tT - (b._seatT || 0)) * 0.25;
-      b._seatY = (b._seatY || 0) + (dT - (b._seatY || 0)) * 0.25;
+      // eased on HIS clock (b.anim, advanced by update), not once per drawn frame: drawn twice
+      // with no step between he stays exactly where he was, and the settle takes the same time at
+      // 30, 60 or 120 frames a second (a quarter of the way each 1/60 s, as before at 60). The
+      // first draw seats him outright instead of sliding up from zero.
+      const clk = typeof b.anim === "number" ? b.anim : performance.now() / 1000;
+      if (b._seatClk == null) { b._seatT = tT; b._seatY = dT; }
+      else {
+        const e = 1 - Math.pow(0.75, Math.min(6, Math.max(0, clk - b._seatClk) * 60));
+        b._seatT += (tT - b._seatT) * e; b._seatY += (dT - b._seatY) * e;
+      }
+      b._seatClk = clk;
       if (Math.abs(b._seatY) > 0.3) c.translate(0, b._seatY);
       if (Math.abs(b._seatT) > 0.003) c.rotate(b._seatT);
     }
