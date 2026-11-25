@@ -56,9 +56,34 @@ const PORT = process.env.TEST_PORT || 8220;
     // THE FRAME HOLDS STILL (owner, 2026-11-25: "Camera should not move with me in the boss fight"):
     // she runs the floor, jumps, and stands on the palm over the west ledge — the frame does not move,
     // and he and the whole floor stay in it
-    { const xs = [], ys = [], seen = [];
+    // ...read off the FINISHED CANVAS, not only off the camera (the camera said "whole arena" once while
+    // the picture still showed 960 px of it: a zoom below 1 was not drawn): marks at both ends of the
+    // room and she and he found by differencing the frame against the frame without each of them,
+    // the clock and the dice held still between the draws
+    const pix = () => {
+      const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE, CW = cv.width, CH = cv.height, kx = CW / 960, ky = CH / 540;
+      const ends = [{ x: 2, y: H / 2 - 10, w: 16, h: 20 }, { x: W - 18, y: H / 2 - 10, w: 16, h: 20 }];
+      let MARK = null; const dk = window.drawCaveDark;
+      window.drawCaveDark = function () { const r = dk.apply(this, arguments); if (MARK) { c.save(); c.globalAlpha = 1; c.fillStyle = '#ff00ff'; for (const m of MARK) c.fillRect(m.x - camSX(), m.y - camSY(), m.w, m.h); c.restore(); } return r; };
+      const n0 = performance.now.bind(performance), r0 = Math.random, Tf = n0();
+      const shot = () => { let s = 7; performance.now = () => Tf; Math.random = () => ((s = (s * 16807) % 2147483647) / 2147483647); try { draw(); } finally { performance.now = n0; Math.random = r0; } return c.getImageData(0, 0, CW, CH).data; };
+      const ch = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 60;
+      const iT = player.iT; player.iT = 0;
+      const plain = shot(); MARK = ends; const marked = shot(); MARK = null;
+      const pd = player.draw; player.draw = () => {}; const noHer = shot(); player.draw = pd;
+      const fd = window.foeDraw; window.foeDraw = function (x, e) { if (e !== bo) return fd.apply(this, arguments); }; const noHim = shot(); window.foeDraw = fd;
+      window.drawCaveDark = dk; player.iT = iT;
+      const mark = (m) => { const x0 = Math.ceil(worldScreenX(m.x) * kx + 1), x1 = Math.floor(worldScreenX(m.x + m.w) * kx - 1), y0 = Math.ceil(worldScreenY(m.y) * ky + 1), y1 = Math.floor(worldScreenY(m.y + m.h) * ky - 1);
+        if (x0 < 0 || y0 < 0 || x1 > CW || y1 > CH || x1 <= x0 || y1 <= y0) return 0;
+        let n = 0, k = 0; for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { n++; if (ch(marked, plain, (y * CW + x) * 4)) k++; } return +(k / n).toFixed(2); };
+      const body = (B, e) => { let k = 0, sx = 0, sy = 0; for (let y = 0; y < CH; y += 2) for (let x = 0; x < CW; x += 2) if (ch(plain, B, (y * CW + x) * 4)) { k++; sx += x; sy += y; }
+        if (k * 4 < 150) return null; const ex = worldScreenX(e.x + e.w / 2) * kx, ey = worldScreenY(e.y + e.h / 2) * ky;
+        return Math.round(Math.hypot(sx / k - ex, sy / k - ey)); };
+      return { L: mark(ends[0]), R: mark(ends[1]), her: body(noHer, player), him: body(noHim, bo), hid: typeof nfHidden === 'function' && nfHidden(bo) ? bo.st : null };
+    };
+    { const xs = [], ys = [], seen = [], drawn = [];
       const at = (x, y) => { player.x = x; player.y = y; player.vx = player.vy = 0; };
-      const probe = () => { xs.push(cam.x); ys.push(cam.y);
+      const probe = () => { xs.push(cam.x); ys.push(cam.y); drawn.push(pix());
         const inView = (e) => { const ex = worldScreenX(e.x + e.w / 2), ey = worldScreenY(e.y + e.h / 2); return ex > 0 && ex < 960 && ey > 0 && ey < 540; };
         seen.push([Math.round(worldScreenX(bo.x + bo.w / 2)), Math.round(worldScreenY(bo.y + bo.h / 2)), Math.round(worldScreenX(player.x)), Math.round(worldScreenY(player.y)), inView(bo) && inView(player)]); };
       at(3 * TILE, 13 * TILE); loop(30, () => { hold(); }); probe();
@@ -68,6 +93,7 @@ const PORT = process.env.TEST_PORT || 8220;
       // a jump from the palm
       player.vy = -700; player.on = false; loop(20, () => { hold(); }); probe();
       out.frame = { dx: Math.round(Math.max(...xs) - Math.min(...xs)), dy: Math.round(Math.max(...ys) - Math.min(...ys)), seen: seen.every(q => q[4]), at: seen };
+      out.drawn = { ok: drawn.every(d => d.L >= 0.8 && d.R >= 0.8 && d.her != null && d.her <= 48 && (d.hid ? d.him == null : d.him != null && d.him <= 96)), probes: drawn };   // (in his leaves he is not drawn at all, by design)
       at(14 * TILE, 13 * TILE); loop(30, () => { hold(); }); }
     // ---- 2. THE COVER
     const L = nfCoverList();
@@ -185,6 +211,7 @@ const PORT = process.env.TEST_PORT || 8220;
   check('the fight is framed as the whole arena: zoomed out until the room fits the screen', Math.abs(R.zFight.now - R.zFight.fit) < 0.01 && R.zFight.now < R.zExplore - 0.3, { explore: R.zExplore, fight: R.zFight });
   check('...and it eases there, it never cuts (under 0.05 a frame: the camera\'s own ease)', R.zFight.dzMax < 0.05, R.zFight);
   check('the frame holds still whatever she does: across the floor, on the palm, in a jump from it — and he is always in it', R.frame.dx <= 2 && R.frame.dy <= 2 && R.frame.seen, R.frame);
+  check('...on the canvas: both ends of his arena are drawn, and she and he are drawn where the camera puts them, on the floor, on the palm and in the jump (centroid within 48 / 96 px)', R.drawn.ok, R.drawn.probes);
   check('the arena has cover across its whole floor: six or more clumps of three or more shapes, each with its leaves, no stretch of floor wider than 320 px without one', R.cover.length >= 6 && new Set(R.cover.map(c => c.key)).size >= 3 && R.cover.every(c => c.leaves >= 2) && R.cover.every((c, i) => i === 0 || c.x - R.cover[i - 1].x <= 320), R.cover.map(c => [c.x, c.key, c.leaves]));
   check('...each stands ON the ground: its foot on the ground under it, never floating, never sunk', R.cover.every(c => c.gy >= c.hi - 1 && c.gy - c.lo <= 26), R.cover.map(c => [c.x, c.gy, c.lo, c.hi]));
   check('...drawn at full strength (no fade, no filter), the art present', R.front.draws > 40 && R.front.faded === 0 && R.front.filt === 0, R.front);
