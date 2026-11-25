@@ -32,48 +32,67 @@ const { chromium } = require('playwright');
     sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
     startGame(sv); loadRoom('A4');
     const b = G.boss;
-    b.st = 'stalk'; b.t = 2; b.dead = false; b.hp = b.hpMax;
+    b.update(1 / 60);                     // the duel (js/nullfang-duel.js) takes him over on his first frame
+    // IN AN OPENING. The owner, 2026-11-24: "You need to decrease the openings for
+    // hitting those bosses. And Lion needs to be even harder than Rhino." A walk-in
+    // mash broke him out of his own wind-up in 4.4 s; the break is now earned only
+    // by blows that land WHOLE, in an opening (a landing's settle here), and it
+    // needs NF_DUEL.dazeAt of them, not five.
+    b.st = 'recover'; b.t = 2; b.dead = false; b.hp = b.hpMax; b.hideK = 1;
     return !!b;
   });
+  const N = await page.evaluate(() => (typeof NF_DUEL !== 'undefined' ? NF_DUEL.dazeAt : G.boss.dazeAt));
 
   // ---- 1. the window opens under a grouped cadence, and NOT under a spaced one
   await boot();
-  const grouped = await page.evaluate(() => {
+  const grouped = await page.evaluate((N) => {
     const b = G.boss;
-    // five hits inside the rolling window, which is what a committed melee
+    // a group inside the rolling window, which is what a committed melee
     // player produces: dealDmg is the funnel every real hit goes through, so
     // calling it is calling the game and not a mock of it
-    for (let i = 0; i < BSTAT.glitch.dazeAt; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
+    for (let i = 0; i < N; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
     b.update(1 / 60);
     return { st: b.st, dur: b.dazeDur || 0 };
-  });
-  check('a group of hits (BSTAT.glitch.dazeAt — six since he was made harder, 2026-11-20) breaks it', grouped.st === 'daze', 'st=' + grouped.st);
+  }, N);
+  check(N + ' grouped whole hits in an opening break it', grouped.st === 'daze', 'st=' + grouped.st);
+
+  // ...and the same group thrown INTO what he is doing does not: it is turned on
+  // his hide, and a break is never taken out of a wind-up (the mash that won)
+  await boot();
+  const intoTell = await page.evaluate((N) => {
+    const b = G.boss;
+    b.st = 'swipewarn'; b.t = 0.5; b.hideK = (typeof NF_DUEL !== 'undefined') ? NF_DUEL.hide : 1;
+    for (let i = 0; i < N; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
+    b.update(1 / 60);
+    return { st: b.st };
+  }, N);
+  check('the same group thrown into his wind-up does not', intoTell.st !== 'daze', 'st=' + intoTell.st);
 
   await boot();
-  const spaced = await page.evaluate(async () => {
+  const spaced = await page.evaluate(async (N) => {
     const b = G.boss;
     // the same five hits, but each one arrives after the window has lapsed —
     // poking from range must never earn the reward
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < N; i++) {
       dealDmg(b, 5, null, b.cx(), b.cy(), true);
       for (let f = 0; f < 90; f++) b.update(1 / 60);   // 1.5 s > DAZE_WINDOW
       if (b.st === 'daze') return { st: 'daze', at: i };
-      b.st = 'stalk'; b.t = 2;                          // keep it in a hittable state
+      b.st = 'recover'; b.t = 2; b.hideK = 1;           // keep it in an opening
     }
     return { st: b.st, at: -1 };
-  });
-  check('five SPACED hits do not', spaced.st !== 'daze', 'st=' + spaced.st);
+  }, N);
+  check(N + ' SPACED hits do not', spaced.st !== 'daze', 'st=' + spaced.st);
 
   // ---- 2. it stops attacking while it is open, and it comes back -----------
   await boot();
-  const window_ = await page.evaluate(() => {
+  const window_ = await page.evaluate((N) => {
     const b = G.boss;
-    for (let i = 0; i < BSTAT.glitch.dazeAt; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
+    for (let i = 0; i < N; i++) dealDmg(b, 5, null, b.cx(), b.cy(), true);
     const seen = {}; let frames = 0;
     b.update(1 / 60);
     while (b.st === 'daze' && frames < 400) { seen[b.st] = 1; b.update(1 / 60); frames++; }
     return { secs: +(frames / 60).toFixed(2), after: b.st, states: Object.keys(seen) };
-  });
+  }, N);
   check('the window is worth having (>= 1 s)', window_.secs >= 1.0, window_.secs + 's');
   check('it never attacked while dazed',
     window_.states.length === 1 && window_.states[0] === 'daze', window_.states.join(','));

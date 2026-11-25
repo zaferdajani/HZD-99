@@ -88,8 +88,8 @@ function alphaFuryFire(b, px, py) {
   alphaWave(b, { R: 680, dur: 1.5, amp: 12, width: 96, col: '#b06aff', fronts: 2, gap: 0.24, nudge: 0, delay: 0.6, dust: false, light: 0.5, pulse: 0, shimmer: 1.2 });
   b.rumbleT = 0.7;
   if (typeof fx === 'function') {
-    fx('pillar', cx, fy, { rx: 120, ry: 420, dur: 0.8, col: ALPHA_RED, hot: ALPHA_HOT, power: 1.3 });
-    fx('flash', cx, b.cy(), { rx: 240, ry: 240, dur: 0.3, col: ALPHA_RED, hot: '#ffffff', power: 1.3 });
+    // (no pillar of light out of him and no flash round him, 2026-11-24: the ledger's light round a
+    // body. The fury is the room bending, the floor cracking and the red grade — alphaAura)
     if (!G.artProbe) {
       fx('ground', cx, fy - 2, { rx: 330, ry: 44, dur: 0.7, col: ALPHA_RED, hot: ALPHA_HOT, power: 1.4 });
       fx('cracks', cx, fy + 3, { rx: 230, ry: 30, dur: 2.2, col: '#c2182c', hot: ALPHA_HOT, power: 1.3 });
@@ -202,11 +202,13 @@ function alphaRendStep(b, dt) {
 //
 // Nothing here is unannounced, and every one of them ends in a rest.
 const ALPHA_WIT = {
-  hide: 0.4,
-  evadeAt: 4, evadeAtFury: 3, evadeCD: 1.5,
+  // (the gauntlet, 2026-11-24: a sword mash took two thirds of it. A blow into its attack is turned
+  // to 15%, and an opening holds two blows — one in its fury — before it springs clear)
+  hide: 0.15,
+  evadeAt: 3, evadeAtFury: 2, evadeCD: 1.5,
   springV: 470, springUp: 270, vaultV: 440, vaultUp: 540, springGrace: 0.24,
-  skyTell: 0.30, skyLive: 0.24, skyReach: 150, skyDwell: 0.30, skyPlunged: 0.7,
-  chain: 2, chainTell: 0.32,
+  skyTell: 0.42, skyLive: 0.24, skyReach: 150, skyDwell: 0.30, skyPlunged: 0.7,
+  chain: 2, chainTell: 0.42,   // (both were under the 0.40 s kingdom-1 floor)
 };
 function alphaOpen(b) { return b.st === 'rest' || b.st === 'idle' || b.st === 'turn' || (b.stagT || 0) > 0; }
 // asked once a step, before the machine: keeps the hide current, and takes the
@@ -274,10 +276,10 @@ function alphaWitStates(b, dt, px, py) {
       b.fired = true;
       if (typeof sfx === 'function') sfx('slash');
       cam.shake = Math.max(cam.shake, 5);
-      if (typeof fx === 'function') {
-        fx('pillar', cx, b.y + 8, { rx: 64, ry: ALPHA_WIT.skyReach + 30, dur: 0.3, col: b.fury ? ALPHA_RED : '#ff8a4a', hot: ALPHA_HOT, power: 1.25 });
-        fx('flash', cx, b.y - 40, { rx: 110, ry: 110, dur: 0.18, col: b.fury ? ALPHA_RED : '#ff8a4a', hot: '#ffffff' });
-      }
+      // THE BITE, generated (js/bossvfx.js): two crescents of fangs snapping shut in the air over its
+      // spine — exactly the box that bites. (It was a pillar of light standing up out of its back and
+      // a flash round its head: light on a body.)
+      if (typeof bossVfx === 'function' && !G.artProbe) bossVfx('alpha_bite', cx, b.y - ALPHA_WIT.skyReach * 0.5, { h: ALPHA_WIT.skyReach * 1.35, dur: 0.42 });
       burst(cx, b.y - 20, 12, '#ffb15a', 260, 0.4, -200, 2.4, true);
     }
     // live for the whole snap: the air over its spine, a body and a half up
@@ -354,8 +356,10 @@ function alphaLeapLanded(b) {
   if (typeof fx === 'function' && !G.artProbe) {
     fx('ground', cx, fy - 2, { rx: ALPHA_FX.quake + 40, ry: 36, dur: 0.55, col: ALPHA_RED, hot: ALPHA_HOT, power: 1.35 });
     fx('cracks', cx, fy + 3, { rx: ALPHA_FX.quake, ry: 26, dur: 1.6, col: '#c2182c', hot: ALPHA_HOT, power: 1.2 });
-    fx('flash', cx, fy - 14, { rx: 150, ry: 150, dur: 0.22, col: ALPHA_RED, hot: '#ffffff' });
   }
+  // the landing, generated: a red shock out along the floor as far as the quake reaches (it was a
+  // flash round its feet)
+  if (typeof bossVfx === 'function' && !G.artProbe) bossVfx('alpha_land', cx, fy, { h: (ALPHA_FX.quake * 2 + 40) * 160 / 338 });
   // through the FLOOR: it reaches her only if she is standing on it
   if (!player.dead && player.iT <= 0 && player.on && Math.abs(player.x + player.w / 2 - cx) < ALPHA_FX.quake
       && Math.abs(player.y + player.h - fy) < 46) {
@@ -372,7 +376,8 @@ function alphaStrikeFx(b, kind, reach, hit) {
     fx('slash', b.cx() + f * reach * 0.55, b.cy() - 2, { rx: 112, ry: 100, dur: 0.28, flip: f < 0, power: 3.4, col, hot: ALPHA_HOT });
     if (typeof sfx === 'function') sfx('alpha_claw');
   } else {
-    fx('flash', b.cx() + f * (b.w * 0.6), b.y + b.h * 0.38, { rx: hit ? 92 : 64, ry: hit ? 92 : 64, dur: 0.18, col, hot: '#ffffff', power: hit ? 1.2 : 0.8 });
+    // the jaws, generated, snapping shut in front of the muzzle (a flash there lit its own head)
+    if (typeof bossVfx === 'function' && !G.artProbe) bossVfx('alpha_bite', b.cx() + f * (b.w * 0.5 + reach * 0.35), b.y + b.h * 0.38, { h: hit ? 120 : 90, dur: 0.3 });
     if (typeof sfx === 'function') sfx('alpha_snap');
   }
 }
@@ -385,7 +390,6 @@ function alphaShakeFx(b, n) {
 function alphaHowlFx(b) {
   if (typeof fx !== 'function') return;
   const cx = b.cx(), fy = alphaFloorY(b);
-  fx('pillar', cx, fy, { rx: 84, ry: 380, dur: 0.9, col: '#ff5f6d', hot: ALPHA_HOT, power: 1.1 });
   // THE HOWL GOES THROUGH THE ROOM. Not rings drawn on it: the picture bends
   // as each front of the note passes, the frame is nudged when it reaches
   // her, and it moves her back a step. Then the note rings on, wider and
@@ -393,14 +397,14 @@ function alphaHowlFx(b) {
   alphaWave(b, { R: 500, dur: 1.0, amp: 28, width: 62, col: '#ff5f8a', fronts: 3, gap: 0.14, push: 190, nudge: 6, shimmer: 2.8, pulse: 0.2 });
   alphaWave(b, { R: 600, dur: 1.4, amp: 10, width: 90, col: '#b06aff', fronts: 2, gap: 0.24, nudge: 0, delay: 0.55, dust: false, light: 0.5, pulse: 0, shimmer: 1.0 });
   b.auraT = 1.3; b.rumbleT = 0.55;
-  fx('flash', cx + (b.face || -1) * b.w * 0.3, b.y + b.h * 0.25, { rx: 150, ry: 150, dur: 0.3, col: '#ff5f8a', hot: '#ffffff', power: 1.3 });
   if (!G.artProbe) for (let i = 0; i < 14; i++)
     addPart(cx + rnd(-60, 60), fy - rnd(0, 20), rnd(-30, 30), rnd(-220, -90), rnd(0.5, 0.9), chance(0.4) ? '#ffb38a' : '#ff5f6d', rnd(1.6, 2.6), -60, true);
 }
 // a wolf called by the howl arrives ALREADY hunting: red light where it lands,
 // and its teeth out before it has taken a step
 function alphaPackArrive(w) {
-  if (typeof fx === 'function') fx('flash', w.x + w.w / 2, w.y + w.h / 2, { rx: 80, ry: 80, dur: 0.28, col: '#ff5f6d', hot: '#ffffff' });
+  // red light where it LANDS, on the floor under it (a flash round the wolf was light round a body)
+  if (typeof bossVfx === 'function' && !G.artProbe) bossVfx('alpha_land', w.x + w.w / 2, w.y + w.h, { h: 54 });
   if (typeof WOLF_HUNT !== 'undefined') { w.hunt = 1; w.snarlT = WOLF_HUNT.snarl; w.snarl0 = w.snarlT; w.snarlCD = WOLF_HUNT.snarl + WOLF_HUNT.again; }
 }
 function alphaRoarFx(b) {

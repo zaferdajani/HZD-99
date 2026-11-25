@@ -267,3 +267,5 @@ Masters (the public preview MP3s) and `SOURCES.json` with every page and licence
 | `sfx/sewer/sw_amb.ogg` | **"StormSewer" by klangfabrik** — https://freesound.org/people/klangfabrik/sounds/123721/ | **CC0 1.0**. Water running through the tunnels under the score |
 
 Masters (the public preview MP3s), the alternates and `SOURCES.json` with every page and licence are in `source/audio/sewer/`. Real recordings, never oscillators.
+
+`fx/boss/*.webp` — the bosses' attack effects (2026-11-24): frames of original Higgsfield Seedance 2.0 Mini clips generated on black for this game (masters, briefs and job ids in `source/vfx/boss-2026-11-24/`), cut by `tools/vfxstrip.py`. AI-generated; no third-party footage or game assets were used.

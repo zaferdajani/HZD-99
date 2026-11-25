@@ -56,6 +56,9 @@ const FIGHTS = [['A4', 'glitch'], ['A10', 'alpha'], ['B4', 'brood'], ['X1', 'pri
           player.x = b.cx() + side * (b.w / 2 + 40) - player.w / 2; player.vx = 0;
           update(1 / 60); for (const k in keysP) keysP[k] = 0; cam.shake = 0; G.hitStop = 0;
           if (f % 40 !== 20 || b.dead) continue;
+          // (where she IS when the blow lands, after the frame: a flier's body can be carried past the
+          // spot she was put — 'away from her' is away from her, not from where she was placed)
+          side = Math.sign(player.x + player.w / 2 - b.cx()) || side;
           const st = String(b.st), hp0 = b.hp, n0 = heard.length, p0 = parts.length, imp0 = b.impactAt;
           const wasOpen = bossKickable(b);
           G.clashAt = 0; b._kickV = 0;

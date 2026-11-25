@@ -604,6 +604,20 @@ const MEDIA_SRC = {
     // HZD-99's claw arc, painted as glowing light on pure black so it can be
     // composited additively with no alpha channel to cut
     slashFx: 'assets/fx/slash.webp',
+    // the bosses' attacks, generated and drawn as light (js/bossvfx.js, tools/vfxstrip.py)
+    bvfx_agent_bolt: 'assets/fx/boss/agent_bolt.webp',
+    bvfx_agent_burst: 'assets/fx/boss/agent_burst.webp',
+    bvfx_agent_pillar: 'assets/fx/boss/agent_pillar.webp',
+    bvfx_agent_slash: 'assets/fx/boss/agent_slash.webp',
+    bvfx_agent_wave: 'assets/fx/boss/agent_wave.webp',
+    bvfx_nf_shock: 'assets/fx/boss/nf_shock.webp',
+    bvfx_nf_bolt: 'assets/fx/boss/nf_bolt.webp',
+    bvfx_nf_claw: 'assets/fx/boss/nf_claw.webp',
+    bvfx_nf_burst: 'assets/fx/boss/nf_burst.webp',
+    bvfx_alpha_bite: 'assets/fx/boss/alpha_bite.webp',
+    bvfx_alpha_land: 'assets/fx/boss/alpha_land.webp',
+    bvfx_chime_shard: 'assets/fx/boss/chime_shard.webp',
+    bvfx_chime_burst: 'assets/fx/boss/chime_burst.webp',
     // THE ROCK, drawn. One slab per kingdom, and every solid tile in the game —
     // floor, wall, ceiling — is cut from it, so these six files are the whole
     // world's surface. Lazy like everything else: js/game.js bakes its

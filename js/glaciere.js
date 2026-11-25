@@ -373,21 +373,27 @@ function drawGlaciere(c, b) {
       const hp2 = glcHornLocal();
       const k = clamp(1 - (b.t || 0) / 0.7, 0, 1);
       c.save(); c.globalCompositeOperation = 'lighter';
-      const g = c.createRadialGradient(hp2.x, hp2.y, 2, hp2.x, hp2.y, 26 + k * 40);
-      g.addColorStop(0, 'rgba(240,160,255,' + (0.5 + k * 0.5) + ')');
-      g.addColorStop(0.5, 'rgba(190,80,240,' + (0.3 + k * 0.35) + ')');
-      g.addColorStop(1, 'rgba(120,30,200,0)');
+      // the WARNING colour arrives at the tip as the shot nears (ART_BIBLE §3.5: a tell raises the
+      // reserved amber). It used to be lent by a bloom round her whole body, removed 2026-11-24 —
+      // light round a body — so it is said here, on the weapon, where the lance comes from.
+      const R = 24 + k * 54, kk = Math.min(1, k * 2.5), mix = (a, b2) => Math.round(a + (b2 - a) * kk);   // (amber from the first third of the tell: §3.6, lit from the first frames)
+      const g = c.createRadialGradient(hp2.x, hp2.y, 2, hp2.x, hp2.y, R);
+      g.addColorStop(0, 'rgba(255,' + mix(200, 236) + ',' + mix(255, 170) + ',' + (0.6 + k * 0.4) + ')');
+      g.addColorStop(0.45, 'rgba(' + mix(200, 255) + ',' + mix(90, 194) + ',' + mix(240, 74) + ',' + (0.4 + k * 0.5) + ')');
+      g.addColorStop(1, 'rgba(255,150,40,0)');
       c.fillStyle = g;
-      c.beginPath(); c.arc(hp2.x, hp2.y, 26 + k * 40, 0, 7); c.fill();
+      c.beginPath(); c.arc(hp2.x, hp2.y, R, 0, 7); c.fill();
       c.restore();
     }
     if (b.st === 'shardwarn') {
       // ice gathers along the spine crystals — the shard tell
       c.save(); c.globalCompositeOperation = 'lighter';
-      c.globalAlpha *= 0.35 + Math.sin(b.anim * 16) * 0.2;
-      const g = c.createRadialGradient(30, -300, 8, 30, -300, 150);
-      g.addColorStop(0, 'rgba(165,216,255,0.5)'); g.addColorStop(1, 'rgba(165,216,255,0)');
-      c.fillStyle = g; c.beginPath(); c.arc(30, -300, 150, 0, 7); c.fill();
+      // (glints AT the crystals, not a wash over her back: a 150 px glow there was light round a body)
+      c.strokeStyle = 'rgba(205,236,255,0.9)'; c.lineWidth = 2;
+      for (let i = 0; i < 5; i++) {
+        const gx = 30 + (i - 2) * 46, gy = -300 + Math.sin(i * 1.7) * 26, L = 6 + 7 * Math.abs(Math.sin(b.anim * 11 + i * 1.3));
+        c.beginPath(); c.moveTo(gx - L, gy); c.lineTo(gx + L, gy); c.moveTo(gx, gy - L); c.lineTo(gx, gy + L); c.stroke();
+      }
       c.restore();
     }
     c.restore();

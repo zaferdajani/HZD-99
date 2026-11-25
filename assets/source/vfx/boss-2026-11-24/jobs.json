@@ -1,0 +1,59 @@
+{
+ "generator": "Higgsfield, Seedance 2.0 Mini, 4 s, 720p, no audio (2026-11-24)",
+ "common_brief": "2D action game visual effect element, side view. Pure flat black background filling the entire frame, nothing else: no ground, no environment, no character, no text. Locked-off camera, no zoom, no cuts. Premium hand-crafted VFX quality, crisp, high contrast, self-luminous.",
+ "cut_by": "tools/vfxstrip.py with strips.json in this folder; shipped in assets/fx/boss/",
+ "clips": {
+  "agent_bolt": {
+   "job": "6f1cfd4b-e384-40fe-9561-1bc48653887e",
+   "brief": "a single EMBER FIREBALL projectile flying to the RIGHT, held in the centre of frame; white-gold core, roiling amber and orange flame, a long tapering comet tail of flame and ember sparks to the LEFT; looping"
+  },
+  "agent_burst": {
+   "job": "5b0249bb-372e-4340-9989-e422bf59b138",
+   "brief": "ONE fire explosion impact burst: from a white-hot point at 0.3 s, a starburst of amber flame tongues and ember sparks, breaking into dark smoke and falling embers, gone by 2 s"
+  },
+  "agent_pillar": {
+   "job": "0f9adbe9-4123-40b5-a53f-ae34594bc2bc",
+   "brief": "a COLUMN OF FIRE ERUPTS straight up from the bottom edge: an ember line at 0.3 s, then a tall narrow geyser of white-gold and amber flame to the top of frame, held, then collapsing into smoke and embers by 2.5 s"
+  },
+  "agent_slash": {
+   "job": "c7a87769-ebba-4d59-93fb-5cf3b64443dd",
+   "brief": "ONE fast SWEEPING SLASH of golden fire: a wide crescent arc from upper-left over the top to lower-right, razor-thin white-hot leading edge, amber flame body, fraying into embers by 1.5 s"
+  },
+  "agent_wave": {
+   "job": "2dbe6007-c4ba-4ced-a47c-0e6b033e75a0",
+   "brief": "a LOW ROLLING WAVE OF FIRE along an invisible floor line, held in the centre of frame: a knee-high crest of amber flame curling forward to the RIGHT, white-gold at its base, a ribbon of dying flame to the LEFT; looping"
+  },
+  "nf_shock": {
+   "job": "a2dacc9e-a84e-4178-bfe6-16f3080cad89",
+   "brief": "crackling VIOLET ELECTRICITY crawling along a straight invisible floor line: jagged branching violet and magenta lightning with white-hot filaments, sparks, and small square pixel glitch shards; looping"
+  },
+  "nf_bolt": {
+   "job": "4007d371-5a90-4942-b537-461d92894004",
+   "brief": "a single VIOLET PLASMA BOLT flying to the RIGHT, held in the centre of frame: a spear-shaped white-violet core, a sheath of violet lightning, a tail of glitching energy and pixel shards to the LEFT; looping"
+  },
+  "nf_claw": {
+   "job": "3bd3a8ba-026f-421c-8802-1e73a82b3850",
+   "brief": "a giant beast's CLAW SWIPE: THREE parallel curved slash marks of violet energy torn diagonally from upper-right to lower-left at 0.3 s, white-hot edges, glitch shards; crumbling away by 1.5 s"
+  },
+  "nf_burst": {
+   "job": "1e4f4702-afe1-4e1b-aaf9-50d3f79c8a8c",
+   "brief": "ONE VIOLET ENERGY IMPACT BURST: a white-hot flash point at 0.3 s snapping into a jagged starburst of violet and magenta lightning spikes with glitch shards, flickering out by 1.8 s"
+  },
+  "alpha_bite": {
+   "job": "d690b037-a71f-4348-929d-230d2c529f90",
+   "brief": "a WOLF'S BITE made of light: two fang-shaped crescents of crimson energy snapping SHUT together in the centre at 0.3 s like closing jaws, a white-hot flash where they meet, red sparks, fading by 1.5 s"
+  },
+  "alpha_land": {
+   "job": "7fc2c206-1577-4ece-9139-d19989b2c22e",
+   "brief": "a HEAVY LANDING IMPACT on an invisible floor line: a white-hot flash at 0.3 s, a flat crimson shockwave blasting LEFT and RIGHT along the floor with red sparks, rock chips and dust, gone by 2 s"
+  },
+  "chime_shard": {
+   "job": "616ed458-0310-4d3c-a360-e546783682b0",
+   "brief": "a single SPINNING ICE-CRYSTAL SHARD projectile, centred: faceted pale icy cyan crystal with a white-hot glint, a shimmer of frost sparkles and faint sound-wave ripples behind it to the LEFT; looping"
+  },
+  "chime_burst": {
+   "job": "df76d78d-05ba-4f8e-8716-7ffc52917516",
+   "brief": "ONE ICE CRYSTAL SHATTER BURST: a white-hot glint at 0.3 s, then sharp faceted icy cyan shards blasting outward, spinning, frost sparkles, gone by 1.8 s"
+  }
+ }
+}

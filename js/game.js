@@ -1617,7 +1617,7 @@ function startGame(save) {
   // Reset before loadRoom so its NEW arrival wake/tutorial is not erased.
   // Previously a paused reward's impact panel and dash lesson followed a
   // restart into the cradle, even though the new cat owned no dash.
-  G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = [];
+  G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = []; if (typeof clearBossVfx === 'function') clearBossVfx();
   if (typeof FXGL !== 'undefined') FXGL.list.length = 0;
   G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
   G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null; G.sceneCaps = null;
@@ -3281,6 +3281,7 @@ function update(dt) {
         else if (player) player.vx = 0;
       }
       if (typeof updateRoarFX === 'function') updateRoarFX(dt);
+      if (typeof updateBossVfx === 'function') updateBossVfx(dt);
       // THE CACHE GATE: the floor entrance stays open until she is truly
       // inside — on her feet, clear of the hole — and only then does the
       // hardlight bridge snap across behind her and seal the arena
@@ -15973,6 +15974,7 @@ function drawWorldFrame() {
   if (typeof drawGatePrompt === 'function') drawGatePrompt();
   if (typeof drawProgress === 'function') drawProgress(c);              // wards and the cleansing light
   if (typeof drawRoarFX === 'function') drawRoarFX(c);
+  if (typeof drawBossVfx === 'function') drawBossVfx(c);           // the bosses' attacks in generated light (js/bossvfx.js)
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
   // stays solid and rich instead of being swallowed by the atmosphere — the
   // one exception is the recharge pod, whose cables and canopy must close

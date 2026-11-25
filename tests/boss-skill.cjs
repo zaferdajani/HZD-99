@@ -117,10 +117,14 @@ const { chromium } = require('playwright');
     const line = d => d.secs + ' s, ' + (d.won ? 'won' : d.died ? 'DIED' : 'timed out') + ', ' + d.dmg + ' cores lost, king at ' + d.bossHp;
     check('ALPHA  mash: a player who only presses ATTACK never beats it', A.mash.every(d => !d.won), A.mash.map(line).join(' | '));
     check('ALPHA  ...and is not close: the king still has a third of its health when she falls', A.mash.every(d => d.died && parseInt(d.bossHp, 10) >= 658 * 0.33), A.mash.map(d => d.bossHp).join(' | '));
-    check('ALPHA  ...because a blow thrown into its attack turns on its hide (two fifths)', A.mash.every(d => /(^|\/)(7|8|10)(\/|$)/.test(d.hitSizes) && /(^|\/)18(\/|$)/.test(d.hitSizes)), 'blows landed for ' + A.mash[0].hitSizes);
+    // (the hide was two fifths until the boss ladder, 2026-11-24, made it 0.15 — js/alphakit.js ALPHA_WIT.hide:
+    // what is checked is that a blow into its attack is TURNED, landing for a fraction of a whole one)
+    check('ALPHA  ...because a blow thrown into its attack turns on its hide (a fraction of a whole blow)', A.mash.every(d => { const z = d.hitSizes.split('/').map(Number); return z.includes(18) && z.some(n => n >= 1 && n <= 10); }), 'blows landed for ' + A.mash[0].hitSizes);
     check('ALPHA  ...and it will not be stood next to: it springs clear of a mash', A.mash.every(d => (d.states.spring || 0) >= 2), A.mash.map(d => (d.states.spring || 0) + ' springs').join(' | '));
     check('ALPHA  pogo: bouncing on its back never beats it', A.pogo.every(d => !d.won), A.pogo.map(line).join(' | '));
-    check('ALPHA  ...it answers the air above it: the skybite is what stops her', A.pogo.every(d => d.srcs.filter(s2 => s2 === 'alpha.sky').length >= 2), A.pogo.map(d => d.srcs.join(',')).join(' | '));
+    // (its body is named since 2026-11-24 — 'alpha.body' — so the list shows what her landings on its
+    // back cost her too; what is checked is that it ANSWERS the air: skybites thrown, and they bite)
+    check('ALPHA  ...it answers the air above it: the skybite is what stops her', A.pogo.every(d => (d.states.skywarn || 0) >= 2 && d.srcs.includes('alpha.sky')), A.pogo.map(d => (d.states.skywarn || 0) + ' skybites; ' + d.srcs.join(',')).join(' | '));
     // (owner, 2026-11-17: "do not allow player to keep hitting rhino with an endless down hit". The
     // count is a five-second memory now, not cleared by the floor: one whole, one half, then plate.)
     check('ALPHA  ...a down-strike is a move, not a plan: never three inside five seconds', A.pogo.every(d => d.hitAt.every((f, i) => i < 2 || f - d.hitAt[i - 2] >= 298)), A.pogo.map(d => d.hitAt.length + ' down-strikes bit, at ' + d.hitAt.map(f => (f / 60).toFixed(1)).join('/')).join(' | '));

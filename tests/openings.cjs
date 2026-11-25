@@ -21,16 +21,30 @@ const { chromium } = require('playwright');
 
 const FIGHTS = [
   { name: 'NULLFANG', room: 'A4', boss: () => G.boss,
-    hurt: ['swipe', 'pounce', 'dive'],
-    // the roar cannot hurt her (it shoves and summons), so it is OPEN time
-    tell: ['swipewarn', 'crouch', 'springwarn', 'nullcharge', 'perch', 'nullhop'],
+    // (owner, 2026-11-24: "Lion needs to be even harder than Rhino ... decrease the
+    // openings". js/nullfang-duel.js gave him the turning rake, the rear-up and the
+    // bite: they hurt, and their wind-ups are wind-ups — counting them as OPEN time
+    // measured his own attacks as gifts he handed her. bitestop, after the bite, is
+    // a real opening and stays OPEN.)
+    hurt: ['swipe', 'pounce', 'dive', 'rake', 'swat', 'bite'],
+    // the roar cannot hurt her (it shoves and summons; its floor shocks travel on
+    // their own), so it is OPEN time
+    tell: ['swipewarn', 'crouch', 'springwarn', 'nullcharge', 'perch', 'nullhop', 'rakewarn', 'swatwarn', 'bitewarn', 'spitwarn'],
     // a move whose opening is allowed past 900: the once-per-fight set piece
     gift: ['pounce>nullend'],
+    // the null field's own chain: pounce, hop, pounce, hop, pounce -> nullend. The
+    // field is the wind-up and the hops are its middle; its END is the gift above
+    chain: ['pounce>nullhop'],
     // what she stands at, per scenario, and the phase
     // stand: she holds one spot in its face. move: she relocates 320 px away
     // every 3.5 s, which is what gives the prowl the time its ambush needs
     runs: [{ dist: 70, phase: 1, secs: 70 }, { dist: 320, phase: 1, secs: 90, move: 3.5 },
-           { dist: 70, phase: 2, secs: 70 }, { dist: 320, phase: 2, secs: 90, move: 3.5 }] },
+           { dist: 70, phase: 2, secs: 70 }, { dist: 320, phase: 2, secs: 90, move: 3.5 },
+           // THE PLACES THAT WERE SAFE (the boss gauntlet, 2026-11-24): his back, the
+           // air over him, and cutting into his hide. Each has its answer now (rake,
+           // rear-up, bite), and each answer must leave its opening.
+           { dist: 90, phase: 1, secs: 50, behind: true, move: 2.5 }, { dist: 0, phase: 1, secs: 40, above: true },
+           { dist: 150, phase: 1, secs: 60, greedy: true, move: 3 }] },
   { name: 'THE ALPHA', room: 'A10', boss: () => G.boss,
     // the rend (js/alphakit.js, 2026-11-15) is a damaging move with its own
     // wind-up; the fury is a wind-up too, though the roar it ends in hurts no one
@@ -118,12 +132,14 @@ const FIGHTS = [
           let moved = false;
           if (i === 0 || (R.move && i % Math.round(R.move / DT) === 0)) {
             moved = i > 0;
-            let side = b.face > 0 ? 1 : -1;
+            let side = (b.face > 0 ? 1 : -1) * (R.behind ? -1 : 1);
             if (b.cx() + side * R.dist < 40 || b.cx() + side * R.dist > W - 40) side = -side;
             window.__gx = Math.max(24, Math.min(W - 24 - player.w, b.cx() + side * R.dist - player.w / 2));
           }
           player.x = window.__gx;
           player.y = G.roomDef.h * TILE - 2 * TILE - player.h;
+          if (R.above) { player.x = b.cx() - player.w / 2; player.y = b.y - 90; }
+          if (R.greedy && i % 15 === 0) keysP.KeyX = 1;
           player.vx = 0; player.vy = 0; player.iT = 9; player.dead = false; player.hp = player.hpMax || 7;
           player.stunT = 0;
           G.dialog = null; G.state = 'PLAY';
@@ -206,7 +222,7 @@ const FIGHTS = [
       const isGift = F.gift.includes(k);
       // a chain's middle (swipe>swipewarn) opens nothing by design; the chain's
       // END must open, and that end is a different row of this table
-      const chain = k.endsWith('warn') && k.startsWith(move) && v.every(x => x < 100);
+      const chain = ((k.endsWith('warn') && k.startsWith(move)) || (F.chain || []).includes(k)) && v.every(x => x < 100);
       console.log('       ' + k.padEnd(20) + ' n=' + String(v.length).padStart(2)
         + '  min ' + String(v[0]).padStart(5) + '  med ' + String(med).padStart(5) + '  max ' + String(v[v.length - 1]).padStart(5)
         + (isGift ? '   (the gift)' : chain ? '   (chain middle)' : ''));
