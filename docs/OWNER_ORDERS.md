@@ -227,6 +227,9 @@ chasing a deploy that had in fact succeeded.
   will direct users later on for the full version, depending on their platform, still users on
   the link can access the second kingdom and all other kingdoms freely."* The paid gate stops
   only store builds without the full game; the web link never stops anyone.
+  At the threshold, first an end-of-kingdom moment: *"You can show it as end of, okay, or
+  something catchy for the first kingdom. And moving on to the next one. The quest is still
+  going. And then it shows the payment or whatever gate or the message."*
 
 ## THE WOLF MOUNT — ordered 2026-11-25, NOT TO START BEFORE "after next Friday, 9 p.m."
 
