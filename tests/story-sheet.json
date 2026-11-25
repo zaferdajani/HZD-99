@@ -26,8 +26,9 @@
   "CHIME": {
    "re": "CHIME",
    "known": [
+    "bossChime",
     "chimeRevealed",
-    "bossChime"
+    "crystal"
    ]
   },
   "GRAVEHORN": {
@@ -84,6 +85,13 @@
    "re": "TALONHOST",
    "known": [
     "bossBrood"
+   ]
+  },
+  "TALLYMAN": {
+   "re": "TALLYMAN",
+   "known": [
+    "bossChime",
+    "sageTame_GA1D"
    ]
   }
  },
@@ -304,13 +312,92 @@
    ],
    "when": "forgeReady",
    "speaker": "Ratchet",
-   "knows": "He shapes the marble into the PURIFIER, then moves his tools to the camp by the lion's enclosure.",
+   "knows": "He shapes the marble into the PURIFIER, then moves his tools to the camp by the lion's enclosure. Then he points her up the climb: the bell, CHIME, comes first (owner, 2026-11-25).",
    "pointer": "Ratchet's own errand: bring a piece back to my workshop (q_ask_ratchet_forge)",
    "lines": [
     "q_thanks_ratchet_forge",
     "sl_ratchet_moving",
     "i_crystald"
+   ],
+   "introduces": [
+    "CHIME"
    ]
+  },
+  {
+   "id": "chime",
+   "room": "A9",
+   "requires": [
+    "crystal"
+   ],
+   "sets": [
+    "bossChime"
+   ],
+   "speaker": "CHIME (no words)",
+   "knows": "It is the Eye's instrument with nobody in it; while it rings, NULLFANG's binding is rewritten and the agent's ring stays dark. Its last note names its keeper, TALLYMAN, below the quarry.",
+   "pointer": "Ratchet: 'Now go silence CHIME, the bell above' (sl_ratchet_forged); op_o_chime; gh_chime at the lair door; the climb opens with the forged blade (gate_chime_ward before it)",
+   "lines": [
+    "chime_keeper"
+   ],
+   "introduces": [
+    "TALLYMAN"
+   ]
+  },
+  {
+   "id": "bell_line",
+   "room": "A3",
+   "requires": [
+    "bossChime",
+    "ratchetCamp"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet (at the camp)",
+   "knows": "The bell is quiet; its keeper waits below the quarry.",
+   "pointer": "The camp is on the road down from the climb to the quarry",
+   "lines": [
+    "@ratchetStanding"
+   ],
+   "key": "sl_ratchet_bell",
+   "optional": true
+  },
+  {
+   "id": "first_sage",
+   "room": "GA1D",
+   "requires": [
+    "crystal",
+    "bossChime"
+   ],
+   "sets": [
+    "sageTame_GA1D",
+    "chimeRevealed"
+   ],
+   "speaker": "The Meadow Sage",
+   "knows": "Its calling betrayed hidden survivors; NULLFANG still resists; the bell that wrote the order back into him is already silent — go to his enclosure. (Older saves that reach it in another order hear the line for that order.)",
+   "pointer": "CHIME's last note: 'names TALLYMAN, below the quarry' (chime_keeper); Ratchet: 'Its keeper waits below the quarry' (sl_ratchet_bell); op_o_sage; gh_sage at the lair door; the quarry's ring is dark until the bell is silent (ring_bell_seal)",
+   "lines": [
+    "@sageReveal"
+   ],
+   "introduces": [
+    "NULLFANG"
+   ]
+  },
+  {
+   "id": "sage_line",
+   "room": "A3",
+   "requires": [
+    "sageTame_GA1D",
+    "ratchetCamp"
+   ],
+   "sets": [],
+   "when": "ratchetSays",
+   "speaker": "Ratchet (at the camp)",
+   "knows": "Word that the sage stood up clean.",
+   "pointer": "The camp is on the road back from the quarry to the lair",
+   "lines": [
+    "@ratchetStanding"
+   ],
+   "key": "sl_ratchet_sage",
+   "optional": true
   },
   {
    "id": "forged_line",
@@ -348,64 +435,11 @@
    "lines": []
   },
   {
-   "id": "first_sage",
-   "room": "GA1D",
-   "requires": [
-    "crystal"
-   ],
-   "sets": [
-    "sageTame_GA1D",
-    "chimeRevealed"
-   ],
-   "speaker": "The Meadow Sage",
-   "knows": "Its calling betrayed hidden survivors; NULLFANG resists; CHIME rewrites the order — or, in whatever order she arrives, that the bell is already silent or the lion already free.",
-   "pointer": "Ratchet: 'The maintenance passage beside the marble quarry leads to the first Sage' (sl_ratchet_forged); gh_sage at the lair door",
-   "lines": [
-    "@sageReveal"
-   ],
-   "introduces": [
-    "NULLFANG",
-    "CHIME"
-   ]
-  },
-  {
-   "id": "sage_line",
-   "room": "A3",
-   "requires": [
-    "sageTame_GA1D",
-    "ratchetCamp"
-   ],
-   "sets": [],
-   "when": "ratchetSays",
-   "speaker": "Ratchet (at the camp)",
-   "knows": "Word that the sage stood up clean.",
-   "pointer": "The camp is on the road back from the quarry to the lair",
-   "lines": [
-    "@ratchetStanding"
-   ],
-   "key": "sl_ratchet_sage",
-   "optional": true
-  },
-  {
-   "id": "chime",
-   "room": "A9",
-   "requires": [
-    "sageTame_GA1D"
-   ],
-   "sets": [
-    "bossChime"
-   ],
-   "speaker": "CHIME (no words)",
-   "knows": "It is an instrument with nobody in it; while it rings, NULLFANG's binding is rewritten.",
-   "pointer": "The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door; the climb itself is warded shut until the Sage is free (gate_chime_ward, ward_chime_fall)",
-   "lines": []
-  },
-  {
    "id": "break",
    "room": "A2",
    "alt": "A3",
    "requires": [
-    "sageTame_GA1D",
+    "crystal",
     "nfMeet"
    ],
    "sets": [
@@ -414,7 +448,7 @@
    "when": "breakWindow",
    "speaker": "NULLFANG (never speaks)",
    "knows": "He resists; the bell writes the order back.",
-   "pointer": "The Meadow Sage's route: the climb rises out of the hub's west end, where he comes out; the camp's east end for a player who walks on",
+   "pointer": "On the road from the forge: the climb rises out of the hub's west end, where he comes out; the camp's east end for a player who walks on",
    "lines": [
     "nf_break1",
     "nf_break2"

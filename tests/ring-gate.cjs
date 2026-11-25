@@ -127,7 +127,8 @@ const { chromium } = require('playwright');
         out.dead.deadTop = +deadTop.toFixed(1); out.dead.liveTop = +liveTop.toFixed(1); out.dead.live = live; }
       out.neon = typeof drawDoorSigns;
       // ---- F: follow the route to the keeper from the meadow ----
-      fresh(); enter('A2', 30 * TILE);
+      // (the agent's errand opens once the bell is silent: the bell before the agent, owner 2026-11-25)
+      fresh({ bossChime: 1 }); enter('A2', 30 * TILE);
       out.goal = progressGoal();
       let guard = 0;
       while (guard++ < 10) {
@@ -167,7 +168,7 @@ const { chromium } = require('playwright');
     check('D  a buried passage\'s ring is dead — the engine says so, and its opening is the darker half of the picture', R.dead.buried.is && R.dead.flagged && R.dead.deadTop < 90, 'luminance in the opening ' + R.dead.deadTop + ' (under the room\'s own haze)');
     check('D  ...and breaking the rubble switches it on', R.dead.liveTop > R.dead.deadTop + 40, R.dead.deadTop + ' → ' + R.dead.liveTop);
     check('E  the neon is gone: no outline pass exists', R.neon === 'undefined', 'typeof drawDoorSigns = ' + R.neon);
-    check('F  the errand in the meadow is the keeper', R.goal === 'pg_goal_sage' && R.want === 'GA1D', R.goal + ' → ' + R.want);
+    check('F  the errand in the meadow, once the bell is silent, is the agent', R.goal === 'pg_goal_sage' && R.want === 'GA1D', R.goal + ' → ' + R.want);
     check('F  following the next step, room by room, arrives there', R.arrived === R.want && R.route.length >= 4, R.route.map(s => s.from + ' —' + s.how + '→ ' + s.to).join('   '));
     check('F  ...and every step is one she can take from that room', R.route.every(s => s.takable));
     check('F  every step is pointed at, and the door the errand goes through is the gold ring', R.route.every(s => s.pointed && s.gold), R.route.filter(s => !s.pointed || !s.gold).map(s => s.from + (s.pointed ? '' : ' not pointed') + (s.gold ? '' : ' wrong colour')).join(', '));

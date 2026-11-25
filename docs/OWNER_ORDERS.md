@@ -185,3 +185,26 @@ It is also the URL the deploy check must md5 against: comparing
 `git show HEAD:index.html` to a 404 page produces a mismatch that looks
 exactly like a failed deploy, and that is how twenty minutes were spent
 chasing a deploy that had in fact succeeded.
+
+## 2026-11-25 — the agent before the lion; grass; game effects
+
+- **The agent comes right before NULLFANG, and the mini-bosses build it up.** *"I think it's
+  better for the story to build the suspense about the agent, hint about the agent from all of
+  the mini bosses that talks about the agent that controls this kingdom. It's the agent from
+  whoever took Mother's song, representing her or representing it in this kingdom. It should be
+  right before Nilfang."* Chapter one is now: the forge → CHIME → TALLYMAN → NULLFANG.
+  GRAVEHORN, beaten, warns that the Eye's hand rules the kingdom; CHIME's last note names
+  TALLYMAN below the quarry and wakes its ring (docs/STORY_CANON.md, tests/story-sheet.json).
+- **Grass.** *"find free library for the grass instead of these green lines"* · *"grass that can
+  move with the characters ... whenever I walk on it or an enemy walk on it"* · *"do not make
+  the game heavy"* · *"It shouldn't look like squares stuck together. It should be continuous
+  without edges."* A CC0 painted card, bending columns, no edges (js/grass.js, tests/grass.cjs).
+- **Effects are a game's, not a comic's.** Of the white impact frame with black action lines:
+  *"As a gamer, do you think this is a proper effect? It looks more like a comic effect than an
+  actual game effect."* (tests/no-comic-fx.cjs).
+- **Enemies see her.** *"Give the enemies self awareness, not just roaming around ... once they
+  see me, they come to me. All of them"* — and the small shield machine is a big armoured walker.
+- **NULLFANG's arena:** zoomed out, metal banana-leaf cover he hides in; the leaves where he will
+  burst from move first, a split second of warning.
+- **Insects:** butterflies, dragonflies by the swamp, moths in caves — small, flying away, not
+  interactive, for a richer world.

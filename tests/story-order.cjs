@@ -233,7 +233,7 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       return { order, bad, named, unfired, fired };
     };
     const greedy = simulate({});
-    // the route the Meadow Sage gives: from the sage to the climb in the hub
+    // the route the chapter gives: from the forge to the climb in the hub
     // (where he comes out), and only then up to the bell
     const route = simulate({ chime: 'nfBreak' });
     for (const [label, s] of [['greedy', greedy], ['sage route', route]]) {
@@ -241,10 +241,11 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       check(label + ': every beat on the sheet can be reached', !s.unfired.length, s.unfired.join(',') || 'all');
       check(label + ': no line names something she has not met', !s.named.length, s.named.slice(0, 3).join(' | ') || 'clean');
     }
-    check('the sage route passes the break where the sage sends her (the hub, under the climb)',
+    check('the route passes the break on the way to the bell (the hub, under the climb)',
       route.fired.break === 'A2', 'break fired in ' + route.fired.break);
-    check('...and in canon order: forge < sage < bell < NULLFANG < Conduits',
-      ['forge', 'first_sage', 'chime', 'nullfang', 'conduits'].map(id => route.order.indexOf(id)).every((v, i, a) => v >= 0 && (!i || v > a[i - 1])),
+    // (the owner's order of 2026-11-25: the bell, then the agent right before the lion)
+    check('...and in canon order: forge < bell < agent < NULLFANG < Conduits',
+      ['forge', 'chime', 'first_sage', 'nullfang', 'conduits'].map(id => route.order.indexOf(id)).every((v, i, a) => v >= 0 && (!i || v > a[i - 1])),
       route.order.join(' > '));
 
     // ---- 4. THE LOOPHOLES, ONE BY ONE ------------------------------------

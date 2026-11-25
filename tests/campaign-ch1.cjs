@@ -69,7 +69,7 @@ const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 // forge are told by their films, and Ratchet's two panels by his own lines)
 // (2026-11-20, the owner choosing the key moments: the gate, the toolbox, the
 // cave mouth, the marble, the maintenance door and the break are library pages)
-const REQUIRED_PANELS = ['letter', 'meet', 'sage', 'chime', 'ch2'];
+const REQUIRED_PANELS = ['letter', 'meet', 'chime', 'sage', 'ch2'];   // the bell, then the agent (owner, 2026-11-25)
 
 function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {
   const seen = Array.from(panelsSeen || []);
@@ -972,17 +972,18 @@ async function readyFor(s, pod, bossRoom) {
   await restAt(s);
   return false;
 }
-mission('sage', s => s.flags.includes('sageTame_GA1D'), async s => {
-  if (!(await readyFor(s, 'CV2', 'GA1D'))) return;
-  if (s.room !== 'GA1D') { await travel(s, 'GA1D'); return; }
-  await bossFight(s);
-});
 // 6. CHIME — the bell on the climb above the meadow (A8 -> A9)
 mission('chime', s => s.flags.includes('bossChime'), async s => {
   // (NULLFANG's break has no pages in the game since 2026-11-20 — the owner
   // chose the key moments — so there is nothing to wait for on the road)
   if (!(await readyFor(s, 'A3', 'A9'))) return;
   if (s.room !== 'A9') { await travel(s, 'A9'); return; }
+  await bossFight(s);
+});
+// THE AGENT, right before NULLFANG (owner, 2026-11-25): its ring wakes when the bell is silent
+mission('sage', s => s.flags.includes('sageTame_GA1D'), async s => {
+  if (!(await readyFor(s, 'CV2', 'GA1D'))) return;
+  if (s.room !== 'GA1D') { await travel(s, 'GA1D'); return; }
   await bossFight(s);
 });
 // 7. NULLFANG — in his enclosure past the camp (A3 -> A4)

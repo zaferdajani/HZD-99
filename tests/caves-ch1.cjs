@@ -132,7 +132,10 @@ const check = (name, ok, detail) => {
     // ---- CV3: the material, and the return ------------------------------
     fresh({ rubbleA5: 1 }); loadRoom('CV3'); quiet();
     out.cv3 = { pillar: G.statics.some(s => s.type === 'pillar'), doorBefore: gateDoors().filter(d => !(typeof gateLocked === 'function' && gateLocked(d))).map(d => d.to).join(',') };   // (ways THROUGH: a ring standing dark is not one — 2026-11-16)
+    // the blade alone does not wake the agent's ring: the bell comes first (owner, 2026-11-25)
     fresh({ rubbleA5: 1, pl_cshard: 1, crystal: 1 }); loadRoom('CV3'); quiet();
+    out.cv3.forgedOnly = { door: gateDoors().filter(d => !(typeof gateLocked === 'function' && gateLocked(d))).map(d => d.to).join(','), phase: pgTrailPhase() };
+    fresh({ rubbleA5: 1, pl_cshard: 1, crystal: 1, bossChime: 1 }); loadRoom('CV3'); quiet();
     G.toasts = []; progressTick(1 / 60);
     out.cv3.after = { pillar: G.statics.some(s => s.type === 'pillar'), door: gateDoors().map(d => d.to).join(','),
                       said: toasts().indexOf(t('pg_cv3_back')) >= 0, phase: pgTrailPhase(), marks: pgTrailMarks('CV3', pgTrailPhase()).join(',') };
@@ -233,7 +236,8 @@ const check = (name, ok, detail) => {
     r.cv1b.term && !r.cv1b.pod && r.cv1b.charted === 'CV1,CV1B,CV2,CV3' && r.cv1b.said && r.cv1b.map === true, JSON.stringify(r.cv1b));
   check('CV2: the beacon\'s log answers the call', r.cv2.beacon);
   check('CV3: the marble is there to quarry, and the passage is not yet open (its ring stands dark)', r.cv3.pillar && r.cv3.doorBefore.indexOf('GA1T') < 0, JSON.stringify(r.cv3));
-  check('...after the forge the pillar is a cut stump, the passage is open, the marks lead to it, and she is told — once',
+  check('...after the forge, while the bell still rings, the passage ring stays dark and no marks lead to it', r.cv3.forgedOnly.door.indexOf('GA1T') < 0 && !r.cv3.forgedOnly.phase, JSON.stringify(r.cv3.forgedOnly));
+  check('...after the forge and the bell the pillar is a cut stump, the passage is open, the marks lead to it, and she is told — once',
     !r.cv3.after.pillar && r.cv3.after.door.indexOf('GA1T') >= 0 && r.cv3.after.said && r.cv3.after.once
     && r.cv3.after.phase === 'sage' && r.cv3.after.marks && r.cv3.after.drawn === true, JSON.stringify(r.cv3.after));
   check('the machines stopped before the forge wait, bound, and say so on the road back', r.bound.said && r.bound.disabled, JSON.stringify(r.bound));

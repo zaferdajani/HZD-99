@@ -375,6 +375,10 @@ const G = {
     // WHO POINTS HER ON. The lion was the Meadows' gate (world.js A3's climb):
     // the moment it is free, the world says where the road now goes.
     if (kind === 'glitch' && typeof revisedStory === 'function' && revisedStory()) G.toast(t('conduits_open'));
+    // THE BELL'S LAST NOTE NAMES ITS KEEPER (owner, 2026-11-25: "build the suspense about the agent,
+    // hint about the agent from all of the mini bosses"): GRAVEHORN warned of the Eye's hand in this
+    // kingdom; the bell, falling silent, says whose it is and where — and the ring beside the quarry wakes
+    if (kind === 'chime' && typeof revisedStory === 'function' && revisedStory() && !this.save.flags.sageTame_GA1D) G.toast(t('chime_keeper'));
     // THE CELL. Every guardian was built around one, and it comes out when the
     // guardian stops. NULLFANG's is the one that opens the shop — which is why
     // the trader is standing in the room next door and why he has been dark
@@ -1837,7 +1841,7 @@ function meetStep(dt) {
       // THE IMPACT FRAME: the least readable frame on purpose
       G.hitStop = Math.max(G.hitStop, 0.2); G.flash = Math.max(G.flash, 0.85);
       cam.shake = Math.max(cam.shake, 18);
-      G.impact = { t: 0.3, t0: 0.3, x: pcx, y: pcy };
+      G.impact = { t: 0.3, t0: 0.3, x: pcx, y: pcy, hurt: 1 };
       if (typeof padRumble === 'function') padRumble(1, 0.9, 600);
       beastSound('swipe'); sfx('hit');
       burst(pcx, pcy, 22, '#b06aff', 320, 0.5, 200, 3, true);
@@ -11723,7 +11727,9 @@ function drawKerfStone(cx2, gy, P, k) {
 // (one object each, so a door keeps its identity from frame to frame — the
 // waking beat below is keyed on it)
 const GATE_STORY = {
-  CV3: { at: 36 / 56, to: 'GA1T', ax: 0.5, lock: 'crystal', lockLine: 'ring_dormant' },
+  // the agent's ring stays dark while the bell rings: the bell first, then the agent, then the lion
+  // (owner, 2026-11-25: "It should be right before Nilfang")
+  CV3: { at: 36 / 56, to: 'GA1T', ax: 0.5, lock: 'bossChime', lockLine: 'ring_bell_seal' },
   GA1T: { at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' },
   // CHAPTER TWO'S ROAD (progress.js): the relay gallery's floor carries a ring,
   // dark until the CARRIER falls, down to UNDERTOW's tunnel — and back
@@ -16283,39 +16289,24 @@ function drawWorldFrame() {
   // brightness control should do in a cave — brighten what she can see, not
   // erase the difference between seen and unseen.
   drawCaveDark();
-  // manga impact frame: white panel + radial action lines
+  // THE IMPACT, AS A GAME DOES IT (owner, 2026-11-25, of the old one: "As a gamer, do you think
+  // this is a proper effect? It looks more like a comic effect than an actual game effect. These
+  // straight lines looks like coming from a comic"). It was a manga impact frame — the screen
+  // washed white and black action lines burst from the hit — which blanked the fight at the one
+  // moment she needed to see it. A hit is now carried by what games use: the hit-stop, the shake
+  // and the sparks its caller already fires, and here only a brief darkening that closes in from
+  // the edges of the screen toward the blow (red when it is HER that is hurt). The middle of the
+  // screen, where the fight is, is never covered. And no lines across the screen while she dashes:
+  // her dash leaves its ghost (js/entities.js), which is the game's own way of showing speed.
   if (G.impact && G.impact.t > 0) {
     const k = G.impact.t / G.impact.t0;
     const sx = G.impact.x - cam.x, sy = G.impact.y - cam.y;
-    c.fillStyle = 'rgba(255,255,255,' + (0.82 * k) + ')';
-    c.fillRect(0, 0, 960, 540);
-    c.save();
-    c.strokeStyle = 'rgba(10,16,26,' + (0.9 * k) + ')';
-    c.lineWidth = 5; c.lineCap = 'round';
-    for (let i = 0; i < 26; i++) {
-      const a = i / 26 * Math.PI * 2 + 0.13;
-      const r1 = 90 + hash2(i, 3) * 120, r2 = 620;
-      c.beginPath();
-      c.moveTo(sx + Math.cos(a) * r1, sy + Math.sin(a) * r1);
-      c.lineTo(sx + Math.cos(a) * r2, sy + Math.sin(a) * r2);
-      c.stroke();
-    }
-    c.restore();
-  }
-  // anime dash speed-lines across the screen
-  if (player && player.dashT > 0) {
-    c.save(); c.globalAlpha = 0.22;
-    c.strokeStyle = '#ffffff'; c.lineWidth = 2;
-    const ang = Math.atan2(player.dashVY, player.dashVX);
-    for (let i = 0; i < 10; i++) {
-      const yy = hash2(i, 77) * 540, xx = hash2(i, 78) * 960;
-      const len = 180 + hash2(i, 79) * 320;
-      c.beginPath();
-      c.moveTo(xx, yy);
-      c.lineTo(xx - Math.cos(ang) * len, yy - Math.sin(ang) * len);
-      c.stroke();
-    }
-    c.restore();
+    const gr = c.createRadialGradient(sx, sy, 130, sx, sy, 560);
+    const col = G.impact.hurt ? '96,0,12' : '0,0,0';
+    gr.addColorStop(0, 'rgba(' + col + ',0)');
+    gr.addColorStop(0.45, 'rgba(' + col + ',' + (0.3 * k).toFixed(3) + ')');
+    gr.addColorStop(1, 'rgba(' + col + ',' + (0.78 * k).toFixed(3) + ')');
+    c.fillStyle = gr; c.fillRect(0, 0, 960, 540);
   }
   if ((G.iceT || 0) > 0) {
     // COOLANT FREEZE: blue mist hangs in the room while the floor is glass

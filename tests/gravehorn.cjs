@@ -617,7 +617,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('at 0 HP in phase two he is beaten, not destroyed', !!down && !down.dead);
     const say = await waitFor(s => s.state === 'DIALOG', 3000);
     const lines = await page.evaluate(() => G.dialog && G.dialog.lines.slice());
-    check('...he speaks: "This isn\'t over. The Eye sees you."', !!say && lines && lines.length === 2 && /isn't over/.test(lines[0]) && /Eye sees you/.test(lines[1]), JSON.stringify(lines));
+    // (and warns of the Eye's hand in this kingdom — the agent she will meet before the lion: the
+    // owner, 2026-11-25, "hint about the agent from all of the mini bosses")
+    check('...he speaks: "This isn\'t over." — and warns of the Eye\'s hand in this kingdom', !!say && lines && lines.length === 2 && /isn't over/.test(lines[0]) && /Eye's hand/.test(lines[1]) && /kingdom/.test(lines[1]), JSON.stringify(lines));
     for (let i = 0; i < 8 && (await S()).state === 'DIALOG'; i++) { await page.keyboard.press('Enter'); await sleep(380); }
     const ret = await waitFor(s => s.st === 'retreat', 2000);
     const bx0 = ret && ret.bx;

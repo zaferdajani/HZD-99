@@ -448,8 +448,9 @@ function opGoalKey() {
   // no hatch before the meeting (progress.js pgHubSealed): the line points east
   if (!f.crystal && !bag.cshard) return typeof pgHubSealed === 'function' && pgHubSealed() ? 'op_o_cross' : 'op_o_marble';
   if (!f.crystal) return 'op_o_return';
-  if (!f.sageTame_GA1D) return 'op_o_sage';
+  // THE AGENT COMES RIGHT BEFORE NULLFANG (owner, 2026-11-25: "build the suspense about the agent ... It should be right before Nilfang"): the forge, then the bell, then the agent, then the lion.
   if (!f.bossChime) return 'op_o_chime';
+  if (!f.sageTame_GA1D) return 'op_o_sage';
   if (!f.bossGlitch) return 'op_o_lion';
   return 'op_o_conduits';
 }

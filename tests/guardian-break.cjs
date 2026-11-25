@@ -32,16 +32,18 @@ const { chromium } = require('playwright');
       };
       const run = (n) => { for (let i = 0; i < n && !G.break; i++) update(1 / 60); };
 
-      // 1. it does NOT open before the sage, or after the bell.
-      stage({}); run(240);
+      // 1. it does NOT open before the forge, or after the bell. (Its window moved on 2026-11-25:
+      // the bell comes before the agent now, so the break is what shows her, after the forge, why
+      // the bell must be silenced.)
+      stage({ crystal: 0 }); run(240);
       const beforeSage = !!G.break;
-      stage({ sageTame_GA1D: 1, bossChime: 1 }); run(240);
+      stage({ bossChime: 1 }); run(240);
       const afterBell = !!G.break;
-      stage({ sageTame_GA1D: 1, bossGlitch: 1 }); run(240);
+      stage({ bossGlitch: 1 }); run(240);
       const afterGuardian = !!G.break;
 
-      // 2. the window itself: sage freed, bell still ringing.
-      stage({ sageTame_GA1D: 1 }); run(600);
+      // 2. the window itself: the blade forged, the bell still ringing.
+      stage({}); run(600);
       if (!G.break) throw Error('the break never opened inside its own window');
       const bossIsStaged = !!(G.boss && G.boss.meet);
       const cores = player.cores, phases = new Set();
@@ -112,7 +114,7 @@ const { chromium } = require('playwright');
                veinPixels, veinTeal, veinPurple };
     });
 
-    assert.equal(r.beforeSage, false, 'the break must not open before the sage is freed');
+    assert.equal(r.beforeSage, false, 'the break must not open before the blade is forged');
     assert.equal(r.afterBell, false, 'once CHIME is silent there is nothing left to break');
     assert.equal(r.afterGuardian, false, 'a resolved guardian does not walk out of his own enclosure');
     assert.equal(r.bossIsStaged, true, 'the body is driven by hand (meet), never as a live fight');

@@ -6,7 +6,10 @@ const check=(v,n)=>{if(!v)throw Error(n)};const enter=r=>{loadRoom(r);G.state='P
 enter('CV3');check(!gateDoors().some(d=>d.to==='GA1T'&&!gateLocked(d)),'no maintenance shortcut before forge');
 {const d0=gateDoors().find(d=>d.to==='GA1T');if(d0){player.x=gateWorldX(d0)-player.w/2;const g0=groundColumnAt(player.x+player.w/2);player.y=Math.min(...g0)-player.h;player.on=true;check(!gateEnter()&&G.roomId==='CV3','the dark ring refuses her');G.dialog=null;G.state='PLAY';}}
 // This harness isolates geometry; chapter-one obtains this sword through Ratchet.
-grantWeapon('single');check(!G.save.flags.bossGlitch&&!G.save.flags.dash&&!G.save.flags.djump,'no guardian powers in fixture');
+grantWeapon('single');
+// (the agent's ring wakes when the bell is silent: the bell before the agent, owner 2026-11-25)
+{enter('CV3');const d1=gateDoors().find(d=>d.to==='GA1T');check(d1&&gateLocked(d1),'with the blade alone the ring is still dark');}
+G.save.flags.bossChime=1;check(!G.save.flags.bossGlitch&&!G.save.flags.dash&&!G.save.flags.djump,'no guardian powers in fixture');
 const out=[];
 for(const [from,to,tx] of [['CV3','GA1T',30],['GA1T','CV3',16]]){
 enter(from);const d=gateDoors().find(d=>d.to===to);check(d,'maintenance entrance exists');

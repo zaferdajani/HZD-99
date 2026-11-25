@@ -16,8 +16,8 @@ function survivorStory(s, lines) {
 function openingGateHint(destination) {
   if (!revisedStory() || destination !== 'A4' || G.save.flags.bossGlitch) return '';
   if (!G.save.flags.crystal) return t('gh_marble');
+  if (!G.save.flags.bossChime) return t('gh_chime');      // the bell, then the agent, then the lion (owner, 2026-11-25)
   if (!G.save.flags.sageTame_GA1D) return t('gh_sage');
-  if (!G.save.flags.bossChime) return t('gh_chime');
   return '';
 }
 // THE SAGE TELLS HER WHAT IS TRUE WHEN SHE STANDS UP — not what was true in
@@ -74,6 +74,8 @@ function ratchetStandingKey(f, tierKey) {
   if (f.bossGlitch) return 'sl_ratchet_conduits';
   if (f.sageTame_GA1D && f.bossChime && f.nfMeet) return 'sl_ratchet_rematch';
   if (f.sageTame_GA1D) return 'sl_ratchet_sage';
+  // the bell first, then its keeper (owner, 2026-11-25): with the bell quiet he points below the quarry
+  if (f.bossChime) return 'sl_ratchet_bell';
   if (f.crystal) return 'sl_ratchet_forged';
   if (f.nfMeet) return 'sl_ratchet_dent';
   // NO FIRST-MEETING QUIP AFTER THE FIRST MEETING (campaign run, 2026-10-10).
@@ -197,8 +199,10 @@ const BREAK_SPOTS = {
   A2: { meet: true, line: 'nf_break1_road', at: (pcx) => pcx < 30 * TILE },
   A3: { meet: false, line: 'nf_break1', at: (pcx, W) => pcx >= W - 18 * TILE },
 };
+// (after the FORGE now, not after the agent: the bell comes first and the agent right before the
+// lion — owner, 2026-11-25 — so this is where she learns why the bell must be silenced)
 function breakWindow() {
-  return revisedStory() && !!G.save.flags.sageTame_GA1D && !G.save.flags.bossChime
+  return revisedStory() && !!G.save.flags.crystal && !G.save.flags.bossChime
     && !G.save.flags.bossGlitch && !G.save.flags.nfBreak;
 }
 function breakCheck() {

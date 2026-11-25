@@ -3716,8 +3716,9 @@ class Player {
     this.hurtPoseT = guarded ? 0.15 : 0.3;   // limbs flail for a beat while the knockback carries her
     cam.shake = guarded ? 4 : 9; sfx(guarded ? 'block' : 'hurt');
     if (typeof padRumble === 'function') padRumble(guarded ? 0.5 : 0.85, guarded ? 0.3 : 0.5, guarded ? 140 : 240);
-    G.flash = Math.max(G.flash, guarded ? 0.2 : 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
-    G.impact = { t: 0.09, t0: 0.09, x: this.x + this.w / 2, y: this.y + this.h / 2 };
+    // (no ring round her as she is hit: THE LEDGER, "remove the ring")
+    G.flash = Math.max(G.flash, guarded ? 0.2 : 0.4);
+    G.impact = { t: 0.12, t0: 0.12, x: this.x + this.w / 2, y: this.y + this.h / 2, hurt: 1 };
     burst(this.x + this.w / 2, this.y + this.h / 2, 14, '#ff5f6d', 260, 0.5, 500, 3, true);
     // BEING HIT IS AN EVENT TOO (owner, 2026-11-14, from the fight film: "when
     // the lion is hitting me, I'm not actually being hit with a step back and
@@ -12289,8 +12290,6 @@ function sageTame(e) {
     cleanseBegin(e.x, e.y, e.w, e.h, 'pg_rescued');
     if (G.roomId === 'GA1D') {
       G.toast(t('pg_sage_free'));
-      // the bell's ward over the meadow climb falls with the Sage's binding
-      if (!G.save.flags.bossChime) G.toast(t('ward_chime_fall'));
     }
   } else {
     sfx('win');
@@ -15722,7 +15721,7 @@ class Boss {
     if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
     if (typeof padRumble === 'function') padRumble(1, 0.85, 800);
     G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);
-    G.addRing(this.cx(), this.cy()); G.addRing(this.cx(), this.cy(), 60);
+    // (no rings round the beaten body: THE LEDGER, "remove the ring")
     G.impact = { t: 0.24, t0: 0.24, x: this.cx(), y: this.cy() };
     if (this.kind !== 'mother') setMusic(G.roomDef.mus || G.roomDef.zone); else stopMusic();
     G.dropScrap(this.cx(), this.cy(), bossScrap(this));

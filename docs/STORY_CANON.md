@@ -108,9 +108,16 @@ This one is an agent. Give it a name, dark name."**
   records of the area... defeating him will start showing a map" — so the map
   screen opens with him, and not before. The others' fragments are something
   else each.
-- **The order of the first kingdom:** GRAVEHORN the rhino (the first of the Eye's
-  constructs) → NULLFANG → the Wolf King, whose fall reveals that the pack was
-  being worked by an agent → that agent.
+- **The order of the first kingdom (owner, 2026-11-25, superseding 2026-11-16):**
+  GRAVEHORN the rhino (the first of the Eye's constructs) → CHIME, the bell → the
+  kingdom's agent, TALLYMAN → NULLFANG, its sage. *"I think it's better for the story
+  to build the suspense about the agent, hint about the agent from all of the mini
+  bosses that talks about the agent that controls this kingdom. It's the agent from
+  whoever took Mother's song, representing her or representing it in this kingdom.
+  It should be right before Nilfang."* So every mini-boss before it speaks of it:
+  GRAVEHORN, beaten, warns that the Eye's hand rules this kingdom and has counted her;
+  CHIME's last note names TALLYMAN, below the quarry, and wakes its ring. The Wolf
+  King and the agent who worked his pack come after NULLFANG.
 - **They are still PURIFIED, not killed.** The owner first ruled that an agent
   "should be killed, not freed", then took it back the same day: *"We do not
   have to kill it since we already have a background story for it as being

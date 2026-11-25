@@ -21,7 +21,10 @@ const { chromium } = require('playwright');
     const cases = [
       ['the marble (before the meeting: east, to the crest)', {}, ['A0', 'A1'], 'pg_goal_cross'],
       ['the marble, down the hatch and through the caves', { nfMeet: 1 }, ['A2', 'A5', 'CV1', 'CV1B', 'CV2'], 'pg_goal_marble'],
-      ['the agent, past the quarry', { nfMeet: 1, crystal: 1 }, ['A0B', 'A0', 'A1', 'A2', 'A5', 'CV1', 'CV2', 'CV3', 'GA1T'], 'pg_goal_sage'],
+      // the bell, then the agent (owner, 2026-11-25): from the forge up the climb to the bell...
+      ['the bell, up the climb', { nfMeet: 1, crystal: 1 }, ['A0B', 'A0', 'A1', 'A2', 'A8'], 'pg_goal_chime'],
+      // ...and with the bell silent, down past the quarry to the agent
+      ['the agent, past the quarry', { nfMeet: 1, crystal: 1, bossChime: 1 }, ['A0B', 'A0', 'A1', 'A2', 'A5', 'CV1', 'CV2', 'CV3', 'GA1T'], 'pg_goal_sage'],
     ];
     const dist = (from, to) => { const seen = { [from]: 0 }, q = [from]; while (q.length) { const id = q.shift(); if (id === to) return seen[id]; for (const e of pgRouteEdges(id)) if (seen[e.to] === undefined) { seen[e.to] = seen[id] + 1; q.push(e.to); } } return Infinity; };
     const out = [];

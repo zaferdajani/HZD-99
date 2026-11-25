@@ -327,7 +327,7 @@ function mjStep(b, dt) {
           cam.shake = Math.max(cam.shake, hit ? 16 : 9);
           if (typeof padRumble === 'function') padRumble(0.9, 0.9, hit ? 420 : 200);
           if (hit) {
-            G.impact = { t: 0.22, t0: 0.22, x: hx, y: hy };
+            G.impact = { t: 0.22, t0: 0.22, x: hx, y: hy, hurt: 1 };
             M.held = true; M.mash = 0; G.ghHold = true;
             M.rollFrom = { x: M.wx, feet: M.feet };
             M.rollTo = mjNearestWater(M.wx);

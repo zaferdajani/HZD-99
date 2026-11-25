@@ -5,7 +5,7 @@
 //    human ... instead of hitting a metallic statue that gets pushed backward"
 //
 // This holds the duel's numbers (js/sage-motion.js SAGE_DUEL_PROFILE):
-//   - harder to break than an agent off the duel by SAGE_DUEL_PROFILE.hpK (1.5 on 2026-11-20, 1.75 since 11-24);
+//   - harder to break than an agent off the duel by SAGE_DUEL_PROFILE.hpK (1.5 on 2026-11-20, 2 since 11-25);
 //   - a decision every 0.7 s, and 0.8 s of breather after three denied lunges;
 //   - below half health a coil opens a chain of THREE lunges, above it two;
 //   - a blow stops him where he stands: the knock it gives moves him a short

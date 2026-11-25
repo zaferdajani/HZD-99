@@ -40,7 +40,8 @@ function pgLairOpen(f) {
 }
 function pgBellOpen(f, visited) {
   f = f || (G.save && G.save.flags) || {};
-  return !!(f.sageTame_GA1D || f.bossChime || f.bossGlitch || (visited && visited.A9));
+  // THE AGENT COMES RIGHT BEFORE NULLFANG (owner, 2026-11-25: "build the suspense about the agent ... It should be right before Nilfang"): the forge, then the bell, then the agent, then the lion.
+  return !!(f.crystal || f.bossChime || f.bossGlitch || (visited && visited.A9));
 }
 
 // A save can only be continued from a bench, and no bench stands inside a
@@ -109,8 +110,9 @@ function progressGoal(f) {
     return pgHubSealed(f) ? 'pg_goal_cross' : 'pg_goal_marble';
   }
   if (f.bossGlitch) return 'pg_goal_up';           // an older save may hold the lion without the rest
-  if (!f.sageTame_GA1D) return 'pg_goal_sage';
+  // THE AGENT COMES RIGHT BEFORE NULLFANG (owner, 2026-11-25: "build the suspense about the agent ... It should be right before Nilfang"): the forge, then the bell, then the agent, then the lion.
   if (!f.bossChime) return 'pg_goal_chime';
+  if (!f.sageTame_GA1D) return 'pg_goal_sage';
   return f.nfMeet ? 'pg_goal_lion' : 'pg_goal_east';
 }
 
@@ -133,7 +135,7 @@ function pgTrailPhase(f) {
   f = f || (G.save && G.save.flags) || {};
   if (!pgRobo()) return null;
   if (!f.crystal) return f.pl_cshard ? null : 'marble';
-  if (!f.sageTame_GA1D) return 'sage';
+  if (f.bossChime && !f.sageTame_GA1D) return 'sage';   // (the agent's leg opens when the bell is silent)
   return null;
 }
 function pgTrailMarks(room, phase) {
@@ -429,7 +431,7 @@ function progressTick(dt) {
   // THE QUARRY, AFTER THE FORGE. The same cavern, visibly not the same: the
   // marble cut, the maintenance passage open and lit, and she is told so the
   // first time she stands there with the blade.
-  if (G.roomId === 'CV3' && f.crystal && !f.sageTame_GA1D && !f.pgCv3Back) {
+  if (G.roomId === 'CV3' && f.bossChime && !f.sageTame_GA1D && !f.pgCv3Back) {
     f.pgCv3Back = 1; persistSoon();
     G.toast(t('pg_cv3_back'));
   }

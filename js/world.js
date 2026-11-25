@@ -1699,7 +1699,7 @@ const ROOMS = {
   // body — vlinkTile reads a closed gate as open air, so there is no floor
   // above to stand on and no seamless handover to slip through.
   A8: { zone: 'A', w: 44, h: 21,
-    exits: { B: 'A2', T: { to: 'A9', flag: 'sageTame_GA1D', or: ['bossChime', 'bossGlitch'], robo: 1, why: 'gate_chime_ward' } },
+    exits: { B: 'A2', T: { to: 'A9', flag: 'crystal', or: ['bossChime', 'bossGlitch'], robo: 1, why: 'gate_chime_ward' } },   // the climb opens with the blade: the bell comes BEFORE the agent (owner, 2026-11-25)
     ents: [['crawler', 8, 15], ['flier', 18, 9], ['scrap', 4, 15, 20], ['scrap', 21, 9, 25],
            ['scrap', 31, 12, 25],
            ['bench', 27, 19]   // the pod before the fight (tests/bossbench.cjs) — LAST: entity order is a save key

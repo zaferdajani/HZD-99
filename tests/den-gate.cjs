@@ -140,13 +140,24 @@ const check = (name, ok, detail) => {
       startGame(loadStored('robo')); quiet();
       out.benches.push({ room, cont, resp, load: G.roomId });
     }
+    // the bell's chamber is open from the forge on (owner, 2026-11-25: the bell before the agent), so
+    // a save parked there is shut out while it is still LOCKED — before the blade
+    {
+      fresh(STAGES.marble, {}, { bench: { room: 'A9', x: 8 * TILE, y: 13 * TILE } });
+      const cont = G.roomId;
+      G.save.bench = { room: 'A9', x: 8 * TILE, y: 13 * TILE }; respawn(); quiet(); const resp = G.roomId;
+      G.save.bench = { room: 'A9', x: 8 * TILE, y: 13 * TILE };
+      localStorage.setItem(saveKeyFor('robo'), JSON.stringify(G.save));
+      startGame(loadStored('robo')); quiet();
+      out.benchA9pre = { room: 'A9 (before the blade)', cont, resp, load: G.roomId };
+    }
     // ...and a save parked in the lair once it IS open stays there
     fresh(STAGES.sage, {}, { bench: { room: 'A4', x: 8 * TILE, y: 13 * TILE } });
     G.save.flags.bossChime = 1;
     G.save.bench = { room: 'A4', x: 8 * TILE, y: 13 * TILE };
     respawn(); quiet();
     out.openBench = G.roomId;
-    // ---- 5. the bell waits for the Sage (A8 -> A9)
+    // ---- 5. the bell waits for the blade (A8 -> A9) — the bell before the agent (owner, 2026-11-25)
     const climb = (flags) => {
       fresh(flags); loadRoom('A8'); quiet();
       // the top rung under the hole (A8: hline 9-16 at row 3)
@@ -156,7 +167,7 @@ const check = (name, ok, detail) => {
       return watch(360, (f) => ({ hold: (f % 30 < 14 ? ['JUMP'] : []).concat(f % 120 < 60 ? [] : ['RIGHT']),
                                   tap: f % 30 === 0 ? ['JUMP'] : [] }));
     };
-    const shut = climb(STAGES.forged), open = climb(STAGES.sage);
+    const shut = climb(STAGES.marble), open = climb(STAGES.forged);   // the climb opens with the blade (owner, 2026-11-25)
     out.bell = { shutA9: shut.inA9, openA9: open.inA9 };
     // ---- 6. the staged lion takes no blow
     const staged = (flags, room, tx) => {
@@ -225,7 +236,7 @@ const check = (name, ok, detail) => {
     {
       fresh({});
       const seq = [{}, { heal: 1 }, { heal: 1, nfMeet: 1 }, { heal: 1, nfMeet: 1, beacon: 1 }, { heal: 1, pl_cshard: 1 }, { heal: 1, pl_cshard: 1, crystal: 1 },
-        { crystal: 1, sageTame_GA1D: 1 }, { crystal: 1, sageTame_GA1D: 1, bossChime: 1 },
+        { crystal: 1, bossChime: 1 }, { crystal: 1, sageTame_GA1D: 1, bossChime: 1 },
         { crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 }, { crystal: 1, bossGlitch: 1 }];
       const base = { woke: 1, tut: 1, 'on_A0B|ratchet': 1 };
       out.goals = seq.map(f => { G.save.bag = {}; const k = progressGoal(Object.assign({}, base, f)); return k; });
@@ -252,13 +263,14 @@ const check = (name, ok, detail) => {
   check('...but not once the chamber behind it is finished: a ring leads somewhere new or is not there', r.grottoGone);
   check('no vertical link anywhere leads into the lair, and the lair has one way in',
     !r.vlinksIntoA4.length && r.a4Exits.join(',') === 'L', 'vlinks ' + r.vlinksIntoA4.join(',') + ' exits ' + r.a4Exits.join(','));
-  const badBench = r.benches.filter(b => [b.cont, b.resp, b.load].some(x => x === 'A4' || x === 'A9'));
+  // (the bell's chamber is open from the forge: a save there after it is hers to keep)
+  const badBench = r.benches.filter(b => [b.cont, b.resp, b.load].some(x => x === 'A4')).concat([r.benchA9pre].filter(b => [b.cont, b.resp, b.load].some(x => x === 'A9')));
   check('Continue, respawn and a stored save never start her inside the lair or the bell\'s chamber',
-    !badBench.length, r.benches.map(b => b.room + '->' + b.cont + '/' + b.resp + '/' + b.load).join(' '));
+    !badBench.length, r.benches.concat([r.benchA9pre]).map(b => b.room + '->' + b.cont + '/' + b.resp + '/' + b.load).join(' '));
   check('...a real bench keeps its own room (A3, CV2, GA1 …)',
-    r.benches.filter(b => b.room !== 'A4' && b.room !== 'A9').every(b => b.cont === b.room && b.resp === b.room && b.load === b.room));
+    r.benches.filter(b => b.room !== 'A4').every(b => b.cont === b.room && b.resp === b.room && b.load === b.room));
   check('...and once the lair is open a save parked there is left alone', r.openBench === 'A4', r.openBench);
-  check('the bell\'s climb (A8 -> A9) is shut until the Sage is free', !r.bell.shutA9);
+  check('the bell\'s climb (A8 -> A9) is shut until the blade is forged (the bell before the agent)', !r.bell.shutA9);
   check('...and climbable once she is', r.bell.openA9);
   check('the corridor meeting\'s staged lion takes no blow and cannot be freed early',
     r.meet.staged && r.meet.dealt === 0 && !r.meet.dead && r.meet.hp && !r.meet.glitch, JSON.stringify(r.meet));
@@ -269,9 +281,9 @@ const check = (name, ok, detail) => {
     r.teaser.calls.length === 0 && r.teaser.flag && r.teaser.b1 === 'ch2', JSON.stringify(r.teaser));
   // before the first meeting there is no hatch to name (progress.js pgHubSealed):
   // the line sends her east, and the meeting turns it into the dig
-  const want = ['pg_goal_pack', 'pg_goal_cross', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_sage', 'pg_goal_chime',
+  const want = ['pg_goal_pack', 'pg_goal_cross', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_chime', 'pg_goal_sage',
     'pg_goal_east', 'pg_goal_lion', 'pg_goal_up'];
-  check('the chapter\'s goal follows the owner\'s order: pack, east to the first meeting, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up',
+  check('the chapter\'s goal follows the owner\'s order: pack, east to the first meeting, marble, quarry, Ratchet, CHIME, the agent, the enclosure, NULLFANG, up',
     JSON.stringify(r.goals) === JSON.stringify(want), r.goals.join(' > '));
   check('...in all five languages', !r.goalLangs.length, r.goalLangs.join(','));
   if (errs.length) check('no page errors', false, errs.slice(0, 3).join(' | '));
