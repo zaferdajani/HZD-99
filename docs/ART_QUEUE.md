@@ -21,6 +21,20 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2cf. THE CRYSTAL SWORD IN EVERY WEAPON STRIP ✱ BLOCKED ON CREDITS 2026-11-26 (owner's order)
+
+Owner, 2026-11-26: "Why are you wasting my tokens on hallucination of wrong versions of the sword and how
+it looks in its stages, instead of giving [Higgsfield a] reference using the existing images of the sword
+and its shapes?" Every weapon strip in the game shows a sword that is not the crystal sword (a katana,
+curved twin blades, a gold gem staff). Re-fire each from the crystal plates (`assets/source/crystal/`:
+crystal_single, sword_ground, crystal_double) with her canon element, the strip's own motion as the
+MOTION-only reference, GPT Image 2.6 high 1k (1.25 credits a sheet):
+- the 25 queued keys in `assets/source/weapons/canon.json` (swings, charges, the joined throw and its
+  projectile, the three dives, the held roll, the gate walk/climb/hop, the hatch) — about 31 credits;
+- the attack in the air per weapon (single, twin, joined), which has no weapon art at all: she claws in
+  the air whatever she holds — about 4 credits.
+Move each to `canon` with its job id as it lands (tests/weapon-canon.cjs).
+
 ## 2ce. BLOCKED ON CREDITS, 2026-11-20 — the owner's orders that need Higgsfield ✱ READY TO FIRE
 
 Higgsfield balance read **0.37 credits** (one 2k image costs 2; a 3-second

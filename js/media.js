@@ -65,6 +65,13 @@ const MEDIA_SRC = {
     alBite: 'assets/characters/alpha/bite.webp',
     alClinch: 'assets/characters/alpha/clinch.webp',
     alYield: 'assets/characters/alpha/yield.webp',
+    // RIDING THE ALPHA (owner, 2026-11-26: "it needs riding motion... instead of becoming on it"; "the wolf I'm
+    // riding on should be at the same size as the wolf I am summoning"): wolf AND rider in one filmed take
+    // (assets/source/beasts/alpha2/ride/), cut by tools/fixcut.py at the Alpha's own scale and floor line.
+    // Her paws are empty on his mane, so the ride never contradicts the weapon she owns.
+    alRideGallop: 'assets/characters/alpha/ride_gallop.webp',   // 15 cells 372x260, one gallop stride, loops
+    alRideLeap: 'assets/characters/alpha/ride_leap.webp',       // 10 cells 372x282: gather, flight, landing (keeps the take's own lift)
+    alRideRear: 'assets/characters/alpha/ride_rear.webp',       // 11 cells 367x263: rears, forepaw swipe (0-6), head up held (5-10: the howl)
     // ...and CHIME's four (same batch): the hover, the ring, the note, the fall
     chRest: 'assets/characters/chime/rest.webp',
     chRing: 'assets/characters/chime/ring.webp',
