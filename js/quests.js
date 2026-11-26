@@ -75,8 +75,11 @@ const QUESTS = [
     // one after that" — Kingdom 3). The Tinker builds things: he will fit a wolf with a harness,
     // once the wolf has shown it fights for her — her CALLED wolf (the Alpha's pack) brings down
     // three machines. Then she can ride it (js/wolfmount.js). Robot story; needs THE PACK.
+    // RETARGETED 2026-11-26 (the owner: ride the Alpha she calls, at the size she calls him): the
+    // harness is for the ALPHA — the errand waits for CALL THE ALPHA (packLv 3, js/packtree.js) and
+    // only machines the called Alpha brings down count. Paid, the Tinker's shelf holds the ride.
     id: 'patch_harness',                 // C5B — after his own errand
-    npc: 'patch', zone: 'C', after: 'patch_quiet', arm: 'pack', robo: 1,
+    npc: 'patch', zone: 'C', after: 'patch_quiet', arm: 'pack', lv: 3, robo: 1,
     kind: 'pack', count: 3,
     reward: { mount: 1, iq: 15 },
   },
@@ -204,6 +207,7 @@ function questFor(npc) {
     if (q.after && qState(q.after) !== 'done') continue;
     if (q.robo && typeof isHero === 'function' && isHero()) continue;
     if (q.arm && !(G.save && G.save.arms && G.save.arms.includes(q.arm))) continue;
+    if (q.lv && ((G.save && G.save.packLv) | 0) < q.lv) continue;
     return q;
   }
   return null;
@@ -251,6 +255,8 @@ function questKill(kind) {
 // a machine her called wolf brought down (js/packcall.js): the harness errand counts these
 function questPackKill(e) {
   if (!G.save || (e && (e instanceof Boss))) return;
+  // the harness is the ALPHA's: a small wolf's kill does not count (js/packtree.js)
+  if (!(G.packWolf && G.packWolf.alpha)) return;
   G.save.packKills = (G.save.packKills | 0) + 1;
   for (const q of QUESTS) {
     if (q.kind !== 'pack' || qState(q.id) !== 'active') continue;

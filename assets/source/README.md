@@ -77,6 +77,8 @@ start frames), `*_take.jpg` (each take as a contact sheet).
 
 ONLY WHAT IS AGREED AND USED IS KEPT (owner, 2026-11-26: "You should only keep the ones that we agreed on. And using now."): refused, superseded, trial, draft and "before" images and review clips were deleted from this tree on that day (tests/archive-clean.cjs). A refused job is named in text, its picture is not kept. Three air-attack sheets fired that day (jobs c530b47a, 580eab34, 7a43ea5a) copied the wrong swords and were deleted.
 
+`ui/skilltree/` is the open-source art of her skill trees (2026-11-26): Wenrexa's "UI Minimalism SciFi" kit (CC0, https://opengameart.org/content/assets-ui-minimalism-scifi) — only the three pieces the screen draws (`MainPanel01.png` the frame, `Button07.png` the node socket, `MainPanel03.png` the card), unchanged; the shipped webps are `ui/skilltree/{frame,socket,card}.webp` (credits in `assets/CREDITS.md`).
+
 `beasts/alpha2/ride/` is her riding the Alpha (2026-11-26): the Seedance take `ride.mp4` (job 9ad74e1d), its cut spec and report, and a contact sheet. Strips: `characters/alpha/ride_{gallop,leap,rear}.webp`.
 
 `weapons/canon.json` registers every weapon-tier art key against the crystal sword plates in `crystal/` (tests/weapon-canon.cjs).

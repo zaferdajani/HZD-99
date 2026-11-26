@@ -9,6 +9,7 @@
 //   C  on the shelf one row is marked as Ratchet's pick, with a reason
 //   D  she cannot afford the whole shelf with what a first visit carries
 //   E  a guardian that goes — purified or not — pays scrap
+//   F  every line the shelf draws clears the key hint and every other row (2026-11-26)
 const { chromium } = require("playwright");
 const PORT = process.env.TEST_PORT || 8220;
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? "ok   " : "FAIL ") + n + (d != null ? "  " + (typeof d === "string" ? d : JSON.stringify(d)) : "")); if (!ok) bad++; };
@@ -35,6 +36,35 @@ const open = async () => { const browser = await chromium.launch({ executablePat
     out.E = { alpha: bossScrap({ kind: 'alpha' }), horn: bossScrap({ kind: 'horn' }), lion: bossScrap({ kind: 'glitch' }) };
     // touch: the question's two buttons exist and LATER closes it
     shopOpen(true); const bs = shopAskButtons(); const later = bs.find(b => b.key === 'shop_later'); shopAskTap(later.x + 5, later.y + 5); out.T = { n: bs.length, state: G.state, ask: !!G.shopAsk };
+    // F: EVERY LINE THE SHELF DRAWS CLEARS THE OTHERS (reviewed 2026-11-26: the last rows sat on the
+    // key hint). Each drawn line's box, measured off the canvas font as drawn, in every language,
+    // on Ratchet's shelf at three rungs of the pack and on the Tinker's: no row's line touches the
+    // hint, no line of one row touches a line of another, and all of it is inside 960x540 (the
+    // phone draws the same 960x540 frame, scaled).
+    out.F = { overlaps: [], outside: [], rows: 0 };
+    const keepF = window.ftxt, boxes = [];
+    window.ftxt = function (str, x, y, size, color, align) {
+      c.font = '700 ' + size + 'px "Segoe UI", Tahoma, sans-serif';
+      const w = c.measureText(String(str)).width, a = align || 'center';
+      boxes.push({ s: String(str), x: a === 'left' ? x : a === 'right' ? x - w : x - w / 2, y: y - size / 2, w, h: size });
+      return keepF.apply(this, arguments);
+    };
+    const keepL = LANG;
+    try {
+      for (const L of ['en', 'ar', 'tr', 'zh', 'ru']) for (const st of [['ratchet', 0], ['ratchet', 1], ['ratchet', 3], ['patch', 3]]) {
+        LANG = L; G.save.arms = st[1] ? ['pack'] : []; G.save.packLv = st[1]; G.save.flags.wolfMount = st[0] === 'patch' ? 1 : 0;
+        shopOpen(false, st[0]); G.shopAsk = false; boxes.length = 0; drawShop();
+        const hint = boxes.find(b => b.s === t('shop_hint'));
+        const rowOf = (b) => Math.round((b.y + b.h / 2 - SHOP_ROW.y0) / SHOP_ROW.step);
+        const lines = boxes.filter(b => b !== hint && b.y + b.h / 2 > SHOP_ROW.y0 - SHOP_ROW.step / 2);
+        out.F.rows = Math.max(out.F.rows, shopList().length);
+        const hit = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+        for (const b of boxes) if (b.x < 0 || b.y < 0 || b.x + b.w > 960 || b.y + b.h > 540) out.F.outside.push(L + ' ' + st + ' ' + b.s);
+        for (const b of lines) if (hint && hit(b, hint)) out.F.overlaps.push(L + ' ' + st + ' "' + b.s + '" x hint');
+        for (let i = 0; i < lines.length; i++) for (let j = i + 1; j < lines.length; j++)
+          if (rowOf(lines[i]) !== rowOf(lines[j]) && hit(lines[i], lines[j])) out.F.overlaps.push(L + ' ' + st + ' "' + lines[i].s + '" x "' + lines[j].s + '"');
+      }
+    } finally { window.ftxt = keepF; LANG = keepL; G.state = 'PLAY'; }
     return out; });
   console.log('── shop-ask  — the shop asks before it opens, a held key buys nothing, and Ratchet marks what to buy');
   check('A  the shop opens as a question', R.A.state === 'SHOP' && R.A.ask === true, R.A);
@@ -42,6 +72,7 @@ const open = async () => { const browser = await chromium.launch({ executablePat
   check('C  the shelf marks one row as his pick, and says why', R.C.ask === false && !!R.C.pick && !!R.C.why && R.C.why.length > 8 && R.C.same, R.C);
   check('D  a first purse does not buy the shelf', R.D.upgrades >= 5 && R.D.total > R.D.purse * 3 && R.D.min >= 250, R.D);
   check('E  a guardian that goes pays scrap', R.E.alpha >= 60 && R.E.horn >= 60 && R.E.lion > R.E.alpha, R.E);
+  check('F  every line on the shelf clears the key hint and the other rows, inside 960x540, in every language, on both shelves', R.F.rows >= 10 && R.F.overlaps.length === 0 && R.F.outside.length === 0, { rows: R.F.rows, overlaps: R.F.overlaps.slice(0, 6), outside: R.F.outside.slice(0, 4) });
   check('   touch: the question has two buttons and LATER closes it', R.T.n === 2 && R.T.state === 'PLAY' && !R.T.ask, R.T);
   check('no page errors', errs.length === 0, errs.slice(0, 2));
   await browser.close(); console.log(bad ? '\nFAILED: ' + bad : '\nOK — the shop asks, guards and guides'); process.exit(bad ? 1 : 0);

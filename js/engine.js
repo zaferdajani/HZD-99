@@ -16,6 +16,9 @@ const KEYB = {
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
   STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
   MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], BRAID: ['KeyY', 'VBRAID', 'GP_BRAID'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
+  // HER SKILL TREES (js/packtree.js). O was free; a pad reaches it through Pause ▸ Skill trees
+  // (every real button is spoken for — see PAD_DEFAULT), a phone through its own corner button.
+  TREE: ['KeyO', 'VTREE'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
   // RUN is a pad verb only. A key has no magnitude and always asks for
@@ -820,12 +823,16 @@ function updateCam(px, py, rw, rh, dt) {
   // Keep the character within a safe vertical band even during a fast drop.
   // Room bounds win at the roof/floor; they are never exchanged for black void.
   if (p && robo && !boss) {
-    const centre=p.y+p.h/2;
+    // RIDING, the body on screen is the ridden Alpha with her on him (js/wolfmount.js wmDrawTop):
+    // the band holds THAT drawn box, not her small one under it, so a leap never cuts his back and
+    // her head off the top of the frame
+    const rTop=typeof wmDrawTop==='function'?wmDrawTop(p):null;
+    const centre=rTop!=null?(rTop+p.y+p.h)/2:p.y+p.h/2, topY=rTop!=null?rTop:p.y;
     // ...a band that travels with the look, or the look is clamped straight off
     const lk=cam.look||0;
     // in a free jump the band's top is the top of the frame itself: she may rise
     // until her head is CAM_TOP from the edge before anything moves
-    const hi=free?Math.max(centre-270+120/z,p.y-oy-CAM_TOP/z):centre-270+120/z;
+    const hi=free?Math.max(centre-270+120/z,topY-oy-CAM_TOP/z):rTop!=null?Math.min(centre-270+120/z,topY-oy-CAM_TOP/z):centre-270+120/z;
     const banded=boundY(clamp(cam.y,centre-270-155/z+Math.min(0,lk),hi+Math.max(0,lk)));
     // A SILENT ROOM CHANGE (game.js vlinkHandover) can leave her outside the
     // band for a moment — the old room's floor held the frame while she fell

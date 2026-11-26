@@ -273,6 +273,8 @@ function tLayout() {
       { code: 'VPAUSE', x: lgx, y: 26 * u + 4, r: 16 * u + 2, icon: '▐▌', show: () => true },
       { code: 'VMAP', x: lgx, y: 92 * u + 4, r: 22 * u + 2, icon: '▦', show: () => typeof mapUnlocked !== 'function' || mapUnlocked() },
       { code: 'VSKILL', x: lgx, y: 156 * u + 4, r: 16 * u + 2, icon: '◈', show: () => tAllow('SKILL') },
+      // HER SKILL TREES (js/packtree.js): shown once there is a tree to show — the pack's first rung
+      { code: 'VTREE', x: lgx, y: 214 * u + 4, r: 16 * u + 2, icon: '⟁', show: () => typeof ptButtonShown === 'function' && ptButtonShown() && tAllow('SKILL') },
     ],
   };
   // the player's own arrangement wins over every default
@@ -320,7 +322,7 @@ function tStateKind() {
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';
   if (s === 'OFFER') return 'offer';
-  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TRIAL' || s === 'FILMS' || s === 'PANELLIST') return 'menu';
+  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TREE' || s === 'TRIAL' || s === 'FILMS' || s === 'PANELLIST') return 'menu';
   return 'tap';
 }
 // layout-editor chrome: fixed controls that are not part of the layout
@@ -430,9 +432,13 @@ function tapMenu(x, y) {
     if (typeof shopAskTap === 'function' && G.shopAsk) { shopAskTap(x, y); return; }
     const R = typeof SHOP_ROW !== 'undefined' ? SHOP_ROW : { y0: 130, step: 46 };
     const i = Math.round((y - R.y0) / R.step);
-    if (i >= 0 && i < SHOP.length && Math.abs(y - (R.y0 + i * R.step)) <= R.step / 2) {
+    const SL = typeof shopList === 'function' ? shopList() : SHOP;
+    if (i >= 0 && i < SL.length && Math.abs(y - (R.y0 + i * R.step)) <= R.step / 2) {
       if (G.shopIdx === i) tPress('VOK'); else { G.shopIdx = i; if (typeof sfx === 'function') sfx('ui'); }
     }
+  } else if (st === 'TREE') {
+    // the same geometry the tree is drawn with — see ptLayout (js/packtree.js)
+    if (typeof ptTap === 'function') ptTap(x, y);
   } else if (st === 'SKILLS') {
     // the same geometry the tree is drawn with — see skillLayout(). This used
     // the two-column formula against SKILLS rather than the pool, so with the

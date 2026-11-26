@@ -180,9 +180,11 @@ const SHOP = [
   // the shop into becoming shooting 2 and 3 and 4. Until it reaches the
   // maximum"). GRAVEHORN's suit fires one; each upgrade adds one, up to four.
   { id: 'volley', type: 'volley', get cost() { return SHOP_VOLLEY[Math.min(SHOP_VOLLEY.length - 1, shardLevel() - 1)]; } },
-  // THE PACK, LONGER (owner, 2026-11-25: "Improving this skill by spending shards at certain NPCs"):
-  // the Alpha's called wolf stays longer and bites harder (js/packcall.js packStat)
-  { id: 'packup', type: 'packup', cost: 760 },
+  // THE PACK LADDER (owner, 2026-11-25: "Improving this skill by spending shards at certain NPCs";
+  // 2026-11-26: the stronger wolf, then the Alpha himself). ONE row: always the next rung Ratchet
+  // sells — A STRONGER WOLF, CALL THE ALPHA, THE ALPHA'S HOWL (js/packtree.js ptNextRatchet; prices
+  // measured: docs/OWNER_ORDERS.md, tests/pack-prices.cjs). The ride is on the Tinker's shelf.
+  { id: 'packup', type: 'packup', get cost() { return typeof ptShelfCost === 'function' ? ptShelfCost() : 700; } },
 ];
 const BENCH_ROOMS = ['A3', 'B3', 'D2', 'E2'];   // (D2: the archive's pod is at ZERO's door now — world.js, SAVE POINTS ARE FOR CRITICAL PLACES)
 
@@ -2985,7 +2987,8 @@ function doInteract(s) {
     // asked you for a favour. Worse in the tutorial, where the trader IS the
     // shop lesson and his errand hid it.
     const base = s.extra === 'ratchet' ? () => shopOpen(true)
-      : s.extra === 'mono' ? () => trialOpen() : null;
+      : s.extra === 'mono' ? () => trialOpen()
+      : s.extra === 'patch' && typeof ptTinkerSells === 'function' && ptTinkerSells() ? () => shopOpen(true, 'patch') : null;
     let after = base;
     if (q) {
       const st = qState(q.id);
@@ -3489,6 +3492,7 @@ function update(dt) {
         if (inP('BRAID')) { G.state = 'BRAID'; braidView.ready = false; sfx('ui'); }
         else if (inP('CREST')) { G.state = 'CREST'; G.crestIdx = 0; sfx('ui'); }
         else if (inP('SKILL')) { G.state = 'SKILLS'; G.skillIdx = 0; sfx('ui'); }
+        else if (inP('TREE') && typeof ptOpen === 'function') ptOpen('PLAY');
         else if (inP('PAUSE')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
       }
     }
@@ -3544,6 +3548,7 @@ function update(dt) {
   else if (G.state === 'SHOP') updateShop();
   else if (G.state === 'FERRY') k2FerryUpdate();
   else if (G.state === 'SKILLS') updateSkills();
+  else if (G.state === 'TREE') updateTree();
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'TRIAL') updateTrial(dt);
   else if (G.state === 'PAUSE') updatePause();
@@ -3823,6 +3828,8 @@ function pauseItems() {
     { id: 'bag', label: t('pm_bag') },
     { id: 'crests', label: t('pm_crests'), lo: 'crest' },
     { id: 'skills', label: t('pm_skills') },
+    // HER SKILL TREES (js/packtree.js): the Pack's ladder, and room for the trees that join it
+    { id: 'tree', label: t('pk_menu') },
     { id: 'relics', label: t('pm_relics'), lo: 'relic' },
     { id: 'ctrl', label: t('ctl_title') },
     { id: 'pace', label: t('pace') + ':  ' + paceLabel() + '   ◂ ▸', arrows: 1, hint: t('pace_d') },
@@ -3936,6 +3943,7 @@ function updatePause() {
     else if (cur.id === 'bag') { G.state = 'BAG'; G.bagIdx = 0; }
     else if (cur.id === 'crests') { G.state = 'CREST'; G.crestIdx = 0; }
     else if (cur.id === 'skills') { G.state = 'SKILLS'; G.skillIdx = 0; }
+    else if (cur.id === 'tree') ptOpen('PAUSE');
     else if (cur.id === 'relics') G.state = 'RELICS';
     else if (cur.id === 'ctrl') { G.ctrlBack = 'PAUSE'; G.state = 'CTRL'; }
     else if (cur.id === 'pace') {
@@ -4108,10 +4116,18 @@ function updateCrest() {
 //     off it is.
 // ---------------------------------------------------------------------------
 const SHOP_PICK_ORDER = ['sprint', 'siphon', 'claws', 'over', 'plate'];
-const SHOP_ROW = { y0: 136, step: 41 };   // ten rows since THE PACK, LONGER (2026-11-25), the last at 505 — the shelf's rows: the drawing and the touch layer read the same two numbers
+// the shelf's rows: the drawing and the touch layer read the same two numbers. TEN ROWS since the
+// pack's rung (2026-11-25): at 41 apart the last row's line sat on the key hint at 512 (reviewed in
+// the pack-ladder clip, 2026-11-26) — at 37 from 132 the last row's lines end at 484, each row's
+// text clears its neighbours', and tests/shop-ask.cjs measures every drawn line against the others
+const SHOP_ROW = { y0: 132, step: 37, h: 35 };
 function shopCost(it) { return Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)); }
 function shopPick() {
   if (!G.save) return null;
+  if (G.shopWho === 'patch') {
+    const it = shopList().find(q => !shopSold(q)); if (!it) return null;
+    return G.save.scrap >= shopCost(it) ? { it, why: 'shop_why_buy' } : { it, why: 'shop_why_save', need: shopCost(it) - G.save.scrap };
+  }
   const f = G.save.flags || {}, cell = SHOP.find(q => q.type === 'cell');
   if (cell && !f.heal) return { it: cell, why: 'shop_why_pack' };
   if (cell && player && player.volts < player.voltMax() * 0.5 && G.save.scrap >= shopCost(cell)) return { it: cell, why: 'shop_why_cell' };
@@ -4123,10 +4139,13 @@ function shopPick() {
   const next = open.slice().sort((a, b) => a.cost - b.cost)[0];
   return { it: next, why: 'shop_why_save', need: shopCost(next) - G.save.scrap };
 }
-function shopOpen(ask) {
+// WHOSE SHELF: Ratchet's (SHOP) or the Tinker's (TINKER_SHOP, js/packtree.js: the ride)
+function shopList() { return G.shopWho === 'patch' && typeof TINKER_SHOP !== 'undefined' ? TINKER_SHOP : SHOP; }
+function shopOpen(ask, who) {
   G.state = 'SHOP';
+  G.shopWho = who || 'ratchet';
   const pk = shopPick();
-  G.shopIdx = pk ? Math.max(0, SHOP.indexOf(pk.it)) : 0;
+  G.shopIdx = pk ? Math.max(0, shopList().indexOf(pk.it)) : 0;
   G.shopAsk = !!ask; G.shopAskIdx = 0;
   G.shopGuard = 0.5;                        // s: no purchase before this, whatever is held
   G.shopArmed = false;                      // ...and not until OK has been seen UP once
@@ -4145,10 +4164,12 @@ function updateShop() {
     return;
   }
   if (inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
-  if (inP('DOWN')) { G.shopIdx = (G.shopIdx + 1) % SHOP.length; sfx('ui'); }
-  if (inP('UP')) { G.shopIdx = (G.shopIdx + SHOP.length - 1) % SHOP.length; sfx('ui'); }
+  const SL = shopList();
+  if (inP('DOWN')) { G.shopIdx = (G.shopIdx + 1) % SL.length; sfx('ui'); }
+  if (inP('UP')) { G.shopIdx = (G.shopIdx + SL.length - 1) % SL.length; sfx('ui'); }
   if (inP('OK') && G.shopArmed && G.shopGuard <= 0) {
-    const it = SHOP[G.shopIdx];
+    const it = SL[G.shopIdx];
+    if (!it) return;
     if (!isHero() && G.save.storyVersion >= 2 && !G.save.flags.heal && it.type !== 'cell') {
       G.toast(t('story_pack_first')); sfx('no'); return;
     }
@@ -4160,6 +4181,7 @@ function updateShop() {
     if (it.type === 'core' && !shopCoreOpen()) { G.toast(t('s_core_wait')); sfx('no'); return; }
     if (it.type === 'volley' && !shopVolleyOpen()) { G.toast(t('s_volley_wait')); sfx('no'); return; }
     if (it.type === 'packup' && !shopPackOpen()) { G.toast(t('s_packup_wait')); sfx('no'); return; }
+    if (it.type === 'alride' && !ptRideOpen()) { G.toast(ptHarness() && !ptHas('alcall') ? t('pk_first').replace('%s', t('pk_n_alcall')) : t('pk_harness')); sfx('no'); return; }
     const cost = Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1));
     if (G.save.scrap < cost) { G.toast(t('poor')); sfx('no'); return; }
     G.save.scrap -= cost; sfx('buy');
@@ -4188,7 +4210,8 @@ function updateShop() {
     }
     if (it.type === 'crest') grantCrest(it.id);
     else if (it.type === 'slot') { G.save.slots++; G.save.shop[it.id] = 1; showItem(t('s_slot'), t('s_slotd')); }
-    else if (it.type === 'packup') { G.save.packLv = 2; G.save.shop[it.id] = 1; showItem(t('s_packup'), t('s_packup_now')); }
+    else if (it.type === 'packup') ptBuy(ptNextRatchet());
+    else if (it.type === 'alride') ptBuy(ptNode('alride'));
     else if (it.type === 'volley') { G.save.shardLv = shardLevel() + 1; showItem(t('s_volley'), t('s_volley_now').replace('%n', String(G.save.shardLv))); }
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
@@ -4201,6 +4224,8 @@ function shopCoreOpen() { return !!(G.save && G.save.flags && (G.save.flags.sage
 function shopSold(it) {
   if (it.type === 'cell') return false;          // a consumable is never sold out
   if (it.type === 'volley') return shardLevel() >= 4;
+  if (it.type === 'packup') return typeof ptNextRatchet === 'function' ? !ptNextRatchet() : !!G.save.shop[it.id];
+  if (it.type === 'alride') return typeof ptHas === 'function' && ptHas('alride');
   return it.type === 'crest' ? G.save.crests.indexOf(it.id) >= 0 : !!G.save.shop[it.id];
 }
 function effSlots() { return G.save.slots + (G.save.skills && G.save.skills.indexOf('mind') >= 0 ? 1 : 0); }
@@ -16252,7 +16277,9 @@ function drawWorldFrame() {
   if (G.boss && !(typeof nfPetFront === 'function' && nfPetFront(G.boss))) foeDraw(c, G.boss);
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
-  if (typeof drawPackWolf === 'function') drawPackWolf(c);
+  // (her called wolf or Alpha is drawn with HER, after the grade — below, before her body: under the
+  //  zone wash the pack's graphite wolf sank into the dark ground and the turret it bit was drawn over
+  //  it; owner's reviewer, 2026-11-26: "I see only her clawing; no wolf on screen")
   if (typeof drawWolfMountPrompt === 'function') drawWolfMountPrompt(c);   // ▲ Ride, beside her called wolf
   for (const p of G.projs) p.draw(c);
   if (typeof drawCrescents === 'function') drawCrescents(c);      // the single blade's charged cut (js/entities.js)
@@ -16494,6 +16521,10 @@ function drawWorldFrame() {
   // her, at full strength like her — objects in the fight, not painted distance
   if (typeof nfCoverDrawFront === 'function') {
     c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); nfCoverDrawFront(c); c.restore();
+  }
+  // HER CALLED WOLF / ALPHA: in her own layer, in front of what it bites, never under the grade
+  if (G.packWolf && typeof drawPackWolf === 'function') {
+    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); drawPackWolf(c); c.restore();
   }
   if (player && !G.recharge && !(G.gateWalk && G.gateWalk.align >= 1)) {
     c.save();
@@ -18454,6 +18485,8 @@ function draw(tms) {
     drawShop();
   } else if (st === 'FERRY') {
     k2FerryDraw();
+  } else if (st === 'TREE') {
+    drawTree();
   } else if (st === 'SKILLS') {
     drawSkills();
   } else if (st === 'RELICS') {
@@ -19912,7 +19945,8 @@ function drawCrest() {
 }
 function shopWhyLine(pk) {
   if (!pk) return t('shop_why_none');
-  const nm = pk.it.type === 'crest' ? t('c_' + pk.it.id) : t('s_' + pk.it.id);
+  const nm = pk.it.type === 'crest' ? t('c_' + pk.it.id) : pk.it.type === 'alride' ? t('pk_n_alride')
+    : pk.it.type === 'packup' && shopPackOpen() && ptNextRatchet() ? t('pk_n_' + ptNextRatchet().id) : t('s_' + pk.it.id);
   return t(pk.why).replace('{item}', nm).replace('{n}', String(pk.need || 0));
 }
 // the question card's two buttons, in 960x540 — the touch layer taps these
@@ -19928,13 +19962,13 @@ function shopAskTap(sx, sy) {
 }
 function drawShop() {
   c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
-  ftxt(t('shop_title'), 480, 50, 28, '#eef3fa', 'center', '#ffd76a');
+  ftxt(G.shopWho === 'patch' ? t('n_patch') : t('shop_title'), 480, 50, 28, '#eef3fa', 'center', '#ffd76a');
   const pk = shopPick();
   if (G.shopAsk) {
     // THE QUESTION: why it opened, and whether she wants it
     c.fillStyle = 'rgba(12,20,28,0.96)'; rr(c, 220, 170, 520, 220, 12); c.fill();
     c.strokeStyle = 'rgba(255,215,106,0.55)'; c.lineWidth = 1.5; rr(c, 220, 170, 520, 220, 12); c.stroke();
-    ftxt(t('n_ratchet'), 480, 198, 15, '#ffd76a', 'center');
+    ftxt(t('n_' + (G.shopWho === 'patch' ? 'patch' : 'ratchet')), 480, 198, 15, '#ffd76a', 'center');
     wrapText(shopWhyLine(pk), 460, 16).slice(0, 3).forEach((ln, i) => ftxt(ln, 480, 232 + i * 22, 16, '#eef3fa', 'center', null, '600'));
     for (const b of shopAskButtons()) {
       const on = b.i === (G.shopAskIdx | 0);
@@ -19946,16 +19980,16 @@ function drawShop() {
   }
   ftxt('⬢ ' + G.save.scrap, 480, 80, 17, '#ffd76a');
   ftxt(shopWhyLine(pk), 480, 104, 13, '#cfe0ee', 'center', null, '600');
-  SHOP.forEach((it, i) => {
+  shopList().forEach((it, i) => {
     const sel = i === G.shopIdx, sold = shopSold(it);
     const y = SHOP_ROW.y0 + i * SHOP_ROW.step;
     if (pk && pk.it === it) {
       // RATCHET'S PICK: a gold bar down the row's edge and its tag, said in words
-      c.fillStyle = 'rgba(255,215,106,0.10)'; rr(c, 160, y - 19, 640, 40, 8); c.fill();
-      c.fillStyle = '#ffd76a'; c.fillRect(LANG === 'ar' ? 796 : 160, y - 19, 4, 40);
-      ftxt('◆ ' + t('shop_pick'), 480, y - 13, 10, '#ffd76a', 'center', null, '700');
+      c.fillStyle = 'rgba(255,215,106,0.10)'; rr(c, 160, y - 17, 640, SHOP_ROW.h, 8); c.fill();
+      c.fillStyle = '#ffd76a'; c.fillRect(LANG === 'ar' ? 796 : 160, y - 17, 4, SHOP_ROW.h);
+      ftxt('◆ ' + t('shop_pick'), 480, y - 11, 10, '#ffd76a', 'center', null, '700');
     }
-    if (sel) { c.fillStyle = 'rgba(255,215,106,0.08)'; rr(c, 160, y - 19, 640, 40, 8); c.fill(); }
+    if (sel) { c.fillStyle = 'rgba(255,215,106,0.08)'; rr(c, 160, y - 17, 640, SHOP_ROW.h, 8); c.fill(); }
     let name = it.type === 'crest' ? t('c_' + it.id) : t('s_' + it.id);
     let desc = it.type === 'crest' ? t('c_' + it.id + 'd') : t('s_' + it.id + 'd');
     // a seal that changes how she fights names its style on the shelf (C1)
@@ -19968,6 +20002,9 @@ function drawShop() {
     if (it.type === 'core' && !sold && !shopCoreOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_core_wait'); }
     if (it.type === 'volley' && !sold && !shopVolleyOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_volley_wait'); }
     if (it.type === 'packup' && !sold && !shopPackOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = t('s_packup_wait'); }
+    // THE PACK LADDER's row wears the rung it sells now (js/packtree.js)
+    else if (it.type === 'packup' && !sold && ptNextRatchet()) { name = t('pk_n_' + ptNextRatchet().id); desc = t('pk_n_' + ptNextRatchet().id + 'd'); }
+    if (it.type === 'alride') { name = t('pk_n_alride'); desc = t('pk_n_alrided'); if (!sold && !ptRideOpen()) { row = Object.assign({}, row || {}, { locked: true }); desc = ptHarness() ? t('pk_first').replace('%s', t('pk_n_alcall')) : t('pk_harness'); } }
     const col = row && row.locked ? '#56626e' : sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
     // WHICH SYSTEM IS THIS LINE? A crest — and the port width a crest sits
     // in — wears the crest's diamond (js/loadout.js): dashed while it is on
