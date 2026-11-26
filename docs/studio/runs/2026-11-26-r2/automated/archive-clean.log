@@ -1,0 +1,10 @@
+
+── archive-clean  — only the art he agreed on and the game uses is kept: nothing refused, superseded, trial, draft, before or review under assets/, and no comic page the game never shows
+── archive-clean — only the art he agreed on and the game uses is kept
+ok   A  nothing kept that was refused, superseded, a trial, a draft, a "before" or a review  []
+ok   B  every comic page shipped is one the game or the reader shows  []
+
+OK — only agreed, used art is kept
+   (archive-clean: 0.4 s)
+
+all 1 harnesses ran

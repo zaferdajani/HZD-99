@@ -1,0 +1,6 @@
+
+── quest-payment-contract  — quest hand-ins persist rewards, items and unique rewards atomically
+PASS quest payments are atomic and completed forge/harness saves recover their rewards
+   (quest-payment-contract: 0.1 s)
+
+all 1 harnesses ran

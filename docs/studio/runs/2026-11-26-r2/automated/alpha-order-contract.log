@@ -1,0 +1,6 @@
+
+── alpha-order-contract  — Alpha side quest is offered only after NULLFANG purification
+PASS Alpha side quest cannot be offered before NULLFANG is purified
+   (alpha-order-contract: 0.1 s)
+
+all 1 harnesses ran

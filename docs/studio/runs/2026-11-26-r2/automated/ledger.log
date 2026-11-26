@@ -1,0 +1,18 @@
+
+── ledger  — the rules file opens with what the owner has had to repeat, each row with a count, his words and a harness or skill that exists, worst first; the correction procedure is there; the file stays under 160 lines and every section that was moved out is where the index says
+── ledger  — what the owner has had to repeat is the first thing a session reads, and the rules file stays short
+ok   A  the ledger is the first section of the rules file  {"line":7}
+ok   B  every row has a count, a rule and his own words  20 rows
+ok      ...and everything a row says holds it exists  []
+ok      ...at most one row is held by nothing but a check before reporting  ["Do the whole job, and show it as it is: motion as a clip, never a sheet of stills; never recite what is left"]
+ok   C  the worst is first: rows in order of how often he has said it  18 13 10 9 8 6 5 5 5 4 4 3 3 3 3 2 2 1 1 1
+ok   D  the procedure for a correction is there: fix, sweep, record, guard, report
+ok   E  the rules file is short enough to be read first (at most 160 lines, 12 KB)  {"lines":118,"bytes":11998}
+ok      ...and the table short enough to be read (at most 20 rows)  20
+ok   F  nothing was lost: every moved section is where the index says  []
+ok      ...and every skill the index names exists  []
+
+OK — the ledger is first, guarded and short, and what was moved is all there
+   (ledger: 0.1 s)
+
+all 1 harnesses ran
