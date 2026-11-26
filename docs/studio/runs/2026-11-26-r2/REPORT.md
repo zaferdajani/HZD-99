@@ -18,9 +18,10 @@ This R2 branch preserves the new owner-approved Alpha ladder and restores safegu
 | Local exact mirror | `5d8804bfb8ef1ee4dbdad9df8a74ef63b1163c9c` | Synthetic local commit; all 42 changed paths matched remote blob SHA |
 | Restored safeguards | `7b2aed5d` | Semantically reconciled with the new Pack ladder |
 | Exact audited source | `805d19d3749c949b5d2a2100dd02d297e5ab90ea` | Final source used by the full audit |
+| Published source equivalent | `8e63f926843e3a8c7c0d9f85720725c9ab90f683` | GitHub commit with the same reviewed source changes, parented directly to remote `main` |
 | Review branch | `codex/studio-review-2026-11-26-r2` | Review only; never merged or deployed |
 
-The local mirror exists because the workspace HTTPS remote had no credential and the connected repository interface was required for current files. The mirror is not ancestry proof: it is tree proof. Every changed intake path was checked against its GitHub blob SHA.
+The local mirror exists because the workspace HTTPS remote had no credential and the connected repository interface was required for current files. The mirror is not ancestry proof: it is tree proof. Every changed intake path was checked against its GitHub blob SHA. Publication was performed through GitHub's object interface: the remote source-equivalent commit is parented directly to `e52753a`, while the evidence commit follows it on the review branch.
 
 ## Evidence boundary
 
