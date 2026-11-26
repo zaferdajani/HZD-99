@@ -728,17 +728,26 @@ function updateCam(px, py, rw, rh, dt) {
   const boss = typeof G !== 'undefined' && G.boss && !G.boss.dead && !['dorm','intro'].includes(G.boss.st) ? G.boss : null;
   // A close exploration camera must not crop the tell of a much larger foe.
   // Fit both bodies during real encounters, and settle back after the fight.
-  if (robo && p && boss && typeof boss.cx === 'function') {
+  // A BOSS FIGHT IS ONE STILL PICTURE OF ITS WHOLE ARENA (owner, 2026-11-25: "make sure that
+  // when I stand on the palm, I'm still zoomed out enough to see the whole screen instead of the
+  // issue with the camera coming up with me, so I wouldn't be able to see Nilfang anymore. Camera
+  // should not move with me in the boss fight, as the screen should just zoom out to fill out all
+  // the screen with all the data needed without moving the camera with me, to avoid distraction.
+  // And focus on the fight."). While a guardian is fighting her, the frame is the arena itself:
+  // zoomed out until the room fits the screen across its width (and its height), and held there —
+  // both bounds below then centre it, so nothing she does moves it. It eases there as the fight
+  // starts and back after it (the zoom's own ease); a staged meeting keeps its own framing.
+  const bossFit = robo && p && boss && typeof boss.cx === 'function' && G.roomDef && G.roomDef.w && rw && rh
+    && !(G.meet && (G.meet.ph==='watch'||G.meet.ph==='coil'))
+    && G.state !== 'PURIFY' && !G.purification && !boss.purified;      // (the purification after it keeps its own framing)
+  if (bossFit) {
+    wantZoom = Math.min(baseZoom, 960 / rw, 540 / rh);
+    px = rw / 2; py = rh / 2;
+  } else if (robo && p && boss && typeof boss.cx === 'function') {
     const dx=Math.abs(boss.cx()-px), dy=Math.abs(boss.cy()-py);
     wantZoom=Math.max(1.05,Math.min(baseZoom,760/(dx+boss.w/2+100),400/(dy+boss.h/2+90)));
-    // NULLFANG'S ARENA (owner, 2026-11-25: "zoom out in the fight to give it more room and
-    // space"): his fight is framed wider than the rest — the whole height of the room and the
-    // leaves he hides in — and wider still when they are far apart (js/nfcover.js NF_CAM)
-    if (typeof nfCamZoom === 'function') { const nz = nfCamZoom(boss, dx); if (nz) wantZoom = Math.min(wantZoom, nz); }
-    if (!(G.meet && (G.meet.ph==='watch'||G.meet.ph==='coil'))) {
-      px = px*.65 + boss.cx()*.35;
-      py = py*.75 + boss.cy()*.25;
-    }
+    px = px*.65 + boss.cx()*.35;
+    py = py*.75 + boss.cy()*.25;
   }
   // a STAGED showing of a guardian (the break: NULLFANG lets go of the order, then the bell
   // takes it back) is framed the way his fight frames him at mid-range — all of him, sharp,
@@ -755,7 +764,7 @@ function updateCam(px, py, rw, rh, dt) {
   // (a camFit room is ARRIVED in, often by a drop: the frame eases out to the
   // whole pool rather than cutting to it on the crossing step)
   const fitIn = typeof G !== 'undefined' && G.roomDef && G.roomDef.camFit && cam.zoom && dt < .5;
-  cam.zoom = snap && !fitIn ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*(fitIn ? 2.5 : 4)));
+  cam.zoom = snap && !fitIn ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*(fitIn || bossFit ? 2.5 : 4)));
   cam.room = typeof G!=='undefined'?G.roomId:null;
   const z=cam.zoom, ox=480*(1-1/z), oy=270*(1-1/z);
   const facing=p ? p.face : 0, speed=p ? Math.abs(p.vx) : 0;

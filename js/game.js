@@ -5232,16 +5232,18 @@ function drawCeiling(zone) {
   // rock never shimmer half a pixel apart
   const sx = Math.round(camSX()), sy = Math.round(camSY());
   const wrapX = (v) => -(((v % CEIL_TW) + CEIL_TW) % CEIL_TW);
+  // across the whole view: wider than 960 when the world is drawn zoomed out (WORLD_VIEW)
+  const V = WORLD_VIEW, vx0 = V.x, vx1 = V.x + V.w, back = (x) => x - Math.ceil(Math.max(0, x - vx0) / CEIL_TW) * CEIL_TW;
   // FAR: dark, wide — the thickness of the roof
   if (tier >= 2) {
     const fy = -sy - 26, fh = CEIL_TH * 1.18;
     if (fy + fh > 0) {
       c.save();
       c.globalAlpha = 0.55;
-      const fx = wrapX(sx + CEIL_TW / 2);
-      for (let x0 = fx; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
+      const fx = back(wrapX(sx + CEIL_TW / 2));
+      for (let x0 = fx; x0 < vx1 + CEIL_TW; x0 += CEIL_TW)
         c.drawImage(tex, x0, fy, CEIL_TW, fh);
-      c.fillStyle = 'rgba(0,0,0,0.45)'; c.fillRect(0, 0, 960, fh + fy);
+      c.fillStyle = 'rgba(0,0,0,0.45)'; c.fillRect(vx0, V.y, V.w, fh + fy - V.y);
       c.restore();
     }
   }
@@ -5249,8 +5251,8 @@ function drawCeiling(zone) {
   const ny = -sy - 8;
   if (ny + CEIL_TH + 40 <= 0) return;           // scrolled out of sight above
   c.save();
-  const nx = wrapX(sx);
-  for (let x0 = nx; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
+  const nx = back(wrapX(sx));
+  for (let x0 = nx; x0 < vx1 + CEIL_TW; x0 += CEIL_TW)
     c.drawImage(tex, x0, ny, CEIL_TW, CEIL_TH);
   // the kingdom's own light spilling down off it
   c.globalCompositeOperation = 'lighter';
@@ -5258,7 +5260,7 @@ function drawCeiling(zone) {
   g2.addColorStop(0, 'rgba(0,0,0,0)');
   g2.addColorStop(0.6, (P && P.glow ? P.glow : '#37ffd0') + '22');
   g2.addColorStop(1, 'rgba(0,0,0,0)');
-  c.fillStyle = g2; c.fillRect(0, ny + CEIL_TH * 0.55, 960, CEIL_TH * 0.5 + 40);
+  c.fillStyle = g2; c.fillRect(vx0, ny + CEIL_TH * 0.55, V.w, CEIL_TH * 0.5 + 40);
   c.restore();
 }
 // ---------------------------------------------------------------------------
@@ -16048,7 +16050,11 @@ function applyBloom(k) {
 }
 function drawWorldFrame() {
   const P = PAL[G.roomDef.zone];
-  drawBG(P, cam.x, cam.y);
+  // the world's own view: at a zoom below 1 the world is drawn small about the frame's centre
+  // (js/presentation.js WORLD_VIEW); the backdrop stays the picture's, on the canvas itself
+  worldViewBegin(c);
+  const WV = WORLD_VIEW;
+  worldOnScreen(c, () => drawBG(P, cam.x, cam.y));
   // The roof, before the tiles: it is the far wall of the room's top, and
   // anything solid the level actually built up there should occlude it.
   // AN INTERIOR HAS ITS OWN ROOF, IN ITS OWN PAINTING. The kingdom's ceiling
@@ -16071,7 +16077,7 @@ function drawWorldFrame() {
   // background came back MORE saturated than the plane the player stands on.
   // Pushing the background down and the chroma out of it is what buys the
   // depth the single end-of-frame wash never could.
-  bgPlanePass();
+  worldOnScreen(c, bgPlanePass);
   drawVLinkBG();                    // beyond a seamless seam, the neighbour's own backdrop
   // THE PLANE PROBE — the measurement hook for ART_BIBLE §9.1/§9.4, and the
   // reason it exists is that the obvious test is wrong. Sampling the top third
@@ -16156,7 +16162,7 @@ function drawWorldFrame() {
   // of which knows about the others. This one is a hair of atmosphere; at 0.16
   // it was taking a sixth of the light out of every frame in the game.
   c.fillStyle = 'rgba(3,6,14,' + WORLD_VEIL + ')';
-  c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+  c.fillRect(cam.x + WV.x - 12, cam.y + WV.y - 12, WV.w + 24, WV.h + 24);
   // THE BRAID writes itself onto the air of the room. A kingdom still deep in
   // the rot runs violet; one she has bought back runs clean. STARLESS worlds
   // lose the ceiling lights entirely.
@@ -16164,12 +16170,12 @@ function drawWorldFrame() {
     const U = universe(), zi = U.inf[G.roomDef.zone] != null ? U.inf[G.roomDef.zone] : 1;
     if (zi > 0.4) {
       c.fillStyle = 'rgba(120,20,90,' + ((zi - 0.4) * 0.13).toFixed(3) + ')';
-      c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+      c.fillRect(cam.x + WV.x - 12, cam.y + WV.y - 12, WV.w + 24, WV.h + 24);
     } else if (zi < 0.25) {
       c.fillStyle = 'rgba(60,220,190,' + ((0.25 - zi) * 0.1).toFixed(3) + ')';
-      c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+      c.fillRect(cam.x + WV.x - 12, cam.y + WV.y - 12, WV.w + 24, WV.h + 24);
     }
-    if (U.darkK) { c.fillStyle = 'rgba(2,4,10,0.4)'; c.fillRect(cam.x - 12, cam.y - 12, 984, 564); }
+    if (U.darkK) { c.fillStyle = 'rgba(2,4,10,0.4)'; c.fillRect(cam.x + WV.x - 12, cam.y + WV.y - 12, WV.w + 24, WV.h + 24); }
   }
   // THE INTERACTABLE STRUCTURES, in the CAST'S plane and not the painting's.
   // The booth, the shrine, the forge hood, the carrel, the hollow and every
@@ -16435,9 +16441,9 @@ function drawWorldFrame() {
   //
   // richK is the quality dial the second call was carrying, so it moves here
   // rather than being lost with it.
-  applyBloom(typeof richK === 'number' ? richK : 1);
+  worldOnScreen(c, () => applyBloom(typeof richK === 'number' ? richK : 1));
   // ---- cinematic grade: zone-tinted light wash + vignette (the "expensive" look) ----
-  {
+  worldOnScreen(c, () => {
     const P2 = PAL[G.roomDef.zone];
     c.save();
     // warm/cool light wash pulled from the zone's own glow colour
@@ -16455,7 +16461,7 @@ function drawWorldFrame() {
     vig.addColorStop(1, 'rgba(0,0,0,0.55)');
     c.fillStyle = vig; c.fillRect(0, 0, 960, 540);
     c.restore();
-  }
+  });
   // ...and the machines get back the bodies the light pass was given: a lit,
   // bloomed, washed lion reads as a see-through one (js/foeread.js FOE_PIG)
   // the palms she stands on, solid, under the bodies laid back next (js/game.js platPalmFront)
@@ -16525,7 +16531,7 @@ function drawWorldFrame() {
   // fringe, and before the HUD and the films. The HUD is already legible and
   // its dark panels are what make the text on them readable; screening those
   // up would wash the interface to fix the world.
-  drawScreenLift();
+  worldOnScreen(c, drawScreenLift);
   // THE DARK, and it goes AFTER the lift on purpose.
   //
   // drawScreenLift is an accessibility floor: a 'screen' with grey 46 at the
@@ -16562,8 +16568,9 @@ function drawWorldFrame() {
     gr.addColorStop(0, 'rgba(' + col + ',0)');
     gr.addColorStop(0.45, 'rgba(' + col + ',' + (0.3 * k).toFixed(3) + ')');
     gr.addColorStop(1, 'rgba(' + col + ',' + (0.78 * k).toFixed(3) + ')');
-    c.fillStyle = gr; c.fillRect(0, 0, 960, 540);
+    c.fillStyle = gr; c.fillRect(WV.x, WV.y, WV.w, WV.h);
   }
+  worldOnScreen(c, () => {
   if ((G.iceT || 0) > 0) {
     // COOLANT FREEZE: blue mist hangs in the room while the floor is glass
     const k = Math.min(1, G.iceT / 1.2) * Math.min(1, (7.5 - G.iceT) * 2 + 1);
@@ -16587,13 +16594,14 @@ function drawWorldFrame() {
     c.fillStyle = 'rgba(230,57,70,' + Math.min(0.16, G.revT * 0.1) + ')';
     c.fillRect(0, 0, 960, 540);
   }
+  });
   if ((G.darkT || 0) > 0 && G.state === 'PLAY') {
     // TOTAL NULL: the arena lights die. You see yourself, her golden core,
     // and — while the Song rings — her whole shape.
     const dk = Math.min(1, G.darkT * 3);
     c.save();
     c.fillStyle = 'rgba(4,4,10,' + (0.92 * dk * ((G.revealT || 0) > 0 ? 0.45 : 1)) + ')';
-    c.beginPath(); c.rect(0, 0, 960, 540);
+    c.beginPath(); c.rect(WV.x, WV.y, WV.w, WV.h);
     const pxs = player.x + player.w / 2 - cam.x, pys = player.y + player.h / 2 - cam.y;
     c.arc(pxs, pys, 68, 0, 7, true);
     if (G.boss && !G.boss.dead) {
@@ -16615,14 +16623,17 @@ function drawWorldFrame() {
   // reached the game and found it silent, with nothing on screen explaining
   // why or what to do. It draws itself only while sound is actually locked.
 
-  lightPass(P);
-  if (G.flash > 0) {
-    c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
-    c.fillRect(0, 0, 960, 540);
-  }
-  scanOverlay();
+  worldOnScreen(c, () => {
+    lightPass(P);
+    if (G.flash > 0) {
+      c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
+      c.fillRect(0, 0, 960, 540);
+    }
+    scanOverlay();
+  });
   drawHazardRescue();               // the way back from a hazard is a cut, shown (hazardRescue)
   drawVLinkFade();                  // just crossed a seamless seam: the room she left, easing out (finished frame over finished frame)
+  worldViewEnd(c);
   if (typeof presentWorld === 'function') presentWorld();
 }
 // ===========================================================================
@@ -16996,22 +17007,25 @@ function drawNearPlate(im, floorY) {
   const k = nearPlateCut(im), par = 1.16;
   const w = k.w, Y = Math.round(floorY - NEAR_RISE);
   const Wd = Math.ceil(w), Hd = Math.ceil(k.h);
-  if (Y >= 540 || Y + Hd <= 0) return;
+  // across the whole view (WORLD_VIEW: wider than 960 when the world is drawn zoomed out)
+  const V = WORLD_VIEW;
+  if (Y >= V.y + V.h || Y + Hd <= V.y) return;
   // the strip at the backbuffer's own resolution, so the plate is not softened
-  const sf = Math.max(1, (cv && cv.width ? cv.width : 960) / 960);
-  const bw = Math.ceil(960 * sf), bh = Math.ceil((Hd + 2) * sf);
+  const sf = Math.max(1, (cv && cv.width ? cv.width : 960) / 960) * V.k;
+  const bw = Math.ceil(V.w * sf), bh = Math.ceil((Hd + 2) * sf);
   if (!nearBandCv) nearBandCv = document.createElement('canvas');
   if (nearBandCv.width !== bw || nearBandCv.height !== bh) { nearBandCv.width = bw; nearBandCv.height = bh; }
   const b = nearBandCv.getContext('2d');
   b.setTransform(1, 0, 0, 1, 0, 0);
   b.globalCompositeOperation = 'source-over';
   b.clearRect(0, 0, bw, bh);
-  b.setTransform(sf, 0, 0, sf, 0, 0);
+  b.setTransform(sf, 0, 0, sf, -V.x * sf, 0);
   let x = -((cam.x * par) % w);
   if (x > 0) x -= w;
+  while (x > V.x) x -= w - 1;
   // mirrored alternate stamps, keyed to the world — see drawDepthPlane
   let n = Math.round((cam.x * par + x) / w);
-  for (; x < 960; x += w - 1, n++) {
+  for (; x < V.x + V.w; x += w - 1, n++) {
     const X = Math.round(x);
     if ((n & 1) === 0) { b.drawImage(k.cv, X, 0, Wd, Hd); continue; }
     b.save();
@@ -17025,8 +17039,8 @@ function drawNearPlate(im, floorY) {
   // all for a source rectangle that runs off its canvas
   if (tileCv && tileCv.width) {
     const ox = Math.round(camSX()), oy = Math.round(camSY()) + Y;
-    const sx0 = Math.max(0, ox), sy0 = Math.max(0, oy);
-    const sx1 = Math.min(tileCv.width, ox + 960), sy1 = Math.min(tileCv.height, oy + Hd + 2);
+    const sx0 = Math.max(0, ox + Math.floor(V.x)), sy0 = Math.max(0, oy);
+    const sx1 = Math.min(tileCv.width, ox + Math.ceil(V.x + V.w)), sy1 = Math.min(tileCv.height, oy + Hd + 2);
     if (sx1 > sx0 && sy1 > sy0) {
       b.globalCompositeOperation = 'destination-out';
       b.drawImage(tileCv, sx0, sy0, sx1 - sx0, sy1 - sy0, sx0 - ox, sy0 - oy, sx1 - sx0, sy1 - sy0);
@@ -17034,7 +17048,7 @@ function drawNearPlate(im, floorY) {
     }
   }
   b.setTransform(1, 0, 0, 1, 0, 0);
-  c.drawImage(nearBandCv, 0, 0, bw, bh, 0, Y, 960, Hd + 2);
+  c.drawImage(nearBandCv, 0, 0, bw, bh, V.x, Y, bw / sf, Hd + 2);
 }
 
 // ===========================================================================
@@ -17331,8 +17345,10 @@ function drawCaveDark() {
   // without its mask is a lit corridor, which is the bug this fixes.
   const glowK = (typeof richK === 'number' ? richK : 1);
   const glow = glowK > 0.02;
-  const S = DARK_W / 960;                        // world px -> mask px
-  const ox = Math.round(camSX()), oy = Math.round(camSY());
+  // over the whole view (WORLD_VIEW: wider than 960 when the world is drawn zoomed out)
+  const V = WORLD_VIEW;
+  const S = DARK_W / V.w;                        // world px -> mask px
+  const ox = Math.round(camSX() + V.x), oy = Math.round(camSY() + V.y);
   dx.globalCompositeOperation = 'source-over';
   dx.fillStyle = indoor ? INT_TINT : DARK_TINT; dx.fillRect(0, 0, DARK_W, DARK_H);
   dx.globalCompositeOperation = 'destination-out';
@@ -17368,11 +17384,11 @@ function drawCaveDark() {
   c.save();
   c.globalAlpha = indoor ? INT_K : DARK_K;
   c.globalCompositeOperation = 'source-over';
-  c.drawImage(darkCv, 0, 0, 960, 540);
+  c.drawImage(darkCv, V.x, V.y, V.w, V.h);
   if (glow) {
     c.globalAlpha = (indoor ? INT_ADD : DARK_ADD) * glowK;
     c.globalCompositeOperation = 'lighter';
-    c.drawImage(litCv, 0, 0, 960, 540);
+    c.drawImage(litCv, V.x, V.y, V.w, V.h);
   }
   c.restore();
 }

@@ -344,13 +344,5 @@ function nfCoverDrawBack(c) {
     c.restore();
   }
 }
-// ---- THE CAMERA (js/engine.js updateCam) -----------------------------------------------------
-// His fight is framed wider than every other (the encounter camera holds 1.05-1.52): the whole
-// height of the room at 1.0, out to 0.88 when the two of them are far apart. Eased by the
-// camera's own lerp, so it pulls out as the fight starts and back in after it — never a cut.
-// Her body at 1.0 is two-thirds of its exploration size, and the HUD is drawn in screen space.
-const NF_CAM = Object.freeze({ zoom: 1.0, far: 0.88, span: 1120 });
-function nfCamZoom(b, dx) {
-  if (!b || b.kind !== 'glitch' || typeof nfDuelOn !== 'function' || !nfDuelOn(b)) return 0;
-  return clamp(NF_CAM.span / (dx + b.w / 2 + 300), NF_CAM.far, NF_CAM.zoom);
-}
+// ---- THE CAMERA: his fight, like every boss fight, is framed as the whole arena and held still
+// (js/engine.js updateCam, owner 2026-11-25) — the leaves, the palms and both of them in one picture.
