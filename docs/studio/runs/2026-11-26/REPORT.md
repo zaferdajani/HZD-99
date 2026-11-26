@@ -17,7 +17,7 @@ This review branch restores safeguards that were present only on yesterday's unm
 | Integration `claude/clawbyte-repo-migration-byhyl8` | same | Aligned; no unmerged integration delta |
 | Previous review branch | `codex/studio-review-2026-11-25` at `2a368cf` | Not an ancestor of production |
 | Previous review source fixes | `31cd0a9` | Semantically reapplied, then reconciled with current main |
-| Current review source fix | `18d547c741761f6744b248f980be4019d0dfaec0` | Exact source audited below |
+| Current review source fix | Local audit commit `18d547c741761f6744b248f980be4019d0dfaec0`; remote tree-equivalent commit `380ee8042b091cfc37e54a631871522b296b72ac` | Identical source tree; exact local source audited below |
 | Current review branch | `codex/studio-review-2026-11-26` | Review only; not merged/deployed |
 
 ## Evidence boundary
@@ -36,6 +36,8 @@ This review branch restores safeguards that were present only on yesterday's unm
 - Controller, physical touch device, haptic, audio mix, screen-reader, store-entitlement, or performance validation.
 
 The configured `/usr/bin/chromium` launcher has no `/usr/lib/chromium/chromium` payload; the default Playwright browser is also absent. The audit preflight therefore marks browser cases **BLOCKED** before dispatch. A blocked case is neither a pass nor a product failure.
+
+Publication used the connected GitHub object API because the workspace HTTPS remote had no credential. That reconstruction preserves the audited source tree exactly but assigns a new commit SHA; the mapping is recorded above.
 
 ## Fifteen senior-role verdicts
 
