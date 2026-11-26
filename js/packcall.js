@@ -114,26 +114,21 @@ function packStep(dt) {
       w.faceVis = w.dir;
       w.lungeT = PACK_CALL.lunge; w.hitDone = false;
       w.vx = w.dir * 470; w.vy = -230; w.on = false;
+      // and when it is down again it backs off and dances before the next
+      w.mind = 'display'; w.dispT = 0; w.dispNeed = rnd(PACK_MIND.again[0], PACK_MIND.again[1]); w.afterT = PACK_MIND.after;
     }
   } else {
-    const q = packQuarry(w);
-    w.hunt = q ? 1 : 0;
-    if (q) {
-      const b = typeof hurtBoxOf === 'function' ? hurtBoxOf(q) : q;
-      const d = b.x + b.w / 2 - cx, ad = Math.abs(d) - b.w / 2;
-      w.dir = Math.sign(d) || w.dir;
-      if (ad < PACK_CALL.reach && w.biteCD <= 0 && w.on !== false) { w.coilT = PACK_CALL.coil; w.bit = q; want = 0; w.vx = 0; }
-      else want = ad < PACK_CALL.reach * 0.6 ? 0 : w.dir * PACK_CALL.spd;
-    } else {
-      // nothing to hunt: at her heel
-      const d = px - cx, ad = Math.abs(d);
-      if (ad > 120) { w.dir = Math.sign(d) || w.dir; want = w.dir * PACK_CALL.spd * (ad > 260 ? 1 : 0.5); }
-    }
+    want = packMind(w, dt, cx, px);
   }
   // turn its picture toward where it is going, in time, and walk like a wolf
   w.faceVis += clamp(w.dir - w.faceVis, -dt * 7, dt * 7);
+  if (w.snapT > 0) w.snapT -= dt;
+  if (w.guardT > 0) w.guardT -= dt;
   const ws = Math.sign(want);
-  if (ws && Math.sign(w.faceVis) !== ws) w.vx *= Math.pow(0.02, dt);
+  // (a back-step goes against its face on purpose: its stride runs backwards — wolves.js)
+  if (w.backing && ws && ws !== w.dir) w.vx += clamp(want - w.vx, -PACK_CALL.spd * 4 * dt, PACK_CALL.spd * 4 * dt);
+  else if (ws && Math.sign(w.faceVis) !== ws) w.vx *= Math.pow(0.02, dt);
+  else if (!ws && w.brake) w.vx *= Math.pow(0.0005, dt);
   else w.vx += clamp(want - w.vx, -PACK_CALL.spd * 6 * dt, PACK_CALL.spd * 6 * dt);
   const col = moveEnt(w, dt);
   w.on = !!col.d;
@@ -145,6 +140,90 @@ function packStep(dt) {
   if (w.stuckT > 0.25 && w.on) { w.vy = -560; w.on = false; w.stuckT = 0; }
   // fell out of the world, or far behind her in another part of the room
   if (G.roomDef && w.y > G.roomDef.h * TILE + 60) { w.x = player.x; w.y = player.y; w.vy = 0; }
+}
+// ---------------------------------------------------------------------------
+// HER WOLF HAS THE PACK'S MIND (owner, 2026-11-26: "this is how it's going to
+// start when I summon my small wolf ... a small wolf comes, helps in attack,
+// attacks a little bit. It's not that strong"). The same dance the wild pack
+// does to her (js/wolfmind.js), aimed at what hunts her: it comes in, stops
+// and LOOKS at its quarry, goes in to a safe distance and holds there low and
+// snarling, darts in once and snaps short of it, and only then closes, coils
+// and bites — and after the bite it backs off, facing the quarry, and dances
+// again. Its bite is the bite it always had; it simply bites less often than
+// it used to (a bite every ~2.5 s, not every ~1.3 s): a helper, not a weapon.
+// ---------------------------------------------------------------------------
+const PACK_MIND = {
+  look: 0.4,             // s it stands and looks at a new quarry
+  ring: 40,              // px past its reach where it holds the quarry (edge to edge)
+  band: 14,
+  stalk: 88,             // px/s: in on the walk (the stalk strip; the gallop starts at 95)
+  back: 80,              // px/s backing off, facing it
+  first: [0.6, 1.0],     // s of display before its first bite on a quarry
+  again: [0.7, 1.2],     // ...and between bites
+  after: 0.45,           // s backing off after a bite
+  feint: [0.2, 0.45],    // s into the dance before it feints
+  dartV: 250, dartT: 0.3, dartStop: 22,
+  backT: 0.38,
+};
+function packMind(w, dt, cx, px) {
+  const P = PACK_MIND;
+  w.backing = false; w.brake = false; w.mindPose = null;
+  const q = packQuarry(w);
+  w.hunt = q ? 1 : 0;
+  if (!q) {
+    w.quarry = null; w.mind = null;
+    // nothing to hunt: at her heel
+    const d = px - cx, ad = Math.abs(d);
+    if (ad > 120) { w.dir = Math.sign(d) || w.dir; return w.dir * PACK_CALL.spd * (ad > 260 ? 1 : 0.5); }
+    return 0;
+  }
+  const b = typeof hurtBoxOf === 'function' ? hurtBoxOf(q) : q;
+  const d = b.x + b.w / 2 - cx, gap = Math.abs(d) - b.w / 2, toward = Math.sign(d) || w.dir;
+  if (w.quarry !== q) {
+    // A NEW QUARRY: it stops and looks before anything else
+    w.quarry = q; w.mind = 'look'; w.lookT = P.look; w.feints = 0; w.dispT = 0;
+    w.dispNeed = rnd(P.first[0], P.first[1]); w.feintCD = rnd(P.feint[0], P.feint[1]); w.feint = null;
+  }
+  w.dir = toward; w.guardFace = toward; w.guardT = 0.12;
+  if (w.mind === 'look') {
+    w.mindPose = 'look'; w.brake = true;
+    if (Math.sign(w.faceVis) === toward && Math.abs(w.vx) < 6) w.lookT -= dt;
+    if (w.lookT <= 0) { w.mind = 'display'; w.mindPose = null; }
+    return 0;
+  }
+  // A QUARRY UP A BANK OR DOWN ONE is not danced at: there is no ground
+  // between them to hold. It goes straight up to it, as it always did.
+  if (w.mind === 'display' && !w.feint && Math.abs(b.y + b.h - (w.y + w.h)) > 36 && w.on !== false) w.mind = 'close';
+  // GOING IN: the dance is done — in to its reach, then the coil (packStep)
+  if (w.mind === 'close') {
+    if (gap < PACK_CALL.reach && w.biteCD <= 0 && w.on !== false && Math.sign(w.faceVis) === toward) {
+      w.coilT = PACK_CALL.coil; w.bit = q; w.vx = 0; w.mind = 'bite'; return 0;
+    }
+    return toward * (gap > PACK_CALL.reach + P.ring + 30 ? PACK_CALL.spd : P.stalk);
+  }
+  // THE FEINT: in at a dart, stop short, snap at the air, back-step out
+  const F = w.feint;
+  if (F) {
+    F.t -= dt;
+    if (F.ph === 'dart') {
+      if (gap <= PACK_CALL.reach + P.dartStop || F.t <= 0) { F.ph = 'snap'; F.t = 0.42; w.brake = true; w.vx *= 0.3; w.snapT = 0.42; if (typeof sfx === 'function') sfx('wolf_snap'); return 0; }
+      return toward * P.dartV;
+    }
+    if (F.ph === 'snap') { w.brake = true; if (F.t <= 0) { F.ph = 'back'; F.t = P.backT; } return 0; }
+    w.backing = true;
+    if (F.t <= 0) { w.feint = null; w.feints++; w.feintCD = 9; }
+    return -toward * P.back;
+  }
+  // THE DANCE: held at its distance, low and snarling
+  if (w.afterT > 0) w.afterT -= dt;
+  const ring = PACK_CALL.reach + P.ring;
+  let want = 0;
+  if (w.afterT > 0 || gap < ring - P.band) { w.backing = true; want = -toward * P.back; }
+  else if (gap > ring + P.band) want = toward * (gap > ring + 60 ? PACK_CALL.spd : P.stalk);
+  else { w.brake = true; if (Math.abs(w.vx) < 12) { w.dispT += dt; w.feintCD -= dt; } }   // the dance is counted AT BAY
+  if (!want && w.feintCD <= 0 && w.on !== false && Math.abs(w.vx) < 12) { w.feint = { ph: 'dart', t: P.dartT }; return 0; }
+  if (w.dispT >= w.dispNeed && (w.feints > 0) && w.biteCD <= 0 && !(w.afterT > 0)) w.mind = 'close';
+  return want;
 }
 function drawPackWolf(c) {
   // a body, solid from the first frame to the last: it runs in and runs off

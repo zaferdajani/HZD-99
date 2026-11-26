@@ -73,6 +73,8 @@ function wolfFrame(e, dt) {
   if ((e.snapT || 0) > 0) e.snapT -= dt;
   if ((e.snarlCD || 0) > 0) e.snarlCD -= dt;
   if ((e.rollT || 0) > 0) e.rollT -= dt;
+  // ...and its mind's: the blow it took, the tell it started (js/wolfmind.js)
+  if (typeof wolfMindFrame === 'function') wolfMindFrame(e, dt);
   // THE LEAPING WOLF NOTICES HER TOO. The hopper's own machine is untouched —
   // it gathers and leaps exactly as it did — but it is the same animal, so it
   // wears the same two pictures: the threat display when she first comes into
@@ -145,6 +147,10 @@ function huntGround(e, want, reach) {
 }
 function wolfHunt(e, dt, px, py, cx, cy) {
   if (!wolfHunter(e) || player.dead) { e.hunt = 0; e.huntHold = false; return 0; }
+  // A WILD PACK HAS A MIND NOW (js/wolfmind.js): it rests, it looks, it calls
+  // the others, it dances, it takes its turn. What is below is the hunt the
+  // Alpha's own summons keep inside his fight.
+  if (typeof wolfMindOn === 'function' && wolfMindOn(e)) return wolfMind(e, dt, px, py, cx, cy);
   const H = WOLF_HUNT, dx = px - cx, ad = Math.abs(dx), dy = Math.abs(py - cy);
   // ...and never through rock: the hunt sees along the open air (js/sight.js)
   const sees = (e.hunt ? (ad < H.lose && dy < H.loseY) : (ad < H.see && dy < H.seeY))

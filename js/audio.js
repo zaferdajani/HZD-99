@@ -499,7 +499,7 @@ function voiceBus(k) {
 // here is unchanged. The numbers are set against the measurement, not by ear:
 // a move is at least as loud as her own hit, a roar is the loudest thing in the room.
 const SFX_VOICE = {
-  alpha_howl: 2.3, alpha_howl_far: 1.3, alpha_bark: 1.2, alpha_fury: 1.0, alpha_furywarn: 1.6,
+  alpha_howl: 2.3, alpha_howl_far: 1.3, alpha_bark: 1.2, alpha_fury: 1.0, alpha_furywarn: 1.6, wolf_bark: 1.1,
   alpha_rendwarn: 2.0, alpha_rend: 1.6, alpha_claw: 5.8, alpha_snap: 3.4, alpha_leap: 8.5,
   alpha_step: 2.4, alpha_quake: 0.9, tell_alpha: 2.2,
   // the sweep: every guardian's wind-up cue and roar had the same fault
@@ -1257,6 +1257,10 @@ const ALPHA_VOICE = {
   alpha_snap: ['al_snap', 0.75, 0.96], wolf_bite: ['al_bite', 0.7, 0.96], alpha_claw: ['al_claw', 0.7, 0.96],
   alpha_leap: ['al_leap', 0.6, 0.96], alpha_rendwarn: ['al_growl', 0.8], alpha_furywarn: ['al_growl', 0.9, 0.9],
   alpha_fury: ['al_fury', 0.95], alpha_rend: ['al_rend', 0.75, 0.96],
+  // THE PACK'S CALL (js/wolfmind.js): the first wolf to see her barks for the
+  // others, and the last of a pack bays — the same recorded bark, pitched up
+  // for an animal half his size, never an oscillator
+  wolf_bark: ['al_bark', 0.62, 1.24],
 };
 function sfxPlain(n) {
   if (!AC || MUTED || (typeof FOE_READ !== 'undefined' && FOE_READ.sil)) return;   // a rim's stencil pass is silent (js/foeread.js)

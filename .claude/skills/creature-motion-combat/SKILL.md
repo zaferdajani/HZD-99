@@ -52,6 +52,13 @@ Use `references/roster.md`. Do not redesign approved art or introduce a species.
 - **Canine:** distinguish measured walk/trot, acceleration, leap and braking.
   Bite/clinch/release owns jaw contact. Do not use one universal phase table for
   all gaits or force a wolf into a cat's flexible-spine cycle.
+  A wolf is never only a gait and a bite: it RESTS with its pack, LOOKS when it
+  notices (and the first one calls the others), DISPLAYS at a safe distance —
+  spaced away from its packmates, feinting short — and only then COMMITS, one at
+  a time (MacNulty, Mech & Smith 2007, J. Mammalogy 88:595 — search, approach,
+  watch, attack; Muro et al. 2011, Behav. Processes 88:192 — close to a safe
+  distance, then move away from the other wolves). `js/wolfmind.js`,
+  `tests/wolf-mind.cjs`; her summoned wolf uses the same mind (`js/packcall.js`).
 - **Avian:** shoulder drives the wing; elbow/wrist folding follows. Separate
   flapping, banking, dive, braking and landing. A pendulum/cable is simulated
   once; no leg gait masquerading as flight.

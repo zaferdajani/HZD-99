@@ -9325,6 +9325,9 @@ class Enemy {
             // meadow scrap under itself takes TELL_SWIPE where the bare gather
             // took TELL_FAST. Same trade the crawler's plate makes — reach
             // bought with warning.
+            // (a pack's leaper never gathers on the beat another wolf's tell
+            // started: js/wolfmind.js — it waits, the tell is the full one)
+            if (this.crouchT <= 0 && !this.gathered && typeof wolfTellOK === 'function' && !wolfTellOK(this)) { this.t = 0.12; break; }
             if (this.crouchT <= 0 && !this.gathered) {
               const rake = this.hasMove('scrapkick');
               // REFRACT'S WIND-UP, and it is the longest warning any of the
@@ -9760,7 +9763,8 @@ class Enemy {
     const sageContact=typeof sageDuelActive==='function'&&sageDuelActive(this);
     // (a MEEK body has lost its sting and nothing else: the opening's first
     // machine, once she is down to two cores — js/game.js tutStep)
-    if (!player.dead && !this.meek && aabb(this, player) && (!sageContact||sageDuelContact(this))) {
+    // (a pack wolf going over her head to her other side is not a blow: js/wolfmind.js)
+    if (!player.dead && !this.meek && !((this.vaultT || 0) > 0) && aabb(this, player) && (!sageContact||sageDuelContact(this))) {
       const cores0 = player.cores;
       player.hurt(DF().edmg,cx,sageContact?'sage.lunge':undefined,this);
       // a wolf's bite that LANDED is held and worried (js/wolfhunt.js)

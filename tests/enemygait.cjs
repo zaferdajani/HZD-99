@@ -75,6 +75,8 @@ const { chromium } = require('playwright');
           if (e.dead) return;
           // the stride's phase is advanced by the pose pick the frame makes when it draws
           if (typeof isCheetah === 'function' && isCheetah(e) && typeof wolfPose === 'function') wolfPose(e, CHEETAH_ART, false);
+          // ...and the pack's, which backs off her on guard too now (js/wolfmind.js)
+          else if (typeof isWolf === 'function' && isWolf(e) && typeof wolfPose === 'function') wolfPose(e, WOLF_ART, false);
           if (typeof e.on !== 'boolean') R.onBool = false;
           const side = e.faceVis >= 0 ? 1 : -1;
           if (side !== S.side) R.turns++;
