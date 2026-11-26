@@ -75,9 +75,9 @@ wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — 
 same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
 start frames), `*_take.jpg` (each take as a contact sheet).
 
-`beasts/alpha2/ride/` is her riding the Alpha (2026-11-26): the Seedance take `ride.mp4` (job 9ad74e1d), its cut spec and report, and a contact sheet. Strips: `characters/alpha/ride_{gallop,leap,rear}.webp`.
+ONLY WHAT IS AGREED AND USED IS KEPT (owner, 2026-11-26: "You should only keep the ones that we agreed on. And using now."): refused, superseded, trial, draft and "before" images and review clips were deleted from this tree on that day (tests/archive-clean.cjs). A refused job is named in text, its picture is not kept. Three air-attack sheets fired that day (jobs c530b47a, 580eab34, 7a43ea5a) copied the wrong swords and were deleted.
 
-`hero/air-refused/` holds three air-attack sheets fired 2026-11-26 (jobs c530b47a single, 580eab34 twin, 7a43ea5a joined) and NOT used: they copied the older in-game swords (a katana, curved twin blades, a gold staff), not the crystal sword. See `weapons/canon.json`.
+`beasts/alpha2/ride/` is her riding the Alpha (2026-11-26): the Seedance take `ride.mp4` (job 9ad74e1d), its cut spec and report, and a contact sheet. Strips: `characters/alpha/ride_{gallop,leap,rear}.webp`.
 
 `weapons/canon.json` registers every weapon-tier art key against the crystal sword plates in `crystal/` (tests/weapon-canon.cjs).
 

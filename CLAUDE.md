@@ -23,10 +23,10 @@ something he has ALREADY corrected, in his words, and how often.
 | 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
 | 5× | **No light, rim, halo, outline or ring round any body; no comic devices over the fight** (white-out, action lines) | "Why still framed with light ?!!!" · "remove the ring" · "more like a comic effect than an actual game effect" | `contrast` `fired-art` `no-rim-baked` `pet-motion` `purify-stage` `no-body-light` `no-comic-fx` |
 | 5× | **A body stands ON the ground** — never in it, never over it | "came out of door glitched and trapped sub terrrain" · "The freed lion now is under the terrain" · "four of its limbs is almost on the air" · "Why floating" | `ring-pads` `gravehorn-ground` `stand-ground` `palm-ledges` |
+| 4× | **All art, video and structures come from Higgsfield; the code is ours; keep only what he agreed on and the game uses** — real sounds, and art he asks for, may come from CC0 libraries, credited | "You are not good at it. You can create the code... but not the art." · "boss attk graphics so basic" · "only keep the ones that we agreed on" | `artbible` `boss-vfx` `archive-clean` · skills `art-bible` `rig-animation` |
 | 3× | **Few words to read — and a picture or film only at the key moments, never one per line** | "minimize all the text that we see" · "When I say pics I meant generated comics" · "Certain key moments require videos or images" | `text-budget` `campaign-ch1` |
 | 3× | **Do not waste the player's time** — and no comic where a film already tells it | "don't waste the player's time" · "When there is a video no need for comic" · "one shot instead of multiple steps" | `campaign-ch1` `panels` `opening-order` `tutor` |
 | 3× | **Do the whole job, and show it as it is: motion as a clip, never a sheet of stills; never recite what is left** | "You are not a kid that I need to keep monitoring." · "a series of duplicate images?" | no harness — check your report before sending it |
-| 3× | **All art, video and structures come from Higgsfield; the code is ours** — real sounds, and art he asks for, may come from CC0 libraries, credited | "You are not good at it. You can create the code... but not the art." · "boss attk graphics so basic" | `artbible` `boss-vfx` · skills `art-bible` `rig-animation` |
 | 3× | **A kingdom is played, not walked through** — two mini-bosses that each give a piece and speak of its agent, its agent right before its sage; the six sages stay | "There is no game in the second kingdom" · "we do not change sages, but we add other bosses" · "It should be right before Nilfang" | `ch2-road` `story-order` `mirejaw` `boss-ladder` |
 | 3× | **An enemy is big enough, visibly alive or down, and comes for her once it sees her** (never through rock) | "This enemy is so small" · "its standing still !!!" · "I don't want this small hero" · "once they see me, they come to me" | `cheetah-hunt` `fired-art` `enemy-sight` |
 | 2× | **Nothing opens or buys by surprise** | "And it happened again... suddenly the window opened" | `shop-ask` |
@@ -78,8 +78,7 @@ you're selling" · "I'm looking for your honest description."
 - **Live:** https://zaferdajani.github.io/HZD-99/ — the only URL to quote.
 - **Story**: `docs/STORY_CANON.md` overrides older text. **Studio**: VibeSolutions,
   one constant `STUDIO` (js/game.js, build.cjs), never an i18n key.
-- **Art**: through Higgsfield; archived in `assets/source/` in the same commit;
-  credited in `assets/CREDITS.md`.
+- **Art**: Higgsfield; what ships is archived in `assets/source/` and credited.
 - **RULE ZERO**: author at full quality, derive every cheaper tier with a tool.
 - **RULE ONE**: web, phone, the app and the desktop shell are ONE build. After
   touching assets, pages or input: `node build.cjs && npm run app:pack`.
@@ -101,10 +100,9 @@ What bites:
   black page. `node --check js/<file>.js`, then build.
 - **Nothing in code may name a file that is not on disk.** After art changes:
   `node tools/lowres.cjs`, `node tools/roomassets.cjs` (served), then build.
-  After a new track or film: `node tools/faststart.cjs` (phones need a plain MP4).
+  New track or film: `node tools/faststart.cjs`.
   After a new plate: `node tools/defringe.cjs --check` (cyan rims).
-- **Never edit sources or rebuild in a tree a harness run is using**; run the
-  suite in batches.
+- **Never edit or rebuild in a tree a harness run is using.**
 
 ## Where the rest is — read it when the work touches it
 
