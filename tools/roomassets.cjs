@@ -136,10 +136,18 @@ const fs = require('fs'), path = require('path');
     // walk still needs the plate when it does.
     const kinds = Object.keys(typeof EKIND === 'object' ? EKIND : {});
     const group = {};
+    // Agent duel plates are selected dynamically from the room's identity
+    // (agTally*, agLeash*, ...), so EKIND cannot close this family for us.
+    // If a measured room asks for any member, preload the complete authored
+    // family. Otherwise the first lunge, purification or struck pose is paid
+    // for on the combat frame that reveals it.
+    const dynamicGroup = {};
     for (const k of Object.keys(MEDIA_SRC.images)) {
       const kind = kinds.find(n => k.length > n.length && k.slice(0, n.length) === n
         && k[n.length] === k[n.length].toUpperCase());
       if (kind) (group[kind] = group[kind] || []).push(k);
+      const dynamic = k.match(/^(ag[A-Z][a-z]+|mj)/);
+      if (dynamic) (dynamicGroup[dynamic[1]] = dynamicGroup[dynamic[1]] || []).push(k);
     }
     // ...and the PROTAGONIST is in every room, so her plates are nobody's
     // room property. heroFidget landed in W2 on one walk and A0 on the next
@@ -151,12 +159,13 @@ const fs = require('fs'), path = require('path');
     // block in — which is the "whether the thing happened" class this whole
     // block exists to keep out of the per-room lists. Measured: three runs of
     // the fixed tool agreed on every key in every room except D6 +/- hzdDeath.
-    const hers = Object.keys(MEDIA_SRC.images).filter(k => /^(hero|swing|trans|hzd)/.test(k));
+    const hers = Object.keys(MEDIA_SRC.images).filter(k => /^(hero|swing|trans|hzd|alRide)/.test(k));
     for (const id in perRoom) {
       const r = perRoom[id];
       if (!r || !r.keys) continue;
       const set = new Set(r.keys.filter(k => hers.indexOf(k) < 0));
       for (const kind in group) if (group[kind].some(k => set.has(k))) for (const k of group[kind]) set.add(k);
+      for (const family in dynamicGroup) if (dynamicGroup[family].some(k => set.has(k))) for (const k of dynamicGroup[family]) set.add(k);
       r.keys = [...set].sort();
     }
     for (const k of hers) if (bootKeys.indexOf(k) < 0) bootKeys.push(k);

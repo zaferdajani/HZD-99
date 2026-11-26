@@ -2,7 +2,8 @@
 // THE INFECTION'S EYES.
 //
 // Every hostile machine carries the virus, and the virus looks out through its
-// eyes: red in the rank and file, purple in the guardians and the Alpha. A lit
+// eyes: red in infected rank and file, purple in infected guardians. Clean kin
+// such as the Alpha never receive infection optics. A lit
 // eye that MOVES leaves a thread of smoke behind it the way a burning incense
 // stick does when it is carried — a bright narrow line at the tip, then soft
 // wisps that curl, rise a little and thin out to nothing.
@@ -84,14 +85,16 @@ function infEyeCap() {
 
 // WHO IS INFECTED, AND WITH WHICH COLOUR. null = not infected now: dead,
 // purified, tamed, calmed, friendly, or held by the Song for the moment. The
-// guardians, the Alpha and the sage duelist carry the purple; everything else
-// the red.
+// infected guardians and the sage duelist carry purple; infected rank-and-file
+// machines carry red. Clean rivals, territorial packs and Eye-built instruments
+// keep their authored optics and never emit infection smoke.
+const INF_EYE_CLEAN_KINDS = new Set(['alpha', 'horn', 'prism', 'chime', 'carrier', 'moth', 'lattice', 'lens']);
 function infEyeClass(e) {
   if (!e || e.dead || e.removed) return null;
   if (e.purified || e.tame || e.calm || e.friendly || e.rescued || e.yielded || e.disabled) return null;
   if ((e.pureM || 0) >= 1) return null;
   if ((e.hypnoT || 0) > 0) return null;
-  if (e.kind === 'alpha' || e.isAlpha) return (typeof alphaFreed === 'function' && alphaFreed()) ? null : 'purple';
+  if (INF_EYE_CLEAN_KINDS.has(e.kind) || e.isAlpha) return null;
   // a tamed pack is every wolf, not one
   if (typeof isWolf === 'function' && (isWolf(e) || (typeof isCheetah === 'function' && isCheetah(e)))
       && typeof packTamed === 'function' && packTamed() && !(typeof isCheetah === 'function' && isCheetah(e))) return null;

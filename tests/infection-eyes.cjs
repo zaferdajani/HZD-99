@@ -2,8 +2,8 @@
 //
 // The owner's brief, rule by rule, each one a number here:
 //
-//   1. Infected ordinary machines burn RED at the eye; guardians (the Alpha
-//      too) burn PURPLE.
+//   1. Infected ordinary machines burn RED at the eye; infected guardians
+//      burn PURPLE. Clean kin such as the Alpha never burn.
 //   2. A moving eye leaves incense smoke: born at the eye, rising, fading.
 //   3. The smoke is born AT THE EYE — the anchor the art reports this frame —
 //      not at the body's centre.
@@ -142,7 +142,7 @@ const { chromium } = require('playwright');
     loadRoom('A2');
     out.room = { preRoom, after: infEyeStats().live };
 
-    // ---- 1b: a guardian burns purple: the Alpha, then NULLFANG ------------------
+    // ---- 1b: the Alpha is clean kin; infected NULLFANG burns purple ------------
     const a = __stage('A10', () => G.boss);
     await a.ensureArt();
     a.body.st = 'prowl';
@@ -196,7 +196,7 @@ const { chromium } = require('playwright');
   check('a teleport clears the trail', R.tp.preTp > 0 && R.tp.after < 4, JSON.stringify(R.tp));
   check('removal clears the trail', R.rm.preRm > 0 && R.rm.after === 0, JSON.stringify(R.rm));
   check('a room change clears everything', R.room.preRoom > 0 && R.room.after === 0, JSON.stringify(R.room));
-  check('the Alpha burns purple', R.alpha.purple > 5 && R.alpha.red === 0 && R.alpha.eye > 0, JSON.stringify(R.alpha));
+  check('the Alpha is clean kin and never receives infection optics', R.alpha.purple === 0 && R.alpha.red === 0 && R.alpha.eye === 0, JSON.stringify(R.alpha));
   check('NULLFANG burns purple', R.lion.purple > 5 && R.lion.red === 0 && R.lion.eye > 0, JSON.stringify(R.lion));
   check('...and once freed, the lion smokes no more', R.lionPure === 0, R.lionPure + ' left');
   check('on a phone the smoke is bounded', R.cap.live <= R.cap.cap && R.cap.cap <= 100, JSON.stringify(R.cap));
