@@ -25,6 +25,7 @@
 const GRASS_ART = { grass: 'grassMeadow', frond: 'grassFrond' };
 const GRASS_H0 = 24;                // the card's nominal drawn height, px (its source scale)
 const GRASS_CROP = 0.8;             // the part of the card's height that is drawn (from its tips)
+const GRASS_ROOT = 0.45;            // the stems below the card's own foot, as a share of its height (grassCard): they lie in the soil
 const GRASS_OVER = 1.8;             // each column is drawn this many columns wide, over its neighbour
 const GRASS = { room: null, cols: [], key: null, collect: null, t: 0, last: 0, ready: false, wait: null };
 
@@ -33,6 +34,46 @@ function grassImg(key) {
   if (typeof mediaFetch === 'function') mediaFetch(key);
   const im = typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG[key] : null;
   return im && im.naturalWidth ? im : null;
+}
+// THE FOOT GOES INTO THE SOIL (owner, 2026-11-26: "the grass needs adjustment to cover the terrain
+// without showing edges like you do right now"). The card ends in a dense mat of stems, and drawn
+// as it was that mat stopped on a line: a bright band with a ruled lower edge lying on the lit crest.
+// So the card is prepared ONCE per picture into a copy that goes on below its own foot — its mat of
+// stems drawn on down into the ground (GRASS_ROOT of its height) — darkening toward the soil and
+// thinning to nothing as it goes: the base of the turf is the ground showing through it, not the
+// bottom of a sticker. One canvas per kind, made when the picture lands; the frame draws it with the
+// same one drawImage a column always cost.
+const GRASS_FADE = { from: 0.55, dark: 0.6, darkFrom: 0.5, mat: [0.55, 0.8], soil: [14, 22, 16] };
+const GRASS_CARD = {};
+function grassCard(key, im) {
+  const had = GRASS_CARD[key];
+  if (had && had._src === im) return had;
+  const iw = im.naturalWidth, ih = Math.round(im.naturalHeight * GRASS_CROP), H = Math.round(ih * (1 + GRASS_ROOT));
+  let cv;
+  try {
+    const F = GRASS_FADE, soil = F.soil.join(',');
+    cv = document.createElement('canvas'); cv.width = iw; cv.height = H;
+    const x = cv.getContext('2d');
+    x.drawImage(im, 0, 0, iw, ih, 0, 0, iw, ih);
+    // the stems go on: the card's own mat, drawn on down under its foot (under the card, so the
+    // card's blades stay exactly what they were)
+    x.globalCompositeOperation = 'destination-over';
+    const m0 = Math.round(ih * F.mat[0]), m1 = Math.round(ih * F.mat[1]), d0 = Math.round(ih * 0.72);
+    x.drawImage(im, 0, m0, iw, m1 - m0, 0, d0, iw, H - d0);
+    // darker toward the soil, keeping every blade's alpha
+    x.globalCompositeOperation = 'source-atop';
+    const gd = x.createLinearGradient(0, ih * F.darkFrom, 0, H);
+    gd.addColorStop(0, 'rgba(' + soil + ',0)'); gd.addColorStop(1, 'rgba(' + soil + ',' + F.dark + ')');
+    x.fillStyle = gd; x.fillRect(0, 0, iw, H);
+    // and thinning to nothing at the root, on a smoothstep
+    x.globalCompositeOperation = 'destination-in';
+    const ga = x.createLinearGradient(0, ih * F.from, 0, H);
+    for (let k = 0; k <= 8; k++) { const t = k / 8, s = t * t * (3 - 2 * t); ga.addColorStop(t, 'rgba(0,0,0,' + (1 - s).toFixed(3) + ')'); }
+    x.fillStyle = ga; x.fillRect(0, 0, iw, H);
+  } catch (e) { return im; }
+  cv._src = im; cv.naturalWidth = iw; cv.naturalHeight = im.naturalHeight; cv._crop = H;
+  GRASS_CARD[key] = cv;
+  return cv;
 }
 function grassColW() { return (typeof QUAL !== 'undefined' && !QUAL.glow) ? 14 : 9; }
 
@@ -48,14 +89,16 @@ function grassTile(x, X, Y, tx, ty, kind, groundY) {
     const cx = X + j * w, mid = cx + w / 2;
     // ONE CONTINUOUS HEIGHT along the ground (owner, 2026-11-25: "It shouldn't look like squares
     // stuck together. It should be continuous without edges"): a slow swell only, so neighbouring
-    // columns differ by a fraction of a pixel; the card's own ragged top is the variety
-    const h = GRASS_H0 * (0.82 + 0.1 * Math.sin(mid * 0.0083 + ty * 0.7) + 0.06 * Math.sin(mid * 0.0031 + 2.1));
+    // columns differ by a fraction of a pixel; the card's own ragged top is the variety. (Along x
+    // alone: it used to take the tile's row too, and the swell jumped at every step of the ground.)
+    const h = GRASS_H0 * (0.82 + 0.1 * Math.sin(mid * 0.0083 + 0.7) + 0.06 * Math.sin(mid * 0.0031 + 2.1));
     // its foot follows the ground's own slope between its two edges, so neighbouring columns join
     // along the drawn coastline instead of standing as a staircase of flat-bottomed blocks
     const gA = groundY(cx), gB = groundY(cx + w);
-    const col = { x: cx, y: gA + 7, s: (gB - gA) / w, w, h, a: 0, v: 0, e: 1, sq: 0 };
+    // (y is the card's foot, as it always was; its stems run on `r` further down into the ground)
+    const col = { x: cx, y: gA + 7, s: (gB - gA) / w, w, h, r: h * GRASS_ROOT, a: 0, v: 0, e: 1, sq: 0 };
     if (GRASS.collect) GRASS.collect.push(col);
-    else grassDrawCol(x, im, col, 0, null);
+    else grassDrawCol(x, grassCard(key, im), col, 0, null);
   }
   GRASS.key = key;
   return true;
@@ -63,15 +106,18 @@ function grassTile(x, X, Y, tx, ty, kind, groundY) {
 
 // a column, bent by `a` (radians, + leans right), rooted at (col.x, col.y)
 function grassDrawCol(c, im, col, a, M) {
-  // (the card's lowest fifth is a solid mat of stems: it is left out, and the root sinks into the
-  // ground instead, so what stands above the coastline is blades, not a carpet edge)
-  const iw = im.naturalWidth, ih = im.naturalHeight * GRASS_CROP, k = im.naturalHeight / GRASS_H0;
+  // (the card's lowest fifth is a solid mat of stems: it is left out — and in its place, under the
+  // foot, the prepared card's stems go on into the ground, thinning out: grassCard)
+  const iw = im.naturalWidth, ih = im._crop || im.naturalHeight * GRASS_CROP, k = im.naturalHeight / GRASS_H0;
   const sw = col.w * k;
   let sx = (col.x * k) % iw; if (sx < 0) sx += iw;
   // a bent blade is shorter than a standing one; one trodden on is pressed down; the last columns
   // of a run taper, so a verge ends in a few low blades and not in a cut
   const e = col.e == null ? 1 : col.e;
   const h = col.h * (1 - Math.min(0.25, a * a * 0.5)) * (1 - (col.sq || 0)) * (0.3 + 0.7 * e);
+  // ...and below the foot its stems go on into the soil (grassCard), the same length however it
+  // bends: it bends from the foot, as it did, and what is under the surface does not stand up
+  const r = im._crop ? (col.r || 0) : 0, D = h + r;
   const sk = -Math.tan(a);                                // x' = x + sk*y, y up is negative
   const sl = col.s || 0;                                  // x' = x + sk*y, y' = y + sl*x
   if (M) c.setTransform(M.a + M.c * sl, M.b + M.d * sl, M.a * sk + M.c, M.b * sk + M.d, M.a * col.x + M.c * col.y + M.e, M.b * col.x + M.d * col.y + M.f);
@@ -82,11 +128,11 @@ function grassDrawCol(c, im, col, a, M) {
   // crack between two columns leaning differently.
   const ov = e < 1 ? 1 : GRASS_OVER, dw = col.w * ov, sw2 = sw * ov;
   if (e < 1) c.globalAlpha = 0.45 + 0.55 * e;
-  if (sx + sw2 <= iw) c.drawImage(im, sx, 0, sw2, ih, 0, -h, dw, h);
+  if (sx + sw2 <= iw) c.drawImage(im, sx, 0, sw2, ih, 0, -h, dw, D);
   else {
     const s1 = iw - sx, d1 = dw * s1 / sw2;
-    c.drawImage(im, sx, 0, s1, ih, 0, -h, d1, h);
-    c.drawImage(im, 0, 0, sw2 - s1, ih, d1, -h, dw - d1, h);
+    c.drawImage(im, sx, 0, s1, ih, 0, -h, d1, D);
+    c.drawImage(im, 0, 0, sw2 - s1, ih, d1, -h, dw - d1, D);
   }
   if (e < 1) c.globalAlpha = 1;
   if (!M) c.restore();
@@ -131,7 +177,7 @@ const GRASS_BODIES = [];
 
 function drawGrass(c) {
   if (G.fringeProbe || !GRASS.ready || GRASS.room !== G.roomId) return;
-  const im = grassImg(GRASS.key); if (!im) return;
+  const im0 = grassImg(GRASS.key); if (!im0) return; const im = grassCard(GRASS.key, im0);
   const now = performance.now() / 1000;
   const dt = Math.min(0.05, Math.max(0, now - (GRASS.last || now))); GRASS.last = now;
   GRASS.t += dt;
