@@ -179,6 +179,11 @@ keys, so a part can be traced from the archive to the tool table to the game.
 
 If it is not in `assets/source/`, it did not happen.
 
+
+**Only what is agreed and used is kept** (owner, 2026-11-26: "You should only keep the ones that we
+agreed on. And using now."). A refused, superseded or trial take is deleted, never archived: name its job id
+in text if the reason matters (tests/archive-clean.cjs).
+
 ## 6. Licensing, non-negotiable
 
 Every file under `assets/` traces to a line in `assets/CREDITS.md`. Generated art
