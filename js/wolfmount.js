@@ -104,6 +104,13 @@ function wmSeatY(p) {
   const W = G.mount.w;
   return W.y + W.h - W.h * ALPHA_PX * RIDE_ART.gallop.ch * 0.92;
 }
+// the top of the drawn ride (wolf and rider, one image), for the camera's band (engine.js updateCam);
+// null when she is not riding
+function wmDrawTop(p) {
+  if (!wmRiding() || p !== player) return null;
+  const W = G.mount.w, H = G.mount._drewH || W.h * ALPHA_PX * RIDE_ART.leap.ch;
+  return W.y + W.h - H;
+}
 // THE HOWL: a recorded wolf; the machines near her stagger, a guardian only flinches
 function wmHowl(p) {
   const H = WOLF_MOUNT.howl, M = G.mount;

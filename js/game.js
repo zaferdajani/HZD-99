@@ -4116,7 +4116,11 @@ function updateCrest() {
 //     off it is.
 // ---------------------------------------------------------------------------
 const SHOP_PICK_ORDER = ['sprint', 'siphon', 'claws', 'over', 'plate'];
-const SHOP_ROW = { y0: 136, step: 41 };   // ten rows since THE PACK, LONGER (2026-11-25), the last at 505 — the shelf's rows: the drawing and the touch layer read the same two numbers
+// the shelf's rows: the drawing and the touch layer read the same two numbers. TEN ROWS since the
+// pack's rung (2026-11-25): at 41 apart the last row's line sat on the key hint at 512 (reviewed in
+// the pack-ladder clip, 2026-11-26) — at 37 from 132 the last row's lines end at 484, each row's
+// text clears its neighbours', and tests/shop-ask.cjs measures every drawn line against the others
+const SHOP_ROW = { y0: 132, step: 37, h: 35 };
 function shopCost(it) { return Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)); }
 function shopPick() {
   if (!G.save) return null;
@@ -16259,7 +16263,9 @@ function drawWorldFrame() {
   if (G.boss && !(typeof nfPetFront === 'function' && nfPetFront(G.boss))) foeDraw(c, G.boss);
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
-  if (typeof drawPackWolf === 'function') drawPackWolf(c);
+  // (her called wolf or Alpha is drawn with HER, after the grade — below, before her body: under the
+  //  zone wash the pack's graphite wolf sank into the dark ground and the turret it bit was drawn over
+  //  it; owner's reviewer, 2026-11-26: "I see only her clawing; no wolf on screen")
   if (typeof drawWolfMountPrompt === 'function') drawWolfMountPrompt(c);   // ▲ Ride, beside her called wolf
   for (const p of G.projs) p.draw(c);
   if (typeof drawCrescents === 'function') drawCrescents(c);      // the single blade's charged cut (js/entities.js)
@@ -16501,6 +16507,10 @@ function drawWorldFrame() {
   // her, at full strength like her — objects in the fight, not painted distance
   if (typeof nfCoverDrawFront === 'function') {
     c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); nfCoverDrawFront(c); c.restore();
+  }
+  // HER CALLED WOLF / ALPHA: in her own layer, in front of what it bites, never under the grade
+  if (G.packWolf && typeof drawPackWolf === 'function') {
+    c.save(); c.translate(-Math.round(camSX()), -Math.round(camSY())); drawPackWolf(c); c.restore();
   }
   if (player && !G.recharge && !(G.gateWalk && G.gateWalk.align >= 1)) {
     c.save();
@@ -19961,11 +19971,11 @@ function drawShop() {
     const y = SHOP_ROW.y0 + i * SHOP_ROW.step;
     if (pk && pk.it === it) {
       // RATCHET'S PICK: a gold bar down the row's edge and its tag, said in words
-      c.fillStyle = 'rgba(255,215,106,0.10)'; rr(c, 160, y - 19, 640, 40, 8); c.fill();
-      c.fillStyle = '#ffd76a'; c.fillRect(LANG === 'ar' ? 796 : 160, y - 19, 4, 40);
-      ftxt('◆ ' + t('shop_pick'), 480, y - 13, 10, '#ffd76a', 'center', null, '700');
+      c.fillStyle = 'rgba(255,215,106,0.10)'; rr(c, 160, y - 17, 640, SHOP_ROW.h, 8); c.fill();
+      c.fillStyle = '#ffd76a'; c.fillRect(LANG === 'ar' ? 796 : 160, y - 17, 4, SHOP_ROW.h);
+      ftxt('◆ ' + t('shop_pick'), 480, y - 11, 10, '#ffd76a', 'center', null, '700');
     }
-    if (sel) { c.fillStyle = 'rgba(255,215,106,0.08)'; rr(c, 160, y - 19, 640, 40, 8); c.fill(); }
+    if (sel) { c.fillStyle = 'rgba(255,215,106,0.08)'; rr(c, 160, y - 17, 640, SHOP_ROW.h, 8); c.fill(); }
     let name = it.type === 'crest' ? t('c_' + it.id) : t('s_' + it.id);
     let desc = it.type === 'crest' ? t('c_' + it.id + 'd') : t('s_' + it.id + 'd');
     // a seal that changes how she fights names its style on the shelf (C1)

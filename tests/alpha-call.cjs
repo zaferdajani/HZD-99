@@ -9,6 +9,7 @@
 //   F  he has a stay and the call a cooldown: calling again while he is out does nothing; his time
 //      up, he lopes off and is gone
 //   G  with THE ALPHA'S HOWL he also howls: the machines near him stagger
+//   I  both the small wolf and the Alpha are seen on screen beside her, in front of what they bite
 //   H  no page errors
 const { chromium } = require('playwright');
 const PORT = process.env.TEST_PORT || 8220;
@@ -84,6 +85,38 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     let stun = 0; step(70, () => { player.iT = 1; stun = Math.max(stun, n1.howlT || 0); });
     window.sfx = sk;
     out.G = { howled: heard.includes('alpha_howl'), stun: +stun.toFixed(2) };
+    // ---- I: SEEN — the small wolf and the Alpha are on the screen beside her, in front of what they
+    // bite, not washed into the ground (reviewed 2026-11-26: "I see only her clawing; no wolf on
+    // screen"). The finished frame with and without the called body: inside its box most pixels change.
+    const seen = async (lv) => {
+      setRoom('A1', 14); G.save.packLv = lv; G.save.flags.alpha = 1;
+      const foe = new Enemy('turret', player.x + 200, 0); const g = groundColumnAt(foe.x + foe.w / 2); if (g) foe.y = Math.min.apply(null, g) - foe.h; foe.hp = foe.maxHp = 900; foe.update = function () {}; G.enemies.push(foe);
+      player.armCD = 0; packCall(player);
+      let best = null;
+      for (let k = 0; k < 6; k++) {
+        step(20, () => { player.iT = 1; });
+        const w = G.packWolf; if (!w) break;
+        const sx0 = worldScreenX(w.x - (w.alpha ? 40 : 14)), sx1 = worldScreenX(w.x + w.w + (w.alpha ? 40 : 14)), sy0 = worldScreenY(w.y + w.h - (w.alpha ? 110 : 50)), sy1 = worldScreenY(w.y + w.h);
+        const X0 = Math.max(0, Math.round(sx0)), X1 = Math.min(960, Math.round(sx1)), Y0 = Math.max(0, Math.round(sy0)), Y1 = Math.min(540, Math.round(sy1));
+        if (X1 - X0 < 20 || Y1 - Y0 < 20) continue;
+        const gc = document.getElementById('cv');
+        const grab = () => { draw(T); return gc.getContext('2d').getImageData(0, 0, gc.width, gc.height); };
+        const kx = gc.width / 960, ky = gc.height / 540;
+        const A = grab(), A2 = grab();
+        const keepD = window.drawPackWolf; window.drawPackWolf = function () {}; const B = grab(); window.drawPackWolf = keepD;
+        let diff = 0, noise = 0, n = 0;
+        for (let y = Math.round(Y0 * ky); y < Y1 * ky; y += 2) for (let x = Math.round(X0 * kx); x < X1 * kx; x += 2) {
+          const i = (y * gc.width + x) * 4; n++;
+          const d = Math.abs(A.data[i] - B.data[i]) + Math.abs(A.data[i + 1] - B.data[i + 1]) + Math.abs(A.data[i + 2] - B.data[i + 2]);
+          const e = Math.abs(A.data[i] - A2.data[i]) + Math.abs(A.data[i + 1] - A2.data[i + 1]) + Math.abs(A.data[i + 2] - A2.data[i + 2]);
+          if (d > 60) diff++; if (e > 60) noise++;
+        }
+        const r = { frac: +(diff / n).toFixed(2), noise: +(noise / n).toFixed(2), box: [X0, Y0, X1, Y1], alpha: !!w.alpha };
+        if (!best || r.frac > best.frac) best = r;
+      }
+      return best;
+    };
+    out.I = { small: await seen(1), alpha: await seen(3) };
     return out;
   });
   const A = R.A, B = R.B;
@@ -98,6 +131,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('F  he has a stay and the call a cooldown longer than it: calling again while he is out does nothing; his time up, he lopes off and is gone',
     R.F.againWhileOut === false && R.F.cd >= R.F.stay && R.F.cdK > R.F.stay && R.F.goneAfter > 0, R.F);
   check('G  with THE ALPHA\'S HOWL he howls (recorded) and the machine near him staggers', R.G.howled && R.G.stun >= 0.8, R.G);
+  check('I  the called small wolf and the Alpha are SEEN: on screen beside her, in front of what they bite (the frame without them differs over much of their box)',
+    R.I.small && R.I.alpha && !R.I.small.alpha && R.I.alpha.alpha && R.I.small.frac >= 0.15 && R.I.alpha.frac >= 0.15 && R.I.small.noise < 0.05 && R.I.alpha.noise < 0.05, R.I);
   check('H  no page errors', errs.length === 0, errs.slice(0, 3));
   await browser.close();
   if (bad) { console.log('\nFAILED: ' + bad); process.exit(1); }

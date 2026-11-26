@@ -5,10 +5,11 @@
 //   A  it opens from the pause menu (its own row) and closes back to it
 //   B  it opens from play by its own key (O) and closes with it
 //   C  on a phone, opened UPRIGHT first: the rotate screen; turned, the game; the tree's own corner
-//      button (once the pack is hers) opens it with a tap, and its ✕ closes it
+//      button (once the pack is hers) opens it with a tap, and ONE ✕ closes it — the touch layer's
+//      (the tree draws no second close button inside its frame)
 //   D  every node — the creature in its socket, its name and its state — is on the screen in a
 //      960x540 frame and inside the game's frame on the phone
-//   E  nothing on it overlaps (sockets, labels, the card, the ✕, the hint), in every language
+//   E  nothing on it overlaps (sockets, labels, the card, the hint), in every language
 //   F  every rung says what it is now in few words: hers; for sale (price and WHERE); or shut —
 //      and then where it is got and what comes first; the ride names Patch-7 and the Foundry
 //   G  nothing is bought on it: OK on a rung for sale changes neither her shards nor her ladder
@@ -119,15 +120,17 @@ const SETUP = async (lv) => {
     return { frame: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)], bad };
   });
   await ph.screenshot({ path: process.env.PT_SHOT || '/tmp/pack-tree-phone.png' });
-  const back = await ph.evaluate(() => { const B = ptLayout().back, r = cv.getBoundingClientRect(); return { x: r.left + B.x * r.width / 960, y: r.top + B.y * r.height / 540 }; });
+  // ONE close control: the touch layer's own ✕ (BACK), top of the left gutter; the tree draws none of its own
+  C.treeCloses = await ph.evaluate(() => { const keep = window.ftxt; let n = 0; window.ftxt = function (str) { if (/✕|×/.test(String(str))) n++; return keep.apply(this, arguments); }; try { drawTree(); } finally { window.ftxt = keep; } return n; });
+  const back = await ph.evaluate(() => ({ x: tLayout().lgx, y: 28 }));
   await ph.touchscreen.tap(back.x, back.y); await ph.waitForTimeout(400);
   C.afterClose = await ph.evaluate(() => G.state);
   await ctx.close();
 
   check('A  it opens from the pause menu (its own row) and closes back to it', R.A.row >= 0 && R.A.opened === 'TREE' && R.A.back === 'PAUSE', R.A);
   check('B  it opens from play by its own key (O) and closes with it', R.B.opened === 'TREE' && R.B.back === 'PLAY', R.B);
-  check('C  on a phone opened upright: the rotate screen; turned, the tree\'s corner button opens it with a tap and its ✕ closes it',
-    up.portrait === true && up.touch && C.portrait === false && C.button && C.button.shown && C.afterTap === 'TREE' && C.afterClose === 'PLAY', Object.assign({ up }, C, { nodes: undefined }));
+  check('C  on a phone opened upright: the rotate screen; turned, the tree\'s corner button opens it with a tap; ONE ✕ (the touch layer\'s) closes it, the tree draws none of its own',
+    up.portrait === true && up.touch && C.portrait === false && C.button && C.button.shown && C.afterTap === 'TREE' && C.afterClose === 'PLAY' && C.treeCloses === 0, Object.assign({ up }, C, { nodes: undefined }));
   check('D  every node, its name and its state are on the screen at 960x540 (every language, every rung) and inside the game frame on the phone', R.D.length === 0 && C.nodes.bad.length === 0, { desk: R.D.slice(0, 6), phone: C.nodes });
   check('E  nothing on it overlaps, in every language and at every rung', R.E.length === 0, R.E.slice(0, 6));
   const F = R.F;

@@ -293,7 +293,6 @@ function ptLayout() {
     nodes: T.nodes.map(n => ({ n, x: PT_POS[n.id][0], y: PT_POS[n.id][1] })),
     card: { x: 648, y: 334, w: 268, h: 140 },
     frame: { x: 30, y: 8, w: 900, h: 524 },
-    back: { x: 66, y: 44, r: 22 },
   };
 }
 function ptOpen(from) {
@@ -403,11 +402,8 @@ function drawTree() {
   wrapText(t('pk_n_' + cur.id + 'd'), C.w - 34, 13).slice(0, 3).forEach((ln, i) => ftxt(ln, C.x + C.w / 2, C.y + 54 + i * 18, 13, '#b8cad8', 'center', null, '600'));
   if (cs.why) ftxt(cs.why, C.x + C.w / 2, C.y + C.h - 38, 12, '#9aa8b4', 'center', null, '600');
   ftxt(cs.line, C.x + C.w / 2, C.y + C.h - 20, 12, cs.k === 'own' ? '#7fe0cf' : cs.k === 'buy' ? '#ffd98a' : '#9aa8b4', 'center', null, '700');
-  // the way out, for a thumb
-  const B = L.back;
-  c.save(); c.beginPath(); c.arc(B.x, B.y, B.r, 0, 7); c.fillStyle = 'rgba(10,18,24,0.85)'; c.fill();
-  c.strokeStyle = '#46d6c2'; c.lineWidth = 1.5; c.stroke(); c.restore();
-  ftxt('✕', B.x, B.y + 1, 16, '#cfe8e4', 'center');
+  // (the way out is the menu's own: Esc / O on a keyboard, the touch layer's ✕ on a phone —
+  //  ONE close control, never a second one drawn inside the frame)
   ftxt(t('pk_hint'), 480, 48, 12, '#7d93a8', 'center');
 }
 // every box the screen draws (the harness checks none overlaps and all are on the screen)
@@ -423,15 +419,13 @@ function ptBoxes() {
     out.push({ id: q.n.id + ':label', x: q.x - w / 2, y: ny - 9, w, h: lines[lines.length - 1][2] + 7 - (ny - 9) });
   }
   out.push(Object.assign({ id: 'card' }, L.card));
-  out.push({ id: 'back', x: L.back.x - L.back.r, y: L.back.y - L.back.r, w: L.back.r * 2, h: L.back.r * 2 });
   const hw = wOf(t('pk_hint'), 12);
   out.push({ id: 'hint', x: 480 - hw / 2, y: 40, w: hw, h: 16 });
   return out;
 }
-// a tap: a node selects (a second tap on it says where), the ✕ closes
+// a tap: a node selects (a second tap on it says where); the touch layer's ✕ closes (BACK)
 function ptTap(x, y) {
-  const L = ptLayout(), B = L.back;
-  if (Math.hypot(x - B.x, y - B.y) < B.r + 12) { ptClose(); return true; }
+  const L = ptLayout();
   for (let i = 0; i < L.nodes.length; i++) {
     const q = L.nodes[i];
     if (Math.abs(x - q.x) < PT_HEX.w / 2 + 6 && Math.abs(y - q.y) < PT_HEX.h / 2 + 6) {

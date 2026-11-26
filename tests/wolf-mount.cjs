@@ -13,7 +13,8 @@
 //   D  beside the called Alpha the interact key puts her on; the picture is ONE filmed ride image
 //      (a RIDE_ART strip), her own body is not drawn and neither is his; the ridden Alpha is the
 //      size of the called Alpha (his box, and the wolf drawn as long); he stands on the ground
-//   E  riding she runs faster and leaps higher than on foot
+//   E  riding she runs faster and leaps higher than on foot; the leap keeps the whole drawn ride
+//      (wolf and rider) inside the frame, apex included
 //   F  the scratch hits what is in the paw's reach in front, not what is behind
 //   G  the dash is a lunge: what it runs through is hurt, and it leaves no light
 //   H  the howl (a recorded wolf) staggers the near machines briefly, not the far; a guardian only
@@ -125,6 +126,27 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     setRoom('A1', 20); callNear(); press('KeyE'); step(3, () => { player.iT = 1; });
     const rideRun = runFor(), rideJump = jumpH();
     out.E = { footRun, rideRun, footJump, rideJump, riding: wmRiding() };
+    // THE LEAP STAYS IN THE FRAME: the drawn ride (wolf and rider) is inside the canvas at every
+    // frame of a full leap — the apex above all — in the meadow (A1) and on the hub's hill (A2)
+    const inFrame = (room, tx) => {
+      setRoom(room, tx); callNear(); press('KeyE'); step(3, () => { player.iT = 1; });
+      if (!wmRiding()) return { riding: false };
+      step(20, () => { player.iT = 1; });
+      let worst = 1e9, apex = null, top = 1e9;
+      press('Space');
+      step(70, (i) => {
+        keys.Space = i < 45 ? 1 : 0; player.iT = 1;
+        const W = G.mount.w, H = G.mount._drewH || 0; if (!H) return;
+        const dw = H * 372 / 282;
+        const y0 = worldScreenY(wmDrawTop(player)), y1 = worldScreenY(W.y + W.h), x0 = worldScreenX(W.x + W.w / 2 - dw / 2), x1 = worldScreenX(W.x + W.w / 2 + dw / 2);
+        const m = Math.min(y0, 540 - y1, x0 + dw * 0.3, 960 - x1 + dw * 0.3);
+        if (m < worst) worst = m;
+        if (player.y < top) { top = player.y; apex = { y0: Math.round(y0), y1: Math.round(y1) }; }
+      });
+      keys.Space = 0; step(40, () => { player.iT = 1; });
+      return { riding: true, worst: Math.round(worst), apex };
+    };
+    out.E.frameA1 = inFrame('A1', 20); out.E.frameA2 = inFrame('A2', 30);
     // ---- F: the scratch
     setRoom('A2', 30); player.face = 1; callNear(); press('KeyE'); step(3, () => { player.iT = 1; });
     player.face = 1; step(2, () => { player.iT = 1; });
@@ -183,6 +205,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('D  beside him the interact key puts her on; ONE filmed ride image is drawn (not her body, not his), the ridden Alpha is the called Alpha\'s size, on the ground',
     D.riding && D.onlyRide && D.wolfDrawnToo === 0 && D.box && D.box[0] === D.box[2] && D.box[1] === D.box[3] && D.sameSize && D.grounded, D);
   check('E  riding she runs faster and leaps higher', R.E.riding && R.E.rideRun > R.E.footRun * 1.25 && R.E.rideJump > R.E.footJump * 1.15, R.E);
+  check('E2 the leap stays in the frame: the drawn ride (his back, her head) is inside the canvas through the whole leap, apex included',
+    R.E.frameA1.riding && R.E.frameA2.riding && R.E.frameA1.worst >= 0 && R.E.frameA2.worst >= 0, { A1: R.E.frameA1, A2: R.E.frameA2 });
   check('F  the scratch hits what is in the paw\'s reach in front, not what is behind', R.F.riding && R.F.front > 0 && R.F.behind === 0, R.F);
   check('G  the dash is a lunge: what it runs through is hurt, and it leaves no light (no echoes of her, no wake, no ring)', R.G.hit > 0 && R.G.echoes === 0 && R.G.wake === 0 && R.G.ripples === 0, R.G);
   check('H  the howl (a recorded wolf) staggers the near machines, briefly, not the far; a guardian only flinches; no ring', R.H.howled && R.H.recorded && R.H.nearStun >= 0.8 && R.H.farStun === 0 && R.H.after <= 0 && R.H.boss > 0 && R.H.boss < 1 && R.H.rings <= 0, R.H);
