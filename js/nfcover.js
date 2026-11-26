@@ -208,7 +208,7 @@ function nfCoverDrawOpen(c, im, cl, b) {
 // the meadow's own recordings, scraped fast and layered: a clump of metal leaves shaking
 function nfCoverRustleSound(v) {
   if (typeof playBuf !== 'function') return;
-  playBuf(Math.random() < 0.5 ? 'hz_stepgrass1' : 'hz_stepgrass2', 0.42 * v, 0.85 + Math.random() * 0.5);
+  playBuf(nfcRnd(0, 1) < 0.5 ? 'hz_stepgrass1' : 'hz_stepgrass2', 0.42 * v, nfcRnd(0.85, 1.35));
 }
 // ---- the springs, stepped on the frame clock ---------------------------------------------
 function nfCoverStep(dt) {
@@ -227,13 +227,13 @@ function nfCoverStep(dt) {
     const wind = 0.6 * Math.sin(t * 0.7 + cl.ph) + 0.4 * Math.sin(t * 1.9 + cl.ph * 1.7);
     cl.sv += (-(cl.sw - wind * 4 - (cl.way || 0) * 30) * C.kS - cl.sv * C.dS) * dt;
     cl.sw += cl.sv * dt;
-    if (amp > 0) cl.sv += (Math.random() - 0.5) * 1400 * amp * dt * 6;
+    if (amp > 0) cl.sv += nfcRnd(-0.5, 0.5) * 1400 * amp * dt * 6;
     for (const L of cl.leaves) {
       const w = 0.035 * Math.sin(t * 0.8 + L.ph) + 0.02 * Math.sin(t * 2.3 + L.ph * 1.3);
       const lw = (cl.way || 0) * (cl.flip ? -1 : 1);         // (a clump made way: its leaves rest leaning out)
       L.tv += (-(L.th - w - lw * 0.3) * C.kA - L.tv * C.dA) * dt;
       L.bv += (-(L.be - w * 0.8 - lw * 0.25) * C.kB - L.bv * C.dB) * dt;
-      if (amp > 0) { L.tv += (Math.random() - 0.5) * 55 * amp * dt * 4; L.bv += (Math.random() - 0.5) * 70 * amp * dt * 4; }
+      if (amp > 0) { L.tv += nfcRnd(-0.5, 0.5) * 55 * amp * dt * 4; L.bv += nfcRnd(-0.5, 0.5) * 70 * amp * dt * 4; }
       // a body in the leaves pushes them aside, harder the faster it goes
       const lx = cl.x + L.q[1] * cl.w;
       for (const e of bodies) {

@@ -94,12 +94,15 @@ function sewerApply(save) {
       if (typeof gridDrop === 'function') gridDrop(id); else if (typeof gridCache !== 'undefined') delete gridCache[id];
     }
   }
-  // the cave's ring out of GB1 told the painter "this picture holds the
-  // doorway" (gx/gy), which pins a cave's painting to its mouth; the sewer's
-  // painting holds no ring, so in this world the row is a plain ring
+  // The old cave's ring left GB1 for late-game B4. Reusing that destination
+  // here made the one-way hatch an unintended shortcut past B4's normal gate.
+  // The sewer keeps a return ring, but sends it back to the relay gallery that
+  // owns the hatch. The hero-world cave keeps its original B4 route unchanged.
   if (typeof GATE_ROOM !== 'undefined' && GATE_ROOM.GB1) {
     if (!SW_CAVES._gate) SW_CAVES._gate = GATE_ROOM.GB1;
-    const plain = SW_CAVES._plain || (SW_CAVES._plain = (({ gx, gy, ...r }) => r)(SW_CAVES._gate));
+    const plain = SW_CAVES._plain || (SW_CAVES._plain = (({ gx, gy, ...r }) => ({
+      ...r, to: 'B6', ax: 26 / 32, need: 'bossCarrier'
+    }))(SW_CAVES._gate));
     GATE_ROOM.GB1 = on ? plain : SW_CAVES._gate;
   }
   if (typeof ROOM_VISTA !== 'undefined') {

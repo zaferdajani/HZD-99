@@ -26,9 +26,8 @@
 // THE WOLF TAKES THE BLOWS: a hit while she rides costs its stamina, not her cores, and it tires
 // on its own as it runs. Spent, it bucks her down onto her feet and lopes off; the call's own
 // cooldown stands.
-// THE ART is what we have: the wolf is the pack's filmed wolf (js/wolves.js, its gait paced by the
-// ground it covers), and she sits on its back in her own landing crouch (the absorb cell of her
-// drawn land strip), bobbing with its stride and leaning into its leaps. No light round either.
+// THE ART is the approved integrated rider-and-wolf film: one authored silhouette for gallop,
+// leap and rear/howl, so the rider cannot slide independently over the animal. No light round it.
 // ===========================================================================
 const WOLF_MOUNT = {
   stam: 100,          // the wolf's stamina
@@ -59,13 +58,15 @@ function wmWolfNear(p) {
 // ON: she climbs on; the wolf stops hunting and carries her
 function wmMount(p) {
   const w = G.packWolf; if (!w) return false;
-  G.mount = { w, stam: WOLF_MOUNT.stam, scrT: 0, scrCD: 0, howlCD: 0, hitSet: null, lastVy: 0, dashB: false, bob: 0 };
+  G.mount = { w, stam: w.mountStam == null ? WOLF_MOUNT.stam : w.mountStam, scrT: 0, scrCD: 0, howlCD: 0, howlT: 0,
+    hitSet: null, lastVy: 0, dashB: false, rideD: 0 };
   w.mounted = 1; w.coilT = 0; w.lungeT = 0; w.bit = null; w.hunt = 0;
   if (!w.w0) { w.w0 = w.w; w.h0 = w.h; }
   const foot = w.y + w.h; w.w = Math.round(w.w0 * WOLF_MOUNT.size); w.h = Math.round(w.h0 * WOLF_MOUNT.size); w.y = foot - w.h;
   p.x = w.x + w.w / 2 - p.w / 2; p.vx = 0;
   if (typeof sfx === 'function') sfx('alpha_bark');
   if (typeof burst === 'function') burst(p.x + p.w / 2, p.y + p.h, 8, '#b9a88a', 140, 0.4, 300, 2.2, true);
+  if (typeof mediaFetch === 'function') for (const k of ['alRideGallop', 'alRideLeap', 'alRideRear']) mediaFetch(k, true);
   if (G.save && G.save.flags && !G.save.flags.wmTold) { G.save.flags.wmTold = 1; G.toast(t('wm_how')); }
   return true;
 }
@@ -75,6 +76,7 @@ function wmDismount(p, spent) {
   const w = M.w;
   G.mount = null;
   if (w) {
+    w.mountStam = Math.max(0, M.stam);
     w.mounted = 0;
     if (w.w0) { const foot = w.y + w.h; w.w = w.w0; w.h = w.h0; w.y = foot - w.h; }
     w.x = p.x + p.w / 2 - w.w / 2; w.y = p.y + p.h - w.h; w.vx = p.vx; w.vy = 0;
@@ -120,7 +122,7 @@ function wmSeatY(p) {
 }
 function wmHowl(p) {
   const H = WOLF_MOUNT.howl, M = G.mount;
-  M.howlCD = H.cd; M.stam = Math.max(1, M.stam - H.cost);
+  M.howlCD = H.cd; M.howlT = 0.9; M.stam = Math.max(1, M.stam - H.cost); M.w.mountStam = M.stam;
   if (typeof sfx === 'function') sfx('alpha_howl');
   cam.shake = Math.max(cam.shake || 0, 5);
   const px = p.x + p.w / 2, py = p.y + p.h / 2;
@@ -140,7 +142,7 @@ function wmHowl(p) {
 // ---- the ride, stepped (Player.update is wrapped below) ------------------------------------
 function wmPre(p, dt) {
   const M = G.mount, S = WOLF_MOUNT.scratch;
-  M.scrCD -= dt; M.howlCD -= dt;
+  M.scrCD -= dt; M.howlCD -= dt; M.howlT = Math.max(0, (M.howlT || 0) - dt);
   // the sword stays sheathed and the suit's arm is the howl while she rides
   p.atkCD = Math.max(p.atkCD || 0, 0.05); p.atkBuf = 0;
   p.armCD = Math.max(p.armCD || 0, 0.05); p.castCD = Math.max(p.castCD || 0, 0.05);
@@ -186,7 +188,8 @@ function wmPost(p, dt) {
     }
   }
   // it tires as it runs
-  M.stam -= WOLF_MOUNT.drain * dt;
+  M.stam -= WOLF_MOUNT.drain * dt; W.mountStam = Math.max(0, M.stam);
+  M.rideD = (M.rideD || 0) + Math.abs(p.vx || 0) * dt;
   // the wolf is under her: its body goes where hers does, its gait paced by the ground covered
   W.x = p.x + p.w / 2 - W.w / 2; W.y = p.y + p.h - W.h; W.vx = p.vx; W.vy = p.vy; W.on = p.on;
   W.dir = p.face || W.dir || 1; W.faceVis = W.dir; W.anim = (W.anim || 0) + dt; W.t = Math.max(W.t || 0, 1);
@@ -207,6 +210,7 @@ function drawWolfMountHud() {
 // the prompt beside her called wolf: one word
 function drawWolfMountPrompt(c2) {
   if (G.mount || !player || !wmWolfNear(player)) return;
+  if (typeof mediaFetch === 'function') for (const k of ['alRideGallop', 'alRideLeap', 'alRideRear']) mediaFetch(k, true);
   const w = G.packWolf;
   ftxt('▲ ' + t('wm_ride'), w.x + w.w / 2, w.y - 34, 12, '#eef3fa', 'center', 'rgba(0,0,0,0.75)', '700');
 }
@@ -229,7 +233,7 @@ function drawWolfMountPrompt(c2) {
     if (!wmRiding() || this !== player) return H.call(this, d, fromX, src, foe);
     if (this.dead || this.iT > 0) return;
     const M = G.mount;
-    M.stam -= WOLF_MOUNT.hit * Math.max(1, d || 1);
+    M.stam -= WOLF_MOUNT.hit * Math.max(1, d || 1); M.w.mountStam = Math.max(0, M.stam);
     this.iT = WOLF_MOUNT.iT; this.hurtPoseT = 0;
     this.vx = Math.sign((this.x + this.w / 2) - (fromX == null ? this.x : fromX) || 1) * 220; this.vy = Math.min(this.vy, -160);
     cam.shake = Math.max(cam.shake || 0, 4);
@@ -240,16 +244,25 @@ function drawWolfMountPrompt(c2) {
     // she sits ON its back in her landing crouch, bobbing with its stride, leaning into a leap
   Player.prototype.draw = function (c2) {
     if (!wmRiding() || this !== player) return D.call(this, c2);
-    const keep = { y: this.y, vx: this.vx, on: this.on, landT: this.landT, land0: this.land0, dashT: this.dashT, hurtPoseT: this.hurtPoseT, swingVis: this.swingVis, skidT: this.skidT, takeoffT: this.takeoffT };
-    this.y = wmSeatY(this);
-    this.vx = 0; this.on = true; this.land0 = 0.12; this.landT = 0.12 * 0.62; this.dashT = 0; this.hurtPoseT = 0; this.swingVis = false; this.skidT = 0; this.takeoffT = 0;
-    const lean = clamp(this.vy / 2600, -0.22, 0.22) * (this.face || 1);
-    c2.save();
-    const pivX = this.x + this.w / 2, pivY = this.y + this.h;
-    c2.translate(pivX, pivY); c2.rotate(lean); c2.translate(-pivX, -pivY);
-    let r;
-    try { r = D.call(this, c2); } finally { c2.restore(); Object.assign(this, keep); }
-    return r;
+    const M = G.mount, W = M.w, base = W.y + W.h;
+    let key = 'alRideGallop', cells = 15, cell = Math.floor((M.rideD || 0) / 18) % cells;
+    if (!this.on) {
+      key = 'alRideLeap'; cells = 10;
+      cell = clamp(Math.floor(((this.vy || 0) + 620) / 1240 * cells), 0, cells - 1);
+    } else if ((M.howlT || 0) > 0) {
+      key = 'alRideRear'; cells = 11; cell = 5 + Math.min(5, Math.floor((1 - M.howlT / 0.9) * 6));
+    } else if (M.scrT > 0) {
+      key = 'alRideRear'; cells = 11; cell = Math.min(6, Math.floor((1 - M.scrT / WOLF_MOUNT.scratch.t) * 7));
+    } else if (Math.abs(this.vx || 0) < 25) cell = 0;
+    if (drawStripCell(c2, key, cell, cells, W.x + W.w / 2, base, Math.max(124, W.h * 2.55), (this.face || 1) > 0, false)) return true;
+    // A cold cache must never make the mount disappear. The approved film is
+    // requested above; until it arrives, keep the prior composed pose visible.
+    if (typeof drawBeastPlate === 'function') drawBeastPlate(c2, W, WOLF_ART, true);
+    const keep = { y: this.y, vx: this.vx, on: this.on, landT: this.landT, land0: this.land0,
+      dashT: this.dashT, hurtPoseT: this.hurtPoseT, swingVis: this.swingVis, skidT: this.skidT, takeoffT: this.takeoffT };
+    this.y = wmSeatY(this); this.vx = 0; this.on = true; this.land0 = 0.12; this.landT = 0.12 * 0.62;
+    this.dashT = 0; this.hurtPoseT = 0; this.swingVis = false; this.skidT = 0; this.takeoffT = 0;
+    try { return D.call(this, c2); } finally { Object.assign(this, keep); }
   };
 })();
 // ---- her words, five languages (measured by tests/text-budget.cjs as part of TEXT_LITE) -----

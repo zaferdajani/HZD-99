@@ -17,19 +17,30 @@
 //   node tools/aactier.cjs            derive what is missing or stale
 //   node tools/aactier.cjs --all      re-derive everything
 //   node tools/aactier.cjs --check    exit 1 if the tier is not complete (no writes)
-const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
+const fs = require('fs'), path = require('path'), crypto = require('crypto'), { execFileSync } = require('child_process');
 const ROOT = path.join(__dirname, '..'), OUT = 'assets/aac', SRC = ['assets/sfx', 'assets/vox'];
 const ALL = process.argv.includes('--all'), CHECK = process.argv.includes('--check');
+const PROVENANCE = path.join(ROOT, OUT, 'hashes.json');
+const fileHash = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+let recorded = {};
+try { recorded = JSON.parse(fs.readFileSync(PROVENANCE, 'utf8')); } catch (e) {}
 const walk = (d) => fs.existsSync(path.join(ROOT, d)) ? fs.readdirSync(path.join(ROOT, d), { withFileTypes: true })
   .flatMap(e => e.isDirectory() ? walk(d + '/' + e.name) : /\.ogg$/i.test(e.name) ? [d + '/' + e.name] : []) : [];
 const oggs = SRC.flatMap(walk).sort();
-const index = {}, missing = [];
+const index = {}, hashes = {}, missing = [];
 let made = 0, bytesIn = 0, bytesOut = 0;
 for (const ogg of oggs) {
   const m4a = OUT + '/' + ogg.replace(/^assets\//, '').replace(/\.ogg$/i, '.m4a');
   index[ogg] = m4a;
   const a = path.join(ROOT, ogg), b = path.join(ROOT, m4a);
-  const stale = !fs.existsSync(b) || fs.statSync(b).mtimeMs < fs.statSync(a).mtimeMs || fs.statSync(b).size === 0;
+  // Checkout mtimes do not record derivation order. A clean clone can make an
+  // older, correct M4A look stale merely because Git wrote its Ogg first. Pin
+  // both committed byte streams instead: changing either side now fails closed
+  // without needlessly regenerating every completed phone asset.
+  const prior = recorded[ogg];
+  const sourceHash = fileHash(a);
+  const outputHash = fs.existsSync(b) && fs.statSync(b).size > 0 ? fileHash(b) : '';
+  const stale = !outputHash || !prior || prior.source !== sourceHash || prior.output !== outputHash;
   if (stale && CHECK) { missing.push(ogg); continue; }
   if (stale || ALL) {
     fs.mkdirSync(path.dirname(b), { recursive: true });
@@ -39,12 +50,14 @@ for (const ogg of oggs) {
       '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:a', '+bitexact', b]);
     made++;
   }
+  hashes[ogg] = { source: sourceHash, output: fs.existsSync(b) && fs.statSync(b).size > 0 ? fileHash(b) : '' };
   bytesIn += fs.statSync(a).size; bytesOut += fs.existsSync(b) ? fs.statSync(b).size : 0;
 }
 if (CHECK) {
   let want = '{}'; try { want = fs.readFileSync(path.join(ROOT, OUT, 'index.json'), 'utf8'); } catch (e) {}
   const same = JSON.stringify(JSON.parse(want)) === JSON.stringify(index);
-  if (missing.length || !same) { console.error('AAC tier incomplete: ' + missing.length + ' missing/stale' + (same ? '' : ', index out of date') + '. Run node tools/aactier.cjs'); process.exit(1); }
+  const provenanceSame = JSON.stringify(recorded) === JSON.stringify(hashes);
+  if (missing.length || !same || !provenanceSame) { console.error('AAC tier incomplete: ' + missing.length + ' missing/stale' + (same ? '' : ', index out of date') + (provenanceSame ? '' : ', hashes out of date') + '. Run node tools/aactier.cjs'); process.exit(1); }
   console.log('AAC tier complete: ' + oggs.length + ' files'); process.exit(0);
 }
 // an .m4a whose .ogg is gone is a file nothing will ever ask for
@@ -54,4 +67,5 @@ const prune = (d) => { if (!fs.existsSync(path.join(ROOT, d))) return; for (cons
 prune(OUT);
 fs.mkdirSync(path.join(ROOT, OUT), { recursive: true });
 fs.writeFileSync(path.join(ROOT, OUT, 'index.json'), JSON.stringify(index) + '\n');
+fs.writeFileSync(PROVENANCE, JSON.stringify(hashes) + '\n');
 console.log(oggs.length + ' ogg: ' + (bytesIn / 1048576).toFixed(2) + ' MB -> ' + (bytesOut / 1048576).toFixed(2) + ' MB of AAC (' + made + ' derived this run)');
