@@ -75,6 +75,12 @@ wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — 
 same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
 start frames), `*_take.jpg` (each take as a contact sheet).
 
+`beasts/alpha2/ride/` is her riding the Alpha (2026-11-26): the Seedance take `ride.mp4` (job 9ad74e1d), its cut spec and report, and a contact sheet. Strips: `characters/alpha/ride_{gallop,leap,rear}.webp`.
+
+`hero/air-refused/` holds three air-attack sheets fired 2026-11-26 (jobs c530b47a single, 580eab34 twin, 7a43ea5a joined) and NOT used: they copied the older in-game swords (a katana, curved twin blades, a gold staff), not the crystal sword. See `weapons/canon.json`.
+
+`weapons/canon.json` registers every weapon-tier art key against the crystal sword plates in `crystal/` (tests/weapon-canon.cjs).
+
 `beasts/alpha2/` is the Alpha re-made as the pack's own breed (2026-10-10):
 the first Alpha was a different animal from the pack the owner approved on
 2026-10-09 (bronze and black, spines, red ribs). `green_plate.jpg` is the boss

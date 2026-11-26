@@ -9,17 +9,15 @@
 **"Why do you not remember what I told you and improve?"** — the owner, 2026-11-17.
 
 No session remembers the one before. This list is the memory: each line is
-something he has ALREADY corrected, in his words, and how often. A high count is
-how tired he is of that mistake.
-**Read it before you start; check your work against every line before you
-tell him anything is done.**
+something he has ALREADY corrected, in his words, and how often.
+**Read it first; check your work against every line before you say it is done.**
 
 | said | the rule | his words | held by |
 |---|---|---|---|
-| 17× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" · "watching the leaves moves" · "scenes are cut one after the other" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` `nf-ambush` `filmflow` · skill `creature-motion-combat` |
+| 18× | **Motion looks like the real animal or machine** — never a slideshow, a tic, a flip or a slide; a new species gets art for every move first | "rotating as a simple paper leaf" · "It looks glitchy and fake" · "Nilfang still jumps backward" · "find real lion fighting" · "you just made it like closing shut its mouth" · "comes up as an elevator" · "not like sliding" · "complete artwork concept" · "watching the leaves moves" · "scenes are cut one after the other" · "roam around without... self-awareness" · "instead of becoming on it" | `frames` `enemygait` `turn-roar` `agent-rig` `glimpse` `pet-motion` `fight-seal` `tallyman` `hero-still` `purify-stage` `nf-phase2` `mirejaw` `species-moveset` `nf-ambush` `filmflow` · skill `creature-motion-combat` |
 | 13× | **A boss is beaten by fighting it: no one move repeated, no place to hide, never easy, built on its signature move and its weak point; one still frame of its arena** — sweep every boss with the bot that does it | "a easy hack" · "an endless down hit" · "I can just simply hide where the crystal is" · "he was super easy to beat" · "epic, with dash attc as signiture" · "I can only see one phase" · "it needs a weak point to hit" · "all the next ones needs to be harder" · "a place where the lion goes inside and hide" · "you only added two trees" · "should not move with me" | `boss-skill` `gravehorn` `gravehorn-ground` `alpha-run` `fight-seal` `tallyman` `nf-dash` `nf-phase2` `mirejaw` `boss-ladder` `nf-ambush` `boss-cam` |
+| 10× | **A character looks like itself, at its own size, and holds only what it has yet — the crystal sword, generated from its plates**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" · "the same size as the wolf I am summoning" · "wrong versions of the sword" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` `weapon-canon` |
 | 8× | **Terrain is shaped ground she stands on** — never squares, straight lines or decoration; a deck only where it is the way up, and solid; its grass painted, edgeless, bending under what walks in it | "No 90-degree elevation or walls in all game" · "these platforms are not organic" · "platforms that do not make any sense" · "so translucent" · "instead of these green lines" · "squares stuck together" · "just a straight line" | `seam` `ring-pads` `fired-art` `grass` `palm-ledges` · skill `terrain-doors` |
-| 7× | **A character looks like itself and holds only what it has yet**, in the game and in the comic | "more like a ninja, not like my hero" · "does not look like the actual Nilfang" · "holding my sword when i dont have it yet" · "a very big, oversized lion instead of its actual size" · "its oversized and colors are pale" · "the sword looks like a cross" | `fired-art` `artbible` `panels` `panel-continuity` `glimpse` `nf-break` `purify-stage` |
 | 7× | **A door is an object that leads somewhere new; in a floor, a hole in broken ground; one ring to a frame, nothing in it** | "neon doors?" · "why two portals" · "the screen is glitched" · "pods... superimposed on doors" · "a hole in the ground" | `ring-gate` `city-gate` `ring-pads` `ring-wake` `pod-door` `purify-stage` `sewer` |
 | 6× | **An enemy is HEARD over the score, on a phone, as a real animal or a real material — recorded, never oscillators, never the same hit twice; the score never dies** — measure the level, never trust the number typed | "There is no sound for the howling" · "alfa still has no sound" · "why music stoped ?" · "why arent you looking for free libraries for voices ???" · "download from any library of a lion roar" | `voice-heard` `whatplays` `media-container` `hit-voices` `nf-phase2` |
 | 5× | **Tell the player what they have, where to go and why** | "I have no idea what to get" · "no idea how to use them" · "I'm confused. I have no idea where I am" · "the arrow keeps directing me back to the gate entrance" | `shop-ask` `gear-how` `map-read` `route-arrow` |
@@ -47,11 +45,9 @@ tell him anything is done.**
    mistake that is ALREADY a row gets its count raised and his new words added:
    the signal that the last fix was too narrow.
 4. **Give it a harness** that fails if it comes back, and name it in the row.
-5. **Tell him what the sweep found**, in a line or two. Never answer a
-   correction by explaining why it was that way.
+5. **Tell him what the sweep found**, in a line or two. Never explain why it was so.
 
-Keep this table short. A row leaves it only when he says so.
-`tests/ledger.cjs` holds this table and the file's size.
+A row leaves only when he says so. `tests/ledger.cjs` holds the table.
 
 ## How to answer him (2026-11-17)
 
@@ -63,9 +59,8 @@ you're selling" · "I'm looking for your honest description."
 - **Answer first, short.** No agent-speak, no recital, no defending.
 - **He plays the game; you cannot.** What he reports from playing outranks
   anything a harness says.
-- **He wants the work to grow with him.** It grows only through what is written
-  here, in the skills and in the tests: leave it better written than you found it. (Working preferences only: this
-  repository is published, so nothing personal about him goes in it.)
+- **He wants the work to grow with him**: through what is written here, in the
+  skills and tests. (This repository is published: nothing personal about him.)
 
 ## How to work here
 

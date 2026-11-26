@@ -15,6 +15,19 @@ result in the running game.
 
 ---
 
+## Weapons: the crystal sword, from its plates
+
+Owner, 2026-11-26: "Why are you wasting my tokens on hallucination of wrong versions of the sword...
+instead of giving [Higgsfield a] reference using the existing images of the sword and its shapes?"
+
+Her weapon is the CRYSTAL SWORD: `assets/source/crystal/crystal_single.jpg` (one), `sword_ground.jpg`,
+`crystal_double.jpg` (the joined form: two crystal blades on one black grip with a gold band). Any image
+of her holding a weapon attaches THOSE plates as the weapon's reference. An older strip of her holding a
+sword is never the weapon reference: every one in the game on 2026-11-26 shows a wrong sword (a katana,
+curved twin blades, a gold staff) and is queued for re-firing in `assets/source/weapons/canon.json`.
+Register every new weapon-tier key there with its refs and job (`tests/weapon-canon.cjs`).
+Before firing, look at the reference you attach and ask: is this the canon object, or a copy of a copy?
+
 ## 0. First decide whether to generate at all
 
 Generation is right for **authored sprite rigs** and wrong for one thing:
