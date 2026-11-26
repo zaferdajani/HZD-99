@@ -30,14 +30,19 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     for (let i = 0; i < 100 && !(MEDIA_IMG.platPalmA && MEDIA_IMG.platPalmA.naturalWidth); i++) await new Promise(r => setTimeout(r, 100));
     const D0 = CanvasRenderingContext2D.prototype.drawImage; let slab = 0;
     CanvasRenderingContext2D.prototype.drawImage = function (im) { if (im && MEDIA_IMG.platObjA && im === MEDIA_IMG.platObjA) slab++; return D0.apply(this, arguments); };
-    const out = {}, home = { x: player.x, y: player.y };
+    const out = {}, home = { x: player.x, y: player.y }; G.palmProbe = {};
     for (const room of ['A4', 'A1', 'A2', 'A8']) {   // (A3's climb is gone since the door to Kingdom 2, 2026-11-25: A8 stands in for it)
       // every room starts her where the game starts her: the last room's check left her on one of ITS
       // palms, and in A8 that spot is over the floor hole, so she fell back into A2 and A2 was measured
-      G.palmProbe = {}; player.x = home.x; player.y = home.y; player.vx = player.vy = 0;
+      // (the probe is NOT reset per room: a room already drawn as the last room's neighbour is reused
+      // as drawn, and its runs were recorded then, under its own name)
+      G.palmProbe = G.palmProbe || {}; player.x = home.x; player.y = home.y; player.vx = player.vy = 0;
       loadRoom(room); G.state = 'PLAY'; G.dialog = null;
+      G.enemies = [];   // (a walker could shove her into A8's floor hole and the room would change under the measure)
       let T = performance.now();
-      for (let i = 0; i < 400 && !(G.palmProbe[room] && G.palmProbe[room].length && !tileDirty); i++) { T += 16.7; player.iT = 99; G.dialog = null; G.state = 'PLAY'; mainLoop(T); if (i % 20 === 19) await new Promise(r => setTimeout(r, 0)); }
+      // (waits on the clock, not a frame count: under a loaded machine the room's sheets land later)
+      const t0w = Date.now();
+      for (let i = 0; Date.now() - t0w < 20000 && !(G.palmProbe[room] && G.palmProbe[room].length && !tileDirty); i++) { T += 16.7; player.iT = 99; G.dialog = null; G.state = 'PLAY'; G.enemies = []; mainLoop(T); if (i % 20 === 19) await new Promise(r => setTimeout(r, 15)); }
       const runs = G.palmProbe[room] || [];
       // the runs the room has, read off its grid
       const g = G.grid; let want = 0;
