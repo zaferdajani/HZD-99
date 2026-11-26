@@ -1,0 +1,6 @@
+
+── repair-lifecycle  — Ratchet puzzle, interrupted visits, saved placements and story reward handoff
+PASS repair lifecycle: ordered puzzle, wrong inputs, prefix reload, boot interruption, once-only NPC rewards, forge quest, stale room/save events, lost cell, menu preservation, visibility cleanup, orphan recovery, legacy save and both loading paths
+   (repair-lifecycle: 0.1 s)
+
+all 1 harnesses ran
