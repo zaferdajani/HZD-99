@@ -78,6 +78,20 @@ it global. Consequences:
   use rock; the Foundry uses slag and machine housings; and so on per zone.
   This binds both authored terrain plates (task #76 / ART_QUEUE §2) and any
   procedural stand-in.
+- **The ground under the surface is ONE BODY, and its grass grows out of it**
+  (owner, 2026-11-26, on an iPhone in W2: "It still looks like patches of
+  square-shaped grasses stuck together instead of blending it with the
+  surrounding and the next patch, especially when it's up and down"). Every
+  pass that draws per TILE leaves the tile in the picture once the curve has
+  moved the surface off the tile line: a lit band at each tile top, a step's
+  face, a corner notch (a hole the backdrop shows through), a per-tile tone.
+  So after the passes, `groundBandSteps` relays the band under the curve in
+  the zone's own plate on a smooth, feathered lower line and cuts back what
+  stands proud of the curve; nothing tonal is chosen per tile; the grass roots
+  on the curve wherever its tile is the curve's ground and thins into the
+  soil. A new pass that draws per tile near the surface must draw from the
+  curve, not the tile line. `tests/ground-seamless.cjs` measures it on the
+  finished frame at phone size.
 
 ## THE ROOF LAW (owner's standing order, 2026-08-24)
 

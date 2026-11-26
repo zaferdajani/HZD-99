@@ -5551,7 +5551,31 @@ function paintFringe(x, W, H) {
     // THE GRASS IS A PAINTED CARD NOW, AND IT BENDS (owner, 2026-11-25: "find free library for the
     // grass instead of these green lines ... grass that can move with the characters"): js/grass.js.
     // The blades below stay as what grows until its picture has arrived.
+    // ON THE CURVE WHEREVER THIS TILE IS THE CURVE'S GROUND (owner, 2026-11-26: "patches of
+    // square-shaped grasses stuck together ... especially when it's up and down"). The test was
+    // "within a tile and a half of this tile's top", and beside a two-tile step the ramped curve
+    // stands further over the tile than that: those columns fell back to the tile line, and a block
+    // of grass sank into the hill a tile below its neighbours. The curve knows which tile it stands
+    // on; a tile that is not it (a deck in the air) keeps the tile line.
+    const ci0 = cur ? Math.min(cur.N - 1, Math.round((X + TILE / 2) / SURF_STEP)) : -1;
+    const onCurve = ci0 >= 0 && cur.top[ci0] === Y && !isNaN(cur.y[ci0]);
     if ((kind === 'grass' || kind === 'frond') && typeof grassTile === 'function' && grassTile(x, X, Y, tx, ty, kind, (wx) => {
+      if (onCurve) {
+        let i = Math.max(0, Math.min(cur.N - 1, Math.round(wx / SURF_STEP)));
+        // a sample past this tile's edge is the next tile's ground: the same surface on a ramp,
+        // another one at a cliff (then the edge of this one is its own last sample)
+        const iIn = Math.max(Math.ceil(X / SURF_STEP), Math.min(Math.floor((X + TILE - 1) / SURF_STEP), i));
+        if (i !== iIn && (isNaN(cur.y[i]) || Math.abs(cur.y[i] - cur.y[iIn]) > TILE / 2)) i = iIn;
+        // ...and over a few px of it, so the surface's small fractures (a slab dropped a few px
+        // against its neighbour, buildSurfaceCurve) are a fold in the turf, not a cut through it:
+        // the stems' faded foot covers the drop, and the ground itself keeps its shape
+        const y0 = cur.y[i];
+        if (!isNaN(y0)) {
+          let s = 0, n = 0;
+          for (let d = -2; d <= 2; d++) { const v = cur.y[i + d]; if (v !== undefined && !isNaN(v) && Math.abs(v - y0) <= TILE / 2) { s += v; n++; } }
+          return s / n + 2;
+        }
+      }
       const cy = curveY(wx);
       return (cy != null && Math.abs(cy - Y) < TILE * 1.5) ? cy + 2 : Y + (typeof fbm1 === 'function' ? Math.round(fbm1(wx, 641) * 10) : 0);
     })) continue;
@@ -7119,15 +7143,21 @@ function* drawTilesSteps(P) {
               c.fillRect(X + sx, Y + off, 2, TILE - off);
             }
           } else {
-            c.globalAlpha = 0.1 + hash2(tx * 3, ty * 7) * 0.13;
+            // (a slow field, not a hash per tile: a shade that jumps at every tile line is a grid of
+            // squares drawn into the body — owner, 2026-11-26, "squares stuck together")
+            c.globalAlpha = (typeof fbm1 === 'function')
+              ? 0.1 + 0.13 * (0.5 * fbm1(X * 0.13 + Y * 0.05, 563) + 0.5 * fbm1(Y * 0.17 - X * 0.04, 569))
+              : 0.1 + hash2(tx * 3, ty * 7) * 0.13;
             c.fillRect(X, Y, TILE, TILE);
           }
           c.globalAlpha = 1;
         }
       } else {
-      // body with per-tile tonal variation
+      // body with tonal variation — from a slow field, not a hash per tile: a tone that jumps at
+      // every tile line is a wall of squares (owner, 2026-11-26), and on NOSTOS's flat stone it was
+      // the plainest thing in the picture
       c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
-      c.globalAlpha = 0.1 + hash2(tx * 3, ty * 7) * 0.22;
+      c.globalAlpha = 0.1 + 0.22 * (0.5 * fbm1(X * 0.13 + Y * 0.05, 577) + 0.5 * fbm1(Y * 0.17 - X * 0.04, 587));
       c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE);
       c.globalAlpha = 1;
       }
@@ -7135,8 +7165,9 @@ function* drawTilesSteps(P) {
         // interior: plate seams, rivets, polychrome mottling. The rock already
         // carries its own surface, so this only dresses the flat fallback.
         if (!rock) {
-          if (hash2(tx, ty) > 0.72) { c.fillStyle = P.dark; c.fillRect(X + 8, Y + 10, 5, 5); c.fillRect(X + 20, Y + 20, 4, 4); }
-          if (hash2(tx * 7, ty) > 0.6) { c.fillStyle = 'rgba(0,0,0,0.14)'; c.fillRect(X, Y + 15, TILE, 2); }
+          // (round, and no seam ruled across the tile: a square stud and a tile-wide line drew the
+          // grid back into the body)
+          if (hash2(tx, ty) > 0.72) { c.fillStyle = P.dark; c.beginPath(); c.arc(X + 10.5, Y + 12.5, 2.5, 0, 7); c.fill(); c.beginPath(); c.arc(X + 22, Y + 22, 2, 0, 7); c.fill(); }
           for (let k = 0; k < 2; k++) {
             const mv = hash2(tx * 11 + k * 5, ty * 13);
             if (mv > 0.45) {
@@ -8770,7 +8801,7 @@ function buildSurfaceCurve() {
       }
     }
   }
-  return { y: out, raw, top: raw, N, W };
+  return { y: out, raw, top: raw, soft, N, W };
 }
 function surfaceCurve() {
   if (surfCurve && surfRoom === G.roomId) return surfCurve;
@@ -9104,12 +9135,128 @@ function* surfaceCurveSteps(x) {
   // kingdom's own colour — traced, continuous, and the single most visible
   // reason the den read as the field outside it. A floor still needs an edge,
   // so it keeps one, in the room's own material and quietly.
+  // ONE BODY UNDER THE ONE SURFACE (owner, 2026-11-26) — see groundBandSteps.
+  yield* groundBandSteps(x, cur);
   const ik2 = (typeof indoorKey === 'function') && indoorKey();
   const IP = ik2 && (INDOOR_PAL[ik2] || INDOOR_PAL.floorDen);
   strokeCurve(IP ? IP.join : P.dark, 7, 6, IP ? 0.26 : 0.34);   // the shadow step
   strokeCurve(IP ? IP.lit : G.roomDef.cave ? '#c5bcb0' : P.edge, 2, 1, IP ? 0.40 : 0.8);
 }
 function surfaceCurvePass(x) { for (const _ of surfaceCurveSteps(x)) { /* drain */ } }
+
+// THE GROUND UNDER THE SURFACE IS ONE BODY, NOT THE TILE GRID WITH A CURVE DRAWN ON IT.
+//
+// The owner, 2026-11-26, on an iPhone in W2 and the meadow: "It still looks like patches of
+// square-shaped grasses stuck together instead of blending it with the surrounding and the next
+// patch, especially when it's up and down." Under the rolling surface the baked layer was still the
+// grid: every tile's own lit top band, the lit rim and dark band down every step's face, the corner
+// notches the organic pass bites, the slab pass's skin standing proud of a ramped step, and the
+// added mass above the grid filled in a tone of its own down to a STAIRCASE (the tile top + 16).
+// Each pass was right about its own tile; together they drew a hill as a stack of squares, and in a
+// dip the corner notch was a hole the backdrop showed through under the grass.
+//
+// So, after every pass has had its say, the band under the curve is laid again as ONE piece of the
+// same material the tiles are cut from (the rock plate at its world position, so it cannot differ
+// in grain or tone from the body below it), from the surface down past the deepest tile top near
+// it, on a smooth lower line that feathers into the body — no lower edge, no steps. And what stands
+// proud of the surface where the ground is merely rolling (a skin, a lump, a step's shoulder) is
+// cut back to the curve. Never at a cliff (a wall keeps its face), never over a deck's lip, a loose
+// rock (its tell is the point of it) or a floor wearing teeth, and never into a ledge overhead.
+// Baked once per room with the rest of the layer: nothing per frame. tests/ground-seamless.cjs.
+const GROUND_BAND = { depth: 20, feather: 18, steps: 6, erase: 18, win: 14 };
+function* groundBandSteps(x, cur) {
+  const g = G.grid; if (!g || !g[0] || !cur) return;
+  const Wt = g[0].length, Ht = g.length, N = cur.N, Y = cur.y, T = cur.top, SF = cur.soft;
+  const P = PAL[G.roomDef.zone] || PAL.A;
+  const at = (tx, ty) => (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) ? '.' : g[ty][tx];
+  const solidCh = ch => ch === '#' || ch === 'B' || ch === '=';
+  const broken = (G.save && G.save.broken) || {};
+  // per sample: is the band laid here, and may anything above the curve be cut?
+  const lay = new Uint8Array(N), cut = new Uint8Array(N), ceil = new Float32Array(N).fill(-1e9);
+  for (let i = 0; i < N; i++) {
+    if (isNaN(Y[i]) || isNaN(T[i]) || (SF && SF[i])) continue;
+    const tx = Math.floor((i * SURF_STEP) / TILE), ty = Math.round(T[i] / TILE);
+    if (at(tx, ty) !== '#') continue;                               // a loose rock keeps its own face
+    if (typeof looseCut === 'function' && looseCut(tx, ty)) continue;
+    lay[i] = 1; cut[i] = 1;
+    // teeth on this floor or beside it: what stands above the curve there is theirs
+    for (let d = -1; d <= 1; d++) if (at(tx + d, ty - 1) === '^' || at(tx + d, ty - 2) === '^') cut[i] = 0;
+    // the lowest thing overhead (a ledge, a deck, the roof): its underside and what hangs off it stay
+    for (let k = ty - 1; k >= 0; k--) {
+      const q = at(tx, k);
+      if (solidCh(q) && !(q === 'B' && broken[G.roomId + ':' + tx + ',' + k])) { ceil[i] = (k + 1) * TILE; break; }
+    }
+  }
+  // runs of rolling ground: no cliff inside one (the crest lifts its pen there too)
+  const runs = [];
+  for (let i = 0; i < N;) {
+    if (!lay[i]) { i++; continue; }
+    let j = i;
+    while (j + 1 < N && lay[j + 1] && Math.abs(Y[j + 1] - Y[j]) <= TILE && Math.abs(T[j + 1] - T[j]) <= TILE * 3) j++;
+    runs.push([i, j]); i = j + 1;
+  }
+  const ik = (typeof indoorKey === 'function') && indoorKey();
+  const tex = (typeof isHero === 'function' && isHero()) ? null : (ik ? floorTex(ik) : rockTex(G.roomDef.zone));
+  const strata = (tex && !ik) ? strataTex(G.roomDef.zone) : null;
+  let pat = null, spat = null;
+  try { if (tex) pat = x.createPattern(tex, 'repeat'); if (strata) spat = x.createPattern(strata, 'repeat'); } catch (e) { pat = spat = null; }
+  const B = GROUND_BAND, W = B.win, X = (i) => i * SURF_STEP;
+  for (const [a, b] of runs) {
+    yield;
+    const n = b - a + 1;
+    // the lower line: past the deepest tile top (or surface) within reach, smoothed twice — a
+    // box over a running maximum of the same reach never comes back above what it covers
+    const mx = new Float32Array(n), lo = new Float32Array(n), tmp = new Float32Array(n);
+    for (let k = 0; k < n; k++) {
+      let m = -1e9;
+      for (let d = -W; d <= W; d++) { const j = a + k + d; if (j < a || j > b) continue; m = Math.max(m, T[j], Y[j]); }
+      mx[k] = m + B.depth;
+    }
+    const box = (src, dst, r) => { for (let k = 0; k < n; k++) { let s2 = 0, c2 = 0; for (let d = -r; d <= r; d++) { const j = k + d; if (j < 0 || j >= n) continue; s2 += src[j]; c2++; } dst[k] = s2 / c2; } };
+    box(mx, tmp, W >> 1); box(tmp, lo, W >> 1);
+    for (let k = 0; k < n; k++) lo[k] = Math.max(lo[k], Y[a + k] + B.depth);
+    // 1. CUT BACK what stands proud of the surface where the ground only rolls (not at a run's ends:
+    //    a run ends at a cliff, a deck or a loose rock, and those keep what they have)
+    const top = new Float32Array(n);
+    for (let k = 0; k < n; k++) {
+      const i = a + k;
+      let m = Y[i];
+      if (cut[i] && k >= 3 && n - 1 - k >= 3) {
+        for (let d = -5; d <= 5; d++) { const j = i + d; if (j < a || j > b) continue; m = Math.min(m, T[j], Y[j]); }
+        m = Math.max(m - B.erase, ceil[i] + 26);
+      }
+      top[k] = Math.min(m, Y[i]);
+    }
+    x.save();
+    x.globalCompositeOperation = 'destination-out';
+    x.beginPath();
+    x.moveTo(X(a), Y[a]);
+    for (let k = 0; k < n; k++) x.lineTo(X(a + k), Y[a + k]);
+    for (let k = n - 1; k >= 0; k--) x.lineTo(X(a + k), top[k]);
+    x.closePath(); x.fillStyle = '#000'; x.fill();
+    x.restore();
+    // 2. LAY the band: the curve down to the lower line, then feathered into the body
+    const band = (y0off, y1off, alpha) => {
+      const yA = (k) => y0off == null ? Y[a + k] : lo[k] + y0off;
+      x.beginPath();
+      x.moveTo(X(a) - 2, yA(0));
+      for (let k = 0; k < n; k++) x.lineTo(X(a + k), yA(k));
+      x.lineTo(X(b) + 2, yA(n - 1));
+      x.lineTo(X(b) + 2, lo[n - 1] + y1off);
+      for (let k = n - 1; k >= 0; k--) x.lineTo(X(a + k), lo[k] + y1off);
+      x.lineTo(X(a) - 2, lo[0] + y1off);
+      x.closePath();
+      x.globalAlpha = alpha;
+      if (pat) { x.fillStyle = pat; x.fill(); if (spat) { x.globalAlpha = alpha * 0.3; x.fillStyle = spat; x.fill(); } }
+      else { x.fillStyle = P.solid; x.fill(); x.globalAlpha = alpha * 0.2; x.fillStyle = P.dark; x.fill(); }
+    };
+    x.save();
+    band(null, 0, 1);
+    const st = B.feather / B.steps;
+    for (let q = 0; q < B.steps; q++) band(q * st, (q + 1) * st, 1 - (q + 1) / (B.steps + 1));
+    x.restore();
+  }
+}
 
 function* organicSilhouetteSteps(x) {
   const g = G.grid;
@@ -9183,6 +9330,7 @@ function* edgeGrammarSteps(x) {
   const W = Wt * TILE;
   const img = x.getImageData(0, 0, W, Ht * TILE), d = img.data;
   const px = (X, Y) => { const i = ((Y * W + X) << 2); return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+  const cur0 = (typeof surfaceCurve === 'function') ? surfaceCurve() : null;
 
   // ---- 1. THE LIP: a bright, irregular crest on every top face -------------
   for (let ty = 0; ty < Ht; ty++) {
@@ -9204,6 +9352,11 @@ function* edgeGrammarSteps(x) {
         // as ground with no lit lip, and it was right. 28px clears the
         // deepest roll any kingdom asks for.
         let Y = y0 - 28;
+        // ...and where this tile IS the surface curve's ground, from just above the curve: next to
+        // a ramped step the curve stands as much as three tiles over this tile's top, and a crest
+        // begun 28 px up was painted inside the hill at a fixed height over the tile line — a lit
+        // stair step in the body (owner, 2026-11-26: "squares stuck together ... up and down")
+        if (cur0) { const ci = Math.min(cur0.N - 1, Math.round(X / SURF_STEP)); if (cur0.top[ci] === y0 && !isNaN(cur0.y[ci])) Y = Math.max(0, Math.min(Y, Math.floor(cur0.y[ci]) - 4)); }
         while (Y < y0 + TILE && (px(X, Math.max(0, Y))[3] < 40)) Y++;
         if (Y >= y0 + TILE) continue;
         const [r, gg, b] = px(X, Math.min(Ht * TILE - 1, Y + 3));
@@ -9380,28 +9533,41 @@ function* edgeGrammarSteps(x) {
   // Deliberately subtle. This runs over the finished face, so a heavy hand
   // reads as dirt rather than as material — the target is to break the
   // correlation, not to decorate.
+  // ...BUT NOT A TILE AT A TIME (owner, 2026-11-26: "patches of square-shaped grasses stuck
+  // together ... It should be continuous without edges"). This pass used to give every tile its own
+  // brightness (0.90-1.10) and its own diagonal sub-bands: it broke the 32 px pitch by drawing the
+  // pitch — a checkerboard of squares in every body, plainest on NOSTOS's flat stone — and it
+  // stopped at the tile top, so the ground the surface curve raised above it kept the old tone and
+  // the tile line showed through as a step. The value now comes from a slow field over the whole
+  // layer (sampled every 8 px, blended between), so it still never repeats at the tile pitch, and it
+  // is laid over every pixel of ground, raised or not.
+  {
+    const KS = 8, KW = Math.ceil(W / KS) + 2, KH = Math.ceil(Ht * TILE / KS) + 2, kg = new Float32Array(KW * KH);
+    for (let gy = 0; gy < KH; gy++) for (let gx = 0; gx < KW; gx++) {
+      const X = gx * KS, Y = gy * KS;
+      kg[gy * KW + gx] = 0.90 + 0.20 * (0.55 * fbm1(X * 0.29 + Y * 0.11, 4141) + 0.45 * fbm1(Y * 0.31 - X * 0.13, 4153));
+    }
+    const HH = Ht * TILE;
+    for (let Y = 0; Y < HH; Y++) {
+      if (!(Y & 31)) yield;
+      const fy = Y / KS, gy = Math.floor(fy), ty2 = fy - gy, r0 = gy * KW, r1 = r0 + KW;
+      for (let X = 0; X < W; X++) {
+        const i = ((Y * W + X) << 2);
+        if (d[i + 3] < 40) continue;
+        const fx = X / KS, gx = Math.floor(fx), tx2 = fx - gx;
+        const a = kg[r0 + gx], b = kg[r0 + gx + 1], c2 = kg[r1 + gx], e2 = kg[r1 + gx + 1];
+        const kk = (a + (b - a) * tx2) * (1 - ty2) + (c2 + (e2 - c2) * tx2) * ty2;
+        d[i]     = Math.max(0, Math.min(255, Math.round(d[i]     * kk)));
+        d[i + 1] = Math.max(0, Math.min(255, Math.round(d[i + 1] * kk)));
+        d[i + 2] = Math.max(0, Math.min(255, Math.round(d[i + 2] * kk)));
+      }
+    }
+  }
   for (let ty = 0; ty < Ht; ty++) {
     yield;
     for (let tx = 0; tx < Wt; tx++) {
       if (!solid(tx, ty)) continue;
-      // one variant per tile, four of them, plus a per-tile value offset
-      const v = Math.floor(hash2(tx * 7 + 1, ty * 13 + 3) * 4);
-      const k = 0.90 + hash2(tx + 41, ty + 97) * 0.20;      // 0.90 .. 1.10
       const x0 = tx * TILE, y0 = ty * TILE;
-      for (let Y = y0; Y < y0 + TILE; Y++) {
-        for (let X = x0; X < x0 + TILE; X++) {
-          const i = ((Y * W + X) << 2);
-          if (d[i + 3] < 40) continue;
-          // the variant rotates WHICH sub-band of the tile gets lifted, so two
-          // tiles with the same k still differ in where the light sits
-          const lx = (X - x0), ly = (Y - y0);
-          const band = ((v === 0 ? ly : v === 1 ? lx : v === 2 ? lx + ly : lx - ly + TILE) >> 3) & 3;
-          const kk = k * (1 + (band - 1.5) * 0.028);
-          d[i]     = Math.max(0, Math.min(255, Math.round(d[i]     * kk)));
-          d[i + 1] = Math.max(0, Math.min(255, Math.round(d[i + 1] * kk)));
-          d[i + 2] = Math.max(0, Math.min(255, Math.round(d[i + 2] * kk)));
-        }
-      }
       // FRACTURES, at this kingdom's density (the spec's crackDensity). A
       // hairline running down an exposed face, hashed per tile so it is the
       // same crack every time the room renders — the spec's Math.random()
@@ -9409,8 +9575,12 @@ function* edgeGrammarSteps(x) {
       if (!solid(tx, ty - 1) && hash2(tx + 613, ty + 727) < TH.crack) {
         const cx0 = tx * TILE + 4 + Math.floor(hash2(tx, ty) * (TILE - 8));
         const clen = 8 + Math.floor(hash2(tx + 3, ty + 3) * (TILE - 8));
+        // (from the drawn surface where the curve is this tile's ground: begun at the tile line, a
+        // raised hill wore a row of hairlines all starting at one height inside it — the grid again)
+        let c0 = ty * TILE;
+        if (cur0) { const ci = Math.min(cur0.N - 1, Math.round(cx0 / SURF_STEP)); if (cur0.top[ci] === ty * TILE && !isNaN(cur0.y[ci])) c0 = Math.round(cur0.y[ci]); }
         for (let k = 0; k < clen; k++) {
-          const cyy = ty * TILE + 3 + k;
+          const cyy = c0 + 3 + k;
           const cxx = cx0 + Math.round(fbm1(cyy * 3 + tx * 37, 733) * 5 - 2.5);
           if (cyy >= Ht * TILE || cxx < 0 || cxx >= W) break;
           const i = ((cyy * W + cxx) << 2);
