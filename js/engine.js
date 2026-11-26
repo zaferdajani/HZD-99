@@ -16,6 +16,9 @@ const KEYB = {
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
   STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
   MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], BRAID: ['KeyY', 'VBRAID', 'GP_BRAID'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
+  // HER SKILL TREES (js/packtree.js). O was free; a pad reaches it through Pause ▸ Skill trees
+  // (every real button is spoken for — see PAD_DEFAULT), a phone through its own corner button.
+  TREE: ['KeyO', 'VTREE'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
   // RUN is a pad verb only. A key has no magnitude and always asks for

@@ -72,6 +72,10 @@ const MEDIA_SRC = {
     alRideGallop: 'assets/characters/alpha/ride_gallop.webp',   // 15 cells 372x260, one gallop stride, loops
     alRideLeap: 'assets/characters/alpha/ride_leap.webp',       // 10 cells 372x282: gather, flight, landing (keeps the take's own lift)
     alRideRear: 'assets/characters/alpha/ride_rear.webp',       // 11 cells 367x263: rears, forepaw swipe (0-6), head up held (5-10: the howl)
+    // HER SKILL TREES' frame, sockets and card (js/packtree.js): Wenrexa, UI Minimalism SciFi, CC0 (assets/CREDITS.md)
+    ptFrame: 'assets/ui/skilltree/frame.webp',
+    ptSocket: 'assets/ui/skilltree/socket.webp',
+    ptCard: 'assets/ui/skilltree/card.webp',
     // ...and CHIME's four (same batch): the hover, the ring, the note, the fall
     chRest: 'assets/characters/chime/rest.webp',
     chRing: 'assets/characters/chime/ring.webp',

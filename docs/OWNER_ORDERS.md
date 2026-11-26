@@ -282,3 +282,75 @@ What it is, so the kingdom work keeps room for it:
 - **The wolf's stamina:** a bar on the HUD (WOLF). Blows land on the wolf, not on her cores;
   the howl costs a little; it tires with use. Spent, it shakes her off onto her feet and lopes
   away, and the call waits its cooldown.
+
+**Reversed 2026-11-26** (owner: *"the wolf I'm riding on should be at the same size as the wolf I
+am summoning — you're summoning a small one and then riding a big one. You probably should summon
+the beaten Alpha and ride it ... at the beginning I can only summon one of the small ones ... I
+upgrade, it becomes stronger, which allows me to summon the Alpha instead ... alongside the upgrades
+I can mount it ... a new skill tree opening ... showing at the end Alpha mount"* · *"it's only going
+to happen in the later stages of the game. Shard amounts will be tested ... It should not be easy,
+but it should not be hard."*). The 1.9×-scaled small wolf with her landing crouch on its back is
+deleted. What stands now (`js/packtree.js`, `js/wolfmount.js`):
+
+### THE PACK LADDER
+
+| rung | where | price | what |
+|---|---|---|---|
+| THE PACK | the Alpha's yield (Kingdom 1) | — | one small wolf, 10 s, bites 14 |
+| A STRONGER WOLF | Ratchet's shelf | **700** | the small wolf stays 15 s, bites 22 |
+| CALL THE ALPHA | Ratchet's shelf | **1150** | the purified Alpha comes instead, at his own size (the boss's box and draw scale), 12 s, call cooldown 22 s; fights with his filmed CLAW (26 a rake); she keeps all her attacks; he never touches her |
+| THE ALPHA'S HOWL | Ratchet's shelf | **400** | his second power: every ~6.5 s he howls (recorded) and machines within 300 px stagger 1.1 s (a guardian 0.3 s) |
+| RIDE THE ALPHA | Patch-7's shelf (the Foundry, Kingdom 3) after his harness task | **800** | ride the Alpha she calls: dash = lunge, attack = scratch (rear and swipe), arm = howl, his own stamina; drawn only from the filmed whole-rider strips (`alRideGallop/Leap/Rear`) |
+
+Ratchet sells his three rungs on ONE row of his shelf, always the next rung. The harness task
+(`patch_harness`) now waits for CALL THE ALPHA and counts only machines the called Alpha brings
+down. Everything is bought by asking (the shop's question card); the tree screen buys nothing.
+The tree screen opens from Pause ▸ Skill trees, the O key, and a corner button on a phone.
+
+### What the kingdoms pay, and how it was measured (2026-11-26)
+
+`node tools/shardincome.cjs` counts every source of shards in every room the way the code pays it
+(purified person-machine 14 + the purification ladder; a construct's wreck 4-9; floor scrap;
+quarry caches 80; bosses' `bossScrap` + the Alpha's 60 / a mini-boss's 40; agents' gifts; errands;
+woken NPCs 25). A cave or chamber counts for the kingdom whose door leads into it. That is a
+**clean sweep**: every room once, every foe, every errand.
+
+| | rooms | clean sweep | cumulative | of which floor scrap | bosses |
+|---|---|---|---|---|---|
+| Kingdom 1 | 29 | **3827** | 3827 | 1593 | Alpha, NULLFANG, CHIME, GRAVEHORN |
+| Kingdom 2 | 24 | **2539** | 6366 | 1365 | TALONHOST, MIREJAW, PRISM, CARRIER |
+| Kingdom 3 | 11 | **1380** | 7746 | 512 | FURNACE, MOTH |
+| Kingdom 4 / 5 | 10 / 10 | 1278 / 1231 | 9024 / 10255 | | |
+
+Partway through Kingdom 2 (half its rooms) is about **5100** cumulative.
+Kingdom 1's critical path alone (the campaign bot's route, 18 rooms, no Alpha den, no LEASH) counts
+**1695** plus its errands and ladder.
+
+**What was NOT measurable, said plainly:** the chapter-one campaign bot (`tests/campaign-ch1.cjs`)
+was run against this build and got STUCK in A2 at 4:24 (it cannot find the way down to A5 any
+more): it had collected every shard in reach by then (98 held after the
+12-shard Volt Pack), so it confirms floor scrap is picked up, but it gives no end-of-kingdom figure,
+and there is no bot for Kingdoms 2 and 3. The owner's own play gives a lower anchor: *"632 scrap in
+the first kingdom"* held after buying (2026-11-16) and the shop's note *"chapter one pays about 700"*
+(2026-11-20) — both from the critical path, before the Alpha's den and the agents' chambers were
+full of scrap. So a REAL player has roughly **55-80 % of the clean sweep** (missed side rooms,
+errands not taken, pouches lost to deaths) — an estimate, not a measurement.
+
+What the shelf competes with: crests 450-740 (five, 2830), Power Regulator 990, the dear life 1600,
+the horn-star volley 600/900/1300 — 8220 in all, more than Kingdoms 1-3 pay. A player cannot buy
+everything; the wolf is a choice.
+
+**The prices against the income** (held by `tests/pack-prices.cjs`, which recounts the kingdoms
+live and fails when a price leaves its band):
+
+| rung | price | share of its kingdom's clean sweep | band | goal of |
+|---|---|---|---|---|
+| A Stronger Wolf | 700 | 18 % of K1 | 12-30 % | the end of Kingdom 1 |
+| Call the Alpha | 1150 | 45 % of K2 | 30-65 % | the end of Kingdom 2 |
+| The Alpha's Howl | 400 | 29 % of K3 | 15-45 % | Kingdom 3 |
+| Ride the Alpha | 800 | 58 % of K3 | 40-85 % | Kingdom 3, after the harness |
+
+The howl and the ride together are 87 % of Kingdom 3's clean sweep (band 60-100 %): at a real
+player's 55-80 % they need some of Kingdom 2's savings — not easy, not out of reach. The wolf's
+whole ladder is 3050, 39 % of everything Kingdoms 1-3 pay. These are the numbers to change when
+the owner has played them.

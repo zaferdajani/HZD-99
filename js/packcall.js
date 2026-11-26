@@ -33,6 +33,9 @@ const PACK_CALL = {
 };
 // THE PACK, LONGER (Ratchet's shelf, 2026-11-25): the bought tier stays longer and bites harder
 function packStat(k) { const up = (G.save && G.save.packLv | 0) >= 2; return k === 'stay' ? (up ? 15 : PACK_CALL.stay) : k === 'dmg' ? (up ? 22 : PACK_CALL.dmg) : PACK_CALL[k]; }
+// THE PACK LADDER (js/packtree.js, owner 2026-11-26): from CALL THE ALPHA on, the call brings the
+// Alpha himself, at his own size, instead of a small wolf — he has his own step and drawing there
+function packCallsAlpha() { return (G.save && G.save.packLv | 0) >= 3 && typeof alcCall === 'function'; }
 function packCallable() { return !(typeof isHero === 'function' && isHero()) && !!(G.save && G.save.arms && G.save.arms.includes('pack')); }
 // the quarry: what is still fighting her, nearest first
 function packQuarry(w) {
@@ -53,6 +56,7 @@ function packQuarry(w) {
 }
 function packCall(p) {
   if (G.packWolf) return false;
+  if (packCallsAlpha()) return alcCall(p);
   const k = (typeof EKIND !== 'undefined' && EKIND.crawler) || { w: 40, h: 28 };
   const back = -(p.face || 1);
   const w = {
@@ -70,6 +74,7 @@ function packCall(p) {
 }
 function packStep(dt) {
   const w = G.packWolf; if (!w) return;
+  if (w.alpha) { if (typeof alcStep === 'function') alcStep(w, dt); return; }   // the called Alpha (js/packtree.js)
   if (G.state !== 'PLAY') return;
   if (G.mount && G.mount.w === w) return;   // she is riding it: it goes where she does (js/wolfmount.js)
   w.anim += dt; w.t -= dt;
@@ -148,7 +153,9 @@ function packStep(dt) {
 }
 function drawPackWolf(c) {
   // a body, solid from the first frame to the last: it runs in and runs off
-  const w = G.packWolf; if (!w || typeof drawBeastPlate !== 'function') return;
+  const w = G.packWolf; if (!w) return;
+  if (w.alpha) { if (typeof alcDraw === 'function') alcDraw(c, w); return; }
+  if (typeof drawBeastPlate !== 'function') return;
   drawBeastPlate(c, w, WOLF_ART, true);
 }
 
