@@ -14864,13 +14864,21 @@ const TUT_STEPS = [
   // price), and on the third blow it bites back and takes a core
   // (YardWinch.onStruck). Claws only scratch it. THEN Ratchet has something to
   // sell, and she has the reason and the scrap to buy it.
+  // (both the 'atk' and the 'pack' lessons are the old purchase: in the robot world the pack is
+  // Ratchet's thanks on waking, so once she holds it they pass WHEREVER she is — `room` held them
+  // to A0 and A0B, and the walk sent her out to the winch and straight back in to Ratchet for a
+  // purchase already made. Owner, 2026-11-26: "the system still requires me to go back inside after
+  // I go outside for no reason ... I think it's a glitch from the previous walkthrough, which we
+  // shortened." tests/opening-order.cjs)
   { id: 'atk', label: 'op_atk', hint: 'op_atk_h', at: 'A0', room: 'A0', hero: ['tut_atk', 'tut_atk_h'],
+    passAnywhere: () => !(typeof isHero === 'function' && isHero()) && !!G.save.flags.heal,
     done: () => (typeof isHero === 'function' && isHero())
       ? (!!player.swing || player.comboT > 0)
       : !!(G.save.flags.winchBit || G.save.flags.heal || G.save.flags.burstDone) },
   // THE VOLT PACK: two lines — what it does, what it costs — and his counter
   // opens with the pack marked. One purchase; the step is the purchase.
   { id: 'pack', label: 'op_pack', hint: 'op_pack_h', at: 'A0B', room: 'A0B', robo: true,
+    passAnywhere: () => !!G.save.flags.heal,
     done: () => !!G.save.flags.heal },
   // THE CORE THE WINCH TOOK, mended with what she just bought. (A save that
   // reaches this at full health — it rested at the pod on the way back — still
@@ -15228,7 +15236,7 @@ function updateTutor(dt) {
   let ok = false;
   try { ok = st.done(); } catch (e) { ok = false; }
   // the lesson is only learned where it is taught (see `room` above)
-  if (st.room && G.roomId !== st.room) ok = false;
+  if (st.room && G.roomId !== st.room && !(st.passAnywhere && st.passAnywhere())) ok = false;
   if (ok && T.t > 0.25) {
     T.hold = 0.7;
     sfx('pick');

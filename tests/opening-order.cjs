@@ -142,6 +142,13 @@ async function play(browser, mode) {
     if (s.firstKill && R.firstKillBeforeTalk == null) R.firstKillBeforeTalk = R.dialogs.filter(d => d.line).length === 0;
     for (const tx of s.toasts || []) if (/It bit back/.test(tx) && !R.dialogs.some(d => d.line === tx)) R.dialogs.push({ step: s.step, room: s.room, name: 'toast', line: tx });
     R.pickups = s.pickups;
+    // NEVER SENT BACK IN (owner, 2026-11-26: "after I free ratchet and he gives me the cell, I should go
+    // outside ... the system still requires me to go back inside after I go outside for no reason"):
+    // the rooms she is in once the pod is behind her, in order
+    if (R.podDone || s.step === 'atk' || s.step === 'pack' || s.step === 'heal' || s.step === 'burst' || s.step === 'node' || s.step === 'go') {
+      R.podDone = true; R.afterPod = R.afterPod || [];
+      if (R.afterPod[R.afterPod.length - 1] !== s.room) R.afterPod.push(s.room);
+    }
     if (s.step && s.step !== lastStep) {
       R.steps.push(s.step); lastStep = s.step;
       R.stepLog.push({ step: s.step, room: s.room, scrap: s.scrap, bench: s.bench });
@@ -350,6 +357,7 @@ async function play(browser, mode) {
     if (R.jumped && R.jumped.length) console.log('  [' + mode + '] machines in the road, jumped: ' + [...new Set(R.jumped)].join(', '));
     check(mode + ': the opening reaches the meadow', R.end === 'A1', R.end);
     check(mode + ': every step, in the owner\'s order', JSON.stringify(R.steps) === JSON.stringify(WANT), R.steps.join(','));
+    check(mode + ': once the pod is used she goes out to the winch and is never sent back into the den', (R.afterPod || []).indexOf('A0') >= 0 && (R.afterPod || []).lastIndexOf('A0B') < (R.afterPod || []).indexOf('A0'), (R.afterPod || []).join(' -> '));
     check(mode + ': every prompt names one control', !R.multiAction.length, R.multiAction.slice(0, 4));
     check(mode + ': every hint names her real controls (nothing left unfilled)', !R.unfilled.length, R.unfilled.slice(0, 3));
     const lines = R.dialogs.map(d => d.line || '');
