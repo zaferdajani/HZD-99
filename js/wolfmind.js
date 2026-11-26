@@ -79,6 +79,7 @@ const WOLF_MIND = {
   after: 0.55,                 // s it backs off after its bite
   yield: 3.5,                  // s it stands at the back of its side's line after its bite (if there is a line)
   shy: 0.7,                    // s it backs off a blow
+  crowd: 0.5,                  // s she may stand inside its bite before it bites anyway
   pant: 1.1, low: 0.45,        // s it pants when its hp falls under this share
   bay: 1.0,                    // s the last of a pack bays
   vaultEvery: [4.5, 7.5],      // s between one wolf's circlings
@@ -89,13 +90,15 @@ const WOLF_MIND = {
   sense: 420, senseY: 120, senseLook: 0.6, senseGo: 6, senseAgain: 5,
 };
 // ONE CLOCK AND ONE LEDGER PER ROOM: when a tell last started and when a bite
-// was last given out, so no two start on one frame. The sim clock is the save's
-// play time (update() advances it once a frame, in PLAY only).
-const WM = { room: null, lastTell: -99, lastGrant: -99 };
+// was last given out, so no two start on one frame. The clock is the wolves'
+// own: one wolf of the room (the lead, any live one) advances it each frame it
+// runs (wolfMindFrame), so it keeps time however the frame was stepped — a
+// harness that steps one body steps the clock too.
+const WM = { room: null, lastTell: -99, lastGrant: -99, t: 0, lead: null };
 // the minds that are AT her (a packmate in one of these is a pack in a fight)
 const WM_FIGHT = { call: 1, display: 1, commit: 1, flank: 1 };
-function wmNow() { return (G.save && G.save.time) || 0; }
-function wmRoom() { if (WM.room !== G.roomId) { WM.room = G.roomId; WM.lastTell = -99; WM.lastGrant = -99; } }
+function wmNow() { return WM.t; }
+function wmRoom() { if (WM.room !== G.roomId) { WM.room = G.roomId; WM.lastTell = -99; WM.lastGrant = -99; WM.lead = null; } }
 // IS THIS A WILD PACK WOLF WITH A MIND? Not in a guardian's fight (the Alpha
 // calls his own and they hunt as he was measured with), not tamed, not hers.
 function wmFight() { return !!(G.boss && !G.boss.dead && typeof bossActive === 'function' && bossActive()); }
@@ -362,6 +365,11 @@ function wolfMind(e, dt, px, py, cx, cy) {
   else if (ad < target - band || (e.afterT || 0) > 0) mode = wmFloor(e, side) ? 'back' : 'cornered';
   if (faceSide(e) !== toward && mode !== 'still') mode = 'turn';
   e.holding = mode === 'hold' || mode === 'cornered';
+  // CROWDED: she has come inside its bite and stays there however it gives
+  // ground — a wolf crowded like that stops dancing and bites (no warning is
+  // shortened by it: the coil that follows is the whole tell)
+  e.crowdT = ad < reach + 8 ? (e.crowdT || 0) + dt : Math.max(0, (e.crowdT || 0) - dt * 2);
+  const crowded = e.crowdT > M.crowd;
   // the dance is counted AT BAY — standing its ground on her, not walking to it
   if (e.holding) { e.dispT += dt; if (e.feintCD > 0) e.feintCD -= dt; }
   if (mode === 'in') {
@@ -397,7 +405,8 @@ function wolfMind(e, dt, px, py, cx, cy) {
   const need = (e.dispNeed || 1.5) * (lone ? M.lone : 1);
   // (only the wolf nearest her on its side goes: the ones behind it wait,
   // or work round — a wolf does not walk in past its packmate to bite)
-  if (rank === 0 && e.dispT >= need && (e.feints > 0 || e.bites > 0 || mode === 'cornered' || e.dispT >= need * 1.6) && !(e.afterT > 0) && mode !== 'turn' && wmGrant(e, hunters, px)) {
+  if (((rank === 0 && e.dispT >= need && (e.feints > 0 || e.bites > 0 || mode === 'cornered' || e.dispT >= need * 1.6) && !(e.afterT > 0)) || crowded)
+      && mode !== 'turn' && wmGrant(e, hunters, px)) {
     e.mind = 'commit'; e.commitT = 0; e.atkCD = 0; e._wmCoiled = 0;
     return 2;
   }
@@ -547,6 +556,9 @@ function wmHopperCalm(e, dt) {
 }
 // ONCE A FRAME (from wolfFrame): the blow it took, the tell it started
 function wolfMindFrame(e, dt) {
+  wmRoom();
+  if (!WM.lead || WM.lead.dead || (G.enemies || []).indexOf(WM.lead) < 0) WM.lead = e;
+  if (WM.lead === e) WM.t += dt;
   if (e.vaultT > 0) e.vaultT -= dt;
   wmTellSeen(e);
   const hp = e.hp;
