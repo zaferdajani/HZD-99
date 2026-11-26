@@ -241,6 +241,18 @@ const WOLF_ART = {
   roll: wolfStrip('wolfRoll12', 12, 161, { once: 'rollT' }),
   stalkStrip: wolfStrip('wolfStalk10', 10, 115),
   chargeStrip: wolfStrip('wolfCharge8', 8, 136),
+  // THE MIND'S OWN PICTURES (js/wolfmind.js, 2026-11-26) — no new take; each
+  // is one of the filmed strips above, played as what it shows:
+  //   sitWild — a wild wolf at rest sitting: the sit take, its cyan seams
+  //             turned back to the wild red (wildArt, the tame recolour run
+  //             the other way); the sit has no eye map, so no eye smoke on it
+  //   sniff   — at rest, nose down: the pant take slowed to a breath
+  //   look    — it has noticed her: the idle take FROZEN on one cell, head up
+  //   pant    — badly hurt, pulled back: the pant take at its own pace
+  sitWild: wolfStrip('wolfSit6', 6, 132, { loop: 2.4, wild: 1 }),
+  sniff: wolfStrip('wolfPant6', 6, 108, { loop: 2.2 }),
+  look: wolfStrip('wolfIdle6', 6, 132, { hold: 1 }),
+  pant: wolfStrip('wolfPant6', 6, 108, { loop: 0.75 }),
 };
 // a pose the cheetah has no drawing for borrows the nearest one it has
 const BEAST_POSE_FALLBACK = { leap: 'lunge', crouch: 'coil', down: 'coil' };
@@ -283,6 +295,32 @@ function tameArt(key, src) {
     out = cv;
   } catch (err) { out = src; }
   TAME_ART[key] = out;
+  return out;
+}
+// ...AND THE OTHER WAY: the sit was filmed on the tamed wolf (cyan seams and
+// optic). A wild wolf resting wears it with the cyan turned back to the pack's
+// red, once per sheet, cached. Read-back fails: drawn as it is.
+const WILD_ART = {};
+function wildArt(key, src) {
+  if (WILD_ART[key] !== undefined) return WILD_ART[key];
+  const w = src && (src.naturalWidth || src.width), h = src && (src.naturalHeight || src.height);
+  if (!w) return src;
+  let out = src;
+  try {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const x = cv.getContext('2d'); x.drawImage(src, 0, 0);
+    const id = x.getImageData(0, 0, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (d[i + 3] && b > 96 && b > r * 1.6 && b > g * 1.15) {
+        d[i] = Math.min(255, b * 0.92); d[i + 1] = r * 0.35; d[i + 2] = r * 0.32;
+      }
+    }
+    x.putImageData(id, 0, 0);
+    cv.naturalWidth = w; cv.naturalHeight = h;
+    out = cv;
+  } catch (err) { out = src; }
+  WILD_ART[key] = out;
   return out;
 }
 // ---------------------------------------------------------------------------
@@ -387,6 +425,10 @@ function wolfPose(e, ART, tame) {
   // still on a hunt is standing AT BAY — low, teeth out — not at rest
   if (!tame && ART && ART.snarl && (e.snarlT || 0) > 0) return 'snarl';
   if (!tame && ART && ART.snap && (e.snapT || 0) > 0 && Math.abs(e.vx || 0) < 6) return 'snap';
+  // THE MIND'S PICTURE while it stands (js/wolfmind.js): sitting or nose down
+  // at rest, frozen looking at her, the bark, panting when badly hurt
+  if (!tame && e.mindPose && ART && ART[e.mindPose] && Math.abs(e.vx || 0) < 6
+      && (e.pack || (typeof wolfMindOn === 'function' && wolfMindOn(e)))) return e.mindPose;
   if (Math.abs(e.vx || 0) < 6) return tame && ART && ART.sit ? 'sit' : (!tame && e.hunt && ART && ART.bay) ? 'bay' : 'rest';   // standing still stands still
   // the half-step the stride is on. The names are phases, not plates: the
   // filmed strips (walkStrip / runStrip) are what draw them, and the old
@@ -477,6 +519,7 @@ function drawBeastPlate(c, e, ART, tame) {
   // meadow is an ambush, and the owner reported exactly that
   let im = (typeof popArt === 'function' && popArt(A.img)) || im0;
   if (tame && !A.raw) im = tameArt(A.img, im);
+  else if (!tame && A.wild) im = wildArt(A.img, im);
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
   const cellW = cell >= 0 ? im.naturalWidth / A.cells : im.naturalWidth;
