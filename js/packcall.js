@@ -89,14 +89,19 @@ function packStep(dt) {
     const away = Math.sign(cx - px) || w.dir || 1;
     w.dir = away; want = away * PACK_CALL.spd * 1.1;
     const sx = typeof worldScreenX === 'function' ? worldScreenX(cx) : cx - cam.x;
-    if (w.leaveT <= 0 || sx < -80 || sx > 1040) { G.packWolf = null; return; }
+    // (it lopes a few strides before it is gone, even out of the frame: a
+    // wolf whose time ran out at the screen's edge used to vanish on the beat)
+    if (w.leaveT <= 0 || (PACK_CALL.leave - w.leaveT > 0.3 && (sx < -80 || sx > 1040))) { G.packWolf = null; return; }
   } else if (w.lungeT > 0) {
     // THE BITE: its flight is the move; the jaws land on what they meet once
     w.lungeT -= dt;
     const q = w.bit;
     if (q && !w.hitDone && !q.dead) {
       const b = typeof hurtBoxOf === 'function' ? hurtBoxOf(q) : q;
-      if (aabb(w, b)) {
+      // the JAWS, not the collider: its drawn head reaches past the front of
+      // its box and its open jaw above it (the hit is the drawn shape)
+      const jaw = { x: w.dir > 0 ? w.x : w.x - 22, y: w.y - 18, w: w.w + 22, h: w.h + 18 };
+      if (aabb(jaw, b)) {
         w.hitDone = true;
         const dm = Math.round(packStat('dmg') * ((typeof DF === 'function' && DF().pdmg) || 1));
         dealDmg(q, dm, null, b.x + b.w / 2, b.y + b.h / 2, true, 'pack');
@@ -106,7 +111,9 @@ function packStep(dt) {
         if (q.hp <= 0 && !q.dead && typeof q.die === 'function') { q.die(w.dir, -0.3); if (typeof questPackKill === 'function') questPackKill(q); }
       }
     }
-    if (w.lungeT <= 0) { w.biteCD = PACK_CALL.again; w.bit = null; }
+    // a bite that MISSED (the quarry sprang clear) does not send it back to
+    // dancing: it presses in again as soon as its jaws are ready
+    if (w.lungeT <= 0) { w.biteCD = PACK_CALL.again; w.bit = null; if (!w.hitDone) { w.mind = 'close'; w.afterT = 0; } }
     const col = moveEnt(w, dt); w.on = !!col.d;
     w.vx *= Math.pow(0.3, dt);
     return;
@@ -118,7 +125,9 @@ function packStep(dt) {
       w.dir = Math.sign(b.x + b.w / 2 - cx) || w.dir;
       w.faceVis = w.dir;
       w.lungeT = PACK_CALL.lunge; w.hitDone = false;
-      w.vx = w.dir * 470; w.vy = -230; w.on = false;
+      // ...and it springs at the height its quarry is at: up a bank, higher
+      const up = Math.max(0, (w.y + w.h) - (b.y + b.h));
+      w.vx = w.dir * 470; w.vy = -230 - Math.min(420, up * 4.5); w.on = false;
       // and when it is down again it backs off and dances before the next
       w.mind = 'display'; w.dispT = 0; w.dispNeed = rnd(PACK_MIND.again[0], PACK_MIND.again[1]); w.afterT = PACK_MIND.after;
     }
@@ -169,11 +178,24 @@ const PACK_MIND = {
   feint: [0.2, 0.45],    // s into the dance before it feints
   dartV: 250, dartT: 0.3, dartStop: 22,
   backT: 0.38,
+  // THE PROMISE (owner, 2026-11-26: weak, "attacks a little bit" — never
+  // idle). Once its quarry is within `near` px it has at most `must` s of
+  // looking, dancing and feinting before it goes in; then it RUSHES to its
+  // reach and bites, however the quarry moves (a cat holding its own guard
+  // used to keep it dancing its whole stay). The clock starts again after
+  // every bite it commits to.
+  near: 220, must: 2.0,
 };
 function packMind(w, dt, cx, px) {
   const P = PACK_MIND;
   w.backing = false; w.brake = false; w.mindPose = null;
-  const q = packQuarry(w);
+  // (it keeps the quarry it has chosen while that one is still in the fight
+  // and in sight: two machines the same distance off must not reset its look
+  // every time the nearer one changes)
+  const k = w.quarry;
+  const keep = k && !k.dead && !k.disabled && !k.calm && !k.rescued && !k.purified
+    && Math.abs(k.x + k.w / 2 - cx) < PACK_CALL.sight && Math.abs(k.y + k.h / 2 - (w.y + w.h / 2)) < 220;
+  const q = keep ? k : packQuarry(w);
   w.hunt = q ? 1 : 0;
   if (!q) {
     w.quarry = null; w.mind = null;
@@ -186,10 +208,12 @@ function packMind(w, dt, cx, px) {
   const d = b.x + b.w / 2 - cx, gap = Math.abs(d) - b.w / 2, toward = Math.sign(d) || w.dir;
   if (w.quarry !== q) {
     // A NEW QUARRY: it stops and looks before anything else
-    w.quarry = q; w.mind = 'look'; w.lookT = P.look; w.feints = 0; w.dispT = 0;
+    w.quarry = q; w.mind = 'look'; w.lookT = P.look; w.feints = 0; w.dispT = 0; w.nearT = 0;
     w.dispNeed = rnd(P.first[0], P.first[1]); w.feintCD = rnd(P.feint[0], P.feint[1]); w.feint = null;
   }
   w.dir = toward; w.guardFace = toward; w.guardT = 0.12;
+  if (gap < P.near) w.nearT = (w.nearT || 0) + dt;
+  if (w.nearT > P.must && w.mind !== 'close') { w.feint = null; w.mind = 'close'; w.backing = false; }
   if (w.mind === 'look') {
     w.mindPose = 'look'; w.brake = true;
     if (Math.sign(w.faceVis) === toward && Math.abs(w.vx) < 6) w.lookT -= dt;
@@ -201,10 +225,12 @@ function packMind(w, dt, cx, px) {
   if (w.mind === 'display' && !w.feint && Math.abs(b.y + b.h - (w.y + w.h)) > 36 && w.on !== false) w.mind = 'close';
   // GOING IN: the dance is done — in to its reach, then the coil (packStep)
   if (w.mind === 'close') {
-    if (gap < PACK_CALL.reach && w.biteCD <= 0 && w.on !== false && Math.sign(w.faceVis) === toward) {
-      w.coilT = PACK_CALL.coil; w.bit = q; w.vx = 0; w.mind = 'bite'; return 0;
+    // (and from its quarry's own level: a lunge from a ledge sails over it)
+    if (gap < PACK_CALL.reach && Math.abs(b.y + b.h - (w.y + w.h)) < 28 && w.biteCD <= 0 && w.on !== false && Math.sign(w.faceVis) === toward) {
+      w.coilT = PACK_CALL.coil; w.bit = q; w.vx = 0; w.mind = 'bite'; w.nearT = 0; return 0;
     }
-    return toward * (gap > PACK_CALL.reach + P.ring + 30 ? PACK_CALL.spd : P.stalk);
+    // (in at a rush: it does not walk up to something that is moving off)
+    return toward * (gap > PACK_CALL.reach + 20 ? PACK_CALL.spd : P.stalk);
   }
   // THE FEINT: in at a dart, stop short, snap at the air, back-step out
   const F = w.feint;

@@ -23,6 +23,8 @@
 //   I  STRIPS    every state draws its own filmed strip
 //   J  HER WOLF  it looks at its quarry, dances and feints before it bites,
 //                bites, never touches her, and bites less often than before
+//   K  NOT IDLE  over 20 seeded runs (a guarding cat, a blob) it bites every
+//                time, the first bite within 4 s of getting near its quarry
 //
 //   node tests/wolf-mind.cjs     (the repo served on :8220, or TEST_PORT)
 const { chromium } = require('playwright');
@@ -271,6 +273,65 @@ const PORT = process.env.TEST_PORT || 8220;
       check('   ...it bites — a little: a few bites in its ten seconds, not a flurry', J.bites >= 2 && J.bites <= 5, J.bites + ' bites, ' + J.dealt + ' dealt');
       check('   ...and never touches her', J.lost === 0, 'cores lost ' + J.lost);
     }
+    // ---- K. HER WOLF NEVER JUST DANCES ------------------------------------------------
+    // (coordinator, 2026-11-26: in a batch run her small wolf danced its whole
+    // ten seconds round a cat in CV2 and never bit.) Weak, never idle: over many
+    // dice, against a cat that holds its own guard and against a slow blob, it
+    // bites at least once every time, and the first bite comes inside 4 s of
+    // it getting near its quarry — the dance and the feint stay before it.
+    const K = await page.evaluate(async () => {
+      window.requestAnimationFrame = () => 0;
+      const fy = (x) => { const g = groundColumnAt(x); return g ? Math.min.apply(null, g) : null; };
+      const runs = [];
+      const one = (scene, seed) => {
+        let s = seed >>> 0; Math.random = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+        const sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { woke: 1, tut: 1, gateOpened: 1, heal: 1, crystal: 1, opNote: 1, alpha: 1 });
+        sv.arms = ['pack']; startGame(sv);
+        G.packWolf = null;
+        let foe;
+        if (scene === 'cat') {
+          // the pack-call scene: the first machine of the cave, the rest put away, her 320 px off
+          loadRoom('CV2'); G.state = 'PLAY'; G.dialog = G.cut = G.wake = G.trans = G.meet = null; G.toasts = [];
+          const foes = G.enemies.filter(e => !e.dead && !e.disabled); foe = foes[0];
+          for (const e of G.enemies) if (e !== foe) e.dead = true;
+          player.x = foe.x + 320; player.y = foe.y + foe.h - player.h; player.face = -1;
+        } else {
+          loadRoom('A1'); G.state = 'PLAY'; G.dialog = G.cut = G.wake = G.trans = G.meet = null; G.toasts = [];
+          const x0 = 26 * TILE; foe = new Enemy('blob', x0, 0); foe.y = fy(x0 + foe.w / 2) - foe.h; G.enemies = [foe];
+          player.x = x0 + 300; player.y = fy(x0 + 300) - player.h; player.face = -1;
+        }
+        foe.hp = 999; foe.calm = false; const hp0 = foe.hp;
+        player.vx = 0; player.iT = 99; const cores0 = player.cores;
+        if (!packCall(player)) return { scene, err: 'no call' };
+        let near = null, bite = null, coil = false, feintFirst = null;
+        for (let f = 0; f < 60 * 11; f++) {
+          player.iT = 99; player.vx = 0; foe.iT = 0; update(1 / 60); G.state = 'PLAY'; G.dialog = null;
+          const w = G.packWolf; if (!w) break;
+          const hb = hurtBoxOf(foe), gap = Math.abs(hb.x + hb.w / 2 - w.x - w.w / 2) - hb.w / 2;
+          const t = f / 60;
+          if (near == null && gap < 200) near = t;
+          if (w.feint && feintFirst == null) feintFirst = t;
+          if (w.coilT > 0) coil = true;
+          if (bite == null && foe.hp < hp0) bite = t;
+          if (foe.dead) break;
+        }
+        return { scene, near, bite, wait: bite != null && near != null ? +(bite - near).toFixed(2) : null, feintFirst, lost: cores0 - player.cores };
+      };
+      for (let i = 0; i < 10; i++) runs.push(one('cat', 0x9e3779b1 * (i + 1)), one('blob', 0x85ebca6b * (i + 3)));
+      return runs;
+    });
+    const noBite = K.filter(r => r.err || r.bite == null);
+    const slow = K.filter(r => r.bite != null && !(r.wait != null && r.wait <= 4));
+    check('K. over 20 dice (10 against a guarding cat, 10 against a blob) her wolf bites in EVERY run', noBite.length === 0,
+      noBite.length ? noBite.map(r => r.scene + (r.err ? ' ' + r.err : ' never bit (near at ' + r.near + ' s)')).join('; ') : K.length + ' runs, every one bit');
+    check('   ...the first bite inside 4 s of getting near its quarry', slow.length === 0,
+      'waits ' + K.map(r => r.scene[0] + r.wait).join(' ') + (slow.length ? '  SLOW: ' + slow.map(r => r.scene + ' ' + r.wait).join(', ') : ''));
+    // (on level ground the dance and its feint come first; a cat up or down a
+    // bank is gone at directly — there is no ground between them to dance on)
+    const blobs = K.filter(r => r.scene === 'blob');
+    const feintedB = blobs.filter(r => r.feintFirst != null && r.bite != null && r.feintFirst < r.bite).length;
+    check('   ...on level ground the feint still comes before the first bite, and it never touches her', feintedB === blobs.length && K.every(r => !r.lost),
+      feintedB + '/' + blobs.length + ' level runs feinted first (' + K.filter(r => r.feintFirst != null && r.bite != null && r.feintFirst < r.bite).length + '/20 overall); cores lost ' + K.reduce((n, r) => n + (r.lost || 0), 0));
     check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   } finally { await browser.close(); }
   console.log(fails.length ? '\nFAILED ' + fails.length + ': ' + fails.join('; ') : '\nwolf-mind: all checks passed');
