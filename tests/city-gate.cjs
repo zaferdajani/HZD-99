@@ -45,6 +45,25 @@ const { chromium } = require('playwright');
   check('W2 wears the city gate painting', R.vista === 'W2', R.vista);
   check('the gate\'s doors read as its painted metal, not flat navy panels', R.warm > 0.5 && R.navy < 0.15, 'warm ' + (R.warm * 100).toFixed(0) + '%, navy ' + (R.navy * 100).toFixed(0) + '%');
   check('...and have texture you can see (local contrast)', R.tex > 4, R.tex.toFixed(1));
+  // THE GATE IS THERE EVEN WHEN SHE ARRIVES BEFORE ITS PAINTING (owner, 2026-11-26: "The city gate now
+  // is gone"): enter W2 with the painting not yet loaded — the meadow backdrop stands in — then let the
+  // painting land. The frame must then show the painting, not the meadow lifted and filed under its name.
+  const R2 = await p.evaluate(async () => {
+    // what a stand-in frame does: the zone's backdrop is lifted while the room's painting is not here
+    const zoneKey = ZONE_VISTA[G.roomDef.zone]; mediaFetch(zoneKey, true);
+    for (let i = 0; i < 100 && !(MEDIA_RAW[zoneKey] && MEDIA_RAW[zoneKey].naturalWidth); i++) await new Promise(r => setTimeout(r, 50));
+    for (const k in BG_LIFT) delete BG_LIFT[k];
+    bgLift(ROOM_VISTA.W2, MEDIA_RAW[zoneKey], VISTA_GAMMA);          // the old code filed it under the gate's name
+    const hidden = player.draw; player.draw = () => {};
+    for (let k = 0; k < 3; k++) { G.dialog = null; draw(performance.now()); }
+    player.draw = hidden;
+    const cv = document.querySelector('canvas'), x = cv.getContext('2d'), sx = cv.width / 960, sy = cv.height / 540;
+    let warm = 0, n = 0;
+    for (const [x0, y0] of [[180, 60], [560, 60]]) { const d = x.getImageData(Math.round(x0 * sx), Math.round(y0 * sy), Math.round(220 * sx), Math.round(200 * sy)).data;
+      for (let i = 0; i < d.length; i += 4) { n++; if (d[i] > d[i + 2] + 12) warm++; } }
+    return { zoneKey, own: G._vistaOwn, warm: warm / n };
+  });
+  check('arriving before the painting: once it lands, the gate painting is drawn, not the stand-in lifted under its name', R2.own === 'W2' && R2.warm > 0.5, R2.zoneKey + ' filed first; warm ' + (R2.warm * 100).toFixed(0) + '%');
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.join(', ')); process.exit(1); }

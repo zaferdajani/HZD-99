@@ -6685,7 +6685,7 @@ function drawZoneVista(P, zone, px, py) {
       c.fillStyle = wg; c.fillRect(0, 0, 960, 540);
       c.restore();
       G._vista = { x: x0, y: y0, w: dw2, h: dh2 }; G._vistaRoom = G.roomId;
-      G._vistaPainted = G.roomId;
+      G._vistaPainted = G.roomId; G._vistaOwn = G.roomId;
       return true;
     }
   }
@@ -6709,8 +6709,12 @@ function drawZoneVista(P, zone, px, py) {
   // gamma lift raises what is in the shadows and leaves the highlights where
   // the painter put them, which is what makes the architecture in the plate
   // visible instead of merely brighter. Cached per plate; see media.js bgLift.
+  // (filed under the name of the picture actually drawn: while the room's own painting is still on
+  // its way, the zone's backdrop stands in, and is not to be filed under the room's painting)
+  const ownUp = !!(own && typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[own] && solo === MEDIA_RAW[own]);
+  G._vistaOwn = ownUp ? G.roomId : null;
   const im = (typeof bgLift === 'function'
-    && bgLift((solo ? (own || ZONE_VISTA[zone]) : 'zones'), im0, VISTA_GAMMA)) || im0;
+    && bgLift((solo ? (ownUp ? own : ZONE_VISTA[zone]) : 'zones'), im0, VISTA_GAMMA)) || im0;
   const CW = solo ? im.naturalWidth : im.naturalWidth / 2;
   const CH = solo ? im.naturalHeight : im.naturalHeight / 3;
   // scale the painting past the screen and pan across the excess as the camera
@@ -12500,7 +12504,7 @@ function drawGateDoor(P, def, nearPlane) {
     // Drawing a second mouth over it creates the pasted-on layer reported by
     // the owner. Rubble and the interaction remain at its shared world anchor.
     const own=ROOM_VISTA[G.roomId];
-    if(def.gx!=null && own && G._vistaRoom===G.roomId && MEDIA_RAW[own]) return;
+    if(def.gx!=null && own && G._vistaOwn===G.roomId && MEDIA_RAW[own]) return;
     // ...and the mouth is told whether it is CHOKED, because a passage packed
     // with rock does not show its interior (see drawCaveMouth).
     drawCaveMouth(ds, gy, P, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)));
@@ -12564,7 +12568,9 @@ function drawGateDoor(P, def, nearPlane) {
   // the gap) is the structure, so once it is up nothing is drawn over it — the same rule
   // the cave mouths keep. The procedural monument stays only as the stand-in while the
   // painting is still in flight.
-  if (G.roomId === 'W2' && G._vistaRoom === 'W2' && MEDIA_RAW[ROOM_VISTA.W2] && MEDIA_RAW[ROOM_VISTA.W2].naturalWidth) return;
+  // (only when the painting itself is what the backdrop drew: while the meadow stands in for it, the
+  // gate is drawn here — never neither)
+  if (G.roomId === 'W2' && G._vistaOwn === 'W2' && MEDIA_RAW[ROOM_VISTA.W2] && MEDIA_RAW[ROOM_VISTA.W2].naturalWidth) return;
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a

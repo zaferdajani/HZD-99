@@ -1450,12 +1450,19 @@ const POP_ART = {};
 // Same LUT as popArt's `lift`, without popArt's contrast passes: those exist to
 // make a hostile body shout, and a backdrop shouting is the opposite of what
 // §9.1 asks for. The plate keeps its alpha and its size.
-const BG_LIFT = {};
+const BG_LIFT = {}; const BG_LIFT_SRC = {};
+// THE LIFT BELONGS TO THE PICTURE IT WAS MADE FROM, not to the name (owner, 2026-11-26: "The city
+// gate now is gone... a background that is blurry"). Cached by key alone, the first picture drawn
+// under a name kept that name forever: the meadow backdrop standing in while the gate painting was
+// still on its way, or the quarter-size stand-in a phone gets first, was lifted, filed as
+// `gateCity` and drawn instead of the gate from then on. So a lift made from another picture is
+// made again (tests/city-gate.cjs enters the room before the painting is there).
 function bgLift(key, src, gamma) {
   const ck = key + '@' + gamma;
-  if (BG_LIFT[ck] !== undefined) return BG_LIFT[ck];
   const im = src || MEDIA_RAW[key];
+  if (BG_LIFT[ck] !== undefined && BG_LIFT_SRC[ck] === im) return BG_LIFT[ck];
   if (!im || !im.naturalWidth) return null;                // not here yet; ask again
+  BG_LIFT_SRC[ck] = im;
   let out = im;
   try {
     const cv = document.createElement('canvas');
