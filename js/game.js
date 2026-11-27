@@ -1230,6 +1230,89 @@ function showItem(name, desc, art, demo) {
   return card;
 }
 
+// THE MARBLE CATCHES THE EYE (owner, 2026-11-27: "the marble should give a sparkle or something to
+// show that it's important — to shine, to glow — to direct the player to it"). It was a grey stone in
+// a grey quarry. Now light lives ON it: a soft glow that breathes inside the stone, a glint that runs
+// across its face every few seconds, a twinkle where the light catches, and motes that rise off it.
+// All of it is clipped to the stone's own shape (MARBLE_GLINT's layer, cut by the plate's alpha):
+// nothing is drawn round it — no halo, no rim, no ring (the ledger) — so the stone shines, not the air.
+// tests/marble-glint.cjs: the stone changes from a screen away; nothing changes outside it.
+const MARBLE_GLINT = { period: 2.8, sweep: 0.95, band: 0.07, peak: 0.9, glow: 0.1, breathe: 0.22, res: 2,
+  twinkle: [[0.34, 0.3, 0.55], [0.64, 0.5, 0.15]], motes: 2.4 };
+let marbleMask = null, marbleLayer = null;
+// the rectangle the plate's visible stone covers, drawn as drawPlateAnchored draws it
+function marbleRect(cx, base, H) {
+  const im = typeof softArt === 'function' ? softArt('rawMarble') : null, box = typeof plateBox === 'function' ? plateBox('rawMarble') : null;
+  if (!im || !im.naturalWidth || !box) return null;
+  const sc = H / (box.h * im.naturalHeight), dw = im.naturalWidth * sc;
+  const w = box.w * dw;
+  return { im, box, x: cx - w / 2, y: base - H, w, h: H };
+}
+function marbleGlint(c, cx, base, H) {
+  const R = marbleRect(cx, base, H); if (!R) return;
+  const K = MARBLE_GLINT, W = Math.max(8, Math.round(R.w * K.res)), Hh = Math.max(8, Math.round(R.h * K.res));
+  // the stone's shape, once per size
+  if (!marbleMask || marbleMask.width !== W || marbleMask.height !== Hh || marbleMask._im !== R.im) {
+    marbleMask = marbleMask || document.createElement('canvas'); marbleMask.width = W; marbleMask.height = Hh; marbleMask._im = R.im;
+    const m = marbleMask.getContext('2d'); m.clearRect(0, 0, W, Hh);
+    const iw = R.im.naturalWidth, ih = R.im.naturalHeight;
+    m.drawImage(R.im, R.box.x * iw, R.box.y * ih, R.box.w * iw, R.box.h * ih, 0, 0, W, Hh);
+  }
+  if (!marbleLayer) marbleLayer = document.createElement('canvas');
+  if (marbleLayer.width !== W || marbleLayer.height !== Hh) { marbleLayer.width = W; marbleLayer.height = Hh; }
+  const L = marbleLayer.getContext('2d');
+  L.globalCompositeOperation = 'source-over'; L.clearRect(0, 0, W, Hh);
+  const now = performance.now() / 1000;
+  // the glow that breathes inside the stone, brightest where its top catches the light
+  const br = 0.5 + 0.5 * Math.sin(now * Math.PI * 2 / 1.7);
+  const gl = K.glow + K.breathe * br;
+  const rg = L.createRadialGradient(W * 0.42, Hh * 0.36, 2, W * 0.46, Hh * 0.5, Math.max(W, Hh) * 0.62);
+  rg.addColorStop(0, 'rgba(236,250,255,' + gl.toFixed(3) + ')');
+  rg.addColorStop(0.55, 'rgba(190,232,255,' + (gl * 0.45).toFixed(3) + ')');
+  rg.addColorStop(1, 'rgba(190,232,255,0)');
+  L.fillStyle = rg; L.fillRect(0, 0, W, Hh);
+  L.globalCompositeOperation = 'lighter';
+  // the glint: a band of light that runs across the stone's face, top-left to bottom-right
+  const ph = (now % K.period) / K.sweep;
+  if (ph < 1) {
+    const u = -0.25 + ph * 1.5, D = W + Hh;               // along the diagonal, from before the stone to past it
+    const px = u * D * 0.5, py = u * D * 0.5, bw = K.band * D * 0.5;
+    const lg = L.createLinearGradient(px - bw, py - bw, px + bw, py + bw);
+    const a = K.peak * Math.sin(Math.PI * ph);
+    lg.addColorStop(0, 'rgba(255,255,255,0)');
+    lg.addColorStop(0.5, 'rgba(255,255,255,' + a.toFixed(3) + ')');
+    lg.addColorStop(1, 'rgba(255,255,255,0)');
+    L.fillStyle = lg; L.fillRect(0, 0, W, Hh);
+  }
+  // the twinkles, where the light catches: a four-point star that flares and goes
+  for (const [fx, fy, off] of K.twinkle) {
+    const q = ((now / K.period + off) % 1) * 5;          // one flare in five of its slots
+    if (q > 1) continue;
+    const a = Math.sin(Math.PI * q), sz = Math.min(W, Hh) * (0.1 + 0.08 * a), x = W * fx, y = Hh * fy;
+    L.fillStyle = 'rgba(255,255,255,' + (0.95 * a).toFixed(3) + ')';
+    L.beginPath(); L.moveTo(x - sz, y); L.lineTo(x, y - sz * 0.09); L.lineTo(x + sz, y); L.lineTo(x, y + sz * 0.09); L.closePath(); L.fill();
+    L.beginPath(); L.moveTo(x, y - sz); L.lineTo(x + sz * 0.09, y); L.lineTo(x, y + sz); L.lineTo(x - sz * 0.09, y); L.closePath(); L.fill();
+    const sg = L.createRadialGradient(x, y, 0, x, y, sz * 0.45);
+    sg.addColorStop(0, 'rgba(255,255,255,' + (0.8 * a).toFixed(3) + ')'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    L.fillStyle = sg; L.fillRect(x - sz, y - sz, sz * 2, sz * 2);
+  }
+  // all of it inside the stone, and nowhere else
+  L.globalCompositeOperation = 'destination-in';
+  L.drawImage(marbleMask, 0, 0);
+  L.globalCompositeOperation = 'source-over';
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.drawImage(marbleLayer, R.x, R.y, R.w, R.h);
+  c.restore();
+}
+// light motes rising OFF the stone (from inside its upper half, never a ring of them round it)
+function marbleMotes(cx, base, H) {
+  if (G.artProbe || G.state !== 'PLAY') return;
+  const R = marbleRect(cx, base, H); if (!R) return;
+  if (!chance(MARBLE_GLINT.motes / 60)) return;
+  addPart(R.x + R.w * rnd(0.3, 0.7), R.y + R.h * rnd(0.25, 0.55), rnd(-6, 6), rnd(-34, -18), 1.4, '#e6f7ff', 1.7, -14, true);
+}
+
+
 // ---------- room loading ----------
 // THE MARBLE STANDS ON THE GROUND SHE STANDS ON (owner, 2026-11-15: "I just
 // found a marble. It's located above the ground. The ground is tilted down
@@ -7842,6 +7925,86 @@ function platGroundBelow(x, ty) {
   }
   return null;
 }
+// A LONG TRUNK IS ONE BODY (owner, 2026-11-27: "a lot of [palms] in several areas have [their] body in
+// segments and fragments. When it's not straight or when it's actually tilted, it shows small fragments
+// on top of each other"). A long trunk used to be its ringed middle stamped again and again above its
+// foot, every copy at the same x: the source trunk LEANS (tx0 -> tx1) and widens toward its foot, so each
+// copy's bottom stood a lean and a flare away from the next copy's top — a stack of offset pieces.
+// Now it is three parts joined edge to edge: the collar under the crown and the flared foot, each at its
+// own size where the art put it, and between them the ringed middle laid down in thin rows, every row
+// set on ONE straight line from the collar's centre to the foot's and drawn at ONE width that eases from
+// the collar's to the foot's. Its outline has no step anywhere along its length (tests/palm-trunk.cjs).
+// The middle is drawn once per palm into a canvas (PALM_TRUNK_CACHE) at the art's own resolution, so
+// the after-the-grade pass that redraws the palms every frame draws one image per trunk.
+const PALM_TRUNK = { collar: 24, foot: 0.35, row: 2, pad: 3, cacheMax: 48 };
+const PALM_TRUNK_CACHE = new Map();
+// per source row of one palm's trunk: its centre and width, measured off the art's alpha (once per palm)
+function palmTrunkShape(im, P, sx, sw, sy, sh) {
+  // (per palm and per picture: a sheet that is replaced by a bigger one is measured again)
+  if (P._shape !== undefined && P._shapeOf === im.naturalWidth) return P._shape;
+  let shape = null;
+  try {
+    const cv = document.createElement('canvas'); cv.width = Math.ceil(sw); cv.height = Math.ceil(sh);
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    x.drawImage(im, P.x + sx, sy, sw, sh, 0, 0, Math.ceil(sw), Math.ceil(sh));
+    const d = x.getImageData(0, 0, cv.width, cv.height).data, W = cv.width;
+    const c = new Float32Array(cv.height), w = new Float32Array(cv.height);
+    for (let r = 0; r < cv.height; r++) {
+      // the run of solid pixels that holds the trunk's expected centre (a frond tip beside it is not trunk)
+      const e = Math.round(P.tx0 + (P.tx1 - P.tx0) * r / Math.max(1, cv.height - 1) - sx);
+      const solid = i => i >= 0 && i < W && d[(r * W + i) * 4 + 3] > 128;
+      let a = Math.max(0, Math.min(W - 1, e)), b;
+      if (!solid(a)) { let f = -1; for (let o = 1; o < P.tw && f < 0; o++) { if (solid(a - o)) f = a - o; else if (solid(a + o)) f = a + o; } if (f < 0) { c[r] = e; w[r] = 0; continue; } a = f; }
+      b = a; while (solid(a - 1)) a--; while (solid(b + 1)) b++;
+      c[r] = (a + b + 1) / 2 + sx; w[r] = b - a + 1;
+    }
+    // a row the art left empty takes its neighbours'; then a light smoothing, so one ragged row is not a step
+    for (let r = 0; r < c.length; r++) if (!w[r]) { let q = r; while (q < c.length && !w[q]) q++; const src = q < c.length ? q : r - 1; if (src >= 0) { c[r] = c[src]; w[r] = w[src]; } }
+    const sm = (A) => { const o = new Float32Array(A.length); for (let r = 0; r < A.length; r++) { let t = 0, n = 0; for (let j = -3; j <= 3; j++) { const q = r + j; if (q >= 0 && q < A.length) { t += A[q]; n++; } } o[r] = t / n; } return o; };
+    shape = { c: sm(c), w: sm(w) };
+  } catch (e) { shape = null; }   // (a canvas the art cannot be read back from: the straight model below)
+  P._shape = shape; P._shapeOf = im.naturalWidth;
+  return shape;
+}
+function palmTrunkLong(p2, im, P, k, x0, yT, L, sx, sw, sy, sh) {
+  const shape = palmTrunkShape(im, P, sx, sw, sy, sh);
+  const n = Math.round(sh);
+  const cOf = r => shape ? shape.c[Math.max(0, Math.min(n - 1, r | 0))] : P.tx0 + (P.tx1 - P.tx0) * r / Math.max(1, n - 1);
+  const wOf = r => shape ? shape.w[Math.max(0, Math.min(n - 1, r | 0))] : P.tw;
+  // source rows: the collar [0, rA), the ringed middle [rA, rB), the foot [rB, sh)
+  const rA = Math.min(PALM_TRUNK.collar, sh * 0.3), rB = sh * (1 - PALM_TRUNK.foot);
+  const colD = rA * k, footD = (sh - rB) * k, midD = L - colD - footD;
+  // the collar and the foot where the art put them
+  p2.drawImage(im, P.x + sx, sy, sw, rA, x0 + sx * k, yT, sw * k, colD);
+  p2.drawImage(im, P.x + sx, sy + rB, sw, sh - rB, x0 + sx * k, yT + L - footD, sw * k, footD);
+  if (midD <= 0.5) return;
+  // the middle, between the collar's bottom row and the foot's top row
+  const cTop = cOf(rA - 1), cBot = cOf(rB), wTop = wOf(rA - 1), wBot = wOf(rB);
+  const key = P.x + ',' + P.y + '|' + im.naturalWidth + '|' + k.toFixed(4) + '|' + Math.round(midD * 2);
+  let ent = PALM_TRUNK_CACHE.get(key);
+  if (!ent) {
+    const cs = 1 / k;                                  // the cache is drawn at the art's own resolution
+    const pad = PALM_TRUNK.pad, half = Math.max(wTop, wBot) / 2 + pad + 2;
+    const lo = Math.min(cTop, cBot) - half, hi = Math.max(cTop, cBot) + half;
+    const cw = Math.max(1, Math.ceil(hi - lo)), ch = Math.max(1, Math.ceil(midD * cs));
+    const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+    const x = cv.getContext('2d');
+    const span = rB - rA, step = PALM_TRUNK.row;
+    for (let y = 0; y < ch; y += step) {
+      const h = Math.min(step, ch - y), f = (y + h / 2) / ch;
+      // the ringed middle runs on down from the collar, and starts over as often as the length needs
+      const r = rA + ((y + h / 2) % span);
+      const ws = Math.max(4, wOf(r)), cSrc = cOf(r);
+      const wd = wTop + (wBot - wTop) * f, cd = cTop + (cBot - cTop) * f - lo;
+      const hs = wd / ws, srcL = cSrc - ws / 2 - pad, srcW = ws + pad * 2;
+      x.drawImage(im, P.x + srcL, sy + r - h / 2, srcW, h, cd - (ws / 2 + pad) * hs, y, srcW * hs, h + 0.6);
+    }
+    ent = { cv, lo };
+    PALM_TRUNK_CACHE.set(key, ent);
+    if (PALM_TRUNK_CACHE.size > PALM_TRUNK.cacheMax) PALM_TRUNK_CACHE.delete(PALM_TRUNK_CACHE.keys().next().value);
+  } else { PALM_TRUNK_CACHE.delete(key); PALM_TRUNK_CACHE.set(key, ent); }   // (most recently used last)
+  p2.drawImage(ent.cv, x0 + ent.lo * k, yT + colD, ent.cv.width * k, midD);
+}
 // one run of the meadow's ledge, X..X+RW, her feet at Y: palms side by side, crowns touching
 function drawPlatPalm(p2, S, X, Y, RW, ty) {
   const im = MEDIA_IMG[S.key];
@@ -7875,13 +8038,7 @@ function drawPlatPalm(p2, S, X, Y, RW, ty) {
       p2.restore();
     } else if (L > 4) {
       if (L <= nat * 1.9) p2.drawImage(im, P.x + sx, sy, sw, sh, x0 + sx * k, yT, sw * k, L);
-      else {
-        // a long way down: its foot at its own height, the ringed trunk repeated above it
-        const fh = sh * 0.35, footD = fh * k, mid = sh - fh, midD = mid * k;
-        p2.drawImage(im, P.x + sx, sy + mid, sw, fh, x0 + sx * k, yT + L - footD, sw * k, footD);
-        let yy = yT + L - footD;
-        while (yy > yT + 0.5) { const d = Math.min(midD, yy - yT); p2.drawImage(im, P.x + sx, sy + mid - d / k, sw, d / k, x0 + sx * k, yy - d, sw * k, d); yy -= d; }
-      }
+      else palmTrunkLong(p2, im, P, k, x0, yT, L, sx, sw, sy, sh);
     }
     // THE CROWN, over its trunk: its level top on the line her feet stand on
     p2.drawImage(im, P.x, P.y, P.w, P.cb, x0, top, P.w * k, P.cb * k);
@@ -14206,6 +14363,9 @@ function drawStatics(P) {
           c.save(); c.fillStyle = '#b9c8cb';
           c.beginPath(); c.ellipse(s.x + s.w/2, s.y + s.h*.57, s.w*.66, s.h*.43, 0, 0, Math.PI*2); c.fill();
           c.restore();
+        } else {
+          marbleGlint(c, s.x + s.w / 2, s.y + s.h, s.h * 1.18);
+          marbleMotes(s.x + s.w / 2, s.y + s.h, s.h * 1.18);
         }
         continue;
       }
@@ -16212,7 +16372,10 @@ function drawLights(P) {
   for (const p of G.projs) lightAt(p.x, p.y, 62, p.color, 0.4);
   if (G.boomer) lightAt(G.boomer.x, G.boomer.y, 72, '#e8f4ff', 0.5);
   for (const s of G.statics) {
-    if (s.type === 'pillar') lightAt(s.x + s.w / 2, s.y + s.h * 0.4, 210, '#cfe8ff', 0.5);
+    // (not over the raw marble: this additive light was laid on the stone itself and washed it to a
+    // white blob with no face for its glint to run over — the light it gives is its own now, ON it:
+    // marbleGlint. The cave's dark is still cleared round it by the lighting pass.)
+    if (s.type === 'pillar' && (isHero() || !(G.save.storyVersion >= 2))) lightAt(s.x + s.w / 2, s.y + s.h * 0.4, 210, '#cfe8ff', 0.5);
     if (s.type === 'bench') lightAt(s.x + s.w / 2, s.y, 80, '#aef7d8', 0.22);
     else if (s.type === 'mod') lightAt(s.x + 12, s.y + 12, 90, P.glow, 0.4);
     else if (s.type === 'chest' && !s.opened) {
