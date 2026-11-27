@@ -1651,7 +1651,7 @@ const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of pa
 //   - the repair bench and the wrist-release it ends in
 function heroOccupied() {
   if (typeof G === 'undefined' || !G) return false;
-  if (G.near || G.meet || G.recharge || G.offer || G.finish || G.break || G.trans || G.lesson || G.ghCard) return true;
+  if (G.near || G.meet || G.recharge || G.offer || G.finish || G.break || G.trans || G.lesson || G.armLesson || G.ghCard) return true;
   if (G.toasts && G.toasts.length) return true;
   if (G.zoneToast) return true;
   // the opening's one-control-at-a-time guide is a thing being read
