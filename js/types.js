@@ -94,6 +94,15 @@ function ownedArms() { return ARMS.filter(a => ((G.save && G.save.arms) || []).i
 // slot 0 is deliberately empty: the plain bolt stays on the wheel, so acquiring a
 // suit never takes an option away from you.
 function armSlots() { return [null].concat(ownedArms()); }
+// WEAR THIS ONE. The wheel is in ARMS order, not the order they were won, so
+// `armIdx = arms.length` (what every grant used to write) wore whichever arm
+// sat last on the wheel: the Prowler's arc, won after the pack, came out of the
+// card with the pack still worn.
+function armWear(id) {
+  const k = armSlots().findIndex(a => a && a.id === id);
+  if (k > 0 && G.save) G.save.armIdx = k;
+  return k > 0;
+}
 function activeArm() {
   const sl = armSlots();
   return sl[((G.save && G.save.armIdx) || 0) % sl.length] || null;
@@ -113,7 +122,10 @@ function fireArm(p, a) {
     const pr = new Proj(x, y, vx, vy, true, Math.round(dmg * base), r, E.col, grav || 0, life || 3);
     pr.el = a.el; G.projs.push(pr); return pr;
   };
-  if (a.id === 'pack') { if (typeof packCall === 'function' && !packCall(p)) { p.volts += a.cost; p.armCD = 0.2; if (typeof sfx === 'function') sfx('no'); } return; }
+  // (G.armCast counts each arm's casts that went off: js/armlesson.js waits for one)
+  const cast = () => { G.armCast = G.armCast || {}; G.armCast[a.id] = (G.armCast[a.id] | 0) + 1; };
+  if (a.id === 'pack') { if (typeof packCall === 'function' && !packCall(p)) { p.volts += a.cost; p.armCD = 0.2; if (typeof sfx === 'function') sfx('no'); } else cast(); return; }
+  cast();
   if (a.id === 'shard') {
     if (typeof isHero === 'function' && isHero()) {     // NOSTOS: the wide cone, as ever
       for (let i = -2; i <= 2; i++) mk(p.face * (430 + Math.abs(i) * 30), i * 105, 11, 5, 260, 0.5);
@@ -499,6 +511,7 @@ function throwStar(p) {
   const vx = (up || dn) ? p.face * 90 : p.face * STAR_SPD;
   G.projs.push(new Star(p.x + p.w / 2 + p.face * 12, p.y + p.h / 2 - 4, vx, vy));
   p.starCD = STAR_CD; sfx('shoot');
+  G.starN = (G.starN | 0) + 1;          // (js/armlesson.js waits for one on a pad)
   return true;
 }
 

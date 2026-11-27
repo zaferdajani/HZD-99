@@ -196,6 +196,7 @@ function swHatchStep(g, dt) {
       player.lastSafe = { x: player.x, y: (L.top) * TILE - player.h - 4 };
     }
     SW.hatchArrive = false;
+    if (typeof packCarryArm === 'function') packCarryArm();   // down the hatch with her, once she lands
   }
 }
 // the door pass: the hatch where the ring stood, its lid on her clock

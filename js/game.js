@@ -348,7 +348,7 @@ const G = {
       // THE PACK ANSWERS HER (owner, 2026-11-20): the yield gives her the arm
       // that calls one of its wolves (js/packcall.js) — one card says both
       this.save.arms = this.save.arms || [];
-      if (!isHero() && !this.save.arms.includes('pack')) { this.save.arms.push('pack'); this.save.armIdx = this.save.arms.length; }
+      if (!isHero() && !this.save.arms.includes('pack')) { this.save.arms.push('pack'); armWear('pack'); if (typeof armLessonStart === 'function') armLessonStart('pack'); }
       {
         const card = showItem(t('alpha_won'), t('alpha_wond') + (isHero() ? '' : '  —  ' + t('arm_how')));
         if (card && !isHero() && typeof loadoutTagCard === 'function') loadoutTagCard(card, 'arm', 'pack');
@@ -401,8 +401,9 @@ const G = {
       if (!this.save.arms) this.save.arms = [];
       if (!this.save.arms.includes(arm)) {
         this.save.arms.push(arm);
-        this.save.armIdx = this.save.arms.length;   // wear it immediately
+        armWear(arm);                                // wear it immediately (its own seat on the wheel)
         loadoutTagCard(showItem(t('arm_' + arm), t('arm_' + arm + 'd') + '  —  ' + t('arm_how')), 'arm', arm);
+        if (typeof armLessonStart === 'function') armLessonStart(arm);   // ...and once the card is closed, a lesson (js/armlesson.js)
       }
     }
     const tr = RELIC_TROPHY[kind];
@@ -1220,6 +1221,8 @@ function grantCrest(id) {
 // caller that adds an onEnd or a line adds it to this card and not to whatever
 // happens to be G.dialog at the time.
 function showItem(name, desc, art, demo) {
+  // a card that names a control names THIS player's ({CAST}, {ARM}: ctlFill)
+  if (typeof ctlFill === 'function') desc = ctlFill(desc);
   const card = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null,
                  art: art || null, demo: demo || null, item: true };
   persist();
@@ -1229,6 +1232,89 @@ function showItem(name, desc, art, demo) {
   else overlayRequest(open, 'item');
   return card;
 }
+
+// THE MARBLE CATCHES THE EYE (owner, 2026-11-27: "the marble should give a sparkle or something to
+// show that it's important — to shine, to glow — to direct the player to it"). It was a grey stone in
+// a grey quarry. Now light lives ON it: a soft glow that breathes inside the stone, a glint that runs
+// across its face every few seconds, a twinkle where the light catches, and motes that rise off it.
+// All of it is clipped to the stone's own shape (MARBLE_GLINT's layer, cut by the plate's alpha):
+// nothing is drawn round it — no halo, no rim, no ring (the ledger) — so the stone shines, not the air.
+// tests/marble-glint.cjs: the stone changes from a screen away; nothing changes outside it.
+const MARBLE_GLINT = { period: 2.8, sweep: 0.95, band: 0.07, peak: 0.9, glow: 0.1, breathe: 0.22, res: 2,
+  twinkle: [[0.34, 0.3, 0.55], [0.64, 0.5, 0.15]], motes: 2.4 };
+let marbleMask = null, marbleLayer = null;
+// the rectangle the plate's visible stone covers, drawn as drawPlateAnchored draws it
+function marbleRect(cx, base, H) {
+  const im = typeof softArt === 'function' ? softArt('rawMarble') : null, box = typeof plateBox === 'function' ? plateBox('rawMarble') : null;
+  if (!im || !im.naturalWidth || !box) return null;
+  const sc = H / (box.h * im.naturalHeight), dw = im.naturalWidth * sc;
+  const w = box.w * dw;
+  return { im, box, x: cx - w / 2, y: base - H, w, h: H };
+}
+function marbleGlint(c, cx, base, H) {
+  const R = marbleRect(cx, base, H); if (!R) return;
+  const K = MARBLE_GLINT, W = Math.max(8, Math.round(R.w * K.res)), Hh = Math.max(8, Math.round(R.h * K.res));
+  // the stone's shape, once per size
+  if (!marbleMask || marbleMask.width !== W || marbleMask.height !== Hh || marbleMask._im !== R.im) {
+    marbleMask = marbleMask || document.createElement('canvas'); marbleMask.width = W; marbleMask.height = Hh; marbleMask._im = R.im;
+    const m = marbleMask.getContext('2d'); m.clearRect(0, 0, W, Hh);
+    const iw = R.im.naturalWidth, ih = R.im.naturalHeight;
+    m.drawImage(R.im, R.box.x * iw, R.box.y * ih, R.box.w * iw, R.box.h * ih, 0, 0, W, Hh);
+  }
+  if (!marbleLayer) marbleLayer = document.createElement('canvas');
+  if (marbleLayer.width !== W || marbleLayer.height !== Hh) { marbleLayer.width = W; marbleLayer.height = Hh; }
+  const L = marbleLayer.getContext('2d');
+  L.globalCompositeOperation = 'source-over'; L.clearRect(0, 0, W, Hh);
+  const now = performance.now() / 1000;
+  // the glow that breathes inside the stone, brightest where its top catches the light
+  const br = 0.5 + 0.5 * Math.sin(now * Math.PI * 2 / 1.7);
+  const gl = K.glow + K.breathe * br;
+  const rg = L.createRadialGradient(W * 0.42, Hh * 0.36, 2, W * 0.46, Hh * 0.5, Math.max(W, Hh) * 0.62);
+  rg.addColorStop(0, 'rgba(236,250,255,' + gl.toFixed(3) + ')');
+  rg.addColorStop(0.55, 'rgba(190,232,255,' + (gl * 0.45).toFixed(3) + ')');
+  rg.addColorStop(1, 'rgba(190,232,255,0)');
+  L.fillStyle = rg; L.fillRect(0, 0, W, Hh);
+  L.globalCompositeOperation = 'lighter';
+  // the glint: a band of light that runs across the stone's face, top-left to bottom-right
+  const ph = (now % K.period) / K.sweep;
+  if (ph < 1) {
+    const u = -0.25 + ph * 1.5, D = W + Hh;               // along the diagonal, from before the stone to past it
+    const px = u * D * 0.5, py = u * D * 0.5, bw = K.band * D * 0.5;
+    const lg = L.createLinearGradient(px - bw, py - bw, px + bw, py + bw);
+    const a = K.peak * Math.sin(Math.PI * ph);
+    lg.addColorStop(0, 'rgba(255,255,255,0)');
+    lg.addColorStop(0.5, 'rgba(255,255,255,' + a.toFixed(3) + ')');
+    lg.addColorStop(1, 'rgba(255,255,255,0)');
+    L.fillStyle = lg; L.fillRect(0, 0, W, Hh);
+  }
+  // the twinkles, where the light catches: a four-point star that flares and goes
+  for (const [fx, fy, off] of K.twinkle) {
+    const q = ((now / K.period + off) % 1) * 5;          // one flare in five of its slots
+    if (q > 1) continue;
+    const a = Math.sin(Math.PI * q), sz = Math.min(W, Hh) * (0.1 + 0.08 * a), x = W * fx, y = Hh * fy;
+    L.fillStyle = 'rgba(255,255,255,' + (0.95 * a).toFixed(3) + ')';
+    L.beginPath(); L.moveTo(x - sz, y); L.lineTo(x, y - sz * 0.09); L.lineTo(x + sz, y); L.lineTo(x, y + sz * 0.09); L.closePath(); L.fill();
+    L.beginPath(); L.moveTo(x, y - sz); L.lineTo(x + sz * 0.09, y); L.lineTo(x, y + sz); L.lineTo(x - sz * 0.09, y); L.closePath(); L.fill();
+    const sg = L.createRadialGradient(x, y, 0, x, y, sz * 0.45);
+    sg.addColorStop(0, 'rgba(255,255,255,' + (0.8 * a).toFixed(3) + ')'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    L.fillStyle = sg; L.fillRect(x - sz, y - sz, sz * 2, sz * 2);
+  }
+  // all of it inside the stone, and nowhere else
+  L.globalCompositeOperation = 'destination-in';
+  L.drawImage(marbleMask, 0, 0);
+  L.globalCompositeOperation = 'source-over';
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.drawImage(marbleLayer, R.x, R.y, R.w, R.h);
+  c.restore();
+}
+// light motes rising OFF the stone (from inside its upper half, never a ring of them round it)
+function marbleMotes(cx, base, H) {
+  if (G.artProbe || G.state !== 'PLAY') return;
+  const R = marbleRect(cx, base, H); if (!R) return;
+  if (!chance(MARBLE_GLINT.motes / 60)) return;
+  addPart(R.x + R.w * rnd(0.3, 0.7), R.y + R.h * rnd(0.25, 0.55), rnd(-6, 6), rnd(-34, -18), 1.4, '#e6f7ff', 1.7, -14, true);
+}
+
 
 // ---------- room loading ----------
 // THE MARBLE STANDS ON THE GROUND SHE STANDS ON (owner, 2026-11-15: "I just
@@ -1302,8 +1388,13 @@ function loadRoom(id) {
   if (typeof k2RoomLoaded === 'function') k2RoomLoaded(id);   // the swamp's raft and its insects (conduits-road.js)
   if (typeof swRoomLoaded === 'function') swRoomLoaded(id);   // the sewer's lift and its air (sewer.js)
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
-  // a called wolf stays in the room it was called to — unless she is riding it (js/wolfmount.js)
-  if (!(G.mount && G.mount.w && G.mount.w === G.packWolf)) { G.packWolf = null; G.mount = null; }
+  // a called wolf comes through with her (js/packcall.js packCarryOut: what is left of its stay is
+  // held until the crossing has placed her, then packCarryArm brings it in beside her) — and a ridden
+  // Alpha simply goes where she does (js/wolfmount.js)
+  if (!(G.mount && G.mount.w && G.mount.w === G.packWolf)) {
+    if (typeof packCarryOut === 'function') packCarryOut(); else G.packCarry = null;
+    G.packWolf = null; G.mount = null;
+  }
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   // An attack belongs to the room where it began. Do not carry a damaging
   // hurricane, buffered strike or half-charged release through a doorway.
@@ -1632,7 +1723,7 @@ function startGame(save) {
   // restart into the cradle, even though the new cat owned no dash.
   G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = []; if (typeof clearBossVfx === 'function') clearBossVfx();
   if (typeof FXGL !== 'undefined') FXGL.list.length = 0;
-  G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
+  G.lesson = null; G.armLesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
   G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null; G.sceneCaps = null;
   if (typeof overlayClear === 'function') overlayClear();
   G.tut = null; G.wake = null; G.meet = null; G.break = null; G.trans = null; G.gateWalk = null;
@@ -1651,6 +1742,7 @@ function startGame(save) {
   // (js/progress.js) — a hand-edited or pre-gate save wakes at the camp
   if (typeof progressBenchGuard === 'function') progressBenchGuard(save);
   loadRoom(save.bench.room);
+  G.packCarry = null;                // a load is not a crossing: no wolf comes with her
   player = new Player(save.bench.x, save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
@@ -1662,6 +1754,7 @@ function respawn() {
   if (G.save.diff === 2 && G.save.lives >= 9) { G.state = 'GAMEOVER'; return; }
   if (typeof progressBenchGuard === 'function') progressBenchGuard(G.save);
   loadRoom(G.save.bench.room);
+  G.packCarry = null;                // nor is waking at the bench
   player = new Player(G.save.bench.x, G.save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
@@ -2234,6 +2327,7 @@ function applyTransition() {
         rnd(-50, 50), rnd(-60, 20), 0.5, '#37ffd0', 2.4, 200, true);
   }
   updateCam(player.x, player.y, W, H, 1);
+  if (typeof packCarryArm === 'function') packCarryArm();   // her called wolf comes through beside her
 }
 
 // ===========================================================================
@@ -2406,6 +2500,7 @@ function vlinkHandover(side, dest) {
   // — or, with no direction held, back down the way she came. The arc is
   // kept for the CUT crossing (applyTransition), which is a real change of room.
   if (side === 'T') player.tCarry = 1.0;
+  if (typeof packCarryArm === 'function') packCarryArm();   // ...and her wolf with her, once she stands
 }
 // How far past its top and bottom the camera may look. Only toward a link
 // whose neighbour is baked (there is a picture to show), and only while she is
@@ -3399,6 +3494,7 @@ function update(dt) {
       updateTutor(dt);
       if (typeof openingTick === 'function') openingTick(dt);
       updateLesson(dt);
+      if (typeof updateArmLesson === 'function') updateArmLesson(dt);   // a new arm teaches itself (js/armlesson.js)
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
       if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);
@@ -7847,6 +7943,86 @@ function platGroundBelow(x, ty) {
   }
   return null;
 }
+// A LONG TRUNK IS ONE BODY (owner, 2026-11-27: "a lot of [palms] in several areas have [their] body in
+// segments and fragments. When it's not straight or when it's actually tilted, it shows small fragments
+// on top of each other"). A long trunk used to be its ringed middle stamped again and again above its
+// foot, every copy at the same x: the source trunk LEANS (tx0 -> tx1) and widens toward its foot, so each
+// copy's bottom stood a lean and a flare away from the next copy's top — a stack of offset pieces.
+// Now it is three parts joined edge to edge: the collar under the crown and the flared foot, each at its
+// own size where the art put it, and between them the ringed middle laid down in thin rows, every row
+// set on ONE straight line from the collar's centre to the foot's and drawn at ONE width that eases from
+// the collar's to the foot's. Its outline has no step anywhere along its length (tests/palm-trunk.cjs).
+// The middle is drawn once per palm into a canvas (PALM_TRUNK_CACHE) at the art's own resolution, so
+// the after-the-grade pass that redraws the palms every frame draws one image per trunk.
+const PALM_TRUNK = { collar: 24, foot: 0.35, row: 2, pad: 3, cacheMax: 48 };
+const PALM_TRUNK_CACHE = new Map();
+// per source row of one palm's trunk: its centre and width, measured off the art's alpha (once per palm)
+function palmTrunkShape(im, P, sx, sw, sy, sh) {
+  // (per palm and per picture: a sheet that is replaced by a bigger one is measured again)
+  if (P._shape !== undefined && P._shapeOf === im.naturalWidth) return P._shape;
+  let shape = null;
+  try {
+    const cv = document.createElement('canvas'); cv.width = Math.ceil(sw); cv.height = Math.ceil(sh);
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    x.drawImage(im, P.x + sx, sy, sw, sh, 0, 0, Math.ceil(sw), Math.ceil(sh));
+    const d = x.getImageData(0, 0, cv.width, cv.height).data, W = cv.width;
+    const c = new Float32Array(cv.height), w = new Float32Array(cv.height);
+    for (let r = 0; r < cv.height; r++) {
+      // the run of solid pixels that holds the trunk's expected centre (a frond tip beside it is not trunk)
+      const e = Math.round(P.tx0 + (P.tx1 - P.tx0) * r / Math.max(1, cv.height - 1) - sx);
+      const solid = i => i >= 0 && i < W && d[(r * W + i) * 4 + 3] > 128;
+      let a = Math.max(0, Math.min(W - 1, e)), b;
+      if (!solid(a)) { let f = -1; for (let o = 1; o < P.tw && f < 0; o++) { if (solid(a - o)) f = a - o; else if (solid(a + o)) f = a + o; } if (f < 0) { c[r] = e; w[r] = 0; continue; } a = f; }
+      b = a; while (solid(a - 1)) a--; while (solid(b + 1)) b++;
+      c[r] = (a + b + 1) / 2 + sx; w[r] = b - a + 1;
+    }
+    // a row the art left empty takes its neighbours'; then a light smoothing, so one ragged row is not a step
+    for (let r = 0; r < c.length; r++) if (!w[r]) { let q = r; while (q < c.length && !w[q]) q++; const src = q < c.length ? q : r - 1; if (src >= 0) { c[r] = c[src]; w[r] = w[src]; } }
+    const sm = (A) => { const o = new Float32Array(A.length); for (let r = 0; r < A.length; r++) { let t = 0, n = 0; for (let j = -3; j <= 3; j++) { const q = r + j; if (q >= 0 && q < A.length) { t += A[q]; n++; } } o[r] = t / n; } return o; };
+    shape = { c: sm(c), w: sm(w) };
+  } catch (e) { shape = null; }   // (a canvas the art cannot be read back from: the straight model below)
+  P._shape = shape; P._shapeOf = im.naturalWidth;
+  return shape;
+}
+function palmTrunkLong(p2, im, P, k, x0, yT, L, sx, sw, sy, sh) {
+  const shape = palmTrunkShape(im, P, sx, sw, sy, sh);
+  const n = Math.round(sh);
+  const cOf = r => shape ? shape.c[Math.max(0, Math.min(n - 1, r | 0))] : P.tx0 + (P.tx1 - P.tx0) * r / Math.max(1, n - 1);
+  const wOf = r => shape ? shape.w[Math.max(0, Math.min(n - 1, r | 0))] : P.tw;
+  // source rows: the collar [0, rA), the ringed middle [rA, rB), the foot [rB, sh)
+  const rA = Math.min(PALM_TRUNK.collar, sh * 0.3), rB = sh * (1 - PALM_TRUNK.foot);
+  const colD = rA * k, footD = (sh - rB) * k, midD = L - colD - footD;
+  // the collar and the foot where the art put them
+  p2.drawImage(im, P.x + sx, sy, sw, rA, x0 + sx * k, yT, sw * k, colD);
+  p2.drawImage(im, P.x + sx, sy + rB, sw, sh - rB, x0 + sx * k, yT + L - footD, sw * k, footD);
+  if (midD <= 0.5) return;
+  // the middle, between the collar's bottom row and the foot's top row
+  const cTop = cOf(rA - 1), cBot = cOf(rB), wTop = wOf(rA - 1), wBot = wOf(rB);
+  const key = P.x + ',' + P.y + '|' + im.naturalWidth + '|' + k.toFixed(4) + '|' + Math.round(midD * 2);
+  let ent = PALM_TRUNK_CACHE.get(key);
+  if (!ent) {
+    const cs = 1 / k;                                  // the cache is drawn at the art's own resolution
+    const pad = PALM_TRUNK.pad, half = Math.max(wTop, wBot) / 2 + pad + 2;
+    const lo = Math.min(cTop, cBot) - half, hi = Math.max(cTop, cBot) + half;
+    const cw = Math.max(1, Math.ceil(hi - lo)), ch = Math.max(1, Math.ceil(midD * cs));
+    const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+    const x = cv.getContext('2d');
+    const span = rB - rA, step = PALM_TRUNK.row;
+    for (let y = 0; y < ch; y += step) {
+      const h = Math.min(step, ch - y), f = (y + h / 2) / ch;
+      // the ringed middle runs on down from the collar, and starts over as often as the length needs
+      const r = rA + ((y + h / 2) % span);
+      const ws = Math.max(4, wOf(r)), cSrc = cOf(r);
+      const wd = wTop + (wBot - wTop) * f, cd = cTop + (cBot - cTop) * f - lo;
+      const hs = wd / ws, srcL = cSrc - ws / 2 - pad, srcW = ws + pad * 2;
+      x.drawImage(im, P.x + srcL, sy + r - h / 2, srcW, h, cd - (ws / 2 + pad) * hs, y, srcW * hs, h + 0.6);
+    }
+    ent = { cv, lo };
+    PALM_TRUNK_CACHE.set(key, ent);
+    if (PALM_TRUNK_CACHE.size > PALM_TRUNK.cacheMax) PALM_TRUNK_CACHE.delete(PALM_TRUNK_CACHE.keys().next().value);
+  } else { PALM_TRUNK_CACHE.delete(key); PALM_TRUNK_CACHE.set(key, ent); }   // (most recently used last)
+  p2.drawImage(ent.cv, x0 + ent.lo * k, yT + colD, ent.cv.width * k, midD);
+}
 // one run of the meadow's ledge, X..X+RW, her feet at Y: palms side by side, crowns touching
 function drawPlatPalm(p2, S, X, Y, RW, ty) {
   const im = MEDIA_IMG[S.key];
@@ -7880,13 +8056,7 @@ function drawPlatPalm(p2, S, X, Y, RW, ty) {
       p2.restore();
     } else if (L > 4) {
       if (L <= nat * 1.9) p2.drawImage(im, P.x + sx, sy, sw, sh, x0 + sx * k, yT, sw * k, L);
-      else {
-        // a long way down: its foot at its own height, the ringed trunk repeated above it
-        const fh = sh * 0.35, footD = fh * k, mid = sh - fh, midD = mid * k;
-        p2.drawImage(im, P.x + sx, sy + mid, sw, fh, x0 + sx * k, yT + L - footD, sw * k, footD);
-        let yy = yT + L - footD;
-        while (yy > yT + 0.5) { const d = Math.min(midD, yy - yT); p2.drawImage(im, P.x + sx, sy + mid - d / k, sw, d / k, x0 + sx * k, yy - d, sw * k, d); yy -= d; }
-      }
+      else palmTrunkLong(p2, im, P, k, x0, yT, L, sx, sw, sy, sh);
     }
     // THE CROWN, over its trunk: its level top on the line her feet stand on
     p2.drawImage(im, P.x, P.y, P.w, P.cb, x0, top, P.w * k, P.cb * k);
@@ -13416,6 +13586,7 @@ function updateGateWalk(dt) {
       if (g.def && g.def.ax != null) gateSetDown();   // a door with no declared arrival keeps the drop it always had
       player.lastSafe = { x: player.x, y: player.y };
     }
+    if (typeof packCarryArm === 'function') packCarryArm();   // through the ring with her
   }
 }
 // SHE COMES OUT STANDING ON THE RING'S PAD (owner, 2026-11-16: "came out of
@@ -14211,6 +14382,9 @@ function drawStatics(P) {
           c.save(); c.fillStyle = '#b9c8cb';
           c.beginPath(); c.ellipse(s.x + s.w/2, s.y + s.h*.57, s.w*.66, s.h*.43, 0, 0, Math.PI*2); c.fill();
           c.restore();
+        } else {
+          marbleGlint(c, s.x + s.w / 2, s.y + s.h, s.h * 1.18);
+          marbleMotes(s.x + s.w / 2, s.y + s.h, s.h * 1.18);
         }
         continue;
       }
@@ -15700,8 +15874,11 @@ const MOD_LESSON = {
            done: () => !player.on && player.airJumps < (hasSkill('triple') ? 2 : 1) },
   wall:  { vb: null, keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick',
            done: () => !!player.wallSlide },
+  // (the guardian that gives the EMP gives its suit too, worn at once — and CAST
+  // then fires the suit, so a lesson that waited for the EMP's own cooldown
+  // waited for ever; a cast of either is the lesson done)
   emp:   { vb: 'VCAST', keys: 'V', pad: 'B', touch: 'CAST',
-           done: () => player.castCD > 0 },
+           done: () => player.castCD > 0 || player.armCD > 0 },
 };
 function lessonStart(id) {
   if (!MOD_LESSON[id]) return;
@@ -15914,8 +16091,33 @@ function drawHUD() {
       c.restore(); c.globalAlpha = 1;
     }
     const a = slots[cur];
-    ftxt(a ? t('arm_' + a.id) : t('arm_none'), 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
-    if (!(TOUCH && TOUCH.enabled)) ftxt('G', 26, 118, 11, '#546b7d');
+    const an = a ? t('arm_' + a.id) : t('arm_none');
+    ftxt(an, 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
+    // THE TWO CONTROLS, BESIDE IT (owner, 2026-11-27: "There isn't a direct way
+    // that tells me how to switch between these skills I have"): after the worn
+    // arm's name, the glyph and her own control that FIRES it (◎) and the one
+    // that CHANGES it (⬡) — the key, the pad's button or the phone's wheel
+    // seat (ctlName). Small, dim, never a sentence. G.hudArmCtl for the harness.
+    if (typeof ctlName === 'function') {
+      c.save();
+      c.font = '600 12px "Segoe UI", Tahoma, sans-serif';
+      let hx = 44 + c.measureText(an).width + 10;
+      const chip = (glyph, key) => {
+        c.font = '700 11px "Segoe UI", Tahoma, sans-serif';
+        const kw = c.measureText(key).width + 10;
+        // (the phone's seat already IS the glyph: ✦ ▸ ◎)
+        if (key.indexOf(glyph) < 0) ftxt(glyph, hx + 6, 146, 12, '#9fb4c4', 'center'); else hx -= 14;
+        c.fillStyle = 'rgba(8,14,20,0.72)'; rr(c, hx + 14, 137, kw, 14, 3); c.fill();
+        c.strokeStyle = 'rgba(159,180,196,0.55)'; c.lineWidth = 1; rr(c, hx + 14, 137, kw, 14, 3); c.stroke();
+        ftxt(key, hx + 14 + kw / 2, 148, 11, '#d6e2ea', 'center', null, '700');
+        hx += 14 + kw + 8;
+      };
+      const fire = ctlName('CAST'), swap = ctlName('ARM');
+      if (a) chip('◎', fire);
+      chip('⬡', swap);
+      G.hudArmCtl = { fire: a ? fire : null, swap, x1: hx };
+      c.restore();
+    }
   }
   // ...and THE REST OF THE BUILD on the same line (js/loadout.js): a cobalt
   // diamond per worn crest, one green seal with the relic count. Arms, crests,
@@ -15945,7 +16147,9 @@ function drawHUD() {
   // the Song is always available — it is hers, not a boss's
   const songReady = player.volts >= SONG_COST;
   ftxt('♪', 934, 118, 20, songReady ? ELEM.murr.glow : 'rgba(125,147,168,0.5)', 'right');
-  if (!(TOUCH && TOUCH.enabled)) ftxt('B', 934, 138, 11, songReady ? '#8fd8c8' : '#546b7d', 'right');
+  // (her own control, not a keyboard letter on a pad — owner, 2026-11-27: "I
+  // don't know how to throw my ninja stars using controller")
+  if (!(TOUCH && TOUCH.enabled)) ftxt(typeof ctlName === 'function' ? ctlName('SONG') : 'B', 934, 138, 11, songReady ? '#8fd8c8' : '#546b7d', 'right');
   // shuriken: pips, so you can read the count without arithmetic
   const sc = starCount(), sm = starMax();
   for (let i = 0; i < sm; i++) {
@@ -15974,7 +16178,7 @@ function drawHUD() {
     }
     c.closePath(); c.fill(); c.shadowBlur = 0; c.restore();
   }
-  if (!(TOUCH && TOUCH.enabled)) ftxt('R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
+  if (!(TOUCH && TOUCH.enabled)) ftxt(typeof ctlName === 'function' ? ctlName('STAR') : 'R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
   }
 
   // scrap + knowledge
@@ -16234,7 +16438,10 @@ function drawLights(P) {
   for (const p of G.projs) lightAt(p.x, p.y, 62, p.color, 0.4);
   if (G.boomer) lightAt(G.boomer.x, G.boomer.y, 72, '#e8f4ff', 0.5);
   for (const s of G.statics) {
-    if (s.type === 'pillar') lightAt(s.x + s.w / 2, s.y + s.h * 0.4, 210, '#cfe8ff', 0.5);
+    // (not over the raw marble: this additive light was laid on the stone itself and washed it to a
+    // white blob with no face for its glint to run over — the light it gives is its own now, ON it:
+    // marbleGlint. The cave's dark is still cleared round it by the lighting pass.)
+    if (s.type === 'pillar' && (isHero() || !(G.save.storyVersion >= 2))) lightAt(s.x + s.w / 2, s.y + s.h * 0.4, 210, '#cfe8ff', 0.5);
     if (s.type === 'bench') lightAt(s.x + s.w / 2, s.y, 80, '#aef7d8', 0.22);
     else if (s.type === 'mod') lightAt(s.x + 12, s.y + 12, 90, P.glow, 0.4);
     else if (s.type === 'chest' && !s.opened) {
@@ -18480,6 +18687,7 @@ function draw(tms) {
   if (typeof pgRoutePointer === 'function') pgRoutePointer(c);   // ...and the way to whatever she was asked to do
   if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
+  if (typeof drawArmLesson === 'function') drawArmLesson();
   drawHUD();
   if (typeof drawDmgOverlay === 'function') drawDmgOverlay(c);   // the Forge's DAMAGE ranking (js/dmglog.js)
   if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js

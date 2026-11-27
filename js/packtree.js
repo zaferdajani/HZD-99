@@ -49,7 +49,7 @@ function ptNextRatchet() { return PACK_TREE.find(n => n.at === 'ratchet' && !ptH
 function ptShelfCost() { const n = ptNextRatchet(); return n ? n.cost : ptNode('packup').cost; }
 function ptBuy(n) {
   if (!n || !G.save) return;
-  if (n.id === 'alride') G.save.flags.alphaRide = 1;
+  if (n.id === 'alride') { G.save.flags.alphaRide = 1; if (typeof armLessonStart === 'function') armLessonStart('alride'); }
   else G.save.packLv = Math.max(ptLv(), n.lv);
   G.save.shop = G.save.shop || {};
   if (typeof showItem === 'function') showItem(t('pk_n_' + n.id), t('pk_n_' + n.id + 'd'));
@@ -90,8 +90,9 @@ const ALPHA_SIDE = {
   heel: 150, leave: 3,
 };
 function alcBox() { const B = typeof BSTAT !== 'undefined' && BSTAT.alpha; return { w: (B && B.w) || 104, h: (B && B.h) || 58 }; }
-function alcCall(p) {
+function alcCall(p, o) {
   if (G.packWolf) return false;
+  const quiet = !!(o && o.quiet);          // brought through a door with her (packcall.js packArrive): no second howl
   const bx = alcBox(), back = -(p.face || 1);
   let x = p.x + p.w / 2 + back * 220 - bx.w / 2;
   const W = G.roomDef ? G.roomDef.w * TILE : 4000;
@@ -106,6 +107,7 @@ function alcCall(p) {
   if (g && g.length) { const top = g.filter(y => y >= p.y - 40); if (top.length) w.y = Math.min.apply(null, top) - bx.h; }
   if (typeof solidAt === 'function' && solidAt(Math.floor((w.x + w.w / 2) / TILE), Math.floor((w.y + w.h / 2) / TILE))) { w.x = p.x + p.w / 2 - bx.w / 2; w.y = p.y + p.h - bx.h; }
   G.packWolf = w;
+  if (quiet) return true;
   p.armCD = Math.max(p.armCD || 0, ALPHA_SIDE.cd);
   if (typeof sfx === 'function') sfx('alpha_howl_far');
   if (typeof burst === 'function') burst(w.x + w.w / 2, w.y + w.h, 12, '#b9a88a', 180, 0.5, 300, 2.6, false);

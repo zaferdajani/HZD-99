@@ -179,9 +179,13 @@ const VIEWS = process.env.GS_VIEWS ? process.env.GS_VIEWS.split(',').map(v => { 
   console.log('     D2 ' + JSON.stringify({ rooms: D2.rooms, cols: D2.cols, sunk: D2.sunk.length }));
   const worst = (k) => Math.max(...all.map(r => r[k]));
   const sum = (k) => all.reduce((a, r) => a + r[k], 0);
-  check('A  the ground body\'s top follows the curve: no step over 3 px between neighbouring columns, nowhere more than 4 px off the surface', all.every(r => r.cols > 200) && worst('jump') <= 3 && sum('offCols') === 0, { worstJump: worst('jump'), stairCols: sum('stairCols'), worstOff: worst('off'), offCols: sum('offCols') });
+  // (how much ground a view must have measured is counted in WORLD px: 200 canvas columns at the scale
+  // it was written at (s 2.2, the high tier) is 91 world px — the low tier, the standard since
+  // 2026-11-27, draws the same view in fewer canvas columns, and every limit below is already in world px)
+  const enough = (n, r) => n / r.s >= 200 / 2.2;
+  check('A  the ground body\'s top follows the curve: no step over 3 px between neighbouring columns, nowhere more than 4 px off the surface', all.every(r => enough(r.cols, r)) && worst('jump') <= 3 && sum('offCols') === 0, { worstJump: worst('jump'), stairCols: sum('stairCols'), worstOff: worst('off'), offCols: sum('offCols') });
   check('B  no backdrop in the body under the surface (no floating band)', sum('holeCols') === 0, { holeCols: sum('holeCols'), worst: worst('holeMax') });
-  check('C  the grass\'s lower boundary is not a hard edge: it thins from 80% to 20% over ' + FALL_MED + '+ px (median), ' + FALL_P10 + '+ px (worst tenth)', all.every(r => r.grassCols > 200 && r.fallMed >= FALL_MED && r.fallP10 >= FALL_P10), all.map(r => r.room + ':' + r.fallMed + '/' + r.fallP10));
+  check('C  the grass\'s lower boundary is not a hard edge: it thins from 80% to 20% over ' + FALL_MED + '+ px (median), ' + FALL_P10 + '+ px (worst tenth)', all.every(r => enough(r.grassCols, r) && r.fallMed >= FALL_MED && r.fallP10 >= FALL_P10), all.map(r => r.room + ':' + r.fallMed + '/' + r.fallP10));
   check('D  the grass grows on the drawn surface: its centre never more than ' + MID_DOWN + ' px into the body, and never jumping over ' + MID_JUMP + ' px against the curve', worst('midDown') <= MID_DOWN && worst('midJump') <= MID_JUMP, { midDown: worst('midDown'), midJump: worst('midJump') });
   check('D2 ...and in every room that grows it, no column of grass is rooted more than 16 px under the surface', D2.rooms > 10 && D2.cols > 1000 && D2.sunk.length === 0, { rooms: D2.rooms, sunk: D2.sunk.slice(0, 8) });
   check('E  no page errors', errs.length === 0, errs.slice(0, 3));

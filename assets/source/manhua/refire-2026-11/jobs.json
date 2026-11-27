@@ -21,12 +21,17 @@
   "s_cleanse": "240dab1e-6dd7-40cf-ad39-e72f3f2ad69f",
   "ch2_b": "0ce2e62e-f84f-4557-87a1-ffd302b0e05c",
   "passage_b": "d903567c-c576-40c9-89e7-8e268c53a9da",
-  "m_stalk": "92c8e58a-8268-495a-a171-d53cd4ea6c30"
+  "m_stalk": "92c8e58a-8268-495a-a171-d53cd4ea6c30",
+  "c_bell": "95a02b3d-68c4-470b-afd8-531d226eb6b9"
  },
  "continuity_2026-11-17": {
   "why": "owner: \"why images show me entering cave with marble holding my sword when i dont have it yet ?\" - the first re-fire of cv_mouth and cv_walk (jobs 26e8a9e6-5b40-4437-af5c-1e276f56d5a6, 753e4441-94a3-4b4c-87fe-fd4be388f8c5) put a sword in her hand two sequences before the forge. Refused; kept as <panel>_sword_refused.jpg.",
   "fired": "GPT Image 2.6, 1k medium, 2026-11-17: the same panels with empty hands; and m_stalk, a new panel of NULLFANG in his own gunmetal for the corridor meeting (page 14 panels 3 and 4 drew him white).",
   "m_stalk": "replaces the crop of page 14 panel 3; panel 4 is a second framing of the same art (his head), so no white lion is left in the sequence",
   "rule": "a panel shows only what she has at that point in the story: the blade first appears in f_blade (tests/panels.cjs)"
+ },
+ "c_bell_2026-11-27": {
+  "why": "owner, 2026-11-27, of the panel after CHIME (\"This one was made by the Eye. Nobody was inside.\"): \"This is a wrong art.\" She had a tail, gloves and a scarf, and the bell was a brass clamp that is not CHIME.",
+  "fired": "GPT Image 2.6, 2k high: her canon element in the prompt; IMAGE 1 the old panel (composition only), IMAGE 2 the broken CHIME of page 20 panel 4 (the bell's design). Cover-fitted to 1600x679 so the crop in js/panels.js holds."
  }
 }
