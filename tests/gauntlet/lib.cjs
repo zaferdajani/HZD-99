@@ -25,6 +25,7 @@
 //   THE AGENT (tally) is not killed: claws break it down to 30% and it LOCKS — that is the fight
 //   won; the crystal's purification after it is a ritual. It has no bo.st: the recorder names its
 //   move with agentRigMove (stand walk coil lunge gather exhale lock pure).
+//   hits = blows that took hp off it (full + turned): the hits-to-kill of a won fight
 //   fullBlowRate = full / all blows; dps = boss hp lost per second; bossHp '{hp}/{max}'
 //   openShare = share of fight frames in which a blow would land whole (probe, see below)
 //   moves: { state: times entered } ; distinct: number of distinct non-idle states
@@ -87,7 +88,7 @@ async function fight(o) {
     const tells = {}; for (const k in tellT) tells[k] = +(tellT[k] / tellN[k]).toFixed(2);
     const idle = /^(idle|rest|walk|dorm|intro|stand|ghwake|ghspeak|ghbellow)$/;
     return { boss, room: G.roomId, seed, won: !!(bo && (bo.dead || bo.hp <= 0 || bo.purified || bo.tamed || bo.tame || bo.locked)) || !!(boss === 'horn' && G.save.flags.ghWon), died,
-      secs: +secsF.toFixed(1), coresLost: 5 - Math.max(0, player.cores), hurtBy, blows, fullBlowRate: all ? +(blows.full / all).toFixed(2) : 0,
+      secs: +secsF.toFixed(1), coresLost: 5 - Math.max(0, player.cores), hurtBy, blows, hits: blows.full + blows.turned, fullBlowRate: all ? +(blows.full / all).toFixed(2) : 0,
       dps: secsF > 0 ? +(lost / secsF).toFixed(2) : 0, bossHp: bo ? Math.round(Math.max(0, bo.hp)) + '/' + Math.round(bo.hpMax || bo.hpMax0 || 0) + (bo.kind === 'sage' ? ' (broken at ' + Math.round((bo.hpMax0 || 0) * 0.3) + ')' : '') : '?',
       openShare: probes ? +(opens / probes).toFixed(3) : 0, moves, distinct: Object.keys(moves).filter(k => !idle.test(k)).length, tells, botError: ctx.err || null };
   }, { boss: o.boss, room: ROOMS[o.boss], entry: ENTRY[o.boss] || null, seed: o.seed || 1, bot: o.bot, secs: o.secs || 150, flags: o.flags || null, react: o.react });

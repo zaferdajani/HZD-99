@@ -120,7 +120,7 @@ function catHunt(e, dt, px, py, cx, cy) {
   // IT OVERSHOT: flat out one way, and she is the other. Claws out.
   if (Math.abs(e.vx || 0) >= H.skidFrom && Math.sign(e.vx) !== want && ad > 26) {
     e.skidT = H.skid; e.running = 0; e.frozeT = 0; e.guardT = 0;      // momentum has its back now, not the guard
-    if (typeof sfx === 'function') sfx('grind');
+    if (typeof sfx === 'function') sfx('cat_skid');   // claws on the floor, recorded (audio.js FIGHT_VOICE)
     return 2;
   }
   e.dir = want;

@@ -2145,6 +2145,18 @@ const HERO_MOOD = {
 };
 
 // ================= PLAYER =================
+// THE ROAR HOLDS HER STILL (owner, 2026-11-27). NULLFANG's roar used to throw her (300-640 px/s
+// and up) with the frame shaking and bending round her — off a palm's crown, that was a fall; on
+// a phone it read as the game glitching. Now it holds her: where she stands, on the ground or in
+// the air, for `dur` seconds, her controls gone with it (stunT), and the frame steady.
+// tests/roar-hold.cjs.
+function playerAwe(dur) {
+  const p = typeof player !== 'undefined' ? player : null;
+  if (!p || p.dead) return;
+  p.aweT = Math.max(p.aweT || 0, dur); p.aweX = p.x; p.aweY = p.y;
+  p.vx = 0; p.vy = 0; p.swing = null; p.chargeT = 0;
+  p.stunT = Math.max(p.stunT || 0, dur); p.dizzyT = 0; p.knockT = 0; p.flungT = 0;
+}
 class Player {
   constructor(x, y) {
     this.x = x; this.y = y; this.w = 24; this.h = 36;
@@ -2222,6 +2234,21 @@ class Player {
   update(dt) {
     this.sinceSwing = (this.sinceSwing == null ? 9 : this.sinceSwing) + dt;
     if (this.dead) return;
+    // HELD BY THE ROAR (owner, 2026-11-27: "Whenever the nilfang appears to intimidate the player,
+    // screen should freeze, I should freeze instead of glitching. That might make me fall down").
+    // She stands exactly where the roar found her — no shove, no stagger, no slide, no gravity in
+    // the air — and her pose holds, until it lets her go (playerAwe). A body moved away from the
+    // spot by something else (a door, a rescue, a blow) is let go at once.
+    if ((this.aweT || 0) > 0) {
+      if (Math.abs(this.x - this.aweX) > 64 || Math.abs(this.y - this.aweY) > 64) this.aweT = 0;
+      else {
+        this.aweT -= dt; this.stunT = Math.max(0, (this.stunT || 0) - dt);
+        this.x = this.aweX; this.y = this.aweY; this.vx = 0; this.vy = 0;
+        this.swing = null; this.chargeT = 0; this.dashT = 0;
+        this.iT = Math.max(0, (this.iT || 0) - dt);
+        return;
+      }
+    }
     // ---- STUNNED: THE CONTROLS ARE GONE, AND THEY ARE GONE ALL AT ONCE ------
     // Gating each input site separately is how a stun ends up letting you dash
     // out of it because one branch was missed. `inD`/`inP` are top-level
@@ -3622,6 +3649,7 @@ class Player {
   // the run and is read from the console.
   hurt(d, fromX, src, foe) {
     if (this.dead || this.iT > 0) return;
+    this.aweT = 0;        // a blow lets the roar's hold go (playerAwe)
     if (typeof combatIncoming === 'function') d = combatIncoming(d, foe, src);
     // A BLOW MET IN THE PARRY WINDOW is turned before anything is spent: no
     // core, no heat, no log entry. Only callers that name the attacker can be
@@ -9849,7 +9877,8 @@ class Enemy {
     // written down the frame it happens so a reload cannot ask for it twice
     if (this.firstFoe && G.save && G.save.flags && !G.save.flags.firstKill) { G.save.flags.firstKill = 1; if (typeof persist === 'function') persist(); }
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
-    sfx('edie');
+    // an animal cries out as it goes down; a machine comes apart in metal (audio.js FIGHT_VOICE)
+    sfx(typeof isWolf === 'function' && isWolf(this) ? 'wolf_die' : typeof isCheetah === 'function' && isCheetah(this) ? 'cat_die' : 'edie');
     player.gainVolts(8);
     burst(cx, cy, 10, PAL[G.roomDef.zone].glow, 200, 0.4, 400, 3, true);
     // a slag blob does not die clean: it bursts into two small blobs
@@ -11697,11 +11726,17 @@ const MINIS = {
 // are plated while they act and open only while they rest; and a player who lands three blows in a
 // breath gets the PEAL — the far move at once, faster, with more of it. (The rest stays 0.6 s: at 0.5
 // CHIME, which stands on the road before NULLFANG, measured as hard as he is — and the kingdom climbs.)
-const MINI_TELL = 0.45, MINI_HIDE = 0.12, MINI_REST = 0.60;
+// (the plate was 0.12, CHIME's 0.16: the stronger blade of 2026-11-27 — x1.69, the owner's order for
+// shorter fights — let a masher break CHIME in ten seconds through it, so the plate turns the same share
+// of a blow it turned before; what she lands in a rest is the stronger blade, whole)
+const MINI_TELL = 0.45, MINI_HIDE = 0.07, MINI_REST = 0.60;
 const MINI_GREED = { n: 3, win: 1.1, tell: 0.45, spd: 1.15 };
 // CHIME stands on the road (A9, before NULLFANG): its plate is thinner, so a player who has not yet
 // learned its rests still wears it down — the chapter's playthrough measured it a wall at 0.12
-const MINI_HIDE_OF = { chime: 0.16 };
+const MINI_HIDE_OF = { chime: 0.095 };
+// ...and with the stronger blade (2026-11-27) two blows into one breath of CHIME's rest are already
+// greed: a player mashing in its face broke it in ten seconds at three (tests/boss-ladder.cjs B, E)
+const MINI_GREED_N = { chime: 2 };
 function isMini(b) { return !!(b && MINIS[b.kind]); }
 // TWO AUTHORED PLATES EACH, and the reason there are two is the silhouette law.
 //
@@ -13265,7 +13300,7 @@ class Boss {
       // rumble motors, on the controller — re-armed in short pulses
       const pb = Math.floor(this.roarBuzzT * 5.5);
       this.roarBuzzT -= dt;
-      cam.shake = Math.max(cam.shake, 2.6);
+      if (this.kind !== 'glitch') cam.shake = Math.max(cam.shake, 2.6);   // (NULLFANG's roar holds the frame still)
       if (Math.floor(this.roarBuzzT * 5.5) !== pb && typeof padRumble === 'function')
         padRumble(0.4, 0.55, 200);
     }
@@ -13488,7 +13523,7 @@ class Boss {
         if (this.kind === 'glitch') beastSound('roar');
         else sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
               atlas: 'roar_drg', prism: 'roar_prism', alpha: 'alpha_howl' }[this.kind] || 'roar');
-        cam.shake = Math.max(cam.shake, 11);
+        if (this.kind !== 'glitch') cam.shake = Math.max(cam.shake, 11);   // (his holds the frame still: playerAwe)
         this.roarBuzzT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
         // NULLFANG'S WAKE IS AN EVENT (owner, 2026-11-20: "more dramatic and
@@ -13496,11 +13531,13 @@ class Boss {
         // goes through the room as the crest's did — the picture bends as the
         // note passes, the frame stops for a breath, the floor's dust goes up
         // and she is shoved back a step (no damage: a roar is not a blow)
-        if (this.kind === 'glitch' && typeof shockRipple === 'function') {
-          shockRipple(this.cx() + (this.face || -1) * 30, this.cy() - this.h * 0.35,
-            { R: 700, dur: 1.1, amp: 28, width: 66, col: '#b06aff', fronts: 3, gap: 0.12, push: 170, nudge: 7, pulse: 0, light: 0.45 });
-          G.hitStop = Math.max(G.hitStop || 0, 0.08);
-          cam.shake = Math.max(cam.shake, 15);
+        // ...AND NOW IT FREEZES HER, NOT THE PICTURE (owner, 2026-11-27: "screen should freeze, I
+        // should freeze instead of glitching. That might make me fall down"): the bent picture, the
+        // shaking frame and the shove off her feet are gone; the frame stops for a beat and she is
+        // held where she stands, on the ground or in the air (playerAwe)
+        if (this.kind === 'glitch') {
+          G.hitStop = Math.max(G.hitStop || 0, 0.22);
+          if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 760 && typeof playerAwe === 'function') playerAwe(1.0);
           for (let i = 0; i < 22; i++)
             addPart(this.cx() + rnd(-this.w, this.w), this.y + this.h - 4, rnd(-200, 200), rnd(-230, -60), 0.6, '#9c8f78', 3, 320, true);
         } else if (typeof roarWave === 'function')
@@ -14032,7 +14069,9 @@ class Boss {
           }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
-            cam.shake = 11; beastSound(this.roarBig ? 'roar_big' : 'roar'); G.flash = Math.max(G.flash, 0.18);
+            // (no shaking frame and no white-out: the roar HOLDS her, and the frame holds with her —
+            // owner, 2026-11-27, "I should freeze instead of glitching"; playerAwe)
+            beastSound(this.roarBig ? 'roar_big' : 'roar'); G.hitStop = Math.max(G.hitStop, 0.12);
             this.roarBuzzT = 0.6;
             if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
             // the roar as pressure leaving the throat, both ways: it shoves from either side
@@ -14044,17 +14083,11 @@ class Boss {
             // and it throws her from further off.)
             const big = this.roarBig || 0; this.roarBig = 0;
             if (big && this.kind === 'glitch') { this.rageSeen = true; this.nullHold = 4; }   // ...and the null field waits: two roars must not run into each other   // from this roar he burns red (beast.js, media.js rageArt)
-            if (typeof shockRipple === 'function')
-              shockRipple(this.cx() + this.face * 30, this.cy() - 10, big
-                ? { R: 820, dur: 1.2, amp: 32 + big * 4, width: 74, col: '#b06aff', fronts: 4, gap: 0.12, nudge: 8, pulse: 0.24 }
-                : { R: 520, dur: 0.8, amp: 18, width: 54, col: '#b06aff', fronts: 2, gap: 0.14, nudge: 4 });
-            if (big) { cam.shake = Math.max(cam.shake, 20); G.flash = Math.max(G.flash, 0.3); G.hitStop = Math.max(G.hitStop, 0.1);
+            if (big) { G.hitStop = Math.max(G.hitStop, 0.22);
               for (let i = 0; i < 18; i++) addPart(this.cx() + rnd(-this.w * 0.8, this.w * 0.8), this.y + this.h - 3, rnd(-140, 140), rnd(-90, -20), rnd(0.3, 0.55), '#8a8a96', rnd(2, 3.5), 160, false); }
-            // the roar itself shoves you off your feet
-            if (adist < (big ? 430 : 250) && !player.dead) {
-              player.vx = (Math.sign(dist) || 1) * (big ? 640 : 520);
-              player.vy = Math.min(player.vy, -170);
-            }
+            // the roar HOLDS her where she stands (it used to throw her 520-640 px/s — off a palm's
+            // crown, a fall): frozen for a beat, then hers again before the pounce comes
+            if (adist < (big ? 430 : 250) && !player.dead && typeof playerAwe === 'function') playerAwe(big ? 0.8 : 0.5);
             // and the pack answers
             if (G.enemies.filter(e => !e.dead && (e.kind === 'crawler' || e.kind === 'hopper')).length < (this.phase === 2 ? 2 : 1)) {
               const wx = clamp(this.cx() - this.face * 150, 60, G.roomDef.w * TILE - 60);
@@ -15356,7 +15389,9 @@ class Boss {
           // GREED: three blows landed inside a breath, and it answers at once — the far move, faster
           if (this.miniGreed) {
             this.miniGreed = false; this.miniPeal = true;
-            this.st = K.far + 'warn'; this.t = MINI_GREED.tell;
+            // (the move that REACHES her: in its face that is the close one — the far volley flew over a
+            // player mashing under it, owner 2026-11-27, "no move is used that cannot touch her")
+            this.st = (adist <= K.near ? K.close : K.far) + 'warn'; this.t = MINI_GREED.tell;
           } else if (this.t <= 0) {
             // alternate the two moves rather than rolling for them: a coin
             // flip between attacks is what combat-design calls unlearnable,
@@ -15394,7 +15429,7 @@ class Boss {
         this.hideK = (this.st === 'rest' || this.st === 'idle') ? 1 : (MINI_HIDE_OF[this.kind] || MINI_HIDE);
         // ...and three blows landed inside a breath wake it (counted off what actually came off its health)
         if (this.miniHp != null && this.hp < this.miniHp - 0.5) { this.miniHits = (this.miniHits || []).filter(q => this.anim - q < MINI_GREED.win); this.miniHits.push(this.anim);
-          if (this.miniHits.length >= MINI_GREED.n && (this.st === 'rest' || this.st === 'idle')) { this.miniHits = []; this.miniGreed = true; if (typeof sfx === 'function') sfx('tellmid'); } }
+          if (this.miniHits.length >= (MINI_GREED_N[this.kind] || MINI_GREED.n) && (this.st === 'rest' || this.st === 'idle')) { this.miniHits = []; this.miniGreed = true; if (typeof sfx === 'function') sfx('tellmid'); } }
         this.miniHp = this.hp;
         // ---- AND WHERE IT IS -------------------------------------------
         // It is NEVER parked. A construct that holds a station between moves is
@@ -15438,7 +15473,8 @@ class Boss {
       burst(this.cx(), this.cy(), 14, '#ffffff', 200, 0.5, 0, 3, true);
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro'
-      && this.st !== 'lsvanish' && this.st !== 'arcstorm' && !(typeof nfHidden === 'function' && nfHidden(this)) && !(this.kind === 'glitch' && this.st === 'lurkpounce')) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
+      && this.st !== 'lsvanish' && this.st !== 'arcstorm' && !(typeof nfHidden === 'function' && nfHidden(this)) && !(this.kind === 'glitch' && this.st === 'lurkpounce')
+      && !(this.kind === 'alpha' && typeof ALPHA_SOFT !== 'undefined' && ALPHA_SOFT[this.st])) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
       // (NULLFANG's burst from the leaves hurts with its drawn body only, js/nullfang-duel.js nfBurstBox:
       // the plain box sits in the clump while the drawn lion is still coming out of it — ledger, the hit
       // is the drawn shape)

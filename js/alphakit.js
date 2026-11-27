@@ -63,7 +63,11 @@ function alphaFuryDue(b) {
 }
 function alphaFuryBegin(b) {
   b.furying = 1; b.st = 'furywarn'; b.t = TELL_HEAVY; b.windT = TELL_HEAVY; b.fired = false; b.vx = 0;
-  if (typeof sfx === 'function') sfx('alpha_furywarn');
+  // THE HEAD GOES BACK, SO IT HOWLS (owner, 2026-11-27: "when it actually howls when I'm fighting
+  // it, it does not produce any sound"). The fury is performed with the howl's take (ALPHA_STRIP)
+  // and it used to say only a growl: the recorded howl plays now, the growl beneath it.
+  if (typeof sfx === 'function') { sfx('alpha_howl'); sfx('alpha_furywarn'); }
+  if (typeof alphaHowlHeard === 'function') alphaHowlHeard();
   if (typeof fx === 'function') b.coilFx = fx('gather', b.cx(), b.y + b.h * 0.35, { rx: 190, ry: 150, dur: TELL_HEAVY, col: ALPHA_RED, hot: ALPHA_HOT, follow: b, power: 1.1 });
 }
 function alphaFuryFire(b, px, py) {
@@ -256,7 +260,10 @@ function alphaWitStates(b, dt, px, py) {
       // along the floor or through the air, turn about
       b.vx = 0; b.face = Math.sign(px - b.cx()) || b.face;
       b.midAlt = !b.midAlt; b.fired = false; b._tellDur = 0;
-      if (!b.midAlt) alphaRendBegin(b);
+      // (only a counter that reaches her: ALPHA_REACH, wolves.js — out of both, it rests)
+      const R = typeof alphaReach === 'function' ? alphaReach(b) : null, ad = Math.abs(px - b.cx());
+      if (R && ad > R.rend) { b.st = 'rest'; b.t = bossRest(b, 0.6); }
+      else if (!b.midAlt || (R && ad > R.leap)) alphaRendBegin(b);
       else {
         b.st = 'coil'; b.t = TELL_SWIPE;
         if (b.fury) { b.quakeX = alphaLeapMark(b); const qy = typeof fxSurfaceY === 'function' ? fxSurfaceY(b.quakeX, b.y + b.h, 60) : NaN; b.quakeY = qy === qy ? qy : b.y + b.h; } else b.quakeX = null;
@@ -274,7 +281,7 @@ function alphaWitStates(b, dt, px, py) {
     const cx = b.cx();
     if (!b.fired) {
       b.fired = true;
-      if (typeof sfx === 'function') sfx('slash');
+      if (typeof sfx === 'function') sfx('alpha_snap');   // (it asked for 'slash', which nothing answered: the skybite was silent)
       cam.shake = Math.max(cam.shake, 5);
       // THE BITE, generated (js/bossvfx.js): two crescents of fangs snapping shut in the air over its
       // spine — exactly the box that bites. (It was a pillar of light standing up out of its back and
@@ -298,6 +305,8 @@ function alphaWitStates(b, dt, px, py) {
 // a fury leap that missed: does it come again? True when it has coiled again.
 function alphaChain(b, px) {
   if (!b.fury || (b.chainN || 0) >= ALPHA_WIT.chain) { b.chainN = 0; return false; }
+  // (a pounce that cannot reach her is not thrown: ALPHA_REACH, wolves.js)
+  if (typeof ALPHA_REACH !== 'undefined' && Math.abs(px - b.cx()) > ALPHA_REACH.leap) { b.chainN = 0; return false; }
   b.chainN = (b.chainN || 0) + 1;
   b.face = Math.sign(px - b.cx()) || b.face;
   b.st = 'coil'; b.t = ALPHA_WIT.chainTell; b.vx = 0; b.fired = false; b._tellDur = 0;

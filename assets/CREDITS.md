@@ -153,7 +153,7 @@ rather than on a contact sheet.
 | `sfx/vox/roar_*.ogg`, `purr.ogg`, `win.ogg` | Higgsfield | the guardians' roars — each one its own animal — and her purr and win (the first-pass barks were retired for the `hzd_*.wav` set) |
 | `vox/*.ogg` | Higgsfield | the machine folk speaking: eighteen lines, six characters, one voice each. Streamed, never decoded |
 | `manhua/ch1/game/{cv_mouth,cv_walk,m_stalk}.webp` | Higgsfield, GPT Image 2.6 | CONTINUITY (2026-11-17, owner: "why images show me entering cave with marble holding my sword when i dont have it yet ?"): the two cave panels fired again with her hands empty, and one new panel of NULLFANG in his own gunmetal for the corridor meeting, which used to crop a white lion off page 14. Masters, the refused sworded versions and job ids in `source/manhua/refire-2026-11/`; what was looked at is recorded in `source/manhua/continuity.json`. |
-| `sfx/hz_*.ogg` | Higgsfield | her foley (§2ae): paired swings, the finisher, the volt burst, dash, the charge swell, the ready chime, jump, land, and five authored footstep pairs — metal, grass, rock, ice, and the Nest's roots. Gain-matched to −6 dB peak; near-silent takes refused on measurement and re-fired |
+| `sfx/hz_*.ogg` | Higgsfield | her foley (§2ae): paired swings, the finisher, the volt burst, dash, the charge swell, the ready chime, jump and land (both replaced by CC0 recordings 2026-11-27 — see "The fight, recorded"), and five authored footstep pairs — metal, grass, rock, ice, and the Nest's roots. Gain-matched to −6 dB peak; near-silent takes refused on measurement and re-fired |
 | `sfx/hz_evosting.ogg`, `hz_winsting.ogg` | cut from `mus_hero.m4a` | her motif quoted at her moments — the same five notes, not a soundalike |
 | `sfx/fz_*.ogg` | Higgsfield | the foes' shared combat vocabulary (§2ae): three telegraph tiers, slam, phase, wave, spike, summon, wreck, part-break, the three elemental casts — plus a roar per guardian, picked at play time by who is roaring. Gain-matched to −4 dB peak |
 | `sfx/hum_*.ogg` | Higgsfield | the NPC presence loops (§2ae): six ambient beds, each cut to a seamless three seconds with the tail crossfaded into the head. The cave keeps its synth on purpose — its line changes when the beacon is found |
@@ -228,8 +228,37 @@ public domain. Cut and level-normalised; master `source/audio/alpha/nps_wolf_den
 25 December 2013 (`yell-YELLWolvesDec252013.mp3`, the park's sound library), public domain. Cut,
 low-passed and normalised; master `source/audio/alpha/nps_yell-YELLWolvesDec252013.mp3`.
 
-`sfx/alpha/{bark,snap,bite,claw,leap,growl,fury,rend}.ogg` — generated wolf foley (Higgsfield,
-Mirelo text-to-audio), declared as generated; masters `source/audio/alpha/hf_*.mp3`.
+`sfx/alpha/{bark,snap,bite,claw,leap,growl,fury,rend}.ogg` were generated wolf foley (Higgsfield,
+Mirelo) until 2026-11-27; the owner asked for real recordings ("I asked for real sound effects for
+wolves and attacks and fights") and they are now cut from the CC0 recordings below. The generated
+masters (`source/audio/alpha/hf_{bark,snap,bite,claw,leap,growl,fury,rend}.mp3`) were deleted.
+
+## The fight, recorded — 2026-11-27
+
+Every file below is cut by `tools/fight-audio.py` (layers, cut points and levels in the script;
+`source/audio/fight/cuts.json`) from **CC0 1.0** recordings on Freesound, archived unchanged (the
+public HQ previews) in `source/audio/fight/` with `SOURCES.json`. Real recordings, never generated or
+synthesised.
+
+| file | made from | source |
+|---|---|---|
+| `sfx/alpha/bark.ogg` | three barks | **"Large Dog Aggressive Bark.mp3" by mrrap4food** — https://freesound.org/people/mrrap4food/sounds/619045/ |
+| `sfx/alpha/growl.ogg` | a held growl | the same recording (619045) |
+| `sfx/alpha/snap.ogg` | teeth, with a snarl under them | **"Dog Teeth Clattering Clicking" by qubodup** — https://freesound.org/people/qubodup/sounds/841350/ ; **"R01-63-Dog Snarling and Attacking.wav" by craigsmith** — https://freesound.org/people/craigsmith/sounds/479633/ |
+| `sfx/alpha/bite.ogg` | teeth and a snarl | 841350 and 479633, as above |
+| `sfx/alpha/claw.ogg` | a swipe through air over a claw on metal | **"Swish Swipe Short" by Qvantor** — https://freesound.org/people/Qvantor/sounds/877976/ ; **"metal plate scratch and hit" by Ridderick** — https://freesound.org/people/Ridderick/sounds/707638/ |
+| `sfx/alpha/rend.ogg` | claws raking metal | 707638 and 877976, as above |
+| `sfx/alpha/leap.ogg` | a dog's push off, a snarl | **"Dog Jumps Off Tree On Grass" by qubodup** — https://freesound.org/people/qubodup/sounds/827435/ ; 479633 |
+| `sfx/alpha/fury.ogg` | a long snarl and a bark | **"Angry Dog" by CmdRobot** — https://freesound.org/people/CmdRobot/sounds/439535/ ; 619045 |
+| `sfx/alpha/quake.ogg` | a heavy body falling on dirt | **"BODY FALL - V HVY - DIRT" by leonelmail** — https://freesound.org/people/leonelmail/sounds/504626/ |
+| `sfx/alpha/step1.ogg`, `step2.ogg` | heavy steps | **"Heavy steps on gravel.wav" by IlMotografo** — https://freesound.org/people/IlMotografo/sounds/679108/ |
+| `sfx/alpha/yelp.ogg` | a dog's yelp | **"Dog's Yelping 7" by unfa** — https://freesound.org/people/unfa/sounds/160478/ |
+| `sfx/hz_jump.ogg` | cloth and a boot's push off rock (replacing the generated take of 2026-08-26) | **"Jacket/Cloth Rustle 9" by brandondelehoy** — https://freesound.org/people/brandondelehoy/sounds/494797/ ; **"Footsteps_Mountain_Boots_Rock_Jump_Sequence_Mono.wav" by Nox_Sound** — https://freesound.org/people/Nox_Sound/sounds/558477/ |
+| `sfx/hz_land.ogg` | a landing on rock (replacing the generated take) | 558477, as above |
+| `sfx/foley/swing1.ogg`, `swing2.ogg` | a sword through air: the crystal blade | **"Sword Swing 1"** and **"Sword Swing 3" by Nomagician** — https://freesound.org/people/Nomagician/sounds/840716/ , https://freesound.org/people/Nomagician/sounds/840717/ |
+| `sfx/foley/swish.ogg` | a short swish | 877976, as above |
+| `sfx/foley/clash1.ogg`, `clash2.ogg` | steel on steel | **"Sword_Clash (7).wav" by JohnBuhr** — https://freesound.org/people/JohnBuhr/sounds/326868/ ; **"Sword clash 1.wav" by spycrah** — https://freesound.org/people/spycrah/sounds/471095/ |
+| `sfx/cat/hiss1.ogg`, `hiss2.ogg` | a cat's hiss | **"Cat Hissing" by aunrea** — https://freesound.org/people/aunrea/sounds/485952/ ; **"catHisses1.wav" by Zabuhailo** — https://freesound.org/people/Zabuhailo/sounds/146963/ |
 
 `sfx/hits/*.ogg` — 45 impacts (metal, plate, tin, glass, bell, punch, soft, generic; three takes
 each) from **Impact Sounds** by Kenney (www.kenney.nl), CC0 1.0 — no attribution required, given

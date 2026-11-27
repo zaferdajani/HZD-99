@@ -56,7 +56,19 @@ function weaponMode(save = G.save) {
 //
 // Equipped, not owned: she can carry the joined blade and choose to fight with
 // one, and the number follows what is actually in her paws.
-const WEAPON_ATK = { claws: 1, single: 1.3, dual: 1.6, joined: 1.95 };
+//
+// A STRONGER BLADE, A SHORTER FIGHT (owner, 2026-11-27, playing chapter one on an iPad: "the bosses
+// are taking so much time to fight and win against, and it's hard to beat, especially for someone
+// who's starting to play ... boring to wait until you win. Maybe at least you start with a stronger
+// sword so that my attack is stronger ... I will need less hits to beat it. The fight is nice, but
+// the sword is weak"). The crystal sword hit for 16 and now for 27 (x1.69), and the later blades keep
+// their step above it (dual 32, joined 38). THE CLAWS STAY AT 12: measured, 13 a blow already let a
+// player who only presses ATTACK beat GRAVEHORN (tests/boss-skill.cjs), and the rhino is fought before
+// the sword is forged — the shorter fights are bought with the sword.
+// Measured with the boss ladder's own bots (tests/boss-ladder.cjs, tests/hit-count.cjs): a
+// chapter-one guardian falls to roughly 40% fewer blows. No boss lost a move, a tell or an opening:
+// the fight is the same fight, shorter.
+const WEAPON_ATK = { claws: 1, single: 2.25, dual: 2.7, joined: 3.2 };
 function weaponAtk(save = G.save) {
   return WEAPON_ATK[weaponMode(save)] || 1;
 }

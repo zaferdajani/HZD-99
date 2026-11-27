@@ -1228,7 +1228,7 @@ function sfx(n) {
 // (the yelp, the spit) and for a recording that has not arrived yet.
 const HIT_BANK = {
   hit: ['metal_light', 0.62], hit_housing: ['plate_medium', 0.7], hit_robe: ['punch_medium', 0.75],
-  hit_wolf: ['plate_light', 0.5, 1], hit_cat: ['tin_medium', 0.5, 1], hit_ice: ['glass_light', 0.6],
+  hit_wolf: ['plate_light', 0.5, 1], hit_cat: ['tin_medium', 0.5, 1],   // (B[2]: its own voice rides over it — fightVoice) hit_ice: ['glass_light', 0.6],
   hit_soft: ['soft_medium', 0.55], hit_wing: ['generic_light', 0.6], hit_spark: ['metal_light', 0.55],
   bosshit: ['metal_heavy', 0.75], bosshit_glitch: ['metal_heavy', 0.8], bosshit_horn: ['plate_heavy', 0.8],
   bosshit_alpha: ['plate_heavy', 0.75], bosshit_brood: ['metal_medium', 0.75], bosshit_zero: ['glass_heavy', 0.7],
@@ -1248,14 +1248,62 @@ function hitBankPlay(n) {
   if (i === HIT_LAST[B[0]]) i = (i + 1 + Math.floor(Math.random() * 2)) % 3;
   const ok = playBuf('hk_' + B[0] + '_' + i, B[1], 0.92 + Math.random() * 0.16);
   if (ok) HIT_LAST[B[0]] = i;
-  return ok && !B[2];        // B[2]: the animal's own voice still plays over it
+  // B[2]: the animal's own voice goes over it — a RECORDED yelp or hiss (FIGHT_VOICE), one blow
+  // in two, never the oscillator yelp it used to be
+  if (B[2]) { if (Math.random() < 0.5) fightVoice(n === 'hit_cat' ? 'cat_hurt' : 'wolf_hurt'); return true; }
+  return ok;
+}
+// THE FIGHT IS HEARD AS REAL THINGS (owner, 2026-11-27: "alpha wolf is a mix of sounds between the
+// actual howling and the old geeky useless sounds of hitting and jumping like Super Mario, which is
+// not what I asked for. I asked for real sound effects for wolves and attacks and fights").
+// Every cue here is a RECORDING (cut by tools/fight-audio.py from CC0 field and foley recordings,
+// credited in assets/CREDITS.md; the impacts are Kenney's) and NOTHING ELSE: until its file has
+// arrived the cue is silent once — playBuf asks for it — and it never falls through to the
+// oscillators below. cue -> takes [recording, level, rate]; one is picked, never the same twice
+// running, at a hair of pitch spread. tests/fight-foley.cjs plays the fights and listens for synth.
+const FIGHT_VOICE = {
+  // the Alpha's floor, feet and wind-up (the rest of its voice is ALPHA_VOICE)
+  alpha_quake: [['al_quake', 0.95, 0.92]], alpha_land: [['al_quake', 0.62, 1.04]],
+  alpha_step: [['al_step1', 0.2, 1], ['al_step2', 0.2, 1]],
+  tell_alpha: [['al_growl', 0.8, 1.06]],
+  // the pack: the same wolf recordings, pitched up for animals half his size
+  wolf_snarl: [['al_growl', 0.55, 1.22]], wolf_lunge: [['al_leap', 0.5, 1.2]],
+  wolf_snap: [['al_snap', 0.6, 1.2]], wolf_yelp: [['al_yelp', 0.55, 1.12]],
+  wolf_hurt: [['al_yelp', 0.34, 1.22]], wolf_die: [['al_yelp', 0.6, 0.94]],
+  // the cats: a real hiss
+  cat_leap: [['ct_hiss1', 0.42, 1.12], ['ct_hiss2', 0.42, 1.12]], cat_hurt: [['ct_hiss1', 0.3, 1.25]],
+  cat_die: [['ct_hiss2', 0.5, 0.92]], cat_skid: [['al_claw', 0.4, 1.2]],
+  // her: steel on steel, a blade through air, the plate she is made of taking a blow
+  clash: [['fl_clash1', 0.6, 1], ['fl_clash2', 0.5, 1]],
+  whiff: [['fl_swish', 0.3, 1]],
+  hurt: [['hk_plate_medium_0', 0.62, 1], ['hk_plate_medium_1', 0.62, 1], ['hk_plate_medium_2', 0.62, 1]],
+  // a machine coming apart, scrap bouncing and scrap picked up: struck metal, not a scale of beeps
+  edie: [['hk_metal_heavy_0', 0.5, 1.1], ['hk_metal_heavy_1', 0.5, 1.1], ['hk_metal_heavy_2', 0.5, 1.1]],
+  phit: [['hk_metal_light_0', 0.16, 1.5], ['hk_metal_light_1', 0.16, 1.5], ['hk_metal_light_2', 0.16, 1.5]],
+  pick: [['hk_metal_light_0', 0.24, 1.9], ['hk_metal_light_1', 0.24, 1.9], ['hk_metal_light_2', 0.24, 1.9]],
+  // a blow on a shell of rock with a void behind it: a dull knock, recorded, pitched down
+  hollow: [['hk_punch_medium_0', 0.55, 0.72], ['hk_punch_medium_1', 0.55, 0.72], ['hk_punch_medium_2', 0.55, 0.72]],
+  // the skybite asked for 'slash' and nothing answered (alphakit.js calls alpha_snap now)
+  slash: [['al_claw', 0.7, 1]],
+};
+const FIGHT_LAST = {};
+function fightVoice(n) {
+  const T = FIGHT_VOICE[n]; if (!T) return false;
+  let i = Math.floor(Math.random() * T.length);
+  if (T.length > 1 && i === FIGHT_LAST[n]) i = (i + 1) % T.length;
+  FIGHT_LAST[n] = i;
+  const k = T[i];
+  playBuf(k[0], k[1], k[2] * (0.96 + Math.random() * 0.08));
+  return true;
 }
 // cue -> [recording, level, rate (randomised a hair above it, so a bite
 // heard twice in a row is not the same bite)]
 const ALPHA_VOICE = {
-  alpha_howl: ['al_howl', 0.95], alpha_howl_far: ['al_howl_far', 0.6], alpha_bark: ['al_bark', 0.8],
-  alpha_snap: ['al_snap', 0.75, 0.96], wolf_bite: ['al_bite', 0.7, 0.96], alpha_claw: ['al_claw', 0.7, 0.96],
-  alpha_leap: ['al_leap', 0.6, 0.96], alpha_rendwarn: ['al_growl', 0.8], alpha_furywarn: ['al_growl', 0.9, 0.9],
+  // (the recorded howl, at 0.95, measured under two thirds of the level the floor asks of it —
+  // owner 2026-11-27, "it does not produce any sound": tests/howl-pace.cjs, tests/voice-heard.cjs)
+  alpha_howl: ['al_howl', 1.7], alpha_howl_far: ['al_howl_far', 0.6], alpha_bark: ['al_bark', 0.8],
+  alpha_snap: ['al_snap', 1.0, 0.96], wolf_bite: ['al_bite', 0.7, 0.96], alpha_claw: ['al_claw', 0.7, 0.96],
+  alpha_leap: ['al_leap', 0.75, 0.96], alpha_rendwarn: ['al_growl', 0.8], alpha_furywarn: ['al_growl', 0.9, 0.9],
   alpha_fury: ['al_fury', 0.95], alpha_rend: ['al_rend', 0.75, 0.96],
   // THE PACK'S CALL (js/wolfmind.js): the first wolf to see her barks for the
   // others, and the last of a pack bays — the same recorded bark, pitched up
@@ -1281,14 +1329,16 @@ function sfxPlain(n) {
     // take the fired pair and the fired finisher on the same combo index the
     // synth escalated on; the crystal blades keep their own slash synths,
     // which are a different weapon's voice, not a fallback.
-    const swung = (w !== 'crystal1' && w !== 'crystal2')
-      && playBuf(cb >= 2 ? 'hz_fin' : (cb === 1 ? 'hz_swing2' : 'hz_swing1'),
-                 cb >= 2 ? 0.55 : 0.5, 0.94 + Math.random() * 0.12);
-    if (!swung) {
-      if (w === 'crystal2') crystalSlash2(cb);
-      else if (w === 'crystal1') crystalSlash(cb);
-      else clawSlash(cb);
-    }
+    // THE CRYSTAL IS A BLADE, AND IT SOUNDS LIKE ONE (owner, 2026-11-27: "the old geeky useless
+    // sounds of hitting and jumping like Super Mario ... I asked for real sound effects"): its two
+    // slash synths are gone; a recorded sword cutting air (tools/fight-audio.py, CC0), the third
+    // beat lower and heavier, the joined pair a hair brighter. A take not yet arrived is a swing
+    // the player does not hear once, never an oscillator.
+    if (w === 'crystal1' || w === 'crystal2')
+      playBuf(cb >= 2 ? 'fl_swing2' : (cb === 1 ? 'fl_swing2' : 'fl_swing1'), cb >= 2 ? 0.62 : 0.5,
+              (w === 'crystal2' ? 1.06 : 1) * (cb >= 2 ? 0.88 : 1) + Math.random() * 0.06);
+    else if (!playBuf(cb >= 2 ? 'hz_fin' : (cb === 1 ? 'hz_swing2' : 'hz_swing1'),
+                      cb >= 2 ? 0.55 : 0.5, 0.94 + Math.random() * 0.12)) playBuf('fl_swish', 0.4, 1.1);
     // the big open-throat take (hzd_atk3) is OUT of the normal rotation — the
     // owner: "it keeps saying the yaaa! voice with normal hit sequence when it
     // was supposed to be for the supercharged one." Normal hits rotate the two
@@ -1309,11 +1359,12 @@ function sfxPlain(n) {
   // than replacing it (no return): the spring sound is the physics, the voice
   // is her. Reported missing because it genuinely did not exist.
   if (n === 'jump') hzdSay('jump', 200);
-  if (n === 'hurt' && hzdSay(player && player.cores <= 1 ? 'hurtbad' : 'hurt', 260)) return;
+  // A BLOW ON HER IS METAL TAKING A BLOW (owner, 2026-11-27): the struck plate, recorded, with
+  // her cry over it — the falling chip-tune third it used to be is gone
+  if (n === 'hurt') { fightVoice('hurt'); hzdSay(player && player.cores <= 1 ? 'hurtbad' : 'hurt', 260); return; }
   if (n === 'die' && hzdSay('die', 0)) return;
-  if (n === 'dash') { const v = hzdSay('dash', 200);
-    if (playBuf('hz_dash', 0.42, 0.95 + Math.random() * 0.1) || v) return; }
-  if (n === 'djump' && hzdSay('djump', 160)) return;
+  if (n === 'dash') { hzdSay('dash', 200); if (!playBuf('hz_dash', 0.42, 0.95 + Math.random() * 0.1)) playBuf('fl_swish', 0.32, 0.8); return; }
+  if (n === 'djump') { hzdSay('djump', 160); playBuf('hz_jump', 0.3, 1.14 + Math.random() * 0.04); return; }
   if (n === 'heal' && hzdSay('heal', 0)) return;
   if (n === 'chargeReady') { const v = hzdSay('evo', 400);
     if (playBuf('hz_ready', 0.5) || v) return; }
@@ -1321,8 +1372,11 @@ function sfxPlain(n) {
   if (n === 'crystalSwirl') { crystalSwirl(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
-  if (n === 'jump' && playBuf('hz_jump', 0.28, 0.98 + Math.random() * 0.04)) return;
-  if (n === 'land' && playBuf('hz_land', 0.32, 0.97 + Math.random() * 0.06)) return;
+  // (hz_jump and hz_land are recordings since 2026-11-27 — cloth and a push off rock, a boot
+  // set down on it — and a jump never falls through to the melody below: recorded or silent)
+  if (n === 'jump') { playBuf('hz_jump', 0.34, 0.98 + Math.random() * 0.04); return; }
+  if (n === 'land') { playBuf('hz_land', 0.36, 0.97 + Math.random() * 0.06); return; }
+  if (fightVoice(n)) return;
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], n === 'win' ? 1 : 0.97 + Math.random() * 0.06)) return;
@@ -1353,7 +1407,8 @@ function sfxPlain(n) {
     const pair = { ice: ['hz_stepice1', 'hz_stepice2'], rock: ['hz_steprock1', 'hz_steprock2'],
                    grass: ['hz_stepgrass1', 'hz_stepgrass2'], org: ['hz_steporg1', 'hz_steporg2'],
                    metal: ['hz_step1', 'hz_step2'] }[surf];
-    if (playBuf(pair[HZST ? 0 : 1], 0.3, 0.9 + Math.random() * 0.2)) return;
+    // (recorded or silent: a footstep never falls to the synth tick — 2026-11-27, tests/fight-foley.cjs)
+    playBuf(pair[HZST ? 0 : 1], 0.3, 0.9 + Math.random() * 0.2); return;
   }
   // THE FOES' OWN FOLEY (fired 2026-08-26, measured like hers). Shared
   // vocabulary, because that is how the fights are built: every enemy speaks
@@ -1362,10 +1417,15 @@ function sfxPlain(n) {
   // THE ALPHA AND ITS PACK ARE ANIMALS (media.js al_*): the recorded wolf
   // plays, and the oscillator line below is only what a phone hears in the
   // moment before the file has arrived
-  { const A = ALPHA_VOICE[n]; if (A && playBuf(A[0], A[1], A[2] ? A[2] + Math.random() * 0.08 : 1)) return; }
+  // (recorded or silent: a wolf is never an oscillator, not even before its file has arrived —
+  // playBuf asks for a missing take, and the next call is the real one)
+  { const A = ALPHA_VOICE[n]; if (A) {
+      playBuf(A[0], A[1], A[2] ? A[2] + Math.random() * 0.08 : 1); return; } }
   if (n.indexOf('hit') === 0 || n.indexOf('bosshit') === 0) {
-    if (hitBankPlay(n)) return;
-    if (n.indexOf('bosshit_') === 0) n = 'bosshit';      // its synthesised clang, until the takes arrive
+    // (a blow with its own recorded bank is that recording or, before the file arrives, nothing —
+    // owner, 2026-11-27: real sounds for the fights, never the synthesised clang)
+    if (HIT_BANK[n]) { hitBankPlay(n); return; }
+    if (n.indexOf('bosshit_') === 0) n = 'bosshit';      // a body with no bank of its own: the shared recorded clang
   }
   if (n === 'tell' && playBuf('fz_tell', 0.4, 0.94 + Math.random() * 0.12)) return;
   if (n === 'tellmid' && playBuf('fz_tellmid', 0.45)) return;

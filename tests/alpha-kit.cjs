@@ -66,13 +66,15 @@ const { chromium } = require('playwright');
       out.warn = warn / 60; out.TELL_SWIPE = TELL_SWIPE; out.cores = c0 - player.cores; out.logged = ((G.dmgLog && G.dmgLog['alpha.rend']) || 0) - log0;
       out.toward = rendDir === side; out.restT = restT; out.waves = waves; out.heard = ['alpha_rendwarn', 'alpha_rend'].filter(n => heard.includes(n)); out.fx = fxs.includes('slash');
       // ...and the same blow against a girl who is in the air when it arrives, and one who is out of its reach
-      const air = async (dx, up) => { put(dx); ask(1, true); player.iT = 0; const c1 = player.cores; let far = 0, x0 = null;
+      // (force: since 2026-11-27 the king throws no rend from out of its reach — "no move is used that
+      // cannot touch her", tests/alpha-reach.cjs — so the wave's END is measured by throwing one at her)
+      const air = async (dx, up, force) => { put(dx); ask(1, true); if (force) { b.face = Math.sign(player.x - b.cx()) || 1; alphaRendBegin(b); } player.iT = 0; const c1 = player.cores; let far = 0, x0 = null;
         run(240, () => { if (up && b.rends && b.rends.length) { player.y = floorY - player.h - 90; player.vy = 0; } else put(dx);
           if (b.rends && b.rends.length) { if (x0 == null) x0 = b.rends[0].x; far = Math.max(far, Math.abs(b.rends[0].x - x0)); }
           if (b.st === 'rest' && b.t > 0.05 && x0 != null && !(b.rends && b.rends.length)) return false; });
         return { lost: c1 - player.cores, far }; };
       out.jumped = await air(220, true);
-      out.beyond = await air(420, false);
+      out.beyond = await air(420, false, true);
       sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; return out;
     })()`));
     check('A. the middle distance takes turns: the leap, then the rend', A.order.join(',') === 'coil,rendwarn,coil,rendwarn', A.order.join(' > '));
@@ -89,9 +91,10 @@ const { chromium } = require('playwright');
       put(150); b.hp = b.hpMax * 0.55; let early = 0;
       run(120, () => { player.iT = 9; put(150); if (/fury/.test(b.st)) early++; });
       // a blow in progress is not cut short: at half health mid-roar, the roar finishes first
-      put(380); ask(2, false); b.alphaAlt = true; run(90, () => { player.iT = 9; put(380); if (b.st === 'roarwarn') return false; }); const during = b.st;
+      // (at 180 px: the roar is begun only with her inside its reach since 2026-11-27)
+      put(180); ask(2, false); b.alphaAlt = true; run(90, () => { player.iT = 9; put(180); if (b.st === 'roarwarn') return false; }); const during = b.st;
       b.hp = b.hpMax * 0.45; let cut = false, sawRoar = false, stag = 0;
-      run(400, () => { player.iT = 9; put(380); if (b.stagT > 0) stag++; if (b.st === 'roar' || b.st === 'howl') sawRoar = true; if (b.st === 'furywarn') { if (!sawRoar) cut = true; return false; } });
+      run(400, () => { player.iT = 9; put(180); if (b.stagT > 0) stag++; if (b.st === 'roar' || b.st === 'howl') sawRoar = true; if (b.st === 'furywarn') { if (!sawRoar) cut = true; return false; } });
       out.during = during; out.cut = cut; out.sawRoar = sawRoar; out.st = b.st; out.stag = stag / 60;
       // the wind-up, and then the roar itself against a girl standing next to it
       const side = put(150); player.iT = 0; const c0 = player.cores; const x0 = player.x;
@@ -156,7 +159,7 @@ const { chromium } = require('playwright');
       const out = {};
       out.claw = move(0, false, 60);     // alphaAlt flips to true: the claw
       out.bite = move(0, true, 60);      // ...to false: the bite
-      out.roar = move(2, true, 380);     // far, alt -> false: the roar
+      out.roar = move(2, true, 180);     // far band, alt -> false, she inside its reach: the roar (never from 380 since 2026-11-27)
       G.enemies = G.enemies.filter(e => e === b);
       out.howl = move(2, false, 380);    // far, alt -> true with room in the pack: the howl
       out.pack = G.enemies.filter(e => e !== b).map(e => ({ hunt: e.hunt, snarl: e.snarlT > 0 }));

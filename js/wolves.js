@@ -58,8 +58,16 @@ function isWolf(e) {
 // King still leads the pack: at the den's mouth in the meadow she hears him
 // from behind the rock, and the moment she is through, he howls — and keeps
 // calling until the fight has begun.
-const ALPHA_CALL = { first: 0.45, every: [6.5, 10], mouth: 640 };
+// ...AND NOW IT CALLS ONLY NOW AND THEN (owner, 2026-11-27: "the alpha is howling too much before I
+// reach it. It should be every once in a while... it's losing the significance of the howling ...
+// The howling is so random"). It called every 6.5-10 s from the den's mouth to his floor. Now: once
+// as she comes into each room of the road (A2's mouth, the Run, his den), then every 22-40 s; never
+// on top of another howl (`gap` s since the last one, his own in the fight included —
+// G.alphaHowlAgo, set by alphaHowlHeard). tests/howl-pace.cjs.
+const ALPHA_CALL = { first: 0.45, every: [22, 40], mouth: 640, gap: 14 };
+function alphaHowlHeard() { if (typeof G !== 'undefined' && G) G.alphaHowlAgo = 0; }
 function alphaCall(dt) {
+  G.alphaHowlAgo = (G.alphaHowlAgo == null ? 1e9 : G.alphaHowlAgo) + dt;
   if ((typeof isHero === 'function' && isHero()) || !G.save || !G.save.flags || G.save.flags.alpha || !player || player.dead) { G.alphaCallT = null; return; }
   if (G.state !== 'PLAY' || G.dialog || G.cut || G.trans) return;
   const id = G.roomId; let far;
@@ -72,10 +80,12 @@ function alphaCall(dt) {
   } else { G.alphaCallT = null; return; }
   if (G.alphaCallRoom !== id || G.alphaCallT == null) { G.alphaCallRoom = id; G.alphaCallT = far ? 1.1 : ALPHA_CALL.first; G.alphaCallN = 0; }
   // (once the fight is on, his howl is a MOVE with its own tell — the den's call stops)
-  if (!far && id === 'A10' && G.alphaCallN > 0 && typeof bossActive === 'function' && bossActive()) return;
+  if (!far && id === 'A10' && typeof bossActive === 'function' && bossActive()) return;
   G.alphaCallT -= dt;
   if (G.alphaCallT > 0) return;
-  sfx(far ? 'alpha_howl_far' : 'alpha_howl'); G.alphaCallN++;
+  // never on top of the last howl: it waits until that one has had its room
+  if (G.alphaHowlAgo < ALPHA_CALL.gap) { G.alphaCallT = ALPHA_CALL.gap - G.alphaHowlAgo; return; }
+  sfx(far ? 'alpha_howl_far' : 'alpha_howl'); G.alphaCallN++; alphaHowlHeard();
   if (!far) { cam.shake = Math.max(cam.shake, 2.5); if (typeof padRumble === 'function') padRumble(0.3, 0.25, 420); }
   G.alphaCallT = rnd(ALPHA_CALL.every[0], ALPHA_CALL.every[1]);
 }
@@ -798,6 +808,26 @@ function alphaQuestOffer() {
   G.save.flags.alphaLead=1;qSet('alpha_pack','active');persist();
   G.dialog={name:t('n_ratchet'),lines:t('q_ask_alpha_pack'),i:0,npc:'ratchet'};G.state='DIALOG';
 }
+// HOW FAR EACH MOVE REACHES, from its centre to hers (owner, 2026-11-27 — see alphaStep):
+//   claw  the close band and the step it takes into the swing (spd x1.6 over its wind-up) and the paw
+//   roar  the stun's radius (260, the ring on the floor) less a margin: she is inside it when it starts
+//   leap  launch 480 px/s for the 0.43 s it is in the air, plus the two bodies' half-widths
+//   rend  the wave starts at its shoulder and runs rendReach along the floor
+//   walk  when nothing reaches her: it walks in toward its band for this long, at its prowl (open
+//         time, as the far roar's wind-up and rest were — a lope straight at her was measured making
+//         the fight a third shorter for the player who lost it, and the owner asked for easier)
+const ALPHA_REACH = { claw: 200, roar: 230, leap: 300, walk: 0.6, walks: 2 };
+function alphaReach(b) {
+  const rr = typeof ALPHA_FX !== 'undefined' ? b.w * 0.5 + 10 + ALPHA_FX.rendReach - 16 : ALPHA_REACH.leap;
+  return { claw: ALPHA_REACH.claw, roar: ALPHA_REACH.roar, leap: ALPHA_REACH.leap, rend: Math.max(ALPHA_REACH.leap, rr) };
+}
+// ITS BODY HURTS ONLY WHEN IT IS STRIKING (the creature-motion-combat contract: "contact damage is
+// active-strike-only, not a hidden tax during its advertised opening"). Measured 2026-11-27 with the
+// boss ladder's skilled bot: most of the cores the Alpha took were its body walking into her while it
+// rested or wound up — an opening that bit. Its rest, its turn, its walk and every wind-up are soft now;
+// the leap, the claw, the bite, the rend, the roar, the fury, the skybite and the spring still hurt.
+const ALPHA_SOFT = { idle: 1, rest: 1, turn: 1, recoil: 1, prowl: 1, broodcall: 1, howl: 1, coil: 1,
+  clawwarn: 1, bitewarn: 1, roarwarn: 1, rendwarn: 1, furywarn: 1, skywarn: 1, dorm: 1 };
 const ALPHA_KIT = {
   spd: 132,          // it prowls; the leap is where the speed is
   close: 128,        // inside this it claws or bites
@@ -849,7 +879,7 @@ function alphaSummon(b) {
     if (typeof alphaPackArrive === 'function') alphaPackArrive(w);
     burst(x + 14, b.y + b.h - 12, 12, '#ff5f6d', 220, 0.5, 220, 3, true);
   }
-  if (want > 0) sfx('cast');
+  if (want > 0) sfx('wolf_bark');    // (the pack answers with a bark, recorded — it was a laser zap)
 }
 
 // The Alpha's whole machine. Written as one pass with no early returns for the
@@ -925,26 +955,46 @@ function alphaStep(b, dt, px, py) {
       // opens), and it waits an extra beat first so the opening is unmissable.
       if ((b.denied || 0) >= 3) { b.denied = 0; b.band = 0; b.t = 0.7; return alphaMove(b, dt, adist); }
       b.alphaAlt = !b.alphaAlt;
-      if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = Math.max(.42,TELL_FAST); }
-      else if (b.band === 1) {
+      // NO MOVE IS THROWN THAT CANNOT TOUCH HER (owner, 2026-11-27: "the wolf is doing shockwaves
+      // even when I'm away from it, which is irrelevant and does not serve a purpose. It does not
+      // even reach me"). The far band used to roar from 375 px with a 262 px stun, and a claw was
+      // thrown from wherever two beats of walking left it. The band still chooses what it WANTS to
+      // do; what it does is the band's move only if that move reaches her from where she is now
+      // (ALPHA_REACH), else the move that does — and if none does, it walks in (alphaMove).
+      const R = alphaReach(b);
+      const claw = () => { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = Math.max(.42,TELL_FAST); };
+      const leap = () => {
+        b.st = 'coil'; b.t = TELL_SWIPE;
+        // a fury leap shakes the ground it lands on: the spot is painted
+        // from the first frame of the coil (alphaDrawUnder)
+        if (b.fury && typeof alphaLeapMark === 'function') {
+          b.quakeX = alphaLeapMark(b);
+          const qy = typeof fxSurfaceY === 'function' ? fxSurfaceY(b.quakeX, b.y + b.h, 60) : NaN;
+          b.quakeY = qy === qy ? qy : b.y + b.h;
+        } else b.quakeX = null;
+      };
+      const rend = () => { if (typeof alphaRendBegin === 'function') alphaRendBegin(b); else leap(); };
+      const roar = () => { b.st = 'roarwarn'; b.t = TELL_HEAVY; };
+      if (b.band === 0 && adist <= R.claw) claw();
+      else if (b.band === 1 && adist <= R.leap) {
         // THE MIDDLE DISTANCE HAS TWO ANSWERS NOW: the leap, and the REND —
         // turn about, the leap first. One comes at her through the air and
         // the other along the floor, so the read is which, not whether.
         b.midAlt = !b.midAlt;
-        if (!b.midAlt && typeof alphaRendBegin === 'function') alphaRendBegin(b);
-        else {
-          b.st = 'coil'; b.t = TELL_SWIPE;
-          // a fury leap shakes the ground it lands on: the spot is painted
-          // from the first frame of the coil (alphaDrawUnder)
-          if (b.fury && typeof alphaLeapMark === 'function') {
-            b.quakeX = alphaLeapMark(b);
-            const qy = typeof fxSurfaceY === 'function' ? fxSurfaceY(b.quakeX, b.y + b.h, 60) : NaN;
-            b.quakeY = qy === qy ? qy : b.y + b.h;
-          } else b.quakeX = null;
-        }
+        if (!b.midAlt) rend(); else leap();
       }
-      else if (b.alphaAlt && packRoom) { b.st = 'broodcall'; b.t = TELL_HEAVY; }
-      else { b.st = 'roarwarn'; b.t = TELL_HEAVY; }
+      else if (b.band === 2 && b.alphaAlt && packRoom) { b.st = 'broodcall'; b.t = TELL_HEAVY; }   // the howl calls the pack: its reach is the room
+      else if (b.band === 2 && adist <= R.roar) roar();
+      // the band's own move does not reach her. It WALKS IN for it first (open time, the beat the
+      // whiff and the far roar used to be), twice; then it throws the move that does reach her,
+      // nearest first — and if none does, it keeps walking
+      else if ((b.walkN = (b.walkN || 0) + 1) <= ALPHA_REACH.walks) { b.band = (b.band + 2) % 3; b.t = ALPHA_REACH.walk; b.alphaAlt = !b.alphaAlt; return alphaMove(b, dt, adist); }
+      else if (adist <= R.claw) claw();
+      else if (adist <= R.roar && b.band === 2) roar();
+      else if (adist <= R.leap) leap();
+      else if (adist <= R.rend) rend();
+      else { b.band = (b.band + 2) % 3; b.t = ALPHA_REACH.walk; b.alphaAlt = !b.alphaAlt; return alphaMove(b, dt, adist); }
+      b.walkN = 0;
     }
   } else if (b.st === 'clawwarn' || b.st === 'bitewarn') {
     // it STEPS INTO the swing rather than planting and swinging at air — which
@@ -965,7 +1015,8 @@ function alphaStep(b, dt, px, py) {
                    w: reach, h: b.h * 0.7 };
       const hit = !player.dead && player.iT <= 0 && aabb(hb, player);
       if (hit) { player.hurt(DF().edmg, b.cx(), 'alpha.' + b.st); b.denied = (b.denied || 0) + 1; b.hitSince = true; }
-      sfx(b.st === 'claw' ? 'slash' : 'hit');
+      // (its voice is alphaStrikeFx's: the recorded claw or jaws — the generic 'slash'/'hit' it also
+      // called were a silence and a struck tin can, owner 2026-11-27)
       if (typeof alphaStrikeFx === 'function') alphaStrikeFx(b, b.st, reach, hit);
       cam.shake = Math.max(cam.shake, 3);
       burst(b.cx() + b.face * reach * 0.7, b.cy(), 8, '#ffb15a', 190, 0.4, 120, 2, true);
@@ -1002,7 +1053,7 @@ function alphaStep(b, dt, px, py) {
     if (want > b.shakeN) {
       b.shakeN = want;
       if (!player.dead) player.hurt(DF().edmg, b.cx(), 'alpha.shake');
-      sfx('hit'); cam.shake = Math.max(cam.shake, 6);
+      cam.shake = Math.max(cam.shake, 6);
       if (typeof alphaShakeFx === 'function') alphaShakeFx(b, b.shakeN);
       if (typeof padRumble === 'function') padRumble(0.8, 0.6, 140);
       burst(b.cx() + b.face * b.w * 0.5, b.cy(), 7, '#ff9a5a', 220, 0.4, 60, 2, true);
@@ -1015,7 +1066,7 @@ function alphaStep(b, dt, px, py) {
         player.stunT = 0;                        // the throw gives her back
       }
       b.st = 'rest'; b.t = bossRest(b, 0.8);
-      sfx('boom'); cam.shake = Math.max(cam.shake, 7);
+      sfx('alpha_land'); cam.shake = Math.max(cam.shake, 7);   // (a body landing, recorded — it was an explosion)
     }
   } else if (b.st === 'coil') {
     b.windT = TELL_SWIPE;
@@ -1041,7 +1092,7 @@ function alphaStep(b, dt, px, py) {
       // IT MISSED. The spin is the opening, and it is the only generous one in
       // the fight — which is exactly why the fight has one.
       b.st = 'turn'; b.t = 0.5; b.vx = 0;
-      cam.shake = Math.max(cam.shake, 5); sfx('boom');
+      cam.shake = Math.max(cam.shake, 5); sfx('alpha_land');
       burst(b.cx(), b.y + b.h, 14, '#c8925c', 200, 0.5, 320, 3);
       if (typeof alphaLeapLanded === 'function') alphaLeapLanded(b);
       // IN FURY IT COMES AGAIN (alphaChain): the spin — the opening — is after
@@ -1063,7 +1114,7 @@ function alphaStep(b, dt, px, py) {
       b.fired = true;
       alphaSummon(b);
       if (typeof alphaHowlFx === 'function') alphaHowlFx(b);
-      sfx('alpha_howl'); cam.shake = Math.max(cam.shake, 7);
+      sfx('alpha_howl'); alphaHowlHeard(); cam.shake = Math.max(cam.shake, 7);
       if (typeof padRumble === 'function') padRumble(0.7, 0.5, 380);
       // (no stroked rings: the howl is a wave through the picture — js/alphakit.js)
     }
@@ -1115,9 +1166,12 @@ function alphaMove(b, dt, adist) {
               || /warn$/.test(b.st) || b.st === 'claw' || b.st === 'bite'
               || b.st === 'rend' || b.st === 'fury' || b.st === 'sky';
   if (b.st !== 'leap' && b.st !== 'recoil' && b.st !== 'spring' && !rooted) {
-    const tgt = b.band === 0 ? ALPHA_KIT.close * 0.55
+    // (the far band stands off to HOWL — the pack's call needs no reach — and comes in to ROAR, whose
+    // stun does: the next commit flips alphaAlt, so a howl is next when it is false now)
+    const howlNext = !b.alphaAlt && G.enemies.filter(e => !e.dead && isWolf(e)).length < ALPHA_KIT.packMax;
+    const tgt = b.band === 0 ? Math.max(ALPHA_KIT.close * 0.55, b.w * 0.5 + 34)   // (close, never INTO her: a walk that ends inside her was a body blow nobody threw)
               : b.band === 1 ? (ALPHA_KIT.close + ALPHA_KIT.near) * 0.5
-              : ALPHA_KIT.near * 1.25;
+              : howlNext ? ALPHA_KIT.near * 1.25 : ALPHA_REACH.roar * 0.7;
     // close if the gap is bigger than the band wants, back off if it is
     // smaller, and stand still inside a dead band so it does not jitter on the
     // boundary the way an unclamped seek does

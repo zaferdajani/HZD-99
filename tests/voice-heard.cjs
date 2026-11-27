@@ -25,6 +25,11 @@ const ROARS = ['roar', 'roar_eagle', 'roar_glc', 'roar_drg', 'roar_prism'];
   const R = await page.evaluate(async (NAMES) => { window.requestAnimationFrame = () => 0; const out = { lv: {} };
     const sv = newSave(1); sv.time = 99; sv.storyVersion = 2; Object.assign(sv.flags, { tut: 1, woke: 1, heal: 1, nfMeet: 1 }); startGame(sv); loadRoom('A10'); G.state = 'PLAY'; G.wake = G.dialog = G.cut = null;
     audioOn(); const real = AC; MUTED = false; MUSIC_ON = true;
+    // THE RECORDINGS FIRST (2026-11-27): the Alpha's voice, the pack's and the impacts are recordings
+    // now and never an oscillator — before the file arrives a cue is silent, not synthesised — so what
+    // is measured is what a player hears once the fight's sounds are in (they load in the first seconds)
+    for (const k in MEDIA_SRC.audio) if (/^(al_|hk_|fz_)/.test(k)) mediaAudio(k);
+    for (let n = 0; n < 150 && Object.keys(MEDIA_SRC.audio).some(k => /^(al_|hk_)/.test(k) && !MBUF[k]); n++) await new Promise(r => setTimeout(r, 100));
     for (const n of NAMES) { const off = new OfflineAudioContext(1, 44100 * 3, 44100); AC = off; MUS_DIP_UNTIL = 0; sfx(n);
       const d = (await off.startRendering()).getChannelData(0), a = Math.exp(-2 * Math.PI * 400 / 44100), W = 4410; let pk = 0, bw = 0, bh = 0, lp = 0;
       for (let s = 0; s + W <= d.length; s += W) { let x = 0, y = 0; for (let i = s; i < s + W; i++) { const v = d[i]; lp = a * lp + (1 - a) * v; const h = v - lp; x += v * v; y += h * h; if (Math.abs(v) > pk) pk = Math.abs(v); } bw = Math.max(bw, Math.sqrt(x / W)); bh = Math.max(bh, Math.sqrt(y / W)); }

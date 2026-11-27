@@ -23,19 +23,20 @@
 //                                    a LOOPING strip drawn by its owner at time t (a bolt in flight,
 //                                    a wave running along the floor, a shock crawling on the ground)
 // (x, y) is where the strip's HOT POINT lands (the white core, measured by the cutter), except for
-// the strips that stand on the floor (`foot`), whose bottom edge sits at y.
+// the strips that stand on the floor (`foot`), whose bottom edge sits at y. A strip that RUNS along the
+// floor (`ground`) is laid along its curve (drawBossVfxCell); a pillar stands at its one point.
 const BOSS_VFX = {
   agent_bolt:   { cells: 8,  cw: 323, ch: 96,  hot: [0.879, 0.517], loop: 1, fps: 14 },
   agent_burst:  { cells: 11, cw: 256, ch: 256, hot: [0.469, 0.47],  dur: 0.55 },
   agent_pillar: { cells: 16, cw: 180, ch: 320, hot: [0.522, 0.98],  foot: 1, dur: 0.9 },
   agent_slash:  { cells: 6,  cw: 266, ch: 256, hot: [0.5, 0.5],     dur: 0.3 },
-  agent_wave:   { cells: 8,  cw: 442, ch: 128, hot: [0.6, 0.92],    loop: 1, fps: 12, foot: 1 },
-  nf_shock:     { cells: 8,  cw: 399, ch: 96,  hot: [0.5, 0.5],     loop: 1, fps: 16 },
+  agent_wave:   { cells: 8,  cw: 442, ch: 128, hot: [0.6, 0.92],    loop: 1, fps: 12, foot: 1, ground: 1 },
+  nf_shock:     { cells: 8,  cw: 399, ch: 96,  hot: [0.5, 0.5],     loop: 1, fps: 16, ground: 1 },
   nf_bolt:      { cells: 8,  cw: 222, ch: 96,  hot: [0.703, 0.449], loop: 1, fps: 16 },
   nf_claw:      { cells: 12, cw: 256, ch: 256, hot: [0.533, 0.439], dur: 0.45 },
   nf_burst:     { cells: 6,  cw: 256, ch: 256, hot: [0.489, 0.543], dur: 0.45, fadeTail: 1 },
   alpha_bite:   { cells: 13, cw: 256, ch: 256, hot: [0.493, 0.478], dur: 0.55 },
-  alpha_land:   { cells: 10, cw: 338, ch: 160, hot: [0.499, 0.815], foot: 1, dur: 0.6 },
+  alpha_land:   { cells: 10, cw: 338, ch: 160, hot: [0.499, 0.815], foot: 1, ground: 1, dur: 0.6 },
   chime_shard:  { cells: 8,  cw: 299, ch: 128, hot: [0.647, 0.301], loop: 1, fps: 14 },
   chime_burst:  { cells: 10, cw: 256, ch: 256, hot: [0.463, 0.552], dur: 0.5 },
 };
@@ -52,6 +53,16 @@ function bossVfxReady(name) {
 // is a blow with no picture
 function bossVfxPrefetch(names) { for (const n of names) bossVfxReady(n); }
 
+// A STRIP THAT STANDS ON THE FLOOR LIES ALONG IT (owner, 2026-11-27: "when the wolf jumps, it
+// creates a straight red line underneath it instead of a red effect underneath it that goes with
+// the terrain curves"; "The agent's fire after effect ... should walk on the terrain, not to the
+// sides horizontally. It should follow the natural terrain"). A floor strip (`ground`) was
+// one flat rectangle: on a mound its middle sank into the ground and its ends hung in the air. It
+// is drawn now as columns, each set on the surface under it (fxSurfaceY, walked out from the
+// centre as fxWalk does), and it ENDS where the ground ends — a drop or a wall — as the blow does.
+// tests/ground-fx.cjs.
+const VFX_DRAPE = { colW: 10, reach: 40 };
+const VFX_DRAPE_Y = new Float32Array(256);
 function drawBossVfxCell(c, name, cell, x, y, h, flip, rot, a, wk) {
   const V = BOSS_VFX[name], im = V && bossVfxReady(name);
   if (!im || !(a > 0.01) || !(h > 1)) return false;
@@ -59,8 +70,36 @@ function drawBossVfxCell(c, name, cell, x, y, h, flip, rot, a, wk) {
   const sw = im.naturalWidth / n, sh = im.naturalHeight, w = h * sw / sh * (wk || 1);
   c.save();
   c.globalCompositeOperation = 'lighter'; c.globalAlpha = Math.min(1, a);
-  c.translate(x, y); if (rot) c.rotate(rot); if (flip) c.scale(-1, 1);
-  c.drawImage(im, i * sw, 0, sw, sh, -V.hot[0] * w, -V.hot[1] * h, w, h);
+  const drape = V.ground && !rot && typeof fxSurfaceY === 'function' && typeof G !== 'undefined' && G.grid;
+  let draped = false;
+  if (drape) {
+    // the columns, in the strip's own frame (flip mirrors them in the world); the surface read at every
+    // column EDGE, walked out from the hot point both ways (so a column is only ever set on ground it
+    // is joined to), and each column sheared from its left edge's height to its right edge's, so the
+    // strip bends along the curve in one piece instead of stepping
+    const N = Math.min(254, Math.max(3, Math.ceil(w / VFX_DRAPE.colW))), cw = w / N, x0 = -V.hot[0] * w;
+    const s0 = fxSurfaceY(x, y, VFX_DRAPE.reach);
+    if (!isNaN(s0)) {
+      draped = true;
+      const fs = flip ? -1 : 1, c0 = clamp(Math.round(-x0 / cw), 0, N), E = VFX_DRAPE_Y, step = Math.max(18, cw * 1.7);
+      let prev = s0;
+      for (let j = c0; j <= N; j++) { E[j] = isNaN(prev) ? NaN : fxSurfaceY(x + fs * (x0 + j * cw), prev, j === c0 ? VFX_DRAPE.reach : step); prev = E[j]; }
+      prev = E[c0];
+      for (let j = c0 - 1; j >= 0; j--) { E[j] = isNaN(prev) ? NaN : fxSurfaceY(x + fs * (x0 + j * cw), prev, step); prev = E[j]; }
+      c.translate(x, y); if (flip) c.scale(-1, 1);
+      const m = c.getTransform();
+      for (let j = 0; j < N; j++) {
+        if (isNaN(E[j]) || isNaN(E[j + 1])) continue;                  // past a drop or a wall: it ends
+        const a0 = clamp(E[j] - s0, -80, 80), a1 = clamp(E[j + 1] - s0, -80, 80);
+        c.setTransform(m); c.translate(x0 + j * cw, a0); c.transform(1, (a1 - a0) / cw, 0, 1, 0, 0);
+        c.drawImage(im, i * sw + j * sw / N, 0, sw / N, sh, 0, -V.hot[1] * h, cw, h);   // (no overlap: under the additive blend an overlap is a bright seam)
+      }
+    }
+  }
+  if (!draped) {
+    c.translate(x, y); if (rot) c.rotate(rot); if (flip) c.scale(-1, 1);
+    c.drawImage(im, i * sw, 0, sw, sh, -V.hot[0] * w, -V.hot[1] * h, w, h);
+  }
   c.restore();
   return true;
 }

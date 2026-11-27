@@ -1,0 +1,167 @@
+{
+ "note": "Freesound files are the public HQ preview MP3s (~128 kbps), not the original WAV/FLAC (originals need a login). Every one was checked CC0 on its page (creativecommons.org/publicdomain/zero/1.0) on 2026-11-27. Cut by tools/fight-audio.py (cuts.json); chosen from page titles and tags and a spectrogram and event analysis of each file, not by listening.",
+ "files": [
+  {
+   "file": "dog_aggressive_bark_mrrap4food_619045.mp3",
+   "title": "Large Dog Aggressive Bark.mp3",
+   "author": "mrrap4food",
+   "page": "https://freesound.org/people/mrrap4food/sounds/619045/",
+   "download": "https://cdn.freesound.org/previews/619/619045_781461-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the Alpha's bark (the stun roar: three barks), his growl (the wind-ups, the pack's snarl), the second voice of his fury"
+  },
+  {
+   "file": "dog_teeth_clatter_qubodup_841350.mp3",
+   "title": "Dog Teeth Clattering Clicking",
+   "author": "qubodup",
+   "page": "https://freesound.org/people/qubodup/sounds/841350/",
+   "download": "https://cdn.freesound.org/previews/841/841350_71257-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the snap and the bite: real teeth"
+  },
+  {
+   "file": "dog_snarl_attack_craigsmith_479633.mp3",
+   "title": "R01-63-Dog Snarling and Attacking.wav",
+   "author": "craigsmith",
+   "page": "https://freesound.org/people/craigsmith/sounds/479633/",
+   "download": "https://cdn.freesound.org/previews/479/479633_2524442-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the snarl under the snap, the bite and the leap"
+  },
+  {
+   "file": "swish_short_qvantor_877976.mp3",
+   "title": "Swish Swipe Short",
+   "author": "Qvantor",
+   "page": "https://freesound.org/people/Qvantor/sounds/877976/",
+   "download": "https://cdn.freesound.org/previews/877/877976_19512113-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the claw's and the rend's air; her swish"
+  },
+  {
+   "file": "metal_plate_scratch_ridderick_707638.mp3",
+   "title": "metal plate scratch and hit",
+   "author": "Ridderick",
+   "page": "https://freesound.org/people/Ridderick/sounds/707638/",
+   "download": "https://cdn.freesound.org/previews/707/707638_5351360-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the claw raking metal, the rend tearing along the floor"
+  },
+  {
+   "file": "dog_jumps_off_qubodup_827435.mp3",
+   "title": "Dog Jumps Off Tree On Grass",
+   "author": "qubodup",
+   "page": "https://freesound.org/people/qubodup/sounds/827435/",
+   "download": "https://cdn.freesound.org/previews/827/827435_71257-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the leap: a real dog's push off"
+  },
+  {
+   "file": "angry_dog_cmdrobot_439535.mp3",
+   "title": "Angry Dog",
+   "author": "CmdRobot",
+   "page": "https://freesound.org/people/CmdRobot/sounds/439535/",
+   "download": "https://cdn.freesound.org/previews/439/439535_214099-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the fury's snarl"
+  },
+  {
+   "file": "body_fall_heavy_dirt_leonelmail_504626.mp3",
+   "title": "BODY FALL - V HVY - DIRT",
+   "author": "leonelmail",
+   "page": "https://freesound.org/people/leonelmail/sounds/504626/",
+   "download": "https://cdn.freesound.org/previews/504/504626_4437257-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the Alpha landing: the quake and the landing after a leap or a throw"
+  },
+  {
+   "file": "heavy_steps_gravel_ilmotografo_679108.mp3",
+   "title": "Heavy steps on gravel.wav",
+   "author": "IlMotografo",
+   "page": "https://freesound.org/people/IlMotografo/sounds/679108/",
+   "download": "https://cdn.freesound.org/previews/679/679108_12704565-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the Alpha's steps"
+  },
+  {
+   "file": "dog_yelping_unfa_160478.mp3",
+   "title": "Dog's Yelping 7",
+   "author": "unfa",
+   "page": "https://freesound.org/people/unfa/sounds/160478/",
+   "download": "https://cdn.freesound.org/previews/160/160478_1038806-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the yelp: a wolf struck, a wolf going down"
+  },
+  {
+   "file": "cloth_rustle_brandondelehoy_494797.mp3",
+   "title": "Jacket/Cloth Rustle 9",
+   "author": "brandondelehoy",
+   "page": "https://freesound.org/people/brandondelehoy/sounds/494797/",
+   "download": "https://cdn.freesound.org/previews/494/494797_4682121-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "her jump: cloth"
+  },
+  {
+   "file": "boots_rock_jump_noxsound_558477.mp3",
+   "title": "Footsteps_Mountain_Boots_Rock_Jump_Sequence_Mono.wav",
+   "author": "Nox_Sound",
+   "page": "https://freesound.org/people/Nox_Sound/sounds/558477/",
+   "download": "https://cdn.freesound.org/previews/558/558477_9250976-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "her jump's push off and her landing"
+  },
+  {
+   "file": "sword_swing_nomagician_840716.mp3",
+   "title": "Sword Swing 1",
+   "author": "Nomagician",
+   "page": "https://freesound.org/people/Nomagician/sounds/840716/",
+   "download": "https://cdn.freesound.org/previews/840/840716_18136826-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the crystal blade's first swing"
+  },
+  {
+   "file": "sword_swing_nomagician_840717.mp3",
+   "title": "Sword Swing 3",
+   "author": "Nomagician",
+   "page": "https://freesound.org/people/Nomagician/sounds/840717/",
+   "download": "https://cdn.freesound.org/previews/840/840717_18136826-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the crystal blade's second and third swing"
+  },
+  {
+   "file": "sword_clash_johnbuhr_326868.mp3",
+   "title": "Sword_Clash (7).wav",
+   "author": "JohnBuhr",
+   "page": "https://freesound.org/people/JohnBuhr/sounds/326868/",
+   "download": "https://cdn.freesound.org/previews/326/326868_4077311-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "steel on steel: a guard, a parry"
+  },
+  {
+   "file": "sword_clash_spycrah_471095.mp3",
+   "title": "Sword clash 1.wav",
+   "author": "spycrah",
+   "page": "https://freesound.org/people/spycrah/sounds/471095/",
+   "download": "https://cdn.freesound.org/previews/471/471095_9856191-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "steel on steel, the second take"
+  },
+  {
+   "file": "cat_hissing_aunrea_485952.mp3",
+   "title": "Cat Hissing",
+   "author": "aunrea",
+   "page": "https://freesound.org/people/aunrea/sounds/485952/",
+   "download": "https://cdn.freesound.org/previews/485/485952_7932944-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the cats' hiss"
+  },
+  {
+   "file": "cat_hisses_zabuhailo_146963.mp3",
+   "title": "catHisses1.wav",
+   "author": "Zabuhailo",
+   "page": "https://freesound.org/people/Zabuhailo/sounds/146963/",
+   "download": "https://cdn.freesound.org/previews/146/146963_2580450-hq.mp3",
+   "licence": "Creative Commons 0 (CC0 1.0), per page licence link",
+   "used_for": "the cats' hiss, the second take"
+  }
+ ]
+}

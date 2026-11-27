@@ -140,6 +140,9 @@ function nfHurt(b, src) {
 // on the ground he is standing on: low enough to jump, gone at its range
 // the ground under x near a height (gravehorn's ghGround: the meadow is a heightfield, not a line)
 function nfGround(x, y0) {
+  // the surface every ground effect stands on (js/fxgl.js fxSurfaceY): NaN past a drop or into a wall,
+  // where the shock ends — it used to hold its old height there and run on through the air (ground-fx)
+  if (typeof fxSurfaceY === 'function') return fxSurfaceY(x, y0, 30);
   const gc = typeof groundColumnAt === 'function' ? groundColumnAt(x) : null;
   if (!gc) return y0;
   const s = gc[0] < gc[1] ? gc[0] : gc[1];
@@ -150,7 +153,13 @@ function nfShock(b, spec) {
   // up on a ledge, or in the air: the floor does not carry it
   if (b.on === false || (typeof tileAt === 'function' && tileAt(Math.floor(b.cx() / TILE), Math.floor((fy + 4) / TILE)) === '=')) return;
   b.nfShocks = b.nfShocks || [];
-  for (const dir of [-1, 1]) b.nfShocks.push({ x: b.cx() + dir * 40, y: fy, dir, v: spec[0], life: spec[1], t: 0, hit: false });
+  // a roar that is HOLDING her (playerAwe) keeps its shock at his feet until she is hers again and
+  // a quarter of a second more: a blow she is frozen in front of is a toll, not a move
+  const wait = (player.aweT || 0) > 0 ? player.aweT + 0.25 : 0;
+  for (const dir of [-1, 1]) b.nfShocks.push({ x: b.cx() + dir * 40, y: fy, dir, v: spec[0], life: spec[1], t: 0, hit: false, wait });
+  if (!wait) nfShockGo();
+}
+function nfShockGo() {
   cam.shake = Math.max(cam.shake, 7); sfx('quake');
   if (typeof padRumble === 'function') padRumble(0.6, 0.5, 220);
 }
@@ -158,7 +167,11 @@ function nfStepHazards(b, dt) {
   const W = G.roomDef.w * TILE, pc = player.x + player.w / 2;
   if (b.nfShocks) for (let i = b.nfShocks.length - 1; i >= 0; i--) {
     const s = b.nfShocks[i];
-    s.t += dt; s.x += s.dir * s.v * dt; s.y = nfGround(s.x, s.y);
+    if (s.wait > 0) { s.wait -= dt; if (s.wait <= 0 && s.dir < 0) nfShockGo(); continue; }
+    s.t += dt; s.x += s.dir * s.v * dt;
+    const gy = nfGround(s.x, s.y);
+    if (gy !== gy) { b.nfShocks.splice(i, 1); continue; }          // the ground ends: so does the shock
+    s.y = gy;
     const wall = solidAt(Math.floor(s.x / TILE), Math.floor((s.y - TILE * 0.6) / TILE));
     if (s.t >= s.life || wall || s.x < 0 || s.x > W) { b.nfShocks.splice(i, 1); continue; }
     if (!G.artProbe) {

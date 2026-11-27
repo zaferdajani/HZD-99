@@ -48,7 +48,9 @@ const check = (name, ok, note) => { console.log('  ' + (ok ? 'ok  ' : 'FAIL') + 
     const realRandom = Math.random;
 
     // ---- THE PRE-REFACTOR FORMULAS (5b32ae4), written out ----------------
-    const WA = { claws: 1, single: 1.3, dual: 1.6, joined: 1.95 };
+    // (the tier multipliers are the owner's of 2026-11-27 — a stronger sword, shorter fights: js/weapons.js
+    // WEAPON_ATK; this harness holds the ORDER and the ROUNDING of the factors, not the old numbers)
+    const WA = { claws: 1, single: 2.25, dual: 2.7, joined: 3.2 };
     const has = (list, id) => (list || []).indexOf(id) >= 0;
     // Player.dmg(), same factor order, so the rounding is the same rounding
     const base0 = (c) => Math.round(12 * WA[c.mode || 'claws'] * (has(c.crests, 'claws') ? 1.25 : 1)

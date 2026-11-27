@@ -116,10 +116,14 @@ const { chromium } = require('playwright');
     for (const bot of ['mash', 'pogo', 'hop', 'skill']) for (let r = 0; r < 3; r++) A[bot].push(await fight('A10', 'single', bot, r));
     const line = d => d.secs + ' s, ' + (d.won ? 'won' : d.died ? 'DIED' : 'timed out') + ', ' + d.dmg + ' cores lost, king at ' + d.bossHp;
     check('ALPHA  mash: a player who only presses ATTACK never beats it', A.mash.every(d => !d.won), A.mash.map(line).join(' | '));
-    check('ALPHA  ...and is not close: the king still has a third of its health when she falls', A.mash.every(d => d.died && parseInt(d.bossHp, 10) >= 658 * 0.33), A.mash.map(d => d.bossHp).join(' | '));
+    // (a third until 2026-11-27: the owner asked for a stronger sword and shorter fights — "I will need
+    // less hits to beat it" — and every blow of a masher's that lands in an opening is that stronger
+    // blow. The masher still dies, and still well short of the king: an eighth of it left at least)
+    check('ALPHA  ...and is not close: the king still has an eighth of its health when she falls', A.mash.every(d => d.died && parseInt(d.bossHp, 10) >= 658 * 0.125), A.mash.map(d => d.bossHp).join(' | '));
     // (the hide was two fifths until the boss ladder, 2026-11-24, made it 0.15 — js/alphakit.js ALPHA_WIT.hide:
     // what is checked is that a blow into its attack is TURNED, landing for a fraction of a whole one)
-    check('ALPHA  ...because a blow thrown into its attack turns on its hide (a fraction of a whole blow)', A.mash.every(d => { const z = d.hitSizes.split('/').map(Number); return z.includes(18) && z.some(n => n >= 1 && n <= 10); }), 'blows landed for ' + A.mash[0].hitSizes);
+    // (31: the crystal sword's whole blow on his plate since 2026-11-27, the owner's stronger sword; it was 18)
+    check('ALPHA  ...because a blow thrown into its attack turns on its hide (a fraction of a whole blow)', A.mash.every(d => { const z = d.hitSizes.split('/').map(Number); return z.includes(31) && z.some(n => n >= 1 && n <= 10); }), 'blows landed for ' + A.mash[0].hitSizes);
     check('ALPHA  ...and it will not be stood next to: it springs clear of a mash', A.mash.every(d => (d.states.spring || 0) >= 2), A.mash.map(d => (d.states.spring || 0) + ' springs').join(' | '));
     check('ALPHA  pogo: bouncing on its back never beats it', A.pogo.every(d => !d.won), A.pogo.map(line).join(' | '));
     // (its body is named since 2026-11-24 — 'alpha.body' — so the list shows what her landings on its
@@ -131,7 +135,8 @@ const { chromium } = require('playwright');
     const wins = A.skill.filter(d => d.won);
     check('ALPHA  hop: one down-strike, back to the floor, again — never beats it either', A.hop.every(d => !d.won && parseInt(d.bossHp, 10) >= 658 * 0.8), A.hop.map(line).join(' | '));
     check('ALPHA  skill: a player who reads it wins', wins.length >= 2, A.skill.map(line).join(' | '));
-    check('ALPHA  ...in a fight, not a formality and not a siege (25–100 s)', wins.length > 0 && wins.every(d => d.secs >= 25 && d.secs <= 100), wins.map(d => d.secs + ' s').join(' | '));
+    // (25-100 s until 2026-11-27; the owner asked for shorter fights. A fight, still: never under 15 s)
+    check('ALPHA  ...in a fight, not a formality and not a siege (15–100 s)', wins.length > 0 && wins.every(d => d.secs >= 15 && d.secs <= 100), wins.map(d => d.secs + ' s').join(' | '));
     check('ALPHA  ...with something left (at most four of five cores lost)', wins.length > 0 && wins.every(d => d.dmg <= 4), wins.map(d => d.dmg).join(' | '));
     const kit = d => ({ howl: d.states.howl || 0, rend: d.states.rend || 0, leap: d.states.leap || 0, roar: d.states.roar || 0, close: sum(d.states, ['claw', 'bite']), spring: d.states.spring || 0, fury: d.states.fury || 0 });
     check('ALPHA  ...and winning it means having been shown the kit: the howl, the rend, the leap, the roar, claw and bite, the spring, the fury',

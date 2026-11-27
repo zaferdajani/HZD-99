@@ -1,0 +1,177 @@
+{
+ "bark": {
+  "out": "assets/sfx/alpha/bark.ogg",
+  "layers": [
+   "dog_aggressive_bark_mrrap4food_619045.mp3"
+  ],
+  "seconds": 1.087,
+  "loudest_100ms_rms": 0.303
+ },
+ "growl": {
+  "out": "assets/sfx/alpha/growl.ogg",
+  "layers": [
+   "dog_aggressive_bark_mrrap4food_619045.mp3"
+  ],
+  "seconds": 1.128,
+  "loudest_100ms_rms": 0.208
+ },
+ "snap": {
+  "out": "assets/sfx/alpha/snap.ogg",
+  "layers": [
+   "dog_teeth_clatter_qubodup_841350.mp3",
+   "dog_snarl_attack_craigsmith_479633.mp3"
+  ],
+  "seconds": 0.48,
+  "loudest_100ms_rms": 0.098
+ },
+ "bite": {
+  "out": "assets/sfx/alpha/bite.ogg",
+  "layers": [
+   "dog_teeth_clatter_qubodup_841350.mp3",
+   "dog_snarl_attack_craigsmith_479633.mp3"
+  ],
+  "seconds": 0.8,
+  "loudest_100ms_rms": 0.247
+ },
+ "claw": {
+  "out": "assets/sfx/alpha/claw.ogg",
+  "layers": [
+   "swish_short_qvantor_877976.mp3",
+   "metal_plate_scratch_ridderick_707638.mp3"
+  ],
+  "seconds": 0.576,
+  "loudest_100ms_rms": 0.236
+ },
+ "rend": {
+  "out": "assets/sfx/alpha/rend.ogg",
+  "layers": [
+   "metal_plate_scratch_ridderick_707638.mp3",
+   "swish_short_qvantor_877976.mp3"
+  ],
+  "seconds": 1.352,
+  "loudest_100ms_rms": 0.22
+ },
+ "leap": {
+  "out": "assets/sfx/alpha/leap.ogg",
+  "layers": [
+   "dog_jumps_off_qubodup_827435.mp3",
+   "dog_snarl_attack_craigsmith_479633.mp3"
+  ],
+  "seconds": 0.653,
+  "loudest_100ms_rms": 0.177
+ },
+ "fury": {
+  "out": "assets/sfx/alpha/fury.ogg",
+  "layers": [
+   "angry_dog_cmdrobot_439535.mp3",
+   "dog_aggressive_bark_mrrap4food_619045.mp3"
+  ],
+  "seconds": 1.645,
+  "loudest_100ms_rms": 0.308
+ },
+ "quake": {
+  "out": "assets/sfx/alpha/quake.ogg",
+  "layers": [
+   "body_fall_heavy_dirt_leonelmail_504626.mp3"
+  ],
+  "seconds": 1.282,
+  "loudest_100ms_rms": 0.175
+ },
+ "step1": {
+  "out": "assets/sfx/alpha/step1.ogg",
+  "layers": [
+   "heavy_steps_gravel_ilmotografo_679108.mp3"
+  ],
+  "seconds": 0.424,
+  "loudest_100ms_rms": 0.091
+ },
+ "step2": {
+  "out": "assets/sfx/alpha/step2.ogg",
+  "layers": [
+   "heavy_steps_gravel_ilmotografo_679108.mp3"
+  ],
+  "seconds": 0.424,
+  "loudest_100ms_rms": 0.083
+ },
+ "yelp": {
+  "out": "assets/sfx/alpha/yelp.ogg",
+  "layers": [
+   "dog_yelping_unfa_160478.mp3"
+  ],
+  "seconds": 0.6,
+  "loudest_100ms_rms": 0.377
+ },
+ "jump": {
+  "out": "assets/sfx/hz_jump.ogg",
+  "layers": [
+   "cloth_rustle_brandondelehoy_494797.mp3",
+   "boots_rock_jump_noxsound_558477.mp3"
+  ],
+  "seconds": 0.33,
+  "loudest_100ms_rms": 0.176
+ },
+ "land": {
+  "out": "assets/sfx/hz_land.ogg",
+  "layers": [
+   "boots_rock_jump_noxsound_558477.mp3"
+  ],
+  "seconds": 0.383,
+  "loudest_100ms_rms": 0.126
+ },
+ "swing1": {
+  "out": "assets/sfx/foley/swing1.ogg",
+  "layers": [
+   "sword_swing_nomagician_840716.mp3"
+  ],
+  "seconds": 0.5,
+  "loudest_100ms_rms": 0.199
+ },
+ "swing2": {
+  "out": "assets/sfx/foley/swing2.ogg",
+  "layers": [
+   "sword_swing_nomagician_840717.mp3"
+  ],
+  "seconds": 0.52,
+  "loudest_100ms_rms": 0.216
+ },
+ "swish": {
+  "out": "assets/sfx/foley/swish.ogg",
+  "layers": [
+   "swish_short_qvantor_877976.mp3"
+  ],
+  "seconds": 0.4,
+  "loudest_100ms_rms": 0.193
+ },
+ "clash1": {
+  "out": "assets/sfx/foley/clash1.ogg",
+  "layers": [
+   "sword_clash_johnbuhr_326868.mp3"
+  ],
+  "seconds": 0.85,
+  "loudest_100ms_rms": 0.182
+ },
+ "clash2": {
+  "out": "assets/sfx/foley/clash2.ogg",
+  "layers": [
+   "sword_clash_spycrah_471095.mp3"
+  ],
+  "seconds": 0.76,
+  "loudest_100ms_rms": 0.429
+ },
+ "hiss1": {
+  "out": "assets/sfx/cat/hiss1.ogg",
+  "layers": [
+   "cat_hissing_aunrea_485952.mp3"
+  ],
+  "seconds": 0.66,
+  "loudest_100ms_rms": 0.311
+ },
+ "hiss2": {
+  "out": "assets/sfx/cat/hiss2.ogg",
+  "layers": [
+   "cat_hisses_zabuhailo_146963.mp3"
+  ],
+  "seconds": 1.1,
+  "loudest_100ms_rms": 0.202
+ }
+}

@@ -93,7 +93,9 @@ const open = async () => { const browser = await chromium.launch({ executablePat
     { narrowest: R.away.narrow, shortest: R.away.short.h, tallest: R.away.tall.h, feet: R.away.feet });
   const ph = R.M.ph, ri = ph.indexOf('roar');
   check('D  he lands, then ROARS, then moves on her', ri > 0 && ph.indexOf('settle') >= 0 && ph.indexOf('settle') < ri && ri < ph.indexOf('wind'), ph);
-  check('   ...the roar holds her for about a second, a stagger back and no more, with the stick held', R.M.roarStun >= 40 && R.M.movedInRoar < 90, { stunnedFrames: R.M.roarStun, roarFrames: R.M.roarN, moved: Math.round(R.M.movedInRoar) });
+  // (since 2026-11-27 it HOLDS her, not staggers her: "I should freeze instead of glitching. That might
+  // make me fall down" — the shove of up to 90 px this allowed is gone; tests/roar-hold.cjs has the rest)
+  check('   ...the roar holds her for about a second, still where she stands, with the stick held', R.M.roarStun >= 40 && R.M.movedInRoar < 1, { stunnedFrames: R.M.roarStun, roarFrames: R.M.roarN, moved: Math.round(R.M.movedInRoar) });
   // "The Guardian stood still for so long on top of the platform that made it so
   // much easier to just stand underneath it and hit it and kill it."
   const P = R.perch;

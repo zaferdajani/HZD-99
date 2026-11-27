@@ -1681,6 +1681,20 @@ function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm' &&
 // chime read "b_chime". Found by tools/castreel.cjs, the first time every boss
 // was filmed in one sitting. The Alpha has its own name line; a construct's
 // name is the head of its meeting toast ("CHIME — it is singing at you").
+// the agent she is fighting in this chamber, if any: hostile, not yet purified (game.js drawHUD)
+function hudAgent() {
+  for (const e of G.enemies || []) {
+    if (!e || e.kind !== 'sage' || e.dead || e.tame || e.calm || e.disabled || e.friendly || e.rescued || !e.hpMax0) continue;
+    if (e.purified || e.meet) continue;
+    return e;
+  }
+  return null;
+}
+// its name: the head of its chamber's title ("TALLYMAN — THE FIRST FRAGMENT: THE MAP")
+function agentBarName() {
+  const k = 'sg_t_' + G.roomId, s = t(k);
+  return s !== k ? s.split(' — ')[0] : '';
+}
 function bossBarName(b) {
   const k = 'b_' + b.kind, s = t(k);
   if (s !== k) return s;
@@ -1795,28 +1809,19 @@ function meetStep(dt) {
         addPart(b.cx() + b.face * 30 + Math.cos(oa) * or2, b.cy() - 6 + Math.sin(oa) * or2, -Math.cos(oa) * 100, -Math.sin(oa) * 100, 0.3, '#b06aff', 2.5, 0, true); }
       if (b.t <= 0.75) {
         b.roared = true;
-        // THE ROAR. The whole frame takes it: the picture bows as the wave
-        // passes (ripple.js), the camera is thrown, the pad shakes — and she
-        // is STUNNED where she stands, staggered a step back from it, for
-        // long enough to understand what she has walked into. The stun is
-        // over before the paw comes up: the swipe that follows is still hers
-        // to run from.
-        cam.shake = Math.max(cam.shake, 20); G.flash = Math.max(G.flash, 0.3); G.hitStop = Math.max(G.hitStop, 0.1);
+        // THE ROAR. She is HELD where she stands, frozen for long enough to
+        // understand what she has walked into (owner, 2026-11-27: "screen should
+        // freeze, I should freeze instead of glitching. That might make me fall
+        // down"). The frame holds still with her — one beat of stopped time as it
+        // leaves his throat, no shaking camera, no bent picture, no white-out —
+        // and only the pad shakes. The hold is over before the paw comes up: the
+        // swipe that follows is still hers to run from. (playerAwe, entities.js)
+        G.hitStop = Math.max(G.hitStop, 0.22);
         beastSound('roar'); if (typeof padRumble === 'function') padRumble(1, 0.9, 900);
-        if (typeof roarWave === 'function') roarWave(b.cx() + b.face * 30, b.cy() - 10, '#b48cff');
-        if (typeof shockRipple === 'function') {
-          shockRipple(b.cx() + b.face * 30, b.cy() - 10, { R: 760, dur: 1.15, amp: 30, width: 70, col: '#b06aff', fronts: 4, gap: 0.12, nudge: 7, pulse: 0.22 });
-        }
         if (typeof fx === 'function') for (const sd of [1, -1])
           fx('cone', b.cx() + sd * 30, b.cy() - 12, { rx: 420, ry: 260, dur: 0.9, flip: sd < 0, col: '#b48cff', hot: '#ffffff', power: sd === b.face ? 1.5 : 0.8 });
         dust(18, b.w * 0.8);
-        if (!player.dead) {
-          const away = pcx < b.cx() ? -1 : 1;
-          player.stunT = Math.max(player.stunT || 0, 1.15); player.dizzyT = Math.max(player.dizzyT || 0, 1.3);
-          player.hurtPoseT = Math.max(player.hurtPoseT || 0, 0.9);
-          player.vx = away * 300; player.vy = Math.min(player.vy, -150);
-          player.swing = null; player.chargeT = 0;
-        }
+        if (!player.dead && typeof playerAwe === 'function') playerAwe(1.15);
       }
     }
     if (b.t <= 0) { b.st = 'stalk'; M.ph = 'land'; M.t = 0.5; }       // ...and then it walks up to her
@@ -16036,7 +16041,24 @@ function drawHUD() {
   // audio blocked indicator (browser hasn't allowed sound yet)
   if (!AC || AC.state !== 'running') ftxt('🔇', 480, 26, 18, 'rgba(255,143,157,0.8)');
   // boss bar
+  // ...AND THE AGENT'S (owner, 2026-11-27: "the Eye agent does not show any life or health indicator,
+  // so I don't know how much more I need to hit it"). An agent is not G.boss — it is a robed body in
+  // G.enemies — so it never had a bar. It wears the guardians' bar now, with its name, measured to
+  // the floor it locks at (its fight is won there, at 30%: sageStruck), and once locked the same bar
+  // fills with the purification her crystal is pouring into it. tests/foe-bar.cjs.
+  const ag = !(bossActive() && G.boss.st !== 'intro' && !G.boss.hideBar) && hudAgent();
+  if (ag) {
+    const w = 480, floor = Math.round(ag.hpMax0 * 0.3);
+    const k = ag.locked ? clamp(ag.pureM || 0, 0, 1) : clamp((ag.hp - floor) / Math.max(1, ag.hpMax0 - floor), 0, 1);
+    c.fillStyle = 'rgba(8,12,18,0.7)'; rr(c, 480 - w / 2, 494, w, 26, 6); c.fill();
+    c.fillStyle = ag.locked ? '#bff7ff' : P.glow; c.globalAlpha = 0.9;
+    c.fillRect(480 - w / 2 + 4, 498, (w - 8) * k, 8);
+    c.globalAlpha = 1;
+    ftxt(agentBarName(), 480, 481, 14, '#eef3fa', 'center', ag.locked ? '#9ffcff' : P.glow);
+    G.hudBar = { name: agentBarName(), k, agent: 1 };
+  } else G.hudBar = null;
   if (bossActive() && G.boss.st !== 'intro' && !G.boss.hideBar) {
+    G.hudBar = { name: bossBarName(G.boss), k: clamp(G.boss.hp / G.boss.hpMax, 0, 1) };
     const b = G.boss, w = 480;
     c.fillStyle = 'rgba(8,12,18,0.7)'; rr(c, 480 - w / 2, 494, w, 26, 6); c.fill();
     c.fillStyle = P.glow; c.globalAlpha = 0.9;
@@ -16257,6 +16279,76 @@ function applyBloom(k) {
   c.restore();
   c.globalAlpha = 1;
 }
+// THE GROUND GOES ON DOWN (owner, 2026-11-27, on an iPad in the Alpha's fight: "the platform,
+// because of the zoom out, it's missing the bottom segment. It's showing the background instead of
+// completing the platform downward"). A boss fight frames its whole arena (engine.js bossFit), and
+// every arena is wider than the screen's shape, so the fit leaves world above and below the room —
+// and under the floor the frame showed the backdrop: a floor one tile thick, floating. Below the
+// room's last row the ground body is continued to the frame's bottom in the room's own material
+// (the rock plate and its strata, as groundBandSteps lays the band — indoors the floor's plate),
+// overlapping the bottom row's eroded underside so no seam of backdrop shows through, and going
+// darker with depth. A column whose bottom tile is open (A9's shaft down to A8) stays a hole into
+// the dark, never rock across a way down; a seamless room below is drawn instead (drawVLinkArt).
+// tests/arena-ground.cjs reads it off the finished frame for every arena.
+const GROUND_BELOW = { overlap: 14, steps: 5, deep: 0.62, span: 260 };
+let groundBelowPat = null, groundBelowKey = null;
+function drawGroundBelow() {
+  if (!G.roomDef || !G.grid || !G.grid.length) return;
+  const rh = G.roomDef.h * TILE, rw = G.roomDef.w * TILE, WV = WORLD_VIEW;
+  const vy1 = camSY() + WV.y + WV.h + 4;
+  if (vy1 <= rh) return;
+  if (G.vlink && G.vlink.B && typeof vlinkSeamless === 'function' && vlinkSeamless('B')) {
+    const e = typeof tileStore !== 'undefined' && tileStore.get(G.vlink.B.id);
+    if (e && e.ready) return;                       // the real room below is drawn there
+  }
+  const hero = typeof isHero === 'function' && isHero();
+  const ik = typeof indoorKey === 'function' && indoorKey();
+  const zone = G.roomDef.zone, P = PAL[zone] || PAL.A;
+  const tex = hero ? null : (ik ? floorTex(ik) : rockTex(zone));
+  const strata = tex && !ik ? strataTex(zone) : null;
+  const key = (tex ? (tex._img || tex).src || zone : 'none') + '|' + (strata ? 's' : '') + '|' + (ik || '');
+  if (groundBelowKey !== key) {
+    groundBelowKey = key; groundBelowPat = null;
+    try { groundBelowPat = { p: tex ? c.createPattern(tex, 'repeat') : null, s: strata ? c.createPattern(strata, 'repeat') : null }; } catch (e) { groundBelowPat = { p: null, s: null }; }
+  }
+  const GP = groundBelowPat || { p: null, s: null };
+  const vx0 = Math.max(-TILE, camSX() + WV.x - 8), vx1 = Math.min(rw + TILE, camSX() + WV.x + WV.w + 8);
+  const row = G.grid[G.grid.length - 1], Wt = row.length;
+  const solid = ch => ch === '#' || ch === 'B' || ch === '=';
+  const B = GROUND_BELOW;
+  c.save();
+  // one body across the whole width (a hole is cut into it below, with a ragged edge — never a square)
+  const fillBody = (y0, y1, alpha) => {
+    c.beginPath(); c.rect(vx0, y0, vx1 - vx0, y1 - y0);
+    c.globalAlpha = alpha;
+    if (GP.p) { c.fillStyle = GP.p; c.fill(); if (GP.s) { c.globalAlpha = alpha * 0.3; c.fillStyle = GP.s; c.fill(); } }
+    else { c.fillStyle = P.solid; c.fill(); c.globalAlpha = alpha * 0.2; c.fillStyle = P.dark; c.fill(); }
+  };
+  // feathered up into the bottom row's eroded underside, then whole to the frame's foot
+  const st = B.overlap / B.steps;
+  for (let q = 0; q < B.steps; q++) fillBody(rh - B.overlap + q * st, rh - B.overlap + (q + 1) * st, (q + 1) / (B.steps + 1));
+  fillBody(rh, vy1, 1);
+  // deeper is darker: the body goes down out of the light, as the tiles' own body does
+  c.globalAlpha = 1;
+  const g = c.createLinearGradient(0, rh, 0, rh + B.span);
+  g.addColorStop(0, 'rgba(3,6,14,0)'); g.addColorStop(1, 'rgba(3,6,14,' + B.deep + ')');
+  c.fillStyle = g; c.fillRect(vx0, rh, vx1 - vx0, vy1 - rh);
+  // an open run of the bottom row is a hole going on down into the dark, its sides ragged rock
+  for (let tx = 0; tx < Wt; tx++) {
+    if (solid(row[tx])) continue;
+    let t2 = tx; while (t2 + 1 < Wt && !solid(row[t2 + 1])) t2++;
+    const x0 = tx * TILE, x1 = (t2 + 1) * TILE, y0 = rh - B.overlap, n = Math.ceil((vy1 + 12 - y0) / 12);
+    c.beginPath(); c.moveTo(x0, y0);
+    for (let k = 0; k <= n; k++) c.lineTo(x0 + 2 + hash2(tx * 3.7, k * 1.3) * 9, y0 + k * 12);
+    for (let k = n; k >= 0; k--) c.lineTo(x1 - 2 - hash2(t2 * 5.3, k * 1.7) * 9, y0 + k * 12);
+    c.closePath();
+    const hg = c.createLinearGradient(0, y0, 0, y0 + 90);
+    hg.addColorStop(0, 'rgba(5,7,12,0.55)'); hg.addColorStop(1, 'rgba(5,7,12,1)');
+    c.fillStyle = hg; c.fill();
+    tx = t2;
+  }
+  c.restore();
+}
 function drawWorldFrame() {
   const P = PAL[G.roomDef.zone];
   // the world's own view: at a zoom below 1 the world is drawn small about the frame's centre
@@ -16330,6 +16422,7 @@ function drawWorldFrame() {
   c.save();
   if(G.roomDef.cave){c.shadowColor='rgba(4,5,10,0.8)';c.shadowBlur=9;c.shadowOffsetY=4;}
   c.drawImage(tileCv, 0, 0);
+  drawGroundBelow();                // a frame wider than the room: its ground goes on down
   drawVLinkArt();                   // the room above / below, where it really is
   c.restore();
   drawInteriorFloor();              // a painting-room walks on the painting's floor

@@ -189,9 +189,20 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
     if ((e.kbT || 0) > 0) markStruck(e);
     e.kbT = 0; e.stagT = 0; e.ringR = null;
     const pcx = player.x + player.w / 2, py = player.y + player.h;
+    // THE FIRE WALKS THE GROUND (owner, 2026-11-27: "The agent's fire after effect that you created
+    // should walk on the terrain, not to the sides horizontally. It should follow the natural
+    // terrain"). The ember ring's two crests and the vault's ground waves ran out level from where
+    // they were born — through a mound, in the air over a dip. Each now rides the surface under it
+    // (agentGroundY, the same lookup every ground effect stands on), and ends where the ground does.
     for (const r of (e.rr = e.rr || [])) {
       r.r += T.ringSpd * dt;
-      if (player.on && Math.abs(py - r.y) < 24 && Math.abs(Math.abs(pcx - r.x) - r.r) < 16) hurt(r.x, 'sage.ring');
+      const ys = r.ys || (r.ys = [r.y, r.y]);
+      for (let k = 0; k < 2; k++) {
+        const sd = k ? 1 : -1;
+        if (isNaN(ys[k])) continue;
+        ys[k] = agentGroundY(r.x + sd * r.r, ys[k]);
+        if (!isNaN(ys[k]) && player.on && Math.abs(py - ys[k]) < 24 && Math.abs((pcx - r.x) * sd - r.r) < 16) hurt(r.x, 'sage.ring');
+      }
     }
     e.rr = e.rr.filter(r => r.r <= T.ringMax);
     for (const b of (e.beads = e.beads || [])) {
@@ -209,6 +220,9 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
     e.marks = e.marks.filter(k => !k.dead);
     for (const w of (e.waves = e.waves || [])) {
       w.x += w.dir * T.waveSpd * dt; w.life -= dt;
+      const gy = agentGroundY(w.x, w.y);
+      if (isNaN(gy)) { w.life = 0; continue; }          // a drop or a wall: the wave ends there
+      w.y = gy;
       if (Math.abs(pcx - w.x) < 14 + player.w / 2 && py > w.y - T.waveH && py <= w.y + 4) hurt(w.x, 'sage.wave');
     }
     e.waves = e.waves.filter(w => w.life > 0);
@@ -226,6 +240,12 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
     if (e.tSt) exportLegacy(e);
   };
 
+  // the ground under a crest at x, from the height it was last at: NaN past a drop or into a wall
+  function agentGroundY(x, y0) {
+    if (typeof fxSurfaceY !== 'function' || !G.grid) return y0;
+    if (x < 4 || x > G.roomDef.w * TILE - 4) return NaN;
+    return fxSurfaceY(x, y0, 30);
+  }
   function start(e, k, face, p2, px) {
     const m = e.sageDuel; m.face = face; e.dir = face; e.vx = 0; e.recent = [k, ...(e.recent || [])].slice(0, 2);
     if (k === 'coil') { e.lunges = p2 ? 2 : 1; S(e, 'coil', T.coil); }
@@ -464,7 +484,7 @@ const AGENT_DUEL_ROOMS = { GA1D: 1 };
       rrL.forEach((r0, i) => {
         // (the newest ring is the one the old timer ringR names: a caller that moved it is drawn moved)
         const R = (i === rrL.length - 1 && e.ringR != null) ? e.ringR : r0.r, a = clamp(1.6 - R / T.ringMax, 0, 1);
-        for (const sd of [1, -1]) drawBossVfxLoop(c, 'agent_wave', t + sd * 0.3, r0.x + sd * R, r0.y + 2, 44, sd < 0, 0, a);
+        for (const sd of [1, -1]) { const gy = r0.ys ? r0.ys[sd > 0 ? 1 : 0] : r0.y; if (!isNaN(gy)) drawBossVfxLoop(c, 'agent_wave', t + sd * 0.3, r0.x + sd * R, gy + 2, 44, sd < 0, 0, a); }
       });
       // the sweep (overhead) and the spin (at the hip): the staff's cut, as large as its reach
       if (e.tSt === 'sweep' || e.tSt === 'spin') {
