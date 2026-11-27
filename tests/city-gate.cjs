@@ -55,6 +55,8 @@ const { chromium } = require('playwright');
     for (const k in BG_LIFT) delete BG_LIFT[k];
     bgLift(ROOM_VISTA.W2, MEDIA_RAW[zoneKey], VISTA_GAMMA);          // the old code filed it under the gate's name
     const hidden = player.draw; player.draw = () => {};
+    // (the same settling as above: the room's name and any toast cleared off the top of the frame)
+    for (let k = 0; k < 90; k++) { update(1 / 60); G.dialog = null; G.state = 'PLAY'; G.toasts = []; }
     for (let k = 0; k < 3; k++) { G.dialog = null; draw(performance.now()); }
     player.draw = hidden;
     const cv = document.querySelector('canvas'), x = cv.getContext('2d'), sx = cv.width / 960, sy = cv.height / 540;

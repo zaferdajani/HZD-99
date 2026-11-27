@@ -407,6 +407,7 @@ function playBuf(key, vol, rate) {
     g.gain.linearRampToValueAtTime(vol, t0 + 0.005);
   }
   s.start(0, onset);
+  playBuf.last = s;      // (fightVoice bends a take's pitch through its length: a warning that climbs)
   // the gesture's length, closed with a ramp rather than a stop: a buffer cut
   // dead mid-cycle is a click, and a click is the one artefact a player hears
   // every single time
@@ -1265,7 +1266,7 @@ const FIGHT_VOICE = {
   // the Alpha's floor, feet and wind-up (the rest of its voice is ALPHA_VOICE)
   alpha_quake: [['al_quake', 0.95, 0.92]], alpha_land: [['al_quake', 0.62, 1.04]],
   alpha_step: [['al_step1', 0.2, 1], ['al_step2', 0.2, 1]],
-  tell_alpha: [['al_growl', 0.8, 1.06]],
+  tell_alpha: [['al_growl', 0.8, 0.9, 1.6]],   // the growl tips up into a bark
   // the pack: the same wolf recordings, pitched up for animals half his size
   wolf_snarl: [['al_growl', 0.55, 1.22]], wolf_lunge: [['al_leap', 0.5, 1.2]],
   wolf_snap: [['al_snap', 0.6, 1.2]], wolf_yelp: [['al_yelp', 0.55, 1.12]],
@@ -1293,7 +1294,16 @@ function fightVoice(n) {
   if (T.length > 1 && i === FIGHT_LAST[n]) i = (i + 1) % T.length;
   FIGHT_LAST[n] = i;
   const k = T[i];
-  playBuf(k[0], k[1], k[2] * (0.96 + Math.random() * 0.08));
+  const r0 = k[2] * (0.96 + Math.random() * 0.08);
+  playBuf.last = null;
+  playBuf(k[0], k[1], r0);
+  // a 4th entry is the rate the take ends on: a warning is a recording that CLIMBS, because the
+  // climb is what tells her how long is left (tests/cuefamily.cjs, the rise law)
+  const s = playBuf.last;
+  if (k[3] && s && s.buffer && AC) {
+    const t = AC.currentTime, d = s.buffer.duration / ((r0 + k[3]) / 2);
+    s.playbackRate.setValueAtTime(r0, t); s.playbackRate.linearRampToValueAtTime(k[3], t + d * 0.85);
+  }
   return true;
 }
 // cue -> [recording, level, rate (randomised a hair above it, so a bite

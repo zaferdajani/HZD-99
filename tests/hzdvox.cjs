@@ -144,8 +144,11 @@ const { chromium } = require('playwright');
     return { first, second, third, barks, all: played };
   });
   check('a swing speaks', gate.barks.length >= 1, gate.barks.join(',') || 'silent');
+  // (her VOICE: a swing also lays its recorded foley — her swing and the blade's swish, js/audio.js —
+  // and those are not her bark; the second swing on the frame must add no bark of hers)
+  const again = gate.all.slice(gate.first, gate.second);
   check('two swings on one frame do not stutter',
-    gate.second - gate.first <= 1, 'delta ' + (gate.second - gate.first));
+    again.filter(k => k.indexOf('hzd_') === 0).length === 0 && again.length <= 2, 'second swing played ' + (again.join(',') || 'nothing'));
 
   // ---- THE HELD NOTE, WHICH IS A STATE AND NOT AN EVENT --------------------
   //

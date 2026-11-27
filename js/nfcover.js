@@ -306,12 +306,35 @@ function nfCoverDrawFront(c) {
   // he is breaking out of one of them (the first half-second of the burst)
   const b = G.boss && !G.boss.dead && G.boss.kind === 'glitch' && G.boss.st === 'lurkpounce' && (G.boss.ambT || 0) < 0.5 ? G.boss : null;
   const out = b && b.coverAt != null ? NFC.list[b.coverAt] : null;
+  // out of his leaves and standing in a clump, the leaves are cut away in his exact shape, so the
+  // body under them is the one the world pass drew — lit, its pigment kept, a blow's flash on it
+  const fb = nfFightFront(G.boss) ? G.boss : null;
+  let dc = c, cut = null;
+  if (fb) {
+    const W = c.canvas.width, H = c.canvas.height;
+    if (!NFC.cut || NFC.cut.width !== W || NFC.cut.height !== H) { NFC.cut = document.createElement('canvas'); NFC.cut.width = W; NFC.cut.height = H; NFC.cutB = document.createElement('canvas'); NFC.cutB.width = W; NFC.cutB.height = H; }
+    cut = NFC.cut; dc = cut.getContext('2d');
+    dc.setTransform(1, 0, 0, 1, 0, 0); dc.globalAlpha = 1; dc.globalCompositeOperation = 'source-over'; dc.clearRect(0, 0, W, H);
+    dc.setTransform(c.getTransform());
+  }
   for (const cl of NFC.list) {
     const im = MEDIA_IMG[cl.key];
     if (!im || !im.naturalWidth) continue;
-    if (cl === out) { nfCoverDrawOpen(c, im, cl, b); continue; }
-    nfCoverPlate(c, im, cl, cl.rust);
-    for (const L of cl.leaves) nfCoverLeaf(c, cl, L);
+    const q = fb && nfCoverOver(cl, fb) ? dc : c;      // only a clump standing over him goes through the cut
+    if (cl === out) { nfCoverDrawOpen(q, im, cl, b); continue; }
+    nfCoverPlate(q, im, cl, cl.rust);
+    for (const L of cl.leaves) nfCoverLeaf(q, cl, L);
+  }
+  if (fb) {
+    const W = cut.width, H = cut.height, bc = NFC.cutB.getContext('2d');
+    bc.setTransform(1, 0, 0, 1, 0, 0); bc.globalAlpha = 1; bc.globalCompositeOperation = 'source-over'; bc.clearRect(0, 0, W, H);
+    bc.setTransform(c.getTransform());
+    const keep = typeof FOE_PIG !== 'undefined' ? FOE_PIG.on : null;
+    if (keep != null) FOE_PIG.on = false;
+    try { foeDraw(bc, fb); } finally { if (keep != null) FOE_PIG.on = keep; }
+    dc.setTransform(1, 0, 0, 1, 0, 0); dc.globalCompositeOperation = 'destination-out'; dc.drawImage(NFC.cutB, 0, 0);
+    dc.globalCompositeOperation = 'source-over';
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; c.drawImage(cut, 0, 0); c.restore();
   }
   nfCoverTornDraw(c);
   // FREED, HE IS NO LONGER HIDING: the purified lion stands in front of the leaves, wherever he
@@ -328,6 +351,24 @@ function nfCoverDrawFront(c) {
 function nfPetFront(b) {
   return !!(b && b.kind === 'glitch' && b.purified && b.dead && !(typeof isHero === 'function' && isHero())
     && NFC.room === G.roomId && NFC.list.length);
+}
+// FIGHTING, HE IS SEEN: out of his leaves the live lion is not covered by them (nfCoverDrawFront
+// cuts them away in his shape). Only going in,
+// hiding and the first half-second of the burst (the clump opening round him) keep him behind
+// them — a lion swiping at her from behind a bush she cannot see through was a hit from nowhere
+// (tests/nf-ambush.cjs). His world-pass draw stays as it was (lit, pigment kept, effects on him:
+// tests/solid-bodies.cjs); only where a clump stands over him is there anything to cut.
+function nfFightFront(b) {
+  if (!(b && b.kind === 'glitch' && !b.dead && !b.purified && !(typeof isHero === 'function' && isHero())
+    && NFC.room === G.roomId && NFC.list.length)) return false;
+  if (/^(coverwarn|coverin|lurk|lurkwarn)$/.test(b.st)) return false;
+  if (b.st === 'lurkpounce' && (b.ambT || 0) < 0.5) return false;
+  if (typeof nfHidden === 'function' && nfHidden(b)) return false;
+  // only where a clump stands over him: in the open his one world-pass draw is all there is
+  return NFC.list.some(cl => nfCoverOver(cl, b));
+}
+function nfCoverOver(cl, b) {
+  return b.x + b.w > cl.x - cl.w / 2 && b.x < cl.x + cl.w / 2 && b.y + b.h > cl.gy - cl.h && b.y < cl.gy;
 }
 // ...and the meadow beyond, behind the level on parallax (js/game.js, after the flora)
 function nfCoverDrawBack(c) {

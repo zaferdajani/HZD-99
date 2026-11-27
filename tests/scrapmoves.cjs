@@ -67,7 +67,10 @@ const check = (name, ok, detail) => {
       let coilRun = 0, bloomRun = 0;
       for (let i = 0; i < frames; i++) {
         // stand in front of it, close enough to be noticed, every frame
-        player.x = clamp(e.x + (e.dir || 1) * 80, 40, 700);
+        // (a meadow crawler is a WOLF now, js/wolfmind.js: one that is pushed in on every frame gives
+        // ground for ever — she holds her first spot and lets it come in to its coil)
+        const wolfy = typeof isWolf === 'function' && isWolf(e);
+        if (!wolfy || i === 0) player.x = clamp(e.x + (e.dir || 1) * 80, 40, 700);
         player.y = floorY - player.h; player.vy = 0; player.on = true;
         player.iT = 999; player.dead = false;
         e.update(1 / 60);

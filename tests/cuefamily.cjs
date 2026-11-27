@@ -95,6 +95,14 @@ const check = (name, ok, detail) => {
       seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; seed |= 0;
       return ((seed >>> 0) % 100000) / 100000;
     };
+    // a warning that is a RECORDING (FIGHT_VOICE, js/audio.js) is measured as one: its takes are
+    // fetched and decoded first, or the offline render hears silence
+    if (typeof FIGHT_VOICE !== 'undefined') {
+      const takes = [...new Set(WARN.flatMap(c => (FIGHT_VOICE[c] || []).map(t => t[0])))];
+      const dc = new OfflineAudioContext(1, 44100, 44100);
+      await Promise.all(takes.map(async k => { if (MBUF[k] || !MEDIA_SRC.audio[k]) return;
+        const ab = await (await fetch(audioSrc(MEDIA_SRC.audio[k]))).arrayBuffer(); MBUF[k] = await dc.decodeAudioData(ab); }));
+    }
     for (const cue of FAM) {
       const off = new OfflineAudioContext(1, N, SR);
       const save = AC; AC = off; MUTED = false;

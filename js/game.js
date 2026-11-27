@@ -12735,7 +12735,9 @@ function drawRingGate(cx2, gy, key, def, k, buried) {
       c.beginPath(); c.ellipse(0, 0, rr * (1 + wob), rr * (1 - wob), t * 0.2 + i, 0, 7); c.stroke();
     }
     const core = c.createRadialGradient(0, 0, 1, 0, 0, frx * 0.5);
-    core.addColorStop(0, ringRGBA(col, 1.2, (0.07 + 0.05 * Math.sin(t * 2.3)) * lvl + (walking ? k * 0.7 : 0)));
+    // (the errand's gold door burns warmer at its heart: with no bloom — the low tier, the default —
+    // the plain 0.07 read barely warmer than a cold door's; tests/ring-gate.cjs F)
+    core.addColorStop(0, ringRGBA(col, 1.2, ((goal ? 0.22 : 0.07) + 0.05 * Math.sin(t * 2.3)) * lvl + (walking ? k * 0.7 : 0)));
     core.addColorStop(1, ringRGBA(col, 1, 0));
     c.fillStyle = core; c.fillRect(-frx, -frx, frx * 2, frx * 2);
     // she is taken: the whole surface goes to white as she steps through

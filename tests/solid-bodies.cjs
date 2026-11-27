@@ -78,7 +78,7 @@ const { chromium } = require('playwright');
         const noLights = without('drawLights'), noBloom = without('applyBloom');
         FOE_PIG.on = false; const washed = stat(frame()); FOE_PIG.on = true;
         const again = stat(frame());
-        out.pig = { n: art.n, art: art.rgb.map(Math.round), kept: kept.rgb.map(Math.round), washed: washed.rgb.map(Math.round),
+        out.pig = { cw: main.width, chh: main.height, n: art.n, art: art.rgb.map(Math.round), kept: kept.rgb.map(Math.round), washed: washed.rgb.map(Math.round),
           keptMean: +kept.mean.toFixed(1), washedMean: +washed.mean.toFixed(1), keptP05: +kept.p05.toFixed(1), washedP05: +washed.p05.toFixed(1), artP05: +art.p05.toFixed(1),
           lights: +Math.abs(kept.mean - noLights.mean).toFixed(2), bloom: +Math.abs(kept.mean - noBloom.mean).toFixed(2), stable: Math.abs(again.mean - kept.mean) < 0.5,
           washedLights: null };
@@ -166,7 +166,8 @@ const { chromium } = require('playwright');
     });
     const P = R.pig;
     check('the lion\'s art is resident before it is measured', R.ready === true);
-    check('the lion on screen is measured over a real body', P.n > 3000, P.n + ' px');
+    // (3000 px of a 960x540 canvas; the detail tier sizes the canvas — low, the default, is 0.7 of each side)
+  check('the lion on screen is measured over a real body', P.n > 3000 * P.cw * P.chh / (960 * 540), P.n + ' px of a ' + P.cw + 'x' + P.chh + ' canvas');
     check('the room\'s light pools do not move the body\'s pixels', P.lights <= 3, 'Δ' + P.lights + ' luminance with them off (Δ' + P.washedLights + ' before the fix)');
     check('...nor does the bloom', P.bloom <= 3, 'Δ' + P.bloom);
     // THE BAR IS ON WHAT SHIPS. This used to ask that keeping the pigment made
