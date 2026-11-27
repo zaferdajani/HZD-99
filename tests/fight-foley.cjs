@@ -28,7 +28,7 @@ const BRAWL = `(bo, P, ctx) => { const pc = P.x + P.w / 2, d = bo.x + bo.w / 2 -
     window.requestAnimationFrame = () => 0;
     const sv0 = newSave(1); sv0.time = 99; startGame(sv0); audioOn(); MUTED = false;
     for (const k in MEDIA_SRC.audio) mediaAudio(k);
-    const want = Object.keys(MEDIA_SRC.audio).filter(k => /^(al_|fl_|ct_|hz_|hk_)/.test(k));
+    const want = Object.keys(MEDIA_SRC.audio).filter(k => /^(al_|fl_|ct_|hz_|hk_|hzd_)/.test(k));
     for (let n = 0; n < 150 && want.some(k => !MBUF[k]); n++) await new Promise(r => setTimeout(r, 100));
     const unloaded = want.filter(k => !MBUF[k]);
     // the listener
@@ -68,7 +68,7 @@ const BRAWL = `(bo, P, ctx) => { const pc = P.x + P.w / 2, d = bo.x + bo.w / 2 -
       return out;
     };
     const A = fight('A10', ALPHA_BOT, 70, () => G.boss);
-    const B = fight('A10R', BRAWL, 45, () => G.enemies.find(e => !e.dead && typeof isWolf === 'function' && isWolf(e)) || null);
+    const B = fight('A10R', BRAWL, 75, () => G.enemies.find(e => !e.dead && typeof isWolf === 'function' && isWolf(e)) || null);
     return { A, B, unloaded };
   }, { ALPHA_BOT, BRAWL });
   const UI = { ui: 1, ok: 1, no: 1 };

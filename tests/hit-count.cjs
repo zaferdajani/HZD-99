@@ -8,14 +8,14 @@
 // one it lost, so a hard fight is still measured. Measured on 2026-11-27 before the sword was made
 // stronger (js/weapons.js WEAPON_ATK) and after:
 //              before   after    the band held here
-//   rhino        48       ~48      36 - 60   (claws: they stay at 12 — at 13 a masher beat him)
-//   CHIME        ~39      ~23-31   12 - 34   (the crystal sword, 16 -> 27; its plate was thinned to
-//                                          turn the share of a blow it turned before, so a
-//                                          masher does not break it: a blow into its acting
-//                                          counts for less, and how many depends on the player)
+//   rhino        48       ~31      18 - 36   (claws 12 -> 19; his toss costs two cores and answers
+//                                          three blows in a breath at his snout, so a masher still dies)
+//   CHIME        ~39      ~36      12 - 42   (the sword 16 -> 27, but its plate turns the same share of
+//                                          a blow as before and it gained the toll and 30% health, so a
+//                                          masher and a heal-trader under it lose: the least shortened)
 //   the agent    ~123     ~69      40 - 85
 //   Wolf King    ~35      ~22      12 - 27
-//   NULLFANG     ~60      ~33      18 - 40
+//   NULLFANG     ~60      ~32      18 - 40
 // The top of each band is the owner's order (35-45% fewer blows, with room for the dice); the bottom
 // is the ledger's (row 13: a boss is beaten by fighting it, never easy) — no guardian falls to a
 // handful of blows.
@@ -26,7 +26,7 @@ const { chromium } = require('playwright');
 const { fight } = require('./gauntlet/lib.cjs');
 const BOT = n => require(path.join(__dirname, 'gauntlet', 'bots', n + '.cjs')).bot;
 const SINGLE = (src) => `(() => { const inner = ${src}; return (bo, P, ctx) => { if (!ctx.__w) { ctx.__w = 1; if (G.save) G.save.weaponMode = 'single'; } return inner(bo, P, ctx); }; })()`;
-const BAND = { horn: [36, 60], chime: [12, 34], tally: [40, 85], alpha: [12, 27], glitch: [18, 40] };
+const BAND = { horn: [18, 36], chime: [12, 42], tally: [40, 85], alpha: [12, 27], glitch: [18, 40] };
 const NAME = { horn: 'the rhino', chime: 'CHIME', tally: 'the agent', alpha: 'the Wolf King', glitch: 'NULLFANG' };
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') + n + (d != null ? '  ' + (typeof d === 'string' ? d : JSON.stringify(d)) : '')); if (!ok) bad++; };
 (async () => {

@@ -11734,7 +11734,7 @@ const BOSS_SELF_STAG = { nullend: 1, cffloor: 1, daze: 1 };
 const MINIS = {
   // (owner, 2026-11-24: every boss after the rhino is harder than the rhino. Measured: CHIME died
   // in about ten blows. Health ×1.5 for all five — the later ones were scaled from it.)
-  chime:  { w: 44, h: 58, hp: 220, zone: 'A', col: '#9fe8ff', acc: '#eefcff' },
+  chime:  { w: 44, h: 58, hp: 290, zone: 'A', col: '#9fe8ff', acc: '#eefcff' },
   carrier:{ w: 52, h: 46, hp: 250, zone: 'B', col: '#57a8ff', acc: '#cfe6ff' },
   moth:   { w: 60, h: 48, hp: 300, zone: 'C', col: '#ffab4a', acc: '#ffe6b8' },
   lattice:{ w: 50, h: 62, hp: 350, zone: 'D', col: '#bfeaff', acc: '#ffffff' },
@@ -11756,6 +11756,11 @@ const MINI_HIDE_OF = { chime: 0.095 };
 // ...and with the stronger blade (2026-11-27) two blows into one breath of CHIME's rest are already
 // greed: a player mashing in its face broke it in ten seconds at three (tests/boss-ladder.cjs B, E)
 const MINI_GREED_N = { chime: 2 };
+// THE TOLL: the bell's answer to a player under it (see the chime branch of Boss.update). under: how
+// close to its middle counts as under it; dwell: how long she may stand there before it answers; tell: the shiver; v: the drop; ring: the floor it rings
+// either side of where it lands; rest: how long it sits on the floor, open; greed: inside this, two blows
+// in a breath are answered with the toll; cores: what it costs her to be under it when it lands
+const CHIME_TOLL = { under: 60, dwell: 0.27, tell: 0.5, v: 980, ring: 64, rest: 0.42, greed: 110, slide: 0, cores: 2, mend: 260 };
 function isMini(b) { return !!(b && MINIS[b.kind]); }
 // TWO AUTHORED PLATES EACH, and the reason there are two is the silhouette law.
 //
@@ -11806,6 +11811,10 @@ const MINI_STRIP = {
     ringwarn: { key: 'chRing', cells: 12, k: 1.95, from: 0, to: 4,  t0: 0.35 },
     ring:     { key: 'chRing', cells: 12, k: 1.95, from: 5, to: 11, t0: 0.5 },
     notewarn: { key: 'chNote', cells: 12, k: 1.46, from: 0, to: 3,  t0: 0.35 },
+    // the toll: the shiver is the ring's wind-up, the drop and the sit are its struck body
+    tollwarn: { key: 'chRing', cells: 12, k: 1.95, from: 0, to: 4,  t0: 0.35 },
+    toll:     { key: 'chRing', cells: 12, k: 1.95, from: 5, to: 8,  t0: 0.3 },
+    tollrest: { key: 'chRing', cells: 12, k: 1.95, from: 9, to: 11, t0: 0.5 },
     note:     { key: 'chNote', cells: 12, k: 1.46, from: 4, to: 11, t0: 0.5 },
     dead:     { key: 'chFall', cells: 12, k: 0.97, death: 1 },
   },
@@ -15407,7 +15416,23 @@ class Boss {
         // tenths of a second it was actually attacking, and every construct
         // measured 60-98% motionless. The state machine decides intent; the
         // block after it always runs.
-        if (this.st === 'idle' || this.st === 'rest') {
+        // THE TOLL (2026-11-27; ledger 13x, "no place to hide"): standing UNDER the bell and striking up
+        // at it was the one place its notes and rings could not reach — a player who only mashed there
+        // broke it. So the bell answers the spot under it: it shivers (the wind-up, CHIME_TOLL.tell), drops
+        // to the floor onto whatever is beneath it, rings once where it lands, and sits there a breath
+        // (an opening: soft to touch, open to blows) before it rises. A player who reads the shiver steps
+        // out from under it; one who keeps mashing there takes the bell.
+        const under = this.kind === 'chime' && adist < CHIME_TOLL.under && py > this.y + this.h - 6 && (this.st === 'idle' || this.st === 'rest');
+        this.underT = under ? (this.underT || 0) + dt : 0;
+        // ...and a player MENDING near it (holding heal) is answered as greed is: at once, with what reaches
+        // her (ladder E: healing between trades must not carry a player through it)
+        if (this.kind === 'chime' && (player.healT || 0) > 0 && adist < CHIME_TOLL.mend && (this.st === 'idle' || this.st === 'rest')) this.miniGreed = true;
+        const greedNear = this.kind === 'chime' && this.miniGreed && adist < CHIME_TOLL.greed && (this.st === 'idle' || this.st === 'rest');
+        if (greedNear || (under && (this.miniGreed || this.t <= 0 || this.underT >= CHIME_TOLL.dwell))) {
+          this.underT = 0;
+          this.miniGreed = false; this.miniPeal = false;
+          this.st = 'tollwarn'; this.t = CHIME_TOLL.tell; this.vx *= 0.3;
+        } else if (this.st === 'idle' || this.st === 'rest') {
           // GREED: three blows landed inside a breath, and it answers at once — the far move, faster
           if (this.miniGreed) {
             this.miniGreed = false; this.miniPeal = true;
@@ -15423,6 +15448,29 @@ class Boss {
             this.st = (far ? K.far : (this.miniAlt ? K.close : K.far)) + 'warn';
             this.t = MINI_TELL;
           }
+        } else if (this.st === 'tollwarn') {
+          // (it shivers where it hangs: the drop is straight down, so stepping out is always the answer)
+          this.windT = CHIME_TOLL.tell; this.vx = 0; this.vy = 0;
+          this.x += clamp(dist, -CHIME_TOLL.slide * dt, CHIME_TOLL.slide * dt);
+          if (this.t <= 0) { this.st = 'toll'; this.t = 0.6; this.fired = false; this.vy = CHIME_TOLL.v; }
+        } else if (this.st === 'toll') {
+          // down, as fast as a bell falls; the body is the blow (Boss contact) and the floor rings
+          const fy = 15 * TILE - this.h;
+          this.vx = 0; this.y += this.vy * dt;
+          if (this.y >= fy || this.t <= 0) {
+            this.y = Math.min(this.y, fy); this.vy = 0; this.st = 'tollrest'; this.t = CHIME_TOLL.rest;
+            const fx0 = this.cx(), floorY = this.y + this.h;
+            // what is under it when it lands is struck — on the floor or in the air over its footprint
+            if (!player.dead && player.iT <= 0 && Math.abs(player.x + player.w / 2 - fx0) < CHIME_TOLL.ring && player.y + player.h > floorY - 150 && player.y < floorY)
+              player.hurt(DF().edmg * CHIME_TOLL.cores, fx0, 'chime.toll');   // a bell's whole weight: two cores
+            cam.shake = Math.max(cam.shake, 6); if (typeof sfx === 'function') sfx('bosshit_chime');
+            if (typeof padRumble === 'function') padRumble(0.5, 0.4, 200);
+            if (!G.artProbe) { burst(fx0, floorY - 4, 14, '#9fe8ff', 240, 0.45, 300, 2.6, true);
+              if (typeof bossVfx === 'function') bossVfx('chime_burst', fx0, floorY - 18, { h: CHIME_TOLL.ring * 1.6 }); }
+          }
+        } else if (this.st === 'tollrest') {
+          this.vx = 0; this.vy = 0;
+          if (this.t <= 0) { this.st = 'rest'; this.t = bossRest(this, MINI_REST) * 0.5; }
         } else if (/warn$/.test(this.st)) {
           // every wind-up is named <move>warn, so TELL_ST fires its sound and
           // Boss.draw paints the amber — no per-construct telegraph code
@@ -15448,7 +15496,7 @@ class Boss {
           if (this.t <= 0) { this.lunged = false; this.st = 'rest'; this.t = bossRest(this, MINI_REST); }
         }
         // PLATED WHILE IT ACTS: a blow into a wind-up or a strike is turned; its rest is the opening
-        this.hideK = (this.st === 'rest' || this.st === 'idle') ? 1 : (MINI_HIDE_OF[this.kind] || MINI_HIDE);
+        this.hideK = (this.st === 'rest' || this.st === 'idle' || this.st === 'tollrest') ? 1 : (MINI_HIDE_OF[this.kind] || MINI_HIDE);
         // ...and three blows landed inside a breath wake it (counted off what actually came off its health)
         if (this.miniHp != null && this.hp < this.miniHp - 0.5) { this.miniHits = (this.miniHits || []).filter(q => this.anim - q < MINI_GREED.win); this.miniHits.push(this.anim);
           if (this.miniHits.length >= (MINI_GREED_N[this.kind] || MINI_GREED.n) && (this.st === 'rest' || this.st === 'idle')) { this.miniHits = []; this.miniGreed = true; if (typeof sfx === 'function') sfx('tellmid'); } }
@@ -15459,7 +15507,9 @@ class Boss {
         // retuned for; these ride a slow figure-of-eight around the station and
         // keep riding it through the telegraph.
         const held = /warn$/.test(this.st) ? 0.55 : 1;
-        if (K.fly) {
+        if (K.fly && (this.st === 'tollwarn' || this.st === 'toll' || this.st === 'tollrest')) {
+          // (the toll moves its own body: no hover, no drift)
+        } else if (K.fly) {
           const tgt = px - this.face * K.stand, ty2 = py - K.hover;
           this.vx += clamp((tgt - this.cx()) * 2.4, -520, 520) * dt * held;
           this.vy += clamp((ty2 - this.cy()) * 2.4, -420, 420) * dt * held;
@@ -15496,7 +15546,8 @@ class Boss {
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro'
       && this.st !== 'lsvanish' && this.st !== 'arcstorm' && !(typeof nfHidden === 'function' && nfHidden(this)) && !(this.kind === 'glitch' && this.st === 'lurkpounce')
-      && !(this.kind === 'alpha' && typeof ALPHA_SOFT !== 'undefined' && ALPHA_SOFT[this.st])) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
+      && !(this.kind === 'alpha' && typeof ALPHA_SOFT !== 'undefined' && ALPHA_SOFT[this.st])
+      && !(this.kind === 'chime' && this.st === 'tollrest')) player.hurt(DF().edmg, this.cx(), this.kind + '.body');   // (named: the gauntlet counted 5 of 15 lost cores as '?')
       // (NULLFANG's burst from the leaves hurts with its drawn body only, js/nullfang-duel.js nfBurstBox:
       // the plain box sits in the clump while the drawn lion is still coming out of it — ledger, the hit
       // is the drawn shape)

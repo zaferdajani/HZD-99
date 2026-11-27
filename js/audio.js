@@ -1380,6 +1380,7 @@ function sfxPlain(n) {
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], n === 'win' ? 1 : 0.97 + Math.random() * 0.06)) return;
+  if (n === 'win' && v) return;      // (her recorded win, or nothing — never the synth arpeggio; tests/fight-foley.cjs)
   // HER OWN FOLEY (fired 2026-08-26, measured before keying — the near-silent
   // takes were refused and re-fired). Same contract as every sample here: the
   // authored take plays if it has decoded, her voice still rides where it used

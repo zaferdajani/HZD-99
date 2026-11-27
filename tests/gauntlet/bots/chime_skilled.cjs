@@ -16,6 +16,8 @@ module.exports = { boss: 'chime', bot: `(bo, P, ctx) => {
     if (adx < 120 && P.on && sy < pcy - 20) jump = true;
     if (adx < 130 && Math.abs(sy - pcy) < 120) swing = true;
   }
+  // THE TOLL (2026-11-27): it shivers before it drops on whoever is under it — step out from under it
+  if ((st === 'tollwarn' || st === 'toll') && adx < 100) { dir = d > 0 ? -1 : 1; jump = false; swing = false; }
   // THE NOTES: simulate each option 0.5 s ahead
   const threats = G.projs.filter(q => !q.friendly && !q.dead);
   const G2 = 2100, JV = 920, floorY = P.y;

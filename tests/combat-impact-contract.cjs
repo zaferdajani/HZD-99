@@ -53,7 +53,7 @@ ctx.G.save.flags={crystal:1,crystal2:1,connector:1};
 const values=[];
 for(const mode of ['claws','single','dual','joined']) { ctx.G.save.weaponMode=mode; values.push(run('player.dmg()')); }
 // (owner, 2026-11-27: a stronger sword, shorter fights — js/weapons.js WEAPON_ATK; was [12,16,19,23])
-assert.deepEqual(values,[12,27,32,38]);
-ctx.G.save.weaponMode='claws'; assert.equal(run('player.attackDmg("burst")'),38);
+assert.deepEqual(values,[19,27,32,38]);
+ctx.G.save.weaponMode='claws'; assert.equal(run('player.attackDmg("burst")'),61);
 assert.ok(run('player.attackDmg("burst") >= 2 * player.attackDmg("slash")'));
 console.log('PASS production combat: damage/armor, protected targets, charged contact, bounded effects/log, weapon progression');

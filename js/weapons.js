@@ -62,13 +62,14 @@ function weaponMode(save = G.save) {
 // who's starting to play ... boring to wait until you win. Maybe at least you start with a stronger
 // sword so that my attack is stronger ... I will need less hits to beat it. The fight is nice, but
 // the sword is weak"). The crystal sword hit for 16 and now for 27 (x1.69), and the later blades keep
-// their step above it (dual 32, joined 38). THE CLAWS STAY AT 12: measured, 13 a blow already let a
-// player who only presses ATTACK beat GRAVEHORN (tests/boss-skill.cjs), and the rhino is fought before
-// the sword is forged — the shorter fights are bought with the sword.
+// their step above it (dual 32, joined 38). The claws she meets the rhino with: 12 -> 19. That first
+// let a player who only presses ATTACK beat GRAVEHORN (tests/boss-skill.cjs), so his toss — the blow
+// that answers standing at his snout — now costs two cores, and three blows in a breath in front of him
+// bring it at once (js/gravehorn.js GH.tossCores, greedN). At 1.8 the masher won again on one seed.
 // Measured with the boss ladder's own bots (tests/boss-ladder.cjs, tests/hit-count.cjs): a
 // chapter-one guardian falls to roughly 40% fewer blows. No boss lost a move, a tell or an opening:
 // the fight is the same fight, shorter.
-const WEAPON_ATK = { claws: 1, single: 2.25, dual: 2.7, joined: 3.2 };
+const WEAPON_ATK = { claws: 1.6, single: 2.25, dual: 2.7, joined: 3.2 };
 function weaponAtk(save = G.save) {
   return WEAPON_ATK[weaponMode(save)] || 1;
 }

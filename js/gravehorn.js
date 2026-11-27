@@ -42,6 +42,7 @@ const GH = {
   skidDec: 1500, recover: 0.62, stun: 1.2, stun2: 1.0, wallTurn: 0.5,
   // HORN TOSS (and its parry)
   tossReach: 78, tossTell: 0.45, toss: 0.30, tossHit: 0.20,
+  greedN: 2, greedWin: 1.6, greedReach: 240, tossCores: 2,          // two blows thrown into his wind-ups or strikes inside this many seconds, in front of him: he tosses
   tossRecover: 0.68, tossRecover2: 0.60, parryLead: 0.15, parryClean: 0.5, stagger: 0.9,
   tossKB: [520, 700], tossKB2: [640, 820], dizzy: 1.4, dizzy2: 1.8,
   // REAR KICK (phase two)
@@ -753,6 +754,19 @@ function ghStep(b, dt) {
   const snoutX = b.cx() + face * 150, rumpX = b.cx() - face * 100;
   const dSnout = Math.abs(px - snoutX), dRump = Math.abs(px - rumpX);
   const low = player.y + player.h > b.y + b.h - 64;
+  // STANDING AT HIS SNOUT SWINGING INTO HIS BLOWS IS ANSWERED (2026-11-27; ledger 13x, "a player who
+  // only presses ATTACK never beats him"). With the claws made stronger for shorter fights, a player who
+  // stood in front of him pressing attack wore him down. What marks her is not landing blows — a reader
+  // lands them in his openings — but swinging INTO his wind-ups and strikes, onto the plate (GH_ARMED):
+  // two of those inside a breath and his next blow is the toss, at once — named, wound up, the toss a
+  // reading player parries with one clean strike or steps away from.
+  // (on its own clock: b._clk is the step log's, advanced once a step above)
+  b.ghGreedClk = (b.ghGreedClk || 0) + dt;
+  if (b.ghHp != null && b.hp < b.ghHp - 0.5 && GH_ARMED[b.st]) { b.ghHits = (b.ghHits || []).filter(q => b.ghGreedClk - q < GH.greedWin); b.ghHits.push(b.ghGreedClk); }
+  b.ghHp = b.hp;
+  if (b.ghHits && b.ghHits.length >= GH.greedN && front && adist < GH.greedReach && low && (b.st === 'idle' || b.st === 'rest' || b.st === 'walk')) {
+    b.ghHits = []; b.ghGreed = true; b.t = 0;
+  }
   let want = 0;                    // horizontal speed the body is asked for
   switch (b.st) {
     // ---------------------------------------------------------- the entrance
@@ -1139,6 +1153,10 @@ function ghDecide(b, px, py, front, dSnout, dRump, adist, low) {
     }
     ghSet(b, 'turn', GH.turnT); b.face = -face; return;
   }
+  if (b.ghGreed) {
+    b.ghGreed = false;
+    if (adist < GH.greedReach && low) { b.lastMove = 'toss'; ghSet(b, 'tossprep', GH.tossTell); return; }
+  }
   if ((b.denied || 0) >= 3) { b.denied = 0; ghSet(b, 'rest', 1.0); b.lastMove = 'rest'; return; }
   const deck = [];
   if (dSnout < GH.tossReach && low) deck.push(['toss', 6]);
@@ -1409,7 +1427,10 @@ function ghClashed(b, p, how) {
 function ghTossHit(b) {
   const p2 = b.phase === 2, face = b.face || -1;
   const c0 = player.cores, iT0 = player.iT;
-  player.hurt(DF().edmg, b.cx(), 'horn.toss', b);
+  // (2026-11-27: the horn's whole weight — two cores. With the stronger claws a player standing at his
+  // snout pressing attack outlasted him; the toss is the blow that stands there is answered with, and
+  // a reading player steps out of it or turns it with one clean strike)
+  player.hurt(DF().edmg * GH.tossCores, b.cx(), 'horn.toss', b);
   if (b.st === 'stagger') return;          // turned by a perfect guard (js/parry.js → ghClashed)
   const KB = p2 ? GH.tossKB2 : GH.tossKB;
   if (player.cores < c0) {
