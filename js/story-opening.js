@@ -120,8 +120,27 @@ function ctlFill(line) {
 // on load, and moves it onto the current story WITHOUT taking anything away
 // and without paying anything twice: every flag below is derived from what
 // the old save already earned.
+const PACK_SAVE_VERSION = 1;
+function migratePack(save) {
+  if (!save || typeof save !== 'object' || save.theme === 'hero') return save;
+  if ((save.packVersion | 0) >= PACK_SAVE_VERSION) return save;
+  const f = save.flags = save.flags || {};
+  save.arms = Array.isArray(save.arms) ? save.arms : [];
+  const hadPack = save.arms.includes('pack');
+  if (hadPack) save.packLv = Math.max(save.packLv | 0, 1);
+  // The former small-wolf ride was replaced by the called Alpha ride. A
+  // player who already earned the old ride keeps that earned capability.
+  if (f.wolfMount || f.alphaRide) {
+    if (!hadPack) save.arms.push('pack');
+    save.packLv = Math.max(save.packLv | 0, 3);
+    f.alphaRide = 1;
+  }
+  save.packVersion = PACK_SAVE_VERSION;
+  return save;
+}
 function migrateStory(save) {
   if (!save || typeof save !== 'object' || save.theme === 'hero') return save;
+  migratePack(save);
   if ((save.storyVersion | 0) >= STORY_VERSION) return save;
   const f = save.flags = save.flags || {};
   save.items = save.items || {};
