@@ -37,7 +37,7 @@ const BRAWL = `(bo, P, ctx) => { const pc = P.x + P.w / 2, d = bo.x + bo.w / 2 -
     const osc0 = BaseAudioContext.prototype.createOscillator;
     BaseAudioContext.prototype.createOscillator = function () { note('osc'); return osc0.apply(this, arguments); };
     const nb0 = window.noiseBuf; window.noiseBuf = function () { note('noise'); return nb0.apply(this, arguments); };
-    const pb0 = window.playBuf; window.playBuf = function (k) { const ok = pb0.apply(this, arguments); if (cur) { cur.rec[k] = 1; if (!ok) cur.miss[k] = 1; } return ok; };
+    const pb0 = window.playBuf; window.playBuf = function (k) { const ok = pb0.apply(this, arguments); if (cur) { cur.rec[k] = 1; if (!ok && !MBUF[k]) cur.miss[k] = 1; /* missing = asked for and not there; her voice held back on purpose (a held charge, her win playing) is not a missing take */ } return ok; };
     const sp0 = window.sfxPlain; window.sfxPlain = function (n) {
       if (cur) return sp0.apply(this, arguments);
       const e = log[n] || (log[n] = { n: 0, osc: 0, noise: 0, rec: {}, miss: {} }); e.n++;
