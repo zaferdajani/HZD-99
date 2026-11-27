@@ -155,8 +155,10 @@ function tcResize() {
 const WHEEL_A = Math.PI, WHEEL_SPREAD = 1.25;
 const wa = (slot) => WHEEL_A + (slot - 2.5) / 2.5 * WHEEL_SPREAD;
 const WHEEL = [
+  // (CAST fires the worn arm too, not only the EMP: with the pack and no EMP a
+  // phone used to have no seat to fire it from at all — owner, 2026-11-27)
   { code: 'VCAST', icon: '◎', a: wa(0),
-    on: () => !!(G.save && G.save.abil.emp) },
+    on: () => !!(G.save && (G.save.abil.emp || (typeof activeArm === 'function' && activeArm()))) },
   { code: 'VSTAR', sym: 'shuriken', a: wa(1),
     tint: { fill: 'rgba(190,238,255,0.96)', ring: 'rgba(90,215,255,0.75)' },
     on: () => typeof starCount === 'function' && starCount() > 0 },
@@ -182,7 +184,7 @@ const WHEEL = [
 function wheelItems() {
   return WHEEL.filter(w => {
     if (w.code === 'VDASH') return !!(G.save && G.save.abil.dash);
-    if (w.code === 'VCAST') return !!(G.save && G.save.abil.emp);
+    if (w.code === 'VCAST') return !!(G.save && (G.save.abil.emp || (typeof ownedArms === 'function' && ownedArms().length > 0)));
     if (w.code === 'VSTAR') return !!(G.save && (G.save.stars > 0 || (typeof starCount === 'function' && starCount() > 0)));
     if (w.code === 'VARM') return typeof armSlots === 'function' && armSlots().length > 1;
     if (w.code === 'VGRAPPLE') return typeof grapUnlocked === 'function' && grapUnlocked();
@@ -794,6 +796,15 @@ function drawWheel(L) {
       tcx.strokeStyle = live ? 'rgba(120,255,220,0.9)' : 'rgba(255,120,120,0.8)';
       tcx.lineWidth = 3;
       tcx.beginPath(); tcx.arc(x, y, g.ir + 7, 0, 7); tcx.stroke();
+      tcx.restore();
+    }
+    // THE SEAT BEING TAUGHT (js/armlesson.js): rung like the button the tutor points at
+    if (TOUCH.hiSeat && it.code === TOUCH.hiSeat) {
+      const pu2 = 0.5 + Math.sin(performance.now() / 240) * 0.5;
+      tcx.save();
+      tcx.strokeStyle = 'rgba(55,255,208,' + (0.45 + pu2 * 0.5).toFixed(2) + ')';
+      tcx.lineWidth = 3; tcx.setLineDash([8, 7]); tcx.lineDashOffset = -performance.now() / 60;
+      tcx.beginPath(); tcx.arc(x, y, g.ir + 9 + pu2 * 4, 0, 7); tcx.stroke();
       tcx.restore();
     }
     tcx.save();

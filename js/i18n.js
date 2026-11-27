@@ -2096,3 +2096,18 @@ function t(k) {
   const v = (I18N[LANG] && I18N[LANG][k]) != null ? I18N[LANG][k] : I18N.en[k];
   return v != null ? v : k;
 }
+// A NEW ARM TEACHES ITSELF (js/armlesson.js, owner 2026-11-27): the lesson chip's
+// two words after the arm's name, and the card's line in HER controls — {CAST}
+// and {ARM} are filled from the device she holds (ctlFill), never "V or K".
+TEXT_LAYERS.push({
+  en: { al_pick: 'wear it', al_cast: 'use it', al_swap: 'Change suit', al_throw: 'throw', al_call: 'call him', al_ride: 'get on',
+        arm_how: '{CAST} fires it, {ARM} changes suit' },
+  ar: { al_pick: 'ارتديه', al_cast: 'استخدميه', al_swap: 'بدّلي البدلة', al_throw: 'ارميها', al_call: 'استدعيه', al_ride: 'اركبيه',
+        arm_how: '{CAST} للإطلاق، {ARM} لتبديل البدلة' },
+  tr: { al_pick: 'tak', al_cast: 'kullan', al_swap: 'Zırh değiştir', al_throw: 'fırlat', al_call: 'çağır', al_ride: 'bin',
+        arm_how: '{CAST} ateşler, {ARM} zırhı değiştirir' },
+  zh: { al_pick: '装上', al_cast: '使用', al_swap: '换装', al_throw: '投掷', al_call: '召唤', al_ride: '骑上',
+        arm_how: '{CAST} 发射，{ARM} 换装' },
+  ru: { al_pick: 'надень', al_cast: 'примени', al_swap: 'Сменить костюм', al_throw: 'брось', al_call: 'позови', al_ride: 'садись',
+        arm_how: '{CAST} — выстрел, {ARM} — сменить костюм' },
+});

@@ -1494,9 +1494,10 @@ function ghGone(b) {
     if (!(typeof isHero === 'function' && isHero())) {
       G.save.arms = G.save.arms || [];
       if (!G.save.arms.includes('shard')) {
-        G.save.arms.push('shard'); G.save.armIdx = G.save.arms.length; G.save.shardLv = 1;
+        G.save.arms.push('shard'); if (typeof armWear === 'function') armWear('shard'); else G.save.armIdx = G.save.arms.length; G.save.shardLv = 1;
         const card = typeof showItem === 'function' ? showItem(t('arm_shard'), t('arm_shardd') + '  —  ' + t('arm_how')) : null;
         if (card && typeof loadoutTagCard === 'function') loadoutTagCard(card, 'arm', 'shard');
+        if (typeof armLessonStart === 'function') armLessonStart('shard');   // the horn-star, taught (js/armlesson.js)
       }
     }
     if (typeof persist === 'function') persist();

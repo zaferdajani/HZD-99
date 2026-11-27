@@ -348,7 +348,7 @@ const G = {
       // THE PACK ANSWERS HER (owner, 2026-11-20): the yield gives her the arm
       // that calls one of its wolves (js/packcall.js) — one card says both
       this.save.arms = this.save.arms || [];
-      if (!isHero() && !this.save.arms.includes('pack')) { this.save.arms.push('pack'); this.save.armIdx = this.save.arms.length; }
+      if (!isHero() && !this.save.arms.includes('pack')) { this.save.arms.push('pack'); armWear('pack'); if (typeof armLessonStart === 'function') armLessonStart('pack'); }
       {
         const card = showItem(t('alpha_won'), t('alpha_wond') + (isHero() ? '' : '  —  ' + t('arm_how')));
         if (card && !isHero() && typeof loadoutTagCard === 'function') loadoutTagCard(card, 'arm', 'pack');
@@ -401,8 +401,9 @@ const G = {
       if (!this.save.arms) this.save.arms = [];
       if (!this.save.arms.includes(arm)) {
         this.save.arms.push(arm);
-        this.save.armIdx = this.save.arms.length;   // wear it immediately
+        armWear(arm);                                // wear it immediately (its own seat on the wheel)
         loadoutTagCard(showItem(t('arm_' + arm), t('arm_' + arm + 'd') + '  —  ' + t('arm_how')), 'arm', arm);
+        if (typeof armLessonStart === 'function') armLessonStart(arm);   // ...and once the card is closed, a lesson (js/armlesson.js)
       }
     }
     const tr = RELIC_TROPHY[kind];
@@ -1220,6 +1221,8 @@ function grantCrest(id) {
 // caller that adds an onEnd or a line adds it to this card and not to whatever
 // happens to be G.dialog at the time.
 function showItem(name, desc, art, demo) {
+  // a card that names a control names THIS player's ({CAST}, {ARM}: ctlFill)
+  if (typeof ctlFill === 'function') desc = ctlFill(desc);
   const card = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null,
                  art: art || null, demo: demo || null, item: true };
   persist();
@@ -1385,8 +1388,13 @@ function loadRoom(id) {
   if (typeof k2RoomLoaded === 'function') k2RoomLoaded(id);   // the swamp's raft and its insects (conduits-road.js)
   if (typeof swRoomLoaded === 'function') swRoomLoaded(id);   // the sewer's lift and its air (sewer.js)
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null; G.crescents = [];
-  // a called wolf stays in the room it was called to — unless she is riding it (js/wolfmount.js)
-  if (!(G.mount && G.mount.w && G.mount.w === G.packWolf)) { G.packWolf = null; G.mount = null; }
+  // a called wolf comes through with her (js/packcall.js packCarryOut: what is left of its stay is
+  // held until the crossing has placed her, then packCarryArm brings it in beside her) — and a ridden
+  // Alpha simply goes where she does (js/wolfmount.js)
+  if (!(G.mount && G.mount.w && G.mount.w === G.packWolf)) {
+    if (typeof packCarryOut === 'function') packCarryOut(); else G.packCarry = null;
+    G.packWolf = null; G.mount = null;
+  }
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   // An attack belongs to the room where it began. Do not carry a damaging
   // hurricane, buffered strike or half-charged release through a doorway.
@@ -1715,7 +1723,7 @@ function startGame(save) {
   // restart into the cradle, even though the new cat owned no dash.
   G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = []; if (typeof clearBossVfx === 'function') clearBossVfx();
   if (typeof FXGL !== 'undefined') FXGL.list.length = 0;
-  G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
+  G.lesson = null; G.armLesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
   G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null; G.sceneCaps = null;
   if (typeof overlayClear === 'function') overlayClear();
   G.tut = null; G.wake = null; G.meet = null; G.break = null; G.trans = null; G.gateWalk = null;
@@ -1734,6 +1742,7 @@ function startGame(save) {
   // (js/progress.js) — a hand-edited or pre-gate save wakes at the camp
   if (typeof progressBenchGuard === 'function') progressBenchGuard(save);
   loadRoom(save.bench.room);
+  G.packCarry = null;                // a load is not a crossing: no wolf comes with her
   player = new Player(save.bench.x, save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
@@ -1745,6 +1754,7 @@ function respawn() {
   if (G.save.diff === 2 && G.save.lives >= 9) { G.state = 'GAMEOVER'; return; }
   if (typeof progressBenchGuard === 'function') progressBenchGuard(G.save);
   loadRoom(G.save.bench.room);
+  G.packCarry = null;                // nor is waking at the bench
   player = new Player(G.save.bench.x, G.save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
@@ -2312,6 +2322,7 @@ function applyTransition() {
         rnd(-50, 50), rnd(-60, 20), 0.5, '#37ffd0', 2.4, 200, true);
   }
   updateCam(player.x, player.y, W, H, 1);
+  if (typeof packCarryArm === 'function') packCarryArm();   // her called wolf comes through beside her
 }
 
 // ===========================================================================
@@ -2484,6 +2495,7 @@ function vlinkHandover(side, dest) {
   // — or, with no direction held, back down the way she came. The arc is
   // kept for the CUT crossing (applyTransition), which is a real change of room.
   if (side === 'T') player.tCarry = 1.0;
+  if (typeof packCarryArm === 'function') packCarryArm();   // ...and her wolf with her, once she stands
 }
 // How far past its top and bottom the camera may look. Only toward a link
 // whose neighbour is baked (there is a picture to show), and only while she is
@@ -3477,6 +3489,7 @@ function update(dt) {
       updateTutor(dt);
       if (typeof openingTick === 'function') openingTick(dt);
       updateLesson(dt);
+      if (typeof updateArmLesson === 'function') updateArmLesson(dt);   // a new arm teaches itself (js/armlesson.js)
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
       if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);
@@ -13568,6 +13581,7 @@ function updateGateWalk(dt) {
       if (g.def && g.def.ax != null) gateSetDown();   // a door with no declared arrival keeps the drop it always had
       player.lastSafe = { x: player.x, y: player.y };
     }
+    if (typeof packCarryArm === 'function') packCarryArm();   // through the ring with her
   }
 }
 // SHE COMES OUT STANDING ON THE RING'S PAD (owner, 2026-11-16: "came out of
@@ -15855,8 +15869,11 @@ const MOD_LESSON = {
            done: () => !player.on && player.airJumps < (hasSkill('triple') ? 2 : 1) },
   wall:  { vb: null, keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick',
            done: () => !!player.wallSlide },
+  // (the guardian that gives the EMP gives its suit too, worn at once — and CAST
+  // then fires the suit, so a lesson that waited for the EMP's own cooldown
+  // waited for ever; a cast of either is the lesson done)
   emp:   { vb: 'VCAST', keys: 'V', pad: 'B', touch: 'CAST',
-           done: () => player.castCD > 0 },
+           done: () => player.castCD > 0 || player.armCD > 0 },
 };
 function lessonStart(id) {
   if (!MOD_LESSON[id]) return;
@@ -16069,8 +16086,33 @@ function drawHUD() {
       c.restore(); c.globalAlpha = 1;
     }
     const a = slots[cur];
-    ftxt(a ? t('arm_' + a.id) : t('arm_none'), 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
-    if (!(TOUCH && TOUCH.enabled)) ftxt('G', 26, 118, 11, '#546b7d');
+    const an = a ? t('arm_' + a.id) : t('arm_none');
+    ftxt(an, 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
+    // THE TWO CONTROLS, BESIDE IT (owner, 2026-11-27: "There isn't a direct way
+    // that tells me how to switch between these skills I have"): after the worn
+    // arm's name, the glyph and her own control that FIRES it (◎) and the one
+    // that CHANGES it (⬡) — the key, the pad's button or the phone's wheel
+    // seat (ctlName). Small, dim, never a sentence. G.hudArmCtl for the harness.
+    if (typeof ctlName === 'function') {
+      c.save();
+      c.font = '600 12px "Segoe UI", Tahoma, sans-serif';
+      let hx = 44 + c.measureText(an).width + 10;
+      const chip = (glyph, key) => {
+        c.font = '700 11px "Segoe UI", Tahoma, sans-serif';
+        const kw = c.measureText(key).width + 10;
+        // (the phone's seat already IS the glyph: ✦ ▸ ◎)
+        if (key.indexOf(glyph) < 0) ftxt(glyph, hx + 6, 146, 12, '#9fb4c4', 'center'); else hx -= 14;
+        c.fillStyle = 'rgba(8,14,20,0.72)'; rr(c, hx + 14, 137, kw, 14, 3); c.fill();
+        c.strokeStyle = 'rgba(159,180,196,0.55)'; c.lineWidth = 1; rr(c, hx + 14, 137, kw, 14, 3); c.stroke();
+        ftxt(key, hx + 14 + kw / 2, 148, 11, '#d6e2ea', 'center', null, '700');
+        hx += 14 + kw + 8;
+      };
+      const fire = ctlName('CAST'), swap = ctlName('ARM');
+      if (a) chip('◎', fire);
+      chip('⬡', swap);
+      G.hudArmCtl = { fire: a ? fire : null, swap, x1: hx };
+      c.restore();
+    }
   }
   // ...and THE REST OF THE BUILD on the same line (js/loadout.js): a cobalt
   // diamond per worn crest, one green seal with the relic count. Arms, crests,
@@ -16100,7 +16142,9 @@ function drawHUD() {
   // the Song is always available — it is hers, not a boss's
   const songReady = player.volts >= SONG_COST;
   ftxt('♪', 934, 118, 20, songReady ? ELEM.murr.glow : 'rgba(125,147,168,0.5)', 'right');
-  if (!(TOUCH && TOUCH.enabled)) ftxt('B', 934, 138, 11, songReady ? '#8fd8c8' : '#546b7d', 'right');
+  // (her own control, not a keyboard letter on a pad — owner, 2026-11-27: "I
+  // don't know how to throw my ninja stars using controller")
+  if (!(TOUCH && TOUCH.enabled)) ftxt(typeof ctlName === 'function' ? ctlName('SONG') : 'B', 934, 138, 11, songReady ? '#8fd8c8' : '#546b7d', 'right');
   // shuriken: pips, so you can read the count without arithmetic
   const sc = starCount(), sm = starMax();
   for (let i = 0; i < sm; i++) {
@@ -16129,7 +16173,7 @@ function drawHUD() {
     }
     c.closePath(); c.fill(); c.shadowBlur = 0; c.restore();
   }
-  if (!(TOUCH && TOUCH.enabled)) ftxt('R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
+  if (!(TOUCH && TOUCH.enabled)) ftxt(typeof ctlName === 'function' ? ctlName('STAR') : 'R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
   }
 
   // scrap + knowledge
@@ -18550,6 +18594,7 @@ function draw(tms) {
   if (typeof pgRoutePointer === 'function') pgRoutePointer(c);   // ...and the way to whatever she was asked to do
   if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
+  if (typeof drawArmLesson === 'function') drawArmLesson();
   drawHUD();
   if (typeof drawDmgOverlay === 'function') drawDmgOverlay(c);   // the Forge's DAMAGE ranking (js/dmglog.js)
   if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js

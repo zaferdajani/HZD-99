@@ -33,6 +33,48 @@ const PACK_CALL = {
 };
 // THE PACK, LONGER (Ratchet's shelf, 2026-11-25): the bought tier stays longer and bites harder
 function packStat(k) { const up = (G.save && G.save.packLv | 0) >= 2; return k === 'stay' ? (up ? 15 : PACK_CALL.stay) : k === 'dmg' ? (up ? 22 : PACK_CALL.dmg) : PACK_CALL[k]; }
+// ---------------------------------------------------------------------------
+// A BITE THAT HURTS (owner, 2026-11-27: "The wolf is super weak. When I
+// summoned it next to the cheetahs, it hit it so many times without any real
+// damage, even though I upgraded the wolf"). Measured before this: a cave cat
+// in CV2 is 121-145 hp (the rift's zone scaling, a level-5 machine, often the
+// tough trait) under 12 % plate, and the bite was a flat 14 (22 upgraded) — 12
+// a bite, a twelfth of the cat, three bites in a ten-second stay. A flat number
+// cannot be right in the meadow and in the rift both, so against an ordinary
+// machine the bite is a SHARE of what that machine started with: a fifth at
+// the first rung (five bites bring it down), three tenths upgraded (four),
+// never less than the flat bite. A guardian, a sage or an agent still takes the
+// flat bite: against them it stays a little help.
+// ---------------------------------------------------------------------------
+const PACK_BITE = { share: 0.2, shareUp: 0.3, upReach: 150 };
+function packBigFoe(q) {
+  return (typeof Boss !== 'undefined' && q instanceof Boss) || q.kind === 'sage' || !!q.agent || !!q.isAgent;
+}
+// the bite before her difficulty, and the raw number that lands it through the plate
+function packBiteRaw(q, flat) {
+  const base = flat * ((typeof DF === 'function' && DF().pdmg) || 1);
+  if (!q || packBigFoe(q)) return Math.round(base);
+  const up = (G.save && G.save.packLv | 0) >= 2;
+  const want = Math.ceil((q.hpMax0 || q.hp || 0) * (up ? PACK_BITE.shareUp : PACK_BITE.share));
+  // dealDmg takes the plate off (combatDamage); hand it the number that comes
+  // out at `want` after it, so the share is the share whatever its armour
+  const def = typeof combatDefense === 'function' ? combatDefense(q) : 0;
+  const raw = def > 0 ? Math.ceil((want + 0.49) / (1 - def / 100)) : want;
+  return Math.max(Math.round(base), raw);
+}
+// the bite, landed: from the side the jaws are on (a shield-walker's plate is
+// on one side, and a bite from behind it goes in whole), the knock the way the
+// wolf was going, and the fold when it is the last
+function packBite(w, q, flat) {
+  const b = typeof hurtBoxOf === 'function' ? hurtBoxOf(q) : q;
+  const hx = w.dir > 0 ? b.x + 3 : b.x + b.w - 3, hy = b.y + b.h * 0.5;
+  const out = dealDmg(q, packBiteRaw(q, flat), null, hx, hy, true, 'pack');
+  if (typeof sfx === 'function') sfx('wolf_bite');
+  if (typeof burst === 'function') burst(hx, hy, 8, '#ffe6c8', 180, 0.3, 200, 2.2, true);
+  if (!(typeof Boss !== 'undefined' && q instanceof Boss) && q.kind !== 'turret') { q.kbT = Math.max(q.kbT || 0, 0.2); q.vx = (q.vx || 0) * 0.3 + w.dir * 200; q.vy = Math.min(q.vy || 0, 0) - 110; }
+  if (q.hp <= 0 && !q.dead && typeof q.die === 'function') { q.die(w.dir, -0.3); if (typeof questPackKill === 'function') questPackKill(q); }
+  return out;
+}
 // THE PACK LADDER (js/packtree.js, owner 2026-11-26): from CALL THE ALPHA on, the call brings the
 // Alpha himself, at his own size, instead of a small wolf — he has his own step and drawing there
 function packCallsAlpha() { return (G.save && G.save.packLv | 0) >= 3 && typeof alcCall === 'function'; }
@@ -56,6 +98,7 @@ function packQuarry(w) {
 }
 function packCall(p) {
   if (G.packWolf) return false;
+  G.packCarry = null;                      // a fresh call is not the one she brought
   if (packCallsAlpha()) return alcCall(p);
   const k = (typeof EKIND !== 'undefined' && EKIND.crawler) || { w: 40, h: 28 };
   const back = -(p.face || 1);
@@ -65,6 +108,11 @@ function packCall(p) {
     dir: -back, faceVis: -back, spd: PACK_CALL.spd, kind: 'crawler', hp: 1,
     coilT: 0, lungeT: 0, biteCD: 0.3, bit: null, leaveT: 0, airT: 0, pack: 1,
   };
+  // ...inside the room: called with her back to the room's edge it used to
+  // come in from past the wall and run on the void outside it for its stay
+  // (measured in V2: spawned at x 1292 in a room 1024 wide, never bit)
+  const W = G.roomDef ? G.roomDef.w * TILE : 4000;
+  w.x = clamp(w.x, TILE + 4, W - TILE - 4 - w.w);
   // it comes in from off her shoulder, not out of the floor
   if (typeof solidAt === 'function' && solidAt(Math.floor((w.x + w.w / 2) / TILE), Math.floor((w.y + w.h / 2) / TILE))) w.x = p.x;
   G.packWolf = w;
@@ -72,7 +120,86 @@ function packCall(p) {
   if (typeof burst === 'function') burst(w.x + w.w / 2, w.y + w.h, 10, '#b9a88a', 160, 0.5, 300, 2.4, true);
   return true;
 }
+// ===========================================================================
+// IT COMES WITH HER (owner, 2026-11-27: "it should move with the screens when I
+// go from one screen to another, which also is not. Not all the time, at
+// least"). loadRoom used to drop the called wolf at every door — only a ridden
+// Alpha crossed. Now loadRoom hands what is left of its stay to G.packCarry
+// (packCarryOut), every crossing arms it once she is placed in the far room
+// (packCarryArm: a side seam, a cut crossing, a vertical shaft, a ring gate,
+// the sewer's hatch), and it comes in beside her, behind her shoulder, on the
+// ground she stands on (packArrive) — the small wolf or the called Alpha, with
+// the seconds it had left. A crossing made in the air (up a shaft, a drop
+// through a floor) waits until her feet are down, the stay still running. A
+// respawn or a load is not a crossing: nothing arms it, and the next call
+// clears it. A wolf already loping off is not brought.
+// ===========================================================================
+const PACK_CARRY = { minT: 0.6, wait: 3, behind: 64, behindAlpha: 110 };
+function packCarryOut() {
+  const w = G.packWolf;
+  if (!w || w.leaveT > 0 || !(w.t > PACK_CARRY.minT)) { G.packCarry = null; return null; }
+  G.packCarry = { alpha: !!w.alpha, t: w.t, room: G.roomId, armed: false, waitT: 0 };
+  return G.packCarry;
+}
+// a crossing has put her in the room: bring it (now, or when she lands)
+function packCarryArm() {
+  const C = G.packCarry;
+  if (!C) return false;
+  C.armed = true; C.room = G.roomId;
+  return packArrive(0);
+}
+// the ground beside her that a body of this size can stand on: behind her
+// first, then her other side, then where she stands; never in rock
+function packArriveSpot(bw, bh, behind) {
+  const p = player, W = G.roomDef.w * TILE, feet = p.y + p.h;
+  const back = -(p.face || 1);
+  const free = (x, y) => {
+    for (let yy = y + 2; yy < y + bh - 1; yy += 8)
+      for (const xx of [x + 2, x + bw / 2, x + bw - 2])
+        if (solidAt(Math.floor(xx / TILE), Math.floor(yy / TILE))) return false;
+    return true;
+  };
+  const under = (x) => {               // something to stand on within two tiles of her feet
+    for (let yy = feet; yy < feet + TILE * 2; yy += 8)
+      for (const xx of [x + 4, x + bw - 4]) if (solidAt(Math.floor(xx / TILE), Math.floor(yy / TILE))) return true;
+    return false;
+  };
+  for (const off of [behind, behind * 1.6, behind * 0.6, -behind * 0.6, -behind, -behind * 1.6, 0]) {
+    const x = clamp(p.x + p.w / 2 + back * off - bw / 2, TILE + 4, W - TILE - 4 - bw);
+    const y = feet - bh;
+    if (free(x, y) && under(x)) return { x, y };
+  }
+  return { x: clamp(p.x + p.w / 2 - bw / 2, 4, W - 4 - bw), y: feet - bh };
+}
+function packArrive(dt) {
+  const C = G.packCarry;
+  if (!C || !C.armed || G.packWolf) return false;
+  if (C.room !== G.roomId || (typeof isHero === 'function' && isHero())) { G.packCarry = null; return false; }
+  C.t -= dt || 0; C.waitT += dt || 0;
+  if (C.t <= PACK_CARRY.minT * 0.5 || C.waitT > PACK_CARRY.wait) { G.packCarry = null; return false; }
+  // in the air (a climb, a drop): it comes once there is ground under her
+  if (!player || player.dead || !player.on || G.climb) return false;
+  const keep = player.armCD;
+  const ok = C.alpha && typeof alcCall === 'function' ? alcCall(player, { quiet: 1 }) : packCallQuiet(player);
+  player.armCD = keep;                 // bringing it is not a second call
+  G.packCarry = null;
+  const w = G.packWolf;
+  if (!ok || !w) return false;
+  const at = packArriveSpot(w.w, w.h, w.alpha ? PACK_CARRY.behindAlpha : PACK_CARRY.behind);
+  w.x = at.x; w.y = at.y; w.vy = 0; w.on = true;
+  w.vx = 0; w.t = C.t; w.carried = (w.carried || 0) + 1;
+  // it keeps its face to where she is going
+  w.dir = player.face || 1; if (w.faceVis != null) w.faceVis = w.dir; if (w.face != null) w.face = w.dir;
+  if (typeof burst === 'function') burst(w.x + w.w / 2, w.y + w.h, 6, '#b9a88a', 120, 0.4, 300, 2, true);
+  return true;
+}
+// the small wolf, without the call's howl (it did not leave: it came through with her)
+function packCallQuiet(p) {
+  const s0 = typeof sfx === 'function' ? sfx : null;
+  try { if (s0) sfx = () => {}; return packCall(p); } finally { if (s0) sfx = s0; }
+}
 function packStep(dt) {
+  if (!G.packWolf && G.packCarry && G.packCarry.armed && G.state === 'PLAY') packArrive(dt);
   const w = G.packWolf; if (!w) return;
   if (w.alpha) { if (typeof alcStep === 'function') alcStep(w, dt); return; }   // the called Alpha (js/packtree.js)
   if (G.state !== 'PLAY') return;
@@ -103,12 +230,7 @@ function packStep(dt) {
       const jaw = { x: w.dir > 0 ? w.x : w.x - 22, y: w.y - 18, w: w.w + 22, h: w.h + 18 };
       if (aabb(jaw, b)) {
         w.hitDone = true;
-        const dm = Math.round(packStat('dmg') * ((typeof DF === 'function' && DF().pdmg) || 1));
-        dealDmg(q, dm, null, b.x + b.w / 2, b.y + b.h / 2, true, 'pack');
-        if (typeof sfx === 'function') sfx('wolf_bite');
-        if (typeof burst === 'function') burst(b.x + b.w / 2, b.y + b.h / 2, 8, '#ffe6c8', 180, 0.3, 200, 2.2, true);
-        if (!(q instanceof Boss) && q.kind !== 'turret') { q.kbT = 0.18; q.vx += w.dir * 200; q.vy -= 90; }
-        if (q.hp <= 0 && !q.dead && typeof q.die === 'function') { q.die(w.dir, -0.3); if (typeof questPackKill === 'function') questPackKill(q); }
+        packBite(w, q, packStat('dmg'));
       }
     }
     // a bite that MISSED (the quarry sprang clear) does not send it back to
@@ -126,8 +248,10 @@ function packStep(dt) {
       w.faceVis = w.dir;
       w.lungeT = PACK_CALL.lunge; w.hitDone = false;
       // ...and it springs at the height its quarry is at: up a bank, higher
+      // (a cat leaping over it or one standing on a bank is reached: a spring
+      // of up to ~150 px, the most a wolf's gather gives)
       const up = Math.max(0, (w.y + w.h) - (b.y + b.h));
-      w.vx = w.dir * 470; w.vy = -230 - Math.min(420, up * 4.5); w.on = false;
+      w.vx = w.dir * 470; w.vy = -230 - Math.min(560, up * 5); w.on = false;
       // and when it is down again it backs off and dances before the next
       w.mind = 'display'; w.dispT = 0; w.dispNeed = rnd(PACK_MIND.again[0], PACK_MIND.again[1]); w.afterT = PACK_MIND.after;
     }
@@ -151,7 +275,14 @@ function packStep(dt) {
   // stopped against one; a hill's steps are walked, not hopped
   w.stuckT = (col.l || col.r) && want && Math.abs(w.x - (w._px == null ? w.x : w._px)) < 0.5 ? (w.stuckT || 0) + dt : 0;
   w._px = w.x;
-  if (w.stuckT > 0.25 && w.on) { w.vy = -560; w.on = false; w.stuckT = 0; }
+  // (as high as the climb in front of it asks — up to the ledge its quarry or
+  // she stands on: a wolf that fell into a pit beside a cat used to hop a
+  // tile and a half against a wall three tiles tall for the rest of its stay)
+  if (w.stuckT > 0.25 && w.on) {
+    const tq = w.quarry && !w.quarry.dead ? (typeof hurtBoxOf === 'function' ? hurtBoxOf(w.quarry) : w.quarry) : player;
+    const need = (w.y + w.h) - (tq.y + tq.h);
+    w.vy = -Math.sqrt(4000 * clamp(need + 30, 80, 200)); w.on = false; w.stuckT = 0;
+  }
   // fell out of the world, or far behind her in another part of the room
   if (G.roomDef && w.y > G.roomDef.h * TILE + 60) { w.x = player.x; w.y = player.y; w.vy = 0; }
 }
@@ -172,9 +303,12 @@ const PACK_MIND = {
   band: 14,
   stalk: 88,             // px/s: in on the walk (the stalk strip; the gallop starts at 95)
   back: 80,              // px/s backing off, facing it
-  first: [0.6, 1.0],     // s of display before its first bite on a quarry
-  again: [0.7, 1.2],     // ...and between bites
-  after: 0.45,           // s backing off after a bite
+  // (owner, 2026-11-27: "the wolf I'm summoning is doing nothing. It should
+  // help me with attacking a little bit" — a bite every ~2.6 s was three in a
+  // stay; now about one every ~1.9 s, four or five in a stay, the dance kept)
+  first: [0.4, 0.7],     // s of display before its first bite on a quarry
+  again: [0.35, 0.6],    // ...and between bites
+  after: 0.35,           // s backing off after a bite
   feint: [0.2, 0.45],    // s into the dance before it feints
   dartV: 250, dartT: 0.3, dartStop: 22,
   backT: 0.38,
@@ -194,10 +328,13 @@ function packMind(w, dt, cx, px) {
   // every time the nearer one changes)
   const k = w.quarry;
   const keep = k && !k.dead && !k.disabled && !k.calm && !k.rescued && !k.purified
-    && Math.abs(k.x + k.w / 2 - cx) < PACK_CALL.sight && Math.abs(k.y + k.h / 2 - (w.y + w.h / 2)) < 220;
+    // (a leaping cat goes high over it: the one it is already on stays its
+    // quarry through the leap, rather than dropping out of its sight mid-air)
+    && Math.abs(k.x + k.w / 2 - cx) < PACK_CALL.sight && Math.abs(k.y + k.h / 2 - (w.y + w.h / 2)) < 340;
   const q = keep ? k : packQuarry(w);
   w.hunt = q ? 1 : 0;
   if (!q) {
+    if (w.quarry) { w.lastQ = w.quarry; w.lostAt = w.anim; }
     w.quarry = null; w.mind = null;
     // nothing to hunt: at her heel
     const d = px - cx, ad = Math.abs(d);
@@ -206,7 +343,12 @@ function packMind(w, dt, cx, px) {
   }
   const b = typeof hurtBoxOf === 'function' ? hurtBoxOf(q) : q;
   const d = b.x + b.w / 2 - cx, gap = Math.abs(d) - b.w / 2, toward = Math.sign(d) || w.dir;
-  if (w.quarry !== q) {
+  if (w.quarry !== q && q === w.lastQ && w.anim - (w.lostAt || 0) < 2.5) {
+    // THE SAME ONE, BACK IN SIGHT: no second look and no dance from the top —
+    // it goes in (it used to start over every time a cat leapt out of view,
+    // and spent its stay looking at a cat it had already looked at)
+    w.quarry = q; w.lastQ = null; w.mind = 'close'; w.feint = null; w.nearT = 0;
+  } else if (w.quarry !== q) {
     // A NEW QUARRY: it stops and looks before anything else
     w.quarry = q; w.mind = 'look'; w.lookT = P.look; w.feints = 0; w.dispT = 0; w.nearT = 0;
     w.dispNeed = rnd(P.first[0], P.first[1]); w.feintCD = rnd(P.feint[0], P.feint[1]); w.feint = null;
@@ -226,7 +368,10 @@ function packMind(w, dt, cx, px) {
   // GOING IN: the dance is done — in to its reach, then the coil (packStep)
   if (w.mind === 'close') {
     // (and from its quarry's own level: a lunge from a ledge sails over it)
-    if (gap < PACK_CALL.reach && Math.abs(b.y + b.h - (w.y + w.h)) < 28 && w.biteCD <= 0 && w.on !== false && Math.sign(w.faceVis) === toward) {
+    // (...or from under it, when it is up a bank or in the air over it: the
+    // spring is aimed up — a leaping cat used to be out of its reach for good)
+    const upQ = (w.y + w.h) - (b.y + b.h);
+    if (gap < PACK_CALL.reach && upQ > -28 && upQ < PACK_BITE.upReach && w.biteCD <= 0 && w.on !== false && Math.sign(w.faceVis) === toward) {
       w.coilT = PACK_CALL.coil; w.bit = q; w.vx = 0; w.mind = 'bite'; w.nearT = 0; return 0;
     }
     // (in at a rush: it does not walk up to something that is moving off)

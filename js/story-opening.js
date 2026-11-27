@@ -93,7 +93,8 @@ function ratchetStandingKey(f, tierKey) {
 // carries {ACTION}; this fills it from the device actually in use — the pad's
 // bound button (howToOpen reads PAD.map), the on-screen glyph on touch, the
 // key otherwise — so the words can never describe a control she does not have.
-const CTL_TOUCH = { MOVE: '◀ ▶', JUMP: '⤒', HEAL: '✚', DOWN: '▼', UP: '▲', INT: 'E' };   // INT: the on-screen button's own letter
+// (ARM and CAST live on the power wheel: its button, then the seat — touch.js WHEEL)
+const CTL_TOUCH = { MOVE: '◀ ▶', JUMP: '⤒', HEAL: '✚', DOWN: '▼', UP: '▲', INT: 'E', ARM: '✦ ▸ ⬡', CAST: '✦ ▸ ◎' };   // INT: the on-screen button's own letter
 function ctlName(a) {
   const touch = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
@@ -110,7 +111,7 @@ function ctlName(a) {
 }
 function ctlFill(line) {
   return typeof line === 'string' && line.indexOf('{') >= 0
-    ? line.replace(/\{(MOVE|JUMP|ATK|HEAL|DOWN|UP|INT|DASH)\}/g, (m, a) => ctlName(a)) : line;
+    ? line.replace(/\{(MOVE|JUMP|ATK|HEAL|DOWN|UP|INT|DASH|CAST|ARM|STAR)\}/g, (m, a) => ctlName(a)) : line;
 }
 
 // ---------------------------------------------------------------------------
