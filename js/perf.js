@@ -87,8 +87,13 @@ function guessTier(d) {
   return 'high';
 }
 const DEVICE = detectDevice();
-let QAUTO = true;                                // is the tier still ours to move?
-let QNAME = guessTier(DEVICE);
+// THE STANDARD IS LOW (owner, 2026-11-27: "Standard resolution should be low because it's
+// smoother"). A new player starts on the low tier, held there — the adaptor does not promote it
+// behind his back — and only his own pick in the pause menu moves it (Detail: auto, low, mid, high,
+// ultra). The device guess is what 'auto' starts from, once he has chosen auto himself.
+const QDEFAULT = 'low';
+let QAUTO = false;                               // is the tier still ours to move? (only once he picks auto)
+let QNAME = QDEFAULT;
 let QUAL = QTIER[QNAME];
 let qHold = 3;                                   // seconds before the first correction
 
@@ -123,13 +128,20 @@ function qualLabel() {
 function qualCycle() {
   const cur = QAUTO ? 'auto' : QNAME;
   const nx = QCYCLE[(QCYCLE.indexOf(cur) + 1) % QCYCLE.length];
-  if (nx === 'auto') { QAUTO = true; qHold = 1; if (G && G.save) { G.save.qual = 'auto'; if (typeof persist === 'function') persist(); } }
+  // (qualMine: this is HIS pick. The adaptor used to write 'auto' into every save on its own, so
+  // 'auto' alone in an older save is not a choice anybody made)
+  if (G && G.save) G.save.qualMine = 1;
+  if (nx === 'auto') { QAUTO = true; qHold = 1; QNAME = guessTier(DEVICE); QUAL = QTIER[QNAME]; applyScale(); if (G && G.save) { G.save.qual = 'auto'; if (typeof persist === 'function') persist(); } }
   else qualSet(nx, false);
 }
 function qualRestore() {                          // called once the save exists
   const w = G.save && G.save.qual;
-  if (!w || w === 'auto') return;
-  if (QTIER[w]) { QAUTO = false; QNAME = w; QUAL = QTIER[w]; applyScale(); }
+  // his own pick, remembered: a fixed tier is only ever written by his pick (qualSet without
+  // keepAuto), and 'auto' counts only when he chose it (qualMine)
+  if (w === 'auto' && G.save.qualMine) { QAUTO = true; qHold = 3; QNAME = guessTier(DEVICE); QUAL = QTIER[QNAME]; applyScale(); return; }
+  if (w && QTIER[w]) { QAUTO = false; QNAME = w; QUAL = QTIER[w]; applyScale(); return; }
+  // nobody chose: the standard
+  QAUTO = false; QNAME = QDEFAULT; QUAL = QTIER[QNAME]; applyScale();
 }
 
 // ---------------------------------------------------------------------------

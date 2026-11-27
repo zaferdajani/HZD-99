@@ -3127,6 +3127,25 @@ class Player {
         sfx('no');
         if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t(typeof ghHoldsStone === 'function' && ghHoldsStone() ? 'grv_stone_held' : 'pl_hint')); }
       }
+      // A STRUCK POD IS A USED POD (owner, 2026-11-27: "Why isn't hitting the pods give me any
+      // energy that helps me to recharge?"). The blade went through it and nothing happened, so the
+      // pod read as scenery. A swing that meets a pod and nothing else does what INTERACT does there
+      // (doInteract: rest, recharge, save, and its "rested"), once per swing — but not while a hostile
+      // body is close enough to make a rest a trap, and not past a lesson that holds INTERACT.
+      if (!this.swing.podHit && !this.swing.set.size && !G.recharge && G.state === 'PLAY'
+          && typeof doInteract === 'function' && (typeof tutAllows !== 'function' || tutAllows('INT'))) {
+        for (const s2 of G.statics) {
+          if (s2.type !== 'bench' || !aabb(hb, s2)) continue;
+          this.swing.podHit = true;
+          const pc = s2.x + s2.w / 2, py = s2.y + s2.h / 2;
+          const hunted = G.enemies.some(e => !e.dead && !e.disabled && !e.rescued && !(typeof isPet === 'function' && isPet(e))
+            && Math.abs(e.x + e.w / 2 - pc) < POD_STRIKE_CLEAR && Math.abs(e.y + e.h / 2 - py) < 200)
+            || (typeof bossActive === 'function' && bossActive());
+          if (hunted) { burst(pc, s2.y + 10, 6, '#8ff6ff', 160, 0.25, 200, 2, true); sfx('no'); break; }
+          doInteract(s2);
+          break;
+        }
+      }
       // WHIFF. A miss used to be silent, which made a missed swing feel like a
       // dropped input rather than a mistake. The blade now cuts air on the frame
       // the window closes, and only if nothing was struck.
@@ -12809,6 +12828,9 @@ function drawCrescents(c) {
 }
 // what each successive down-strike off a guardian's back is worth, until her
 // feet find the floor again (Player.update, the swing)
+// a pod she strikes is used only with no hostile body this near it (px, either side): a whiff beside
+// a pod in the middle of a fight must not dock her into a 1.4 s rest
+const POD_STRIKE_CLEAR = 300;
 const POGO_FADE = [1, 0.5, 0];
 // how long she must leave a guardian's back alone before a down-strike is whole again
 const POGO_MEMORY = 5.0;
