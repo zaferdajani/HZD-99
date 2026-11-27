@@ -49,7 +49,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       try { draw(); } finally { performance.now = now0; Math.random = rnd0; }
       return c.getImageData(0, 0, cv.width, cv.height).data;
     };
-    const kx = cv.width / 960, ky = cv.height / 540, CW = cv.width, CH = cv.height;
+    // (read again after each startGame: the save's detail tier sizes the canvas — low, the default, is 0.7 of it)
+    let kx = cv.width / 960, ky = cv.height / 540, CW = cv.width, CH = cv.height;
     const changed = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 60;
     // the canvas rect of a world rect, and how much of it the difference covers
     const devRect = (m) => ({ x0: worldScreenX(m.x) * kx, y0: worldScreenY(m.y) * ky, x1: worldScreenX(m.x + m.w) * kx, y1: worldScreenY(m.y + m.h) * ky });
@@ -73,7 +74,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       // each guardian as she meets it: GRAVEHORN guards the marble (before she has it), TALONHOST waits for the joined blade
       if (id === 'CV3') sv.flags.crystal = 0;
       if (id === 'B4') Object.assign(sv.flags, { crystal2: 1, connector: 1 });
-      startGame(sv);
+      startGame(sv); kx = cv.width / 960; ky = cv.height / 540; CW = cv.width; CH = cv.height;
       try { loadRoom(id); } catch (e) { out[id] = { err: String(e).slice(0, 80) }; continue; }
       G.state = 'PLAY'; G.dialog = G.cut = G.meet = G.wake = G.tut = null; G.enemies = [];
       const b = G.boss; if (!b) { out[id] = { noBoss: 1 }; continue; }

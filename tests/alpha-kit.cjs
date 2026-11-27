@@ -190,10 +190,10 @@ const { chromium } = require('playwright');
         }
         G.artProbe = 0; G.save.opts.reduceMotion = false;
         return { fired, bent, bentMax, nudged, shook, live, pushed: far, lost: c0 - player.cores, left: RIPPLES.length }; };
-      const out = { plain: howl({}), calm: howl({ calm: 1 }), probe: howl({ probe: 1 }) };
+      const out = { plain: howl({}), calm: howl({ calm: 1 }), probe: howl({ probe: 1 }), low: typeof QUAL !== 'undefined' && QUAL && QUAL.name === 'low' };
       sfx = sfxWas; fx = fxWas; if (bvWas) bossVfx = bvWas; shockRipple = srWas; return out;
     })()`));
-    check('E. the howl bends the picture as it passes, for most of a second and a half', E.plain.fired >= 0 && E.plain.bent >= 60 && E.plain.bentMax >= 16, E.plain.bent + ' frames bent, up to ' + E.plain.bentMax + ' sub-rings in one frame');
+    check('E. the howl bends the picture as it passes, for most of a second and a half', E.plain.fired >= 0 && E.plain.bent >= 60 && E.plain.bentMax >= (E.low ? 4 : 16), E.plain.bent + ' frames bent, up to ' + E.plain.bentMax + ' sub-rings in one frame' + (E.low ? ' (low detail, the default: one front of 4 sub-rings by design, js/ripple.js; 16 at high)' : ''));
     check('   it pushes her back one step and costs her nothing', E.plain.pushed >= 12 && E.plain.pushed <= 60 && E.plain.lost === 0, 'pushed ' + E.plain.pushed.toFixed(0) + ' px, cores lost ' + E.plain.lost);
     check('   the frame is nudged when it reaches her, and the screen trembles under the note', E.plain.nudged >= 6 && E.plain.shook >= 20, E.plain.nudged + ' frames nudged, ' + E.plain.shook + ' frames trembling');
     check('   ...and it ends: nothing is left bending the room afterwards', E.plain.left === 0, E.plain.left + ' waves left after 3 s');

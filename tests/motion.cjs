@@ -80,6 +80,8 @@ const check = (name, ok, detail) => {
           return n ? { bot, n } : null;
         };
         for (const st of Object.keys(BEAST_STRIP)) {
+          // (in his leaves — lurk, lurkwarn — he is not drawn at all, by design since 2026-11-25: tests/nf-ambush.cjs)
+          if (typeof NF_HID !== 'undefined' && NF_HID[st]) continue;
           const rig = snap2(st, false, -1), sp = snap2(st, true, -1), fl = snap2(st, true, 1);
           let diff = 0;
           for (let i = 0; i < rig.data.length; i += 4)

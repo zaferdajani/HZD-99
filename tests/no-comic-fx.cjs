@@ -35,7 +35,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
     return { mid: lum(0.3, 0.3, 0.7, 0.7), edge: (lum(0, 0, 0.12, 1) + lum(0.88, 0, 1, 1)) / 2, top: lum(0.15, 0.05, 0.85, 0.2) };
   }, setup);
   // freeze the simulation so both frames show the same world
-  await page.evaluate(() => { G.paused = true; });
+  // (and the room's name gone: its 2.6 s fade over the top of the view is not the dash's doing)
+  await page.evaluate(() => { G.paused = true; G.zoneToast = null; });
   const rest = await grab('');
   const hit = await grab('G.impact = { t: 0.12, t0: 0.12, x: player.x + player.w / 2, y: player.y + player.h / 2, hurt: 1 }; G.impact.t = 0.11; window.__keepImpact = setInterval(() => { if (G.impact) G.impact.t = 0.11; else G.impact = { t: 0.11, t0: 0.12, x: player.x + player.w / 2, y: player.y + player.h / 2, hurt: 1 }; }, 5);');
   await page.evaluate(() => clearInterval(window.__keepImpact));
