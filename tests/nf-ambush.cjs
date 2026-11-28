@@ -79,7 +79,7 @@ const PORT = process.env.TEST_PORT || 8220;
       const body = (B, e) => { let k = 0, sx = 0, sy = 0; for (let y = 0; y < CH; y += 2) for (let x = 0; x < CW; x += 2) if (ch(plain, B, (y * CW + x) * 4)) { k++; sx += x; sy += y; }
         if (k * 4 < 150) return null; const ex = worldScreenX(e.x + e.w / 2) * kx, ey = worldScreenY(e.y + e.h / 2) * ky;
         return Math.round(Math.hypot(sx / k - ex, sy / k - ey)); };
-      return { L: mark(ends[0]), R: mark(ends[1]), her: body(noHer, player), him: body(noHim, bo), hid: typeof nfHidden === 'function' && nfHidden(bo) ? bo.st : null };
+      return { L: mark(ends[0]), R: mark(ends[1]), her: body(noHer, player), him: body(noHim, bo), hid: typeof nfHidden === 'function' && nfHidden(bo) ? bo.st : null, sink: +(bo.coverFade || 0).toFixed(2), parts: typeof beastImgReady === 'function' ? beastImgReady() : null };
     };
     { const xs = [], ys = [], seen = [], drawn = [];
       const at = (x, y) => { player.x = x; player.y = y; player.vx = player.vy = 0; };
@@ -93,7 +93,7 @@ const PORT = process.env.TEST_PORT || 8220;
       // a jump from the palm
       player.vy = -700; player.on = false; loop(20, () => { hold(); }); probe();
       out.frame = { dx: Math.round(Math.max(...xs) - Math.min(...xs)), dy: Math.round(Math.max(...ys) - Math.min(...ys)), seen: seen.every(q => q[4]), at: seen };
-      out.drawn = { ok: drawn.every(d => d.her != null && d.her <= 48 && (d.hid ? d.him == null : d.him != null && d.him <= 96)), probes: drawn };   // (in his leaves he is not drawn at all, by design)
+      out.drawn = { ok: drawn.every(d => d.her != null && d.her <= 48 && (d.hid && !d.sink ? d.him == null : d.him != null && d.him <= 96)), probes: drawn };   // (in his leaves he is not drawn at all, by design; while he sinks into them, nfcover's 0.3 s, he is drawn where he is)
       at(14 * TILE, 13 * TILE); loop(30, () => { hold(); }); }
     // ---- 2. THE COVER
     const L = nfCoverList();

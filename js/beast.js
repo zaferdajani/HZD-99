@@ -116,6 +116,13 @@ function beastImg() {
   if (typeof MEDIA_IMG === 'undefined') return null;
   return (typeof softArt === 'function' && softArt('beastParts')) || MEDIA_IMG.beastParts;
 }
+function beastImgReady() { const im = beastImg(); return !!(im && im.naturalWidth); }
+// his filmed idle is in memory: enough to draw him as himself without the parts sheet
+function beastTakeReady() {
+  const k = 'beastStudioIdle', im = typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[k];
+  if (!(im && im.naturalWidth) && typeof mediaFetch === 'function') mediaFetch(k, 1);
+  return !!(im && im.naturalWidth);
+}
 
 // ---------------------------------------------------------------------------
 // THE FRONT VIEW, built from the authored art itself. The sheet has no
@@ -1347,6 +1354,21 @@ function beastStrip(c, b) {
     S = { key: 'beastHurt', cells: 12, k: 1, ax: -9, recoil: true };
   const turn = beastTurnState(b);
   if (turn) S = BEAST_TURN;
+  // HE IS NEVER THE HOLD WHILE HIS OWN TAKE IS HERE. With the parts sheet not in
+  // memory yet (it is the one sheet with no quarter-scale copy: tools/lowres.cjs
+  // keeps parts atlases whole) there is no rig to fall back on, and a state
+  // whose strip is still in flight used to drop him to the dark silhouette
+  // (drawBossHold) — on a phone, for seconds, at the start of his fight. He
+  // stands in on his filmed idle instead, coloured as he is (beastLook) and
+  // blinking, until the take for what he is doing lands; it is asked for now.
+  if (!b.dead && !turn && !beastImgReady()) {
+    const want = S && !(S.when && !S.when(b)) && MEDIA_RAW[S.key];
+    if (!(want && want.naturalWidth)) {
+      if (S && typeof mediaFetch === 'function') mediaFetch(S.key, 1);
+      const I = BEAST_STRIP.idle, ri = MEDIA_RAW[I.key];
+      if (ri && ri.naturalWidth) { S = I; st = 'idle'; }
+    }
+  }
   if (!S || (S.when && !S.when(b))) return false;
   const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
   let cell;
@@ -1482,7 +1504,9 @@ function drawBeast(c, b) {
   // silhouette (a dark oval with two eyes) until the fight's sheet arrived.
   const im = beastImg();
   const parts = !!(im && im.naturalWidth);
-  if (!parts && !b.purified) return false;
+  // without the parts sheet he is drawn from his filmed takes alone (beastStrip stands
+  // him in on his idle until the take for his state lands); only with neither is he the hold
+  if (!parts && !b.purified && !beastTakeReady()) return false;
   try {
     const fv = b.faceVis == null ? -1 : b.faceVis;
     const S = (b.h * 2.35) / BEAST_H;
@@ -1592,8 +1616,10 @@ function drawBeast(c, b) {
     if (b.stagT > 0 && !b.dead) {
       // staggered by the Song: cowering low, trembling
       BEAST_LIVE.glow = 0.35;
-      if (!drawStripCell(c, 'beastHurt', 7, 12, 0, 0, 256 * BEAST_STRIP_PX, false, beastLook(b)))
-        bFig(c, 'aAtk', 0, 2.2);
+      if (!drawStripCell(c, 'beastHurt', 7, 12, 0, 0, 256 * BEAST_STRIP_PX, false, beastLook(b))) {
+        if (parts) bFig(c, 'aAtk', 0, 2.2);
+        else drawStripCell(c, 'beastStudioIdle', 0, 24, -BEAST_STRIP.idle.ax * BEAST_STRIP_PX, 0, 256 * BEAST_STRIP_PX, false, beastLook(b));
+      }
     // THE WHOLE LEAP USED TO BE INTERCEPTED HERE and handed to `aAtk` — the
     // authored standing side view — squashed on the coil, stretched in the air.
     // Six different beats, one drawing. It is the rig's job now (beastLeap /
@@ -1689,8 +1715,10 @@ function drawBeast(c, b) {
       c.restore();
     } else if (b.st === 'dorm' && !b.dead) {
       // asleep, composed flat from his own parts — only the breath moves
+      if (!parts) { c.restore(); return false; }
       bSleep(c, b.anim, 0);
     } else if (b.st === 'intro' && (b.t || 0) > 1.0 && !b.dead) {
+      if (!parts) { c.restore(); return false; }
       // the stir: head off the paws first, chest following — still down
       const k = clamp(1 - (b.t || 0) / 2, 0, 1);
       c.save();

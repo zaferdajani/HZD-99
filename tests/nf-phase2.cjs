@@ -19,12 +19,21 @@ const { chromium } = require('playwright');
   const p = await b.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.addInitScript(() => { localStorage.setItem('cb_intro_seen', '1'); window.requestAnimationFrame = () => 0; });
-  await p.goto('http://127.0.0.1:8220/index.html');
+  await p.goto('http://127.0.0.1:' + (process.env.TEST_PORT || 8220) + '/index.html');
   await p.waitForFunction(() => typeof startGame === 'function', { timeout: 30000 });
   const R = await p.evaluate(async () => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; startGame(sv);
     for (const k of Object.keys(MEDIA_SRC.images).filter(k => /^beast/.test(k))) mediaFetch(k, true);
-    for (let i = 0; i < 400 && !['beastStudioIdle', 'beastStudioRoar', 'beastStudioRear'].every(k => MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth); i++) await new Promise(r => setTimeout(r, 50));
+    // WAIT FOR WHAT IS MEASURED. Everything below runs in one synchronous block, so
+    // nothing that has not landed by the end of this wait lands during it: every take
+    // his fight plays (BEAST_STRIPS), and the parts sheet his rig is posed from. This
+    // used to wait for three takes alone, and about two runs in three the fight was
+    // then drawn without the parts sheet — which before 2026-11-28 dropped him to the
+    // hold silhouette and recorded no take at all ({"p1":[],"p2":[]}, 0 blinks).
+    // Section 5 below draws him with the sheet withheld on purpose.
+    const need = [...BEAST_STRIPS, 'beastParts'];
+    for (let i = 0; i < 1200 && (!need.every(k => MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth && MEDIA_LOW[k] !== 2)); i++) await new Promise(r => setTimeout(r, 50));
+    const missing = need.filter(k => !(MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth));
     // every recording asked for, by key
     const played = []; const PB = window.playBuf; window.playBuf = function (k) { played.push(k); return true; };
     const looks = { p1: new Set(), p2: new Set(), pre: new Set() }; const DS = window.drawStripCell;
@@ -70,7 +79,25 @@ const { chromium } = require('playwright');
     { const bo = stage(1, 1); let blinks = 0, last = 0, inTell = 0;
       fight(bo, 14, 700, (q) => { const k = q._blinkK || 0; if (k > 0.5 && last <= 0.5) blinks++; if (k > 0 && /warn|crouch|charge/.test(q.st)) inTell++; last = k; });
       out.blinks = blinks; out.inTell = inTell; }
+    // 5. WITHOUT HIS PARTS SHEET (a slow phone, the fight's first seconds) he is still
+    //    himself: every frame is one of his filmed takes, never the hold silhouette — and a
+    //    state whose take has not landed either stands in on his idle
+    { const sIm = MEDIA_IMG.beastParts, sSoft = SOFT_ART.beastParts, sStalk = MEDIA_RAW.beastStudioStalk;
+      MEDIA_IMG.beastParts = undefined; SOFT_ART.beastParts = null;
+      const DH = window.drawBossHold; let holds = 0, frames = 0, took = 0, stalkIdle = 0, stalkF = 0, lastKey = null;
+      window.drawBossHold = function () { holds++; return DH.apply(this, arguments); };
+      const DS2 = window.drawStripCell;
+      window.drawStripCell = function (c, key) { if (/^beast/.test(key)) lastKey = key; return DS2.apply(this, arguments); };
+      const bo = stage(0.4, 2);
+      fight(bo, 6, 320, (q) => { frames++; if (lastKey) took++; lastKey = null; });
+      MEDIA_RAW.beastStudioStalk = { naturalWidth: 0, naturalHeight: 0 };   // that take still in flight
+      const bo2 = stage(1, 1); bo2.st = 'stalk'; bo2._motionElapsed = 1;
+      for (let f = 0; f < 30; f++) { lastKey = null; bo2.st = 'stalk'; bo2.t = 1; bo2._motionElapsed = 1; bo2.draw(ctx); stalkF++; if (lastKey === 'beastStudioIdle') stalkIdle++; }
+      MEDIA_RAW.beastStudioStalk = sStalk; MEDIA_IMG.beastParts = sIm; SOFT_ART.beastParts = sSoft;
+      window.drawBossHold = DH; window.drawStripCell = DS2;
+      out.noParts = { frames, took, holds, stalkF, stalkIdle }; }
     window.playBuf = PB; window.drawStripCell = DS;
+    out.missing = missing;
     out.looks = { p1: [...looks.p1], p2: [...looks.p2] };
     out.rearArt = !!(MEDIA_RAW.beastStudioRear && MEDIA_RAW.beastStudioRear.naturalWidth);
     return out;
@@ -87,6 +114,9 @@ const { chromium } = require('playwright');
   check('...never in phase one', R.r1.n === 0, JSON.stringify(R.r1));
   check('he blinks every few seconds', R.blinks >= 3, R.blinks + ' blinks in 14 s');
   check('...and never in a wind-up', R.inTell === 0, R.inTell + ' frames');
+  check('every take his fight plays was in memory before it was measured', R.missing.length === 0, JSON.stringify(R.missing));
+  check('without his parts sheet he is drawn from his own takes every frame, never the hold', R.noParts.frames > 0 && R.noParts.took === R.noParts.frames && R.noParts.holds === 0, JSON.stringify(R.noParts));
+  check('...and a state whose take is still in flight stands in on his filmed idle', R.noParts.stalkIdle === R.noParts.stalkF, JSON.stringify(R.noParts));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.join(', ')); process.exit(1); }
