@@ -56,7 +56,8 @@ function wmWolfNear(p) {
 // ON: she climbs on; he stops hunting and carries her
 function wmMount(p) {
   const w = G.packWolf; if (!w || !w.alpha) return false;
-  G.mount = { w, stam: WOLF_MOUNT.stam, scrT: 0, scrCD: 0, howlCD: 0, howlT: 0, landT: 0, hitSet: null, lastVy: 0, dashB: false };
+  G.mount = { w, stam: w.mountStam == null ? WOLF_MOUNT.stam : w.mountStam,
+    scrT: 0, scrCD: 0, howlCD: 0, howlT: 0, landT: 0, hitSet: null, lastVy: 0, dashB: false };
   w.mounted = 1; w.st = 'run'; w.stT = 0; w.hunt = 0;
   // he comes under her (she stays on the ground she chose; moving her to him could set her over a pit)
   w.x = p.x + p.w / 2 - w.w / 2; w.y = p.y + p.h - w.h; p.vx = 0;
@@ -72,6 +73,7 @@ function wmDismount(p, spent) {
   const w = M.w;
   G.mount = null;
   if (w) {
+    w.mountStam = Math.max(0, M.stam);
     w.mounted = 0;
     w.x = p.x + p.w / 2 - w.w / 2; w.y = p.y + p.h - w.h; w.vx = p.vx; w.vy = 0; w.face = p.face || w.face;
     // spent, his time is up: the lope away (alcStep's own)
@@ -114,7 +116,7 @@ function wmDrawTop(p) {
 // THE HOWL: a recorded wolf; the machines near her stagger, a guardian only flinches
 function wmHowl(p) {
   const H = WOLF_MOUNT.howl, M = G.mount;
-  M.howlCD = H.cd; M.howlT = H.t; M.stam = Math.max(1, M.stam - H.cost);
+  M.howlCD = H.cd; M.howlT = H.t; M.stam = Math.max(1, M.stam - H.cost); M.w.mountStam = M.stam;
   if (typeof sfx === 'function') sfx('alpha_howl');
   cam.shake = Math.max(cam.shake || 0, 5);
   const px = p.x + p.w / 2, py = p.y + p.h / 2;
@@ -184,7 +186,7 @@ function wmPost(p, dt) {
   }
   if (M.howlT > 0) M.howlT -= dt;
   // he tires as he runs
-  M.stam -= WOLF_MOUNT.drain * dt;
+  M.stam -= WOLF_MOUNT.drain * dt; W.mountStam = Math.max(0, M.stam);
   // he is under her: his body goes where hers does, his stride paced by the ground covered
   const wasOn = W.on;
   const nx = p.x + p.w / 2 - W.w / 2;
@@ -208,6 +210,7 @@ function drawWolfMountHud() {
 // the prompt beside her called Alpha: one word
 function drawWolfMountPrompt(c2) {
   if (G.mount || !player || !wmWolfNear(player)) return;
+  if (typeof mediaFetch === 'function') for (const k of ['alRideGallop', 'alRideLeap', 'alRideRear']) mediaFetch(k, true);
   const w = G.packWolf;
   ftxt('▲ ' + t('wm_ride'), w.x + w.w / 2, w.y - 64, 12, '#eef3fa', 'center', 'rgba(0,0,0,0.75)', '700');
 }
@@ -230,7 +233,7 @@ function drawWolfMountPrompt(c2) {
     if (!wmRiding() || this !== player) return H.call(this, d, fromX, src, foe);
     if (this.dead || this.iT > 0) return;
     const M = G.mount;
-    M.stam -= WOLF_MOUNT.hit * Math.max(1, d || 1);
+    M.stam -= WOLF_MOUNT.hit * Math.max(1, d || 1); M.w.mountStam = Math.max(0, M.stam);
     this.iT = WOLF_MOUNT.iT; this.hurtPoseT = 0;
     this.vx = Math.sign((this.x + this.w / 2) - (fromX == null ? this.x : fromX) || 1) * 220; this.vy = Math.min(this.vy, -160);
     cam.shake = Math.max(cam.shake || 0, 4);

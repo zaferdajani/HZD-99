@@ -804,7 +804,7 @@ function alphaStripCell(b) {
   return {S,cell};
 }
 function alphaQuestOffer() {
-  if(isHero()||!G.save.flags.crystal||G.save.flags.alphaLead||G.save.flags.alpha)return;
+  if(isHero()||!G.save.flags.crystal||!G.save.flags.bossGlitch||G.save.flags.alphaLead||G.save.flags.alpha)return;
   G.save.flags.alphaLead=1;qSet('alpha_pack','active');persist();
   G.dialog={name:t('n_ratchet'),lines:t('q_ask_alpha_pack'),i:0,npc:'ratchet'};G.state='DIALOG';
 }

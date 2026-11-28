@@ -428,6 +428,7 @@ function alphaBowBegin(b) {
   const f = G.save && G.save.flags;
   if (!f || f.alphaBowed || (typeof isHero === 'function' && isHero())) { b.bowT = 0; return; }
   f.alphaBowed = 1;
+  if (typeof persist === 'function') persist();
   b.bow0 = b.bowT = ALPHA_BOW.back + ALPHA_BOW.bow + ALPHA_BOW.hold;
   const px = player.x + player.w / 2;
   b.bowSide = Math.sign(b.cx() - px) || 1;           // away from her: where it backs to, and where the pack stands

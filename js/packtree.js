@@ -303,7 +303,7 @@ function ptOpen(from) {
   // the cursor starts on the next thing she can get
   const i = L.nodes.findIndex(q => !ptHas(q.n.id));
   G.treeIdx = i < 0 ? L.nodes.length - 1 : i;
-  if (typeof mediaFetch === 'function') for (const k of ['ptFrame', 'ptSocket', 'ptCard', 'wolfIdle6', 'alRest', 'alRideGallop']) mediaFetch(k, 1);
+  if (typeof mediaFetch === 'function') for (const k of ['ptFrame', 'ptSocket', 'ptCard', 'wolfIdle6', 'alRest', 'alRideGallop', 'alRideLeap', 'alRideRear']) mediaFetch(k, 1);
   if (typeof sfx === 'function') sfx('ui');
 }
 function ptClose() { G.state = G.treeBack === 'PAUSE' ? 'PAUSE' : 'PLAY'; if (typeof sfx === 'function') sfx('ui'); }
