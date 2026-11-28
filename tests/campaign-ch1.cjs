@@ -287,14 +287,30 @@ function buildEdges(M) {
       const cost = r.t + (prog.hold ? (prog.hold >= 2 ? 0.15 : 0.35) : 0.05) + (prog.vx0 ? 0.1 : 0) + (prog.dash != null ? 0.6 : 0);
       const prev = E[i].find(e => (e.exit ? 'X' + e.exit : e.to) === key);
       if (prev && prev.cost <= cost) return;
-      if (prev && prev.walk) return;
+      if (prev && (prev.walk || prev.drop != null)) return;
       if (prev) E[i].splice(E[i].indexOf(prev), 1);
       E[i].push(r.exit ? { exit: r.exit, cost, prog } : { to: r.node, cost, prog });
       seen.add(key);
     };
+    // A ONE-TILE HOLE IN THE FLOOR (a broken block: CV2's scrap pocket above the hoppers opens only
+    // through the 'B' an up-strike breaks): a 24-px body skims a 32-px gap at a run, so neither a
+    // walk nor a walk-off falls through it. The way down is to stand centred over it and let go.
+    // (the sim's walk-off falls through it, the game's does not: in a one-tile hole the drop is the only plan)
+    const hole1 = dir => { const hx = n.x + dir;
+      return !(M.idx.get(hx + ',' + n.y) != null || M.solid(hx, n.y) || M.solid(hx, n.y - 1) || M.solid(hx, n.y + 1) || M.at(hx, n.y + 1) === '=')
+        && (M.solid(hx + dir, n.y + 1) || M.at(hx + dir, n.y + 1) === '='); };   // a wider gap is a walk-off's
+    for (const dir of [-1, 1]) {
+      const hx = n.x + dir;
+      if (!hole1(dir)) continue;
+      const st = { x: hx * TL + (TL - PW) / 2, y: (n.y + 1) * TL - PH - 0.01, vx: 0, vy: 0, on: false };
+      const r = simulate(M, st, { dir: 0, hold: 0, d0: 0, d1: 0, vx0: 0, drop: hx });
+      if (r.fail || r.exit || r.node === i) continue;
+      E[i].push({ to: r.node, cost: r.t + 0.6, drop: hx, prog: { dir: 0, hold: 0, d0: 0, d1: 0, vx0: 0, drop: hx } });
+      seen.add(r.node);
+    }
     for (const p of WALKOFF) {
       const ahead = M.idx.get((n.x + p.dir) + ',' + n.y);
-      if (ahead != null) continue;
+      if (ahead != null || hole1(p.dir)) continue;
       add(p, simulate(M, nodeStart(M, n, p.vx0), p));
     }
     for (const p of (M.info.dash ? PROGS.concat(DASH_PROGS) : PROGS)) {
@@ -747,6 +763,14 @@ async function walkTo(s, goal) {
     if (endsInJump === 'run' || !(endsInJump || ledge) || room2 > brake + 24) { await hold([best.walk < 0 ? 'ArrowLeft' : 'ArrowRight']); return 'moving'; }
     await hold([]);
     if (Math.abs(p.vx) < 40 && room2 > 6) await tap(ddx > 0 ? 'ArrowRight' : 'ArrowLeft', room2 > 20 ? 60 : 30);
+    return 'moving';
+  }
+  if (best.drop != null) {
+    // centre over the hole in short taps, then stand still: she falls through it
+    const tx = best.drop * TL + (TL - PW) / 2, ddx = tx - p.x;
+    if (DEBUG) log('  DROP through the hole at tile ' + best.drop + ' (dx ' + Math.round(ddx) + ')');
+    await hold([]);
+    if (Math.abs(ddx) > 3 && Math.abs(p.vx) < 30) await tap(ddx > 0 ? 'ArrowRight' : 'ArrowLeft', Math.abs(ddx) > 16 ? 60 : 30);
     return 'moving';
   }
   const pr = best.prog;
