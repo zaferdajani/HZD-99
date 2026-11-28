@@ -136,7 +136,8 @@ const { chromium } = require('playwright');
   check('the wallow is islands in open water: at least four islands', U.isles >= 4, U.isles + ' islands, gaps ' + U.gaps.join('/'));
   check('...and every gap between them is a jump (at most 9 tiles), never a wall of water', U.gaps.every(n => n <= 9), U.gaps.join('/'));
   check('he comes up only in open water his body fits in, never half inside a wall', U.walls.length === 0, U.walls.slice(0, 6).join(' ') || 'every island');
-  check('the camera pulls back to frame the whole pool', U.zoom <= U.fitZoom + 0.02, 'zoom ' + U.zoom.toFixed(2) + ' (fit ' + U.fitZoom.toFixed(2) + ')');
+  // (owner, 2026-11-28: every guardian's arena is framed 15% in from whole — "do the same for the rest"; js/engine.js BOSS_FRAME_IN)
+  check('the camera pulls back to frame most of the pool: 15% in from the whole of it', U.zoom <= U.fitZoom * 1.15 + 0.02, 'zoom ' + U.zoom.toFixed(2) + ' (whole ' + U.fitZoom.toFixed(2) + ', 15% in ' + (U.fitZoom * 1.15).toFixed(2) + ')');
   check('THE HIDE: a blow on his back turns (an eighth of it)', U.back > 0 && U.back <= U.jaws * 0.2, U.back + ' vs ' + U.jaws);
   check('...the open jaws of a beached crocodile take it whole', U.jaws >= 60, U.jaws);
   check('...the head is armour again once the jaws are not open', U.walkHead <= U.jaws * 0.2, U.walkHead);

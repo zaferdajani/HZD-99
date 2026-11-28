@@ -12,11 +12,21 @@
 // by differencing the frame with each of them drawn against the frame without (the clock and the
 // dice held still, so nothing else in the frame changes between the two).
 //
+// 15% IN, SLIDING LEFT AND RIGHT — owner, 2026-11-28: "decrease zoom in with 15%, which means I can
+// move left and right a little bit in the map while it's still seeing most of it ... And do the same
+// for the rest, while maintaining always solid floor all the way to the bottom of the screen". The
+// frame is the arena fitted, then 15% closer (BOSS_FRAME_IN), aimed half-way between her and the
+// guardian; it slides left and right only, and never up or down (the palm, the jump).
+//
 // For every boss arena in the game, with its guardian fighting, she at the middle of the floor, at
 // both ends of it, high in the air (on a palm's height) and in a jump:
-//   A  the camera is zoomed to fit the room
-//   B  the room's left and right edges are both drawn on the canvas (marks at each end, mid-height)
-//   C  the frame does not move when she does: the marks land on the same canvas pixels in every pose
+//   A  the camera is zoomed 15% in from fitting the room
+//   B  most of the arena is on screen (at least 1/1.15 of its width), and the frame reaches each end:
+//      the west edge drawn in some pose, the east edge in some pose (the aim is half-way to the guardian,
+//      so with her at one end and him far off at the other the wall behind her may sit just off it;
+//      the two of them in it is D)
+//   C  the frame never moves up or down: a mark at the room's middle lands on the same canvas row in
+//      every pose (<= 2 px), and it does slide sideways between the two ends
 //   D  the guardian and she are both drawn, on the canvas, where worldScreenX/Y put them
 //   E  a zoom below 1 is DRAWN: a mark 20 px inside the right edge of the view — more than 960 px
 //      of world from its left edge — is on the canvas
@@ -25,7 +35,7 @@ const { chromium } = require('playwright');
 const PORT = process.env.TEST_PORT || 8220;
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') + n + (d != null ? '  ' + (typeof d === 'string' ? d : JSON.stringify(d)) : '')); if (!ok) bad++; };
 (async () => {
-  console.log('── boss-cam — every boss fight is one still picture of its whole arena, read off the canvas');
+  console.log('── boss-cam — every boss fight is its arena 15% in from whole, sliding sideways only, read off the canvas');
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 }, serviceWorkers: 'block' }); const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.addInitScript(() => { localStorage.setItem('cb_intro_seen', '1'); window.requestAnimationFrame = () => 0; });
@@ -90,6 +100,8 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       if (out[id]) continue;
       const fit = Math.min(960 / W, 540 / H, typeof PRESENTATION !== 'undefined' ? PRESENTATION.explorationZoom : 9);
       const ends = [{ x: 2, y: H / 2 - 10, w: 16, h: 20 }, { x: W - 18, y: H / 2 - 10, w: 16, h: 20 }];
+      const mid = { x: W / 2 - 8, y: H / 2 - 10, w: 16, h: 20 };
+      const want = Math.min(PRESENTATION.explorationZoom, Math.min(960 / W, 540 / H) * BOSS_FRAME_IN);
       const poses = [];
       const shoot = (name) => {
         player.iT = 0;                     // drawn at full strength (the i-frame blink would halve her)
@@ -97,15 +109,15 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
         const far = { x: vl + 960 / z - 20 - 8, y: cam.y + 270 - 8, w: 16, h: 16 };   // 20 px inside the view's right edge
         const Tf = now0();
         MARK = null; const plain = frame(Tf);
-        MARK = ends.concat(z < 0.999 ? [far] : []); const marked = frame(Tf); MARK = null;
+        MARK = ends.concat([mid], z < 0.999 ? [far] : []); const marked = frame(Tf); MARK = null;
         const pd = player.draw; player.draw = () => {}; const noHer = frame(Tf); player.draw = pd;
         const fd = window.foeDraw; window.foeDraw = function (x, e) { if (e !== b) return fd.apply(this, arguments); }; const noHim = frame(Tf); window.foeDraw = fd;
         const her = blob(plain, noHer), him = blob(plain, noHim);
         const at = (e) => [Math.round(worldScreenX(e.x + e.w / 2) * kx), Math.round(worldScreenY(e.y + e.h / 2) * ky)];
         const inCanvas = (e) => { const p = at(e); return p[0] > 0 && p[0] < CW && p[1] > 0 && p[1] < CH; };
         const near = (bl, e, tol) => !!(bl.at && Math.hypot(bl.at[0] - at(e)[0], bl.at[1] - at(e)[1]) <= tol);
-        const L = found(marked, plain, ends[0]), Rr = found(marked, plain, ends[1]);
-        poses.push({ name, z: +z.toFixed(3), L: L.on, R: Rr.on, Lat: L.at, Rat: Rr.at,
+        const L = found(marked, plain, ends[0]), Rr = found(marked, plain, ends[1]), M = found(marked, plain, mid);
+        poses.push({ name, z: +z.toFixed(3), L: L.on, R: Rr.on, Lat: L.at, Rat: Rr.at, M: M.on, Mat: M.at, seen: Math.min(1, 960 / z / W),
           far: z < 0.999 ? found(marked, plain, far).on : null, farX: z < 0.999 ? Math.round(far.x + 8 - vl) : null,
           her: her.n, herOk: her.n >= 150 && near(her, player, Math.max(48, player.h * z * kx)),
           him: him.n, himOk: him.n < 150 ? inCanvas(b) : near(him, b, Math.max(64, Math.max(b.w, b.h) * z * kx)),
@@ -118,9 +130,11 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       player.y = 4 * TILE; player.vy = 0; loop(8); shoot('high');
       stand(W * 0.5); player.vy = -760; player.on = false; loop(18); shoot('jump');
       const spread = (k, j) => { const v = poses.map(p => p[k] && p[k][j]).filter(v => v != null); return v.length === poses.length ? +(Math.max(...v) - Math.min(...v)).toFixed(1) : 999; };
-      out[id] = { kind: b.kind, zoom: +cam.zoom.toFixed(3), fit: +fit.toFixed(3), poses,
-        edges: poses.every(p => p.L >= 0.8 && p.R >= 0.8),
-        still: Math.max(spread('Lat', 0), spread('Lat', 1), spread('Rat', 0), spread('Rat', 1)),
+      const pw = poses.find(p => p.name === 'west end'), pe = poses.find(p => p.name === 'east end');
+      out[id] = { kind: b.kind, zoom: +cam.zoom.toFixed(3), fit: +want.toFixed(3), poses,
+        most: Math.min(...poses.map(p => p.seen)) >= 1 / 1.15 - 0.005,
+        edges: poses.some(p => p.L >= 0.8) && poses.some(p => p.R >= 0.8),
+        still: spread('Mat', 1), slides: pw.Mat && pe.Mat ? Math.abs(pw.Mat[0] - pe.Mat[0]) : null, needSlide: 960 / cam.zoom < W - 4,
         bodies: poses.every(p => p.herOk && p.himOk), himDrawn: poses.some(p => p.him >= 150),
         wide: poses.every(p => p.far == null || p.far >= 0.8), below1: poses.some(p => p.far != null) };
     }
@@ -130,9 +144,9 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   const ids = Object.keys(R);
   const ok = (r) => r && !r.err && !r.noBoss;
   const by = (f) => Object.fromEntries(ids.map(id => [id, ok(R[id]) ? f(R[id]) : R[id]]));
-  check('A  every boss fight is zoomed to fit its room', ids.length >= 10 && ids.every(id => ok(R[id]) && Math.abs(R[id].zoom - R[id].fit) < 0.01), by(r => [r.zoom, r.fit]));
-  check('B  both ends of the room are drawn on the canvas, wherever she is (marks at each end, >= 80% found)', ids.every(id => ok(R[id]) && R[id].edges), by(r => r.edges ? true : r.poses.map(p => p.name + ' L' + p.L + ' R' + p.R).join(', ')));
-  check('C  the frame does not move when she does: the end marks land on the same pixels in every pose (<= 2 px)', ids.every(id => ok(R[id]) && R[id].still <= 2), by(r => r.still));
+  check('A  every boss fight is zoomed 15% in from fitting its room', ids.length >= 10 && ids.every(id => ok(R[id]) && Math.abs(R[id].zoom - R[id].fit) < 0.01), by(r => [r.zoom, r.fit]));
+  check('B  most of the arena is on screen (>= 1/1.15 of its width), and the frame reaches each end of it', ids.every(id => ok(R[id]) && R[id].most && R[id].edges), by(r => r.most && r.edges ? true : r.poses.map(p => p.name + ' seen' + p.seen.toFixed(2) + ' L' + p.L + ' R' + p.R).join(', ')));
+  check('C  the frame never moves up or down (the middle mark on one canvas row in every pose, <= 2 px), and slides sideways between the ends', ids.every(id => ok(R[id]) && R[id].still <= 2 && (!R[id].needSlide || R[id].slides > 8)), by(r => 'dy ' + r.still + ', slide ' + r.slides));
   check('D  the guardian and she are both drawn on the canvas, where worldScreenX/Y put them', ids.every(id => ok(R[id]) && R[id].bodies), by(r => r.bodies ? true : r.poses.filter(p => !p.herOk || !p.himOk).map(p => ({ pose: p.name, her: [p.her, p.herAt, p.herWant], him: [p.him, p.himAt, p.himWant] }))));
   // (in a pose where a guardian draws nothing — MIREJAW under the water — he is held to the projection only)
   check('D2 ...and every guardian is seen drawn by its pixels in at least one pose', ids.every(id => ok(R[id]) && R[id].himDrawn), { notDrawn: ids.filter(id => ok(R[id]) && !R[id].himDrawn) });
@@ -140,5 +154,5 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
   check('F  no page errors', errs.length === 0, errs.slice(0, 3));
   await browser.close();
   if (bad) { console.log('\nFAILED: ' + bad); process.exit(1); }
-  console.log('\nOK — every boss fight is one still picture of its whole arena, on the canvas');
+  console.log('\nOK — every boss fight frames most of its arena, sliding sideways only, on the canvas');
 })().catch(e => { console.error(e); process.exit(1); });

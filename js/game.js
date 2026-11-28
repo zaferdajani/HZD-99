@@ -16490,8 +16490,8 @@ function applyBloom(k) {
 }
 // THE GROUND GOES ON DOWN (owner, 2026-11-27, on an iPad in the Alpha's fight: "the platform,
 // because of the zoom out, it's missing the bottom segment. It's showing the background instead of
-// completing the platform downward"). A boss fight frames its whole arena (engine.js bossFit), and
-// every arena is wider than the screen's shape, so the fit leaves world above and below the room —
+// completing the platform downward"). A boss fight frames its arena 15% in from whole (engine.js
+// bossFit); a wide arena still leaves world above and below the room —
 // and under the floor the frame showed the backdrop: a floor one tile thick, floating. Below the
 // room's last row the ground body is continued to the frame's bottom in the room's own material
 // (the rock plate and its strata, as groundBandSteps lays the band — indoors the floor's plate),

@@ -72,7 +72,7 @@ function purificationBegin(b) {
  if (Math.abs(tx + player.w/2 - b.cx()) < gap - 40) tx = clampX(b.cx() - side * gap - player.w/2);
  G.purification = { b, room:G.roomId, phase:'stage', hold:0, t:0, clock:0, armed:false, committed:false, motes:[], stage:{ tx, T:0, walked:0 } };
  const span=Math.abs(b.cx()-player.x)+b.w+180;
- // (its own close framing — the two of them — not the fight's whole-arena picture it comes out of: js/engine.js bossFit)
+ // (its own close framing — the two of them — not the fight's wide arena frame it comes out of: js/engine.js bossFit)
  cam.zoom=purificationZoom(span);
  cam.x=(b.cx()+player.x+player.w/2)/2-480;cam.y=(b.cy()+player.y)/2-270;purificationCamClamp();
  G.state = 'PURIFY'; purificationPointer = false; releaseInput();

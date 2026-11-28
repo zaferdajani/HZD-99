@@ -723,6 +723,8 @@ function camJumping(p) {
   if ((cam.extUp || 0) > 0 || (cam.extDn || 0) > 0) return false;
   return true;
 }
+// a guardian's fight frames its arena fitted, then this much closer (owner, 2026-11-28: 15%)
+const BOSS_FRAME_IN = 1.15;
 function updateCam(px, py, rw, rh, dt) {
   const robo = !(typeof isHero === 'function' && isHero()) && !(typeof window !== 'undefined' && window.EDITOR);
   const baseZoom = robo && typeof PRESENTATION !== 'undefined' ? PRESENTATION.explorationZoom : 1;
@@ -743,9 +745,19 @@ function updateCam(px, py, rw, rh, dt) {
   const bossFit = robo && p && boss && typeof boss.cx === 'function' && G.roomDef && G.roomDef.w && rw && rh
     && !(G.meet && (G.meet.ph==='watch'||G.meet.ph==='coil'))
     && G.state !== 'PURIFY' && !G.purification && !boss.purified;      // (the purification after it keeps its own framing)
+  // ...15% IN FROM THE WHOLE (owner, 2026-11-28: "decrease zoom in with 15%, which means I can move
+  // left and right a little bit in the map while it's still seeing most of it"): the frame is the arena
+  // fitted, then 15% closer, so most of it is on screen and it slides LEFT AND RIGHT only — aimed
+  // half-way between her and the guardian, so both stay in it (she never in the outer fifth of it) —
+  // and never up and down: its height is
+  // held (the ground at its foot, and the solid ground below it to the bottom of the screen,
+  // js/game.js drawGroundBelow), so a jump or a palm never lifts it.
   if (bossFit) {
-    wantZoom = Math.min(baseZoom, 960 / rw, 540 / rh);
-    px = rw / 2; py = rh / 2;
+    wantZoom = Math.min(baseZoom, Math.min(960 / rw, 540 / rh) * BOSS_FRAME_IN);
+    // (half-way to him, but she never nearer the screen's side than a fifth of it: backing to a wall,
+    // she sees the wall; only a guardian at the far end of the arena may then sit at the frame's edge)
+    const hx = p.x + p.w / 2, half = 0.3 * 960 / wantZoom;
+    px = clamp((hx + boss.cx()) / 2, hx - half, hx + half); py = rh / 2;
   } else if (robo && p && boss && typeof boss.cx === 'function') {
     const dx=Math.abs(boss.cx()-px), dy=Math.abs(boss.cy()-py);
     wantZoom=Math.max(1.05,Math.min(baseZoom,760/(dx+boss.w/2+100),400/(dy+boss.h/2+90)));
@@ -760,7 +772,8 @@ function updateCam(px, py, rw, rh, dt) {
   // "You probably will have to zoom out a little bit of the screen"): a room
   // that says camFit is framed whole across its width — the islands, the water
   // between them and what is in it are the fight, and none of it is off-screen
-  if (robo && typeof G !== 'undefined' && G.roomDef && G.roomDef.camFit && G.roomDef.w)
+  // (a guardian's fight in such a room is framed as every guardian's is: 15% in from the whole, above)
+  if (robo && !bossFit && typeof G !== 'undefined' && G.roomDef && G.roomDef.camFit && G.roomDef.w)
     wantZoom = Math.min(wantZoom, Math.max(0.6, 960 / (G.roomDef.w * 32)));
   const snap=dt>=.5 || cam.room!==(typeof G!=='undefined'?G.roomId:null);
   const step=Math.max(0,Math.min(dt,.1));
@@ -816,8 +829,10 @@ function updateCam(px, py, rw, rh, dt) {
   cam.look=snap?0:lerp(cam.look||0,lookWant,1-Math.exp(-step*(lookWant?4.5:7)));
   // (a staged moment may hold the frame on a point of the room for a beat: cam.peek, a world x —
   // the door NULLFANG wakes, js/k2door.js — and lets it go again; the ease below carries it)
-  const tx=boundX(cam.peek!=null?cam.peek-480:px-480+cam.lead);
-  const ty=boundY(aimY-(robo?270+112/z:300)+fall+cam.look);
+  const tx=boundX(cam.peek!=null?cam.peek-480:px-480+(bossFit?0:cam.lead));
+  // (a guardian's frame holds its height: the arena's foot on the screen's foot when it is taller
+  // than the view, centred when it is not — and nothing she does moves it up or down)
+  const ty=bossFit?boundY(rh-540+oy):boundY(aimY-(robo?270+112/z:300)+fall+cam.look);
   cam.x=snap?tx:lerp(cam.x,tx,1-Math.exp(-step*11));
   cam.y=snap?ty:lerp(cam.y,ty,1-Math.exp(-step*9));
   // Keep the character within a safe vertical band even during a fast drop.

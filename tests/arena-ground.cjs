@@ -2,20 +2,22 @@
 // "the platform, because of the zoom out, it's missing the bottom segment. It's showing the background
 // instead of completing the platform downward." · "when the player is zoomed out in the boss fight,
 // it's showing an empty space underneath the platform terrain".
-// Every arena is wider than the screen's shape, so the fight's whole-arena picture (js/engine.js
-// bossFit) leaves world below the room; js/game.js drawGroundBelow carries the room's ground body on
-// down in its own rock. Read off the finished canvas, for every boss arena with its guardian fighting:
+// The fight's frame is the arena fitted, then 15% closer (owner, 2026-11-28: "decrease zoom in with 15%
+// ... while maintaining always solid floor all the way to the bottom of the screen"; js/engine.js
+// bossFit). Where it reaches below the room, js/game.js drawGroundBelow carries the room's ground body
+// on down in its own rock; where it does not, the room's own ground is the frame's foot. Read off the finished canvas, for every boss arena with its guardian fighting:
 // the frame drawn with the real backdrop and again with the backdrop painted magenta — a pixel that
 // changes between the two is backdrop showing.
-//   A  every arena is drawn below a zoom of 1 (so the frame does run past the room's floor)
-//   B  under the room's last row, down to the frame's foot, no backdrop shows (< 1% of the band)
+//   A  every arena is framed 15% in from fitting it whole (BOSS_FRAME_IN), never further in than that
+//   B  under the room's last row, to the frame's foot, no backdrop shows (< 1%); where the frame stops
+//      inside the room (an arena taller than the view), the room's own ground is its foot
 //   C  ...and what is there is ground, not a flat fill: it has the rock's grain (luminance spread)
 //   D  no page errors
 const { chromium } = require('playwright');
 const PORT = process.env.TEST_PORT || 8220;
 let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') + n + (d != null ? '  ' + (typeof d === 'string' ? d : JSON.stringify(d)) : '')); if (!ok) bad++; };
 (async () => {
-  console.log('── arena-ground — every boss arena, zoomed out, has ground to the frame\'s foot');
+  console.log('── arena-ground — every boss arena has solid ground to the foot of the screen');
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 }, serviceWorkers: 'block' }); const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.addInitScript(() => { localStorage.setItem('cb_intro_seen', '1'); window.requestAnimationFrame = () => 0; });
@@ -53,6 +55,7 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
       let magenta; try { magenta = frame(Tf); } finally { window.drawBG = bg0; window.bgPlanePass = pp0; window.drawVLinkBG = vl0; }
       const CW = cv.width, CH = cv.height, ky = CH / 540;
       const y0 = Math.ceil(worldScreenY(H) * ky) + 2;
+      const fit = Math.min(960 / W, 540 / H);
       let n = 0, show = 0, sum = 0, sum2 = 0;
       for (let y = Math.max(0, y0); y < CH; y += 2) for (let x = 0; x < CW; x += 2) {
         const i = (y * CW + x) * 4; n++;
@@ -60,15 +63,15 @@ let bad = 0; const check = (n, ok, d) => { console.log((ok ? 'ok   ' : 'FAIL ') 
         const L = 0.3 * plain[i] + 0.59 * plain[i + 1] + 0.11 * plain[i + 2]; sum += L; sum2 += L * L;
       }
       const mean = n ? sum / n : 0, sd = n ? Math.sqrt(Math.max(0, sum2 / n - mean * mean)) : 0;
-      out[id] = { zoom: +cam.zoom.toFixed(3), bandTop: Math.round(y0 / ky), band: n, backdrop: n ? +(show / n).toFixed(4) : null, lum: +mean.toFixed(1), grain: +sd.toFixed(1) };
+      out[id] = { foot: Math.round(worldScreenY(H) * ky) + '/' + CH, zoom: +cam.zoom.toFixed(3), want: +Math.min(PRESENTATION.explorationZoom, fit * BOSS_FRAME_IN).toFixed(3), bandTop: Math.round(y0 / ky), band: n, backdrop: n ? +(show / n).toFixed(4) : null, lum: +mean.toFixed(1), grain: +sd.toFixed(1) };
     }
     return out;
   });
   const ids = Object.keys(R), ok = r => r && !r.err && !r.noBoss;
   const by = f => Object.fromEntries(ids.map(id => [id, ok(R[id]) ? f(R[id]) : R[id]]));
-  check('A  every arena (' + ids.length + ') is drawn below a zoom of 1, so the frame runs past its floor', ids.length >= 10 && ids.every(id => ok(R[id]) && R[id].zoom < 0.999), by(r => r.zoom));
+  check('A  every arena (' + ids.length + ') is framed 15% in from fitting it whole', ids.length >= 10 && ids.every(id => ok(R[id]) && Math.abs(R[id].zoom - R[id].want) < 0.01), by(r => r.zoom + ' for ' + r.want));
   const banded = ids.filter(id => ok(R[id]) && R[id].band > 0);
-  check('B  under the room\'s last row, to the frame\'s foot, no backdrop shows (< 1%)', banded.length >= 10 && banded.every(id => R[id].backdrop < 0.01), by(r => r.band ? r.backdrop : 'no band'));
+  check('B  under the room\'s last row, to the frame\'s foot, no backdrop shows (< 1%)', banded.length >= 5 && banded.every(id => R[id].backdrop < 0.01), by(r => r.band ? r.backdrop : 'no band'));
   check('C  ...and it is ground with grain, not a flat fill', banded.every(id => R[id].grain >= 3), by(r => r.band ? r.lum + '±' + r.grain : '-'));
   check('D  no page errors', errs.length === 0, errs.slice(0, 3));
   await browser.close();
