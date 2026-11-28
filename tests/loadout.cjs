@@ -189,7 +189,7 @@ const COUNT = `(rect, cols, tol) => {
     }`, `(count) => {
       const l = gearLayout(), ar = LANG === 'ar';
       return l.visible.map((row, i) => ({ id: row.id, lo: loadoutKindOf('gear', row.id), st: row.installed ? 'filled' : row.acquired ? 'empty' : 'locked',
-        n: count({ x: (ar ? 890 : 500) - 14, y: l.y + i * l.step - 14, w: 28, h: 28 }, ${JSON.stringify(C3)}, ${TOL}) }));
+        n: count({ x: (l.frameX != null ? l.frameX : (ar ? 890 : 500)) - 14, y: l.y + i * l.step - 14, w: 28, h: 28 }, ${JSON.stringify(C3)}, ${TOL}) }));
     }`);
     const crestRows = r.filter(x => x.lo === 'crest');
     check('gear [' + lang + ']: crest rows are on screen', crestRows.length >= 2, r.map(x => x.id).join(','));
@@ -204,7 +204,7 @@ const COUNT = `(rect, cols, tol) => {
       G.crestIdx = gearRows(G.save).findIndex(r => r.id === 'claws');
       const l = gearLayout(), out = [];
       for (let i = 0; i < l.visible.length; i++) {
-        G.crestIdx = l.index; gearTouch(500, l.y + i * l.step);
+        G.crestIdx = l.index; gearTouch(l.frameX != null ? l.frameX : 500, l.y + i * l.step);   // (the row's frame, where gearLayout puts it)
         out.push(G.crestIdx === l.start + i);
         for (const k in keysP) keysP[k] = 0; for (const k in keys) keys[k] = 0;
         if (TOUCH.tapRel) TOUCH.tapRel.length = 0;

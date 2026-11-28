@@ -3594,7 +3594,9 @@ function update(dt) {
         else if (inP('CREST')) { G.state = 'CREST'; G.crestIdx = 0; sfx('ui'); }
         else if (inP('SKILL')) { G.state = 'SKILLS'; G.skillIdx = 0; sfx('ui'); }
         else if (inP('TREE') && typeof ptOpen === 'function') ptOpen('PLAY');
-        else if (inP('PAUSE')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
+        // OPTIONS / START OPENS HER CHARACTER MENU (js/charmenu.js, owner 2026-11-28), on the page she
+        // last had open; the hero's world keeps its pause list
+        else if (inP('PAUSE')) { if (typeof cmOpen === 'function' && !isHero()) cmOpen(); else { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); } }
       }
     }
     // THE AFTERMATH IS THE FRAME THAT CARRIES THE INFORMATION (manga-direction
@@ -3638,6 +3640,8 @@ function update(dt) {
     if (inP('BRAID') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; braidView.ready = false; sfx('ui'); }
     else updateBraidView(dt);
   }
+  // the character menu's pages turn on the bumpers before a page reads its own keys (js/charmenu.js)
+  else if (typeof cmUpdate === 'function' && cmUpdate(dt)) {}
   else if (G.state === 'MAP') {
     if (G.mapBtnNew > 0) G.mapBtnNew = 0;
     if (inP('MAP') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; mapView.ready = false; sfx('ui'); }
@@ -4085,6 +4089,12 @@ function updateRelics() {
 function relicsLayout() {
   const owned = (G.save && G.save.relics) || [];
   const rtl = typeof isRTL === 'function' ? isRTL() : LANG === 'ar';
+  // the robot's relics are a page of the character menu (js/charmenu.js): five seals to a row,
+  // read from the right in Arabic
+  if (typeof isHero === 'function' && !isHero()) return { owned, rtl, r: 26, pos: i => {
+    const col = i % 5, k = rtl ? 4 - col : col;
+    return { x: 110 + k * 96, y: 168 + Math.floor(i / 5) * 104 };
+  } };
   return { owned, rtl, r: 17, pos: i => {
     const col = i % 2;
     return { x: rtl ? 710 - col * 400 : 250 + col * 400, y: 120 + Math.floor(i / 2) * 62 };
@@ -18740,6 +18750,9 @@ function draw(tms) {
       ftxt(G.deathLine, 480, 300, 17, '#c9a0a6', 'center');
       c.restore();
     }
+  } else if (typeof cmOn === 'function' && cmOn()) {
+    // her character menu: every page of it, under its medallions (js/charmenu.js)
+    cmDraw();
   } else if (st === 'PAUSE') {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('paused'), 480, 118, 34, '#eef3fa', 'center', '#37ffd0');

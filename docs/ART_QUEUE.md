@@ -21,6 +21,15 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2cg. THE CHARACTER MENU'S OWN ART ✱ BLOCKED ON CREDITS 2026-11-28 (owner: "graphically amazing interface ... like [Silksong's]")
+
+The menu shipped (js/charmenu.js) on art the game already has — the Conduit ring as her crest, her 8-way turnaround, the jets, boots, cell and marble, the crystal sword cut from its canon plates — and the CC0 Wenrexa kit for its cards, rows and sockets. Higgsfield had 0.12 credits, so nothing was fired for it. When credits are in, these would make it the game's own throughout (about 8 credits at GPT Image 2.6 high 1k):
+
+- a parchment-dark backplate for the whole menu: machine schematic engraving, brass and teal, no figures (1)
+- seven medallion icons in one style for the pages: equipment, inventory, neural tree, pack, relics, map, system (one sheet, 1–2)
+- her crest's own emblem for the ring's heart when she holds claws (1), and an ornate frame for the parts card (1)
+- three item icons the game has none for: repair kit, coil, a quest parcel (1 sheet)
+
 ## 2cf. THE CRYSTAL SWORD IN EVERY WEAPON STRIP ✱ BLOCKED ON CREDITS 2026-11-26 (owner's order)
 
 Owner, 2026-11-26: "Why are you wasting my tokens on hallucination of wrong versions of the sword and how

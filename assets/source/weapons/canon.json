@@ -1,46 +1,61 @@
 {
- "why": [
-  "Owner, 2026-11-26: \"Why are you wasting my tokens on hallucination of wrong versions of the sword and how it looks in its stages, instead of giving [Higgsfield a] reference using the existing images of the sword and its shapes?\"",
-  "The canon weapon is the CRYSTAL SWORD: a straight white crystal blade on a black cylindrical grip with a gold ring; the twin form is two of them; the joined form is two crystal blades meeting at one black grip with a gold band. Every weapon image is generated FROM these plates (attached as references), never from an older strip of her holding a sword."
- ],
- "refs": {
-  "single": "assets/source/crystal/crystal_single.jpg",
-  "ground": "assets/source/crystal/sword_ground.jpg",
-  "joined": "assets/source/crystal/crystal_double.jpg"
- },
- "canon": {},
- "queue_note": "Weapon art in the game on 2026-11-26 that was NOT made from the crystal plates (a katana, curved twin blades, a gold gem staff). Each is re-fired from the refs above and moved to canon with its job id; the queue only shrinks (tests/weapon-canon.cjs).",
- "queue": {
-  "swingDual": "assets/characters/hero/swing/dual.webp",
-  "swingDualCharge": "assets/characters/hero/swing/dual_charge.webp",
-  "swingJoined": "assets/characters/hero/swing/joined.webp",
-  "heroJoinedProjectile": "assets/characters/hero/swing/joined_projectile.webp",
-  "heroJoinedThrow": "assets/characters/hero/swing/joined_throw.webp",
-  "swingSingle": "assets/characters/hero/swing/single.webp",
-  "swingSingleCharge": "assets/characters/hero/swing/single_charge.webp",
-  "swingDownSingle": "assets/characters/hero/swing/down_single.webp",
-  "swingDownDual": "assets/characters/hero/swing/down_dual.webp",
-  "swingDownJoined": "assets/characters/hero/swing/down_joined.webp",
-  "heroHeldSingle": "assets/characters/hero/held_roll_single.webp",
-  "heroHeldDual": "assets/characters/hero/held_roll_dual.webp",
-  "heroHeldJoined": "assets/characters/hero/held_roll_joined.webp",
-  "heroGateSingle": "assets/characters/hero/gate_walk_single.webp",
-  "heroGateDual": "assets/characters/hero/gate_walk_dual.webp",
-  "heroGateJoined": "assets/characters/hero/gate_walk_joined.webp",
-  "heroClimbSingle": "assets/characters/hero/gate_climb_single.webp",
-  "heroClimbDual": "assets/characters/hero/gate_climb_dual.webp",
-  "heroClimbJoined": "assets/characters/hero/gate_climb_joined.webp",
-  "heroHatchSingle": "assets/characters/hero/hatch_single.webp",
-  "heroHatchDual": "assets/characters/hero/hatch_dual.webp",
-  "heroHatchJoined": "assets/characters/hero/hatch_joined.webp",
-  "heroHopSingle": "assets/characters/hero/gate_hop_single.webp",
-  "heroHopDual": "assets/characters/hero/gate_hop_dual.webp",
-  "heroHopJoined": "assets/characters/hero/gate_hop_joined.webp"
- },
- "missing_note": "Moves that show the wrong weapon because they have no art per weapon yet: the attack in the air draws her claws (and the single blade light) whatever she holds.",
- "missing": [
-  "swingAirSingle",
-  "swingAirDual",
-  "swingAirJoined"
- ]
+  "why": [
+    "Owner, 2026-11-26: \"Why are you wasting my tokens on hallucination of wrong versions of the sword and how it looks in its stages, instead of giving [Higgsfield a] reference using the existing images of the sword and its shapes?\"",
+    "The canon weapon is the CRYSTAL SWORD: a straight white crystal blade on a black cylindrical grip with a gold ring; the twin form is two of them; the joined form is two crystal blades meeting at one black grip with a gold band. Every weapon image is generated FROM these plates (attached as references), never from an older strip of her holding a sword."
+  ],
+  "refs": {
+    "single": "assets/source/crystal/crystal_single.jpg",
+    "ground": "assets/source/crystal/sword_ground.jpg",
+    "joined": "assets/source/crystal/crystal_double.jpg"
+  },
+  "canon": {
+    "swordSingle": {
+      "file": "assets/ui/menu/swordSingle.webp",
+      "refs": [
+        "assets/source/crystal/crystal_single.jpg"
+      ],
+      "job": "none: the plate itself, cropped to the blade (2026-11-28, the character menu's weapon socket)"
+    },
+    "swordJoined": {
+      "file": "assets/ui/menu/swordJoined.webp",
+      "refs": [
+        "assets/source/crystal/crystal_double.jpg"
+      ],
+      "job": "none: the plate itself, cropped to the blade (2026-11-28, the character menu's weapon socket)"
+    }
+  },
+  "queue_note": "Weapon art in the game on 2026-11-26 that was NOT made from the crystal plates (a katana, curved twin blades, a gold gem staff). Each is re-fired from the refs above and moved to canon with its job id; the queue only shrinks (tests/weapon-canon.cjs).",
+  "queue": {
+    "swingDual": "assets/characters/hero/swing/dual.webp",
+    "swingDualCharge": "assets/characters/hero/swing/dual_charge.webp",
+    "swingJoined": "assets/characters/hero/swing/joined.webp",
+    "heroJoinedProjectile": "assets/characters/hero/swing/joined_projectile.webp",
+    "heroJoinedThrow": "assets/characters/hero/swing/joined_throw.webp",
+    "swingSingle": "assets/characters/hero/swing/single.webp",
+    "swingSingleCharge": "assets/characters/hero/swing/single_charge.webp",
+    "swingDownSingle": "assets/characters/hero/swing/down_single.webp",
+    "swingDownDual": "assets/characters/hero/swing/down_dual.webp",
+    "swingDownJoined": "assets/characters/hero/swing/down_joined.webp",
+    "heroHeldSingle": "assets/characters/hero/held_roll_single.webp",
+    "heroHeldDual": "assets/characters/hero/held_roll_dual.webp",
+    "heroHeldJoined": "assets/characters/hero/held_roll_joined.webp",
+    "heroGateSingle": "assets/characters/hero/gate_walk_single.webp",
+    "heroGateDual": "assets/characters/hero/gate_walk_dual.webp",
+    "heroGateJoined": "assets/characters/hero/gate_walk_joined.webp",
+    "heroClimbSingle": "assets/characters/hero/gate_climb_single.webp",
+    "heroClimbDual": "assets/characters/hero/gate_climb_dual.webp",
+    "heroClimbJoined": "assets/characters/hero/gate_climb_joined.webp",
+    "heroHatchSingle": "assets/characters/hero/hatch_single.webp",
+    "heroHatchDual": "assets/characters/hero/hatch_dual.webp",
+    "heroHatchJoined": "assets/characters/hero/hatch_joined.webp",
+    "heroHopSingle": "assets/characters/hero/gate_hop_single.webp",
+    "heroHopDual": "assets/characters/hero/gate_hop_dual.webp",
+    "heroHopJoined": "assets/characters/hero/gate_hop_joined.webp"
+  },
+  "missing_note": "Moves that show the wrong weapon because they have no art per weapon yet: the attack in the air draws her claws (and the single blade light) whatever she holds.",
+  "missing": [
+    "swingAirSingle",
+    "swingAirDual",
+    "swingAirJoined"
+  ]
 }

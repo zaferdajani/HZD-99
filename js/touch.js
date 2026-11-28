@@ -324,7 +324,7 @@ function tStateKind() {
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';
   if (s === 'OFFER') return 'offer';
-  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TREE' || s === 'TRIAL' || s === 'FILMS' || s === 'PANELLIST') return 'menu';
+  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TREE' || s === 'BAG' || s === 'RELICS' || s === 'CMAP' || s === 'TRIAL' || s === 'FILMS' || s === 'PANELLIST') return 'menu';
   return 'tap';
 }
 // layout-editor chrome: fixed controls that are not part of the layout
@@ -369,6 +369,8 @@ function tApplyJoy() {
 }
 function tapMenu(x, y) {
   const st = G.state;
+  // the character menu's medallions, and its pages drawn new (js/charmenu.js)
+  if (typeof cmTap === 'function' && cmTap(x, y)) return;
   if (st === 'MENU') {
     // tap the update banner to take the newer build
     if (G.updateReady && y > 452 && y < 498 && x > 250 && x < 710) {

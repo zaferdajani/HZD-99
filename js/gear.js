@@ -217,8 +217,12 @@ function gearHow(r) {
 }
 function gearLayout() {
   const rows = gearRows(G.save), index = Math.max(0, Math.min(G.crestIdx || 0, rows.length - 1));
-  const start = Math.max(0, Math.min(index - 2, rows.length - 6));
-  return { rows, index, start, visible: rows.slice(start, start + 6), x: 480, w: 430, y: 144, step: 46, h: 42 };
+  // the parts column of the character menu's equipment page (js/charmenu.js cmDrawGear): five rows
+  // in the card on the right, the selected part said under them
+  const start = Math.max(0, Math.min(index - 2, rows.length - 5));
+  // (each row's frame stands at its leading edge: the right one in Arabic, the way it is read)
+  const rtl = typeof isRTL === 'function' ? isRTL() : (typeof LANG !== 'undefined' && LANG === 'ar');
+  return { rows, index, start, visible: rows.slice(start, start + 5), x: 700, w: 210, y: 130, step: 42, h: 38, rtl, frameX: rtl ? 892 : 718 };
 }
 function gearActivate() {
   const r = gearLayout().rows[gearLayout().index];
@@ -258,17 +262,22 @@ function updateGear() {
   if (inP('OK')) gearActivate();
 }
 function gearTouch(x, y) {
-  if (x >= 730 && x <= 935 && y >= 20 && y <= 65 && typeof exportCombatLog === 'function') { exportCombatLog(); return; }
   const l = gearLayout(), i = Math.round((y - l.y) / l.step);
   if (x >= l.x && x <= l.x + l.w && i >= 0 && i < l.visible.length && Math.abs(y - (l.y + i * l.step)) <= l.h / 2) {
     G.crestIdx = l.start + i; tPress('VOK'); return;
   }
-  if (y >= 410 && y <= 450) {
-    if (x >= 480 && x <= 650) G.crestIdx = Math.max(0, l.index - 1);
-    else if (x >= 740 && x <= 910) G.crestIdx = Math.min(l.rows.length - 1, l.index + 1);
+  // a socket round the crest selects the first part that sits in it (js/charmenu.js CM_SOCKETS)
+  if (typeof CM_SOCKETS !== 'undefined' && typeof cmSlotOf === 'function') {
+    const C = CM_CREST;
+    for (const S of CM_SOCKETS) {
+      const a = S.a * Math.PI / 180, sx = C.x + Math.cos(a) * C.sock, sy = C.y + Math.sin(a) * C.sock;
+      if (Math.hypot(x - sx, y - sy) <= 30) { const k = l.rows.findIndex(r => cmSlotOf(r) === S.slot); if (k >= 0) { G.crestIdx = k; if (typeof sfx === 'function') sfx('ui'); } return; }
+    }
   }
 }
 function drawGear() {
+  // the robot's equipment is the character menu's first page now (js/charmenu.js)
+  if (typeof cmDrawGear === 'function') return cmDrawGear();
   c.fillStyle = 'rgba(4,7,12,0.97)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('crest_title'), 480, 42, 28, '#eef3fa');
   dimPanel(38, 82, 415, 352);

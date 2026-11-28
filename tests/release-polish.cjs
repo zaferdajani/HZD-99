@@ -14,8 +14,9 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
  await page.goto(origin);
  await page.waitForFunction(()=>typeof heroArtReady==='function'&&heroArtReady(),{timeout:30000});
  await page.waitForFunction(()=>document.getElementById('cv').clientWidth===1280,{timeout:5000});
- const fitted=await page.evaluate(()=>({width:cv.clientWidth,height:cv.clientHeight,pixels:cv.width}));
- assert.equal(fitted.height,720);assert(fitted.pixels>=960);record('cold desktop viewport fills available 16:9 area',fitted);
+ const fitted=await page.evaluate(()=>({width:cv.clientWidth,height:cv.clientHeight,pixels:cv.width,rs:(typeof QUAL!=='undefined'&&QUAL&&QUAL.rs)||1}));
+ // (the backbuffer is the screen at the detail tier's scale: low, the default since 2026-11-27 — "Standard resolution should be low" — is 0.7 of it)
+ assert.equal(fitted.height,720);assert(fitted.pixels>=Math.floor(1280*fitted.rs)-2&&fitted.pixels>=Math.floor(960*Math.min(1,fitted.rs)));record('cold desktop viewport fills available 16:9 area',fitted);
  const core=await page.evaluate(()=>({build:window.BUILD_ID,core:HERO_CORE_KEYS.map(k=>({key:k,embedded:MEDIA_SRC.images[k].startsWith('data:image/webp'),width:MEDIA_RAW[k].width})),run:HERO_GAIT.run}));
  assert(core.core.every(a=>a.embedded&&a.width>0));assert.equal(core.run.from,0);assert.equal(core.run.to,15);record('cold-start canonical art without external gait downloads',core);
  const result=await page.evaluate(async()=>{

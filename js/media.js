@@ -76,6 +76,14 @@ const MEDIA_SRC = {
     ptFrame: 'assets/ui/skilltree/frame.webp',
     ptSocket: 'assets/ui/skilltree/socket.webp',
     ptCard: 'assets/ui/skilltree/card.webp',
+    // THE CHARACTER MENU (js/charmenu.js, owner 2026-11-28): the same CC0 kit's card, rows, slots,
+    // title bar and grid (Wenrexa, assets/CREDITS.md), and the crystal sword cut from its own canon
+    // plates (assets/source/crystal; registered in assets/source/weapons/canon.json)
+    cmCard: 'assets/ui/menu/card.webp', cmCardDim: 'assets/ui/menu/cardDim.webp',
+    cmRow: 'assets/ui/menu/row.webp', cmRowOn: 'assets/ui/menu/rowOn.webp',
+    cmSlot: 'assets/ui/menu/slot.webp', cmSlotOn: 'assets/ui/menu/slotOn.webp',
+    cmTitle: 'assets/ui/menu/title.webp', cmGrid: 'assets/ui/menu/grid.webp', cmTall: 'assets/ui/menu/tall.webp',
+    swordSingle: 'assets/ui/menu/swordSingle.webp', swordJoined: 'assets/ui/menu/swordJoined.webp',
     // ...and CHIME's four (same batch): the hover, the ring, the note, the fall
     chRest: 'assets/characters/chime/rest.webp',
     chRing: 'assets/characters/chime/ring.webp',
