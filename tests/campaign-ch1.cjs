@@ -163,13 +163,18 @@ function roomModel(info) {
 }
 // one physics step of the hero, as js/entities.js has it
 function simStep(M, s, dir, jumpEdge, jumpHeld) {
-  if (dir) {
+  // THE DASH (js/entities.js, inP('DASH')): 0.16 s level at 940 px/s, no gravity, then she falls from
+  // rest; after it the run is taken as her ordinary 340 (the game brakes it slower: the plan is short)
+  if (s.dashT > 0) {
+    s.dashT -= DT; s.vx = s.dashV; s.vy = 0;
+    if (s.dashT <= 0) { s.vx = clamp(s.vx, -340, 340); }
+  } else if (dir) {
     const turn = Math.sign(s.vx) === -dir ? 1.6 : 1;
     s.vx = clamp(s.vx + dir * 3000 * turn * DT, -340, 340);
   } else { const sg = Math.sign(s.vx); s.vx -= sg * 2900 * DT; if (Math.sign(s.vx) !== sg) s.vx = 0; }
   let grav = s.vy < 0 ? 2150 : 3050;
   if (!s.on && Math.abs(s.vy) < 150) grav *= 0.55;
-  s.vy = Math.min(s.vy + grav * DT, 1020);
+  if (!(s.dashT > 0)) s.vy = Math.min(s.vy + grav * DT, 1020);
   if (jumpEdge) s.jb = 0.12;
   if (s.jb > 0) { if (s.on || s.coy > 0) { s.vy = -905;  /* 920 in the game; planned a little short so a marginal ledge is not chosen */ s.on = false; s.coy = 0; s.jb = 0; s.jumped = true; } else s.jb -= DT; }
   if (!jumpHeld && s.vy < -280) s.vy = -280;
@@ -220,6 +225,7 @@ function simulate(M, start, prog, maxT = 3) {
   let t = 0, air = false;
   for (let i = 0; i < maxT / DT; i++) {
     const dir = (t >= prog.d0 && t < prog.d1) ? prog.dir : 0;
+    if (prog.dash != null && !s.dashed && t >= prog.dash) { s.dashed = 1; s.dashT = 0.16; s.dashV = prog.dir * 940; }
     simStep(M, s, dir, i === 0 && prog.hold > 0, prog.hold > 0 && t < prog.hold);
     t += DT;
     if (s.spike) return { fail: 'spike', t };
@@ -244,6 +250,10 @@ const PROGS = [];
 for (const dir of [-1, 1]) for (const hold of [0.12, 0.2, 0.3, 2]) for (const run of [0, 1])
   for (const [d0, d1] of [[0, 9], [0.18, 9], [0, 0.22], [0, 0.4]]) PROGS.push({ dir, hold, d0, d1, vx0: run ? dir * 340 : 0 });
 for (const hold of [0.12, 2]) PROGS.push({ dir: 0, hold, d0: 0, d1: 0, vx0: 0 });
+// a running jump with the dash thrown near its top: what crosses A14's twelve-tile pits (the dash is
+// NULLFANG's gift; js/world.js A14 says a run-up jump alone carries 317 px of the 384)
+const DASH_PROGS = [];
+for (const dir of [-1, 1]) for (const dash of [0.3, 0.38, 0.45, 0.52]) DASH_PROGS.push({ dir, hold: 2, d0: 0, d1: 9, vx0: dir * 340, dash });
 const WALKOFF = [];
 for (const dir of [-1, 1]) for (const d1 of [0.05, 0.15, 0.3, 9]) WALKOFF.push({ dir, hold: 0, d0: 0, d1, vx0: dir * 340, walkoff: 1 });
 // where her feet rest on a stand tile at world column cx (the drawn curve may lift them)
@@ -274,7 +284,7 @@ function buildEdges(M) {
       if (r.fail) return;
       const key = r.exit ? 'X' + r.exit : r.node;
       if (r.node === i) return;
-      const cost = r.t + (prog.hold ? (prog.hold >= 2 ? 0.15 : 0.35) : 0.05) + (prog.vx0 ? 0.1 : 0);
+      const cost = r.t + (prog.hold ? (prog.hold >= 2 ? 0.15 : 0.35) : 0.05) + (prog.vx0 ? 0.1 : 0) + (prog.dash != null ? 0.6 : 0);
       const prev = E[i].find(e => (e.exit ? 'X' + e.exit : e.to) === key);
       if (prev && prev.cost <= cost) return;
       if (prev && prev.walk) return;
@@ -287,8 +297,9 @@ function buildEdges(M) {
       if (ahead != null) continue;
       add(p, simulate(M, nodeStart(M, n, p.vx0), p));
     }
-    for (const p of PROGS) {
-      if (p.vx0) { const back = M.idx.get((n.x - p.dir) + ',' + n.y); if (back == null) continue; }
+    for (const p of (M.info.dash ? PROGS.concat(DASH_PROGS) : PROGS)) {
+      // (a run-up may come down a slope or up one: the tile behind is on her row or a row off it)
+      if (p.vx0) { const bx = n.x - p.dir; if ([0, -1, 1].every(dy => M.idx.get(bx + ',' + (n.y + dy)) == null)) continue; }
       add(p, simulate(M, nodeStart(M, n, p.vx0), p));
     }
   });
@@ -345,9 +356,9 @@ async function snap() {
     try { tp = st && G.state === 'PLAY' && !G.dialog ? tutPrompt(st) : null; } catch (e) { tp = null; }
     const P = typeof player !== 'undefined' && player;
     const en = (G.enemies || []).filter(e => e && !e.dead).map(e => ({ k: e.kind || (e.constructor && e.constructor.name), x: Math.round(e.x), y: Math.round(e.y), w: e.w, h: e.h, hp: e.hp, mech: e.mechanism || null,
-      calm: !!(e.tame || e.friendly || e.freed || e.calm || e.disabled || e.ally), st: e.st || e.state || null, wt: e.windT || 0,
+      calm: !!(e.tame || e.friendly || e.freed || e.calm || e.disabled || e.ally), st: e.st || e.state || null, wt: e.windT || 0, mind: e.mind || null, feint: !!e.feint, vx: Math.round(e.vx || 0), co: e.coilT || 0, lu: e.lungeT || 0, wd: e.windedT || 0, pl: !!e.guard, dir: e.dir || 0, cr: e.crouchT || 0, wa: !!e.wasAir, vy: Math.round(e.vy || 0), lt: e.landT || 0,
       sg: e.kind === 'sage' ? { coil: e.coilT || 0, lunge: e.lungeT || 0, winded: e.windedT || 0, gather: e.gatherT || 0, ring: e.ringR == null ? null : e.ringR, locked: !!e.locked, tame: !!e.tame, pure: e.pureM || 0, vx: e.vx || 0,
-        st: e.tSt || null, oh: e.openHits || 0, p2: e.hpMax0 ? e.hp <= e.hpMax0 * 0.6 : false, rr: (e.rr || []).map(r => [r.x, r.r]), marks: (e.marks || []).map(k => k.x), waves: (e.waves || []).map(w => [w.x, w.dir]),
+        st: e.tSt || null, ln: e.lunges | 0, nb: (e.beads || []).length + (e.pendingWave ? 5 : 0), oh: e.openHits || 0, p2: e.hpMax0 ? e.hp <= e.hpMax0 * 0.6 : false, rr: (e.rr || []).map(r => [r.x, r.r]), marks: (e.marks || []).map(k => [k.x, k.t]), waves: (e.waves || []).map(w => [w.x, w.dir]),
         beads: (e.beads || []).map(b => { const a = 450, c = b.y - b.floor, tl = (-b.vy + Math.sqrt(Math.max(0, b.vy * b.vy - 4 * a * c))) / (2 * a); return tl < 0.6 ? b.x + b.vx * tl : null; }).filter(x => x != null) } : null }));
     const projs = (G.projs || []).filter(q => q && !q.dead && !q.friendly).slice(0, 24).map(q => ({ x: Math.round(q.x), y: Math.round(q.y), vx: Math.round(q.vx || 0), vy: Math.round(q.vy || 0), r: q.r || 6, g: q.grav || 0 }));
     const B = G.boss;
@@ -394,7 +405,7 @@ async function snap() {
         gh: B.kind === 'horn' && B.missiles ? { phase: B.phase, big: B.hornBig !== false, small: B.hornSmall !== false,
           m: B.missiles.map(m => ({ x: Math.round(m.x), y: Math.round(m.y), vx: Math.round(m.vx), vy: Math.round(m.vy), ph: m.ph, locked: !!m.locked })),
           r: B.rocks.map(r => ({ x: Math.round(r.x), ph: r.ph })) } : null } : null, projs,
-      doors, rub,
+      doors, rub, dmg: Object.assign({}, G.dmgLog || {}),
       busy: { trans: !!G.trans, gate: !!G.gateWalk, wake: !!G.wake, cut: !!G.cut, entry: !!G.bossEntry, meet: G.meet ? { ph: G.meet.ph, inter: !!G.meet.interactive } : null, brk: G.break ? G.break.ph || 1 : null, rech: !!G.recharge, finish: !!G.finish, hitStop: G.hitStop || 0 },
       panels: G.state === 'PANELS',
       lesson: G.lesson && !(G.lesson.hold > 0) ? G.lesson.id : null,
@@ -403,6 +414,16 @@ async function snap() {
       trial: G.state === 'TRIAL' && typeof TRI !== 'undefined' ? { game: TRI.game, phase: TRI.memPhase, seq: TRI.memSeq ? TRI.memSeq.slice() : null, st: TRI.st } : null,
       shop: G.state === 'SHOP' && typeof SHOP !== 'undefined' ? { idx: G.shopIdx, n: SHOP.length, type: SHOP[G.shopIdx] && SHOP[G.shopIdx].type } : null,
     };
+  });
+}
+// a narrower look, for the moments a body reacts in: her feet and the duel's floor, nothing else
+// (a full look costs about 40 ms on this machine; a ring crest crosses 16 px of her in 80)
+async function liteDuel() {
+  return page.evaluate(() => {
+    const P = player, e = (G.enemies || []).find(q => q && q.kind === 'sage' && !q.dead);
+    return { t: Date.now(), px: P.x + P.w / 2, on: !!P.on, st: e ? e.tSt || null : null,
+      rr: e ? (e.rr || []).map(r => [r.x, r.r]) : [], waves: e ? (e.waves || []).map(w => [w.x, w.dir]) : [],
+      marks: e ? (e.marks || []).filter(k => k.t > -0.25).map(k => k.x) : [], beads: e ? (e.beads || []).length : 0 };
   });
 }
 async function roomInfo() {
@@ -415,7 +436,8 @@ async function roomInfo() {
     // the drawn surface she really stands on (js/game.js groundColumnAt)
     let hf = null;
     try { const cur = typeof surfaceCurve === 'function' ? surfaceCurve() : null; if (cur) hf = { step: SURF_STEP, n: cur.N, y: Array.from(cur.y, v => isNaN(v) ? null : v), t: Array.from(cur.raw, v => isNaN(v) ? null : v) }; } catch (e) { }
-    return { id: G.roomId, w, h, rows, exits, tGap: G.grid.tGap || null, statics, sky: !!G.roomDef.sky, hf };
+    return { id: G.roomId, w, h, rows, exits, tGap: G.grid.tGap || null, statics, sky: !!G.roomDef.sky, hf,
+      dash: typeof hasMod === 'function' && !!hasMod('dash') };
   });
 }
 // THE MAP: room adjacency, as the map screen knows it (ROOMS exits + doors)
@@ -462,7 +484,13 @@ function diffLog(s) {
     const px = s.p.x + 12, py = s.p.y + 18;
     const near = s.en.concat(s.boss ? [{ k: s.boss.k, x: s.boss.x, y: s.boss.y, w: s.boss.w, h: s.boss.h, st: s.boss.st }] : []).map(e => ({ e, d: Math.hypot(e.x + e.w / 2 - px, e.y + e.h / 2 - py) })).sort((a, b) => a.d - b.d)[0];
     const pj = s.projs.map(q => Math.hypot(q.x - px, q.y - py)).sort((a, b) => a - b)[0];
-    log('HURT ' + prevS.p.cores + ' -> ' + s.p.cores + ' in ' + s.room + (near ? ' (nearest ' + near.e.k + (near.e.st ? '/' + near.e.st : '') + ' at ' + Math.round(near.d) + ' px)' : '') + (pj != null && pj < 60 ? ' (a shot ' + Math.round(pj) + ' px away)' : ''));
+    // what struck her, as the game itself names it (G.dmgLog, the blow's source)
+    const src = Object.keys(s.dmg || {}).filter(k => (s.dmg[k] | 0) > ((prevS.dmg || {})[k] | 0)).join('+');
+    const sgP = prevS.en.find(e => e.k === 'sage' && e.sg && e.sg.st);
+    const how = sgP ? ' [agent ' + sgP.sg.st + ' dist ' + Math.round(Math.abs(sgP.x + sgP.w / 2 - prevS.p.x - 12)) + (prevS.p.on ? ' she on' : ' she air') + ' held ' + [...HELD].join('+') + ']' : '';
+    const nP = prevS.en.filter(e => !e.sg).map(e => ({ e, d: Math.hypot(e.x + e.w / 2 - prevS.p.x - 12, e.y + e.h / 2 - prevS.p.y - 18) })).sort((a, b) => a.d - b.d)[0];
+    const was = nP ? ' [' + nP.e.k + ' was ' + JSON.stringify({ d: Math.round(nP.d), dx: Math.round(nP.e.x + nP.e.w / 2 - prevS.p.x - 12), cr: +(nP.e.cr || 0).toFixed(2), air: nP.e.wa, lt: +(nP.e.lt || 0).toFixed(2), co: +(nP.e.co || 0).toFixed(2), lu: +(nP.e.lu || 0).toFixed(2), wd: +(nP.e.wd || 0).toFixed(2), vx: nP.e.vx, sheOn: prevS.p.on, held: [...HELD].join('+') }) + ']' : '';
+    log('HURT ' + prevS.p.cores + ' -> ' + s.p.cores + ' in ' + s.room + (src ? ' by ' + src : '') + how + was + (near ? ' (nearest ' + near.e.k + (near.e.st ? '/' + near.e.st : '') + ' at ' + Math.round(near.d) + ' px)' : '') + (pj != null && pj < 60 ? ' (a shot ' + Math.round(pj) + ' px away)' : ''));
   }
   if (prevS && prevS.scrap !== s.scrap) log('SCRAP ' + prevS.scrap + ' -> ' + s.scrap);
   if (prevS && JSON.stringify(prevS.items) !== JSON.stringify(s.items)) log('ITEMS ' + JSON.stringify(s.items));
@@ -602,7 +630,12 @@ let stall = { k: -1, since: 0, best: Infinity };
 async function ensureModel() {
   // (which exits are open is part of the plan: A3 planned before NULLFANG kept its shut hatch after he opened it)
   const sig = await page.evaluate(() => { const ex = G.roomDef.exits || {}; const op = ['L', 'R', 'T', 'B'].filter(k => ex[k] && (typeof ex[k] !== 'object' || typeof exitOpen !== 'function' || exitOpen(ex[k]))).join('');
-    return G.roomId + '|' + Object.keys(G.save.broken || {}).length + '|' + (G.grid && G.grid.length) + '|' + op; });
+    // ...and what the tiles ARE: a floor the story seals and unseals answers tileAt differently with no
+    // tile broken (js/progress.js pgHubSealed: A2's hatch is rock until the first meeting, and a plan
+    // made before it walked her back and forth looking for a way down that its map said was rock)
+    let hsh = 0; const H = (G.grid && G.grid.length) || 0, Wd = G.roomDef.w || 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < Wd; x++) hsh = (hsh * 31 + ((tileAt(x, y) || '.').charCodeAt(0))) | 0;
+    return G.roomId + '|' + Object.keys(G.save.broken || {}).length + '|' + (G.grid && G.grid.length) + '|' + op + '|' + hsh + '|' + (typeof hasMod === 'function' && hasMod('dash') ? 'D' : ''); });
   if (sig === modelKey && model) return;
   info = await roomInfo();
   // exits the room will actually let her through right now
@@ -658,6 +691,11 @@ async function walkTo(s, goal) {
       const tp = t - flight.lead;
       const dir = (tp >= pr.d0 && tp < pr.d1 && tp < flight.landT - flight.lead * 0.5) ? pr.dir : 0;
       await hold([dir < 0 ? 'ArrowLeft' : dir > 0 ? 'ArrowRight' : null, pr.hold > 0 && tp < pr.hold ? 'Space' : null]);
+      // the dash, thrown on the planned beat (the key lands a look late: thrown that much early)
+      if (pr.dash != null && !flight.dashed && tp >= pr.dash - flight.lead) {
+        flight.dashed = 1; await hold([pr.dir < 0 ? 'ArrowLeft' : 'ArrowRight', 'Space']); await tap('KeyC', 40);
+        if (DEBUG) log('  DASH in the air at ' + tp.toFixed(2) + ' s');
+      }
       return 'moving';
     }
   }
@@ -694,6 +732,10 @@ async function walkTo(s, goal) {
         endsInJump = !!(nb && !nb.walk);
         // a RUNNING jump the same way is taken at speed: no slowing for it
         if (nb && nb.prog && nb.prog.vx0 && Math.sign(nb.prog.vx0) === best.walk) endsInJump = 'run';
+        // ...and a chain that ends in the room's own exit is walked straight through it: the room's
+        // edge read as a ledge, she braked a tile short of the doorway and stood there until the
+        // stall watch gave up on her, nine seconds at nearly every side exit of the meadow
+        if (nb && nb.exit) endsInJump = 'run';
         break;
       }
       k = nb.to;
@@ -842,7 +884,7 @@ function threat(s) {
     if (e.calm || e.mech === 'winch' || e.k === 'sage') continue;
     const ex = e.x + e.w / 2, ey = e.y + e.h / 2;
     const dx = Math.abs(ex - px), dy = Math.abs(ey - py);
-    const reach = /crawler|hopper|wolf/.test(e.k) ? 200 : 150;
+    const reach = (/crawler|hopper|wolf/.test(e.k) ? 200 : 150) + (e.k === 'guard' ? 90 : 0);   // (the armoured walker is three times its old size)
     if (dx < reach && dy < (e.k === 'flier' || e.k === 'bat' ? 140 : 80) && dx < bd) { bd = dx; best = e; }
   }
   return best;
@@ -851,12 +893,61 @@ async function fight(s, e) {
   const px = s.p.x + 12, ex = e.x + e.w / 2;
   const dir = ex > px ? 1 : -1;
   const dist = Math.abs(ex - px) - e.w / 2;
+  if (!R.fightLog || R.fightLog.k !== e.k || Date.now() - R.fightLog.t > 4000) { R.fightLog = { k: e.k, t: Date.now() }; log('FIGHT ' + e.k + ' (hp ' + Math.round(e.hp) + ') in ' + s.room); }
+  // THE WALKER'S AND THE CRAWLER'S BEAT, read as a player reads it (js/entities.js, the guard/crawler
+  // case): a coil (the tell, its sound) then a lunge along the ground, then it stands WINDED — the
+  // opening. The armoured walker (GUARD, three times its measured size) turns every blow on its plate
+  // outside that opening, and its lunge runs about 80 px past its own front. So: out of the lunge's
+  // reach on the tell (over it with a wall at her back), in and strike while it is winded, and while
+  // it is plated keep just outside the distance it notices her from and let it come.
+  // THE HOPPER (js/entities.js case 'hopper'): it crouches (the tell), leaps about 110 px at her and
+  // LANDS HARD — the ground within 62 px of where it comes down shakes her off her feet — then folds
+  // for a third of a second (HOP_LAND_T), the opening. So: never be where it will land, and be at it
+  // while it is folded.
+  if (e.k === 'hopper') {
+    const feet = s.p.y + PH, ebot = e.y + e.h;
+    let land = null;
+    if (e.wa && e.vy !== 0) { const dy = Math.max(0, feet - ebot); const tl = ((e.vy || 0) + Math.sqrt(Math.max(0, (e.vy || 0) * (e.vy || 0) + 4000 * dy))) / 2000; land = ex + (e.vx || 0) * tl; }
+    else if (e.cr > 0) land = ex + (Math.sign(px - ex) || 1) * 115;
+    // one coming AT her through the air is met with the blade: her cut reaches past its body before
+    // its body reaches hers (it cannot be out-run: a cat's leap is twice her speed)
+    const closing = e.wa && Math.sign(e.vx || 0) === Math.sign(px - ex) && Math.abs(e.vx || 0) > 60;
+    if (closing && Math.abs(ex - px) < e.w / 2 + 96) {
+      if (s.p.face !== dir) await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft']);
+      await hold([]); await tap('KeyX', 30); await sleep(60); return;
+    }
+    if (land != null && Math.abs(px - land) < 84) {
+      const away = Math.sign(px - land) || -dir;
+      if (wallBehind(s, away) || (pitAhead(s, away) && s.p.on)) { await hold(['Space']); await sleep(120); await hold([]); return; }
+      await hold([away > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(70); return;
+    }
+    if (e.wa) { await hold([]); if (s.p.face !== dir) await tap(dir > 0 ? 'ArrowRight' : 'ArrowLeft', 20); await sleep(30); return; }
+  }
+  const big = e.k === 'guard';
+  const reachOf = big ? e.w / 2 + 150 : e.w / 2 + 120;
+  const cd = Math.abs(ex - px);
+  if (e.co > 0 || e.lu > 0) {
+    if (cd < reachOf) {
+      if (wallBehind(s, -dir) || (pitAhead(s, -dir) && s.p.on)) { await hold(['Space', dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(260); await hold([]); return; }
+      await hold([dir > 0 ? 'ArrowLeft' : 'ArrowRight']); await sleep(90); return;
+    }
+    await hold([]); if (s.p.face !== dir) await tap(dir > 0 ? 'ArrowRight' : 'ArrowLeft', 25); await sleep(40); return;
+  }
   // a wind-up (the amber tell) at close range: step out of it, come back after
   if ((e.wt > 0 || /warn/.test(e.st || '')) && dist < 90) { await hold([dir > 0 ? 'ArrowLeft' : 'ArrowRight']); await sleep(180); await hold([]); return; }
-  if (!R.fightLog || R.fightLog.k !== e.k || Date.now() - R.fightLog.t > 4000) { R.fightLog = { k: e.k, t: Date.now() }; log('FIGHT ' + e.k + ' (hp ' + Math.round(e.hp) + ') in ' + s.room); }
+  // (the plate is on the side it faces, js/types.js: from behind, or from above, a blow lands whole)
+  const behind = (Math.sign(px - ex) || 1) !== (e.dir || 1);
+  if (e.pl && !(e.wd > 0) && !behind) {
+    // plated and not winded: a blow is turned. Hold off at the edge of its notice and let it commit
+    if (cd < e.w / 2 + 120) { if (!wallBehind(s, -dir)) { await hold([dir > 0 ? 'ArrowLeft' : 'ArrowRight']); await sleep(70); return; } }
+    else if (cd > e.w / 2 + 165) { if (!pitAhead(s, dir)) { await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(50); return; } }
+    await hold([]); if (s.p.face !== dir) await tap(dir > 0 ? 'ArrowRight' : 'ArrowLeft', 25); await sleep(40); return;
+  }
   // something OVER her (a diving flier): jump and strike upward
   const ey = e.y + e.h / 2, py = s.p.y + PH / 2;
-  if (ey < py - 22 && Math.abs(ex - px) < 80 && s.p.on) {
+  // (a FLIER: the armoured walker's middle is above hers because it is three times her height, and a
+  // jump into it is a jump into its plate)
+  if (ey < py - 22 && Math.abs(ex - px) < 80 && s.p.on && e.y + e.h < py) {
     await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft', 'Space', 'ArrowUp']); await sleep(Math.round(0.18 / Math.max(0.3, RATE) * 1000));
     await tap('KeyX', 40); await sleep(90); await tap('KeyX', 40); await hold([]); await sleep(120); return;
   }
@@ -871,8 +962,13 @@ async function maybeHeal(s) {
   const reserve = (!s.bag.includes("cshard") && !s.flags.includes("crystal")) ? s.burstVolts : 0;
   // in a duel, mend only out of its reach or while it cannot act
   const sg = s.en.find(e => e.k === 'sage' && !e.sg.tame);
+  // (the duel mends on its own terms, in sageFight: a mend is 0.85 s standing still, and held through
+  // an exhale it was still being held when the vault's waves and the next lunge arrived)
+  if (sg && sg.sg.st && !sg.sg.locked) return false;
   if (sg && !(sg.sg.locked || sg.sg.winded > 0.4 || Math.abs(sg.x + sg.w / 2 - s.p.x - 12) > 220)) return false;
   if (s.boss && !s.boss.dead && Math.abs(s.boss.cx - s.p.x - 12) < 260 && !/rest|dorm|stagger/.test(s.boss.st || '')) return false;
+  // the bell hears a mend inside 260 px whatever it is doing (CHIME_TOLL.mend) and answers it at once
+  if (s.boss && !s.boss.dead && s.boss.k === 'chime' && s.boss.st !== 'dorm' && Math.abs(s.boss.cx - s.p.x - 12) < 300) return false;
   if ((s.p.cores <= 2 || (s.p.cores <= s.p.max - 3 && s.p.volts >= s.healCost + reserve)) && s.p.volts >= s.healCost && !threat(s) && s.p.on) {
     log('HEAL (cores ' + s.p.cores + '/' + s.p.max + ', volts ' + Math.round(s.p.volts) + ')');
     await hold([]); await page.keyboard.down('KeyF'); await sleep(1500); await page.keyboard.up('KeyF'); await sleep(150);
@@ -1095,7 +1191,10 @@ async function backOff(s, dir, ms = 80) {   // dir = the way AWAY
 const bLog = (s, msg) => { if (!R.bossLog || Date.now() - R.bossLog > 3000) { R.bossLog = Date.now(); log(msg + ' | cores ' + s.p.cores + '/' + s.p.max + ' volts ' + Math.round(s.p.volts)); } };
 async function bossFight(s) {
   // the Sage is a duelist in the chamber's enemy list, not a G.boss
-  const sage = s.en.find(e => e.k === 'sage');
+  // (the agent itself: if the room ever holds more than one robed body, the one still fighting or kneeling)
+  const sages = s.en.filter(e => e.k === 'sage');
+  const sage = sages.find(e => e.sg && e.sg.locked) || sages.find(e => e.sg && !e.sg.tame) || sages[0];
+  if (sages.length > 1 && !R.sagesLogged) { R.sagesLogged = 1; log('NOTE ' + sages.length + ' robed bodies in ' + s.room + ': ' + JSON.stringify(sages.map(e => [e.x, e.sg && e.sg.locked, e.sg && e.sg.tame]))); }
   // WATCHDOG: a fight that has not moved in 25 s (no hp, no purity) gets a
   // fresh approach from a few steps away — and the log says it happened
   const sig = sage ? Math.round(sage.hp) + '/' + sage.sg.pure : s.boss ? Math.round(s.boss.hp) : '';
@@ -1136,14 +1235,23 @@ async function sageFight(s, e) {
   };
   if (g.tame) { await hold([]); await sleep(200); return; }
   // the ring rolls along the floor: be in the air as it passes
-  if (g.ring != null && s.p.on) {
+  if (g.ring != null && s.p.on && !g.st) {
     const d = Math.hypot(px - cx, feet - (e.y + e.h));
     if (d - g.ring > -4 && d - g.ring < 52) { log('SAGE ring: jump'); await hold([]); await tap('Space', 260); return; }
   }
   if (g.locked) {
+    // KNEELING, the crystal fills its purity a quarter a blow. Blows that come off nothing are a sign
+    // she is striking from where the blade does not meet it: a player tries the other side of it
+    if (R.lockPure == null || g.pure > R.lockPure + 0.01) { R.lockPure = g.pure; R.lockTries = 0; }
+    if (R.lockTries >= 6) {
+      log('SAGE kneeling: ' + R.lockTries + ' blows and its purity still ' + g.pure.toFixed(2) + ' (she at ' + Math.round(px) + ' facing ' + s.p.face + ', it at ' + Math.round(cx) + ', dist ' + Math.round(dist) + ') — from its other side');
+      R.lockTries = 0; await hold(['Space', dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(450); await hold([]); return;
+    }
     if (dist > 30) { await approach(s, cx); return; }
+    if (dist >= 6 && s.p.face === dir) R.lockTries = (R.lockTries || 0) + 1;
     await strike(); return;
   }
+  R.lockPure = null;
   // THE DUEL (js/agent-duel.js), read as the boss ladder's careful player reads it
   // (tests/gauntlet/bots/tally_skilled.cjs, ported to the keyboard): what is already in the air or on
   // the floor first — a fire ring or a ground wave is hopped, a burning mark or a bead's landing is a
@@ -1152,33 +1260,128 @@ async function sageFight(s, e) {
   if (g.st) {
     const L = 'ArrowLeft', Rt = 'ArrowRight', W = ((model && model.info && model.info.w) || 44) * TL, key = d => d > 0 ? Rt : L;
     const near = d => (d < 0 ? px < 130 : px > W - 130);
-    const ringHop = (g.rr || []).some(([x, r]) => { const gap = Math.abs(px - x) - r; return gap > -6 && gap < 44; })
-      || (g.waves || []).some(([x, d]) => { const q = (px - x) * d; return q > -4 && q < 56; });
-    if (ringHop && s.p.on) { await hold([]); await tap('Space', 120); return; }
-    const hz = (g.marks || []).map(x => [x, 46]).concat((g.beads || []).map(x => [x, 42]));
+    const st = g.st, chain = /^(coil|lunge|replant|lastcoil)$/.test(st);
+    // a breath is one opening: count her own blows in it (the snapshot's count lags the key)
+    if (st === 'exhale' && R.duelSt !== 'exhale') R.duelBlows = 0;
+    R.duelSt = st;
+    // WHAT RUNS THE FLOOR, timed: each ember-ring crest (200 px/s, it burns her within 16 px while she
+    // stands — js/agent-duel.js sageDuelTick) and each ground wave off the vault (380 px/s, 26 px tall,
+    // 26 px either side of her middle) is hopped on its time to reach her, not on a fixed distance — the
+    // wave covers 56 px in a seventh of a second, about one look of the bot's eyes, and a fixed window
+    // was met as often late as on time. The look is a little old when the key lands: that is `lag`.
+    const lag = Math.max(0, (Date.now() - s.t) / 1000) * RATE + 0.04;
+    const ttcs = [];
+    for (const [x, r] of (g.rr || [])) { const q = Math.abs(px - x) - r; if (q > -16) ttcs.push((q - 16) / 200 - lag); }
+    for (const [x, d] of (g.waves || [])) { const q = (px - x) * d; if (q > -26) ttcs.push((q - 26) / 380 - lag); }
+    if (DEBUG && ttcs.length) log('  ttc ' + ttcs.map(t => t.toFixed(2)).join(',') + ' st=' + st + ' on=' + s.p.on + ' age=' + (Date.now() - s.t) + 'ms');
+    if (s.p.on && ttcs.some(t => t < 0.16)) { if (DEBUG) log('  HOP ttc=' + Math.min(...ttcs).toFixed(3) + ' lag=' + lag.toFixed(3) + ' px=' + Math.round(px) + ' rr=' + JSON.stringify(g.rr) + ' w=' + JSON.stringify(g.waves)); await hold([]); await tap('Space', 120); return; }
+    // A BURNING MARK OR A BEAD'S LANDING IS A WALL: never walk into one (a mark erupts 0.7 s after it is
+    // laid, 56 px wide, for a quarter second), and step off one she is standing on
+    const hz = (g.marks || []).filter(([x, t]) => t > -0.25).map(([x]) => [x, 52]).concat((g.beads || []).map(x => [x, 27]));   // (a bead burns her within its 7 px and her own 12 of her middle; they land 80-90 px apart, and the gap between is where she stands)
     const inHz = hz.find(([x, r]) => Math.abs(px - x) < r);
-    if (inHz) { await hold([key(px >= inHz[0] ? 1 : -1)]); await sleep(110); await hold([]); return; }
-    const out = async (ms) => { if (near(-dir)) { await hold(['Space', key(dir)]); await sleep(380); await hold([]); } else { await hold([key(-dir)]); await sleep(ms); await hold([]); } };
-    switch (g.st) {
-      case 'exhale':
-        if (g.oh >= (g.p2 ? 1 : 2)) { if (dist < 120) await out(90); else { await hold([]); await sleep(40); } return; }
-        if (dist > 30) { await approach(s, cx); return; }
-        await strike(); return;
-      case 'coil': case 'lunge': case 'replant': case 'lastcoil':
-        if (dist < 400) await out(120); else { await hold([]); await sleep(40); } return;
-      case 'vaultcrouch': await hold([]); await sleep(40); return;
-      case 'vault': if (R.vaultFrom == null) R.vaultFrom = px; if (Math.abs(px - R.vaultFrom) < 95) await out(110); return;
-      case 'spinprep': case 'spin': if (dist < 150) await out(110); else { await hold([]); await sleep(40); } return;
-      case 'plumbprep': case 'sweep': if (dist < 170) await out(110); else { await hold([]); await sleep(40); } return;
-      case 'unbind': if (dist < 150) await out(90); else { await hold([]); await sleep(40); } return;
-      case 'gather': case 'gather2': if (dist > 140) await approach(s, cx); else { await hold([]); await sleep(40); } return;
-      case 'countprep': case 'sightprep': case 'mark': case 'volley': if (dist > 200) await approach(s, cx); else { await hold([]); await sleep(40); } return;
-      default:
+    if (DEBUG && (g.marks || []).some(([x]) => Math.abs(px - x) < 120)) log('  MARKS px=' + Math.round(px) + ' ' + JSON.stringify((g.marks || []).map(([x, t]) => [Math.round(x), +t.toFixed(2)])) + ' st=' + st + ' inHz=' + !!inHz + ' face=' + s.p.face);
+    const blocked = d => hz.some(([x, r]) => { const ahead = px + d * 40; return Math.abs(ahead - x) < r && Math.abs(ahead - x) < Math.abs(px - x) + 1; })
+      || (d < 0 ? px < 60 : px > W - 60);
+    if (inHz) { let d = px >= inHz[0] ? 1 : -1; if (R.runFor && R.runDir && !(R.runDir < 0 ? px < 60 : px > W - 60)) d = R.runDir; await hold([key(blocked(d) && !(R.runFor && d === R.runDir) ? -d : d)]); await sleep(60); return; }
+    const go = async (d, ms = 60) => { if (blocked(d)) { await hold([]); await sleep(30); return; } await hold([key(d)]); await sleep(ms); };
+    // OUT: away from it; with a wall at her back, over it while it stands still for its wind-up (the coil
+    // is planted for half a second: the lunge then runs on away from her and re-aims from further off)
+    const out = async (ms) => {
+      if (near(-dir) || blocked(-dir)) {
+        if ((/^(coil|lastcoil|replant|lunge|gather|vaultcrouch|countprep|sightprep|exhale)$/.test(st) && dist < 120 || (st === 'lunge' && dist < 200)) && s.p.on) {
+          log('SAGE cornered on its ' + st + ': over the top'); await hold(['Space', key(dir)]); await sleep(420); return; }
+        await hold([]); await sleep(30); return;
+      }
+      await hold([key(-dir)]); await sleep(ms);
+    };
+    // (one is coming, but not yet: stand for it — walking on into it shortens the time it gives her —
+    // and WATCH it come with the narrow look, so the hop is timed on the crest, not on the last full look)
+    if (s.p.on && !chain && !/^(spin|vault$)/.test(st) && !inHz && !(g.beads || []).length && ttcs.some(t => t < 0.7)) {
+      await hold([]);
+      const tEnd = Date.now() + 900;
+      while (Date.now() < tEnd) {
+        const q = await liteDuel(); if (!q.on) return;
+        const lg = Math.max(0, (Date.now() - q.t) / 1000) * RATE + 0.03, tt = [];
+        for (const [x, r] of q.rr) { const d = Math.abs(q.px - x) - r; if (d > -16) tt.push((d - 16) / 200 - lg); }
+        for (const [x, d0] of q.waves) { const d = (q.px - x) * d0; if (d > -26) tt.push((d - 26) / 380 - lg); }
+        if (!tt.length || /^(coil|lunge|replant|lastcoil|spin|vault)/.test(q.st || '') || q.beads || q.marks.some(x => Math.abs(q.px - x) < 46)) return;
+        // (off the ground takes a frame to be seen and 35 ms to clear a wave's 26 px; the air holds her
+        // half a second, so early is safe and late is a core)
+        if (tt.some(t => t < 0.15)) { if (DEBUG) log('  HOP (watched) ttc=' + Math.min(...tt).toFixed(3)); await tap('Space', 120); return; }
+        if (!tt.some(t => t < 0.7)) return;
+      }
+      return;
+    }
+    // (every bead still in the air, and phase two's second five still to come, not only the ones about
+    // to land: she was turning back for the opening while the row was still falling round her)
+    // ...and the marks too: phase two lays three, 110 px apart, the far one where a short run ends
+    const markNear = (g.marks || []).some(([x, t]) => t > -0.25 && Math.abs(px - x) < 110);
+    if ((g.nb || markNear) && !chain && R.runFor && R.runDir) { await go(blocked(R.runDir) ? -R.runDir : R.runDir, 50); return; }
+    if (!/^(countprep|volley|sightprep|mark)$/.test(st) && !g.nb && !markNear) R.runFor = null;
+    switch (st) {
+      case 'exhale': {
+        // THE OPENING: two blows (one in phase two), then out past the staff's reach at the hip (150 px
+        // from its middle) before the breath ends on a greedy player
+        const allow = g.p2 ? 1 : 2;
+        // (a second blow only with time left to be past 95 px of its middle when the breath ends: two
+        // blows and a player still inside that wake the staff at the hip)
+        if (g.oh >= allow || R.duelBlows >= allow || (R.duelBlows >= 1 && g.winded < 0.35)) { if (dist < 140) await out(80); else { await hold([]); await sleep(30); } return; }
+        if (dist > 34) { await go(dir, 50); return; }
+        if (dist < 6) { await go(-dir, 50); return; }
+        if (s.p.face !== dir) { await hold([key(dir)]); await sleep(25); await hold([]); return; }
+        await hold([]); R.duelBlows++; await tap('KeyX', 40); await sleep(150); return; }
+      case 'coil': case 'lunge': case 'replant': case 'lastcoil': {
+        // each lunge carries it about 82 px (2.2 x its 170 px/s for 0.22 s) and it re-aims between them:
+        // stand just past what is left of the chain, not across the room — the breath after the last
+        // lunge (0.7 s; 0.55 in phase two) is the opening, and it is only worth anything from near
+        const left = g.ln + 1, need = left * 95 + 40;
+        if (dist < need) await out(80); else { await hold([]); await face(); await sleep(25); } return; }
+      case 'vaultcrouch': await hold([]); await sleep(30); return;
+      case 'vault': if (R.vaultFrom == null) R.vaultFrom = px; if (Math.abs(px - R.vaultFrom) < 100) { const d = near(1) ? -1 : near(-1) ? 1 : -dir; await go(d, 70); } else { await hold([]); await sleep(20); } return;
+      case 'spinprep': case 'spin': if (dist < 150) await out(80); else { await hold([]); await sleep(30); } return;
+      case 'plumbprep': case 'sweep': if (!s.p.on || dist < 160) await out(80); else { await hold([]); await sleep(30); } return;
+      case 'unbind': if (dist < 150) await out(80); else { await hold([]); await sleep(30); } return;
+      // its own wind-ups at range: stand still (the bead volley and the sighting aim where she IS, so
+      // she moves once they have chosen — the mark and the beads above are walls)
+      case 'gather': case 'gather2': if (dist < 60) await out(60); else { await hold([]); await face(); await sleep(30); } return;
+      // THE COUNT AND THE SIGHTING AIM WHERE SHE STANDS when they let go (beads 80-90 px apart in a row,
+      // five and then five more between them in phase two; one mark, or three 110 px apart): a row of
+      // fire is not stepped between, it is run out of. So she runs while it counts and while it sights,
+      // to the side with the floor to run on, and keeps running until what it threw has landed.
+      case 'countprep': case 'sightprep': case 'mark': case 'volley': {
+        if (R.runFor !== st && !(R.runFor && /^(countprep|volley|sightprep|mark)$/.test(R.runFor) && /^(volley|mark)$/.test(st))) {
+          const roomL = px - 60, roomR = W - 60 - px, away = -dir;
+          R.runDir = (away < 0 ? roomL : roomR) > 260 ? away : (roomL > roomR ? -1 : 1);
+        }
+        R.runFor = st;
+        if (blocked(R.runDir)) R.runDir = -R.runDir;
+        if (R.runDir === dir && dist < 60) { await hold([]); await face(); await sleep(30); return; }
+        await go(R.runDir, 70); return; }
+      default: {
         R.vaultFrom = null;
-        // its neutral turns blows and two wake the riposte: keep just outside its reach and wait
-        if (dist > 160) { await approach(s, cx); return; }
-        if (dist < 100) { await out(80); return; }
-        await hold([]); await face(); await sleep(50); return;
+        // A MEND, when it is safe to stand still for one: far from it, nothing on the floor or in the air,
+        // and let go the instant that changes (a released mend is lost, a mend under a lunge is a core)
+        const quiet = !(g.rr || []).length && !(g.waves || []).length && !(g.marks || []).length && !(g.beads || []).length;
+        const wantHeal = s.canHeal && s.p.volts >= s.healCost && (s.p.cores <= 2 || s.p.cores <= s.p.max - 3);
+        if (wantHeal && dist < 300 && !near(-dir) && !blocked(-dir)) { await out(70); return; }
+        if (quiet && wantHeal && s.p.on && dist > 260) {
+          log('HEAL in the duel (cores ' + s.p.cores + '/' + s.p.max + ', volts ' + Math.round(s.p.volts) + ', dist ' + Math.round(dist) + ')');
+          await hold([]); await page.keyboard.down('KeyF');
+          for (let i = 0; i < 11; i++) {
+            await sleep(90);
+            const q = await snap(), a = q.en.find(x => x.k === 'sage');
+            if (!a || !a.sg || !q.p) break;
+            const d2 = Math.abs(a.x + a.w / 2 - q.p.x - 12) - a.w / 2;
+            if ((a.sg.rr || []).length || (a.sg.waves || []).length || (a.sg.marks || []).length || (a.sg.beads || []).length
+              || d2 < 150 || /^(vault|coil|lunge|countprep|sightprep|volley|mark)/.test(a.sg.st || '')) break;
+          }
+          await page.keyboard.up('KeyF'); return;
+        }
+        // NEUTRAL: it turns blows and two wake the riposte, so nothing is thrown here. Keep just past the
+        // reach of its lunge chain's first strike and let it commit (it walks in from past 160 px)
+        if (dist > 170) { await go(dir, 50); return; }
+        if (dist < 110) { await out(70); return; }
+        await hold([]); await face(); await sleep(40); return; }
     }
   }
   if (g.lunge > 0 && dist < 110) { await hold([]); await tap('Space', 300); return; }
@@ -1204,16 +1407,43 @@ async function chimeFight(s, b) {
   bLog(s, 'CHIME st=' + b.st + ' hp=' + b.hp + ' dx=' + Math.round(d) + ' dy=' + Math.round(sy - py));
   if (b.st === 'dorm') { await approach(s, b.cx); return; }
   let dir = 0, jump = false, swing = false;
-  if (adx > 40) dir = Math.sign(d);
-  if (adx < 120 && P.on && sy < py - 20) jump = true;
-  if (adx < 130 && Math.abs(sy - py) < 120) swing = true;
+  // THE TOLL (js/entities.js CHIME_TOLL, 2026-11-27): the spot under the bell is not safe any more —
+  // stand there a quarter second, or put two blows into one of its breaths, and it shivers (half a
+  // second, amber, a sound), drops and rings the floor 64 px either side of where it lands, then sits
+  // on the floor a breath, open, before it rises. A player who has seen it once fights it from beside
+  // it, never under it: steps out on the shiver, and takes the bell on the floor.
+  const TOLL_CLEAR = 112;                        // the ring's 64 + her half-width + a margin for the drift
+  const wallAt = sd => sd > 0 ? px > (s.w || 40) * TL - 90 : px < 90;
+  if (b.st === 'tollwarn' || b.st === 'toll') {
+    if (!R.tollLogged || Date.now() - R.tollLogged > 2500) { R.tollLogged = Date.now(); log('CHIME shivers (the toll): out from under it, dx=' + Math.round(d)); }
+    if (adx < TOLL_CLEAR) { let out = -(Math.sign(d) || 1); if (wallAt(out) && adx < 40) out = -out; dir = out; }
+    // (no jump: the ring takes her in the air over its footprint too)
+  } else if (b.st === 'tollrest') {
+    // on the floor, open, and soft to touch: in beside it and strike level
+    if (adx > 58) dir = Math.sign(d);
+    else if (adx < 30) dir = -Math.sign(d);
+    swing = adx < 120;
+  } else {
+    // beside it, out of the spot under it (60 px) and inside a sword's reach: jump and strike level
+    if (adx > 104) dir = Math.sign(d); else if (adx < 72) dir = -Math.sign(d);
+    if (adx < 125 && P.on && sy < py - 20) jump = true;
+    if (adx < 135 && Math.abs(sy - py) < 120) swing = true;
+    // greed: one blow in each of its breaths is all it allows near it (two wake the toll), so after a
+    // blow lands she lets that breath go (counted off its health, as a player sees the hit spark)
+    if (R.chimeHp != null && b.hp < R.chimeHp - 0.5) R.chimeHitAt = Date.now();
+    if (Date.now() - (R.chimeHitAt || 0) < 1150 / Math.max(0.3, RATE)) swing = false;
+  }
+  if (b.st === 'tollrest' && R.chimeHp != null && b.hp < R.chimeHp - 0.5) R.chimeHitAt = Date.now();
+  R.chimeHp = b.hp;
   const G2 = 2100, JV = 920, floor = P.on ? P.y : (s.chimeFloor || P.y); if (P.on) s.chimeFloor = P.y;
   const path = (dx, jp, t) => { const x = P.x + dx * 340 * t; let y;
     if (P.on && jp) y = P.y - (JV * t - 0.5 * G2 * t * t); else if (!P.on) y = P.y + (P.vy || 0) * t + 0.5 * G2 * t * t; else y = P.y;
     if ((!P.on || jp) && y > floor) y = floor; return { x, y }; };
+  const lagC = Math.max(0, (Date.now() - s.t) / 1000) * RATE + 0.04;
   const hits = (dx, jp) => { let worst = 9;
     for (let k = 0; k <= 15; k++) { const t = k / 30, q0 = path(dx, jp, t);
-      for (const q of s.projs) { const qx = q.x + q.vx * t, qy = q.y + q.vy * t + 0.5 * (q.g || 0) * t * t, m = (q.r || 6) + 10;
+      // (the notes are seen a moment late — the look's age, and the key's — so they are where they will be)
+      for (const q of s.projs) { const tq = t + lagC, qx = q.x + q.vx * tq, qy = q.y + q.vy * tq + 0.5 * (q.g || 0) * tq * tq, m = (q.r || 6) + 12;
         if (qx > q0.x - m && qx < q0.x + PW + m && qy > q0.y - m && qy < q0.y + PH + m) worst = Math.min(worst, t); } }
     for (let k = 0; k <= 9; k++) { const t = k / 30, q0 = path(dx, jp, t), bx = b.x + (b.vx || 0) * t, by = b.y + (b.vy || 0) * t;
       if (q0.x < bx + b.w + 2 && q0.x + PW > bx - 2 && q0.y < by + b.h + 2 && q0.y + PH > by - 2) worst = Math.min(worst, t + 0.05); }
@@ -1229,7 +1459,8 @@ async function chimeFight(s, b) {
   const keys = [];
   if (dir > 0) keys.push('ArrowRight'); else if (dir < 0) keys.push('ArrowLeft');
   if (jump || (!P.on && (P.vy || 0) < 0 && sy < py - 40)) keys.push('Space');
-  if (swing && sy < py - 50 && adx < 60) keys.push('ArrowUp');
+  // a level strike needs her facing it: with no move held, a touch toward it turns her
+  if (swing && !dir && (P.face || 1) !== (Math.sign(d) || 1)) keys.push(d > 0 ? 'ArrowRight' : 'ArrowLeft');
   await hold(keys);
   if (swing) await tap('KeyX', 30);
   await sleep(Math.round(0.05 / Math.max(0.3, RATE) * 1000));
@@ -1423,7 +1654,10 @@ async function runMissions(s) {
     if (s.p && s.state === 'PLAY') {
       if (await maybeHeal(s)) return;
       const e = threat(s);
-      if (e && !s.tut) { stall.since = Date.now(); await fight(s, e); return; }
+      // (in a duel the agent's floor is what kills: its fight reads the hazards, so a bat in the
+      // chamber is struck only when it comes to her there, never chased across the burning floor)
+      const duel = s.en.find(q => q.k === 'sage' && q.sg && !q.sg.tame && !q.sg.locked && Math.abs(q.x + q.w / 2 - s.p.x - 12) < 600);
+      if (e && !s.tut && !duel) { stall.since = Date.now(); await fight(s, e); return; }
     }
     await m.step(s);
     return;
@@ -1431,7 +1665,7 @@ async function runMissions(s) {
   return 'complete';
 }
 
-if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, nodeStart, nodeFeet,
+if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, DASH_PROGS, nodeStart, nodeFeet,
   campaignCertification, REQUIRED_PANELS };
 else (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
@@ -1440,7 +1674,7 @@ else (async () => {
   const errors = [];
   page.on('pageerror', e => { errors.push(String(e)); log('PAGE ERROR ' + String(e).slice(0, 300)); });
   // a cleared browser, or the save the game itself wrote at a pod
-  await page.goto('http://127.0.0.1:8220/index.html');
+  await page.goto('http://127.0.0.1:' + (process.env.TEST_PORT || 8220) + '/index.html');
   await page.evaluate(seg => {
     localStorage.clear();
     if (seg) for (const [k, v] of Object.entries(seg)) localStorage.setItem(k, v);
@@ -1454,7 +1688,9 @@ else (async () => {
   let lastSave = 0, fpsT = Date.now(), fpsSim = 0;
   while (Date.now() - T0 < MAX_MS) {
     let s;
-    try { s = await snap(); } catch (e) {
+    const tS0 = Date.now();
+    if (DEBUG) { R.loopN = (R.loopN || 0) + 1; if (R.loopT0 && Date.now() - R.loopT0 > 5000) { log('  LOOP ' + ((Date.now() - R.loopT0) / R.loopN).toFixed(0) + ' ms/iter, snap ' + (R.snapMs / R.loopN).toFixed(0) + ' ms'); R.loopT0 = Date.now(); R.loopN = 0; R.snapMs = 0; } if (!R.loopT0) { R.loopT0 = Date.now(); R.snapMs = 0; } }
+    try { s = await snap(); if (DEBUG) R.snapMs += Date.now() - tS0; } catch (e) {
       log('snap failed: ' + e.message);
       if (/closed|crash/i.test(e.message)) { result = 'browser closed'; break; }
       await sleep(500); continue;
