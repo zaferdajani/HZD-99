@@ -131,6 +131,17 @@ This one is an agent. Give it a name, dark name."**
 Internal names are still unchanged and still not story (`sage`, `sageTame_*`,
 `sg_*`): they mean the agents.
 
+## THE INSECT KINGDOMS (owner's order, 2026-11-28)
+
+*"Add insect kingdoms."* Asked, he chose **new kingdoms on top** of the six, each
+with an insect sage. The six sages are unchanged. Proposed (names, gifts and
+fragments wait on his reading; `docs/INSECT_KINGDOMS.md` is the whole design):
+**THE HUM** (zone F, the hive whose pollinators carried Mother's song: WAXWARD,
+DRONEMASS, the agent SMOKER, the sage HUSHQUEEN) and **THE UNDERLEAF** (zone G, the
+forest floor where the world's scrap becomes ground: PITMAW, DUNGTHRONE, the agent
+PINNER, the sage ORCHIDSCYTHE). They come after the Crystal Cache and before the
+Virus Nest, which stays the end. Not in the game yet: no fight before its art.
+
 ## World, song and infection
 
 This is a world of robots divided into kingdoms. Each kingdom has its own

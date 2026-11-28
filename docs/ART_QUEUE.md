@@ -21,6 +21,15 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2ch. THE INSECT KINGDOMS ✱ BLOCKED ON CREDITS 2026-11-28 (owner: "add insect kingdoms")
+
+Two new kingdoms on top of the six, THE HUM and THE UNDERLEAF; the whole design, cast and art list is
+`docs/INSECT_KINGDOMS.md`. Priced with Higgsfield's estimator: a still 1.25 credits, a 5 s Seedance 2.5
+take 15 credits at 480p. About **265 credits a kingdom, ~530 for both**. Every insect is a parts rig with
+only its signature move filmed from a real-insect reference. **Fire first, as the proof: HUSHQUEEN alone,
+~38 credits** (turnaround, parts sheet, two key poses, THE CALL and her ground phase as takes), and show
+the owner her fight as a clip before the rest.
+
 ## 2cg. THE CHARACTER MENU'S OWN ART ✱ BLOCKED ON CREDITS 2026-11-28 (owner: "graphically amazing interface ... like [Silksong's]")
 
 The menu shipped (js/charmenu.js) on art the game already has — the Conduit ring as her crest, her 8-way turnaround, the jets, boots, cell and marble, the crystal sword cut from its canon plates — and the CC0 Wenrexa kit for its cards, rows and sockets. Higgsfield had 0.12 credits, so nothing was fired for it. When credits are in, these would make it the game's own throughout (about 8 credits at GPT Image 2.6 high 1k):

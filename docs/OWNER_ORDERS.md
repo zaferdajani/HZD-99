@@ -354,3 +354,11 @@ The howl and the ride together are 87 % of Kingdom 3's clean sweep (band 60-100 
 player's 55-80 % they need some of Kingdom 2's savings — not easy, not out of reach. The wolf's
 whole ladder is 3050, 39 % of everything Kingdoms 1-3 pay. These are the numbers to change when
 the owner has played them.
+
+## 2026-11-28 — insect kingdoms
+
+*"Add insect kingdoms."* Asked whether he meant turning Kingdoms 3-5 into insect kingdoms, new
+kingdoms on top, or insect foes inside the existing ones, he chose **new kingdoms on top**, each
+with an insect sage. Designed in `docs/INSECT_KINGDOMS.md` (THE HUM and THE UNDERLEAF, between the
+Crystal Cache and the Virus Nest); art queued as ART_QUEUE 2ch, ~530 credits, HUSHQUEEN first as
+the proof (~38). Higgsfield held 0.12 credits that day, so nothing is in the game yet.
