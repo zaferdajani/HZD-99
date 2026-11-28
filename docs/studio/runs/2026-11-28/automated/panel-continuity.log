@@ -1,0 +1,14 @@
+
+── panel-continuity  — every comic panel that plays before the blade is forged is declared empty-handed against the md5 of the picture that was looked at; the corridor meeting draws NULLFANG from his own gunmetal panel
+── panel-continuity — a panel shows only what she has at that point in the story
+ok   the story order is declared and every sequence in it exists  []
+ok   A  every panel that plays before the blade exists is declared  []
+ok      ...and in every one of them her hands are empty  []
+ok   B  the file on disk is the one that was looked at (a re-fire must be looked at again)  []
+ok   C  the blade first appears in the forge  f_blade
+ok   D  the corridor meeting draws NULLFANG from his own panel, not page 14's white lion  ["m_down","m_stalk"]
+
+OK — nothing is in her hands before she has made it
+   (panel-continuity: 0.1 s)
+
+all 1 harnesses ran

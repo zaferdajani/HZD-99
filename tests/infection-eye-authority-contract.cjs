@@ -23,4 +23,3 @@ if (!rear || rear.c !== 30 || rear.r !== 1 || rear.e.length !== 30 || rear.e.som
   throw new Error('NULLFANG signature rear is missing per-cell infection-eye anchors');
 }
 console.log('PASS only infected bodies receive finite red/purple eye trails');
-

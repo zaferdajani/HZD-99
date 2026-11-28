@@ -1,0 +1,6 @@
+
+── alpha-bow-persist-contract  — Alpha covenant ceremony persists once per save
+PASS Alpha covenant ceremony is persisted once per save
+   (alpha-bow-persist-contract: 0.1 s)
+
+all 1 harnesses ran

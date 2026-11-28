@@ -11,4 +11,3 @@ assert.match(game, /G\.save\.flags\.crystal && G\.save\.flags\.bossGlitch && !G\
   'Ratchet talk must not activate Alpha before NULLFANG');
 assert.match(quests, /id:'alpha_pack'[\s\S]*?after:'bossGlitch'/, 'quest authority must record the post-NULLFANG order');
 console.log('PASS Alpha side quest cannot be offered before NULLFANG is purified');
-

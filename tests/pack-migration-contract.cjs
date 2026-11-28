@@ -45,4 +45,3 @@ const call = src.indexOf('migratePack(save);');
 const early = src.indexOf('if ((save.storyVersion | 0) >= STORY_VERSION) return save;');
 assert.ok(call >= 0 && call < early, 'Pack migration runs even for current-story saves');
 console.log('PASS legacy Pack and mount saves retain earned capability exactly once');
-

@@ -38,4 +38,3 @@ assert.equal(G.mount.stam, 100, 'a genuinely new summon starts full');
 const manifest = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
 for (const key of ['alRideGallop', 'alRideLeap', 'alRideRear']) assert.ok(manifest.boot.includes(key), `${key} must preload`);
 console.log('PASS integrated wolf-mount film is wired and same-summon stamina cannot be reset');
-

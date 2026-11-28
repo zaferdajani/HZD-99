@@ -1,0 +1,3071 @@
+{
+  "started_utc": "2026-11-28T09:03:43.501153+00:00",
+  "base_commit": "e5e34f059fa5e70f4ea26790dd71aa2646e361e6",
+  "dirty_at_start": "",
+  "profile": "full",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.816019,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "cc6c51929b0b6bf0d989441b548b4aebd310f1f3c4aa2bd9e9a49b33fdda0355"
+    },
+    {
+      "name": "pack",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.465102,
+      "timeout_seconds": 180,
+      "log": "pack.log",
+      "sha256": "58f6d95022af246449c560a0684306bfd76e9594ea6123c80445f09bbce8a367"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "cdb83a41a841565ec83ff272998cb4e5969f0669a74fbc087df68695abf15f05",
+        "odyssey.html": "4915df06c1fa381e02318a358b3094a3513cf98a43f06ce9d89b327988eec48a",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "779bc16d7d0c0046893052837568e5e0c69be06538801762d0066a977dbd2efc",
+        "assets/lowres/alBite.webp": "aeb34a295471dd1750dfc82c544789c22cfc1f412753cdd4f101a0fbc64c43a1"
+      }
+    },
+    {
+      "name": "combat-impact-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165298,
+      "timeout_seconds": 480,
+      "log": "combat-impact-contract.log",
+      "sha256": "05aba05fc6f6147fa8fc44184910cd7f9f81afae80aa5a17856cdd7693d8a50a"
+    },
+    {
+      "name": "combat-impact-browser",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "combat-impact-browser.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "purification-controls",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "purification-controls.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "purification",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "purification.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "combat-impact-input",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "combat-impact-input.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "wrist-release",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "wrist-release.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "repair-browser",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "repair-browser.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "repair-lifecycle",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164279,
+      "timeout_seconds": 480,
+      "log": "repair-lifecycle.log",
+      "sha256": "0e15e559d14bbaec11d9f9e5d10a1841677ab33250332688551a7c3c9de2b5fe"
+    },
+    {
+      "name": "lion-studio",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "lion-studio.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "lion-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "lion-motion.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-hitfeel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-hitfeel.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "first-foe",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "first-foe.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "gear-how",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gear-how.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "alpha-run",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "alpha-run.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pure-gift",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pure-gift.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ring-pads",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ring-pads.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ring-wake",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ring-wake.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "shop-ask",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "shop-ask.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "turn-roar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "turn-roar.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "map-read",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "map-read.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "fired-art",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "fired-art.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "agent-rig",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "agent-rig.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pod-door",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pod-door.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "voice-heard",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "voice-heard.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "panel-continuity",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.418209,
+      "timeout_seconds": 480,
+      "log": "panel-continuity.log",
+      "sha256": "caf620338e0c5040aab06a5369e9004f1f1bec8daf701f6168d5e274269c683d"
+    },
+    {
+      "name": "media-container",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.366324,
+      "timeout_seconds": 480,
+      "log": "media-container.log",
+      "sha256": "d19ab9480a6d85c8e4f189e1ed4eb3d5259560b5113e22987cc3c11af55849a7"
+    },
+    {
+      "name": "sharp",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sharp.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "no-rim-baked",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "no-rim-baked.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "no-body-light",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "no-body-light.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "no-comic-fx",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "no-comic-fx.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "palm-ledges",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "palm-ledges.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "insects",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "insects.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "grass",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "grass.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ground-seamless",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ground-seamless.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "palm-trunk",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "palm-trunk.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "marble-glint",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "marble-glint.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pod-strike",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pod-strike.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "qual-default",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "qual-default.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-vfx",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-vfx.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-ladder",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 2580,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-ladder.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "arena-ground",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "arena-ground.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "roar-hold",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "roar-hold.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "howl-pace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "howl-pace.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "alpha-reach",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "alpha-reach.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "fight-foley",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "fight-foley.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ground-fx",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ground-fx.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "foe-bar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "foe-bar.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hit-count",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1980,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hit-count.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "rotate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "rotate.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "archive-clean",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.417065,
+      "timeout_seconds": 480,
+      "log": "archive-clean.log",
+      "sha256": "6b8bb604eab11bac6d20a01e00ca74bd1f53e415cec7537d3ef3c101393e3756"
+    },
+    {
+      "name": "weapon-canon",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114188,
+      "timeout_seconds": 480,
+      "log": "weapon-canon.log",
+      "sha256": "356ab0e97c94e2a05cf792f48c8a2852210bf9253ca9869113fed2a20abfd99d"
+    },
+    {
+      "name": "ledger",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.417521,
+      "timeout_seconds": 480,
+      "log": "ledger.log",
+      "sha256": "67cbc297225d7c1479abdb38a3eb50f0ba08cd59cd2bf40b9702a00f0745ec19"
+    },
+    {
+      "name": "gravehorn-ground",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gravehorn-ground.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cheetah-hunt",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cheetah-hunt.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "seam-backdrop",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "seam-backdrop.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "sword-edge",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sword-edge.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "marble-seat",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "marble-seat.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-skill",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-skill.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ring-gate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ring-gate.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "bound-cue",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "bound-cue.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "decode-ahead",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "decode-ahead.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "plunge",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "plunge.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-fx",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-fx.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "alpha-kit",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "alpha-kit.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "wolf-mind",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "wolf-mind.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "wolf-hunt",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "wolf-hunt.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "solid-enemies",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "solid-enemies.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "solid-bodies",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "solid-bodies.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ios-ready",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ios-ready.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "story-opening",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114705,
+      "timeout_seconds": 480,
+      "log": "story-opening.log",
+      "sha256": "4d24a76bfb865353e0a32ea3d3c82d8211f11b54c1b43e9ea163bde3fd349460"
+    },
+    {
+      "name": "infection-eye-authority-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164303,
+      "timeout_seconds": 480,
+      "log": "infection-eye-authority-contract.log",
+      "sha256": "bef6fba84359c299ede4e01fd27262cee458ccf7510dcbbcc789166314d9b1f2"
+    },
+    {
+      "name": "quest-payment-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164573,
+      "timeout_seconds": 480,
+      "log": "quest-payment-contract.log",
+      "sha256": "0f0950cdf15f88e78f7ee46e343fd6f778a7fee278e4e22b8e374b91d8807db6"
+    },
+    {
+      "name": "wolf-mount-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.1142,
+      "timeout_seconds": 480,
+      "log": "wolf-mount-contract.log",
+      "sha256": "e31ae01359fd0d6a769f18d61d0824414603fc93188c88a8d45d6da282cbf2e1"
+    },
+    {
+      "name": "pack-migration-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114262,
+      "timeout_seconds": 480,
+      "log": "pack-migration-contract.log",
+      "sha256": "4fde1d1ba83b6bed8cb2cf06b4089ba3fc175072ff9d2346804e0d1a4b178f68"
+    },
+    {
+      "name": "alpha-bow-persist-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114351,
+      "timeout_seconds": 480,
+      "log": "alpha-bow-persist-contract.log",
+      "sha256": "58214fe331eeae95e2e6e41d99c580317b5591210acdf692ead755a9b3016e5d"
+    },
+    {
+      "name": "alpha-order-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164303,
+      "timeout_seconds": 480,
+      "log": "alpha-order-contract.log",
+      "sha256": "b7ccbb34204fb6ebdb7a90b15c83d1ed9afb8de8c524662ec1ab96144df8fe68"
+    },
+    {
+      "name": "story-order",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "story-order.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "caves-ch1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "caves-ch1.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "survey-a7",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "survey-a7.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "den-gate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "den-gate.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "comic-rewards",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "comic-rewards.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "story-battery",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "story-battery.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "story-rescue",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "story-rescue.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "story-meeting",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "story-meeting.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "first-sage-route",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "first-sage-route.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "script-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114231,
+      "timeout_seconds": 480,
+      "log": "script-route.log",
+      "sha256": "485e35e3caa9ea77fc14c4ee966a46682ba9d2143e87e54917a7bf8db11bcad1"
+    },
+    {
+      "name": "guardian-break",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "guardian-break.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "sage-quiet",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sage-quiet.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "mobile-platform",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "mobile-platform.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "gesture-input",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gesture-input.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "input-contract",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "input-contract.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "winch-integration",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "winch-integration.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "winch-purpose",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "winch-purpose.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "manhwa-reader",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "manhwa-reader.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "panels",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "panels.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "entrance-integration",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "entrance-integration.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hero-cache-regression",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero-cache-regression.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "scratch-visual",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "scratch-visual.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "scratch-reach",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164521,
+      "timeout_seconds": 480,
+      "log": "scratch-reach.log",
+      "sha256": "ffa2216e547011a907c1f1157f4281ea6fbe184744575951a7803f5a49de6d39"
+    },
+    {
+      "name": "hero-move-coverage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero-move-coverage.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hero-feedback",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164288,
+      "timeout_seconds": 480,
+      "log": "hero-feedback.log",
+      "sha256": "be52f8a8e5e29cdc98e5981886e34eeea486fd8e36e71c43627e40eef3b065f0"
+    },
+    {
+      "name": "hero-delivery",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero-delivery.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hero-frame-alpha",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero-frame-alpha.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hero-alpha",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero-alpha.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tutorial-controller",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164433,
+      "timeout_seconds": 480,
+      "log": "tutorial-controller.log",
+      "sha256": "b15e9c8d93aa7f4bcc7887dcbd4d1c1a785244fe4adc0691f89db7c6d13cf5a7"
+    },
+    {
+      "name": "offline-release",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164333,
+      "timeout_seconds": 480,
+      "log": "offline-release.log",
+      "sha256": "e95b1b36733610861291a45e8d26a0576adfbdd35eb275b98c41c8477bb4c42d"
+    },
+    {
+      "name": "release-polish",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "release-polish.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "chapter-one",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "chapter-one.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "sage-specials",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164419,
+      "timeout_seconds": 480,
+      "log": "sage-specials.log",
+      "sha256": "83e612131a12629c96e0d4c864d2083d28b6422fec599b54fbaa1a841f810d20"
+    },
+    {
+      "name": "tutorial-clarity",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164335,
+      "timeout_seconds": 480,
+      "log": "tutorial-clarity.log",
+      "sha256": "d38d462670977c2eb01a793c0d5ab18551c99cee4a49bb64646728ddecf391ff"
+    },
+    {
+      "name": "story-progression",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16435,
+      "timeout_seconds": 480,
+      "log": "story-progression.log",
+      "sha256": "6816c053e1b610eedcd5e9d82ebd39c833240870d66cb344d6f0f535ed57cab0"
+    },
+    {
+      "name": "input-focus",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164326,
+      "timeout_seconds": 480,
+      "log": "input-focus.log",
+      "sha256": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44"
+    },
+    {
+      "name": "voice-handoff",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164398,
+      "timeout_seconds": 480,
+      "log": "voice-handoff.log",
+      "sha256": "53a90d21b5e2fd75a38aa43fbb2b721a533e64ce7c93735d50e8012c305bf384"
+    },
+    {
+      "name": "desktop-protocol",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164654,
+      "timeout_seconds": 480,
+      "log": "desktop-protocol.log",
+      "sha256": "72ab3995559ccdd043452f8db0db369292a565081c937fb13e23ce592cae07a4"
+    },
+    {
+      "name": "cave-passage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cave-passage.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cave-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.364987,
+      "timeout_seconds": 480,
+      "log": "cave-ground.log",
+      "sha256": "e3b750c7677cbc249e32c6b18d762ed4cd3ac9588c1c2c65fef7f51b82898725"
+    },
+    {
+      "name": "seam-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164429,
+      "timeout_seconds": 480,
+      "log": "seam-route.log",
+      "sha256": "63acaf57fdd59a7562520ff81ea78758ce00dc8466d56589e7c0eda92a216de8"
+    },
+    {
+      "name": "shadow-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164702,
+      "timeout_seconds": 480,
+      "log": "shadow-ground.log",
+      "sha256": "73da52a301ef0e3abb066462991eb76cb477de26399f190aa61b89ad78b5aefc"
+    },
+    {
+      "name": "visual-depth",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "visual-depth.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "dialogue-audio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164344,
+      "timeout_seconds": 480,
+      "log": "dialogue-audio.log",
+      "sha256": "044a47d071898fdcae0e5e6948eded494d07a6eb7cab2f5f58f75aaecdc86563"
+    },
+    {
+      "name": "weapons",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.214682,
+      "timeout_seconds": 480,
+      "log": "weapons.log",
+      "sha256": "bcd5241bfea20d19c43456d8fed284b03058547d134f0433fa62ca4f77435fea"
+    },
+    {
+      "name": "gear",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.166582,
+      "timeout_seconds": 480,
+      "log": "gear.log",
+      "sha256": "800676a9991c4b59349b0e3fa5f38a48c00a1404cab6f2b60e8165168577bd83"
+    },
+    {
+      "name": "motion-sampling",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164434,
+      "timeout_seconds": 480,
+      "log": "motion-sampling.log",
+      "sha256": "0f0d61bbfb0a51d4888af715427d96a75fe9b0ceaaa9a84c77632b7922956796"
+    },
+    {
+      "name": "combo-routing",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164429,
+      "timeout_seconds": 480,
+      "log": "combo-routing.log",
+      "sha256": "9f5db0bd7427473dbccdd2d46425f91476c746c39a5caacf9c55506d67dceb38"
+    },
+    {
+      "name": "regress",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "regress.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "wake",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "wake.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "lesson",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "lesson.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "nodes",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "nodes.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "memnode-retry",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "memnode-retry.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "denfloor",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "denfloor.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cadence",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cadence.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "glimpse",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "glimpse.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pet-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pet-motion.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "fight-seal",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "fight-seal.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pack-call",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pack-call.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "alpha-bow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "alpha-bow.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "wolf-mount",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "wolf-mount.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "alpha-call",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "alpha-call.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pack-follow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pack-follow.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pack-bite",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 780,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pack-bite.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "arm-lesson",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "arm-lesson.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pack-tree",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pack-tree.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pack-prices",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pack-prices.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tallyman",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "tallyman.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hero-still",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero-still.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ch2-road",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ch2-road.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "city-gate",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "city-gate.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "nf-break",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "nf-break.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "nf-dash",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "nf-dash.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-cam",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-cam.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "nf-ambush",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "nf-ambush.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "nf-phase2",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "nf-phase2.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "mire-ferry",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "mire-ferry.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "mirejaw",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "mirejaw.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "gate-step",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gate-step.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "sewer",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sewer.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "species-moveset",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "species-moveset.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "stand-ground",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "stand-ground.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "purify-stage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "purify-stage.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hit-voices",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hit-voices.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "prize",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "prize.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "bossbench",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "bossbench.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "grounded",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "grounded.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "dighub",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "dighub.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "camjump",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "camjump.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "padfeel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "padfeel.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "impatient",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "impatient.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "text-budget",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "text-budget.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "route-arrow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "route-arrow.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "lives",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "lives.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "toolbox",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "toolbox.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "film",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "film.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "filmflow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "filmflow.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cutskip",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cutskip.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "frames",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "frames.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "whatplays",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "whatplays.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "overlap",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "overlap.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cuepitch",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cuepitch.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cues",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cues.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "herofoley",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "herofoley.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "feel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "feel.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "attacks",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "attacks.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "credits",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.415021,
+      "timeout_seconds": 480,
+      "log": "credits.log",
+      "sha256": "ab8b8af23763b9a8a123c272e47358ebd8f03a7985931d7925e2bcc846ef02af"
+    },
+    {
+      "name": "brand",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "brand.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "slashsnd",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "slashsnd.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "voxmeas",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "voxmeas.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "speed2",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "speed2.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "saw",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "saw.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-counters",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-counters.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "combat",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "combat.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "pace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "pace.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ceiling",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ceiling.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "ceillock",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "ceillock.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tutor",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "tutor.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tells",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "tells.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boss-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boss-motion.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "bosswindow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "bosswindow.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "threat",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "threat.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "errands",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "errands.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "deadend",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "deadend.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "benchloop",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "benchloop.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "padlife",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "padlife.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "climbout",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "climbout.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cover",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cover.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tap",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "tap.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "textreveal",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "textreveal.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "text-rules",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "text-rules.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "servo-presence",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "servo-presence.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "bosspace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "bosspace.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "daze",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "daze.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "openings",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "openings.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "guardians",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "guardians.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "arc",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "arc.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "meet",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "meet.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "secrets",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "secrets.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "secrettell",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "secrettell.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tails",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.61957,
+      "timeout_seconds": 480,
+      "log": "tails.log",
+      "sha256": "4a052dc5ac7581e64913eeea030794e66e553f95856d7419fa609b2744f3979d"
+    },
+    {
+      "name": "kingdom",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "kingdom.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "artbible",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "artbible.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "grammar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "grammar.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "battery",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "battery.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "minis",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "minis.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "hzdvox",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hzdvox.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "wolves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "wolves.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "gravehorn",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gravehorn.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "furnace",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "furnace.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "retired",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "retired.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "gait",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gait.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "motion.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "tinker",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "tinker.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "folk",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "folk.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "rubble",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "rubble.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cavedark",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cavedark.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "terrainrun",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "terrainrun.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "enemygait",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "enemygait.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "infection-eyes",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "infection-eyes.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "infection-roster",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 420,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "infection-roster.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "infection-poses",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "infection-poses.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "reach",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "reach.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "gatecue",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "gatecue.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cuefamily",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cuefamily.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "shopread",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "shopread.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "beacon",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "beacon.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "doorway",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "doorway.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cross",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cross.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "look",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "look.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "seam",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "seam.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "vlink",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "vlink.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "seam-look",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "seam-look.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "roomcache",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "roomcache.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "mapgrid",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "mapgrid.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "mapexits",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "mapexits.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "shaftfit",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "shaftfit.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "glowcost",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "glowcost.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "meadow",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "meadow.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "drawclock",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "drawclock.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "guard",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "guard.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "shield",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "shield.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "airattack",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "airattack.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "grapple",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "grapple.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "grapple-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164399,
+      "timeout_seconds": 480,
+      "log": "grapple-contract.log",
+      "sha256": "7c721a72da07456da64e4880da4dc844a9717bd38ba29db323b16a3437da6f5b"
+    },
+    {
+      "name": "reel-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.364844,
+      "timeout_seconds": 480,
+      "log": "reel-contract.log",
+      "sha256": "f238413a245411bd04bcb642d5e72f87bee47f400dc1fd4c2b9d376decbfdd36"
+    },
+    {
+      "name": "hitshape",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hitshape.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "slashlayer",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "slashlayer.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "crestfight",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "crestfight.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "face",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "face.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "glide",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "glide.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "dmglog",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "dmglog.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "loadout",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "loadout.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "soar",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "soar.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "shopscale",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "shopscale.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "foescale",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "foescale.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "enemy-sight",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "enemy-sight.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "contrast",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 600,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "contrast.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "foelevel",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "foelevel.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "scrapmoves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "scrapmoves.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "conduits",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "conduits.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "foundry",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "foundry.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "archives",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "archives.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "nestmoves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "nestmoves.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cachemoves",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cachemoves.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "cacheroster",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "cacheroster.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "npcstrip",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "npcstrip.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "opening",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "opening.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "opening-order",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 1080,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "opening-order.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "campaign-ch1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 3780,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "campaign-ch1.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "campaign-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.414931,
+      "timeout_seconds": 480,
+      "log": "campaign-contract.log",
+      "sha256": "9e2b4bc7fdebf04620307a0f496be47d2e75105f0b4411fe0f901cf2888507da"
+    },
+    {
+      "name": "hero",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "hero.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "preload",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "preload.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "boot",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "boot.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "lowres",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "lowres.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "demo",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "demo.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "k2-door",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "k2-door.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "twin",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "twin.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "crystal",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "crystal.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "sage-motion",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sage-motion.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "sage",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "sage.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "kingdom1",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "kingdom1.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "memnote",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "memnote.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "platform",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "platform.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "packs",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "packs.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "warp",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "warp.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "denlight",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "denlight.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "bake3d",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "bake3d.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "forge",
+      "status": "blocked",
+      "exit_code": null,
+      "seconds": 0,
+      "timeout_seconds": 480,
+      "reason": "Chromium executable is missing: /opt/pw-browsers/chromium",
+      "log": "forge.log",
+      "sha256": "1898ecc3516da8d40c24a7ce8d47b72e959def5bb058636120d7b18c944f8a49"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "cdb83a41a841565ec83ff272998cb4e5969f0669a74fbc087df68695abf15f05",
+        "odyssey.html": "4915df06c1fa381e02318a358b3094a3513cf98a43f06ce9d89b327988eec48a",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "779bc16d7d0c0046893052837568e5e0c69be06538801762d0066a977dbd2efc",
+        "assets/lowres/alBite.webp": "aeb34a295471dd1750dfc82c544789c22cfc1f412753cdd4f101a0fbc64c43a1"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "cdb83a41a841565ec83ff272998cb4e5969f0669a74fbc087df68695abf15f05",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-11-28T09:03:55.064664+00:00"
+}

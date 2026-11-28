@@ -113,4 +113,3 @@ function harness(save, persistResult = true) {
   assert.equal(ctx.G.save.flags.wolfMount, 1);
 }
 console.log('PASS quest payments are atomic and completed forge/harness saves recover their rewards');
-
